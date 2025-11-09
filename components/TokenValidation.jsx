@@ -11,6 +11,7 @@ export default function TokenValidation({ token, cid }) {
   const validateToken = async () => {
     setLoading(true);
     const response = await inviteTokenValidation(token, cid);
+    console.log("response", response);
     setLoading(false);
     if (response.success) {
       const userId = response.data.userId;
