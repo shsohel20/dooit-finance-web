@@ -114,7 +114,7 @@ export default function ResizableTable({
   };
 
   return (
-    <div className="overflow-x-auto rounded-md  text-xs ">
+    <div className="overflow-x-auto   text-xs ">
       {/* Toolbar */}
       <div className="flex items-center justify-end py-4 gap-2">
         <DropdownMenu>
@@ -153,7 +153,7 @@ export default function ResizableTable({
         {actions && actions}
       </div>
       <Table
-        className="w-full transition-[width] duration-700 ease-in-out"
+        className="w-full transition-[width] duration-700 ease-in-out border"
         // style={{ width: table.getTotalSize() ?? "100%" }}
       >
         <TableHeader>

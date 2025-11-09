@@ -27,13 +27,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const data = await res.json();
           const decodedToken = jwtDecode(data.token);
-          console.log("decodedToken", decodedToken);
           const user = {
+            ...decodedToken,
             token: data.token,
             role: decodedToken.role,
             name: decodedToken.name,
             email: decodedToken.email,
             userType: decodedToken.userType,
+            id: decodedToken.id,
           }
           console.log("user", user);
           if (data.success) {
@@ -59,17 +60,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = user.role;
         token.name = user.name;
         token.email = user.email;
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
       const decodedToken = jwtDecode(token.accessToken);
       session.user = {
+        ...decodedToken,
         name: token.name,
         email: token.email,
         role: token.role,
         accessToken: token.accessToken,
         userType: decodedToken.userType || null,
+        id: token.id,
       };
 
       return session;

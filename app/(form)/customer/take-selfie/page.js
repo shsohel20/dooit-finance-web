@@ -1,3 +1,4 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import { Camera } from 'lucide-react';
 import Link from 'next/link';
@@ -6,6 +7,8 @@ import FormSubtitle from '../../(layouts)/FormSubtitle';
 import FormTitle from '../../(layouts)/FormTitle';
 
 const TakeSelfie = () => {
+    const regType = localStorage.getItem('reg-type') ?? '';
+    console.log("regType", regType);
     return (
         <div className='grid place-items-center min-h-[80vh] mt-10'>
             <div>
@@ -25,7 +28,7 @@ const TakeSelfie = () => {
                 <p className='text-center text-gray-700 mt-4'>For best results, ensure good lighting and clear focus</p>
                 <div className='flex justify-center'>
                     <Button variant={'outline'} className={'mt-4'}>
-                        <Link href='/customer/registration'>Skip</Link>
+                        <Link href={`/customer/registration/${regType}`}>Skip</Link>
                     </Button>
                 </div>
             </div>

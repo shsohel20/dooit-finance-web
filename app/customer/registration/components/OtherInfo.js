@@ -8,7 +8,7 @@ const OtherInfo = () => {
     return (
         <div>
             <FormTitle>Funds/Wealth Information</FormTitle>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 mb-8'>
+            <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 mb-8'>
                 <CustomInput label='Source of Funds' />
                 <CustomInput label='Source of Wealth' />
                 <CustomInput label='Reason Of Opening Account' />
@@ -35,7 +35,7 @@ const OtherInfo = () => {
                     </div>
                 </div>
 
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4'>
+                <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4'>
                     <CustomInput label='First Name' />
                     <CustomInput label='Last Name' />
                     <CustomInput label='Date of Birth' />

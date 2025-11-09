@@ -26,10 +26,9 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
-export function LoginForm({ className, ...props }) {
+export function LoginForm({ className, token, cid, ...props }) {
   const router = useRouter();
   const session = useSession();
-  console.log("session", session);
   const [isLoading, setIsLoading] = useState(false);
   const {
     register,
@@ -49,6 +48,8 @@ export function LoginForm({ className, ...props }) {
         router.replace("/dashboard/admin");
       } else if (session.data?.user?.userType === "admin") {
         router.replace("/dashboard/client");
+      } else if (session.data.user.role === "customer" && token) {
+        router.replace("/auth/registration-type");
       } else {
         router.replace("/");
       }
@@ -57,7 +58,6 @@ export function LoginForm({ className, ...props }) {
     }
   }, [session.data?.user?.userType]);
   const onSubmit = async (data) => {
-    console.log("data", data);
     setIsLoading(true);
     const formData = new FormData();
     formData.append("email", data.email);
@@ -67,21 +67,11 @@ export function LoginForm({ className, ...props }) {
       redirect: false,
     });
     const user = res.user;
-    // if (user.role === "admin") {
-    //   router.push("/cl");
-    // } else {
-    //   router.push("/");
-    // }
+
     if (res.error) {
       toast.error("Something went wrong");
     }
-    console.log("login response", res);
-    // console.log("login response", res);
-    // if (res.ok) {
-    //   router.push("/dashboard");
-    // } else {
-    //   console.error("Login failed");
-    // }
+
     setIsLoading(false);
   };
   return (
@@ -147,7 +137,10 @@ export function LoginForm({ className, ...props }) {
               </div>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <a href="#" className="underline underline-offset-4">
+                <a
+                  href="/auth/register"
+                  className="underline underline-offset-4"
+                >
                   Sign up
                 </a>
               </div>
