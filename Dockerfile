@@ -1,61 +1,86 @@
-# ---- Base image ----
+# syntax=docker/dockerfile:1
+####################################
+# Base image (small, alpine)
+####################################
 FROM node:20-alpine AS base
 ENV NODE_ENV=production
 WORKDIR /app
-# small deps useful for some native packages (sharp, etc.)
+
+# some native deps (sharp, etc.) may require this compatibility lib
 RUN apk add --no-cache libc6-compat
 
-# ---- deps: install dependencies (respects pnpm/yarn/npm lockfiles) ----
+####################################
+# deps - install production deps (cached layer)
+# This stage installs dependencies (pnpm is enabled here)
+####################################
 FROM base AS deps
-# copy manifest files only to leverage layer caching
-COPY package.json package-lock.json pnpm-lock.yaml yarn.lock* ./
+# copy only manifests to leverage docker cache
+COPY package.json pnpm-lock.yaml* ./
 
-# Use a shell script style decision to pick package manager based on lockfile
-# - pnpm if pnpm-lock.yaml present
-# - npm if package-lock.json present
-# - yarn if yarn.lock present
-# - fall back to npm install if none
+# enable corepack & install production deps
+# if pnpm-lock.yaml is present this will use pnpm with frozen lockfile
 RUN set -eux; \
     if [ -f pnpm-lock.yaml ]; then \
-      corepack enable pnpm && corepack prepare pnpm@latest --activate && pnpm i --frozen-lockfile; \
+      corepack enable pnpm; \
+      corepack prepare pnpm@latest --activate; \
+      pnpm install --frozen-lockfile --prod; \
     elif [ -f package-lock.json ]; then \
       npm ci --only=production; \
-    elif [ -f yarn.lock ]; then \
-      corepack enable yarn && yarn install --frozen-lockfile --production; \
     else \
-      npm ci || npm install; \
+      npm ci --only=production || npm install --only=production; \
     fi
 
-# ---- builder: copy source, install dev deps, build ----
-FROM node:20-alpine AS builder
+####################################
+# builder - copy source and build the app
+####################################
+FROM base AS builder
 WORKDIR /app
-COPY . .
-# copy dependencies from deps stage (node_modules). If pnpm was used, pnpm stores files differently,
-# but copying node_modules should still work for most cases when pnpm has created a node_modules folder.
-COPY --from=deps /app/node_modules ./node_modules
-# If you use pnpm with a workspace layout and no node_modules is present, you may need to run install here as well.
-# Build the Next.js app
-RUN npm run build
 
-# ---- runner: runtime image (production) ----
+# copy deps' node_modules (production deps). If you use pnpm with a strict workspace
+# layout that doesn't populate node_modules in the deps stage, the builder may need to run pnpm install here.
+COPY --from=deps /app/node_modules ./node_modules
+
+# copy the rest of the app
+COPY . .
+
+# build Next.js (will create .next and standalone output when using experimental outputStandalone)
+# Ensure you have "next build" script in package.json (pnpm build or npm run build)
+RUN set -eux; \
+    if [ -f pnpm-lock.yaml ]; then \
+      corepack enable pnpm; corepack prepare pnpm@latest --activate; pnpm build; \
+    else \
+      npm run build; \
+    fi
+
+####################################
+# runner - minimal runtime image using Next.js standalone output
+####################################
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-# create non-root user
-RUN addgroup -S app && adduser -S app -G app
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# copy only runtime artifacts
-COPY --from=builder /app/.next ./.next
+# create a non-root user
+RUN addgroup --system --gid 1001 nodejs \
+ && adduser --system --uid 1001 --ingroup nodejs nextjs
+
+# Copy minimal runtime artifacts
+# - standalone folder contains server.js and a minimal package.json for runtime
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-# copy node_modules from deps (production dependencies)
+
+# copy production node_modules from deps stage for native modules and runtime dependencies
 COPY --from=deps /app/node_modules ./node_modules
 
-# expose port Next.js listens on (default 3000)
+# Ensure proper ownership (so the non-root user can write to prerender cache etc.)
+RUN mkdir -p /app/.next && chown -R nextjs:nodejs /app
+
+USER nextjs
+
 EXPOSE 3000
 
-USER app
-
-# Start using "next start" if you have it in package.json scripts:
-# "start": "next start -p 3000"
-CMD ["npm", "start"]
+# If you used Next.js standalone output the entrypoint is server.js located in the current folder.
+# Start the standalone server directly with node
+CMD ["node", "server.js"]
