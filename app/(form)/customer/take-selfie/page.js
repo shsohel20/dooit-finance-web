@@ -7,8 +7,7 @@ import FormSubtitle from '../../(layouts)/FormSubtitle';
 import FormTitle from '../../(layouts)/FormTitle';
 
 const TakeSelfie = () => {
-    const regType = localStorage.getItem('reg-type') ?? '';
-    console.log("regType", regType);
+    const regType = 'individual';
     return (
         <div className='grid place-items-center min-h-[80vh] mt-10'>
             <div>
