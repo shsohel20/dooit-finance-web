@@ -40,41 +40,38 @@ export default function ClientSidebar({ ...props }) {
         },
         {
           title: 'Pending Collection',
-          url: '/#',
+          url: '/dashboard/client/onboarding/customer-queue/pending',
           icon: IconDatabase,
           current: true,
         },
         {
           title: 'Rejected Application',
-          url: '#',
+          url: '/dashboard/client/onboarding/customer-queue/rejected',
           icon: IconPentagonX,
           current: true,
         },
         {
-          title: 'Ready for verification',
-          url: '#',
+          title: 'Verified',
+          url: '/dashboard/client/onboarding/customer-queue/verified',
           icon: IconCircleDashedCheck,
           current: true,
         },
         {
-          title: 'New Applications',
-          url: '#',
+          title: 'In Review',
+          url: '/dashboard/client/onboarding/customer-queue/in-review',
           icon: IconProgress,
           current: true,
         },
+      ]
+    },
+    {
+      title: 'Branch Management',
+      icon: IconListDetails,
+      children: [
         {
-          title: 'In Progress',
-          url: '#',
-          icon: IconProgress,
-          current: true,
-        },
-        {
-          title: 'Accepted',
-          url: '#',
-          icon: IconCircleCheck,
-          current: true,
-        },
-
+          title: 'Branch List',
+          url: '/dashboard/client/branch',
+        }
       ]
     },
     {

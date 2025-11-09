@@ -1,8 +1,7 @@
 'use client'
 
-import { getCustomers } from '@/app/dashboard/client/onboarding/customer-queue/actions'
+import { getCustomerById, getCustomers } from '@/app/dashboard/client/onboarding/customer-queue/actions'
 import { useCustomerStore } from '@/app/store/useCustomer'
-import CustomDatatable from '@/components/CustomDatatable'
 import CustomPagination from '@/components/CustomPagination'
 import { DataTableColumnHeader } from '@/components/DatatableColumnHeader'
 import { Badge } from '@/components/ui/badge'
@@ -19,9 +18,9 @@ import { Label } from '@/components/ui/label'
 import ResizableTable from '@/components/ui/Resizabletable'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
 import { Textarea } from '@/components/ui/textarea'
-import { dateShowFormat } from '@/lib/utils'
+import { dateShowFormat, dateShowFormatWithTime, objWithValidValues } from '@/lib/utils'
 import { IconChevronDown, IconChevronRight, IconEye, IconGrid3x3, IconGridDots, IconList, IconSearch } from '@tabler/icons-react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
@@ -38,7 +37,8 @@ const riskLevelVariants = {
   High: 'danger',
 }
 
-const GridView = ({ data }) => {
+const GridView = () => {
+  const { customers } = useCustomerStore();
   const [openReporting, setOpenReporting] = useState(false);
   const [openDetailView, setOpenDetailView] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
@@ -51,19 +51,19 @@ const GridView = ({ data }) => {
     setOpenDetailView(true);
   }
   return (
-    <div className='grid grid-cols-4  mt-4'>
+    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xxl:grid-cols-4  mt-4'>
       {
-        data.map((item) => (
+        customers?.map((item) => (
           <Item key={item.id} onDoubleClick={() => handleDoubleClick(item)} className={'p-6 border border-neutral-100 '}>
 
             <ItemMedia className='size-20 rounded-full overflow-hidden'>
-              <img src="/profile.png" alt="" className='w-full h-full object-cover' />
+              <img src={item.user?.photoUrl} alt="" className='w-full h-full object-cover' />
             </ItemMedia>
             <ItemContent className='text-xs gap-2 '>
               <div className='flex items-center justify-between w-full'>
                 <div className=''>
                   <ItemDescription className='text-[0.6rem] uppercase'>Customer ID</ItemDescription>
-                  <ItemTitle className={'font-mono'}>{item.caseId}</ItemTitle>
+                  <ItemTitle className={'font-mono'}>{item.user?.slug}</ItemTitle>
                 </div>
                 <Badge
                   variant={riskLevelVariants[item.riskLevel]}>
@@ -73,7 +73,7 @@ const GridView = ({ data }) => {
               <div>
                 <ItemDescription className='text-[0.6rem]  uppercase'>Customer Name</ItemDescription>
                 <ItemTitle className={'text-base font-semibold'}>
-                  {item.name}
+                  {item.user?.name}
                 </ItemTitle>
               </div>
             </ItemContent>
@@ -94,20 +94,21 @@ const GridView = ({ data }) => {
         ))
       }
       <ReportingModal open={openReporting} setOpen={setOpenReporting} currentItem={currentItem} />
-      <DetailViewModal open={openDetailView} setOpen={setOpenDetailView} currentItem={currentItem} />
+      <DetailViewModal open={openDetailView} setOpen={setOpenDetailView} currentId={currentItem?.id} />
     </div>
   )
 }
 
-const ListView = ({ data }) => {
+const ListView = () => {
   const { customers, fetching, currentPage, limit, totalItems, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems } = useCustomerStore();
+  console.log('customers => ', customers);
 
-  console.log('customers', customers);
+
   const [openReporting, setOpenReporting] = useState(false);
   const [openDetailView, setOpenDetailView] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
-  const columns = [
 
+  const columns = [
     {
       header: ({ column }) => (
         <DataTableColumnHeader
@@ -180,7 +181,7 @@ const ListView = ({ data }) => {
       accessorKey: 'createdAt',
       size: 100,
       cell: ({ row }) => (
-        <span>{dateShowFormat(row.original.createdAt)}</span>
+        <span>{dateShowFormatWithTime(row.original.createdAt)}</span>
       ),
     },
     {
@@ -193,7 +194,7 @@ const ListView = ({ data }) => {
       accessorKey: 'updatedAt',
       size: 100,
       cell: ({ row }) => (
-        <span>{dateShowFormat(row.original.updatedAt)}</span>
+        <span>{dateShowFormatWithTime(row.original.updatedAt)}</span>
       ),
     },
     {
@@ -205,11 +206,11 @@ const ListView = ({ data }) => {
       ),
       accessorKey: 'actions',
       size: 100,
-      cell: (row) => (
+      cell: ({ row }) => (
         <Button
           variant="outline"
           size="icon"
-          onClick={() => handleViewClick(row)}
+          onClick={() => handleViewClick(row.original.id)}
         >
           <IconEye />
         </Button>
@@ -221,8 +222,8 @@ const ListView = ({ data }) => {
     setCurrentItem(item);
     setOpenReporting(true);
   }
-  const handleViewClick = (item) => {
-    setCurrentItem(item);
+  const handleViewClick = (id) => {
+    setCurrentItem(id);
     setOpenDetailView(true);
   }
   const handlePageChange = (page) => {
@@ -234,45 +235,58 @@ const ListView = ({ data }) => {
   }
   return (
     <>
+      {/* <div className='flex justify-end'>
+        <Button>Send Invite</Button>
+      </div> */}
       <ResizableTable
         columns={columns}
         data={customers}
         onDoubleClick={handleDoubleClick}
         loading={fetching}
+
       />
-      {/* <CustomPagination
+      <CustomPagination
         currentPage={currentPage}
         onPageChange={handlePageChange}
         totalItems={totalItems}
         limit={limit}
         onChangeLimit={handleLimitChange}
-      /> */}
+      />
       {/* <CustomDatatable data={data} columns={columns} onDoubleClick={handleDoubleClick} /> */}
       <ReportingModal open={openReporting} setOpen={setOpenReporting} currentItem={currentItem} />
-      <DetailViewModal open={openDetailView} setOpen={setOpenDetailView} currentItem={currentItem} />
+      <DetailViewModal open={openDetailView} setOpen={setOpenDetailView} currentId={currentItem} />
     </>
   )
 }
 
 export default function CustomerQueueList({ variant, data }) {
   const [view, setView] = useState('list')
-  const { customers, fetching, currentPage, limit, totalItems, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems } = useCustomerStore();
+  const { currentPage, limit, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems, kycStatus } = useCustomerStore();
   const fetchData = async () => {
     setFetching(true);
-    const response = await getCustomers(currentPage, limit);
+    const queryParams = objWithValidValues({
+      page: currentPage,
+      limit: limit,
+      kycStatus: kycStatus
+    });
+
+    const response = await getCustomers(queryParams);
     setCustomers(response.data);
     setTotalItems(response.totalRecords);
     setCurrentPage(response.currentPage);
     setLimit(response.limit);
     setFetching(false);
   }
+
   useEffect(() => {
     fetchData();
-  }, [currentPage, limit]);
+
+  }, [currentPage, limit, kycStatus]);
+
   return (
     <div className='my-2'>
       <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2 mb-4'>
+        <div className='flex items-center gap-2  '>
           <InputGroup className={'max-w-64'}>
             <InputGroupInput placeholder="Search..." />
             <InputGroupAddon >
@@ -316,7 +330,9 @@ export default function CustomerQueueList({ variant, data }) {
             </SelectContent>
           </Select>
         </div>
-        <div>
+        <div className='flex items-center gap-2 '>
+          {/* <Button size={'sm'} className={'text-xs'}><IconBrandTelegram />  Send Invite </Button> */}
+
           <ButtonGroup>
             <Button
               onClick={() => setView('grid')}
@@ -364,7 +380,24 @@ export const ReportingModal = ({ open, setOpen }) => {
   )
 }
 
-export const DetailViewModal = ({ open, setOpen, currentItem }) => {
+export const DetailViewModal = ({ open, setOpen, currentId }) => {
+  const [details, setDetails] = useState(null);
+  const currentItem = null;
+
+
+  const fetchDetails = async () => {
+    const response = await getCustomerById(currentId);
+    if (response.success) {
+      setDetails(response.data);
+    }
+  }
+
+  useEffect(() => {
+    if (currentId) {
+      fetchDetails();
+    }
+  }, [currentId]);
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className='sm:max-w-5xl w-full overflow-y-auto'>
@@ -378,17 +411,17 @@ export const DetailViewModal = ({ open, setOpen, currentItem }) => {
           <div className='flex items-center gap-4'>
             <div className='size-20 rounded-md overflow-hidden'>
               <img
-                src="/profile.png"
+                src={details?.user?.photoUrl}
                 alt=""
                 className='w-full h-full object-cover'
               />
             </div>
             <div>
-              <h4 className='text-lg font-bold'>{currentItem?.name}</h4>
-              <p>Customer ID: {currentItem?.caseId}</p>
+              <h4 className='text-lg font-bold'>{details?.user?.name}</h4>
+              <p>{details?.user?.email}</p>
               <p className='text-sm mt-2'>
-                <Badge variant={riskLevelVariants[currentItem?.riskLevel]}>
-                  {currentItem?.riskLevel} Risk
+                <Badge variant={statusVariants[details?.kycStatus]}>
+                  {details?.kycStatus}
                 </Badge>
               </p>
             </div>
@@ -402,7 +435,7 @@ export const DetailViewModal = ({ open, setOpen, currentItem }) => {
                   Awaiting manual verification of address proof.</CardDescription>
               </CardHeader>
               <CardContent>
-                <Badge variant={statusVariants[currentItem?.kycStatus]} >{currentItem?.kycStatus}</Badge>
+                <Badge variant={statusVariants[currentItem?.kycStatus]} >{details?.isActive ? 'Active' : 'Inactive'}</Badge>
                 {/* <p className='mt-2 text-xs'></p> */}
               </CardContent>
             </Card>
@@ -427,17 +460,10 @@ export const DetailViewModal = ({ open, setOpen, currentItem }) => {
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-2'>
-                    <div className='flex items-center gap-2 '>
-                      <h4 className='font-bold w-[80px]'>Name</h4>
-                      <p>{currentItem?.name}</p>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                      <h4 className='font-bold w-[80px]'>Email</h4>
-                      <p>{currentItem?.email}</p>
-                    </div>
+
                     <div className='flex items-center gap-2'>
                       <h4 className='font-bold w-[80px] '>Phone</h4>
-                      <p>+61 412 345 678</p>
+                      <p>{details?.user?.phone}</p>
                     </div>
                     <div className='flex items-center gap-2'>
                       <h4 className='font-bold w-[80px]'>Date of Birth</h4>
@@ -445,7 +471,7 @@ export const DetailViewModal = ({ open, setOpen, currentItem }) => {
                     </div>
                     <div className='flex items-center gap-2'>
                       <h4 className='font-bold w-[80px] '>Country</h4>
-                      <p>Australia</p>
+                      <p>{details?.country}</p>
                     </div>
                     <div className='flex items-center gap-2'>
                       <h4 className='font-bold w-[80px] flex-shrink-0'>Address</h4>
@@ -511,16 +537,15 @@ export const DetailViewModal = ({ open, setOpen, currentItem }) => {
               <Card className={'shadow-none'}>
                 <CardHeader>
                   <CardTitle>Onboarding timeline</CardTitle>
-
                 </CardHeader>
-                <CardContent className='flex flex-col gap-1 text-xs'>
+                <CardContent className='flex flex-col gap-4 text-xs'>
                   <div className='flex items-center gap-2'>
                     <h4 className=' font-bold w-[80px]'>Created On</h4>
-                    <p > 12 Aug 2025</p>
+                    <p>{dateShowFormat(details?.createdAt)}</p>
                   </div>
                   <div className='flex items-center gap-2'>
                     <h4 className=' font-bold  w-[80px]'>Last Updated</h4>
-                    <p> 09 Oct 2025</p>
+                    <p>{dateShowFormat(details?.updatedAt)}</p>
                   </div>
                   <div className='flex items-center gap-2 '>
                     <h4 className=' font-bold  w-[80px]'>Review Time</h4>
@@ -535,19 +560,19 @@ export const DetailViewModal = ({ open, setOpen, currentItem }) => {
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-4  divide-y [&>p]:pb-2 [&>p]:relative [&>p]:before:content-[""] [&>p]:before:absolute [&>p]:before:left-0 [&>p]:before:top-1/2 [&>p]:before:-translate-y-1/2 [&>p]:before:size-2.5 [&>p]:before:bg-cyan-500 [&>p]:before:rounded-full [&>p]:pl-5'>
-                    <p className=''>Reviewer: John Doe completed final Identity verification.
-                      09 Oct 2025, 10:30 AM</p>
-                    <p className=''>
-                      KYC Status changed to **In Review**.
-                      09 Oct 2025, 10:00 AM</p>
-                    <p className=''>System flagged as **Medium Risk** due to international address format.
-                      13 Sep 2025, 03:20 PM</p>
-                    <p className=''>Customer completed all digital onboarding steps.
-                      12 Sep 2025, 09:15 AM</p>
-                    <p className=''>
-                      Customer profile **C-10045** created.
-                      12 Sep 2025, 09:00 AM
-                    </p>
+
+                    {
+                      details?.kycHistory?.map((item) => (
+                        <p className='flex gap-1 flex-wrap' key={item.id}>
+                          <span>
+                            {item.note}
+                          </span>
+                          <span>
+                            {dateShowFormatWithTime(item.createdAt)}
+                          </span>
+                        </p>
+                      ))
+                    }
                   </div>
                 </CardContent>
               </Card>

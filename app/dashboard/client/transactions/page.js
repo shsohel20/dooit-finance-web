@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { Textarea } from '@/components/ui/textarea';
-import { IconAlertSquare, IconDots, IconDotsCircleHorizontal, IconEye, IconGridDots, IconList, IconSearch } from '@tabler/icons-react';
+import { IconAlertCircle, IconAlertSquare, IconDots, IconDotsCircleHorizontal, IconEye, IconGridDots, IconList, IconPennant, IconSearch } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react'
 const transactions = [
@@ -538,6 +538,7 @@ const ListView = () => {
       cell: ({ row }) => {
         return <>
           <StatusPill
+            icon={<IconPennant />}
             variant={riskVariants[row.original.risk]}
           >
             {row.original.risk}

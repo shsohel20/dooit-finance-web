@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 export const PageTitle = ({ children, className }) => {
   return (
-    <h2 className={cn("text-foreground text-base font-semibold", className)}>
+    <h2 className={cn("text-3xl font-bold tracking-tight", className)}>
       {children}
     </h2>
   );
@@ -10,12 +10,10 @@ export const PageTitle = ({ children, className }) => {
 
 export const PageDescription = ({ children, className }) => {
   return (
-    <p className={cn("text-muted-foreground text-sm", className)}>{children}</p>
+    <p className={cn("text-muted-foreground mt-1", className)}>{children}</p>
   );
 };
 
 export const PageHeader = ({ children, className }) => {
-  return (
-    <div className={cn("flex flex-col gap-0.5", className)}>{children}</div>
-  );
+  return <div className={cn("flex flex-col mb-8", className)}>{children}</div>;
 };

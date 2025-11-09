@@ -20,9 +20,9 @@ import {
 } from "./ui/select";
 export default function CustomPagination(props) {
   const {
-    currentPage,
+    currentPage = 1,
     onPageChange,
-    totalItems,
+    totalItems = 0,
     limit = 10,
     onChangeLimit,
   } = props;
