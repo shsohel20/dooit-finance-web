@@ -96,12 +96,13 @@ const CustomerRegistration = () => {
     const onSubmit = (data) => {
         console.log("data", data);
     }
+    console.log("errors", errors);
     const router = useRouter();
 
     const handleStep = () => {
         setCurrentStep(prev => {
             if (prev === TOTAL_STEPS) {
-                router.push('/customer/registration/preview');
+                // router.push('/customer/registration/preview');
                 return TOTAL_STEPS;
             }
             return prev + 1;
@@ -132,9 +133,12 @@ const CustomerRegistration = () => {
                     variant='outline'
                     onClick={handlePreviousStep}
                     className={'w-[200px]'}>Previous</Button>}
-                <Button onClick={handleStep} className={'w-[200px]'}>
-                    {currentStep === TOTAL_STEPS ? 'Preview' : 'Next'}
-                </Button>
+                {currentStep < TOTAL_STEPS && <Button onClick={handleStep} className={'w-[200px]'}>
+                    Next
+                </Button>}
+                {currentStep === TOTAL_STEPS && <Button onClick={handleSubmit(onSubmit)} className={'w-[200px]'}>
+                    Preview
+                </Button>}
             </div>
         </div>
     );

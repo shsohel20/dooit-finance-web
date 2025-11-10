@@ -8,12 +8,14 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { getLoggedInCustomer, getLoggedInUser } from '../actions';
 import dynamic from 'next/dynamic';
+import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
 const CustomSelect = dynamic(() => import('@/components/ui/CustomSelect'), { ssr: false });
 
 const RegistrationType = () => {
     const [selectedType, setSelectedType] = useState(null);
     const [country, setCountry] = useState(null);
     const [user, setUser] = useState(null);
+    const { setRegisterType, setCountry: setCountryStore } = useCustomerRegisterStore();
     const handleGetLoggedInUser = async () => {
         const user = await getLoggedInCustomer();
         console.log("user", user);
@@ -43,8 +45,9 @@ const RegistrationType = () => {
     }
     const handleContinue = () => {
         if (selectedType && country) {
-            localStorage.setItem('reg-type', selectedType?.type?.toLowerCase());
-            localStorage.setItem('reg-country', country?.value?.toLowerCase());
+            setRegisterType(selectedType?.type?.toLowerCase());
+            setCountryStore(country?.value?.toLowerCase());
+
             if (user?.kycStatus === 'pending') {
                 router.push('/customer/document-type');
             }

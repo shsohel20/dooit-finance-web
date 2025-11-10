@@ -15,42 +15,75 @@ const PersonalInfo = ({ control, errors }) => {
                     control={control}
                     name='personalInfo.customer_details.given_name'
                     render={({ field }) => (
-                        <CustomInput label='First Name' {...field} />
+                        <CustomInput
+                            label='First Name'
+                            placeholder='John'
+                            {...field}
+                            error={errors.personalInfo?.customer_details?.given_name?.message}
+                        />
                     )}
                 />
                 <Controller
                     control={control}
                     name='personalInfo.customer_details.middle_name'
                     render={({ field }) => (
-                        <CustomInput label='Middle Name' {...field} />
+                        <CustomInput
+                            label='Middle Name'
+                            placeholder='Marco'
+                            {...field}
+                            error={errors.personalInfo?.customer_details?.middle_name?.message}
+                        />
                     )}
                 />
                 <Controller
                     control={control}
                     name='personalInfo.customer_details.surname'
                     render={({ field }) => (
-                        <CustomInput label='Last Name' {...field} />
+                        <CustomInput
+                            label='Last Name'
+                            placeholder='Doe'
+                            {...field}
+                            error={errors.personalInfo?.customer_details?.surname?.message}
+                        />
                     )}
                 />
                 <Controller
                     control={control}
                     name='personalInfo.customer_details.date_of_birth'
                     render={({ field }) => (
-                        <CustomInput label='Date of Birth' {...field} />
+                        <CustomInput
+                            label='Date of Birth'
+                            type='date'
+                            placeholder='YYYY-MM-DD'
+                            {...field}
+                            error={errors.personalInfo?.customer_details?.date_of_birth?.message}
+                        />
                     )}
                 />
                 <Controller
                     control={control}
                     name='personalInfo.contact_details.phone'
                     render={({ field }) => (
-                        <CustomInput label='Phone Number' {...field} />
+                        <CustomInput
+                            label='Phone Number'
+                            type='tel'
+                            placeholder='+1 (555) 000-0000'
+                            {...field}
+                            error={errors.personalInfo?.contact_details?.phone?.message}
+                        />
                     )}
                 />
                 <Controller
                     control={control}
                     name='personalInfo.contact_details.email'
                     render={({ field }) => (
-                        <CustomInput label='Email' {...field} />
+                        <CustomInput
+                            label='Email'
+                            type='email'
+                            {...field}
+                            placeholder='example@example.com'
+                            error={errors.personalInfo?.contact_details?.email?.message}
+                        />
                     )}
                 />
                 <Controller
