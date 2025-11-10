@@ -35,5 +35,6 @@ EXPOSE 3000
 RUN addgroup -S app && adduser -S app -G app
 USER app
 
-# Start Next.js
+# Start Next.js f
 CMD ["npm", "start"]
+ 
