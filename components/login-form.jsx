@@ -54,7 +54,7 @@ export function LoginForm({ className, token, cid, ...props }) {
         router.replace("/");
       }
     } else {
-      router.push("/auth/login");
+      // router.push("/auth/login");
     }
   }, [session.data?.user?.userType]);
   const onSubmit = async (data) => {

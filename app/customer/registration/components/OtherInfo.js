@@ -3,25 +3,86 @@ import CustomInput from '@/components/ui/CustomInput';
 import { Label } from '@/components/ui/label';
 import React from 'react';
 import FormTitle from './FormTitle';
+import { Controller } from 'react-hook-form';
 
-const OtherInfo = () => {
+const OtherInfo = ({ control, errors }) => {
     return (
         <div>
             <FormTitle>Funds/Wealth Information</FormTitle>
             <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4 mb-8'>
-                <CustomInput label='Source of Funds' />
-                <CustomInput label='Source of Wealth' />
-                <CustomInput label='Reason Of Opening Account' />
-                <CustomInput label='Estimated Trading Volume' />
-                <CustomInput label='Email' />
-                <CustomInput label='Occupation' />
-                <CustomInput label='Employer&apos; Name' />
-                <CustomInput label='Industry' />
+                <Controller
+                    control={control}
+                    name='funds_wealth.source_of_funds'
+                    render={({ field }) => (
+                        <CustomInput label='Source of Funds' {...field} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='funds_wealth.source_of_wealth'
+                    render={({ field }) => (
+                        <CustomInput label='Source of Wealth' {...field} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='funds_wealth.account_purpose'
+                    render={({ field }) => (
+                        <CustomInput label='Reason Of Opening Account' {...field} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='funds_wealth.estimated_trading_volume'
+                    render={({ field }) => (
+                        <CustomInput label='Estimated Trading Volume' {...field} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='funds_wealth.email'
+                    render={({ field }) => (
+                        <CustomInput label='Email' {...field} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='funds_wealth.occupation'
+                    render={({ field }) => (
+                        <CustomInput label='Occupation' {...field} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='funds_wealth.employer_name'
+                    render={({ field }) => (
+                        <CustomInput label='Employer&apos; Name' {...field} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='funds_wealth.industry'
+                    render={({ field }) => (
+                        <CustomInput label='Industry' {...field} />
+                    )}
+                />
             </div>
 
             <FormTitle>Sole Trader Status</FormTitle>
             <div className='mt-4'>
-                <div className='flex gap-4 items-center'>
+
+                <Controller
+                    control={control}
+                    name='sole_trader.is_sole_trader'
+                    render={({ field }) => (
+                        <div className='flex items-center gap-2'>
+                            <Label htmlFor='is-sole-trader'>Are you acting as a sole trader?</Label>
+                            <Checkbox label='Are you acting as a sole trader?' id='is-sole-trader' checked={field.value} onCheckedChange={field.onChange} />
+
+                        </div>
+                    )}
+                />
+                {/* <div className='flex gap-4 items-center'>
                     <Label htmlFor='sole-trader'>Are you acting as a sole trader?</Label>
                     <div className='flex gap-4'>
                         <div className='flex items-center gap-2'>
@@ -33,7 +94,7 @@ const OtherInfo = () => {
                             <Label htmlFor='is-not-sole-trader'>No</Label>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4'>
                     <CustomInput label='First Name' />

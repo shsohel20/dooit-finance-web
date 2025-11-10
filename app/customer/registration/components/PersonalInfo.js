@@ -4,6 +4,7 @@ import React from 'react';
 import FormTitle from './FormTitle';
 import { Controller } from 'react-hook-form';
 import dynamic from 'next/dynamic';
+import { countriesData } from '@/constants';
 const CustomSelect = dynamic(() => import('@/components/ui/CustomSelect'), { ssr: false });
 
 const PersonalInfo = ({ control, errors }) => {
@@ -13,7 +14,7 @@ const PersonalInfo = ({ control, errors }) => {
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:grid-cols-4 mt-8'>
                 <Controller
                     control={control}
-                    name='personalInfo.customer_details.given_name'
+                    name='customer_details.given_name'
                     render={({ field }) => (
                         <CustomInput
                             label='First Name'
@@ -25,7 +26,7 @@ const PersonalInfo = ({ control, errors }) => {
                 />
                 <Controller
                     control={control}
-                    name='personalInfo.customer_details.middle_name'
+                    name='customer_details.middle_name'
                     render={({ field }) => (
                         <CustomInput
                             label='Middle Name'
@@ -37,7 +38,7 @@ const PersonalInfo = ({ control, errors }) => {
                 />
                 <Controller
                     control={control}
-                    name='personalInfo.customer_details.surname'
+                    name='customer_details.surname'
                     render={({ field }) => (
                         <CustomInput
                             label='Last Name'
@@ -49,7 +50,7 @@ const PersonalInfo = ({ control, errors }) => {
                 />
                 <Controller
                     control={control}
-                    name='personalInfo.customer_details.date_of_birth'
+                    name='customer_details.date_of_birth'
                     render={({ field }) => (
                         <CustomInput
                             label='Date of Birth'
@@ -62,7 +63,7 @@ const PersonalInfo = ({ control, errors }) => {
                 />
                 <Controller
                     control={control}
-                    name='personalInfo.contact_details.phone'
+                    name='contact_details.phone'
                     render={({ field }) => (
                         <CustomInput
                             label='Phone Number'
@@ -75,7 +76,7 @@ const PersonalInfo = ({ control, errors }) => {
                 />
                 <Controller
                     control={control}
-                    name='personalInfo.contact_details.email'
+                    name='contact_details.email'
                     render={({ field }) => (
                         <CustomInput
                             label='Email'
@@ -88,50 +89,103 @@ const PersonalInfo = ({ control, errors }) => {
                 />
                 <Controller
                     control={control}
-                    name='personalInfo.employment_details.occupation'
+                    name='employment_details.occupation'
                     render={({ field }) => (
                         <CustomInput label='Occupation' {...field} />
                     )}
                 />
                 <Controller
                     control={control}
-                    name='personalInfo.employment_details.employer_name'
+                    name='employment_details.employer_name'
                     render={({ field }) => (
                         <CustomInput label='Employer&apos; Name' {...field} />
                     )}
                 />
                 <Controller
                     control={control}
-                    name='personalInfo.employment_details.industry'
+                    name='employment_details.industry'
                     render={({ field }) => (
                         <CustomInput label='Industry' {...field} />
                     )}
                 />
                 <div className='lg:col-span-3 xl:col-span-4'>
                     <h4 className=' mb-2'>Residential Address</h4>
-                    <CustomInput label='Address Line 1' type='textarea' />
+                    <Controller
+                        control={control}
+                        name='residential_address.address'
+                        render={({ field }) => (
+                            <CustomInput label='Address Line 1' type='textarea' {...field} />
+                        )}
+                    />
                 </div>
+
                 <Controller
                     control={control}
-                    name='personalInfo.residential_address.city'
+                    name='residential_address.suburb'
                     render={({ field }) => (
-                        <CustomSelect label='City' {...field} />
+                        <CustomInput label='Suburb' {...field} />
                     )}
                 />
                 <Controller
                     control={control}
-                    name='personalInfo.residential_address.state'
+                    name='residential_address.state'
                     render={({ field }) => (
-                        <CustomSelect label='State' {...field} />
+                        <CustomInput label='State' {...field} />
                     )}
                 />
                 <Controller
                     control={control}
-                    name='personalInfo.residential_address.zip_code'
+                    name='residential_address.country'
+                    render={({ field }) => (
+                        <CustomSelect label='Country' {...field} options={countriesData} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='residential_address.zip_code'
                     render={({ field }) => (
                         <CustomInput label='Zip Code' {...field} />
                     )}
                 />
+                <div className='lg:col-span-3 xl:col-span-4'>
+                    <h4 className=' mb-2'>Mailing Address</h4>
+                    <Controller
+                        control={control}
+                        name='mailing_address.address'
+                        render={({ field }) => (
+                            <CustomInput label='Address Line 1' type='textarea' {...field} />
+                        )}
+                    />
+                </div>
+                <Controller
+                    control={control}
+                    name='mailing_address.suburb'
+                    render={({ field }) => (
+                        <CustomInput label='Suburb' {...field} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='mailing_address.state'
+                    render={({ field }) => (
+                        <CustomInput label='State' {...field} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='mailing_address.country'
+                    render={({ field }) => (
+                        <CustomSelect label='Country' {...field} options={countriesData} />
+                    )}
+                />
+                <Controller
+                    control={control}
+                    name='mailing_address.postcode'
+                    render={({ field }) => (
+                        <CustomInput label='Postcode' {...field} />
+                    )}
+                />
+
 
             </div>
 

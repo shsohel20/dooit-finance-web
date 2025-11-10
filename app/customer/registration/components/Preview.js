@@ -1,53 +1,55 @@
+'use client';
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
-import React from 'react'
+import React, { useState } from 'react'
 import FormTitle from './FormTitle'
+import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
+import LabelDetails from '@/components/LabelDetails';
+import { Label } from '@/components/ui/label';
+import { individualCustomerRegistration } from '../actions';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const Preview = () => {
+    const [agreed, setAgreed] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+    const { customerRegisterData } = useCustomerRegisterStore();
+    console.log("customerRegisterData", customerRegisterData);
+    const handleContinue = async () => {
+        setLoading(true);
+        const response = await individualCustomerRegistration(customerRegisterData);
+        if (response.success) {
+            router.push('/customer/dashboard');
+            localStorage.removeItem('invite_token');
+            localStorage.removeItem('invite_cid');
+            toast.success('Welcome onboard!');
+        }
+    }
     return (
         <div className='container py-8'>
             <FormTitle>Preview</FormTitle>
             <div className='space-y-4 mt-4'>
                 <div className=''>
                     <h4 className='text-md font-bold tracking-tighter'>Personal Information</h4>
-                    <div className='space-y-4 mt-4'>
-                        <div>
-                            First Name: John
-                        </div>
-                        <div>
-                            Last Name: Doe
-                        </div>
-                        <div>
-                            Date of Birth: 18th Oct, 1999
-                        </div>
-                        <div>
-                            Occupation: Banker
-                        </div>
-                        <div>
-                            Email: john@gmail.com
-                        </div>
-                        <div>
-                            Industry: Finance & Banking
-                        </div>
-                        <div>
-                            Employer&apos; Name:
-                        </div>
-                        <div>
-                            Residential Address:
-                        </div>
-                        <div>
-                            City:
-                        </div>
-                        <div>
-                            State:
-                        </div>
-                        <div>
-                            Zip Code:
-                        </div>
+                    <div className='grid grid-cols-4 gap-2 py-6'>
+                        <LabelDetails label="First Name" value={customerRegisterData?.personalKyc?.personal_form?.customer_details?.given_name} />
+                        <LabelDetails label="Middle Name" value={customerRegisterData?.personalKyc?.personal_form?.customer_details?.middle_name} />
+                        <LabelDetails label="Last Name" value={customerRegisterData?.personalKyc?.personal_form?.customer_details?.surname} />
+                        <LabelDetails label="Date of Birth" value={customerRegisterData?.personalKyc?.personal_form?.customer_details?.date_of_birth} />
+                        <LabelDetails label="Occupation" value={customerRegisterData?.personalKyc?.personal_form?.employment_details?.occupation} />
+                        <LabelDetails label="Email" value={customerRegisterData?.personalKyc?.personal_form?.contact_details?.email} />
+                        <LabelDetails label="Industry" value={customerRegisterData?.personalKyc?.personal_form?.employment_details?.industry} />
+                        <LabelDetails label="Employer&apos; Name" value={customerRegisterData?.personalKyc?.personal_form?.employment_details?.employer_name} />
+                        <LabelDetails label="Residential Address" value={customerRegisterData?.personalKyc?.personal_form?.residential_address?.address} />
+                        <LabelDetails label="Country" value={customerRegisterData?.personalKyc?.personal_form?.residential_address?.country?.value} />
+                        <LabelDetails label="State" value={customerRegisterData?.personalKyc?.personal_form?.residential_address?.state} />
+                        <LabelDetails label="Zip Code" value={customerRegisterData?.personalKyc?.personal_form?.residential_address?.zip_code} />
                     </div>
                 </div>
-                <div>
+                <div className=''>
                     <h4 className='text-md font-bold tracking-tighter'>Identification Documents</h4>
                     <p>Upload Government
                         issued ID document :</p>
@@ -117,12 +119,12 @@ const Preview = () => {
 
                 <div className='flex flex-col items-center justify-center gap-4 mt-8'>
                     <div className='flex items-center gap-2'>
-                        <Checkbox />
-                        <p>I have read and agreed</p>
+                        <Checkbox id='agreed' checked={agreed} onCheckedChange={(checked) => setAgreed(checked)} />
+                        <Label htmlFor='agreed'>I have read and agreed</Label>
                     </div>
                     <div>
-                        <Button>
-                            <Link href='/customer/dashboard'>Continue</Link>
+                        <Button onClick={handleContinue} disabled={!agreed || loading}>
+                            {loading ? <Loader2 className='animate-spin size-4' /> : 'Continue'}
                         </Button>
                     </div>
                 </div>
