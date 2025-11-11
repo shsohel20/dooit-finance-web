@@ -167,11 +167,15 @@ button {
   }
 }
 /* react-select */
+.react-select-container[aria-invalid="true"] {
+  border-color: red !important;
+}
 .react-select__control {
   border-color: var(--border) !important;
   border-radius: var(--radius) !important;
   min-height: 10px !important;
 }
+
 .react-select__indicator {
   padding: 7px !important;
 }

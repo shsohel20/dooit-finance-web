@@ -131,6 +131,7 @@ const IdentificationDocuments = ({ control, errors }) => {
                             options={documentTypes}
                             value={field.value}
                             placeholder='Select Document Type'
+                            error={errors.document_type?.message}
                             onChange={(e) => handleDocumentTypeChange(e, field.onChange)}
                         />
                     )}

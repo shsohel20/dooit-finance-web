@@ -19,7 +19,7 @@ const personalInfoSchema = z.object({
     document_type: z.object({
         value: z.string().min(1, 'Document type is required'),
         label: z.string().min(1, 'Document type is required'),
-    }).nullable(),
+    }),
     contact_details: z.object({
         email: z.string().email('Invalid email address'),
         phone: z.string().min(1, 'Phone number is required'),
@@ -82,9 +82,9 @@ const TOTAL_STEPS = 3;
 const CustomerRegistration = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const { customerRegisterData, setCustomerRegisterData, registerType, country } = useCustomerRegisterStore();
-    console.log("customerRegisterData useform", customerRegisterData);
 
-    const { handleSubmit, control, formState: { errors } } = useForm({
+
+    const { handleSubmit, control, formState: { errors, }, setValue } = useForm({
         defaultValues: customerRegisterData,
         resolver: zodResolver(personalInfoSchema),
         mode: 'onChange',
@@ -98,7 +98,7 @@ const CustomerRegistration = () => {
     console.log("errors", errors);
     const router = useRouter();
 
-    const handleStep = () => {
+    const handleNextStep = () => {
         setCurrentStep(prev => {
             if (prev === TOTAL_STEPS) {
                 // router.push('/customer/registration/preview');
@@ -115,18 +115,21 @@ const CustomerRegistration = () => {
             return prev - 1;
         });
     }
+    const handleStep = (step) => {
+        setCurrentStep(step);
+    }
     return (
         <div className='container'>
             {/* stepper */}
             <div>
-                <Stepper currentStep={currentStep} totalSteps={TOTAL_STEPS} />
+                <Stepper currentStep={currentStep} totalSteps={TOTAL_STEPS} handleStep={handleStep} />
             </div>
             {/* content */}
             <div>
                 {currentStep === 1 && <IdentificationDocuments control={control} errors={errors} />}
                 {currentStep === 2 && <PersonalInfo control={control} errors={errors} />}
 
-                {currentStep === 3 && <OtherInfo control={control} errors={errors} />}
+                {currentStep === 3 && <OtherInfo control={control} errors={errors} setValue={setValue} />}
             </div>
             <div className='flex justify-end gap-2 my-8'>
                 {currentStep > 1 && <Button
@@ -138,7 +141,7 @@ const CustomerRegistration = () => {
                 }
                 {currentStep < TOTAL_STEPS &&
                     <Button
-                        onClick={handleStep}
+                        onClick={handleNextStep}
                         className={'w-[200px]'}
                     >
                         Next

@@ -1,11 +1,22 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import CustomInput from '@/components/ui/CustomInput';
 import { Label } from '@/components/ui/label';
-import React from 'react';
+import React, { useEffect } from 'react';
 import FormTitle from './FormTitle';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 
-const OtherInfo = ({ control, errors }) => {
+const OtherInfo = ({ control, errors, setValue }) => {
+    const isSoleTrader = useWatch({ control, name: 'sole_trader.is_sole_trader' });
+
+    useEffect(() => {
+        if (!isSoleTrader) {
+            setValue('sole_trader.business_details.first_name', '');
+            setValue('sole_trader.business_details.last_name', '');
+            setValue('sole_trader.business_details.date_of_birth', '');
+            setValue('sole_trader.business_details.phone_number', '');
+            setValue('sole_trader.business_details.id_number', '');
+        }
+    }, [isSoleTrader]);
     return (
         <div>
             <FormTitle>Funds/Wealth Information</FormTitle>
@@ -82,21 +93,9 @@ const OtherInfo = ({ control, errors }) => {
                         </div>
                     )}
                 />
-                {/* <div className='flex gap-4 items-center'>
-                    <Label htmlFor='sole-trader'>Are you acting as a sole trader?</Label>
-                    <div className='flex gap-4'>
-                        <div className='flex items-center gap-2'>
-                            <Checkbox label='Yes' id='is-sole-trader' />
-                            <Label htmlFor='is-sole-trader'>Yes</Label>
-                        </div>
-                        <div className='flex items-center gap-2'>
-                            <Checkbox label='No' id='is-not-sole-trader' />
-                            <Label htmlFor='is-not-sole-trader'>No</Label>
-                        </div>
-                    </div>
-                </div> */}
 
-                <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4'>
+
+                {isSoleTrader && <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4'>
 
                     <Controller
                         control={control}
@@ -139,7 +138,7 @@ const OtherInfo = ({ control, errors }) => {
                     <CustomInput label='Phone Number' />
                     <CustomInput label='ID Number' /> */}
 
-                </div>
+                </div>}
             </div>
         </div>
 
