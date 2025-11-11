@@ -16,11 +16,43 @@ const Preview = () => {
     const [agreed, setAgreed] = useState(false);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const { customerRegisterData } = useCustomerRegisterStore();
+    const { customerRegisterData, registerType, country } = useCustomerRegisterStore();
     console.log("customerRegisterData", customerRegisterData);
     const handleContinue = async () => {
         setLoading(true);
-        const response = await individualCustomerRegistration(customerRegisterData);
+        const token = localStorage.getItem("invite_token");
+        const cid = localStorage.getItem("invite_cid");
+
+        const submittedData = {
+            token,
+            cid,
+            requestedType: registerType,
+            country: country,
+            personalKyc: {
+                personal_form: {
+                    customer_details: customerRegisterData?.customer_details,
+                    contact_details: customerRegisterData?.contact_details,
+                    employment_details: customerRegisterData?.employment_details,
+                    residential_address: {
+                        ...customerRegisterData?.residential_address,
+                        country: customerRegisterData?.residential_address.country.value
+                    },
+                    mailing_address: {
+                        ...customerRegisterData?.mailing_address,
+                        country: customerRegisterData?.mailing_address.country.value
+                    },
+
+                },
+                funds_wealth: customerRegisterData?.funds_wealth,
+                sole_trader: customerRegisterData?.sole_trader,
+            },
+            documents: customerRegisterData?.documents,
+            declaration: customerRegisterData?.declaration,
+        }
+        console.log("submittedData", submittedData);
+        const response = await individualCustomerRegistration(submittedData);
+        setLoading(false);
+        console.log("response", response);
         if (response.success) {
             router.push('/customer/dashboard');
             localStorage.removeItem('invite_token');
@@ -35,18 +67,18 @@ const Preview = () => {
                 <div className=''>
                     <h4 className='text-md font-bold tracking-tighter'>Personal Information</h4>
                     <div className='grid grid-cols-4 gap-2 py-6'>
-                        <LabelDetails label="First Name" value={customerRegisterData?.personalKyc?.personal_form?.customer_details?.given_name} />
-                        <LabelDetails label="Middle Name" value={customerRegisterData?.personalKyc?.personal_form?.customer_details?.middle_name} />
-                        <LabelDetails label="Last Name" value={customerRegisterData?.personalKyc?.personal_form?.customer_details?.surname} />
-                        <LabelDetails label="Date of Birth" value={customerRegisterData?.personalKyc?.personal_form?.customer_details?.date_of_birth} />
-                        <LabelDetails label="Occupation" value={customerRegisterData?.personalKyc?.personal_form?.employment_details?.occupation} />
-                        <LabelDetails label="Email" value={customerRegisterData?.personalKyc?.personal_form?.contact_details?.email} />
-                        <LabelDetails label="Industry" value={customerRegisterData?.personalKyc?.personal_form?.employment_details?.industry} />
-                        <LabelDetails label="Employer&apos; Name" value={customerRegisterData?.personalKyc?.personal_form?.employment_details?.employer_name} />
-                        <LabelDetails label="Residential Address" value={customerRegisterData?.personalKyc?.personal_form?.residential_address?.address} />
-                        <LabelDetails label="Country" value={customerRegisterData?.personalKyc?.personal_form?.residential_address?.country?.value} />
-                        <LabelDetails label="State" value={customerRegisterData?.personalKyc?.personal_form?.residential_address?.state} />
-                        <LabelDetails label="Zip Code" value={customerRegisterData?.personalKyc?.personal_form?.residential_address?.zip_code} />
+                        <LabelDetails label="First Name" value={customerRegisterData.customer_details?.given_name} />
+                        <LabelDetails label="Middle Name" value={customerRegisterData?.customer_details?.middle_name} />
+                        <LabelDetails label="Last Name" value={customerRegisterData?.customer_details?.surname} />
+                        <LabelDetails label="Date of Birth" value={customerRegisterData?.customer_details?.date_of_birth} />
+                        <LabelDetails label="Occupation" value={customerRegisterData?.employment_details?.occupation} />
+                        <LabelDetails label="Email" value={customerRegisterData?.contact_details?.email} />
+                        <LabelDetails label="Industry" value={customerRegisterData?.employment_details?.industry} />
+                        <LabelDetails label="Employer&apos; Name" value={customerRegisterData?.employment_details?.employer_name} />
+                        <LabelDetails label="Residential Address" value={customerRegisterData?.residential_address?.address} />
+                        <LabelDetails label="Country" value={customerRegisterData?.residential_address?.country?.value} />
+                        <LabelDetails label="State" value={customerRegisterData?.residential_address?.state} />
+                        <LabelDetails label="Zip Code" value={customerRegisterData?.residential_address?.postcode} />
                     </div>
                 </div>
                 <div className=''>

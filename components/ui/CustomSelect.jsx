@@ -8,7 +8,7 @@ const CustomSelect = ({ label, ...props }) => {
   return (
     <div className="w-full">
       {label && <Label>{label}</Label>}
-      <Select {...props} classNamePrefix="react-select" />
+      <Select classNamePrefix="react-select" {...props} />
     </div>
   );
 };

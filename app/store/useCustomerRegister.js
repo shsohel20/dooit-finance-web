@@ -8,6 +8,7 @@ const initialFormData = {
     other_names: '',
     referral: '',
   },
+  document_type: null,
   contact_details: {
     email: '',
     phone: ''

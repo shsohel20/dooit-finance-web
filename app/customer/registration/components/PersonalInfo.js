@@ -108,8 +108,8 @@ const PersonalInfo = ({ control, errors }) => {
                         <CustomInput label='Industry' {...field} />
                     )}
                 />
-                <div className='lg:col-span-3 xl:col-span-4'>
-                    <h4 className=' mb-2'>Residential Address</h4>
+                <div className='lg:col-span-3 xl:col-span-4 mt-4'>
+                    <h4 className='font-semibold mb-4'>Residential Address</h4>
                     <Controller
                         control={control}
                         name='residential_address.address'
@@ -147,8 +147,8 @@ const PersonalInfo = ({ control, errors }) => {
                         <CustomInput label='Zip Code' {...field} />
                     )}
                 />
-                <div className='lg:col-span-3 xl:col-span-4'>
-                    <h4 className=' mb-2'>Mailing Address</h4>
+                <div className='lg:col-span-3 xl:col-span-4 mt-4'>
+                    <h4 className='font-semibold mb-4'>Mailing Address</h4>
                     <Controller
                         control={control}
                         name='mailing_address.address'

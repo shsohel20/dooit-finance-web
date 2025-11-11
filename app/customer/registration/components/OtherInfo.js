@@ -38,14 +38,14 @@ const OtherInfo = ({ control, errors }) => {
                         <CustomInput label='Estimated Trading Volume' {...field} />
                     )}
                 />
-                <Controller
+                {/* <Controller
                     control={control}
                     name='funds_wealth.email'
                     render={({ field }) => (
                         <CustomInput label='Email' {...field} />
                     )}
-                />
-                <Controller
+                /> */}
+                {/* <Controller
                     control={control}
                     name='funds_wealth.occupation'
                     render={({ field }) => (
@@ -65,7 +65,7 @@ const OtherInfo = ({ control, errors }) => {
                     render={({ field }) => (
                         <CustomInput label='Industry' {...field} />
                     )}
-                />
+                /> */}
             </div>
 
             <FormTitle>Sole Trader Status</FormTitle>
@@ -97,11 +97,47 @@ const OtherInfo = ({ control, errors }) => {
                 </div> */}
 
                 <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4'>
-                    <CustomInput label='First Name' />
+
+                    <Controller
+                        control={control}
+                        name='sole_trader.business_details.first_name'
+                        render={({ field }) => (
+                            <CustomInput label='First Name' {...field} />
+                        )}
+                    />
+                    <Controller
+                        control={control}
+                        name='sole_trader.business_details.last_name'
+                        render={({ field }) => (
+                            <CustomInput label='Last Name' {...field} />
+                        )}
+                    />
+                    <Controller
+                        control={control}
+                        name='sole_trader.business_details.date_of_birth'
+                        render={({ field }) => (
+                            <CustomInput label='Date of Birth' {...field} type='date' />
+                        )}
+                    />
+                    <Controller
+                        control={control}
+                        name='sole_trader.business_details.phone_number'
+                        render={({ field }) => (
+                            <CustomInput label='Phone Number' type='tel' {...field} />
+                        )}
+                    />
+                    <Controller
+                        control={control}
+                        name='sole_trader.business_details.id_number'
+                        render={({ field }) => (
+                            <CustomInput label='ID Number' {...field} />
+                        )}
+                    />
+                    {/* <CustomInput label='First Name' />
                     <CustomInput label='Last Name' />
                     <CustomInput label='Date of Birth' />
                     <CustomInput label='Phone Number' />
-                    <CustomInput label='ID Number' />
+                    <CustomInput label='ID Number' /> */}
 
                 </div>
             </div>

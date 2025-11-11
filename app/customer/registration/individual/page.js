@@ -16,6 +16,10 @@ const personalInfoSchema = z.object({
         middle_name: z.string().min(1, 'Middle name is required'),
         surname: z.string().min(1, 'Last name is required'),
     }),
+    document_type: z.object({
+        value: z.string().min(1, 'Document type is required'),
+        label: z.string().min(1, 'Document type is required'),
+    }).nullable(),
     contact_details: z.object({
         email: z.string().email('Invalid email address'),
         phone: z.string().min(1, 'Phone number is required'),
@@ -39,6 +43,7 @@ const personalInfoSchema = z.object({
         url: z.string().optional(),
         mimeType: z.string().optional(),
         type: z.string().optional(),
+        docType: z.string().optional(),
     })),
     declaration: z.object({
         declarations_accepted: z.boolean().optional(),
@@ -67,46 +72,27 @@ const personalInfoSchema = z.object({
         suburb: z.string().optional(),
         state: z.string().optional(),
         postcode: z.string().optional(),
-        country: z.string().optional(),
+        country: z.object({
+            value: z.string(),
+            label: z.string(),
+        }).nullable().optional(),
     }),
 });
 const TOTAL_STEPS = 3;
 const CustomerRegistration = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const { customerRegisterData, setCustomerRegisterData, registerType, country } = useCustomerRegisterStore();
+    console.log("customerRegisterData useform", customerRegisterData);
 
     const { handleSubmit, control, formState: { errors } } = useForm({
         defaultValues: customerRegisterData,
         resolver: zodResolver(personalInfoSchema),
+        mode: 'onChange',
     });
     const onSubmit = (data) => {
         console.log("data", data);
-        const token = localStorage.getItem("invite_token");
-        const cid = localStorage.getItem("invite_cid");
-        const submittedData = {
-            token,
-            cid,
-            requestedType: registerType,
-            country: country,
-            personalKyc: {
-                personal_form: {
-                    customer_details: data.customer_details,
-                    contact_details: data.contact_details,
-                    employment_details: data.employment_details,
-                    residential_address: {
-                        ...data.residential_address,
-                        country: data.residential_address.country.value
-                    },
-                    mailing_address: data.mailing_address,
 
-                },
-                funds_wealth: data.funds_wealth,
-                sole_trader: data.sole_trader,
-            },
-            documents: data.documents,
-            declaration: data.declaration,
-        }
-        setCustomerRegisterData(submittedData);
+        setCustomerRegisterData(data);
         router.push('/customer/registration/preview')
     }
     console.log("errors", errors);
@@ -137,8 +123,9 @@ const CustomerRegistration = () => {
             </div>
             {/* content */}
             <div>
-                {currentStep === 1 && <PersonalInfo control={control} errors={errors} />}
-                {currentStep === 2 && <IdentificationDocuments control={control} errors={errors} />}
+                {currentStep === 1 && <IdentificationDocuments control={control} errors={errors} />}
+                {currentStep === 2 && <PersonalInfo control={control} errors={errors} />}
+
                 {currentStep === 3 && <OtherInfo control={control} errors={errors} />}
             </div>
             <div className='flex justify-end gap-2 my-8'>
