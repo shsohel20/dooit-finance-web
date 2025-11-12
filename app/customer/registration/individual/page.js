@@ -42,9 +42,9 @@ const personalInfoSchema = z.object({
         name: z.string().optional(),
         url: z.string().optional(),
         mimeType: z.string().optional(),
-        type: z.string().optional(),
+        type: z.enum(['front', 'back']),
         docType: z.string().optional(),
-    })),
+    })).max(2, 'You can only upload 2 documents'),
     declaration: z.object({
         declarations_accepted: z.boolean().optional(),
         signatory_name: z.string().optional(),

@@ -9,7 +9,7 @@ const CustomSelect = dynamic(() => import('@/components/ui/CustomSelect'), { ssr
 
 const PersonalInfo = ({ control, errors }) => {
     return (
-        <div>
+        <div className='pb-8'>
             <FormTitle>Personal Information</FormTitle>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:grid-cols-4 mt-8'>
                 <Controller
@@ -20,7 +20,7 @@ const PersonalInfo = ({ control, errors }) => {
                             label='First Name'
                             placeholder='John'
                             {...field}
-                            error={errors.personalInfo?.customer_details?.given_name?.message}
+                            error={errors.customer_details?.given_name?.message}
                         />
                     )}
                 />
@@ -32,7 +32,7 @@ const PersonalInfo = ({ control, errors }) => {
                             label='Middle Name'
                             placeholder='Marco'
                             {...field}
-                            error={errors.personalInfo?.customer_details?.middle_name?.message}
+                            error={errors.customer_details?.middle_name?.message}
                         />
                     )}
                 />
@@ -44,7 +44,7 @@ const PersonalInfo = ({ control, errors }) => {
                             label='Last Name'
                             placeholder='Doe'
                             {...field}
-                            error={errors.personalInfo?.customer_details?.surname?.message}
+                            error={errors.customer_details?.surname?.message}
                         />
                     )}
                 />
@@ -57,7 +57,7 @@ const PersonalInfo = ({ control, errors }) => {
                             type='date'
                             placeholder='YYYY-MM-DD'
                             {...field}
-                            error={errors.personalInfo?.customer_details?.date_of_birth?.message}
+                            error={errors.customer_details?.date_of_birth?.message}
                         />
                     )}
                 />
@@ -70,7 +70,7 @@ const PersonalInfo = ({ control, errors }) => {
                             type='tel'
                             placeholder='+1 (555) 000-0000'
                             {...field}
-                            error={errors.personalInfo?.contact_details?.phone?.message}
+                            error={errors.contact_details?.phone?.message}
                         />
                     )}
                 />
@@ -83,7 +83,7 @@ const PersonalInfo = ({ control, errors }) => {
                             type='email'
                             {...field}
                             placeholder='example@example.com'
-                            error={errors.personalInfo?.contact_details?.email?.message}
+                            error={errors.contact_details?.email?.message}
                         />
                     )}
                 />
@@ -91,21 +91,21 @@ const PersonalInfo = ({ control, errors }) => {
                     control={control}
                     name='employment_details.occupation'
                     render={({ field }) => (
-                        <CustomInput label='Occupation' {...field} />
+                        <CustomInput label='Occupation' {...field} error={errors.employment_details?.occupation?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='employment_details.employer_name'
                     render={({ field }) => (
-                        <CustomInput label='Employer&apos; Name' {...field} />
+                        <CustomInput label='Employer&apos; Name' {...field} error={errors.employment_details?.employer_name?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='employment_details.industry'
                     render={({ field }) => (
-                        <CustomInput label='Industry' {...field} />
+                        <CustomInput label='Industry' {...field} error={errors.employment_details?.industry?.message} />
                     )}
                 />
                 <div className='lg:col-span-3 xl:col-span-4 mt-4'>
@@ -114,7 +114,7 @@ const PersonalInfo = ({ control, errors }) => {
                         control={control}
                         name='residential_address.address'
                         render={({ field }) => (
-                            <CustomInput label='Address Line 1' type='textarea' {...field} />
+                            <CustomInput label='Address Line 1' type='textarea' {...field} error={errors.residential_address?.address?.message} />
                         )}
                     />
                 </div>
@@ -123,28 +123,28 @@ const PersonalInfo = ({ control, errors }) => {
                     control={control}
                     name='residential_address.suburb'
                     render={({ field }) => (
-                        <CustomInput label='Suburb' {...field} />
+                        <CustomInput label='Suburb' {...field} error={errors.residential_address?.suburb?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='residential_address.state'
                     render={({ field }) => (
-                        <CustomInput label='State' {...field} />
+                        <CustomInput label='State' {...field} error={errors.residential_address?.state?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='residential_address.country'
                     render={({ field }) => (
-                        <CustomSelect label='Country' {...field} options={countriesData} />
+                        <CustomSelect label='Country' {...field} options={countriesData} error={errors.residential_address?.country?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='residential_address.zip_code'
                     render={({ field }) => (
-                        <CustomInput label='Zip Code' {...field} />
+                        <CustomInput label='Zip Code' {...field} error={errors.residential_address?.zip_code?.message} />
                     )}
                 />
                 <div className='lg:col-span-3 xl:col-span-4 mt-4'>
@@ -153,7 +153,7 @@ const PersonalInfo = ({ control, errors }) => {
                         control={control}
                         name='mailing_address.address'
                         render={({ field }) => (
-                            <CustomInput label='Address Line 1' type='textarea' {...field} />
+                            <CustomInput label='Address Line 1' type='textarea' {...field} error={errors.mailing_address?.address?.message} />
                         )}
                     />
                 </div>
@@ -161,28 +161,28 @@ const PersonalInfo = ({ control, errors }) => {
                     control={control}
                     name='mailing_address.suburb'
                     render={({ field }) => (
-                        <CustomInput label='Suburb' {...field} />
+                        <CustomInput label='Suburb' {...field} error={errors.mailing_address?.suburb?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='mailing_address.state'
                     render={({ field }) => (
-                        <CustomInput label='State' {...field} />
+                        <CustomInput label='State' {...field} error={errors.mailing_address?.state?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='mailing_address.country'
                     render={({ field }) => (
-                        <CustomSelect label='Country' {...field} options={countriesData} />
+                        <CustomSelect label='Country' {...field} options={countriesData} error={errors.mailing_address?.country?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='mailing_address.postcode'
                     render={({ field }) => (
-                        <CustomInput label='Postcode' {...field} />
+                        <CustomInput label='Postcode' {...field} error={errors.mailing_address?.postcode?.message} />
                     )}
                 />
 

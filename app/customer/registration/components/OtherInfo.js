@@ -25,28 +25,28 @@ const OtherInfo = ({ control, errors, setValue }) => {
                     control={control}
                     name='funds_wealth.source_of_funds'
                     render={({ field }) => (
-                        <CustomInput label='Source of Funds' {...field} />
+                        <CustomInput label='Source of Funds' {...field} error={errors.funds_wealth?.source_of_funds?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='funds_wealth.source_of_wealth'
                     render={({ field }) => (
-                        <CustomInput label='Source of Wealth' {...field} />
+                        <CustomInput label='Source of Wealth' {...field} error={errors.funds_wealth?.source_of_wealth?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='funds_wealth.account_purpose'
                     render={({ field }) => (
-                        <CustomInput label='Reason Of Opening Account' {...field} />
+                        <CustomInput label='Reason Of Opening Account' {...field} error={errors.funds_wealth?.account_purpose?.message} />
                     )}
                 />
                 <Controller
                     control={control}
                     name='funds_wealth.estimated_trading_volume'
                     render={({ field }) => (
-                        <CustomInput label='Estimated Trading Volume' {...field} />
+                        <CustomInput label='Estimated Trading Volume' {...field} error={errors.funds_wealth?.estimated_trading_volume?.message} />
                     )}
                 />
                 {/* <Controller
@@ -101,35 +101,35 @@ const OtherInfo = ({ control, errors, setValue }) => {
                         control={control}
                         name='sole_trader.business_details.first_name'
                         render={({ field }) => (
-                            <CustomInput label='First Name' {...field} />
+                            <CustomInput label='First Name' {...field} error={errors.sole_trader?.business_details?.first_name?.message} />
                         )}
                     />
                     <Controller
                         control={control}
                         name='sole_trader.business_details.last_name'
                         render={({ field }) => (
-                            <CustomInput label='Last Name' {...field} />
+                            <CustomInput label='Last Name' {...field} error={errors.sole_trader?.business_details?.last_name?.message} />
                         )}
                     />
                     <Controller
                         control={control}
                         name='sole_trader.business_details.date_of_birth'
                         render={({ field }) => (
-                            <CustomInput label='Date of Birth' {...field} type='date' />
+                            <CustomInput label='Date of Birth' {...field} type='date' error={errors.sole_trader?.business_details?.date_of_birth?.message} />
                         )}
                     />
                     <Controller
                         control={control}
                         name='sole_trader.business_details.phone_number'
                         render={({ field }) => (
-                            <CustomInput label='Phone Number' type='tel' {...field} />
+                            <CustomInput label='Phone Number' type='tel' {...field} error={errors.sole_trader?.business_details?.phone_number?.message} />
                         )}
                     />
                     <Controller
                         control={control}
                         name='sole_trader.business_details.id_number'
                         render={({ field }) => (
-                            <CustomInput label='ID Number' {...field} />
+                            <CustomInput label='ID Number' {...field} error={errors.sole_trader?.business_details?.id_number?.message} />
                         )}
                     />
                     {/* <CustomInput label='First Name' />

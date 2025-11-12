@@ -15,6 +15,7 @@ const documentTypes = [
 ]
 
 const DropZone = ({ children, disabled = false, loading = false, url = null, error = false }) => {
+    console.log('url', url);
     const renderIcon = () => {
         if (loading === true) {
             return <Loader2 className='w-4 h-4 animate-spin' />
@@ -58,7 +59,7 @@ const IdentificationDocuments = ({ control, errors }) => {
     const [backLoading, setBackLoading] = useState(false);
     const [backUrl, setBackUrl] = useState(null);
     const [backError, setBackError] = useState(false);
-    const { fields, append, remove, } = useFieldArray({
+    const { fields, append, remove, update } = useFieldArray({
         control,
         name: "documents",
     });
@@ -72,15 +73,26 @@ const IdentificationDocuments = ({ control, errors }) => {
         console.log('file', file);
         setFrontLoading(true);
         const response = await fileUploadOnCloudinary(file);
+        console.log('front image', response?.data);
         if (response.success) {
-            setFrontUrl(response.data.fileUrl);
-            append({
-                name: file.name,
-                url: response.data.fileUrl,
-                mimeType: file.type,
-                type: 'front',
-                docType: documentTypeValue?.value,
-            })
+            const existingFrontIndex = fields.findIndex((item) => item.type === 'front');
+
+            if (existingFrontIndex !== -1) {
+                update(existingFrontIndex, {
+                    ...fields[existingFrontIndex],
+                    name: file.name,
+                    url: response.data.fileUrl,
+                    mimeType: file.type,
+                });
+            } else {
+                append({
+                    name: file.name,
+                    url: response.data.fileUrl,
+                    mimeType: file.type,
+                    type: 'front',
+                    docType: documentTypeValue?.value,
+                });
+            }
         } else {
             setFrontError(true);
         }
@@ -92,14 +104,23 @@ const IdentificationDocuments = ({ control, errors }) => {
         setBackLoading(true);
         const response = await fileUploadOnCloudinary(file);
         if (response.success) {
-            setBackUrl(response.data.fileUrl);
-            append({
-                name: file.name,
-                url: response.data.fileUrl,
-                mimeType: file.type,
-                type: 'back',
-                docType: documentTypeValue?.value,
-            })
+            const existingBackIndex = fields.findIndex((item) => item.type === 'back');
+            if (existingBackIndex !== -1) {
+                update(existingBackIndex, {
+                    ...fields[existingBackIndex],
+                    name: file.name,
+                    url: response.data.fileUrl,
+                    mimeType: file.type,
+                });
+            } else {
+                append({
+                    name: file.name,
+                    url: response.data.fileUrl,
+                    mimeType: file.type,
+                    type: 'back',
+                    docType: documentTypeValue?.value,
+                })
+            }
         }
         else {
             setBackError(true);
@@ -109,8 +130,6 @@ const IdentificationDocuments = ({ control, errors }) => {
     }
     const handleDocumentTypeChange = (e, onChange) => {
         onChange(e);
-        setFrontUrl(null);
-        setBackUrl(null);
         setFrontError(false);
         setBackError(false);
         fields.forEach(field => {

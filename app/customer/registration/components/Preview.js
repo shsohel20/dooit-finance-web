@@ -11,6 +11,7 @@ import { individualCustomerRegistration } from '../actions';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const Preview = () => {
     const [agreed, setAgreed] = useState(false);
@@ -66,7 +67,7 @@ const Preview = () => {
             <div className='space-y-4 mt-4'>
                 <div className=''>
                     <h4 className='text-md font-bold tracking-tighter'>Personal Information</h4>
-                    <div className='grid grid-cols-4 gap-2 py-6'>
+                    <div className='grid grid-cols-6 gap-2 py-6'>
                         <LabelDetails label="First Name" value={customerRegisterData.customer_details?.given_name} />
                         <LabelDetails label="Middle Name" value={customerRegisterData?.customer_details?.middle_name} />
                         <LabelDetails label="Last Name" value={customerRegisterData?.customer_details?.surname} />
@@ -83,52 +84,48 @@ const Preview = () => {
                 </div>
                 <div className=''>
                     <h4 className='text-md font-bold tracking-tighter'>Identification Documents</h4>
-                    <p>Upload Government
-                        issued ID document :</p>
-                    <div className='h-[150px]'></div>
+                    <div className=''>
+                        <p>Document Type: <span className='font-bold'>{customerRegisterData?.document_type?.label}</span></p>
+                        <div className='flex py-4 gap-2'>
+                            {
+                                customerRegisterData?.documents?.map((document, index) => (
+                                    <div key={document.id} className={
+                                        cn('h-[200px] aspect-3/4 rounded-md overflow-hidden border')
+                                    }>
+                                        <img src={document.url} alt={document.name} className='w-full h-full object-cover' />
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    </div>
                     <h4 className='text-md font-bold tracking-tighter'>Bank Statement</h4>
-                    <div className='h-[150px]'></div>
+                    <div className='h-[150px]'>
+
+                    </div>
                 </div>
                 <div>
                     <h4 className='text-md font-bold tracking-tighter'>Funds/Wealth Information</h4>
-                    <div className='space-y-4'>
-                        <div>
-                            Source of Funds:
-                        </div>
-                        <div>
-                            Source of Wealth:
-                        </div>
-                        <div>
-                            Reason Of Opening Account:
-                        </div>
-                        <div>
-                            Estimated Trading Volume:
-                        </div>
-                        <div>
-                            Email:
-                        </div>
-                        <div>
-                            Occupation:
-                        </div>
-                        <div>
-                            Employer&apos; Name:
-                        </div>
-                        <div>
-                            Industry:
-                        </div>
+                    <div className='grid grid-cols-6 gap-2 py-6'>
+                        <LabelDetails label="Source of Wealth" value={customerRegisterData?.funds_wealth?.source_of_wealth} />
+                        <LabelDetails label="Reason Of Opening Account" value={customerRegisterData?.funds_wealth?.account_purpose} />
+                        <LabelDetails label="Estimated Trading Volume" value={customerRegisterData?.funds_wealth?.estimated_trading_volume} />
+                        <LabelDetails label="Email" value={customerRegisterData?.contact_details?.email} />
+                        <LabelDetails label="Occupation" value={customerRegisterData?.employment_details?.occupation} />
+                        <LabelDetails label="Employer&apos; Name" value={customerRegisterData?.employment_details?.employer_name} />
+                        <LabelDetails label="Industry" value={customerRegisterData?.employment_details?.industry} />
                     </div>
                 </div>
                 <div>
                     <h4 className='text-md font-bold tracking-tighter'>Sole Trader Status</h4>
                     <div className='space-y-4'>
                         <div>
-                            Are you acting as a sole trader?: Yes
+                            Are you acting as a sole trader?: <span className='font-bold'>{customerRegisterData?.sole_trader?.is_sole_trader ? 'Yes' : 'No'}</span>
                         </div>
 
                     </div>
                 </div>
                 <div>
-                    <h4 className='text-md font-bold tracking-tighter'>Declaration</h4>
+                    {/* <h4 className='text-md font-bold tracking-tighter'>Declaration</h4>
                     <div className='space-y-1 mt-2'>
                         <p>1. I declare that the information I have provided is TRUE and CORRECT</p>
                         <p>2. I declare that I am NOT a politically exposed person (PEP),
@@ -146,7 +143,7 @@ const Preview = () => {
                             Conditions; and Privacy Policy on CobWeb Pay website:
                             https://www.cobwebpay.com/.</p>
                         <p>6. I declare that I am not a U.S resident for tax purposes.</p>
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className='flex flex-col items-center justify-center gap-4 mt-8'>

@@ -4,6 +4,17 @@ import React from "react";
 import Select from "react-select";
 import { Label } from "./label";
 import { cn } from "@/lib/utils";
+export const selectThemeColors = (theme) => ({
+  ...theme,
+  colors: {
+    ...theme.colors,
+    primary25: "var(--accent)", // for option hover bg-color
+    primary: "var(--primary)", // for selected option bg-color
+    neutral10: "var(--primary)", // for tags bg-color
+    neutral20: "var(--border)", // for input border-color
+    neutral30: "var(--border)", // for input hover border-color
+  },
+});
 
 const CustomSelect = ({ label, error, ...props }) => {
   return (
@@ -12,12 +23,25 @@ const CustomSelect = ({ label, error, ...props }) => {
       <Select
         aria-invalid={error ? true : false}
         classNamePrefix="react-select"
+        className={cn(
+          "dropdown-select border border-border !rounded-lg    focus:outline-none focus:ring-1 focus:ring-gray-200 transition-colors",
+          {
+            "border-red-500": error,
+          }
+        )}
+        // menuPortalTarget={document.body}
+        menuPlacement="auto"
+        styles={{
+          menuPortal: (base) => ({
+            ...base,
+            zIndex: "9999",
+          }),
+        }}
+        theme={selectThemeColors}
         {...props}
       />
       {error && (
-        <p className="text-red-600 font-semibold text-sm mt-0.5">
-          This field is required
-        </p>
+        <p className="text-red-500   text-xs mt-0.5">This field is required</p>
       )}
     </div>
   );
