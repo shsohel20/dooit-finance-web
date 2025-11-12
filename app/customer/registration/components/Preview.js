@@ -18,7 +18,7 @@ const Preview = () => {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
     const { customerRegisterData, registerType, country } = useCustomerRegisterStore();
-    console.log("customerRegisterData", customerRegisterData);
+
     const handleContinue = async () => {
         setLoading(true);
         const token = localStorage.getItem("invite_token");
@@ -89,7 +89,7 @@ const Preview = () => {
                         <div className='flex py-4 gap-2'>
                             {
                                 customerRegisterData?.documents?.map((document, index) => (
-                                    <div key={document.id} className={
+                                    <div key={document.url + index} className={
                                         cn('h-[200px] aspect-3/4 rounded-md overflow-hidden border')
                                     }>
                                         <img src={document.url} alt={document.name} className='w-full h-full object-cover' />

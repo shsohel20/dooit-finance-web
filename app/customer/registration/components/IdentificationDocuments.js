@@ -15,7 +15,6 @@ const documentTypes = [
 ]
 
 const DropZone = ({ children, disabled = false, loading = false, url = null, error = false }) => {
-    console.log('url', url);
     const renderIcon = () => {
         if (loading === true) {
             return <Loader2 className='w-4 h-4 animate-spin' />

@@ -10,6 +10,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import {
+  IconAlertTriangle,
+  IconBuildingBank,
   IconChartBar,
   IconCircleCheck,
   IconCircleDashedCheck,
@@ -18,6 +20,7 @@ import {
   IconListDetails,
   IconPentagonX,
   IconProgress,
+  IconUsers,
 } from "@tabler/icons-react"
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
@@ -30,7 +33,7 @@ export default function ClientSidebar({ ...props }) {
     {
       title: "Customer Queue",
       // url: "#",
-      icon: IconListDetails,
+      icon: IconUsers,
       // current: true,
       children: [
         {
@@ -66,7 +69,7 @@ export default function ClientSidebar({ ...props }) {
     },
     {
       title: 'Branch Management',
-      icon: IconListDetails,
+      icon: IconBuildingBank,
       children: [
         {
           title: 'Branch List',
@@ -76,7 +79,7 @@ export default function ClientSidebar({ ...props }) {
     },
     {
       title: 'Customer Risk Assessment',
-      icon: IconListDetails,
+      icon: IconAlertTriangle,
       children: [
         {
           title: 'Customer List',
@@ -197,6 +200,52 @@ export default function ClientSidebar({ ...props }) {
     },
   ]
 
+  const knowledgeHubMenuItems = [
+    {
+      title: 'Policy Hub',
+      icon: IconListDetails,
+      url: '/dashboard/client/knowledge-hub/policy-hub',
+    },
+    {
+      title: 'Training Hub',
+      icon: IconListDetails,
+      url: '/dashboard/client/knowledge-hub/training-hub',
+    },
+    {
+      title: 'EWRA',
+      icon: IconListDetails,
+      url: '/dashboard/client/faq',
+      children: [
+        // {
+        //   title: 'Risk Assessment',
+        //   url: '/dashboard/client/risk-assessment',
+        //   icon: IconListDetails,
+        // },
+        {
+          title: 'ML Risk Assessment',
+          url: '/dashboard/client/knowledge-hub/ewra/ml-risk-assesment',
+          icon: IconListDetails,
+        },
+        {
+          title: 'TF Risk Assessment',
+          url: '/dashboard/client/tf-risk-assessment-module',
+          icon: IconListDetails,
+        },
+        {
+          title: 'ABC Risk Assessment',
+          url: '/dashboard/client/abc-risk-assessment',
+          icon: IconListDetails,
+        },
+      ]
+    },
+    {
+      title: 'Regulatory Links',
+      icon: IconListDetails,
+      url: '/dashboard/client/regulatory-links',
+
+    },
+  ]
+
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -216,6 +265,7 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={onBoardingMenuItems} label="Onboarding" />
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={reportingMenuItems} label="Reporting & Registers" />
+        <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
         {/* <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
