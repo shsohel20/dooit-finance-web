@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from './(layout)/Header';
 
-const layout = ( { children } ) => {
+const layout = ({ children }) => {
     return (
         <div>
             <Header />
@@ -13,7 +13,7 @@ const layout = ( { children } ) => {
                             <p>Please provide the necessary information to complete the KYC process.</p>
                         </div>
                         <div>
-                            <p className='font-semibold'>Type: Individual</p>
+                            {/* <p className='font-semibold'>Type: Individual</p> */}
                         </div>
                     </div>
                 </div>

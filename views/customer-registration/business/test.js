@@ -3,6 +3,9 @@
 import { useState } from "react"
 import { ChevronDown, Check } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function KYCCompanyForm() {
   const [expandedSections, setExpandedSections] = useState({
@@ -21,45 +24,45 @@ export default function KYCCompanyForm() {
 
   const formData = {
     general_information: {
-      legal_name: "NextTech Solutions Pty Ltd",
-      trading_names: "NextTech",
-      phone_number: "+61 412 345 678",
-      registration_number: "ACN123456789",
-      country_of_incorporation: "Australia",
-      contact_email: "info@nexttech.com.au",
-      industry: "Software Development",
-      nature_of_business: "Custom web & mobile software solutions",
-      annual_income: "1M - 5M AUD",
-      estimated_trading_volume: "500K - 1M AUD / year",
+      legal_name: "",
+      trading_names: "",
+      phone_number: "",
+      registration_number: "",
+      country_of_incorporation: "",
+      contact_email: "",
+      industry: "",
+      nature_of_business: "",
+      annual_income: "",
+      estimated_trading_volume: "",
     },
     addresses: {
       local_agent: {
-        name: "John Doe",
-        street: "15 Harbour Street",
-        suburb: "Sydney",
-        state: "NSW",
-        postcode: "2000",
-        country: "Australia",
+        name: "",
+        street: "",
+        suburb: "",
+        state: "",
+        postcode: "",
+        country: "",
       },
       registered: {
-        street: "10 Pitt Street",
-        suburb: "Sydney",
-        state: "NSW",
-        postcode: "2000",
-        country: "Australia",
+        street: "",
+        suburb: "",
+        state: "",
+        postcode: "",
+        country: "",
       },
       business: {
-        street: "25 Bridge Street",
-        suburb: "Sydney",
-        state: "NSW",
-        postcode: "2000",
-        country: "Australia",
+        street: "",
+        suburb: "",
+        state: "",
+        postcode: "",
+        country: "",
       },
     },
     account_purpose: {
       peer_to_peer: true,
       other: true,
-      other_details: "Corporate account for software exports",
+      other_details: "",
     },
   }
 
@@ -70,9 +73,9 @@ export default function KYCCompanyForm() {
 
   const beneficialOwners = [
     {
-      full_name: "Michael Anderson",
-      date_of_birth: "1980-06-21",
-      residential_address: "5 Bay Road, North Sydney NSW 2060, Australia",
+      full_name: "",
+      date_of_birth: "",
+      residential_address: "",
     },
   ]
 
@@ -117,41 +120,34 @@ export default function KYCCompanyForm() {
                 <h3 className="font-semibold text-sm text-foreground">Company Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-2">Legal Name</label>
+                    <Label>Legal Name</Label>
                     <Input
                       type="text"
                       defaultValue={formData.general_information.legal_name}
-                      className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-2">Trading Name</label>
-                    <input
+                    <Label>Trading Name</Label>
+                    <Input
                       type="text"
                       defaultValue={formData.general_information.trading_names}
-                      className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-2">Registration Number</label>
-                    <input
+                    <Label >Registration Number</Label>
+                    <Input
                       type="text"
                       defaultValue={formData.general_information.registration_number}
-                      className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
 
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-2">
+                    <Label >
                       Country of Incorporation
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       type="text"
                       defaultValue={formData.general_information.country_of_incorporation}
-                      className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-
                     />
                   </div>
                 </div>
@@ -162,21 +158,17 @@ export default function KYCCompanyForm() {
                 <h3 className="font-semibold text-sm text-foreground">Contact Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-2">Email</label>
-                    <input
+                    <Label >Email</Label>
+                    <Input
                       type="email"
                       defaultValue={formData.general_information.contact_email}
-                      className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      readOnly
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-2">Phone</label>
-                    <input
+                    <Label >Phone</Label>
+                    <Input
                       type="tel"
                       defaultValue={formData.general_information.phone_number}
-                      className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      readOnly
                     />
                   </div>
                 </div>
@@ -187,30 +179,24 @@ export default function KYCCompanyForm() {
                 <h3 className="font-semibold text-sm text-foreground">Business Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-2">Industry</label>
-                    <input
+                    <Label >Industry</Label>
+                    <Input
                       type="text"
                       defaultValue={formData.general_information.industry}
-                      className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      readOnly
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-muted-foreground mb-2">Annual Income</label>
-                    <input
+                    <Label >Annual Income</Label>
+                    <Input
                       type="text"
                       defaultValue={formData.general_information.annual_income}
-                      className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      readOnly
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-muted-foreground mb-2">Nature of Business</label>
-                    <textarea
+                    <Label >Nature of Business</Label>
+                    <Textarea
                       defaultValue={formData.general_information.nature_of_business}
-                      className="w-full px-3 py-2 rounded-lg border border-border/50 bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                       rows={2}
-                      readOnly
                     />
                   </div>
                 </div>
@@ -222,33 +208,138 @@ export default function KYCCompanyForm() {
                 <div className="space-y-4">
                   <div>
                     <h4 className="text-xs font-medium text-foreground/80 mb-3">Registered Address</h4>
-                    <div className="p-3 rounded-lg bg-background/50 border ">
-                      <p className="text-sm text-foreground">
-                        {formData.addresses.registered.street}, {formData.addresses.registered.suburb}{" "}
-                        {formData.addresses.registered.state} {formData.addresses.registered.postcode},{" "}
-                        {formData.addresses.registered.country}
-                      </p>
+                    <div className="p-3 rounded-lg grid grid-cols-4 gap-4 border ">
+                      <div>
+                        <Label>Street</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.registered.street}
+                        />
+                      </div>
+                      <div>
+                        <Label>Suburb</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.registered.suburb}
+                        />
+                      </div>
+                      <div>
+                        <Label>State</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.registered.state}
+                        />
+                      </div>
+                      <div>
+                        <Label>Postcode</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.registered.postcode}
+                        />
+                      </div>
+                      <div>
+                        <Label>Country</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.registered.country}
+                        />
+                      </div>
+
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-xs font-medium text-foreground/80 mb-3">Business Address</h4>
-                    <div className="p-3 rounded-lg bg-background/50 border ">
-                      <p className="text-sm text-foreground">
-                        {formData.addresses.business.street}, {formData.addresses.business.suburb}{" "}
-                        {formData.addresses.business.state} {formData.addresses.business.postcode},{" "}
-                        {formData.addresses.business.country}
-                      </p>
+                    <div>
+                      <h4 className="text-xs font-medium text-foreground/80 mb-3">Business Address</h4>
+                      <div className="flex items-center gap-2">
+                        <Label>Same as registered address</Label>
+                        <Checkbox
+                          defaultChecked={false}
+                        />
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg grid grid-cols-4 gap-4 border ">
+                      <div>
+                        <Label>Street</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.business.street}
+                        />
+                      </div>
+                      <div>
+                        <Label>Suburb</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.business.suburb}
+                        />
+                      </div>
+                      <div>
+                        <Label>State</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.business.state}
+                        />
+                      </div>
+                      <div>
+                        <Label>Postcode</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.business.postcode}
+                        />
+                      </div>
+                      <div>
+                        <Label>Country</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.business.country}
+                        />
+                      </div>
                     </div>
                   </div>
                   <div>
                     <h4 className="text-xs font-medium text-foreground/80 mb-3">Local Agent</h4>
-                    <div className="p-3 rounded-lg bg-background/50 border ">
-                      <p className="text-sm font-medium text-foreground">{formData.addresses.local_agent.name}</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {formData.addresses.local_agent.street}, {formData.addresses.local_agent.suburb}{" "}
-                        {formData.addresses.local_agent.state} {formData.addresses.local_agent.postcode},{" "}
-                        {formData.addresses.local_agent.country}
-                      </p>
+                    <div className="p-3 rounded-lg grid grid-cols-4 gap-4 border ">
+                      <div>
+                        <Label>Name</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.local_agent.name}
+                        />
+                      </div>
+                      <div>
+                        <Label>Street</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.local_agent.street}
+                        />
+                      </div>
+                      <div>
+                        <Label>Suburb</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.local_agent.suburb}
+                        />
+                      </div>
+                      <div>
+                        <Label>State</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.local_agent.state}
+                        />
+                      </div>
+                      <div>
+                        <Label>Postcode</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.local_agent.postcode}
+                        />
+                      </div>
+                      <div>
+                        <Label>Country</Label>
+                        <Input
+                          type="text"
+                          defaultValue={formData.addresses.local_agent.country}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
