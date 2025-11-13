@@ -1,7 +1,7 @@
 'use client';
 import CustomInput from '@/components/ui/CustomInput';
 import React from 'react';
-import FormTitle from './FormTitle';
+import FormTitle from '../common/FormTitle';
 import { Controller } from 'react-hook-form';
 import dynamic from 'next/dynamic';
 import { countriesData } from '@/constants';

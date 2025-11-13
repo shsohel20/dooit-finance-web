@@ -30,14 +30,17 @@ const RegistrationType = () => {
         {
             type: 'Individual',
             desc: 'Register as an individual user',
+            value: 'individual',
         },
         {
             type: 'Business',
             desc: 'Register as a business entity',
+            value: 'business',
         },
         {
             type: 'Join Account',
             desc: 'Register as a join account',
+            value: 'joint-account',
         },
 
     ]
@@ -46,13 +49,14 @@ const RegistrationType = () => {
     }
     const handleContinue = () => {
         if (selectedType && country) {
-            setRegisterType(selectedType?.type?.toLowerCase());
+            setRegisterType(selectedType?.value);
             setCountryStore(country?.value?.toLowerCase());
 
             if (user?.kycStatus === 'pending') {
-                router.push('/customer/document-type');
+                //TODO:Will add additional logic later.
+                router.push(`/customer/registration/${selectedType?.value}`);
             } else {
-                router.push('/customer/registration/individual');
+                router.push(`/customer/registration/${selectedType?.value}`);
             }
         }
     }

@@ -3,11 +3,11 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import FormTitle from './FormTitle'
+import FormTitle from '../common/FormTitle'
 import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
 import LabelDetails from '@/components/LabelDetails';
 import { Label } from '@/components/ui/label';
-import { individualCustomerRegistration } from '../actions';
+import { individualCustomerRegistration } from '../../../app/customer/registration/actions';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -18,6 +18,7 @@ const Preview = () => {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
     const { customerRegisterData, registerType, country } = useCustomerRegisterStore();
+
 
     const handleContinue = async () => {
         setLoading(true);

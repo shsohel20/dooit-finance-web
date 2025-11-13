@@ -3,13 +3,17 @@ import { Button } from '@/components/ui/button';
 import Stepper from '@/components/ui/Stepper';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import IdentificationDocuments from '../components/IdentificationDocuments';
-import OtherInfo from '../components/OtherInfo';
-import PersonalInfo from '../components/PersonalInfo';
+
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
+import IdentificationDocuments from '@/views/customer-registration/common/IdentificationDocuments';
+import PersonalInfo from '@/views/customer-registration/individual/PersonalInfo';
+import OtherInfo from '@/views/customer-registration/individual/OtherInfo';
+
+
 const personalInfoSchema = z.object({
     customer_details: z.object({
         given_name: z.string().min(1, 'First name is required'),
@@ -93,15 +97,13 @@ const CustomerRegistration = () => {
         console.log("data", data);
 
         setCustomerRegisterData(data);
-        router.push('/customer/registration/preview')
+        router.push('/customer/registration/individual/preview')
     }
-    console.log("errors", errors);
     const router = useRouter();
 
     const handleNextStep = () => {
         setCurrentStep(prev => {
             if (prev === TOTAL_STEPS) {
-                // router.push('/customer/registration/preview');
                 return TOTAL_STEPS;
             }
             return prev + 1;

@@ -2,7 +2,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import CustomInput from '@/components/ui/CustomInput';
 import { Label } from '@/components/ui/label';
 import React, { useEffect } from 'react';
-import FormTitle from './FormTitle';
+import FormTitle from '../common/FormTitle';
 import { Controller, useWatch } from 'react-hook-form';
 
 const OtherInfo = ({ control, errors, setValue }) => {

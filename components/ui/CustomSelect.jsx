@@ -24,7 +24,7 @@ const CustomSelect = ({ label, error, ...props }) => {
         aria-invalid={error ? true : false}
         classNamePrefix="react-select"
         className={cn(
-          "dropdown-select border border-border !rounded-lg    focus:outline-none focus:ring-1 focus:ring-gray-200 transition-colors",
+          "dropdown-select border border-transparent !rounded-lg     transition-colors",
           {
             "border-red-500": error,
           }

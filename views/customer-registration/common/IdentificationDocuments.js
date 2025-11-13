@@ -52,11 +52,9 @@ const IdentificationDocuments = ({ control, errors }) => {
 
     //front
     const [frontLoading, setFrontLoading] = useState(false);
-    const [frontUrl, setFrontUrl] = useState(null);
     const [frontError, setFrontError] = useState(false);
     //back
     const [backLoading, setBackLoading] = useState(false);
-    const [backUrl, setBackUrl] = useState(null);
     const [backError, setBackError] = useState(false);
     const { fields, append, remove, update } = useFieldArray({
         control,
@@ -66,16 +64,12 @@ const IdentificationDocuments = ({ control, errors }) => {
         control,
         name: "document_type",
     });
-    console.log('fields', fields);
 
     const handleFrontChange = async (file) => {
-        console.log('file', file);
         setFrontLoading(true);
         const response = await fileUploadOnCloudinary(file);
-        console.log('front image', response?.data);
         if (response.success) {
             const existingFrontIndex = fields.findIndex((item) => item.type === 'front');
-
             if (existingFrontIndex !== -1) {
                 update(existingFrontIndex, {
                     ...fields[existingFrontIndex],
@@ -96,10 +90,8 @@ const IdentificationDocuments = ({ control, errors }) => {
             setFrontError(true);
         }
         setFrontLoading(false);
-        console.log('response', response);
     }
     const handleBackChange = async (file) => {
-        console.log('file', file);
         setBackLoading(true);
         const response = await fileUploadOnCloudinary(file);
         if (response.success) {
@@ -125,7 +117,6 @@ const IdentificationDocuments = ({ control, errors }) => {
             setBackError(true);
         }
         setBackLoading(false);
-        console.log('response', response);
     }
     const handleDocumentTypeChange = (e, onChange) => {
         onChange(e);
@@ -135,7 +126,6 @@ const IdentificationDocuments = ({ control, errors }) => {
             remove(field.id);
         });
     }
-    console.log('control', control)
     return (
         <div className='mt-4'>
             <FormTitle>Identification Documents</FormTitle>
@@ -154,13 +144,6 @@ const IdentificationDocuments = ({ control, errors }) => {
                         />
                     )}
                 />
-                {/* <CustomSelect
-                    label='Select Document Type'
-                    options={documentTypes}
-                    value={documentType}
-                    placeholder='Select Document Type'
-                    onChange={handleDocumentTypeChange}
-                /> */}
             </div>
             <div className='flex gap-4'>
                 <div className='w-full'>
@@ -169,8 +152,6 @@ const IdentificationDocuments = ({ control, errors }) => {
                         disabled={!documentTypeValue}
                         handleChange={handleFrontChange}
                     >
-                        {/* <p className='mb-2'>Upload Bank statement <span className='italic'>(issued within 30 days and covers 90
-                            days of transaction history)</span></p> */}
                         <DropZone
                             disabled={!documentTypeValue}
                             loading={frontLoading}
