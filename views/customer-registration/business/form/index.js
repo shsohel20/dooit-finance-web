@@ -392,60 +392,69 @@ export default function KYCCompanyForm() {
                       />
                     )}
                   />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Controller
-                    control={control}
-                    name="general_information.company_type.is_listed"
-                    render={({ field }) => (
-                      <Checkbox {...field} onCheckedChange={field.onChange} />
-                    )}
-                  />
-                  <Label className={'mb-0'}>Is Listed?</Label>
 
                 </div>
-                <div className="flex items-center gap-2">
-                  <Controller
-                    control={control}
-                    name="general_information.account_purpose.digital_currency_exchange"
-                    render={({ field }) => (
-                      <Checkbox {...field} onCheckedChange={field.onChange} />
-                    )}
-                  />
-                  <Label className={'mb-0'} >Digital Currency Exchange?</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Controller
-                    control={control}
-                    name="general_information.account_purpose.peer_to_peer"
-                    render={({ field }) => (
-                      <Checkbox {...field} onCheckedChange={field.onChange} />
-                    )}
-                  />
-                  <Label className={'mb-0'} >Peer-to-Peer (P2P)?</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Controller
-                    control={control}
-                    name="general_information.account_purpose.fx"
-                    render={({ field }) => (
-                      <Checkbox {...field} onCheckedChange={field.onChange} />
-                    )}
-                  />
-                  <Label className={'mb-0'} >FX?</Label>
-                </div>
+                <div>
+                  <h3>Account Purpose</h3>
+                  <div className="flex flex-col gap-4 py-4">
+                    <div className="flex items-center gap-2 ">
+                      <Controller
+                        control={control}
+                        name="general_information.company_type.is_listed"
+                        render={({ field }) => (
+                          <Checkbox {...field} id="general_information.company_type.is_listed" onCheckedChange={field.onChange} />
+                        )}
+                      />
+                      <Label htmlFor="general_information.company_type.is_listed" className={'mb-0'}>Is Listed?</Label>
+
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Controller
+                        control={control}
+                        name="general_information.account_purpose.digital_currency_exchange"
+                        render={({ field }) => (
+                          <Checkbox {...field} id="general_information.account_purpose.digital_currency_exchange" onCheckedChange={field.onChange} />
+                        )}
+                      />
+                      <Label htmlFor="general_information.account_purpose.digital_currency_exchange" className={'mb-0'} >Digital Currency Exchange?</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Controller
+                        control={control}
+
+                        name="general_information.account_purpose.peer_to_peer"
+                        render={({ field }) => (
+                          <Checkbox id="general_information.account_purpose.peer_to_peer" {...field} onCheckedChange={field.onChange} />
+                        )}
+                      />
+                      <Label htmlFor="general_information.account_purpose.peer_to_peer" className={'mb-0'} >Peer-to-Peer (P2P)?</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Controller
+                        control={control}
+                        name="general_information.account_purpose.fx"
+                        render={({ field }) => (
+                          <Checkbox id="general_information.account_purpose.fx" {...field} onCheckedChange={field.onChange} />
+                        )}
+                      />
+                      <Label htmlFor="general_information.account_purpose.fx" className={'mb-0'} >FX?</Label>
+                    </div>
+                  </div>
 
 
-                <div className="lg:col-span-4">
-                  <Label  >Other Details</Label>
 
-                  <Controller
-                    control={control}
-                    name="general_information.company_type.account_purpose.other_details"
-                    render={({ field }) => (
-                      <Input type="textarea" {...field} error={errors.general_information?.company_type?.account_purpose?.other_details?.message} />
-                    )}
-                  />
+                  <div className="lg:col-span-4">
+                    <Label  >Other Details</Label>
+
+                    <Controller
+                      control={control}
+                      name="general_information.company_type.account_purpose.other_details"
+                      render={({ field }) => (
+                        <Input type="textarea" {...field} error={errors.general_information?.company_type?.account_purpose?.other_details?.message} />
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
