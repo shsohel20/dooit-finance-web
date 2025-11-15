@@ -4,9 +4,9 @@ import FormTitle from './FormTitle';
 import DragDrop from '@/components/DragDop';
 import { Controller, useFieldArray, useWatch } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+
 import { fileUploadOnCloudinary } from '@/app/actions';
+import CustomDropZone from '@/components/ui/DropZone';
 
 const documentTypes = [
     { label: 'National ID', value: 'nid' },
@@ -14,40 +14,7 @@ const documentTypes = [
     { label: 'Driving License', value: 'driving_license' },
 ]
 
-const DropZone = ({ children, disabled = false, loading = false, url = null, error = false }) => {
-    const renderIcon = () => {
-        if (loading === true) {
-            return <Loader2 className='w-4 h-4 animate-spin' />
-        }
 
-        if (error === true) {
-            return <XCircle className='w-4 h-4 text-red-500' />
-        }
-
-        if (typeof url === 'string' && url.length > 0) {
-            return <CheckCircle className='w-4 h-4 text-green-500' />
-        }
-
-        return <Upload className='w-4 h-4' />
-    }
-
-
-    return (
-        <div className={cn('border-2 min-h-[400px] w-full border-dashed rounded-xl flex flex-col items-center justify-center gap-2 relative z-2 overflow-hidden', disabled ? 'opacity-50' : '', {
-            'bg-green-50/20 border-green-400': url && !error,
-            'bg-red-50/20 border-red-500': error,
-            'bg-yellow-100/20 border-yellow-500': loading,
-        })}>
-            <div className='bg-secondary size-10 rounded-full flex items-center justify-center'>{renderIcon()} </div>
-
-            {children}
-            <div />
-            {url && <div className='h-[250px] aspect-3/4 border rounded-md overflow-hidden'>
-                <img src={url} alt="document" className='w-full h-full object-cover' />
-            </div>}
-        </div>
-    )
-}
 const IdentificationDocuments = ({ control, errors }) => {
 
     //front
@@ -147,35 +114,30 @@ const IdentificationDocuments = ({ control, errors }) => {
             </div>
             <div className='flex gap-4'>
                 <div className='w-full'>
-                    <DragDrop
-                        classes=''
-                        disabled={!documentTypeValue}
+
+                    <CustomDropZone
                         handleChange={handleFrontChange}
+                        disabled={!documentTypeValue}
+                        loading={frontLoading}
+                        url={fields.find(field => field.type === 'front')?.url}
+                        error={frontError}
                     >
-                        <DropZone
-                            disabled={!documentTypeValue}
-                            loading={frontLoading}
-                            url={fields.find(field => field.type === 'front')?.url}
-                            error={frontError}
-                        >
-                            <p>Front of document</p>
-                        </DropZone>
-                    </DragDrop>
+                        <p className='font-bold'>Front of document</p>
+                        <p className='text-sm text-muted-foreground'>Drag and drop your document here or click to upload</p>
+                    </CustomDropZone>
+
                 </div>
                 <div className='w-full'>
-                    <DragDrop
-                        classes=''
-                        handleChange={handleBackChange}
+
+                    <CustomDropZone
                         disabled={!documentTypeValue}
-                    >
-                        <DropZone
-                            disabled={!documentTypeValue}
-                            loading={backLoading}
-                            url={fields.find(field => field.type === 'back')?.url}
-                            error={backError}>
-                            <p>Back of document</p>
-                        </DropZone>
-                    </DragDrop>
+                        handleChange={handleBackChange}
+                        loading={backLoading}
+                        url={fields.find(field => field.type === 'back')?.url}
+                        error={backError}>
+                        <p className='font-bold'>Back of document</p>
+                        <p className='text-sm text-muted-foreground'>Drag and drop your document here or click to upload</p>
+                    </CustomDropZone>
                 </div>
             </div>
 

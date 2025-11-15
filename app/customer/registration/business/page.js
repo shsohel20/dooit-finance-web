@@ -1,4 +1,5 @@
-import KYCCompanyForm from '@/views/customer-registration/business/test'
+
+import KYCCompanyForm from '@/views/customer-registration/business/form'
 import React from 'react'
 
 const BusinessRegistration = () => {

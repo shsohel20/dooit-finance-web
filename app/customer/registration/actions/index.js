@@ -9,3 +9,12 @@ export const individualCustomerRegistration = async (data) => {
   })
   return response.json();
 }
+
+
+export const businessCustomerRegistration = async (data) => {
+  const response = await fetchWithAuth('customer/register/onboarding', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+  return response.json();
+}

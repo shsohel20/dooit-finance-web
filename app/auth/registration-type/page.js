@@ -49,6 +49,8 @@ const RegistrationType = () => {
     }
     const handleContinue = () => {
         if (selectedType && country) {
+            // localStorage.setItem('registration_type', selectedType?.value);
+            // localStorage.setItem('country', country?.value?.toLowerCase());
             setRegisterType(selectedType?.value);
             setCountryStore(country?.value?.toLowerCase());
 
