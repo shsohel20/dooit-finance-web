@@ -81,6 +81,20 @@ const personalInfoSchema = z.object({
             label: z.string(),
         }).nullable().optional(),
     }),
+    declaration: z.object({
+        declarations_accepted: z.boolean().refine(
+            (val) => val === true,
+            "You must accept the declarations"
+        ),
+        signatory_name: z
+            .string()
+            .min(1, "Signatory name is required")
+            .min(2, "Signatory name must be at least 2 characters"),
+        signature: z.string().min(1, "Signature is required"),
+        date: z
+            .string()
+        ,
+    }),
 });
 const TOTAL_STEPS = 3;
 const CustomerRegistration = () => {
@@ -94,7 +108,6 @@ const CustomerRegistration = () => {
         mode: 'onChange',
     });
     const onSubmit = (data) => {
-        console.log("data", data);
 
         setCustomerRegisterData(data);
         router.push('/customer/registration/individual/preview')

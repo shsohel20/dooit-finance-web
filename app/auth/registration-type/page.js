@@ -38,9 +38,29 @@ const RegistrationType = () => {
             value: 'business',
         },
         {
-            type: 'Join Account',
-            desc: 'Register as a join account',
-            value: 'joint-account',
+            type: 'Trust',
+            desc: 'Register as a trust',
+            value: 'trust',
+        },
+        {
+            type: 'Partnership',
+            desc: 'Register as a partnership',
+            value: 'partnership',
+        },
+        {
+            type: 'Government Body',
+            desc: 'Register as a government body',
+            value: 'government-body',
+        },
+        {
+            type: 'Association',
+            desc: 'Register as an association',
+            value: 'association',
+        },
+        {
+            type: 'Cooperative',
+            desc: 'Register as a cooperative',
+            value: 'cooperative',
         },
 
     ]
@@ -67,7 +87,7 @@ const RegistrationType = () => {
             <div className='min-w-[500px]'>
                 <h1 className='text-2xl font-bold tracking-tighter text-center'>Choose Registration Type</h1>
                 <p className='text-center'>Select the option that best describes you to get started.</p>
-                <div className='py-8 space-y-4 flex flex-col items-center'>
+                <div className='py-8  flex flex-col gap-4 items-center justify-center'>
                     {
                         types.map((type, index) => (
                             <div
@@ -82,7 +102,7 @@ const RegistrationType = () => {
                                     }
                                 }}
                                 tabIndex={index + 1}
-                                className={cn('flex items-center gap-4 py-6 px-4 border rounded-lg cursor-pointer transition-all duration-300 w-[400px] focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2', {
+                                className={cn('flex items-center gap-4 py-2.5 px-4 border rounded-lg cursor-pointer transition-all duration-300 w-[400px] focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2', {
                                     'border-yellow-500 w-[460px]  px-6': selectedType?.type === type.type,
                                 })}>
                                 <div className={

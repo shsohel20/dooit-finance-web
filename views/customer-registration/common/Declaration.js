@@ -35,10 +35,11 @@ export default function Declaration({ control, errors, setValue }) {
               onCheckedChange={field.onChange}
               checked={field.value}
               error={errors.declaration?.declarations_accepted?.message}
+              id='declaration.declarations_accepted'
             />
           )}
         />
-        <Label htmlFor='declaration.declarations_accepted' className={' mb-0'}>Declarations Accepted</Label>
+        <Label errors={errors.declaration?.declarations_accepted?.message} htmlFor='declaration.declarations_accepted' className={' mb-0'}>I accept all declarations</Label>
 
       </div>
       <div className='max-w-56'>

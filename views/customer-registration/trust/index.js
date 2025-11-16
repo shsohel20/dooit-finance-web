@@ -8,13 +8,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrustRegistrationFormSchema } from './Schema';
 import { FormField } from '../common/FormField';
+import IdentificationDocuments from '../common/IdentificationDocuments';
+import Declaration from '../common/Declaration';
+import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
+import { customerOnboarding } from '@/app/customer/registration/actions';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 export default function TrustRegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState(null);
+  const { country } = useCustomerRegisterStore();
 
   const form = useForm({
     resolver: zodResolver(TrustRegistrationFormSchema),
+    mode: 'onChange',
     defaultValues: {
       kyc: {
         trust_details: {
@@ -106,31 +114,37 @@ export default function TrustRegistrationForm() {
         declarations_accepted: false,
         signatory_name: '',
         signature: '',
-        date: '',
+        date: new Date().toISOString(),
       },
     },
   });
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    setSubmitMessage(null);
 
+    const submittedData = {
+      ...data,
+      token: localStorage.getItem('invite_token'),
+      cid: localStorage.getItem('invite_cid'),
+      requestedType: 'trust',
+      country: country?.value,
+    }
+    console.log('submittedData', JSON.stringify(submittedData, null, 2))
     try {
-      console.log('Form Data:', data);
-      setSubmitMessage({
-        type: 'success',
-        text: 'KYC form submitted successfully!',
-      });
-      form.reset();
+      const response = await customerOnboarding(submittedData);
+      if (response.success) {
+        toast.success('KYC form submitted successfully!');
+      } else {
+        toast.error('Failed to submit KYC form!');
+      }
     } catch (error) {
-      setSubmitMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Failed to submit form',
-      });
+
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  console.log('errors', form.formState.errors)
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
@@ -139,16 +153,6 @@ export default function TrustRegistrationForm() {
           <h1 className="text-3xl font-bold text-foreground">KYC Form</h1>
           <p className="text-muted-foreground mt-2">Complete all sections to submit your KYC information</p>
         </div>
-
-        {submitMessage && (
-          <Card className={`mb-6 border ${submitMessage.type === 'success' ? 'border-green-500' : 'border-destructive'}`}>
-            <CardContent className="pt-6">
-              <p className={submitMessage.type === 'success' ? 'text-green-700' : 'text-destructive'}>
-                {submitMessage.text}
-              </p>
-            </CardContent>
-          </Card>
-        )}
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <Tabs defaultValue="trust-details" className="w-full">
@@ -306,7 +310,7 @@ export default function TrustRegistrationForm() {
                 <CardHeader>
                   <CardTitle>Contact Information</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   <FormField
                     form={form}
                     name="kyc.trust_details.contact_information.email"
@@ -376,12 +380,18 @@ export default function TrustRegistrationForm() {
                   )}
 
                   <div className="mt-6 space-y-3">
-                    <p className="font-semibold">Account Purpose</p>
+                    <p className="font-semibold">Account Purpose <span className={cn('text-foreground', {
+                      'text-destructive': form.formState.errors.kyc?.trust_details?.account_purpose?.message,
+                    })}>
+                      ( {form.formState.errors.kyc?.trust_details?.account_purpose?.message ? form.formState.errors.kyc?.trust_details?.account_purpose?.message : 'Select at least one account purpose'})
+                    </span>
+                    </p>
                     <FormField
                       form={form}
                       name="kyc.trust_details.account_purpose.digital_currency_exchange"
                       label="Digital Currency Exchange"
                       type="checkbox"
+
                     />
                     <FormField
                       form={form}
@@ -427,7 +437,11 @@ export default function TrustRegistrationForm() {
                     required
                   />
                   <div>
-                    <p className="font-semibold mb-4">Residential Address</p>
+                    <p
+                      className="font-semibold mb-4"
+                    >
+                      Residential Address
+                    </p>
                     <FormField
                       form={form}
                       name="kyc.individual_trustees.trustees.0.residential_address.street"
@@ -528,81 +542,15 @@ export default function TrustRegistrationForm() {
 
             {/* Documents Tab */}
             <TabsContent value="documents" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Documents</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    form={form}
-                    name="documents.0.name"
-                    label="Document Name"
-                    required
-                  />
-                  <FormField
-                    form={form}
-                    name="documents.0.url"
-                    label="Document URL"
-                    type="text"
-                    required
-                  />
-                  <FormField
-                    form={form}
-                    name="documents.0.mimeType"
-                    label="MIME Type"
-                    required
-                  />
-                  <FormField
-                    form={form}
-                    name="documents.0.type"
-                    label="Type"
-                    required
-                  />
-                  <FormField
-                    form={form}
-                    name="documents.0.docType"
-                    label="Document Type"
-                    required
-                  />
-                </CardContent>
+              <Card className='p-6'>
+                <IdentificationDocuments control={form.control} errors={form.formState.errors} />
               </Card>
             </TabsContent>
 
             {/* Declaration Tab */}
             <TabsContent value="declaration" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Declaration</CardTitle>
-                  <CardDescription>Review and sign the declaration</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    form={form}
-                    name="declaration.declarations_accepted"
-                    label="I accept all declarations"
-                    type="checkbox"
-                  />
-                  <FormField
-                    form={form}
-                    name="declaration.signatory_name"
-                    label="Signatory Name"
-                    required
-                  />
-                  <FormField
-                    form={form}
-                    name="declaration.signature"
-                    label="Signature"
-                    type="textarea"
-                    required
-                  />
-                  <FormField
-                    form={form}
-                    name="declaration.date"
-                    label="Date"
-                    type="date"
-                    required
-                  />
-                </CardContent>
+              <Card className='p-6'>
+                <Declaration control={form.control} errors={form.formState.errors} setValue={form.setValue} />
               </Card>
             </TabsContent>
           </Tabs>

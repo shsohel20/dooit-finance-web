@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { get } from "react-hook-form";
 
 
 
@@ -20,8 +21,7 @@ export function FormField({
   description,
 }) {
   const { control, formState: { errors } } = form;
-  const error = errors[name]?.message;
-
+  const error = get(errors, name)?.message;
   if (type === 'checkbox') {
     return (
       <Controller
@@ -34,7 +34,7 @@ export function FormField({
               checked={field.value || false}
               onCheckedChange={field.onChange}
             />
-            {label && <Label className='mb-0' htmlFor={name}>{label}</Label>}
+            {label && <Label errors={errors[name]?.message} className='mb-0' htmlFor={name}>{label}</Label>}
           </div>
         )}
       />
@@ -100,7 +100,6 @@ export function FormField({
       </div>
     );
   }
-
   return (
     <div className="flex flex-col ">
       {label && (
@@ -119,11 +118,11 @@ export function FormField({
             placeholder={placeholder}
             {...field}
             value={field.value || ''}
+            error={error}
           />
         )}
       />
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      {description && <p className="text-sm text-muted-foreground">{description}</p>}
+
     </div>
   );
 }

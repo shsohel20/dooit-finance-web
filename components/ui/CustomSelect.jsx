@@ -1,9 +1,13 @@
 "use client";
 
 import React from "react";
-import Select from "react-select";
+const Select = dynamic(
+  () => import("react-select"),
+  { ssr: false } // This line is crucial
+);
 import { Label } from "./label";
 import { cn } from "@/lib/utils";
+import dynamic from "next/dynamic";
 export const selectThemeColors = (theme) => ({
   ...theme,
   colors: {

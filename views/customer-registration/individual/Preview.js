@@ -7,7 +7,7 @@ import FormTitle from '../common/FormTitle'
 import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
 import LabelDetails from '@/components/LabelDetails';
 import { Label } from '@/components/ui/label';
-import { individualCustomerRegistration } from '../../../app/customer/registration/actions';
+import { customerOnboarding } from '../../../app/customer/registration/actions';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -52,7 +52,7 @@ const Preview = () => {
             declaration: customerRegisterData?.declaration,
         }
         console.log("submittedData", submittedData);
-        const response = await individualCustomerRegistration(submittedData);
+        const response = await customerOnboarding(submittedData);
         setLoading(false);
         console.log("response", response);
         if (response.success) {

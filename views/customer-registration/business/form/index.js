@@ -15,7 +15,7 @@ import Declaration from "../../common/Declaration"
 import { countriesData } from "@/constants"
 import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister"
 import { toast } from "sonner"
-import { businessCustomerRegistration } from "@/app/customer/registration/actions"
+import { customerOnboarding } from "@/app/customer/registration/actions"
 import { Checkbox } from "@/components/ui/checkbox"
 import dynamic from "next/dynamic"
 const CustomSelect = dynamic(() => import("@/components/ui/CustomSelect"), { ssr: false })
@@ -173,7 +173,7 @@ export default function KYCCompanyForm() {
     }
     // console.log("submittedData", submittedData);
     console.log('submittedData', JSON.stringify(submittedData, null, 2))
-    const response = await businessCustomerRegistration(submittedData);
+    const response = await customerOnboarding(submittedData);
     setFormLoading(false)
     console.log("response", response);
     if (response.success) {

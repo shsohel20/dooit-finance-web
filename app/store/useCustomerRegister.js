@@ -50,7 +50,7 @@ const initialFormData = {
     declarations_accepted: false,
     signatory_name: '',
     signature: '',
-    date: '',
+    date: new Date().toISOString(),
   }
 }
 export const useCustomerRegisterStore = create((set) => ({

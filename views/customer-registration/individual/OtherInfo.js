@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import React, { useEffect } from 'react';
 import FormTitle from '../common/FormTitle';
 import { Controller, useWatch } from 'react-hook-form';
+import Declaration from '../common/Declaration';
 
 const OtherInfo = ({ control, errors, setValue }) => {
     const isSoleTrader = useWatch({ control, name: 'sole_trader.is_sole_trader' });
@@ -80,14 +81,16 @@ const OtherInfo = ({ control, errors, setValue }) => {
             </div>
 
             <FormTitle>Sole Trader Status</FormTitle>
-            <div className='mt-4'>
+            <div className='my-4 '>
 
                 <Controller
                     control={control}
                     name='sole_trader.is_sole_trader'
                     render={({ field }) => (
                         <div className='flex items-center gap-2'>
-                            <Label htmlFor='is-sole-trader'>Are you acting as a sole trader?</Label>
+                            <Label
+                                className='mb-0'
+                                htmlFor='is-sole-trader'>Are you acting as a sole trader?</Label>
                             <Checkbox label='Are you acting as a sole trader?' id='is-sole-trader' checked={field.value} onCheckedChange={field.onChange} />
 
                         </div>
@@ -132,13 +135,12 @@ const OtherInfo = ({ control, errors, setValue }) => {
                             <CustomInput label='ID Number' {...field} error={errors.sole_trader?.business_details?.id_number?.message} />
                         )}
                     />
-                    {/* <CustomInput label='First Name' />
-                    <CustomInput label='Last Name' />
-                    <CustomInput label='Date of Birth' />
-                    <CustomInput label='Phone Number' />
-                    <CustomInput label='ID Number' /> */}
 
                 </div>}
+
+            </div>
+            <div className='mt-4 border p-4 rounded-lg'>
+                <Declaration control={control} errors={errors} setValue={setValue} />
             </div>
         </div>
 

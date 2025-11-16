@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const addressSchema = z.object({
-  address: z.string().min(1, 'Address is required'),
+  street: z.string().min(1, 'Address is required'),
   suburb: z.string().min(1, 'Suburb is required'),
   state: z.string().min(1, 'State is required'),
   postcode: z.string().min(1, 'Postcode is required'),
@@ -79,12 +79,23 @@ const beneficiarySchema = z.object({
 const companyTrusteeSchema = z.object({
   company_name: z.string().min(1, 'Company name is required'),
   registration_number: z.string().min(1, 'Registration number is required'),
-});
+})
 
 const companyTrusteesSchema = z.object({
   has_company_trustees: z.boolean(),
   company_details: z.array(companyTrusteeSchema).optional(),
-});
+}).refine(
+  (data) => {
+    if (data.has_company_trustees) {
+      return Array.isArray(data.company_details) && data.company_details.length > 0;
+    }
+    return true; // when has_company_trustees = false, no validation needed
+  },
+  {
+    message: "At least one company trustee is required.",
+    path: ["company_details"], // error will show here
+  }
+);
 
 const individualTrusteeSchema = z.object({
   full_name: z.string().min(1, 'Full name is required'),
