@@ -2,6 +2,7 @@
 
 import { PageDescription, PageHeader, PageTitle } from "@/components/common"
 import { ChevronRight, Download, Eye, Filter } from "lucide-react"
+import { useState } from "react"
 import {
   BarChart,
   Bar,
@@ -15,6 +16,7 @@ import {
   Pie,
   Cell,
 } from "recharts"
+import Details from "./form/Details"
 
 const performanceData = [
   { month: "Jan", accuracy: 78, precision: 72, recall: 65 },
@@ -32,7 +34,102 @@ const complianceData = [
   { name: "Not Applicable", value: 55, color: "oklch(0.7 0.1 250)" },
 ]
 
+const riskImpactMatrix = [
+  { label: "Critical", count: "2", percent: "6.3%", bg: "bg-red-50 dark:bg-red-950/30", border: "border-red-200 dark:border-red-800" },
+  { label: "High", count: "7", percent: "21%", bg: "bg-orange-50 dark:bg-orange-950/30", border: "border-orange-200 dark:border-orange-800" },
+  { label: "Medium", count: "11", percent: "34%", bg: "bg-yellow-50 dark:bg-yellow-950/30", border: "border-yellow-200 dark:border-yellow-800" },
+  { label: "Low", count: "12", percent: "37%", bg: "bg-emerald-50 dark:bg-emerald-950/30", border: "border-emerald-200 dark:border-emerald-800" },
+]
+const activeRiskMitigation = [
+  {
+    id: 1,
+    event: "KYC Fraud Detection",
+    description: "Performance degradation detected. Accuracy dropped from 84% to 72%.",
+    severity: "Critical",
+    severityColor: "bg-red-100/50 text-red-700 border-red-200/50",
+    time: "2 hours ago",
+    date: "19 May, 14:30",
+    assigned: "Robert Smith",
+    role: "ML Engineer",
+    sla: "Due in 4h",
+    slaColor: "bg-red-50 text-red-600",
+  },
+  {
+    id: 2,
+    event: "Credit Scoring - High Risk Detected",
+    description: "Demographic bias score exceeded threshold (0.54).",
+    severity: "High",
+    severityColor: "bg-orange-100/50 text-orange-700 border-orange-200/50",
+    time: "1 day ago",
+    date: "17 May, 09:45",
+    assigned: "Miss Thompson",
+    role: "Data Scientist",
+    sla: "Due in 2d",
+    slaColor: "bg-orange-50 text-orange-600",
+  },
+  {
+    id: 3,
+    event: "Customer Segmentation",
+    description: "EU AI Act Article 8 compliance requirements.",
+    description2: "Compliance Gap",
+    severity: "Medium",
+    severityColor: "bg-amber-100/50 text-amber-700 border-amber-200/50",
+    time: "2 days ago",
+    date: "16 May, 14:20",
+    assigned: "Lisa Davis",
+    role: "Risk Analyst",
+    sla: "Due in 5d",
+    slaColor: "bg-amber-50 text-amber-600",
+  },
+]
+
+const detailedModelRiskAssessment = [
+  {
+    id: 1,
+    name: "KYC Fraud Detection",
+    version: "v2.5.3 | MLOps Integrated",
+    performance: 75,
+    performanceColor: "bg-red-100/50",
+    risk: "Critical",
+    riskColor: "bg-red-100 text-red-700",
+    dataQuality: "Poor",
+    dataQualityColor: "bg-orange-100 text-orange-700",
+    compliance: "Partial",
+    complianceColor: "bg-yellow-100 text-yellow-700",
+    updated: "2023-05-15",
+  },
+  {
+    id: 2,
+    name: "Credit Scoring",
+    version: "v1.4.2 | API Integrated",
+    performance: 88,
+    performanceColor: "bg-yellow-100/50",
+    risk: "High",
+    riskColor: "bg-orange-100 text-orange-700",
+    dataQuality: "Fair",
+    dataQualityColor: "bg-yellow-100 text-yellow-700",
+    compliance: "Compliant",
+    complianceColor: "bg-green-100 text-green-700",
+    updated: "2023-05-15",
+  },
+  {
+    id: 3,
+    name: "Transaction Monitoring",
+    version: "v3.0.1 | AML Compliance",
+    performance: 94,
+    performanceColor: "bg-cyan-100/50",
+    risk: "Medium",
+    riskColor: "bg-amber-100 text-amber-700",
+    dataQuality: "Good",
+    dataQualityColor: "bg-green-100 text-green-700",
+    compliance: "Compliant",
+    complianceColor: "bg-green-100 text-green-700",
+    updated: "2023-05-15",
+  },
+]
+
 export default function Page() {
+  const [openRiskDetails, setOpenRiskDetails] = useState(false);
   return (
     <div className=" space-y-12">
       <div className="">
@@ -44,7 +141,7 @@ export default function Page() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto  space-y-12">
+      <div className="  space-y-12">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-12">
           <div className="stat-card">
             <div className="subsection-text mb-2">Total Models</div>
@@ -75,36 +172,7 @@ export default function Page() {
         <div className="card-subtle ">
           <h2 className="section-title mb-8">Risk Impact Matrix</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-            {[
-              {
-                label: "Critical",
-                count: "2",
-                percent: "6.3%",
-                bg: "bg-red-50 dark:bg-red-950/30",
-                border: "border-red-200 dark:border-red-800",
-              },
-              {
-                label: "High",
-                count: "7",
-                percent: "21%",
-                bg: "bg-orange-50 dark:bg-orange-950/30",
-                border: "border-orange-200 dark:border-orange-800",
-              },
-              {
-                label: "Medium",
-                count: "11",
-                percent: "34%",
-                bg: "bg-yellow-50 dark:bg-yellow-950/30",
-                border: "border-yellow-200 dark:border-yellow-800",
-              },
-              {
-                label: "Low",
-                count: "12",
-                percent: "37%",
-                bg: "bg-emerald-50 dark:bg-emerald-950/30",
-                border: "border-emerald-200 dark:border-emerald-800",
-              },
-            ].map((item, i) => (
+            {riskImpactMatrix.map((item, i) => (
               <div
                 key={i}
                 className={`rounded-lg ${item.bg} border ${item.border} p-5 text-center transition-all hover:shadow-sm`}
@@ -271,7 +339,7 @@ export default function Page() {
 
       {/* Header */}
       <div className="">
-        <div className="max-w-7xl mx-auto ">
+        <div className=" ">
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-semibold text-foreground tracking-tight">Risk Mitigation</h1>
@@ -286,7 +354,7 @@ export default function Page() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto ">
+      <div className="">
         {/* Active Risk Mitigation Section */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
@@ -298,51 +366,11 @@ export default function Page() {
           </div>
 
           <div className="space-y-3">
-            {[
-              {
-                id: 1,
-                event: "KYC Fraud Detection",
-                description: "Performance degradation detected. Accuracy dropped from 84% to 72%.",
-                severity: "Critical",
-                severityColor: "bg-red-100/50 text-red-700 border-red-200/50",
-                time: "2 hours ago",
-                date: "19 May, 14:30",
-                assigned: "Robert Smith",
-                role: "ML Engineer",
-                sla: "Due in 4h",
-                slaColor: "bg-red-50 text-red-600",
-              },
-              {
-                id: 2,
-                event: "Credit Scoring - High Risk Detected",
-                description: "Demographic bias score exceeded threshold (0.54).",
-                severity: "High",
-                severityColor: "bg-orange-100/50 text-orange-700 border-orange-200/50",
-                time: "1 day ago",
-                date: "17 May, 09:45",
-                assigned: "Miss Thompson",
-                role: "Data Scientist",
-                sla: "Due in 2d",
-                slaColor: "bg-orange-50 text-orange-600",
-              },
-              {
-                id: 3,
-                event: "Customer Segmentation",
-                description: "EU AI Act Article 8 compliance requirements.",
-                description2: "Compliance Gap",
-                severity: "Medium",
-                severityColor: "bg-amber-100/50 text-amber-700 border-amber-200/50",
-                time: "2 days ago",
-                date: "16 May, 14:20",
-                assigned: "Lisa Davis",
-                role: "Risk Analyst",
-                sla: "Due in 5d",
-                slaColor: "bg-amber-50 text-amber-600",
-              },
-            ].map((item) => (
+            {activeRiskMitigation.map((item) => (
               <div
                 key={item.id}
-                className="rounded-lg border bg-card/50 backdrop-blur-sm p-5 hover:border-border/60 hover:bg-card/80 transition-all duration-200"
+                className="rounded-lg border bg-card/50 backdrop-blur-sm p-5 hover:border-border/60 hover:bg-card/80 transition-all duration-200 cursor-pointer hover:shadow-sm "
+                onClick={() => setOpenRiskDetails(true)}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -402,53 +430,11 @@ export default function Page() {
           </div>
 
           <div className="space-y-3">
-            {[
-              {
-                id: 1,
-                name: "KYC Fraud Detection",
-                version: "v2.5.3 | MLOps Integrated",
-                performance: 75,
-                performanceColor: "bg-red-100/50",
-                risk: "Critical",
-                riskColor: "bg-red-100 text-red-700",
-                dataQuality: "Poor",
-                dataQualityColor: "bg-orange-100 text-orange-700",
-                compliance: "Partial",
-                complianceColor: "bg-yellow-100 text-yellow-700",
-                updated: "2023-05-15",
-              },
-              {
-                id: 2,
-                name: "Credit Scoring",
-                version: "v1.4.2 | API Integrated",
-                performance: 88,
-                performanceColor: "bg-yellow-100/50",
-                risk: "High",
-                riskColor: "bg-orange-100 text-orange-700",
-                dataQuality: "Fair",
-                dataQualityColor: "bg-yellow-100 text-yellow-700",
-                compliance: "Compliant",
-                complianceColor: "bg-green-100 text-green-700",
-                updated: "2023-05-15",
-              },
-              {
-                id: 3,
-                name: "Transaction Monitoring",
-                version: "v3.0.1 | AML Compliance",
-                performance: 94,
-                performanceColor: "bg-cyan-100/50",
-                risk: "Medium",
-                riskColor: "bg-amber-100 text-amber-700",
-                dataQuality: "Good",
-                dataQualityColor: "bg-green-100 text-green-700",
-                compliance: "Compliant",
-                complianceColor: "bg-green-100 text-green-700",
-                updated: "2023-05-15",
-              },
-            ].map((model) => (
+            {detailedModelRiskAssessment.map((model) => (
               <div
                 key={model.id}
-                className="rounded-lg border bg-card/50 backdrop-blur-sm p-5 hover:border-border/60 hover:bg-card/80 transition-all duration-200"
+                className="rounded-lg border bg-card/50 backdrop-blur-sm p-5 hover:border-border/60 hover:bg-card/80 transition-all duration-200 cursor-pointer hover:shadow-sm"
+                onClick={() => setOpenRiskDetails(true)}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -525,6 +511,7 @@ export default function Page() {
           </div>
         </div>
       </div>
+      {openRiskDetails && <Details open={openRiskDetails} setOpen={setOpenRiskDetails} />}
     </div>
   )
 }

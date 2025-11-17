@@ -228,7 +228,7 @@ export default function ClientSidebar({ ...props }) {
         },
         {
           title: 'TF Risk Assessment',
-          url: '/dashboard/client/tf-risk-assessment-module',
+          url: '/dashboard/client/knowledge-hub/ewra/tf-risk-assesment',
           icon: IconListDetails,
         },
         {
