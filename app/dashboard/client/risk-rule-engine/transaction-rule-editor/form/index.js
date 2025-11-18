@@ -52,7 +52,7 @@ export default function RuleConfigurationForm() {
 
       <main className="py-8">
         {/* Tabs */}
-        <Tabs defaultValue="Rule Builder" value={activeTab} onValueChange={setActiveTab} className="mb-8">
+        <Tabs defaultValue="Rule Builder" value={activeTab} onValueChange={setActiveTab} className="mb-4">
           <TabsList className="border-b border-gray-200 bg-white p-0 mb-6">
             {['Rule Builder', 'Existing Rules', 'Rule Tester', 'Change History'].map((tab) => (
               <TabsTrigger

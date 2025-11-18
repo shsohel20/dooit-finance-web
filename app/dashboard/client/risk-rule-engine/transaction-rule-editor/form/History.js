@@ -48,7 +48,7 @@ export default function ChangeHistory() {
   );
 
   return (
-    <main className="min-h-screen bg-background py-2 ">
+    <main className="min-h-screen bg-background">
       <div className="">
         {/* Header */}
         <div className="mb-8">

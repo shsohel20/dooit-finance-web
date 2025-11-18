@@ -250,7 +250,6 @@ export default function ClientSidebar({ ...props }) {
       title: 'User & Role Management',
       icon: IconListDetails,
       url: '/dashboard/client/user-and-role-management',
-
     },
     {
       title: 'Risk Rule Engine',
@@ -258,7 +257,7 @@ export default function ClientSidebar({ ...props }) {
       children: [
         {
           title: 'CRA Scoring Configuration',
-          url: '/dashboard/client/risk-rule-engine/cra-scoring-configuration',
+          url: '/dashboard/client/risk-rule-engine/cra-scoring-config',
           icon: IconDatabase,
         },
         {
@@ -268,6 +267,17 @@ export default function ClientSidebar({ ...props }) {
         }
       ]
     },
+    {
+      title: 'System Settings',
+      icon: IconListDetails,
+      children: [
+        {
+          title: 'Privacy',
+          url: '/dashboard/client/system-settings/privacy',
+          icon: IconDatabase,
+        },
+      ]
+    }
   ]
 
 
