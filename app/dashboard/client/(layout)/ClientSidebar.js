@@ -233,7 +233,7 @@ export default function ClientSidebar({ ...props }) {
         },
         {
           title: 'ABC Risk Assessment',
-          url: '/dashboard/client/abc-risk-assessment',
+          url: '/dashboard/client/knowledge-hub/ewra/abc-risk-assesment',
           icon: IconListDetails,
         },
       ]
@@ -241,8 +241,32 @@ export default function ClientSidebar({ ...props }) {
     {
       title: 'Regulatory Links',
       icon: IconListDetails,
-      url: '/dashboard/client/regulatory-links',
+      url: '/dashboard/client/knowledge-hub/regulatory-links',
 
+    },
+  ]
+  const configurationMenuItems = [
+    {
+      title: 'User & Role Management',
+      icon: IconListDetails,
+      url: '/dashboard/client/user-and-role-management',
+
+    },
+    {
+      title: 'Risk Rule Engine',
+      icon: IconListDetails,
+      children: [
+        {
+          title: 'CRA Scoring Configuration',
+          url: '/dashboard/client/risk-rule-engine/cra-scoring-configuration',
+          icon: IconDatabase,
+        },
+        {
+          title: 'Transaction Rule Editor',
+          url: '/dashboard/client/risk-rule-engine/transaction-rule-editor',
+          icon: IconDatabase,
+        }
+      ]
     },
   ]
 
@@ -266,6 +290,7 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
+        <NavMain items={configurationMenuItems} label="Configuration" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
         {/* <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" /> */}

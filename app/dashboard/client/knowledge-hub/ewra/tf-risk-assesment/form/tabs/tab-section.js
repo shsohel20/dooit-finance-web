@@ -1,12 +1,14 @@
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { RiskAnalysis } from './risk-analysis'
-import { RiskFactorsPanel } from './risk-factors-panel'
+import { RiskAnalysis } from '../risk-analysis'
+import { RiskFactorsPanel } from '../risk-factors-panel'
+import { RiskMetrics } from './risk-metrics'
+import { SimilarTransactions } from './SimilarTransactions'
+import ActivityTimeline from './activity-timeline'
 
 const tabs = [
   { id: 'analysis', label: 'Risk Analysis' },
   { id: 'similar', label: 'Similar Transactions' },
-  { id: 'details', label: 'Transaction Details' },
   { id: 'activity', label: 'Activity Timeline' }
 ]
 
@@ -24,11 +26,16 @@ export function TabSection({ activeTab, setActiveTab }) {
 
         <TabsContent value="analysis">
           {/* <RiskAnalysis /> */}
-          <RiskFactorsPanel />
+          {/* <RiskFactorsPanel /> */}
+          <RiskMetrics />
         </TabsContent>
-        <TabsContent value="similar" />
-        <TabsContent value="details" />
-        <TabsContent value="activity" />
+        <TabsContent value="similar" >
+          <SimilarTransactions />
+        </TabsContent>
+
+        <TabsContent value="activity" >
+          <ActivityTimeline />
+        </TabsContent>
       </Tabs>
 
     </div>

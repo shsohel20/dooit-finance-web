@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, AlertCircle, CheckCircle2, XCircle, MessageSquare, Flag } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 import { TransactionHeader } from './transaction-header'
-import { RiskMetrics } from './risk-metrics'
 import { ActionButtons } from './action-buttons'
 
 import { RiskAnalysis } from './risk-analysis'
@@ -45,7 +44,7 @@ export function TransactionDetail({ openDetail, setOpenDetail }) {
               {/* Left Column - Transaction Details */}
               <div className="lg:col-span-2 space-y-6">
                 <TransactionHeader />
-                <RiskMetrics />
+                {/* <RiskMetrics /> */}
                 <RiskAnalysis activeTab={activeTab} setActiveTab={setActiveTab} />
               </div>
 

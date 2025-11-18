@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card'
 import { AlertCircle } from 'lucide-react'
-import { TabSection } from './tab-section'
+import { TabSection } from './tabs/tab-section'
 import RiskPanel from './tabs/RiskPanel'
 
 export function RiskAnalysis({ activeTab, setActiveTab }) {

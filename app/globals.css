@@ -170,7 +170,7 @@ button {
 
 .react-select__control {
   /* border-color: var(--border) !important; */
-  /* border-radius: var(--radius) !important; */
+  border-radius: var(--radius) !important;
   min-height: 10px !important;
 }
 
