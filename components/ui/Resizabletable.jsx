@@ -114,7 +114,7 @@ export default function ResizableTable({
   };
 
   return (
-    <div className="overflow-x-auto   text-xs relative">
+    <div className="overflow-x-auto   text-xs relative ">
       {/* Toolbar */}
       <div className="flex items-center justify-end py-4 gap-2">
         <DropdownMenu>
@@ -152,124 +152,123 @@ export default function ResizableTable({
         </DropdownMenu>
         {actions && actions}
       </div>
-      <Table
-        className="w-full transition-[width] duration-700 ease-in-out border "
-        // style={{ width: table.getTotalSize() ?? "100%" }}
-      >
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow className="" key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                const canResize = header.column.getCanResize();
+      <div className="rounded-md overflow-hidden border border-border/50">
+        <Table
+          className="w-full transition-[width] duration-700 ease-in-out border "
+          // style={{ width: table.getTotalSize() ?? "100%" }}
+        >
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow className="" key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const canResize = header.column.getCanResize();
 
-                return (
-                  <TableHead
-                    key={header.id}
-                    className={
-                      "text-xs border-r   first:border-l border-primary/90  font-bold  bg-primary text-white border-t sticky top-0 "
-                    }
-                    style={{
-                      position: "relative",
-                      width: header.getSize() ?? "auto",
-                    }}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className={
+                        "text-xs border-r   first:border-l  font-bold  bg-primary/5 text-primary border-t sticky top-0 "
+                      }
+                      style={{
+                        position: "relative",
+                        width: header.getSize() ?? "auto",
+                      }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
 
-                    {/* Resizer handle */}
-                    {canResize && (
-                      <div
-                        onMouseDown={header.getResizeHandler()}
-                        onTouchStart={header.getResizeHandler()}
-                        className="absolute right-0 top-0 h-full w-[2px] cursor-col-resize select-none  hover:bg-gray-400 transition font-extrabold"
-                      />
-                    )}
-                    {/* {canResize && (
+                      {/* Resizer handle */}
+                      {canResize && (
+                        <div
+                          onMouseDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          className="absolute right-0 top-0 h-full w-[2px] cursor-col-resize select-none  hover:bg-gray-400 transition font-extrabold"
+                        />
+                      )}
+                      {/* {canResize && (
                       <DataTableResizer header={header} table={table} />
                     )} */}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
 
-        {loading ? (
-          <>
-            <TableBody>
-              {Array.from({ length: 5 }).map((_, index) => (
-                <TableRow
-                  key={`skeleton-row-${index}`}
-                  className="last:border-b"
-                >
-                  {table.getVisibleLeafColumns().map((header) => {
-                    return (
-                      <TableCell
-                        key={header.id}
-                        className={" border-r   first:border-l  font-bold  "}
-                      >
-                        <Skeleton className="w-full h-4 animate-pulse" />
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableBody>
-          </>
-        ) : (
-          <>
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-highlighted={highlightedId === row?.original?.id}
-                    className={cn(
-                      "even:bg-muted/50 hover:bg-neutral-100  font-medium ",
-                      {
-                        "bg-blue-50 ": highlightedId === row?.original?.id,
-                      }
-                    )}
-                    onDoubleClick={() => handleDoubleClick(row.original)}
-                    onClick={() => handleRowClick(row.original)}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        // data-highlighted={highlightedId === row?.id}
-                        className={
-                          "text-xs text-black border-r w-full  first:border-l border-b "
-                        }
-                        style={{
-                          width: cell.column.getSize() ?? "auto",
-                        }}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
+          {loading ? (
+            <>
+              <TableBody>
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={`skeleton-row-${index}`} className="">
+                    {table.getVisibleLeafColumns().map((header) => {
+                      return (
+                        <TableCell
+                          key={header.id}
+                          className={" border-r   first:border-l  font-bold  "}
+                        >
+                          <Skeleton className="w-full h-4 animate-pulse" />
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </>
-        )}
-      </Table>
+                ))}
+              </TableBody>
+            </>
+          ) : (
+            <>
+              <TableBody>
+                {table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-highlighted={highlightedId === row?.original?.id}
+                      className={cn(
+                        "even:bg-muted/50 hover:bg-neutral-100  font-medium ",
+                        {
+                          "bg-blue-50 ": highlightedId === row?.original?.id,
+                        }
+                      )}
+                      onDoubleClick={() => handleDoubleClick(row.original)}
+                      onClick={() => handleRowClick(row.original)}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          // data-highlighted={highlightedId === row?.id}
+                          className={
+                            "text-xs text-black border-r w-full  first:border-l border-b "
+                          }
+                          style={{
+                            width: cell.column.getSize() ?? "auto",
+                          }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </>
+          )}
+        </Table>
+      </div>
     </div>
   );
 }
