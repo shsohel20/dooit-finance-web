@@ -43,8 +43,8 @@ export default function DataPurgeStatistics() {
   ];
 
   return (
-    <div className="min-h-screen bg-white p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-white py-8">
+      <div className="">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-black mb-2">Data Purge Statistics</h1>
@@ -61,7 +61,7 @@ export default function DataPurgeStatistics() {
               <div className="text-sm text-gray-600 mb-2">{stat.label}</div>
               <div className="text-3xl font-bold text-black">
                 {stat.link ? (
-                  <a href="#" className="text-blue-600 hover:underline">
+                  <a href="#" className="text-primary hover:underline">
                     {stat.value}
                   </a>
                 ) : (
@@ -103,7 +103,7 @@ export default function DataPurgeStatistics() {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className="bg-blue-500 h-2 rounded-full transition-all"
+                        className="bg-primary h-2 rounded-full transition-all"
                         style={{ width: `${policy.compliance}%` }}
                       />
                     </div>
@@ -126,7 +126,7 @@ export default function DataPurgeStatistics() {
                   onChange={(e) =>
                     setSettings({ ...settings, retentionPeriod: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="30">30 days</option>
                   <option value="60">60 days</option>
@@ -143,7 +143,7 @@ export default function DataPurgeStatistics() {
                 <select
                   value={settings.autoDelete}
                   onChange={(e) => setSettings({ ...settings, autoDelete: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="enabled">Enabled</option>
                   <option value="disabled">Disabled</option>
@@ -159,7 +159,7 @@ export default function DataPurgeStatistics() {
                   onChange={(e) =>
                     setSettings({ ...settings, deleteSchedule: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
@@ -177,7 +177,7 @@ export default function DataPurgeStatistics() {
                   onChange={(e) =>
                     setSettings({ ...settings, retentionReports: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="weekly">Weekly</option>
                   <option value="monthly">Monthly</option>
@@ -186,7 +186,7 @@ export default function DataPurgeStatistics() {
                 </select>
               </div>
 
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors mt-6">
+              <button className="w-full bg-primary hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors mt-6">
                 Update Setting
               </button>
             </div>

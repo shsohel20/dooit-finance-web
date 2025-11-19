@@ -56,8 +56,8 @@ export default function DSARPage() {
   );
 
   return (
-    <div className="min-h-screen bg-white p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen py-8">
+      <div className="">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-black mb-2">Data Subject Access Requests</h1>
@@ -73,7 +73,7 @@ export default function DSARPage() {
               placeholder="Search by name, ID, date"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <button className="flex items-center gap-2 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors">
@@ -99,7 +99,7 @@ export default function DSARPage() {
             <tbody>
               {filteredRequests.map((request, idx) => (
                 <tr key={idx} className="border-b border-gray-300 hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-blue-600 underline cursor-pointer">{request.id}</td>
+                  <td className="px-6 py-4 text-sm text-primary underline cursor-pointer">{request.id}</td>
                   <td className="px-6 py-4 text-sm text-black">{request.subjectName}</td>
                   <td className="px-6 py-4 text-sm text-black">{request.requestType}</td>
                   <td className="px-6 py-4 text-sm text-black">{request.dateSubmitted}</td>
@@ -110,7 +110,7 @@ export default function DSARPage() {
                   </td>
                   <td className="px-6 py-4 text-sm text-black">{request.dueDate}</td>
                   <td className="px-6 py-4 flex items-center gap-3">
-                    <button className="text-gray-600 hover:text-blue-600 transition-colors">
+                    <button className="text-gray-600 hover:text-primary transition-colors">
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button className="text-gray-600 hover:text-red-600 transition-colors">

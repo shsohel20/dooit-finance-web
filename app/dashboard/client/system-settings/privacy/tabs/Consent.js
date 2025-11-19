@@ -3,6 +3,11 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 
+const initialPreferences = [
+  { id: 1, title: 'Email Notifications', description: 'Receive email notifications for new updates', lastUpdated: '2025-01-01', enabled: true },
+  { id: 2, title: 'SMS Notifications', description: 'Receive SMS notifications for new updates', lastUpdated: '2025-01-01', enabled: false },
+  { id: 3, title: 'Push Notifications', description: 'Receive push notifications for new updates', lastUpdated: '2025-01-01', enabled: true },
+];
 
 export default function ConsentPreferencesPage() {
   const [preferences, setPreferences] = useState(initialPreferences);
@@ -16,7 +21,7 @@ export default function ConsentPreferencesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-8">
+    <div className="min-h-screen bg-white py-8">
       <div className="max-w-3xl">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
