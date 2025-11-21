@@ -1,12 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, Download, Save, FileSpreadsheet } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -14,8 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Download, FileSpreadsheet, Save, Upload } from "lucide-react";
+import { useEffect, useState } from "react";
 
-export function ECDDForm() {
+export function ECDDForm({ data, caseNumber }) {
   const [formData, setFormData] = useState({
     isPEP: "No",
     isSanctioned: "No",
@@ -23,6 +23,41 @@ export function ECDDForm() {
   });
   const [lastSaved, setLastSaved] = useState(null);
 
+  useEffect(() => {
+    if (data) {
+      const formattedData = {
+        ...data,
+        analystName: data.analyst_name,
+        analysisEndDate: data.analysis_end_date,
+        date: data.analysis_date || new Date().toISOString().split("T")[0],
+        caseNumber: caseNumber,
+        fullName: data.name,
+        onboardingDate: data.onboarding_date,
+        withdrawalDetails: data.withdrawal_details,
+        expectedVolume: data.Expected_Trading_Volume,
+        accountCreationDate: data.account_creation_date,
+        accountPurpose: data.account_purpose,
+        behavioralAnalysis: data.behavioral_analysis,
+        additionalInfo: data.additonal_information,
+        annualIncome: data.annual_income,
+        beneficialOwner: data.beneficial_owner,
+        totalDepositsAUD: data.total_deposits_AUD,
+        totalWithdrawalsBTC: data.total_withdrawals_BTC,
+        totalWithdrawalsETH: data.total_withdrawals_ETH,
+        totalWithdrawalsUSDT: data.total_withdrawals_USDT,
+        depositDetails: data.deposit_details,
+        ipLocations: data.ip_locations,
+        registeredAddress: data.registered_address,
+        recommendation: data.recommendation,
+        transactionAnalysis: data.transaction_analysis,
+        profileSummary: data.recommendation,
+        directors: data.director_name,
+        isPEP: data.pep_flag,
+        isSanctioned: data.sanction_flag,
+      };
+      setFormData(formattedData);
+    }
+  }, [data]);
   const handleFileUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;

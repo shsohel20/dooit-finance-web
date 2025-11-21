@@ -105,32 +105,31 @@ const MOCK_BRANCHES = [
 ];
 
 export default function BranchList() {
-  const [branches, setBranches] = useState(MOCK_BRANCHES);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [branches, setBranches] = useState( MOCK_BRANCHES );
+  const [searchTerm, setSearchTerm] = useState( "" );
+  const [isDialogOpen, setIsDialogOpen] = useState( false );
 
   const filteredBranches = branches
 
-  const handleAddBranch = (newBranch) => {
-    setBranches([
+  const handleAddBranch = ( newBranch ) => {
+    setBranches( [
       ...branches,
       { ...newBranch, id: `BR${branches.length + 1}` },
-    ]);
+    ] );
   };
-  console.log("branches", branches);
 
-  useEffect(() => {
+  useEffect( () => {
     const fetchBranches = async () => {
       const res = await getBranches();
       // setBranches(branches);
-      if (res.success) {
-        setBranches(res.data);
+      if ( res.success ) {
+        setBranches( res.data );
       }
     };
     fetchBranches();
-  }, []);
-  const activeCount = branches?.filter((b) => b.status === "Active").length;
-  const totalStaff = branches?.reduce((acc, b) => acc + b.contacts.length, 0);
+  }, [] );
+  const activeCount = branches?.filter( ( b ) => b.status === "Active" ).length;
+  const totalStaff = branches?.reduce( ( acc, b ) => acc + b.contacts.length, 0 );
 
   return (
     <div className="space-y-6">
@@ -142,7 +141,7 @@ export default function BranchList() {
             Manage all branch locations and user access
           </p>
         </div> */}
-        <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
+        <Button onClick={() => setIsDialogOpen( true )} className="gap-2">
           <Plus className="h-4 w-4" />
           Add New Branch
         </Button>
@@ -191,7 +190,7 @@ export default function BranchList() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Set(branches.map((b) => b.city)).size}
+              {new Set( branches.map( ( b ) => b.city ) ).size}
             </div>
             <p className="text-xs text-muted-foreground">Across regions</p>
           </CardContent>
@@ -203,14 +202,14 @@ export default function BranchList() {
         <Input
           placeholder="Search by branch name, code, or city..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={( e ) => setSearchTerm( e.target.value )}
           className="flex-1"
         />
       </div>
 
       {/* Branches List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {filteredBranches.map((branch) => (
+        {filteredBranches.map( ( branch ) => (
           <Card
             key={branch.id}
             className="overflow-hidden hover:shadow-lg transition-shadow"
@@ -286,11 +285,11 @@ export default function BranchList() {
 
               {/* Services */}
               <div className="flex flex-wrap gap-1">
-                {branch.services.slice(0, 2).map((service) => (
+                {branch.services.slice( 0, 2 ).map( ( service ) => (
                   <Badge key={service} variant="outline" className="text-xs">
                     {service}
                   </Badge>
-                ))}
+                ) )}
                 {branch.services.length > 2 && (
                   <Badge variant="outline" className="text-xs">
                     +{branch.services.length - 2}
@@ -299,7 +298,7 @@ export default function BranchList() {
               </div>
             </CardContent>
           </Card>
-        ))}
+        ) )}
       </div>
 
       {/* Add Branch Dialog */}
