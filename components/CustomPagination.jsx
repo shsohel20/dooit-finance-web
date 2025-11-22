@@ -29,7 +29,7 @@ export default function CustomPagination(props) {
   const pageCount = Math.ceil(totalItems / limit);
 
   return (
-    <div className="flex justify-between items-center  rounded-md my-4">
+    <div className="flex justify-between items-center  rounded-md my-4 bg-white border p-4 shadow">
       <div className="flex items-center gap-2">
         {" "}
         <Select value={limit} onValueChange={onChangeLimit}>

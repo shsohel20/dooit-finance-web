@@ -25,13 +25,14 @@ import {
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
 import { useSession } from 'next-auth/react'
+import { FileInput, Newspaper, ShieldHalf, ShieldUser } from 'lucide-react'
 
 export default function ClientSidebar({ ...props }) {
   const session = useSession();
   const onBoardingMenuItems = [
 
     {
-      title: "Customer Queue",
+      title: "Customers",
       // url: "#",
       icon: IconUsers,
       // current: true,
@@ -42,13 +43,13 @@ export default function ClientSidebar({ ...props }) {
           url: '/dashboard/client/onboarding/customer-queue',
         },
         {
-          title: 'Pending Collection',
+          title: 'Pending',
           url: '/dashboard/client/onboarding/customer-queue/pending',
           icon: IconDatabase,
           current: true,
         },
         {
-          title: 'Rejected Application',
+          title: 'Rejected',
           url: '/dashboard/client/onboarding/customer-queue/rejected',
           icon: IconPentagonX,
           current: true,
@@ -68,7 +69,7 @@ export default function ClientSidebar({ ...props }) {
       ]
     },
     {
-      title: 'Branch Management',
+      title: 'Branches',
       icon: IconBuildingBank,
       children: [
         {
@@ -78,7 +79,7 @@ export default function ClientSidebar({ ...props }) {
       ]
     },
     {
-      title: 'Customer Risk Assessment',
+      title: 'Risk Assessment',
       icon: IconAlertTriangle,
       children: [
         {
@@ -99,7 +100,7 @@ export default function ClientSidebar({ ...props }) {
       url: '/dashboard/client/report-compliance',
     },
     {
-      title: 'STR Filing Report',
+      title: 'STR Filing',
       icon: IconChartBar,
       children: [
         {
@@ -123,8 +124,8 @@ export default function ClientSidebar({ ...props }) {
       ]
     },
     {
-      title: 'SMR Filing Report',
-      icon: IconListDetails,
+      title: 'SMR Filing ',
+      icon: FileInput,
       children: [
         {
           title: 'SMR',
@@ -141,8 +142,8 @@ export default function ClientSidebar({ ...props }) {
       ]
     },
     {
-      title: 'Compliance Report',
-      icon: IconListDetails,
+      title: 'Compliance ',
+      icon: ShieldHalf,
       children: [
 
         {
@@ -180,15 +181,20 @@ export default function ClientSidebar({ ...props }) {
     // },
     {
       title: 'Case Management',
-      icon: IconListDetails,
+      icon: Newspaper,
       children: [
         {
           title: 'Alerts',
           url: '/dashboard/client/monitoring-and-cases/case-list',
-          icon: IconDatabase,
+          icon: IconAlertTriangle,
         },
 
       ]
+    },
+    {
+      title: 'ECDD',
+      icon: ShieldUser,
+      url: '/dashboard/client/report-compliance/ecdd',
     }
   ]
 
@@ -300,8 +306,9 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
-        <NavMain items={configurationMenuItems} label="Configuration" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
+        <NavMain items={configurationMenuItems} label="Configuration" />
+
         {/* <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>

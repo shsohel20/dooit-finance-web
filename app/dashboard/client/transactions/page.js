@@ -1,4 +1,5 @@
 "use client";
+import { PageDescription, PageHeader, PageTitle } from '@/components/common';
 import CustomDatatable from '@/components/CustomDatatable'
 import { DataTableColumnHeader } from '@/components/DatatableColumnHeader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -573,6 +574,12 @@ const ListView = () => {
 
   return (
     <div>
+      <PageHeader>
+        <PageTitle>Transaction History</PageTitle>
+        <PageDescription>
+          View and manage transaction history for your clients.
+        </PageDescription>
+      </PageHeader>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2 mb-4'>
           <InputGroup className={'max-w-64'}>

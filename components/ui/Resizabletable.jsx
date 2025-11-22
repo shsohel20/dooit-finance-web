@@ -114,7 +114,7 @@ export default function ResizableTable({
   };
 
   return (
-    <div className="overflow-x-auto   text-xs relative ">
+    <div className="overflow-x-auto   text-xs relative bg-white  mt-4 px-4 rounded-md pb-6 shadow">
       {/* Toolbar */}
       <div className="flex items-center justify-end py-4 gap-2">
         <DropdownMenu>
@@ -152,7 +152,7 @@ export default function ResizableTable({
         </DropdownMenu>
         {actions && actions}
       </div>
-      <div className="rounded-md overflow-hidden border border-border/50">
+      <div className="rounded-md  border border-border/50">
         <Table
           className="w-full transition-[width] duration-700 ease-in-out border "
           // style={{ width: table.getTotalSize() ?? "100%" }}
@@ -167,7 +167,7 @@ export default function ResizableTable({
                     <TableHead
                       key={header.id}
                       className={
-                        "text-xs border-r   first:border-l  font-bold  bg-primary/5 text-primary border-t sticky top-0 "
+                        "text-xs   font-bold  bg-zinc-100  text-zinc-700 uppercase sticky top-0 "
                       }
                       style={{
                         position: "relative",
@@ -240,7 +240,7 @@ export default function ResizableTable({
                           key={cell.id}
                           // data-highlighted={highlightedId === row?.id}
                           className={
-                            "text-xs text-black border-r w-full  first:border-l border-b "
+                            "text-xs text-black border-r w-full   border-b "
                           }
                           style={{
                             width: cell.column.getSize() ?? "auto",
