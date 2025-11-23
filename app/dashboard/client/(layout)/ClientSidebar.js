@@ -81,15 +81,7 @@ export default function ClientSidebar({ ...props }) {
     {
       title: 'Risk Assessment',
       icon: IconAlertTriangle,
-      children: [
-        {
-          title: 'Customer List',
-          url: '/#',
-          icon: IconDatabase,
-          current: true,
-        },
-
-      ]
+      url: '/dashboard/client/risk-assessment',
 
     }
   ]

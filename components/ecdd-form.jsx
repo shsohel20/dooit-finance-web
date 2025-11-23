@@ -1,5 +1,6 @@
 "use client";
 
+import { createEcdd } from "@/app/dashboard/client/report-compliance/ecdd/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,8 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Download, FileSpreadsheet, Save, Upload } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Save, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export function ECDDForm({ data, caseNumber }) {
   const [formData, setFormData] = useState({
@@ -22,7 +25,8 @@ export function ECDDForm({ data, caseNumber }) {
     relatedParty: "N/A",
   });
   const [lastSaved, setLastSaved] = useState(null);
-
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   useEffect(() => {
     if (data) {
       const formattedData = {
@@ -45,8 +49,8 @@ export function ECDDForm({ data, caseNumber }) {
         transactionAnalysis: data.transaction_analysis,
         profileSummary: data.recommendation,
         directors: data.director_name,
-        isPEP: data.pep_flag,
-        isSanctioned: data.sanction_flag,
+        isPEP: data.pep_flag ? "Yes" : "No",
+        isSanctioned: data.sanction_flag ? "Yes" : "No",
         userId: data.user_id,
         accountPurpose: data.account_purpose,
         annualIncome: data.annual_income,
@@ -54,6 +58,10 @@ export function ECDDForm({ data, caseNumber }) {
         analysisEndDate: data.analysis_end_date,
         additionalInfo: data.additonal_information,
         behavioralAnalysis: data.behavioral_analysis,
+        customer: "6906cf020acf10ef6ab1ffd3",
+        analyst: "6906ef042b25d3502f3a6915",
+        generatedBy: "6906ef042b25d3502f3a6915",
+        transaction: "690fd9dbfc65168c8a447a8a",
       };
       setFormData(formattedData);
     }
@@ -200,11 +208,19 @@ ${
     }) conducted multiple AUD deposits followed by USDT and BTC withdrawals where the majority of them were sourced from an external whitelisted bank account. However, the SOF and SOW needs to be collected. Thus recommending to continue the relationship as a high risk customer (HRC) and request RFI at this stage.`;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setLastSaved(new Date());
+    setLoading(true);
     // const {} = formData;
-
-    console.log("[v0] ECDD data saved:", formData);
+    const response = await createEcdd(formData);
+    if (response.success) {
+      toast.success("Case created successfully");
+      router.push(`/dashboard/client/report-compliance/ecdd`);
+    } else {
+      toast.error("Failed to create case");
+    }
+    console.log("[v0] ECDD response", response);
+    setLoading(false);
   };
 
   const handleExport = () => {
@@ -720,9 +736,14 @@ ${formData.recommendation || "_________________________"}
           size="lg"
           variant="outline"
           className="border   bg-transparent"
+          disabled={loading}
         >
           <Save className="w-5 h-5 mr-2" />
-          Save Progress
+          {loading ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : (
+            "Save Progress"
+          )}
         </Button>
         {/* <Button
           onClick={handleExport}
