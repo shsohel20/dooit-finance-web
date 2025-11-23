@@ -21,6 +21,10 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Upload, Download, Calculator, FileText } from "lucide-react";
+import ResizableTable from "../ui/Resizabletable";
+import { riskLevelVariants } from "@/views/onboarding/customer-queue/list";
+import { IconPennant } from "@tabler/icons-react";
+import { Badge } from "../ui/badge";
 
 export function CustomerRiskAssessment() {
   const [customerData, setCustomerData] = useState({
@@ -398,6 +402,40 @@ Generated: ${new Date().toISOString()}
     }.txt`;
     link.click();
   };
+  const columns = [
+    {
+      header: "Customer Name",
+      accessorKey: "customerName",
+    },
+    {
+      header: "Total Risk Score",
+      accessorKey: "totalScore",
+    },
+    {
+      header: "Risk Level",
+      accessorKey: "riskLevel",
+      cell: ({ row }) => {
+        return (
+          <Badge variant={riskLevelVariants[row.original.riskLevel]}>
+            <IconPennant />
+            {row.original.riskLevel} Risk
+          </Badge>
+        );
+      },
+    },
+    {
+      header: "Assessment Date",
+      accessorKey: "assessmentDate",
+    },
+    {
+      header: "Customer Type",
+      accessorKey: "customerType.value",
+    },
+    {
+      header: "Jurisdiction",
+      accessorKey: "jurisdiction.value",
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -729,65 +767,7 @@ Generated: ${new Date().toISOString()}
             </Button>
           </div>
 
-          {data.length > 0 && (
-            <div className="space-y-4">
-              {data.map((customerData, index) => (
-                <Card className="border-primary" key={index}>
-                  {/* <CardHeader>
-                    <CardTitle>Risk Assessment Result</CardTitle>
-                  </CardHeader> */}
-                  <CardContent>
-                    <div className="grid gap-6 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label className="text-muted-foreground">
-                          Customer Name
-                        </Label>
-                        <div className=" font-bold">
-                          {customerData.customerName}
-                        </div>
-                        <Label className="text-muted-foreground">
-                          Total Risk Score
-                        </Label>
-                        <div className="text-4xl font-bold">
-                          {customerData.totalScore}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          <div>Low Risk: &lt; 18 (Standard due diligence)</div>
-                          <div>Medium Risk: 18-20 (Enhanced monitoring)</div>
-                          <div>High Risk: 21+ (Enhanced due diligence)</div>
-                          <div>Unacceptable: 1000+ (Decline or exit)</div>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-muted-foreground">
-                          Risk Level
-                        </Label>
-                        <div
-                          className={`text-4xl font-bold ${getRiskLevelColor(
-                            customerData.riskLevel
-                          )}`}
-                        >
-                          {customerData.riskLevel}
-                        </div>
-                        {customerData.riskLevel === "Unacceptable" && (
-                          <div className="text-sm text-red-600 font-semibold">
-                            ⚠️ Enhanced due diligence required or customer
-                            declination recommended.
-                          </div>
-                        )}
-                        {customerData.riskLevel === "High" && (
-                          <div className="text-sm text-orange-600 font-semibold">
-                            ⚠️ Enhanced due diligence and ongoing monitoring
-                            required.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          {data.length > 0 && <ResizableTable data={data} columns={columns} />}
         </CardContent>
       </Card>
     </div>

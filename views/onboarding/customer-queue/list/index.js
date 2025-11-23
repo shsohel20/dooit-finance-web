@@ -32,7 +32,7 @@ const statusVariants = {
   'In Review': 'warning',
   Closed: 'secondary',
 }
-const riskLevelVariants = {
+export const riskLevelVariants = {
   Low: 'info',
   Medium: 'warning',
   High: 'danger',
