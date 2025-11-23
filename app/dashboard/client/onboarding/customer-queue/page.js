@@ -34,16 +34,16 @@ export default function Page() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="all-applications">
-            <CustomerQueueList />
+            <CustomerQueueList kycStatus='' />
           </TabsContent>
           <TabsContent value="pending-collection">
-            <PendingCollection />
+            <PendingCollection kycStatus='pending' />
           </TabsContent>
           <TabsContent value="rejected-applications">
-            <Rejected />
+            <Rejected kycStatus='rejected' />
           </TabsContent>
           <TabsContent value="ready-for-verification">
-            <Verified />
+            <Verified kycStatus='verified' />
           </TabsContent>
         </Tabs>
       </div>

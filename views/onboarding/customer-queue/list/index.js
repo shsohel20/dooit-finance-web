@@ -288,9 +288,9 @@ const ListView = () => {
   )
 }
 
-export default function CustomerQueueList({ variant, data }) {
+export default function CustomerQueueList({ variant, data, kycStatus }) {
   const [view, setView] = useState('list')
-  const { currentPage, limit, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems, kycStatus } = useCustomerStore();
+  const { currentPage, limit, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems } = useCustomerStore();
   const fetchData = async () => {
     setFetching(true);
     const queryParams = objWithValidValues({
@@ -299,18 +299,22 @@ export default function CustomerQueueList({ variant, data }) {
       kycStatus: kycStatus
     });
 
+    console.log('queryParams => ', queryParams);
+
     const response = await getCustomers(queryParams);
+    console.log('response => ', response);
+    setFetching(false);
     setCustomers(response.data);
     setTotalItems(response.totalRecords);
     setCurrentPage(response.currentPage);
     setLimit(response.limit);
-    setFetching(false);
   }
 
   useEffect(() => {
     fetchData();
-
   }, [currentPage, limit, kycStatus]);
+
+
 
 
   return (

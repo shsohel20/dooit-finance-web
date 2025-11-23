@@ -13,7 +13,7 @@ export default function Rejected() {
   }, []);
   return (
     <div>
-      <CustomerQueueList />
+      <CustomerQueueList kycStatus='rejected' />
     </div>
   )
 }
