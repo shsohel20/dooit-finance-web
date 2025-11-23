@@ -15,11 +15,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { Textarea } from '@/components/ui/textarea';
-import { IconAlertCircle, IconAlertSquare, IconDots, IconDotsCircleHorizontal, IconDotsVertical, IconEye, IconGridDots, IconList, IconPennant, IconSearch } from '@tabler/icons-react';
+import { IconAlertCircle, IconAlertSquare, IconDots, IconDotsCircleHorizontal, IconDotsVertical, IconDownload, IconEye, IconGridDots, IconList, IconPennant, IconSearch, IconUpload } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 import { getTransactions } from './actions';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Plus } from 'lucide-react';
 import { formatAUD, formatDateTime } from '@/lib/utils';
 const transactions = [
   {
@@ -478,12 +478,12 @@ const ListView = () => {
       cell: ({ row }) => {
         return <div className='flex gap-2 items-center'>
           <div >
-            <h4 className='text-zinc-700 font-semibold'>{row.original?.sender?.name}</h4>
+            <h4 className='text-zinc-800 font-semibold'>{row.original?.sender?.name}</h4>
             <p className='text-zinc-500 text-xs'>{row.original?.sender?.account}</p>
           </div>
           <div><ArrowRight className='size-4 text-green-500' /></div>
           <div>
-            <h4 className='text-zinc-700 font-semibold'>{row.original?.receiver?.name}</h4>
+            <h4 className='text-zinc-800 font-semibold'>{row.original?.receiver?.name}</h4>
             <p className='text-zinc-500 text-xs'>{row.original?.receiver?.account}</p>
           </div>
         </div>
@@ -510,7 +510,7 @@ const ListView = () => {
       size: 100,
       cell: ({ row }) => {
         return <div>
-          <h4 className='text-zinc-700 font-semibold'>{row.original?.beneficiary?.name}</h4>
+          <h4 className='text-zinc-800 font-semibold'>{row.original?.beneficiary?.name}</h4>
           <p className='text-zinc-500 text-xs'>{row.original?.beneficiary?.account}</p>
         </div>
       },
@@ -584,7 +584,7 @@ const ListView = () => {
       accessorKey: 'date',
       cell: ({ row }) => {
         return <div>
-          <p className='text-zinc-700 font-semibold'>{formatDateTime(row.original?.timeStamp)?.date}</p>
+          <p className='text-zinc-800 font-semibold'>{formatDateTime(row.original?.timeStamp)?.date}</p>
           <p className='text-zinc-400 '>{formatDateTime(row.original?.timeStamp)?.time}</p>
         </div>
       },
@@ -593,6 +593,24 @@ const ListView = () => {
 
 
   ]
+
+  const Actions = () => {
+    return (
+      <div className='flex items-center gap-2'>
+        <Button variant="outline" size='sm'>
+          <IconDownload />
+          Export CSV
+        </Button>
+        <Button variant="outline" size='sm'>
+          <IconUpload />
+          Import CSV
+        </Button>
+        <Button size='sm'>
+          <Plus /> Add New
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -672,6 +690,7 @@ const ListView = () => {
         data={transactions}
         onDoubleClick={handleViewReportClick}
         loading={fetching}
+        actions={<Actions />}
       />
       <DetailView
         open={openDetailView}

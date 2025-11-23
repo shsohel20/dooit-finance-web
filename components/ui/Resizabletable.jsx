@@ -240,7 +240,7 @@ export default function ResizableTable({
                           key={cell.id}
                           // data-highlighted={highlightedId === row?.id}
                           className={
-                            "text-xs text-black border-r w-full   border-b "
+                            "text-xs text-zinc-700 border-r w-full   border-b "
                           }
                           style={{
                             width: cell.column.getSize() ?? "auto",
