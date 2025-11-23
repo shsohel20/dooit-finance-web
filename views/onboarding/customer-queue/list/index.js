@@ -21,7 +21,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 
 import { Textarea } from '@/components/ui/textarea'
 import { dateShowFormat, dateShowFormatWithTime, objWithValidValues } from '@/lib/utils'
-import { IconChevronDown, IconChevronRight, IconDownload, IconEye, IconGrid3x3, IconGridDots, IconList, IconSearch, IconUpload } from '@tabler/icons-react'
+import { IconChevronDown, IconChevronRight, IconDownload, IconEye, IconGrid3x3, IconGridDots, IconList, IconPennant, IconSearch, IconUpload } from '@tabler/icons-react'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
@@ -161,14 +161,29 @@ const ListView = () => {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
+          title="Type"
+        />
+      ),
+      accessorKey: 'riskAssessment?.customerType?.value',
+      cell: ({ row }) => (
+        <span className='capitalize'>
+          {row.original.riskAssessment?.customerType?.value}
+        </span>
+      ),
+    },
+    {
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
           title="Risk Level"
         />
       ),
-      accessorKey: 'riskLevel',
+      accessorKey: 'riskLabel',
       size: 100,
       cell: ({ row }) => (
-        <Badge variant={riskLevelVariants[row.original.riskLevel]} >
-          {row.original.riskLevel}
+        <Badge variant={riskLevelVariants[row.original.riskLabel]} >
+          <IconPennant />
+          {row.original.riskLabel}
         </Badge>
       ),
     },
