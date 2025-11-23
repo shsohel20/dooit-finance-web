@@ -420,10 +420,12 @@ const ListView = () => {
   const [viewReport, setViewReport] = useState(false);
   const [currentItemReport, setCurrentItemReport] = useState(null);
   const [transactions, setTransactions] = useState([]);
+  const [fetching, setFetching] = useState(false);
   useEffect(() => {
     const fetchTransactions = async () => {
+      setFetching(true);
       const transactions = await getTransactions();
-      console.log('transactions => ', transactions);
+      setFetching(false);
       setTransactions(transactions?.data || []);
     }
     fetchTransactions();
@@ -669,6 +671,7 @@ const ListView = () => {
         columns={columns}
         data={transactions}
         onDoubleClick={handleViewReportClick}
+        loading={fetching}
       />
       <DetailView
         open={openDetailView}
