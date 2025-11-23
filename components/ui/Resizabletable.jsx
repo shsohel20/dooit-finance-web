@@ -167,7 +167,7 @@ export default function ResizableTable({
                     <TableHead
                       key={header.id}
                       className={
-                        "text-xs   font-bold  bg-zinc-100  text-zinc-700 uppercase sticky top-0 "
+                        "text-xs     bg-zinc-100  text-zinc-700 uppercase sticky top-0 "
                       }
                       style={{
                         position: "relative",
