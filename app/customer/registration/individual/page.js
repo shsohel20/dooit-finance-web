@@ -3,17 +3,26 @@ import { Button } from '@/components/ui/button';
 import Stepper from '@/components/ui/Stepper';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import IdentificationDocuments from '../components/IdentificationDocuments';
-import OtherInfo from '../components/OtherInfo';
-import PersonalInfo from '../components/PersonalInfo';
+
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
+import IdentificationDocuments from '@/views/customer-registration/common/IdentificationDocuments';
+import PersonalInfo from '@/views/customer-registration/individual/PersonalInfo';
+import OtherInfo from '@/views/customer-registration/individual/OtherInfo';
+
+
 const personalInfoSchema = z.object({
     customer_details: z.object({
         given_name: z.string().min(1, 'First name is required'),
         middle_name: z.string().min(1, 'Middle name is required'),
         surname: z.string().min(1, 'Last name is required'),
+    }),
+    document_type: z.object({
+        value: z.string().min(1, 'Document type is required'),
+        label: z.string().min(1, 'Document type is required'),
     }),
     contact_details: z.object({
         email: z.string().email('Invalid email address'),
@@ -25,83 +34,89 @@ const personalInfoSchema = z.object({
     }),
     residential_address: z.object({
         address: z.string().min(1, 'Address is required'),
-        suburb: z.string().min(1, 'Suburb is required'),
-        state: z.string().min(1, 'State is required'),
-        postcode: z.string().min(1, 'Postcode is required'),
-        country: z.string().min(1, 'Country is required'),
+        suburb: z.string().optional(),
+        state: z.string(),
+        postcode: z.string().optional(),
+        country: z.object({
+            value: z.string(),
+            label: z.string(),
+        }).nullable(),
     }),
     documents: z.array(z.object({
-        name: z.string().min(1, 'Document name is required'),
-        url: z.string().min(1, 'Document URL is required'),
-        mimeType: z.string().min(1, 'Document MIME type is required'),
-        type: z.string().min(1, 'Document type is required'),
-    })),
+        name: z.string().optional(),
+        url: z.string().optional(),
+        mimeType: z.string().optional(),
+        type: z.enum(['front', 'back']),
+        docType: z.string().optional(),
+    })).max(2, 'You can only upload 2 documents'),
     declaration: z.object({
-        declarations_accepted: z.boolean(),
-        signatory_name: z.string().min(1, 'Signatory name is required'),
-        signature: z.string().min(1, 'Signature is required'),
-        date: z.string().min(1, 'Date is required'),
+        declarations_accepted: z.boolean().optional(),
+        signatory_name: z.string().optional(),
+        signature: z.string().optional(),
+        date: z.string().optional(),
+    }),
+    funds_wealth: z.object({
+        source_of_funds: z.string().optional(),
+        source_of_wealth: z.string().optional(),
+        account_purpose: z.string().optional(),
+        estimated_trading_volume: z.string().optional(),
+    }),
+    sole_trader: z.object({
+        is_sole_trader: z.boolean().optional(),
+        business_details: z.object({
+            first_name: z.string().optional(),
+            last_name: z.string().optional(),
+            date_of_birth: z.string().optional(),
+            phone_number: z.string().optional(),
+            id_number: z.string().optional(),
+        }),
+    }),
+    mailing_address: z.object({
+        address: z.string().optional(),
+        suburb: z.string().optional(),
+        state: z.string().optional(),
+        postcode: z.string().optional(),
+        country: z.object({
+            value: z.string(),
+            label: z.string(),
+        }).nullable().optional(),
+    }),
+    declaration: z.object({
+        declarations_accepted: z.boolean().refine(
+            (val) => val === true,
+            "You must accept the declarations"
+        ),
+        signatory_name: z
+            .string()
+            .min(1, "Signatory name is required")
+            .min(2, "Signatory name must be at least 2 characters"),
+        signature: z.string().min(1, "Signature is required"),
+        date: z
+            .string()
+        ,
     }),
 });
 const TOTAL_STEPS = 3;
 const CustomerRegistration = () => {
     const [currentStep, setCurrentStep] = useState(1);
-    const initialFormData = {
-        personalInfo: {
-            customer_details: {
-                given_name: '',
-                middle_name: '',
-                surname: '',
-                date_of_birth: '',
-                other_names: '',
-                referral: '',
-            }
-        },
-        contact_details: {
-            email: '',
-            phone: ''
-        },
-        employment_details: {
-            occupation: '',
-            industry: '',
-            employer_name: '',
-        },
-        residential_address: {
-            address: '',
-            suburb: '',
-            state: '',
-            postcode: '',
-            country: '',
+    const { customerRegisterData, setCustomerRegisterData, registerType, country } = useCustomerRegisterStore();
 
-        },
-        documents: [
-            {
-                name: '',
-                url: '',
-                mimeType: '',
-                type: '',
-            }
-        ],
-        declaration: {
-            declarations_accepted: true,
-            signatory_name: '',
-            signature: '',
-            date: '',
-        }
-    }
-    const { handleSubmit, control, formState: { errors } } = useForm({
-        defaultValues: initialFormData,
+
+    const { handleSubmit, control, formState: { errors, }, setValue } = useForm({
+        defaultValues: customerRegisterData,
         resolver: zodResolver(personalInfoSchema),
+        mode: 'onChange',
     });
     const onSubmit = (data) => {
-        console.log("data", data);
+
+        setCustomerRegisterData(data);
+        router.push('/customer/registration/individual/preview')
     }
     const router = useRouter();
 
-    const handleStep = () => {
+    const handleNextStep = () => {
         setCurrentStep(prev => {
             if (prev === TOTAL_STEPS) {
-                router.push('/customer/registration/preview');
                 return TOTAL_STEPS;
             }
             return prev + 1;
@@ -115,26 +130,41 @@ const CustomerRegistration = () => {
             return prev - 1;
         });
     }
+    const handleStep = (step) => {
+        setCurrentStep(step);
+    }
     return (
         <div className='container'>
             {/* stepper */}
             <div>
-                <Stepper currentStep={currentStep} totalSteps={TOTAL_STEPS} />
+                <Stepper currentStep={currentStep} totalSteps={TOTAL_STEPS} handleStep={handleStep} />
             </div>
             {/* content */}
             <div>
-                {currentStep === 1 && <PersonalInfo control={control} errors={errors} />}
-                {currentStep === 2 && <IdentificationDocuments />}
-                {currentStep === 3 && <OtherInfo />}
+                {currentStep === 1 && <IdentificationDocuments control={control} errors={errors} />}
+                {currentStep === 2 && <PersonalInfo control={control} errors={errors} />}
+
+                {currentStep === 3 && <OtherInfo control={control} errors={errors} setValue={setValue} />}
             </div>
             <div className='flex justify-end gap-2 my-8'>
                 {currentStep > 1 && <Button
                     variant='outline'
                     onClick={handlePreviousStep}
-                    className={'w-[200px]'}>Previous</Button>}
-                <Button onClick={handleStep} className={'w-[200px]'}>
-                    {currentStep === TOTAL_STEPS ? 'Preview' : 'Next'}
+                    className={'w-[200px]'}>
+                    Previous
                 </Button>
+                }
+                {currentStep < TOTAL_STEPS &&
+                    <Button
+                        onClick={handleNextStep}
+                        className={'w-[200px]'}
+                    >
+                        Next
+                    </Button>
+                }
+                {currentStep === TOTAL_STEPS && <Button onClick={handleSubmit(onSubmit)} className={'w-[200px]'}>
+                    Preview
+                </Button>}
             </div>
         </div>
     );

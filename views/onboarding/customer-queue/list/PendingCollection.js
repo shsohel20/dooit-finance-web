@@ -13,7 +13,7 @@ export default function PendingCollection() {
   }, []);
   return (
     <div>
-      <CustomerQueueList />
+      <CustomerQueueList kycStatus='pending' />
     </div>
   )
 }

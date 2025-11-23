@@ -2,7 +2,12 @@ import { cn } from "@/lib/utils";
 
 export const PageTitle = ({ children, className }) => {
   return (
-    <h2 className={cn("text-3xl font-bold tracking-tight", className)}>
+    <h2
+      className={cn(
+        "text-3xl font-semibold tracking-tight text-zinc-700",
+        className
+      )}
+    >
       {children}
     </h2>
   );
@@ -15,5 +20,5 @@ export const PageDescription = ({ children, className }) => {
 };
 
 export const PageHeader = ({ children, className }) => {
-  return <div className={cn("flex flex-col mb-8", className)}>{children}</div>;
+  return <div className={cn("flex flex-col mb-6", className)}>{children}</div>;
 };

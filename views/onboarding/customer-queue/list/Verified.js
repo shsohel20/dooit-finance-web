@@ -13,7 +13,7 @@ export default function Verified() {
   }, []);
   return (
     <div>
-      <CustomerQueueList />
+      <CustomerQueueList kycStatus='verified' />
     </div>
   )
 }

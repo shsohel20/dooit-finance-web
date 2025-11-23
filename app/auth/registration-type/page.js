@@ -8,12 +8,15 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { getLoggedInCustomer, getLoggedInUser } from '../actions';
 import dynamic from 'next/dynamic';
+import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
 const CustomSelect = dynamic(() => import('@/components/ui/CustomSelect'), { ssr: false });
 
 const RegistrationType = () => {
     const [selectedType, setSelectedType] = useState(null);
     const [country, setCountry] = useState(null);
     const [user, setUser] = useState(null);
+    console.log("user", user);
+    const { setRegisterType, setCountry: setCountryStore } = useCustomerRegisterStore();
     const handleGetLoggedInUser = async () => {
         const user = await getLoggedInCustomer();
         console.log("user", user);
@@ -27,14 +30,37 @@ const RegistrationType = () => {
         {
             type: 'Individual',
             desc: 'Register as an individual user',
+            value: 'individual',
         },
         {
             type: 'Business',
             desc: 'Register as a business entity',
+            value: 'business',
         },
         {
-            type: 'Join Account',
-            desc: 'Register as a join account',
+            type: 'Trust',
+            desc: 'Register as a trust',
+            value: 'trust',
+        },
+        {
+            type: 'Partnership',
+            desc: 'Register as a partnership',
+            value: 'partnership',
+        },
+        {
+            type: 'Government Body',
+            desc: 'Register as a government body',
+            value: 'government-body',
+        },
+        {
+            type: 'Association',
+            desc: 'Register as an association',
+            value: 'association',
+        },
+        {
+            type: 'Cooperative',
+            desc: 'Register as a cooperative',
+            value: 'cooperative',
         },
 
     ]
@@ -43,10 +69,16 @@ const RegistrationType = () => {
     }
     const handleContinue = () => {
         if (selectedType && country) {
-            localStorage.setItem('reg-type', selectedType?.type?.toLowerCase());
-            localStorage.setItem('reg-country', country?.value?.toLowerCase());
+            // localStorage.setItem('registration_type', selectedType?.value);
+            // localStorage.setItem('country', country?.value?.toLowerCase());
+            setRegisterType(selectedType?.value);
+            setCountryStore(country?.value?.toLowerCase());
+
             if (user?.kycStatus === 'pending') {
-                router.push('/customer/document-type');
+                //TODO:Will add additional logic later.
+                router.push(`/customer/registration/${selectedType?.value}`);
+            } else {
+                router.push(`/customer/registration/${selectedType?.value}`);
             }
         }
     }
@@ -55,7 +87,7 @@ const RegistrationType = () => {
             <div className='min-w-[500px]'>
                 <h1 className='text-2xl font-bold tracking-tighter text-center'>Choose Registration Type</h1>
                 <p className='text-center'>Select the option that best describes you to get started.</p>
-                <div className='py-8 space-y-4 flex flex-col items-center'>
+                <div className='py-8  flex flex-col gap-4 items-center justify-center'>
                     {
                         types.map((type, index) => (
                             <div
@@ -70,7 +102,7 @@ const RegistrationType = () => {
                                     }
                                 }}
                                 tabIndex={index + 1}
-                                className={cn('flex items-center gap-4 py-6 px-4 border rounded-lg cursor-pointer transition-all duration-300 w-[400px] focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2', {
+                                className={cn('flex items-center gap-4 py-2.5 px-4 border rounded-lg cursor-pointer transition-all duration-300 w-[400px] focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2', {
                                     'border-yellow-500 w-[460px]  px-6': selectedType?.type === type.type,
                                 })}>
                                 <div className={

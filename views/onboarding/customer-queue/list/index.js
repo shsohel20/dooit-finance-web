@@ -21,7 +21,8 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 
 import { Textarea } from '@/components/ui/textarea'
 import { dateShowFormat, dateShowFormatWithTime, objWithValidValues } from '@/lib/utils'
-import { IconChevronDown, IconChevronRight, IconEye, IconGrid3x3, IconGridDots, IconList, IconSearch } from '@tabler/icons-react'
+import { IconChevronDown, IconChevronRight, IconDownload, IconEye, IconGrid3x3, IconGridDots, IconList, IconPennant, IconSearch, IconUpload } from '@tabler/icons-react'
+import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 const statusVariants = {
@@ -160,14 +161,29 @@ const ListView = () => {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
+          title="Type"
+        />
+      ),
+      accessorKey: 'riskAssessment?.customerType?.value',
+      cell: ({ row }) => (
+        <span className='capitalize'>
+          {row.original.riskAssessment?.customerType?.value}
+        </span>
+      ),
+    },
+    {
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
           title="Risk Level"
         />
       ),
-      accessorKey: 'riskLevel',
+      accessorKey: 'riskLabel',
       size: 100,
       cell: ({ row }) => (
-        <Badge variant={riskLevelVariants[row.original.riskLevel]} >
-          {row.original.riskLevel}
+        <Badge variant={riskLevelVariants[row.original.riskLabel]} >
+          <IconPennant />
+          {row.original.riskLabel}
         </Badge>
       ),
     },
@@ -233,6 +249,19 @@ const ListView = () => {
     setLimit(limit);
     setCurrentPage(1);
   }
+
+  const Actions = () => {
+    return (
+      <div className='flex items-center gap-2 '>
+        <Button className='text-xs' size='sm' variant='outline'>
+          Export CSV <IconDownload className='size-4' />
+        </Button>
+        <Button className='text-xs' size='sm' variant='outline'>
+          Import CSV <IconUpload className='size-4' />
+        </Button>
+      </div>
+    )
+  }
   return (
     <>
       {/* <div className='flex justify-end'>
@@ -243,7 +272,7 @@ const ListView = () => {
         data={customers}
         onDoubleClick={handleDoubleClick}
         loading={fetching}
-
+        actions={<Actions />}
       />
       <CustomPagination
         currentPage={currentPage}
@@ -259,9 +288,9 @@ const ListView = () => {
   )
 }
 
-export default function CustomerQueueList({ variant, data }) {
+export default function CustomerQueueList({ variant, data, kycStatus }) {
   const [view, setView] = useState('list')
-  const { currentPage, limit, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems, kycStatus } = useCustomerStore();
+  const { currentPage, limit, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems } = useCustomerStore();
   const fetchData = async () => {
     setFetching(true);
     const queryParams = objWithValidValues({
@@ -270,22 +299,26 @@ export default function CustomerQueueList({ variant, data }) {
       kycStatus: kycStatus
     });
 
+
     const response = await getCustomers(queryParams);
+    setFetching(false);
     setCustomers(response.data);
     setTotalItems(response.totalRecords);
     setCurrentPage(response.currentPage);
     setLimit(response.limit);
-    setFetching(false);
   }
 
   useEffect(() => {
     fetchData();
-
   }, [currentPage, limit, kycStatus]);
+
+
+
 
   return (
     <div className='my-2'>
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between  py-4 bg-white rounded-md px-4 shadow'>
+        {/* Search and Filter */}
         <div className='flex items-center gap-2  '>
           <InputGroup className={'max-w-64'}>
             <InputGroupInput placeholder="Search..." />
@@ -329,6 +362,8 @@ export default function CustomerQueueList({ variant, data }) {
               <SelectItem value="Australia">Australia</SelectItem>
             </SelectContent>
           </Select>
+          <Button size='icon' variant='outline'><Plus className='size-4' /></Button>
+
         </div>
         <div className='flex items-center gap-2 '>
           {/* <Button size={'sm'} className={'text-xs'}><IconBrandTelegram />  Send Invite </Button> */}

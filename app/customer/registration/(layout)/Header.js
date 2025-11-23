@@ -1,8 +1,17 @@
-import { IconInnerShadowTop } from '@tabler/icons-react';
+'use client';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { IconInnerShadowTop, IconLogout } from '@tabler/icons-react';
 import { Bell } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 import React from 'react';
 
 const Header = () => {
+    const logout = async () => {
+        signOut({
+            // redirect: true,
+            callbackUrl: "/auth/login",
+        });
+    };
     return (
         <div className=' border-b py-4 flex justify-between items-center'>
             <div className='flex items-center justify-between container'>
@@ -22,7 +31,18 @@ const Header = () => {
                     <span><Bell /></span>
                     <span>Sarah Miller</span>
                     <div>
-                        <div className='size-10 rounded-full bg-white border'></div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <div className='size-10 rounded-full bg-white border'></div>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={logout}>
+                                    <IconLogout />
+                                    Log out
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
                     </div>
                 </div>
             </div>

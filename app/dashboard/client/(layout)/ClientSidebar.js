@@ -10,6 +10,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import {
+  IconAlertTriangle,
+  IconBuildingBank,
   IconChartBar,
   IconCircleCheck,
   IconCircleDashedCheck,
@@ -18,19 +20,21 @@ import {
   IconListDetails,
   IconPentagonX,
   IconProgress,
+  IconUsers,
 } from "@tabler/icons-react"
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
 import { useSession } from 'next-auth/react'
+import { FileInput, Newspaper, ShieldHalf, ShieldUser } from 'lucide-react'
 
 export default function ClientSidebar({ ...props }) {
   const session = useSession();
   const onBoardingMenuItems = [
 
     {
-      title: "Customer Queue",
+      title: "Customers",
       // url: "#",
-      icon: IconListDetails,
+      icon: IconUsers,
       // current: true,
       children: [
         {
@@ -39,13 +43,13 @@ export default function ClientSidebar({ ...props }) {
           url: '/dashboard/client/onboarding/customer-queue',
         },
         {
-          title: 'Pending Collection',
+          title: 'Pending',
           url: '/dashboard/client/onboarding/customer-queue/pending',
           icon: IconDatabase,
           current: true,
         },
         {
-          title: 'Rejected Application',
+          title: 'Rejected',
           url: '/dashboard/client/onboarding/customer-queue/rejected',
           icon: IconPentagonX,
           current: true,
@@ -65,8 +69,8 @@ export default function ClientSidebar({ ...props }) {
       ]
     },
     {
-      title: 'Branch Management',
-      icon: IconListDetails,
+      title: 'Branches',
+      icon: IconBuildingBank,
       children: [
         {
           title: 'Branch List',
@@ -75,17 +79,9 @@ export default function ClientSidebar({ ...props }) {
       ]
     },
     {
-      title: 'Customer Risk Assessment',
-      icon: IconListDetails,
-      children: [
-        {
-          title: 'Customer List',
-          url: '/#',
-          icon: IconDatabase,
-          current: true,
-        },
-
-      ]
+      title: 'Risk Assessment',
+      icon: IconAlertTriangle,
+      url: '/dashboard/client/risk-assessment',
 
     }
   ]
@@ -96,7 +92,7 @@ export default function ClientSidebar({ ...props }) {
       url: '/dashboard/client/report-compliance',
     },
     {
-      title: 'STR Filing Report',
+      title: 'STR Filing',
       icon: IconChartBar,
       children: [
         {
@@ -120,8 +116,8 @@ export default function ClientSidebar({ ...props }) {
       ]
     },
     {
-      title: 'SMR Filing Report',
-      icon: IconListDetails,
+      title: 'SMR Filing ',
+      icon: FileInput,
       children: [
         {
           title: 'SMR',
@@ -138,8 +134,8 @@ export default function ClientSidebar({ ...props }) {
       ]
     },
     {
-      title: 'Compliance Report',
-      icon: IconListDetails,
+      title: 'Compliance ',
+      icon: ShieldHalf,
       children: [
 
         {
@@ -177,15 +173,20 @@ export default function ClientSidebar({ ...props }) {
     // },
     {
       title: 'Case Management',
-      icon: IconListDetails,
+      icon: Newspaper,
       children: [
         {
           title: 'Alerts',
           url: '/dashboard/client/monitoring-and-cases/case-list',
-          icon: IconDatabase,
+          icon: IconAlertTriangle,
         },
 
       ]
+    },
+    {
+      title: 'ECDD',
+      icon: ShieldUser,
+      url: '/dashboard/client/report-compliance/ecdd',
     }
   ]
 
@@ -195,6 +196,86 @@ export default function ClientSidebar({ ...props }) {
       icon: IconListDetails,
       url: '/dashboard/client/watchlist-and-screening/internal-blacklist',
     },
+  ]
+
+  const knowledgeHubMenuItems = [
+    {
+      title: 'Policy Hub',
+      icon: IconListDetails,
+      url: '/dashboard/client/knowledge-hub/policy-hub',
+    },
+    {
+      title: 'Training Hub',
+      icon: IconListDetails,
+      url: '/dashboard/client/knowledge-hub/training-hub',
+    },
+    {
+      title: 'EWRA',
+      icon: IconListDetails,
+      url: '/dashboard/client/faq',
+      children: [
+        // {
+        //   title: 'Risk Assessment',
+        //   url: '/dashboard/client/risk-assessment',
+        //   icon: IconListDetails,
+        // },
+        {
+          title: 'ML Risk Assessment',
+          url: '/dashboard/client/knowledge-hub/ewra/ml-risk-assesment',
+          icon: IconListDetails,
+        },
+        {
+          title: 'TF Risk Assessment',
+          url: '/dashboard/client/knowledge-hub/ewra/tf-risk-assesment',
+          icon: IconListDetails,
+        },
+        {
+          title: 'ABC Risk Assessment',
+          url: '/dashboard/client/knowledge-hub/ewra/abc-risk-assesment',
+          icon: IconListDetails,
+        },
+      ]
+    },
+    {
+      title: 'Regulatory Links',
+      icon: IconListDetails,
+      url: '/dashboard/client/knowledge-hub/regulatory-links',
+
+    },
+  ]
+  const configurationMenuItems = [
+    {
+      title: 'User & Role Management',
+      icon: IconListDetails,
+      url: '/dashboard/client/user-and-role-management',
+    },
+    {
+      title: 'Risk Rule Engine',
+      icon: IconListDetails,
+      children: [
+        {
+          title: 'CRA Scoring Configuration',
+          url: '/dashboard/client/risk-rule-engine/cra-scoring-config',
+          icon: IconDatabase,
+        },
+        {
+          title: 'Transaction Rule Editor',
+          url: '/dashboard/client/risk-rule-engine/transaction-rule-editor',
+          icon: IconDatabase,
+        }
+      ]
+    },
+    {
+      title: 'System Settings',
+      icon: IconListDetails,
+      children: [
+        {
+          title: 'Privacy',
+          url: '/dashboard/client/system-settings/privacy',
+          icon: IconDatabase,
+        },
+      ]
+    }
   ]
 
 
@@ -216,7 +297,10 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={onBoardingMenuItems} label="Onboarding" />
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={reportingMenuItems} label="Reporting & Registers" />
+        <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
+        <NavMain items={configurationMenuItems} label="Configuration" />
+
         {/* <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>

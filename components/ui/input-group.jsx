@@ -14,7 +14,7 @@ function InputGroup({ className, ...props }) {
       data-slot="input-group"
       role="group"
       className={cn(
-        "group/input-group border-input dark:bg-input/30 relative flex w-full items-center rounded-md border shadow-xs transition-[color,box-shadow] outline-none text-xs",
+        "group/input-group border-input dark:bg-input/30 relative flex w-full items-center rounded-md border shadow-sm transition-[color,box-shadow] outline-none text-xs",
         "h-9 min-w-0 has-[>textarea]:h-auto",
         // Variants based on alignment.
         "has-[>[data-align=inline-start]]:[&>input]:pl-2",
@@ -124,7 +124,7 @@ function InputGroupInput({ className, ...props }) {
     <Input
       data-slot="input-group-control"
       className={cn(
-        "flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent text-xs",
+        "flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent text-xs  ",
         className
       )}
       {...props}

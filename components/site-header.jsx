@@ -6,13 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { IconHelpCircle } from "@tabler/icons-react";
 
 export function SiteHeader() {
   const pathname = usePathname();
   const routes = [
     {
       name: "Customers",
-      href: "/#",
+      href: "/dashboard/client/onboarding/customer-queue",
     },
 
     {
@@ -25,23 +26,26 @@ export function SiteHeader() {
     },
   ];
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) bg-white">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        {/* <h1 className="text-base font-medium">Documents</h1> */}
-        <div className=" w-full flex justify-center">
+
+        <div className=" w-full flex ">
           <ul className="flex items-center gap-2">
             {routes.map((route) => (
               <li key={route.name}>
                 <Link
                   href={route.href}
-                  className={cn(" px-4 py-2 rounded-md bg-secondary", {
-                    "bg-primary text-white font-bold ": pathname === route.href,
-                  })}
+                  className={cn(
+                    " px-4 py-2 rounded-md text-zinc-400  font-extrabold ",
+                    {
+                      "text-zinc-800  font-bold ": pathname === route.href,
+                    }
+                  )}
                 >
                   {route.name}
                 </Link>
@@ -50,6 +54,9 @@ export function SiteHeader() {
           </ul>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          <Button variant="secondary" size="sm">
+            Help <IconHelpCircle />
+          </Button>
           <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
             <span>
               <Avatar>

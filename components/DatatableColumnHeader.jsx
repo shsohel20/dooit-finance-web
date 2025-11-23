@@ -50,7 +50,7 @@ export function DataTableColumnHeader({ column, title, className }) {
           <Button
             variant="ghost"
             size="sm"
-            className=" h-8 hover:bg-transparent hover:text-primary font-bold"
+            className=" h-8 hover:bg-transparent hover:text-primary uppercase"
           >
             <span className="text-xs">{title}</span>
             {currentDirection === "desc" ? (

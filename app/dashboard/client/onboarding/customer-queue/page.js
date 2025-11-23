@@ -7,43 +7,46 @@ import CustomerQueueHeader from '@/views/onboarding/customer-queue/header';
 import PendingCollection from '@/views/onboarding/customer-queue/list/PendingCollection';
 import Rejected from '@/views/onboarding/customer-queue/list/Rejected';
 import Verified from '@/views/onboarding/customer-queue/list/Verified';
+import { Card } from '@/components/ui/card';
 
 export default function Page() {
 
   return (
     <div>
-      <CustomerQueueHeader />
+      <div>
+        <CustomerQueueHeader />
 
-      <Tabs defaultValue="pending-collection">
-        <TabsList>
-          <TabsTrigger value="all-applications">
-            All
-            <Badge variant="secondary">100</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="pending-collection">
-            Pending Collection
-            <Badge variant="secondary">13</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="rejected-applications">
-            Rejected Applications
-          </TabsTrigger>
-          <TabsTrigger value="ready-for-verification">
-            Ready for Verification
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="all-applications">
-          <CustomerQueueList />
-        </TabsContent>
-        <TabsContent value="pending-collection">
-          <PendingCollection />
-        </TabsContent>
-        <TabsContent value="rejected-applications">
-          <Rejected />
-        </TabsContent>
-        <TabsContent value="ready-for-verification">
-          <Verified />
-        </TabsContent>
-      </Tabs>
+        <Tabs defaultValue="pending-collection">
+          <TabsList>
+            <TabsTrigger value="all-applications">
+              All
+              <Badge variant="secondary">100</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="pending-collection">
+              Pending
+              <Badge variant="secondary">13</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="rejected-applications">
+              Rejected
+            </TabsTrigger>
+            <TabsTrigger value="ready-for-verification">
+              Ready for Verification
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="all-applications">
+            <CustomerQueueList kycStatus='' />
+          </TabsContent>
+          <TabsContent value="pending-collection">
+            <PendingCollection kycStatus='pending' />
+          </TabsContent>
+          <TabsContent value="rejected-applications">
+            <Rejected kycStatus='rejected' />
+          </TabsContent>
+          <TabsContent value="ready-for-verification">
+            <Verified kycStatus='verified' />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 }

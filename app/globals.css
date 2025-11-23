@@ -10,7 +10,7 @@
 
 :root {
   --purple: #402e7a;
-  --primary: #023047;
+  --primary: #008082;
   --accent: #ffb703;
   --secondary: oklch(0.97 0 0);
   --brown: #f9c74f;
@@ -54,7 +54,10 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
-
+.border-red {
+  border-color: var(--danger);
+  border-width: 5px;
+}
 @theme inline {
   --color-purple: var(--purple);
   --color-background: var(--background);
@@ -167,11 +170,13 @@ button {
   }
 }
 /* react-select */
+
 .react-select__control {
-  border-color: var(--border) !important;
+  /* border-color: var(--border) !important; */
   border-radius: var(--radius) !important;
   min-height: 10px !important;
 }
+
 .react-select__indicator {
   padding: 7px !important;
 }

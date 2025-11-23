@@ -1,6 +1,7 @@
 'use client';
 import { getClientById } from "@/app/dashboard/admin/client/actions";
 import { PageDescription, PageHeader, PageTitle } from "@/components/common";
+import LabelDetails from "@/components/LabelDetails";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -8,14 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { IconEdit } from "@tabler/icons-react";
 import { Fragment, useEffect, useState } from "react";
 
-const LabelDetails = ({ label, value, loading }) => {
-  return (
-    <div className="space-y-2">
-      <Label className={'text-muted-foreground'}>{label}</Label>
-      <p className="font-bold text-gray-900">{loading ? <Skeleton className="w-full h-4" /> : value}</p>
-    </div>
-  )
-}
+
 
 export default function ClientDetails({ id }) {
   const [loading, setLoading] = useState(true);

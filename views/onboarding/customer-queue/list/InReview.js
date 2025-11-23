@@ -13,7 +13,7 @@ export default function InReview() {
   }, []);
   return (
     <div>
-      <CustomerQueueList />
+      <CustomerQueueList kycStatus='in_review' />
     </div>
   )
 }

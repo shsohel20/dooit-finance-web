@@ -1,4 +1,5 @@
 "use client";
+import { PageDescription, PageHeader, PageTitle } from '@/components/common';
 import CustomDatatable from '@/components/CustomDatatable'
 import { DataTableColumnHeader } from '@/components/DatatableColumnHeader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -14,9 +15,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { Textarea } from '@/components/ui/textarea';
-import { IconAlertCircle, IconAlertSquare, IconDots, IconDotsCircleHorizontal, IconEye, IconGridDots, IconList, IconPennant, IconSearch } from '@tabler/icons-react';
+import { IconAlertCircle, IconAlertSquare, IconDots, IconDotsCircleHorizontal, IconDotsVertical, IconDownload, IconEye, IconGridDots, IconList, IconPennant, IconSearch, IconUpload } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { getTransactions } from './actions';
+import { ArrowRight, Plus } from 'lucide-react';
+import { formatAUD, formatDateTime } from '@/lib/utils';
 const transactions = [
   {
     id: 1,
@@ -415,6 +419,17 @@ const ListView = () => {
   const [currentItem, setCurrentItem] = useState(null);
   const [viewReport, setViewReport] = useState(false);
   const [currentItemReport, setCurrentItemReport] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [fetching, setFetching] = useState(false);
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      setFetching(true);
+      const transactions = await getTransactions();
+      setFetching(false);
+      setTransactions(transactions?.data || []);
+    }
+    fetchTransactions();
+  }, []);
   const handleViewReportClick = (item) => {
     setCurrentItemReport(item);
     setViewReport(true);
@@ -430,43 +445,49 @@ const ListView = () => {
   }
   const columns = [
     {
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title="ID"
-        />
+      header: 'Actions',
+      accessorKey: 'actions',
+      cell: ({ row }) => (
+        <div className='flex justify-center'>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                // size="sm"
+                className="!py-2 h-auto "
+              >
+                <IconDotsVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => handleViewClick(row.original)}>
+                <IconEye className="mr-2 size-3 text-muted-foreground/70" />
+                View
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       ),
-      accessorKey: 'id',
-      size: 100,
     },
     {
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title="Name"
-        />
+        <span>Flow Direction</span>
       ),
-      accessorKey: 'name',
-    },
-    {
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title="Credit"
-        />
-      ),
-      accessorKey: 'credit',
-      size: 100,
-    },
-    {
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title="Debit"
-        />
-      ),
-      accessorKey: 'debit',
-      size: 100,
+      accessorKey: 'sender.name',
+      size: 200,
+      cell: ({ row }) => {
+        return <div className='flex gap-2 items-center'>
+          <div >
+            <h4 className='text-zinc-800 font-semibold'>{row.original?.sender?.name}</h4>
+            <p className='text-zinc-500 text-xs'>{row.original?.sender?.account}</p>
+          </div>
+          <div><ArrowRight className='size-4 text-green-500' /></div>
+          <div>
+            <h4 className='text-zinc-800 font-semibold'>{row.original?.receiver?.name}</h4>
+            <p className='text-zinc-500 text-xs'>{row.original?.receiver?.account}</p>
+          </div>
+        </div>
+      },
     },
     {
       header: ({ column }) => (
@@ -482,11 +503,17 @@ const ListView = () => {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title="Date"
+          title="Beneficial Owner"
         />
       ),
-      accessorKey: 'date',
+      accessorKey: 'beneficiary.name',
       size: 100,
+      cell: ({ row }) => {
+        return <div>
+          <h4 className='text-zinc-800 font-semibold'>{row.original?.beneficiary?.name}</h4>
+          <p className='text-zinc-500 text-xs'>{row.original?.beneficiary?.account}</p>
+        </div>
+      },
     },
     {
       header: ({ column }) => (
@@ -496,18 +523,14 @@ const ListView = () => {
         />
       ),
       accessorKey: 'amount',
+      cell: ({ row }) => {
+        return <div>
+          <p className='text-zinc-600 text-end'>{formatAUD(row.original?.amount, row.original?.currency)}</p>
+        </div>
+      },
       size: 100,
     },
-    {
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title="Currency"
-        />
-      ),
-      accessorKey: 'currency',
-      size: 100,
-    },
+
     {
       header: ({ column }) => (
         <DataTableColumnHeader
@@ -517,6 +540,11 @@ const ListView = () => {
       ),
       accessorKey: 'method',
       size: 100,
+      cell: ({ row }) => {
+        return <div>
+          <p className='text-zinc-600 text-end'>{row.original?.method || 'N/A'}</p>
+        </div>
+      },
     },
     {
       header: ({ column }) => (
@@ -525,7 +553,7 @@ const ListView = () => {
           title="Ref"
         />
       ),
-      accessorKey: 'ref'
+      accessorKey: 'reference'
     },
     {
       header: ({ column }) => (
@@ -534,47 +562,66 @@ const ListView = () => {
           title="Risk"
         />
       ),
-      accessorKey: 'risk',
+      accessorKey: 'Status',
       cell: ({ row }) => {
         return <>
           <StatusPill
             icon={<IconPennant />}
-            variant={riskVariants[row.original.risk]}
+            variant={riskVariants[row.original.status]}
           >
-            {row.original.risk}
+            {row.original.status}
           </StatusPill>
         </>
       },
     },
     {
-      header: 'Actions',
-      accessorKey: 'actions',
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              // size="sm"
-              className="!py-2 h-auto "
-            >
-              <IconDots />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem onClick={() => handleViewClick(row.original)}>
-              <IconEye className="mr-2 size-3 text-muted-foreground/70" />
-              View
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Date & Time"
+        />
       ),
-    }
+      accessorKey: 'date',
+      cell: ({ row }) => {
+        return <div>
+          <p className='text-zinc-800 font-semibold'>{formatDateTime(row.original?.timeStamp)?.date}</p>
+          <p className='text-zinc-400 '>{formatDateTime(row.original?.timeStamp)?.time}</p>
+        </div>
+      },
+      size: 100,
+    },
+
+
   ]
+
+  const Actions = () => {
+    return (
+      <div className='flex items-center gap-2'>
+        <Button variant="outline" size='sm'>
+          <IconDownload />
+          Export CSV
+        </Button>
+        <Button variant="outline" size='sm'>
+          <IconUpload />
+          Import CSV
+        </Button>
+        <Button size='sm'>
+          <Plus /> Add New
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2 mb-4'>
+      <PageHeader>
+        <PageTitle>Transaction History</PageTitle>
+        <PageDescription>
+          View and manage transaction history for your clients.
+        </PageDescription>
+      </PageHeader>
+      <div className='flex items-center justify-between bg-white shadow-sm rounded-md p-4'>
+        <div className='flex items-center gap-2   '>
           <InputGroup className={'max-w-64'}>
             <InputGroupInput placeholder="Search by name, id..." />
             <InputGroupAddon >
@@ -616,6 +663,7 @@ const ListView = () => {
               <SelectItem value="Australia">Australia</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="outline" size='sm'>+</Button>
         </div>
         <div>
           <ButtonGroup>
@@ -641,6 +689,8 @@ const ListView = () => {
         columns={columns}
         data={transactions}
         onDoubleClick={handleViewReportClick}
+        loading={fetching}
+        actions={<Actions />}
       />
       <DetailView
         open={openDetailView}

@@ -5,9 +5,10 @@ import Link from 'next/link';
 import React from 'react';
 import FormSubtitle from '../../(layouts)/FormSubtitle';
 import FormTitle from '../../(layouts)/FormTitle';
+import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
 
 const TakeSelfie = () => {
-    const regType = 'individual';
+    const { registerType } = useCustomerRegisterStore();
     return (
         <div className='grid place-items-center min-h-[80vh] mt-10'>
             <div>
@@ -24,10 +25,12 @@ const TakeSelfie = () => {
                     <Button variant='secondary' className='w-[200px] font-semibold'><Camera /> Open Camera</Button>
 
                 </div>
-                <p className='text-center text-gray-700 mt-4'>For best results, ensure good lighting and clear focus</p>
+                <p className='text-center text-gray-700 mt-4'>
+                    For best results, ensure good lighting and clear focus
+                </p>
                 <div className='flex justify-center'>
                     <Button variant={'outline'} className={'mt-4'}>
-                        <Link href={`/customer/registration/${regType}`}>Skip</Link>
+                        <Link href={`/customer/registration/${registerType}`}>Skip</Link>
                     </Button>
                 </div>
             </div>
