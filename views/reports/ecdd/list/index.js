@@ -1,15 +1,36 @@
 'use client'
 
+import { getEcdds } from '@/app/dashboard/client/report-compliance/ecdd/actions';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ResizableTable from '@/components/ui/Resizabletable';
 import { IconDotsVertical } from '@tabler/icons-react';
 import { Edit, Eye, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-const EcddList = ( { data, loading } ) => {
+const EcddList = (  ) => {
     const router = useRouter();
+    const [data, setData]=useState([]);
+    const [loading, setLoading]=useState(false)
+    const getData=async()=>{
+         setLoading(true)
+        try {
+           
+            const res=await getEcdds();
+            setData(res?.data)
+            console.log('res ecdd', res)
+        } catch (error) {
+            console.log('error', error)
+        }finally{
+            setLoading(false)
+        }
+    }
+
+    useEffect(()=>{
+getData()
+    },[])
+
     const handleView = ( id ) => {
         router.push( `/dashboard/client/report-compliance/ecdd/form/${id}` );
     }
@@ -74,6 +95,7 @@ const EcddList = ( { data, loading } ) => {
             <ResizableTable
                 columns={columns}
                 data={data}
+                loading={loading}
                 actions={<Actions />}
             />
         </div>

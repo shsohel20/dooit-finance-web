@@ -13,8 +13,12 @@ export async function createEcdd(formData) {
 
 
 export async function getEcdds() {
-    const response = await fetchWithAuth('ecdd-report');
+    try {
+        const response = await fetchWithAuth('ecdd-report');
     return response.json();
+    } catch (error) {
+        console.log('ecdd error', error)
+    }
 }
 
 export async function getEcddById(id) {

@@ -5,16 +5,19 @@ import { getEcdds } from './actions';
 
 const EcddPage = async () => {
     let loading = true;
-    const data = await getEcdds();
+    // const data = await getEcdds();
+    // console.log('ecdd data', data)
     loading = false;
-    console.log( 'ecdd data', data );
+    // console.log( 'ecdd data', data );
+
+    const data={data: []}
     return (
         <div>
             <PageHeader>
                 <PageTitle>ECDD</PageTitle>
                 <PageDescription>Enhanced Customer Due Diligence</PageDescription>
             </PageHeader>
-            <EcddList data={data?.data} loading={loading} />
+            <EcddList data={data?.data || []} loading={loading} />
         </div>
     );
 };
