@@ -299,10 +299,8 @@ export default function CustomerQueueList({ variant, data, kycStatus }) {
       kycStatus: kycStatus
     });
 
-    console.log('queryParams => ', queryParams);
 
     const response = await getCustomers(queryParams);
-    console.log('response => ', response);
     setFetching(false);
     setCustomers(response.data);
     setTotalItems(response.totalRecords);

@@ -13,6 +13,7 @@ import { customerOnboarding } from '@/app/customer/registration/actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
+import { useState } from 'react'
 
 
 export default function GovernmentBodyRegistrationForm() {

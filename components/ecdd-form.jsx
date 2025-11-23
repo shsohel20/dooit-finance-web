@@ -47,7 +47,7 @@ export function ECDDForm({ data, caseNumber }) {
         directors: data.director_name,
         isPEP: data.pep_flag,
         isSanctioned: data.sanction_flag,
-        userId: user_id,
+        userId: data.user_id,
         accountPurpose: data.account_purpose,
         annualIncome: data.annual_income,
         beneficialOwner: data.beneficial_owner,
@@ -380,7 +380,7 @@ ${formData.recommendation || "_________________________"}
         </h2>
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            {/* <div>
               <Label htmlFor="userId">User ID</Label>
               <Input
                 id="userId"
@@ -388,7 +388,7 @@ ${formData.recommendation || "_________________________"}
                 onChange={(e) => updateField("userId", e.target.value)}
                 placeholder="X1"
               />
-            </div>
+            </div> */}
             <div>
               <Label htmlFor="fullName">Full Name</Label>
               <Input
