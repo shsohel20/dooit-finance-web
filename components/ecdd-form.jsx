@@ -26,9 +26,7 @@ export function ECDDForm({ data, caseNumber }) {
   useEffect(() => {
     if (data) {
       const formattedData = {
-        ...data,
         analystName: data.analyst_name,
-        analysisEndDate: data.analysis_end_date,
         date: data.analysis_date || new Date().toISOString().split("T")[0],
         caseNumber: caseNumber,
         fullName: data.name,
@@ -36,11 +34,6 @@ export function ECDDForm({ data, caseNumber }) {
         withdrawalDetails: data.withdrawal_details,
         expectedVolume: data.Expected_Trading_Volume,
         accountCreationDate: data.account_creation_date,
-        accountPurpose: data.account_purpose,
-        behavioralAnalysis: data.behavioral_analysis,
-        additionalInfo: data.additonal_information,
-        annualIncome: data.annual_income,
-        beneficialOwner: data.beneficial_owner,
         totalDepositsAUD: data.total_deposits_AUD,
         totalWithdrawalsBTC: data.total_withdrawals_BTC,
         totalWithdrawalsETH: data.total_withdrawals_ETH,
@@ -54,6 +47,13 @@ export function ECDDForm({ data, caseNumber }) {
         directors: data.director_name,
         isPEP: data.pep_flag,
         isSanctioned: data.sanction_flag,
+        userId: user_id,
+        accountPurpose: data.account_purpose,
+        annualIncome: data.annual_income,
+        beneficialOwner: data.beneficial_owner,
+        analysisEndDate: data.analysis_end_date,
+        additionalInfo: data.additonal_information,
+        behavioralAnalysis: data.behavioral_analysis,
       };
       setFormData(formattedData);
     }
@@ -202,6 +202,8 @@ ${
 
   const handleSave = () => {
     setLastSaved(new Date());
+    // const {} = formData;
+
     console.log("[v0] ECDD data saved:", formData);
   };
 
@@ -275,7 +277,7 @@ ${formData.recommendation || "_________________________"}
     <div className="max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-primary mb-2">
+        <h1 className="text-4xl font-bold  text-zinc-700 mb-2">
           Enhanced Customer Due Diligence
         </h1>
         <p className="text-muted-foreground">
@@ -289,24 +291,24 @@ ${formData.recommendation || "_________________________"}
       </div>
 
       {/* File Upload Section */}
-      <Card className="border-2 border-primary p-6 mb-6">
+      {/* <Card className="border   p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-bold text-primary mb-1">Data Import</h3>
+            <h3 className="text-lg font-bold  text-zinc-700 mb-1">Data Import</h3>
             <p className="text-sm text-muted-foreground">
               Upload JSON or Excel file to auto-populate fields
             </p>
           </div>
-          <FileSpreadsheet className="w-8 h-8 text-primary" />
+          <FileSpreadsheet className="w-8 h-8  text-zinc-700" />
         </div>
         <div className="flex gap-4">
           <Label
             htmlFor="file-upload"
-            className="flex-1 cursor-pointer border-2 border-dashed border-primary rounded-lg p-6 hover:bg-primary/5 transition-colors"
+            className="flex-1 cursor-pointer border border-dashed   rounded-lg p-6 hover:bg-primary/5 transition-colors"
           >
             <div className="flex flex-col items-center gap-2">
-              <Upload className="w-8 h-8 text-primary" />
-              <span className="text-sm font-medium text-primary">
+              <Upload className="w-8 h-8  text-zinc-700" />
+              <span className="text-sm font-medium  text-zinc-700">
                 Click to upload JSON file
               </span>
               <span className="text-xs text-muted-foreground">
@@ -322,11 +324,11 @@ ${formData.recommendation || "_________________________"}
             />
           </Label>
         </div>
-      </Card>
+      </Card> */}
 
       {/* Section 1: Analysis and Review */}
-      <Card className="border-2 border-primary p-6 mb-6">
-        <h2 className="text-2xl font-bold text-primary mb-6">
+      <Card className="border   p-6 mb-6">
+        <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
           1. Analysis and Review
         </h2>
         <div className="space-y-4">
@@ -372,8 +374,8 @@ ${formData.recommendation || "_________________________"}
       </Card>
 
       {/* Section 2: Customer Profile */}
-      <Card className="border-2 border-primary p-6 mb-6">
-        <h2 className="text-2xl font-bold text-primary mb-6">
+      <Card className="border   p-6 mb-6">
+        <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
           2. Customer Profile
         </h2>
         <div className="space-y-4">
@@ -478,7 +480,7 @@ ${formData.recommendation || "_________________________"}
       </Card>
 
       {/* Section 3-5: PEP, Sanctioned, Related Party */}
-      <Card className="border-2 border-primary p-6 mb-6">
+      <Card className="border   p-6 mb-6">
         <div className="space-y-6">
           <div>
             <Label htmlFor="isPEP">3. Customer is PEP (Y/N)</Label>
@@ -523,8 +525,8 @@ ${formData.recommendation || "_________________________"}
       </Card>
 
       {/* Section 6: Transaction Analysis */}
-      <Card className="border-2 border-primary p-6 mb-6">
-        <h2 className="text-2xl font-bold text-primary mb-6">
+      <Card className="border   p-6 mb-6">
+        <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
           6. Transaction Analysis
         </h2>
         <div className="space-y-4">
@@ -648,8 +650,8 @@ ${formData.recommendation || "_________________________"}
       </Card>
 
       {/* Section 7: Behavioral Analysis */}
-      <Card className="border-2 border-primary p-6 mb-6">
-        <h2 className="text-2xl font-bold text-primary mb-6">
+      <Card className="border   p-6 mb-6">
+        <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
           7. Behavioral Analysis
         </h2>
         <div className="space-y-4">
@@ -693,8 +695,8 @@ ${formData.recommendation || "_________________________"}
       </Card>
 
       {/* Section 8: Recommendation */}
-      <Card className="border-2 border-primary p-6 mb-6">
-        <h2 className="text-2xl font-bold text-primary mb-6">
+      <Card className="border   p-6 mb-6">
+        <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
           8. Recommendation
         </h2>
         <div>
@@ -717,20 +719,20 @@ ${formData.recommendation || "_________________________"}
           onClick={handleSave}
           size="lg"
           variant="outline"
-          className="border-2 border-primary bg-transparent"
+          className="border   bg-transparent"
         >
           <Save className="w-5 h-5 mr-2" />
           Save Progress
         </Button>
-        <Button
+        {/* <Button
           onClick={handleExport}
           size="lg"
           variant="outline"
-          className="border-2 border-primary bg-transparent"
+          className="border   bg-transparent"
         >
           <Download className="w-5 h-5 mr-2" />
           Export JSON
-        </Button>
+        </Button> */}
         <Button
           onClick={handleGenerateReport}
           size="lg"

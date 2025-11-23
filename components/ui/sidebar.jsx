@@ -430,7 +430,7 @@ function SidebarMenuItem({ className, ...props }) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-lg px-2 py-4  text-left  outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-white active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-secondary  data-[active=true]:text-sidebar-accent-foreground data-[active=true]:text-primary data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 font-medium text-zinc-600 text-[0.7rem]",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-lg px-2 py-4  text-left  outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-white active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-secondary  data-[active=true]:text-sidebar-accent-foreground data-[active=true]:text-primary data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 font-medium text-zinc-700 text-[0.7rem]",
   {
     variants: {
       variant: {
@@ -618,7 +618,7 @@ function SidebarMenuSubButton({
       data-active={isActive}
       className={cn(
         "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent  py-4 rounded-md  hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden  px-3 outline-hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4  [&>svg]:shrink-0 ",
-        "data-[active=true]:bg-primary data-[active=true]:text-white data-[active=true]:[&>svg]:text-white    text-zinc-600 font-medium",
+        "data-[active=true]:bg-primary data-[active=true]:text-white data-[active=true]:[&>svg]:text-white    text-zinc-700 font-medium",
         size === "sm" && "text-xs",
         size === "md" && "text-[0.8rem]",
         "group-data-[collapsible=icon]:hidden",
