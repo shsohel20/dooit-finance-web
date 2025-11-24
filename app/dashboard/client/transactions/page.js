@@ -21,6 +21,10 @@ import React, { useEffect, useState } from 'react'
 import { getTransactions } from './actions';
 import { ArrowRight, Plus } from 'lucide-react';
 import { formatAUD, formatDateTime } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Pie, PieChart, Cell, ResponsiveContainer } from "recharts"
+
 const transactions = [
   {
     id: 1,
@@ -420,6 +424,7 @@ const ListView = () => {
   const [viewReport, setViewReport] = useState(false);
   const [currentItemReport, setCurrentItemReport] = useState(null);
   const [transactions, setTransactions] = useState([]);
+  console.log('transactions', transactions);
   const [fetching, setFetching] = useState(false);
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -468,6 +473,15 @@ const ListView = () => {
           </DropdownMenu>
         </div>
       ),
+    },
+    {
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="ID"
+        />
+      ),
+      accessorKey: 'uid',
     },
     {
       header: ({ column }) => (
@@ -538,11 +552,11 @@ const ListView = () => {
           title="Method"
         />
       ),
-      accessorKey: 'method',
+      accessorKey: 'channel',
       size: 100,
       cell: ({ row }) => {
         return <div>
-          <p className='text-zinc-600 text-end'>{row.original?.method || 'N/A'}</p>
+          <p className='text-zinc-600 text-end'>{row.original?.channel || 'N/A'}</p>
         </div>
       },
     },
@@ -612,6 +626,14 @@ const ListView = () => {
     )
   }
 
+
+  const riskData = [
+    { name: "Pending", value: 8, color: "var(--chart-3)" },
+    { name: "Approved", value: 15, color: "var(--chart-2)" },
+    { name: "Flagged", value: 3, color: "var(--chart-5)" },
+    { name: "Rejected", value: 2, color: "var(--chart-1)" },
+  ]
+
   return (
     <div>
       <PageHeader>
@@ -620,6 +642,81 @@ const ListView = () => {
           View and manage transaction history for your clients.
         </PageDescription>
       </PageHeader>
+      <Card className="border-border/50 mb-4">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Transaction Risk Status</CardTitle>
+              <CardDescription className="mt-1">Overview of all transaction statuses</CardDescription>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold">{riskData.reduce((sum, item) => sum + item.value, 0)}</p>
+              <p className="text-xs text-muted-foreground">Total Transactions</p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-[300px_1fr]">
+            <ChartContainer
+              config={{
+                pending: {
+                  label: "Pending",
+                  color: "hsl(var(--chart-3))",
+                },
+                approved: {
+                  label: "Approved",
+                  color: "hsl(var(--chart-2))",
+                },
+                flagged: {
+                  label: "Flagged",
+                  color: "hsl(var(--chart-5))",
+                },
+                rejected: {
+                  label: "Rejected",
+                  color: "hsl(var(--chart-1))",
+                },
+              }}
+              className="h-[240px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Pie
+                    data={riskData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={90}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {riskData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+
+            <div className="grid grid-cols-2 gap-4 content-center">
+              {riskData.map((item) => (
+                <div key={item.name} className="flex items-center gap-3 rounded-lg border border-border/50 p-4">
+                  <div
+                    className="h-10 w-10 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: item.color, opacity: 0.2 }}
+                  >
+                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-2xl font-bold">{item.value}</p>
+                    <p className="text-xs text-muted-foreground">{item.name}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       <div className='flex items-center justify-between bg-white shadow-sm rounded-md p-4'>
         <div className='flex items-center gap-2   '>
           <InputGroup className={'max-w-64'}>
