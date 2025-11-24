@@ -1,7 +1,10 @@
+import ClientDashboard from '@/views/client-dashboard'
 import React from 'react'
 
 export default function DashboardClientPage() {
   return (
-    <div>DashboardClientPage</div>
+    <div>
+      <ClientDashboard />
+    </div>
   )
 }

@@ -15,6 +15,7 @@ import {
   IconChartBar,
   IconCircleCheck,
   IconCircleDashedCheck,
+  IconDashboard,
   IconDatabase,
   IconInnerShadowTop,
   IconListDetails,
@@ -30,6 +31,11 @@ import { FileInput, Newspaper, ShieldHalf, ShieldUser } from 'lucide-react'
 export default function ClientSidebar({ ...props }) {
   const session = useSession();
   const onBoardingMenuItems = [
+    {
+      title: 'Dashboard',
+      icon: IconDashboard,
+      url: '/dashboard/client',
+    },
 
     {
       title: "Customers",
