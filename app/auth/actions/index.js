@@ -44,7 +44,6 @@ export const registerAction = async (data) => {
             "Content-Type": "application/json"
         }
     })
-    console.log("res", res);
     return res.json()
 }
 

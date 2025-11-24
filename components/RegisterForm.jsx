@@ -52,7 +52,7 @@ export default function RegisterForm({ className, token, cid, ...props }) {
     resolver: zodResolver(registerSchema),
     defaultValues: initialValues,
   });
-  console.log("errors", errors);
+
   const onSubmit = async (data) => {
     const { confirmPassword, ...rest } = data;
     const submittedData = {

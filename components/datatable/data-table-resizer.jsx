@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 
 export function DataTableResizer({ header, table }) {
   const isResizing = header.column.getIsResizing();
-  console.log("isResizing", isResizing);
 
   const handleResize = () => {
     header.getResizeHandler(true);

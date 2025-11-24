@@ -7,7 +7,6 @@ export async function getCustomers(queryParams) {
   const response = await fetchWithAuth(`customer?isActive=true&${queryString}`, {
     method: "GET",
   });
-  console.log('response => ', response);
   return response.json();
 
 }

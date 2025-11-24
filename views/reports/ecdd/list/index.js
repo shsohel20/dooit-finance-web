@@ -9,42 +9,42 @@ import { Edit, Eye, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-const EcddList = (  ) => {
+const EcddList = () => {
     const router = useRouter();
-    const [data, setData]=useState([]);
-    const [loading, setLoading]=useState(false)
-    const getData=async()=>{
-         setLoading(true)
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false)
+
+    const getData = async () => {
+        setLoading(true)
         try {
-           
-            const res=await getEcdds();
+
+            const res = await getEcdds();
             setData(res?.data)
-            console.log('res ecdd', res)
         } catch (error) {
             console.log('error', error)
-        }finally{
+        } finally {
             setLoading(false)
         }
     }
 
-    useEffect(()=>{
-getData()
-    },[])
+    useEffect(() => {
+        getData()
+    }, [])
 
-    const handleView = ( id ) => {
-        router.push( `/dashboard/client/report-compliance/ecdd/form/${id}` );
+    const handleView = (id) => {
+        router.push(`/dashboard/client/report-compliance/ecdd/form/${id}`);
     }
-    const handleEdit = ( caseNumber ) => {
-        router.push( `/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}` );
+    const handleEdit = (caseNumber) => {
+        router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`);
     }
-    const handleDelete = ( id ) => {
-        router.push( `/dashboard/client/report-compliance/ecdd/form/${id}` );
+    const handleDelete = (id) => {
+        router.push(`/dashboard/client/report-compliance/ecdd/form/${id}`);
     }
     const columns = [
         {
             header: 'Action',
             accessorKey: 'id',
-            cell: ( { row } ) => <DropdownMenu>
+            cell: ({ row }) => <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button size='sm' variant='ghost'>
                         <IconDotsVertical className="size-4" />
@@ -52,7 +52,7 @@ getData()
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                     <DropdownMenuItem > <Eye />View</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEdit( row?.original?.caseNumber )}> <Edit />Edit</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleEdit(row?.original?.caseNumber)}> <Edit />Edit</DropdownMenuItem>
                     <DropdownMenuItem variant='destructive'> <Trash />Delete</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>,
@@ -81,12 +81,11 @@ getData()
             header: 'Status',
             accessorKey: 'status',
         },
-
     ]
 
     const Actions = () => {
         return (
-            <Button size='sm'>Add new</Button>
+            <Button size='sm' onClick={() => router.push('/dashboard/client/report-compliance/ecdd/form')}>Add new</Button>
         )
     }
 
