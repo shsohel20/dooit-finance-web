@@ -13,7 +13,7 @@ export default async function CaseListDetails({ params, searchParams }) {
         <CaseHeader />
         <div className="border-b border-border">
           <div className="container mx-auto ">
-            <CaseTabs caseNumber={caseNumber} />
+            <CaseTabs caseNumber={caseNumber} id={id}/>
           </div>
         </div>
         {/* <main className="container mx-auto px-6 py-8">

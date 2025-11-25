@@ -8,7 +8,8 @@ import RFI from "./RFI";
 import ActionAndDisposition from "./ActionAndDisposition";
 import InvestigationPanel from "./InvestigationPanel";
 import Ecdd from "./Ecdd";
-
+import { getCaseDetails } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
+import { useEffect } from "react";
 const tabs = [
   {
     title: "Summary and Timeline",
@@ -36,15 +37,27 @@ const tabs = [
   },
 ];
 
-export default function CaseTabs({ caseNumber }) {
+export default function CaseTabs({ caseNumber, id }) {
   const [activeTab, setActiveTab] = useState(tabs[0]);
+  const [data, setData] = useState(null);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("id", id);
+      const response = await getCaseDetails(id);
+      
+      console.log("response", response);
+      // setData(response); 
+    };  
+    fetchData();
+  }, [caseNumber]);
 
   return (
     <>
       <nav className="flex gap-1 overflow-x-auto border-b">
         {tabs.map((tab) => (
           <button
-            key={tab}
+            key={tab}     
             onClick={() => setActiveTab(tab)}
             className={cn(
               "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative ",

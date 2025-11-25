@@ -23,7 +23,8 @@ import {
   IconSearch,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { getCaseList } from "./actions";
 const cases = [
   {
     caseId: "#CA-1234567890",
@@ -373,6 +374,15 @@ const ListView = () => {
   );
 };
 export default function CaseList() {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await getCaseList();
+      console.log("response", response);
+      setData(response);
+    };
+    fetchData();
+  }, []);
   return (
     <div>
       <div className="flex items-center justify-between">
