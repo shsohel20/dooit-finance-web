@@ -156,7 +156,6 @@ export function ClientForm({ id }) {
     if (id) {
       const fetchClient = async () => {
         const response = await getClientById(id);
-        console.log("response", response);
         const modifiedData = {
           ...response.data,
           userName: response.data?.user?.userName,
@@ -169,7 +168,6 @@ export function ClientForm({ id }) {
 
   const onSubmit = async (data) => {
     setLoading(true);
-    console.log("data", JSON.stringify(data, null, 2));
     // const submittedData = {
     //   ...data,
     //   contacts: data.contacts.length > 0 ? data.contacts : [],
@@ -177,7 +175,6 @@ export function ClientForm({ id }) {
     // }
     const action = id ? updateClient(id, data) : createClient(data);
     const res = await action;
-    console.log("res", res);
     setLoading(false);
     if (res.success || res.succeed) {
       toast.success(id ? "Client updated" : "Client created");

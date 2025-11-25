@@ -28,7 +28,6 @@ export function OtpForm({ email, token, cid }) {
   const onSubmit = async () => {
     setIsLoading(true);
     const res = await verifyOtp({ code: value });
-    console.log("res", res);
     setIsLoading(false);
     if (res.success) {
       router.push(`/auth/login?token=${token}&cid=${cid}`);

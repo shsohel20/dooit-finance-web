@@ -9,3 +9,11 @@ export const getTransactions = async () => {
   })
   return response.json()
 }
+
+export const getTransactionById = async (id) => {
+  const response = await fetchWithAuth(`transaction/${id}`, {
+    method: 'GET',
+  })
+  console.log(' transaction response', response);
+  return response.json()
+}

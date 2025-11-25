@@ -8,7 +8,7 @@ export default function RiskThresholdsPage() {
   const [highRisk, setHighRisk] = useState(100);
 
   const handleUpdate = () => {
-    console.log('Thresholds updated:', { lowRisk, mediumRisk, highRisk });
+    // console.log('Thresholds updated:', { lowRisk, mediumRisk, highRisk });
   };
 
   return (

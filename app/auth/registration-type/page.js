@@ -15,11 +15,9 @@ const RegistrationType = () => {
     const [selectedType, setSelectedType] = useState(null);
     const [country, setCountry] = useState(null);
     const [user, setUser] = useState(null);
-    console.log("user", user);
     const { setRegisterType, setCountry: setCountryStore } = useCustomerRegisterStore();
     const handleGetLoggedInUser = async () => {
         const user = await getLoggedInCustomer();
-        console.log("user", user);
         setUser(user?.data?.customer);
     }
     useEffect(() => {

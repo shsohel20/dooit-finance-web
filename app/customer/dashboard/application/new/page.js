@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import Stepper from './(components)/Stepper';
 
 
-const LabelDetails = ( { label, value } ) => {
+const LabelDetails = ({ label, value }) => {
     return (
         <div className='space-y-1'>
             <h4 className='text-purple'>{label}</h4>
@@ -117,12 +117,12 @@ const Step3 = () => {
             <div className='space-y-2'>
                 <h4 className='font-semibold'>Investment Goals (select that apply)</h4>
                 <div className='flex flex-wrap gap-2 '>
-                    {goals.map( ( goal, index ) => (
+                    {goals.map((goal, index) => (
                         <div key={index} className='flex items-center gap-2 p-3 rounded-md bg-gray-50 border border-gray-200'>
                             <Checkbox label={goal} />
                             <Label htmlFor={goal}>{goal}</Label>
                         </div>
-                    ) )}
+                    ))}
                 </div>
             </div>
         </div>
@@ -170,28 +170,27 @@ const Step2 = () => {
 
 const TotalSteps = 4;
 const NewApplication = () => {
-    const [currentStep, setCurrentStep] = useState( 1 );
-    const [showSuccess, setShowSuccess] = useState( false );
+    const [currentStep, setCurrentStep] = useState(1);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const handlePreviousStep = () => {
-        setCurrentStep( prev => {
-            if ( prev === 1 ) {
+        setCurrentStep(prev => {
+            if (prev === 1) {
                 return prev;
             }
             return prev - 1;
-        } );
+        });
     }
     const handleStep = () => {
-        setCurrentStep( prev => {
-            if ( prev === TotalSteps ) {
+        setCurrentStep(prev => {
+            if (prev === TotalSteps) {
                 return prev;
             }
             return prev + 1;
-        } );
+        });
     }
     const handleSubmit = () => {
-        console.log( 'submit' );
-        setShowSuccess( true );
+        setShowSuccess(true);
     }
     return (
         <div className='container pt-8'>
