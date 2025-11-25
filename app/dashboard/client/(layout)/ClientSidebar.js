@@ -77,12 +77,8 @@ export default function ClientSidebar({ ...props }) {
     {
       title: 'Branches',
       icon: IconBuildingBank,
-      children: [
-        {
-          title: 'Branch List',
-          url: '/dashboard/client/branch',
-        }
-      ]
+      url: '/dashboard/client/branch',
+
     },
     {
       title: 'Risk Assessment',
