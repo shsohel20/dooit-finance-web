@@ -2,7 +2,7 @@
 
 import {
   createEcdd,
-  getEcddByCaseNumber,
+  autoPopulatedEcddData,
 } from "@/app/dashboard/client/report-compliance/ecdd/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -37,7 +37,7 @@ export function ECDDForm({ caseNumber }) {
   const getData = async () => {
     setFetching(true);
     try {
-      const response = await getEcddByCaseNumber(caseNumber);
+      const response = await autoPopulatedEcddData(caseNumber);
       console.log("response", response);
       setData(response);
     } catch (error) {

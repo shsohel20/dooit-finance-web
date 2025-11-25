@@ -7,6 +7,7 @@ import CustomerProfile from "./CustomerProfile";
 import RFI from "./RFI";
 import ActionAndDisposition from "./ActionAndDisposition";
 import InvestigationPanel from "./InvestigationPanel";
+import Ecdd from "./Ecdd";
 
 const tabs = [
   {
@@ -23,7 +24,7 @@ const tabs = [
   },
   {
     title: "ECDD Review",
-    component: <div />,
+    component: <Ecdd />,
   },
   {
     title: "RFI",
@@ -35,7 +36,7 @@ const tabs = [
   },
 ];
 
-export default function CaseTabs() {
+export default function CaseTabs({ caseNumber }) {
   const [activeTab, setActiveTab] = useState(tabs[0]);
 
   return (
