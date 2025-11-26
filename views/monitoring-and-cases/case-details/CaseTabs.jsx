@@ -10,6 +10,8 @@ import InvestigationPanel from "./InvestigationPanel";
 import Ecdd from "./Ecdd";
 import { getCaseDetails } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
 import { useEffect } from "react";
+import useAlertStore from "@/app/store/alerts";
+
 const tabs = [
   {
     title: "Summary and Timeline",
@@ -36,38 +38,42 @@ const tabs = [
     component: <ActionAndDisposition />,
   },
 ];
-
 export default function CaseTabs({ caseNumber, id }) {
+  const { details, setDetails, setFetching } = useAlertStore();
   const [activeTab, setActiveTab] = useState(tabs[0]);
-  const [data, setData] = useState(null);
-  
+
   useEffect(() => {
     const fetchData = async () => {
-      console.log("id", id);
-      const response = await getCaseDetails(id);
-      
-      console.log("response", response);
-      // setData(response); 
-    };  
+      setFetching(true);
+      try {
+        const response = await getCaseDetails(id);
+        console.log("alert details response", response);
+        setDetails(response?.data || null);
+      } catch (error) {
+        console.error("Failed to get data", error);
+      } finally {
+        setFetching(false);
+      }
+    };
     fetchData();
-  }, [caseNumber]);
+  }, [id]);
 
   return (
     <>
       <nav className="flex gap-1 overflow-x-auto border-b">
         {tabs.map((tab) => (
           <button
-            key={tab}     
+            key={tab?.title}
             onClick={() => setActiveTab(tab)}
             className={cn(
               "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative ",
-              activeTab.title === tab.title
+              activeTab?.title === tab?.title
                 ? "text-foreground"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
             {tab.title}
-            {activeTab.title === tab.title && (
+            {activeTab?.title === tab?.title && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}
           </button>

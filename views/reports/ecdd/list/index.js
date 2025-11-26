@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ResizableTable from '@/components/ui/Resizabletable';
 import { IconDotsVertical } from '@tabler/icons-react';
-import { Edit, Eye, Trash } from 'lucide-react';
+import { Edit, Eye, FileText, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 const EcddList = () => {
     const router = useRouter();
     const [data, setData] = useState([]);
+    console.log("data", data);
     const [loading, setLoading] = useState(false)
 
     const getData = async () => {
@@ -40,6 +41,9 @@ const EcddList = () => {
     const handleDelete = (id) => {
         router.push(`/dashboard/client/report-compliance/ecdd/form/${id}`);
     }
+    const handleGenerateEcdd = (alertId) => {
+        router.push(`/dashboard/client/monitoring-and-cases/case-list/details/${alertId}`);
+    }
     const columns = [
         {
             header: 'Action',
@@ -53,6 +57,7 @@ const EcddList = () => {
                 <DropdownMenuContent>
                     <DropdownMenuItem > <Eye />View</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleEdit(row?.original?.caseNumber)}> <Edit />Edit</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleGenerateEcdd(row?.original?.caseId)}> <FileText />Generate ECDD</DropdownMenuItem>
                     <DropdownMenuItem variant='destructive'> <Trash />Delete</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>,

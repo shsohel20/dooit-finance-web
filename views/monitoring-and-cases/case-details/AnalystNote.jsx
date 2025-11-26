@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
+import useAlertStore from "@/app/store/alerts";
+import { formatDateTime } from "@/lib/utils";
 
 const existingNotes = [
   {
@@ -21,7 +23,8 @@ const existingNotes = [
 
 export function AnalystNotes() {
   const [note, setNote] = useState("");
-
+  const { details } = useAlertStore();
+  console.log("analyst notes", details?.activityNote);
   return (
     <Card className="bg-card border-border">
       <CardHeader>
@@ -30,18 +33,18 @@ export function AnalystNotes() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {existingNotes.map((note, index) => (
+        {details?.activityNote?.map((note, index) => (
           <div
             key={index}
             className="rounded-lg bg-muted/30 border border-border p-4"
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xs font-mono text-primary">
-                {note.date}
+                {formatDateTime(note.uploadedAt)?.date}
               </span>
             </div>
             <p className="text-sm text-foreground leading-relaxed">
-              {note.content}
+              {note.note}
             </p>
           </div>
         ))}

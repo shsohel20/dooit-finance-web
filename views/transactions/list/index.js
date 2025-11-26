@@ -32,7 +32,6 @@ const TransactionListView = () => {
   const [viewReport, setViewReport] = useState(false);
   const [currentItemReport, setCurrentItemReport] = useState(null);
   const [transactions, setTransactions] = useState([]);
-  console.log('transactions', transactions);
   const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
@@ -49,6 +48,7 @@ const TransactionListView = () => {
     setCurrentItemReport(item);
     setViewReport(true);
   }
+
   const riskVariants = {
     Low: 'info',
     Medium: 'warning',
