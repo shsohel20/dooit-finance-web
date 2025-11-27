@@ -393,23 +393,23 @@ const TransactionDetailView = ({ open, setOpen, currentItem }) => {
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Occupation</p>
                             <p className="mt-1 text-lg font-medium">
-                              {customer?.personalKyc?.personal_form?.employment_details?.occupation}
+                              {customer?.customer?.personalKyc?.personal_form?.employment_details?.occupation}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Industry</p>
                             <p className="mt-1 text-lg font-medium">
-                              {customer?.personalKyc?.personal_form?.employment_details?.industry}
+                              {customer?.customer?.personalKyc?.personal_form?.employment_details?.industry}
                             </p>
                           </div>
                           <div className="sm:col-span-2">
                             <p className="text-sm font-medium text-muted-foreground">Employer</p>
-                            <div className="mt-2 flex items-center gap-2 rounded-lg bg-muted/50 p-3">
+                            {/* <div className="mt-2 flex items-center gap-2 rounded-lg bg-muted/50 p-3">
                               <Building2 className="size-5 text-muted-foreground" />
                               <p className="font-medium">
                                 {customer?.personalKyc?.personal_form?.employment_details?.employer_name}
                               </p>
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                       </CardContent>
@@ -428,21 +428,21 @@ const TransactionDetailView = ({ open, setOpen, currentItem }) => {
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Source of Funds</p>
-                            <p className="mt-1">{customer?.personalKyc?.funds_wealth?.source_of_funds}</p>
+                            <p className="mt-1">{customer?.customer?.personalKyc?.funds_wealth?.source_of_funds}</p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Source of Wealth</p>
-                            <p className="mt-1">{customer?.personalKyc?.funds_wealth?.source_of_wealth}</p>
+                            <p className="mt-1">{customer?.customer?.personalKyc?.funds_wealth?.source_of_wealth}</p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Account Purpose</p>
-                            <p className="mt-1">{customer?.personalKyc?.funds_wealth?.account_purpose}</p>
+                            <p className="mt-1">{customer?.customer?.personalKyc?.funds_wealth?.account_purpose}</p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Estimated Trading Volume</p>
                             <p className="mt-1 text-lg font-semibold">
                               $
-                              {Number.parseInt(customer?.personalKyc?.funds_wealth?.estimated_trading_volume).toLocaleString()}
+                              {customer?.customer?.personalKyc?.funds_wealth?.estimated_trading_volume}
                             </p>
                           </div>
                         </div>

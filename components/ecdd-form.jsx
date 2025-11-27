@@ -21,6 +21,48 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import UILoader from "./UILoader";
+import CustomSelect from "./ui/CustomSelect";
+import { getCaseList } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+  caseNumber: z.object({
+    label: z.string(),
+    value: z.string(),
+  }),
+  analystName: z.string().min(1, "Analyst name is required"),
+  fullName: z.string().min(1, "Full name is required"),
+  accountPurpose: z.string().min(1, "Account purpose is required"),
+  onboardingDate: z.string().min(1, "Onboarding date is required"),
+  expectedVolume: z.string().min(1, "Expected volume is required"),
+  beneficialOwner: z.string().min(1, "Beneficial owner is required"),
+  withdrawalDetails: z.string().min(1, "Withdrawal details is required"),
+  accountCreationDate: z.string().min(1, "Account creation date is required"),
+  totalDepositsAUD: z.string().min(1, "Total deposits AUD is required"),
+  totalWithdrawalsUSDT: z.string().min(1, "Total withdrawals USDT is required"),
+  totalWithdrawalsETH: z.string().min(1, "Total withdrawals ETH is required"),
+  totalWithdrawalsBTC: z.string().min(1, "Total withdrawals BTC is required"),
+  depositDetails: z.string().min(1, "Deposit details is required"),
+  ipLocations: z.string().min(1, "IP locations is required"),
+  registeredAddress: z.string().min(1, "Registered address is required"),
+  annualIncome: z.number().min(1, "Annual income is required"),
+  additionalInfo: z.string().min(1, "Additional information is required"),
+  behavioralAnalysis: z.string().min(1, "Behavioral analysis is required"),
+  directors: z.string().min(1, "Directors is required"),
+  isPEP: z.string().min(1, "Is PEP is required"),
+  isSanctioned: z.string().min(1, "Is sanctioned is required"),
+  relatedParty: z.string().min(1, "Related party is required"),
+  totalDepositsAUD: z.number().min(1, "Total deposits AUD is required"),
+  totalWithdrawalsUSDT: z.number().min(1, "Total withdrawals USDT is required"),
+  totalWithdrawalsETH: z.number().min(1, "Total withdrawals ETH is required"),
+  totalWithdrawalsBTC: z.number().min(1, "Total withdrawals BTC is required"),
+  analysisEndDate: z.string().min(1, "Analysis end date is required"),
+  accountCreationDate: z.string().min(1, "Account creation date is required"),
+
+  
+});
 
 export function ECDDForm({ caseNumber }) {
   const [data, setData] = useState(null);
@@ -28,12 +70,24 @@ export function ECDDForm({ caseNumber }) {
     isPEP: "No",
     isSanctioned: "No",
     relatedParty: "N/A",
+    position: "Compliance Officer",
+    date: new Date().toISOString().split("T")[0],
+
   });
+ 
   const [lastSaved, setLastSaved] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const router = useRouter();
 
+  const [caseNumbers, setCaseNumbers] = useState([]);
+  const [fetchingCaseNumbers, setFetchingCaseNumbers] = useState(false);
+
+  const router = useRouter();
+  const {control, handleSubmit, formState: { errors }} = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: formData,
+  });
+  console.log("errors", errors);
   const getData = async () => {
     setFetching(true);
     try {
@@ -52,10 +106,12 @@ export function ECDDForm({ caseNumber }) {
       getData();
     }
   }, [caseNumber]);
+
   useEffect(() => {
     if (data) {
       const formattedData = {
         analystName: data.analyst_name,
+        position: "Compliance Officer",
         date: data.analysis_date || new Date().toISOString().split("T")[0],
         caseNumber: caseNumber,
         fullName: data.name,
@@ -314,6 +370,47 @@ ${formData.recommendation || "_________________________"}
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const fetchCaseNumbers = async () => {
+    setFetchingCaseNumbers(true);
+    try {
+      const response = await getCaseList();
+      console.log("response", response);
+      const options=response.data.map((item) => ({
+        ...item,
+        label: item.uid,
+        value: item.uid,
+      }));
+
+      setCaseNumbers(options);
+    } catch (error) {
+      console.error("Failed to get case numbers", error);
+    } finally {
+      setFetchingCaseNumbers(false);
+    }
+  };
+
+  const handleCaseNumberChange = (value) => {
+    console.log("value", value);
+    const kycData=value?.customer?.personalKyc;
+    setFormData((prev) => ({ ...prev, 
+      caseNumber: value ,
+      analystName: value.analyst.name,
+      fullName: kycData?.personal_form?.customer_details?.given_name + " " + kycData?.personal_form?.customer_details?.surname,
+      accountPurpose: kycData?.funds_wealth?.account_purpose,
+      onboardingDate: value?.customer?.createdAt?.split("T")[0],
+      expectedVolume: kycData?.funds_wealth?.estimated_trading_volume,
+      beneficialOwner: value?.transaction?.beneficiary?.name,
+      transaction:value?.transaction?._id,
+      generatedBy: value?.analyst?._id,
+      analyst: value?.analyst?._id,
+      customer: value?.customer?._id,
+      isPEP: value?.customer?.isPep ? "Yes" : "No",
+      isSanctioned: value?.customer?.sanction ? "Yes" : "No",
+      registeredAddress: kycData?.personal_form?.residential_address?.address,
+
+    }));
+  };
+
   return (
     <UILoader loading={fetching} type="form">
       <div className="max-w-6xl mx-auto">
@@ -389,8 +486,9 @@ ${formData.recommendation || "_________________________"}
                 <Input
                   id="position"
                   value={formData.position || ""}
-                  onChange={(e) => updateField("position", e.target.value)}
+                  // onChange={(e) => updateField("position", e.target.value)}
                   placeholder="Compliance Officer"
+                  disabled
                 />
               </div>
               <div>
@@ -399,16 +497,27 @@ ${formData.recommendation || "_________________________"}
                   id="date"
                   type="date"
                   value={formData.date || ""}
-                  onChange={(e) => updateField("date", e.target.value)}
+                  disabled
+                  // onChange={(e) => updateField("date", e.target.value)}
                 />
               </div>
               <div>
-                <Label htmlFor="caseNumber">Case Number</Label>
+                {/* <Label htmlFor="caseNumber">Case Number</Label>
                 <Input
                   id="caseNumber"
                   value={formData.caseNumber || ""}
                   onChange={(e) => updateField("caseNumber", e.target.value)}
                   placeholder="EC_20240101_01"
+                /> */}
+                <CustomSelect
+                  label="Case Number"
+                  options={caseNumbers}
+                  value={formData.caseNumber || ""}
+                  onChange={handleCaseNumberChange}
+                  onFocus={fetchCaseNumbers}
+                  isLoading={fetchingCaseNumbers}
+                  // isDisabled={fetchingCaseNumbers}
+                 
                 />
               </div>
             </div>
@@ -774,7 +883,7 @@ ${formData.recommendation || "_________________________"}
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-4 mb-8">
           <Button
-            onClick={handleSave}
+            onClick={handleSubmit(handleSave)}
             size="lg"
             variant="outline"
             className="border   bg-transparent"

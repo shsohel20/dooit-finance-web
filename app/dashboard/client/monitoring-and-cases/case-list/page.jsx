@@ -443,6 +443,7 @@ const ListView = ({ data, loading }) => {
 export default function CaseList() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -457,10 +458,11 @@ export default function CaseList() {
     };
     fetchData();
   }, []);
+
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center justify-between bg-white shadow-sm rounded-md p-4">
+        <div className="flex items-center gap-2  ">
           <InputGroup className={"max-w-64"}>
             <InputGroupInput placeholder="Search..." />
             <InputGroupAddon>

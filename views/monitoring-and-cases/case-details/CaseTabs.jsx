@@ -38,6 +38,7 @@ const tabs = [
     component: <ActionAndDisposition />,
   },
 ];
+
 export default function CaseTabs({ caseNumber, id }) {
   const { details, setDetails, setFetching } = useAlertStore();
   const [activeTab, setActiveTab] = useState(tabs[0]);
