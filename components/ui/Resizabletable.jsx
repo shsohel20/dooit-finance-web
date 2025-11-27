@@ -70,6 +70,7 @@ export default function ResizableTable({
     },
     [setColumnSizing]
   );
+  
   React.useEffect(() => {
     const newId = localStorage.getItem("newId");
     if (newId) {

@@ -3,6 +3,7 @@
 import {
   createEcdd,
   autoPopulatedEcddData,
+  updateEcdd,
 } from "@/app/dashboard/client/report-compliance/ecdd/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,8 +25,9 @@ import UILoader from "./UILoader";
 import CustomSelect from "./ui/CustomSelect";
 import { getCaseList } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getEcddById } from "@/app/dashboard/client/report-compliance/ecdd/actions";
 
 const formSchema = z.object({
   caseNumber: z.object({
@@ -36,7 +38,7 @@ const formSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
   accountPurpose: z.string().min(1, "Account purpose is required"),
   onboardingDate: z.string().min(1, "Onboarding date is required"),
-  expectedVolume: z.string().min(1, "Expected volume is required"),
+  expectedVolume: z.coerce.number().min(1, "Expected volume is required"),
   beneficialOwner: z.string().min(1, "Beneficial owner is required"),
   withdrawalDetails: z.string().min(1, "Withdrawal details is required"),
   accountCreationDate: z.string().min(1, "Account creation date is required"),
@@ -45,35 +47,103 @@ const formSchema = z.object({
   totalWithdrawalsETH: z.string().min(1, "Total withdrawals ETH is required"),
   totalWithdrawalsBTC: z.string().min(1, "Total withdrawals BTC is required"),
   depositDetails: z.string().min(1, "Deposit details is required"),
-  ipLocations: z.string().min(1, "IP locations is required"),
+  ipLocations: z.coerce.number().min(1, "IP locations is required"),
   registeredAddress: z.string().min(1, "Registered address is required"),
-  annualIncome: z.number().min(1, "Annual income is required"),
+  annualIncome: z.coerce.number().min(1, "Annual income is required"),
   additionalInfo: z.string().min(1, "Additional information is required"),
   behavioralAnalysis: z.string().min(1, "Behavioral analysis is required"),
   directors: z.string().min(1, "Directors is required"),
   isPEP: z.string().min(1, "Is PEP is required"),
   isSanctioned: z.string().min(1, "Is sanctioned is required"),
   relatedParty: z.string().min(1, "Related party is required"),
-  totalDepositsAUD: z.number().min(1, "Total deposits AUD is required"),
-  totalWithdrawalsUSDT: z.number().min(1, "Total withdrawals USDT is required"),
-  totalWithdrawalsETH: z.number().min(1, "Total withdrawals ETH is required"),
-  totalWithdrawalsBTC: z.number().min(1, "Total withdrawals BTC is required"),
+  totalDepositsAUD: z.coerce.number().min(1, "Total deposits AUD is required"),
+  totalWithdrawalsUSDT: z.coerce.number().min(1, "Total withdrawals USDT is required"),
+  totalWithdrawalsETH: z.coerce.number().min(1, "Total withdrawals ETH is required"),
+  totalWithdrawalsBTC: z.coerce.number().min(1, "Total withdrawals BTC is required"),
   analysisEndDate: z.string().min(1, "Analysis end date is required"),
   accountCreationDate: z.string().min(1, "Account creation date is required"),
-
-  
+  transactionAnalysis: z.string().min(1, "Transaction analysis is required"),
+  abn: z.string().min(1, "ABN is required"),
+  profileSummary: z.string().min(1, "Profile summary is required"),
+  recommendation: z.string().optional(),
+  transaction: z.string().optional(),
+  generatedBy: z.string().optional(),
+  analyst: z.string().optional(),
+  customer: z.string().optional(),
+  date: z.string().min(1, "Date is required"),
 });
 
-export function ECDDForm({ caseNumber }) {
+export function ECDDForm({ caseNumber , id}) {
   const [data, setData] = useState(null);
   const [formData, setFormData] = useState({
     isPEP: "No",
     isSanctioned: "No",
     relatedParty: "N/A",
+    abn: "",
+    
     position: "Compliance Officer",
     date: new Date().toISOString().split("T")[0],
+    analystName: "",
+    analysisEndDate: "",
+    fullName: "",
+    accountPurpose: "",
+    onboardingDate: "",
+    expectedVolume: 0,
+    beneficialOwner: "",
+    withdrawalDetails: "",
+    accountCreationDate: "",
+    totalDepositsAUD: 0,
+    totalWithdrawalsUSDT: 0,
+    totalWithdrawalsETH: 0,
+    totalWithdrawalsBTC: 0,
+    depositDetails: "",
+    ipLocations: "",
+    registeredAddress: "",
+    annualIncome: 0,
+    additionalInfo: "",
+    behavioralAnalysis: "",
+    directors: "",
+    isPEP: "No",
+    isSanctioned: "No",
+    relatedParty: "N/A",
+    transaction: "",
+    generatedBy: "",
+    analyst: "",
+    customer: "",
+    profileSummary: "",
+    transactionAnalysis: "",
+    recommendation: "",
+    ipLocations: "",
+    registeredAddress: "",
+    behavioralAnalysis: "",
+    recommendation: "",
+    additionalInfo: "",
+    behavioralAnalysis: "",
+    directors: "",
+    isPEP: "No",
+    isSanctioned: "No",
+    relatedParty: "N/A",
+    transaction: "",
+    generatedBy: "",
+    
+    customer: "",
+    profileSummary: "",
+    transactionAnalysis: "",
+    recommendation: "",
+    ipLocations: "",
+    registeredAddress: "",
+    behavioralAnalysis: "",
+    recommendation: "",
+    additionalInfo: "",
+    behavioralAnalysis: "",
+    directors: "",
+    isPEP: "No",
+    isSanctioned: "No",
+    relatedParty: "N/A",
+   
 
   });
+  
  
   const [lastSaved, setLastSaved] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -83,17 +153,27 @@ export function ECDDForm({ caseNumber }) {
   const [fetchingCaseNumbers, setFetchingCaseNumbers] = useState(false);
 
   const router = useRouter();
-  const {control, handleSubmit, formState: { errors }} = useForm({
+  const {control, handleSubmit, formState: { errors }, setValue, reset} = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: formData,
   });
   console.log("errors", errors);
-  const getData = async () => {
+
+  useEffect(() => {
+    if (id) {
+      getDataById();
+    }else if (caseNumber) {
+      getDataFromAIAnalysis();
+    }
+  }, [id, caseNumber]);
+
+  const getDataFromAIAnalysis = async () => {
     setFetching(true);
     try {
       const response = await autoPopulatedEcddData(caseNumber);
       console.log("response", response);
-      setData(response);
+      const formattedData = getFormattedData(response);
+      reset(formattedData);
     } catch (error) {
       console.error("Failed to get data", error);
       // toast.error("Failed to get data");
@@ -101,52 +181,83 @@ export function ECDDForm({ caseNumber }) {
       setFetching(false);
     }
   };
-  useEffect(() => {
-    if (caseNumber) {
-      getData();
-    }
-  }, [caseNumber]);
 
-  useEffect(() => {
-    if (data) {
+  console.log("formData", formData);
+
+  const getDataById = async () => {
+    setFetching(true);
+    try {
+      const response = await getEcddById(id);
+      console.log("response by id", response);
+      const {caseNumber, transaction, analyst, customer, customerName, ...data} = response?.data;
       const formattedData = {
-        analystName: data.analyst_name,
+        ...data,
+        caseNumber: {
+          label: caseNumber,
+          value:caseNumber,
+        },
+        transaction: transaction?._id,
+        analyst: analyst?._id,
+        customer: customer?._id,
+        onboardingDate: customer?.createdAt?.split("T")[0],
         position: "Compliance Officer",
-        date: data.analysis_date || new Date().toISOString().split("T")[0],
-        caseNumber: caseNumber,
-        fullName: data.name,
-        onboardingDate: data.onboarding_date,
-        withdrawalDetails: data.withdrawal_details,
-        expectedVolume: data.Expected_Trading_Volume,
-        accountCreationDate: data.account_creation_date,
-        totalDepositsAUD: data.total_deposits_AUD,
-        totalWithdrawalsBTC: data.total_withdrawals_BTC,
-        totalWithdrawalsETH: data.total_withdrawals_ETH,
-        totalWithdrawalsUSDT: data.total_withdrawals_USDT,
-        depositDetails: data.deposit_details,
-        ipLocations: data.ip_locations,
-        registeredAddress: data.registered_address,
-        recommendation: data.recommendation,
-        transactionAnalysis: data.transaction_analysis,
-        profileSummary: data.recommendation,
-        directors: data.director_name,
-        isPEP: data.pep_flag ? "Yes" : "No",
-        isSanctioned: data.sanction_flag ? "Yes" : "No",
-        userId: data.user_id,
-        accountPurpose: data.account_purpose,
-        annualIncome: data.annual_income,
-        beneficialOwner: data.beneficial_owner,
-        analysisEndDate: data.analysis_end_date,
-        additionalInfo: data.additonal_information,
-        behavioralAnalysis: data.behavioral_analysis,
-        customer: "6906cf020acf10ef6ab1ffd3",
-        analyst: "6906ef042b25d3502f3a6915",
-        generatedBy: "6906ef042b25d3502f3a6915",
-        transaction: "690fd9dbfc65168c8a447a8a",
+        accountCreationDate: data?.accountCreationDate?.split("T")[0],
+        analysisEndDate: data?.analysisEndDate?.split("T")[0],
+        date: data?.date ? data?.date?.split("T")[0] : '',
+        generatedBy: data?.generatedBy?._id,
+        
       };
-      setFormData(formattedData);
+      reset(formattedData);
+    }catch (error) {
+      console.error("Failed to get data", error);
+      // toast.error("Failed to get data");
+    } finally {
+      setFetching(false);
     }
-  }, [data]);
+  };
+
+  const getFormattedData=(data)=>{
+    const formattedData = {
+      withdrawalDetails: data.withdrawal_details,
+      depositDetails: data.deposit_details,
+      profileSummary: data.recommendation,
+      additionalInfo: data.additonal_information,
+      behavioralAnalysis: data.behavioral_analysis,
+      analystName: data.analyst_name,
+      position: "Compliance Officer",
+      date: data.analysis_date || new Date().toISOString().split("T")[0],
+      caseNumber: caseNumber,
+      fullName: data.name,
+      onboardingDate: data.onboarding_date,
+      expectedVolume: data.Expected_Trading_Volume,
+      accountCreationDate: data.account_creation_date,
+      totalDepositsAUD: data.total_deposits_AUD,
+      totalWithdrawalsBTC: data.total_withdrawals_BTC,
+      totalWithdrawalsETH: data.total_withdrawals_ETH,
+      totalWithdrawalsUSDT: data.total_withdrawals_USDT,
+      ipLocations: data.ip_locations,
+      registeredAddress: data.registered_address,
+      recommendation: data.recommendation,
+      transactionAnalysis: data.transaction_analysis,
+      directors: data.director_name,
+      isPEP: data.pep_flag ? "Yes" : "No",
+      isSanctioned: data.sanction_flag ? "Yes" : "No",
+      userId: data.user_id,
+      accountPurpose: data.account_purpose,
+      annualIncome: data.annual_income,
+      beneficialOwner: data.beneficial_owner,
+      analysisEndDate: data.analysis_end_date,
+      caseNumber:{
+        label: caseNumber,
+        value:caseNumber,
+      },
+      customer: "6906cf020acf10ef6ab1ffd3",
+      analyst: "6906ef042b25d3502f3a6915",
+      generatedBy: "6906ef042b25d3502f3a6915",
+      transaction: "690fd9dbfc65168c8a447a8a",
+    };
+    return formattedData;
+  }
   const handleFileUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -204,7 +315,7 @@ export function ECDDForm({ caseNumber }) {
       profileSummary: generateProfileSummary(data),
       transactionAnalysis: generateTransactionAnalysis(data),
       behavioralAnalysis: generateBehavioralAnalysis(data),
-      recommendation: generateRecommendation(data),
+      recommendation: generateRecommendation(data),  
     };
 
     setFormData(populated);
@@ -289,13 +400,22 @@ ${
     }) conducted multiple AUD deposits followed by USDT and BTC withdrawals where the majority of them were sourced from an external whitelisted bank account. However, the SOF and SOW needs to be collected. Thus recommending to continue the relationship as a high risk customer (HRC) and request RFI at this stage.`;
   };
 
-  const handleSave = async () => {
+  const handleSave = async (data) => {
     setLastSaved(new Date());
     setLoading(true);
     // const {} = formData;
-    const response = await createEcdd(formData);
+    const submittedData = {
+      ...data,
+      caseNumber: data?.caseNumber?.value,
+      ...(id ? { id: id } : {}),
+    }
+    console.log('submittedData', JSON.stringify(submittedData, null, 2));
+    const action = id ? updateEcdd : createEcdd;
+    const response = await action(submittedData);
+    console.log('submit response', response);
     if (response.success) {
-      toast.success("Case created successfully");
+      localStorage.setItem("newId", response.data._id);
+      toast.success(id ? "Case updated successfully" : "Case created successfully");
       router.push(`/dashboard/client/report-compliance/ecdd`);
     } else {
       toast.error("Failed to create case");
@@ -366,9 +486,7 @@ ${formData.recommendation || "_________________________"}
     link.click();
   };
 
-  const updateField = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+
 
   const fetchCaseNumbers = async () => {
     setFetchingCaseNumbers(true);
@@ -389,26 +507,24 @@ ${formData.recommendation || "_________________________"}
     }
   };
 
-  const handleCaseNumberChange = (value) => {
-    console.log("value", value);
-    const kycData=value?.customer?.personalKyc;
-    setFormData((prev) => ({ ...prev, 
-      caseNumber: value ,
-      analystName: value.analyst.name,
-      fullName: kycData?.personal_form?.customer_details?.given_name + " " + kycData?.personal_form?.customer_details?.surname,
-      accountPurpose: kycData?.funds_wealth?.account_purpose,
-      onboardingDate: value?.customer?.createdAt?.split("T")[0],
-      expectedVolume: kycData?.funds_wealth?.estimated_trading_volume,
-      beneficialOwner: value?.transaction?.beneficiary?.name,
-      transaction:value?.transaction?._id,
-      generatedBy: value?.analyst?._id,
-      analyst: value?.analyst?._id,
-      customer: value?.customer?._id,
-      isPEP: value?.customer?.isPep ? "Yes" : "No",
-      isSanctioned: value?.customer?.sanction ? "Yes" : "No",
-      registeredAddress: kycData?.personal_form?.residential_address?.address,
 
-    }));
+  const handleCaseNumberChange = (value) => {
+    const kycData = value?.customer?.personalKyc;
+  
+    setValue("caseNumber", value, { shouldValidate: true });
+    setValue("analystName", value?.analyst?.name, { shouldValidate: true });
+    setValue("fullName", `${kycData?.personal_form?.customer_details?.given_name} ${kycData?.personal_form?.customer_details?.surname}`, { shouldValidate: true });
+    setValue("accountPurpose", kycData?.funds_wealth?.account_purpose, { shouldValidate: true });
+    setValue("onboardingDate", value?.customer?.createdAt?.split("T")[0], { shouldValidate: true });
+    setValue("expectedVolume", kycData?.funds_wealth?.estimated_trading_volume, { shouldValidate: true });
+    setValue("beneficialOwner", value?.transaction?.beneficiary?.name, { shouldValidate: true });
+    setValue("transaction", value?.transaction?._id, { shouldValidate: true });
+    setValue("generatedBy", value?.analyst?._id, { shouldValidate: true });
+    setValue("analyst", value?.analyst?._id, { shouldValidate: true });
+    setValue("customer", value?.customer?._id, { shouldValidate: true });
+    setValue("isPEP", value?.customer?.isPep ? "Yes" : "No", { shouldValidate: true });
+    setValue("isSanctioned", value?.customer?.sanction ? "Yes" : "No", { shouldValidate: true });
+    setValue("registeredAddress", kycData?.personal_form?.residential_address?.address, { shouldValidate: true });
   };
 
   return (
@@ -472,53 +588,57 @@ ${formData.recommendation || "_________________________"}
           </h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Controller
+            control={control}
+            name="analystName"
+            render={({ field }) => (
               <div>
                 <Label htmlFor="analystName">Analyst Name</Label>
-                <Input
-                  id="analystName"
-                  value={formData.analystName || ""}
-                  onChange={(e) => updateField("analystName", e.target.value)}
-                  placeholder="Enter analyst name"
-                />
+                <Input id="analystName" {...field} placeholder="Enter analyst name" error={errors.analystName?.message} />
               </div>
+            )}
+            />
+              <Controller
+              control={control}
+              name="position"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="position">Position</Label>
+                  <Input id="position" {...field} placeholder="Enter position" />
+                </div>
+              )}
+              />
+             
+             <Controller
+             control={control}
+             name="date"
+             render={({ field }) => (
+               <div>
+                 <Label htmlFor="date">Date</Label>
+                 <Input id="date" {...field} placeholder="Enter date" type="date"/>
+               </div>
+             )}
+             />
+              
               <div>
-                <Label htmlFor="position">Position</Label>
-                <Input
-                  id="position"
-                  value={formData.position || ""}
-                  // onChange={(e) => updateField("position", e.target.value)}
-                  placeholder="Compliance Officer"
-                  disabled
-                />
-              </div>
-              <div>
-                <Label htmlFor="date">Date</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={formData.date || ""}
-                  disabled
-                  // onChange={(e) => updateField("date", e.target.value)}
-                />
-              </div>
-              <div>
-                {/* <Label htmlFor="caseNumber">Case Number</Label>
-                <Input
-                  id="caseNumber"
-                  value={formData.caseNumber || ""}
-                  onChange={(e) => updateField("caseNumber", e.target.value)}
-                  placeholder="EC_20240101_01"
-                /> */}
+               <Controller
+               control={control}
+               name="caseNumber"
+               render={({ field }) => (
                 <CustomSelect
-                  label="Case Number"
-                  options={caseNumbers}
-                  value={formData.caseNumber || ""}
-                  onChange={handleCaseNumberChange}
-                  onFocus={fetchCaseNumbers}
-                  isLoading={fetchingCaseNumbers}
-                  // isDisabled={fetchingCaseNumbers}
-                 
-                />
+                label="Case Number"
+                options={caseNumbers}
+                value={field.value || null}
+                onChange={(value) => handleCaseNumberChange(value)}
+                onFocus={fetchCaseNumbers}
+                isLoading={fetchingCaseNumbers}
+                error={errors.caseNumber?.message}
+                // isDisabled={fetchingCaseNumbers}
+               
+              />
+               )}
+               />
+                
               </div>
             </div>
           </div>
@@ -531,123 +651,117 @@ ${formData.recommendation || "_________________________"}
           </h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* <div>
-              <Label htmlFor="userId">User ID</Label>
-              <Input
-                id="userId"
-                value={formData.userId || ""}
-                onChange={(e) => updateField("userId", e.target.value)}
-                placeholder="X1"
+              <Controller
+              control={control}
+              name="fullName"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input id="fullName" {...field} placeholder="Enter full name" error={errors.fullName?.message} />
+                </div>
+              )}
               />
-            </div> */}
-              <div>
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  value={formData.fullName || ""}
-                  onChange={(e) => updateField("fullName", e.target.value)}
-                  placeholder="Customer/Company Name"
-                />
-              </div>
-              <div>
-                <Label htmlFor="abn">ABN</Label>
-                <Input
-                  id="abn"
-                  value={formData.abn || ""}
-                  onChange={(e) => updateField("abn", e.target.value)}
-                  placeholder="ABN Number"
-                />
-              </div>
-              <div>
-                <Label htmlFor="onboardingDate">Onboarding Date</Label>
-                <Input
-                  id="onboardingDate"
-                  type="date"
-                  value={formData.onboardingDate || ""}
-                  onChange={(e) =>
-                    updateField("onboardingDate", e.target.value)
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="accountPurpose">Account Purpose</Label>
-                <Input
-                  id="accountPurpose"
-                  value={formData.accountPurpose || ""}
-                  onChange={(e) =>
-                    updateField("accountPurpose", e.target.value)
-                  }
-                  placeholder="Digital Currency Exchange"
-                />
-              </div>
-              <div>
-                <Label htmlFor="expectedVolume">
-                  Expected Trading Volume (AUD)
-                </Label>
-                <Input
-                  id="expectedVolume"
-                  value={formData.expectedVolume || ""}
-                  onChange={(e) =>
-                    updateField("expectedVolume", e.target.value)
-                  }
-                  placeholder="1000000"
-                />
-              </div>
-              <div>
-                <Label htmlFor="annualIncome">
-                  Annual Income (Million AUD)
-                </Label>
-                <Input
-                  id="annualIncome"
-                  value={formData.annualIncome || ""}
-                  onChange={(e) => updateField("annualIncome", e.target.value)}
-                  placeholder="5"
-                />
-              </div>
-              <div>
-                <Label htmlFor="beneficialOwner">Beneficial Owner</Label>
-                <Input
-                  id="beneficialOwner"
-                  value={formData.beneficialOwner || ""}
-                  onChange={(e) =>
-                    updateField("beneficialOwner", e.target.value)
-                  }
-                  placeholder="Owner Name"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="directors">Directors</Label>
-                <Input
-                  id="directors"
-                  value={formData.directors || ""}
-                  onChange={(e) => updateField("directors", e.target.value)}
-                  placeholder="Director names (comma separated)"
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="profileSummary">
-                Profile Summary (Auto-generated)
-              </Label>
-              <Textarea
-                id="profileSummary"
-                value={formData.profileSummary || ""}
-                onChange={(e) => updateField("profileSummary", e.target.value)}
-                rows={6}
-                className="font-mono text-sm"
+
+              <Controller
+              control={control}
+              name="abn"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="abn">ABN</Label>
+                  <Input id="abn" {...field} placeholder="Enter ABN" error={errors.abn?.message} />
+                </div>
+              )}
               />
+              
+             <Controller
+              control={control}
+              name="onboardingDate"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="onboardingDate">Onboarding Date</Label>
+                  <Input id="onboardingDate" {...field} placeholder="Enter onboarding date" error={errors.onboardingDate?.message} />
+                </div>
+              )}
+              />
+              <Controller
+              control={control}
+              name="accountPurpose"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="accountPurpose">Account Purpose</Label>
+                  <Input id="accountPurpose" {...field} placeholder="Enter account purpose" error={errors.accountPurpose?.message} />
+                </div>
+              )}
+              />
+             <Controller
+              control={control}
+              name="expectedVolume"
+              type="number"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="expectedVolume">Expected Trading Volume (AUD)</Label>
+                  <Input id="expectedVolume" {...field} type="number" placeholder="Enter expected trading volume" error={errors.expectedVolume?.message} />
+                </div>
+              )}
+              />
+             <Controller
+              control={control}
+              name="annualIncome"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="annualIncome">Annual Income (Million AUD)</Label>
+                  <Input id="annualIncome" type="number" {...field} placeholder="Enter annual income" error={errors.annualIncome?.message} />
+                </div>
+              )}
+              />
+            <Controller
+              control={control}
+              name="beneficialOwner"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="beneficialOwner">Beneficial Owner</Label>
+                  <Input id="beneficialOwner" {...field} placeholder="Enter beneficial owner" error={errors.beneficialOwner?.message} />
+                </div>
+              )}
+              />
+              <Controller
+              control={control}
+              name="directors"
+              render={({ field }) => (
+                <div className="md:col-span-2">
+                  <Label htmlFor="directors">Directors</Label>
+                  <Input id="directors" {...field} placeholder="Enter directors" error={errors.directors?.message} />
+                </div>
+              )}
+              />
+            
             </div>
+              <Controller
+              control={control}
+              name="profileSummary"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="profileSummary">Profile Summary</Label>
+                  <Textarea id="profileSummary" {...field} placeholder="Enter profile summary" error={errors.profileSummary?.message} />
+                </div>
+              )}
+              />
+            
           </div>
         </Card>
 
         {/* Section 3-5: PEP, Sanctioned, Related Party */}
         <Card className="border   p-6 mb-6">
           <div className="space-y-6">
-            <div>
-              <Label htmlFor="isPEP">3. Customer is PEP (Y/N)</Label>
-              <Select
-                value={formData.isPEP || "No"}
-                onValueChange={(value) => updateField("isPEP", value)}
+            <Controller
+              control={control}
+              name="isPEP"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="isPEP">Customer is PEP (Y/N)</Label>
+                  <Select
+                value={field.value || "No"}
+                onValueChange={(value) => field.onChange(value)}
               >
                 <SelectTrigger id="isPEP">
                   <SelectValue />
@@ -657,12 +771,18 @@ ${formData.recommendation || "_________________________"}
                   <SelectItem value="No">No</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div>
-              <Label htmlFor="isSanctioned">4. Sanctioned Customer (Y/N)</Label>
-              <Select
-                value={formData.isSanctioned || "No"}
-                onValueChange={(value) => updateField("isSanctioned", value)}
+                </div>
+              )}
+              />
+            <Controller
+              control={control}
+              name="isSanctioned"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="isSanctioned">Sanctioned Customer (Y/N)</Label>
+                  <Select
+                value={field.value || "No"}
+                onValueChange={(value) => field.onChange(value)}
               >
                 <SelectTrigger id="isSanctioned">
                   <SelectValue />
@@ -672,16 +792,20 @@ ${formData.recommendation || "_________________________"}
                   <SelectItem value="No">No</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div>
-              <Label htmlFor="relatedParty">5. Related Party</Label>
-              <Input
-                id="relatedParty"
-                value={formData.relatedParty || ""}
-                onChange={(e) => updateField("relatedParty", e.target.value)}
-                placeholder="N/A"
+                </div>
+              )}
               />
+           <Controller
+           control={control}
+           name="relatedParty"
+           render={({ field }) => (
+            <div>
+              <Label htmlFor="relatedParty">Related Party</Label>
+              <Input id="relatedParty" {...field} placeholder="Enter related party" error={errors.relatedParty?.message} />
             </div>
+           )}
+           />
+            
           </div>
         </Card>
 
@@ -692,127 +816,114 @@ ${formData.recommendation || "_________________________"}
           </h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="accountCreationDate">
-                  Account Creation Date
-                </Label>
-                <Input
-                  id="accountCreationDate"
-                  type="date"
-                  value={formData.accountCreationDate || ""}
-                  onChange={(e) =>
-                    updateField("accountCreationDate", e.target.value)
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="analysisEndDate">Analysis End Date</Label>
-                <Input
-                  id="analysisEndDate"
-                  type="date"
-                  value={formData.analysisEndDate || ""}
-                  onChange={(e) =>
-                    updateField("analysisEndDate", e.target.value)
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="totalDepositsAUD">Total Deposits (AUD)</Label>
-                <Input
-                  id="totalDepositsAUD"
-                  value={formData.totalDepositsAUD || ""}
-                  onChange={(e) =>
-                    updateField("totalDepositsAUD", e.target.value)
-                  }
-                  placeholder="1000000"
-                />
-              </div>
-              <div>
-                <Label htmlFor="totalWithdrawalsUSDT">
-                  Total Withdrawals (USDT)
-                </Label>
-                <Input
-                  id="totalWithdrawalsUSDT"
-                  value={formData.totalWithdrawalsUSDT || ""}
-                  onChange={(e) =>
-                    updateField("totalWithdrawalsUSDT", e.target.value)
-                  }
-                  placeholder="500000"
-                />
-              </div>
-              <div>
-                <Label htmlFor="totalWithdrawalsETH">
-                  Total Withdrawals (ETH)
-                </Label>
-                <Input
-                  id="totalWithdrawalsETH"
-                  value={formData.totalWithdrawalsETH || ""}
-                  onChange={(e) =>
-                    updateField("totalWithdrawalsETH", e.target.value)
-                  }
-                  placeholder="100"
-                />
-              </div>
-              <div>
-                <Label htmlFor="totalWithdrawalsBTC">
-                  Total Withdrawals (BTC)
-                </Label>
-                <Input
-                  id="totalWithdrawalsBTC"
-                  value={formData.totalWithdrawalsBTC || ""}
-                  onChange={(e) =>
-                    updateField("totalWithdrawalsBTC", e.target.value)
-                  }
-                  placeholder="10"
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="depositDetails">Deposit Details</Label>
-              <Textarea
-                id="depositDetails"
-                value={formData.depositDetails || ""}
-                onChange={(e) => updateField("depositDetails", e.target.value)}
-                rows={4}
-                placeholder="Detailed deposit information..."
+              <Controller
+              control={control}
+              name="accountCreationDate"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="accountCreationDate">Account Creation Date</Label>
+                  <Input id="accountCreationDate" type="date" {...field} placeholder="Enter account creation date" error={errors.accountCreationDate?.message} />
+                </div>
+              )}
+              />
+              
+              <Controller
+              control={control}
+              name="analysisEndDate"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="analysisEndDate">Analysis End Date</Label>
+                  <Input id="analysisEndDate" type="date" {...field} placeholder="Enter analysis end date" error={errors.analysisEndDate?.message} />
+                </div>
+              )}
+              />
+              <Controller
+              control={control}
+              name="totalDepositsAUD"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="totalDepositsAUD">Total Deposits (AUD)</Label>
+                  <Input id="totalDepositsAUD" {...field} placeholder="Enter total deposits" error={errors.totalDepositsAUD?.message} />
+                </div>
+              )}
+              />
+              <Controller
+              control={control}
+              name="totalWithdrawalsUSDT"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="totalWithdrawalsUSDT">Total Withdrawals (USDT)</Label>
+                  <Input id="totalWithdrawalsUSDT" {...field} placeholder="Enter total withdrawals" error={errors.totalWithdrawalsUSDT?.message} />
+                </div>
+              )}
+              />
+              
+
+              <Controller
+              control={control}
+              name="totalWithdrawalsETH"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="totalWithdrawalsETH">Total Withdrawals (ETH)</Label>
+                  <Input id="totalWithdrawalsETH" {...field} placeholder="Enter total withdrawals" error={errors.totalWithdrawalsETH?.message} />
+                </div>
+              )}
+              />
+              
+              <Controller
+              control={control}
+              name="totalWithdrawalsBTC"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="totalWithdrawalsBTC">Total Withdrawals (BTC)</Label>
+                  <Input id="totalWithdrawalsBTC" {...field} placeholder="Enter total withdrawals" error={errors.totalWithdrawalsBTC?.message} />
+                </div>
+              )}
               />
             </div>
-            <div>
-              <Label htmlFor="withdrawalDetails">Withdrawal Details</Label>
-              <Textarea
-                id="withdrawalDetails"
-                value={formData.withdrawalDetails || ""}
-                onChange={(e) =>
-                  updateField("withdrawalDetails", e.target.value)
-                }
-                rows={4}
-                placeholder="Detailed withdrawal information..."
+            <Controller
+              control={control}
+              name="depositDetails"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="depositDetails">Deposit Details</Label>
+                  <Textarea id="depositDetails" {...field} placeholder="Enter deposit details" error={errors.depositDetails?.message} />
+                </div>
+              )}
               />
-            </div>
-            <div>
-              <Label htmlFor="transactionAnalysis">
-                Transaction Analysis (Auto-generated)
-              </Label>
-              <Textarea
-                id="transactionAnalysis"
-                value={formData.transactionAnalysis || ""}
-                onChange={(e) =>
-                  updateField("transactionAnalysis", e.target.value)
-                }
-                rows={8}
-                className="font-mono text-sm"
+            <Controller
+              control={control}
+              name="withdrawalDetails"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="withdrawalDetails">Withdrawal Details</Label>
+                  <Textarea id="withdrawalDetails" {...field} placeholder="Enter withdrawal details" error={errors.withdrawalDetails?.message} />
+                </div>
+              )}
               />
-            </div>
-            <div>
-              <Label htmlFor="additionalInfo">Additional Information</Label>
-              <Textarea
-                id="additionalInfo"
-                value={formData.additionalInfo || ""}
-                onChange={(e) => updateField("additionalInfo", e.target.value)}
-                rows={3}
-                placeholder="Any additional context or CCO comments..."
+            
+            <Controller
+              control={control}
+              name="transactionAnalysis"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="transactionAnalysis">Transaction Analysis</Label>
+                  <Textarea id="transactionAnalysis" {...field} placeholder="Enter transaction analysis" error={errors.transactionAnalysis?.message} />
+                </div>
+              )}
               />
-            </div>
+
+            <Controller
+              control={control}
+              name="additionalInfo"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="additionalInfo">Additional Information</Label>
+                  <Textarea id="additionalInfo" {...field} placeholder="Enter additional information" error={errors.additionalInfo?.message} />
+                </div>
+              )}
+              />
+            
           </div>
         </Card>
 
@@ -823,41 +934,40 @@ ${formData.recommendation || "_________________________"}
           </h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="ipLocations">Number of IP Locations</Label>
-                <Input
-                  id="ipLocations"
-                  value={formData.ipLocations || ""}
-                  onChange={(e) => updateField("ipLocations", e.target.value)}
-                  placeholder="Leave empty for OTC customers"
-                />
-              </div>
-              <div>
-                <Label htmlFor="registeredAddress">Registered Address</Label>
-                <Input
-                  id="registeredAddress"
-                  value={formData.registeredAddress || ""}
-                  onChange={(e) =>
-                    updateField("registeredAddress", e.target.value)
-                  }
-                  placeholder="City/State"
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="behavioralAnalysis">
-                Behavioral Analysis (Auto-generated)
-              </Label>
-              <Textarea
-                id="behavioralAnalysis"
-                value={formData.behavioralAnalysis || ""}
-                onChange={(e) =>
-                  updateField("behavioralAnalysis", e.target.value)
-                }
-                rows={4}
-                className="font-mono text-sm"
+              <Controller
+              control={control}
+              name="ipLocations"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="ipLocations">Number of IP Locations</Label>
+                  <Input id="ipLocations" type="number" {...field} placeholder="Enter number of IP locations" error={errors.ipLocations?.message} />
+                </div>
+              )}
               />
+               
+              <Controller
+              control={control}
+              name="registeredAddress"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="registeredAddress">Registered Address</Label>
+                  <Input id="registeredAddress" {...field} placeholder="Enter registered address" error={errors.registeredAddress?.message} />
+                </div>
+              )}
+              />
+                
             </div>
+            <Controller
+              control={control}
+              name="behavioralAnalysis"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="behavioralAnalysis">Behavioral Analysis</Label>
+                  <Textarea id="behavioralAnalysis" {...field} placeholder="Enter behavioral analysis" error={errors.behavioralAnalysis?.message} />
+                </div>
+              )}
+              />
+           
           </div>
         </Card>
 
@@ -866,18 +976,17 @@ ${formData.recommendation || "_________________________"}
           <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
             8. Recommendation
           </h2>
-          <div>
-            <Label htmlFor="recommendation">
-              Recommendation (Auto-generated)
-            </Label>
-            <Textarea
-              id="recommendation"
-              value={formData.recommendation || ""}
-              onChange={(e) => updateField("recommendation", e.target.value)}
-              rows={6}
-              className="font-mono text-sm"
-            />
-          </div>
+          <Controller
+              control={control}
+              name="recommendation"
+              render={({ field }) => (
+                <div>
+                  <Label htmlFor="recommendation">Recommendation</Label>
+                  <Textarea id="recommendation" {...field} placeholder="Enter recommendation" error={errors.recommendation?.message} />
+                </div>
+              )}
+              />
+          
         </Card>
 
         {/* Action Buttons */}

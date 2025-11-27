@@ -18,8 +18,11 @@ import { StatusPill } from "@/components/ui/StatusPill";
 import {
   IconDotsVertical,
   IconEye,
+  IconFile,
+  IconFilePlus,
   IconGridDots,
   IconList,
+  IconPencil,
   IconPennant,
   IconSearch,
 } from "@tabler/icons-react";
@@ -309,6 +312,7 @@ const cases = [
 ];
 
 const ListView = ({ data, loading }) => {
+  console.log("list data", data);
   const router = useRouter();
   const riskVariants = {
     Low: "info",
@@ -321,6 +325,10 @@ const ListView = ({ data, loading }) => {
     Rejected: "danger",
     "In Review": "warning",
   };
+  const handleEdit = (caseNumber) => {
+    // console.log("caseNumber", caseNumber);
+    router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`);
+}
   const columns = [
     {
       header: "Actions",
@@ -347,6 +355,14 @@ const ListView = ({ data, loading }) => {
                 >
                   <IconEye className="mr-2 size-3 text-muted-foreground/70" />
                   View
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    handleEdit(row?.original?.uid)
+                  }
+                >
+                  <IconFilePlus className="mr-2 size-3 " />
+                  Generate ECDD
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -449,7 +465,7 @@ export default function CaseList() {
       setLoading(true);
       try {
         const response = await getCaseList();
-        console.log("response", response);
+        
         setData(response?.data || []);
         setLoading(false);
       } catch (error) {

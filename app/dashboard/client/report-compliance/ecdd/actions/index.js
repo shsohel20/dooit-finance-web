@@ -22,14 +22,15 @@ export async function getEcdds() {
 }
 
 export async function getEcddById(id) {
-    const response = await fetchWithAuth(`ecdd/${id}`);
+    const response = await fetchWithAuth(`ecdd-report/${id}`);
     return response.json();
 }
 
-export async function updateEcdd(id, formData) {
-    const response = await fetchWithAuth(`ecdd/${id}`, {
+export async function updateEcdd(formData) {
+    const {id, ...data} = formData;
+    const response = await fetchWithAuth(`ecdd-report/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(formData)
+        body: JSON.stringify(data)
     })
     return response.json();
 }
