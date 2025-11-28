@@ -1,13 +1,29 @@
+import useAlertStore from "@/app/store/alerts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const caseDetails = [
-  { label: "Case Type", value: "Alert" },
-  { label: "System", value: "Transaction Monitoring System" },
+  // { label: "Case Type", value: "Alert" },
+  // { label: "System", value: "Transaction Monitoring System" },
   { label: "Owner", value: "Sarah Johnson" },
   { label: "Related Alerts", value: "TM-2023-045, TM-2023-067" },
 ];
 
+const LabelValue = ({ label, value }) => {
+  return (
+    <div className="flex items-start justify-between py-3 border-b border-border last:border-0">
+      <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <span className="text-sm text-foreground text-right max-w-[60%]">
+        {value}
+      </span>
+    </div>
+  );
+};
+
 export function CaseOverview() {
+  const { details } = useAlertStore();
+
+  const customer_details =
+    details?.customer?.personalKyc?.personal_form?.customer_details;
   return (
     <Card className="bg-card border-border">
       <CardHeader>
@@ -17,19 +33,26 @@ export function CaseOverview() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {caseDetails.map((detail, index) => (
-            <div
-              key={index}
-              className="flex items-start justify-between py-3 border-b border-border last:border-0"
-            >
-              <span className="text-sm font-medium text-muted-foreground">
-                {detail.label}
-              </span>
-              <span className="text-sm text-foreground text-right max-w-[60%]">
-                {detail.value}
-              </span>
-            </div>
-          ))}
+          <LabelValue label="Case Type" value={details?.caseType} />
+          <LabelValue
+            label="Risk Score"
+            value={details?.transaction?.riskScore}
+          />
+          <LabelValue
+            label="Owner"
+            value={
+              customer_details?.given_name +
+              " " +
+              customer_details?.middle_name +
+              " " +
+              customer_details?.surname
+            }
+          />
+          <LabelValue
+            label="Related Alerts"
+            value={details?.relatedPartyTxnId}
+          />
+
           <div className="pt-4">
             <div className="rounded-lg bg-muted/50 border border-border p-4">
               <h4 className="text-sm font-medium text-foreground mb-2">

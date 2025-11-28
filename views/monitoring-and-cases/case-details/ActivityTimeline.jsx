@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, UserCheck, FileCheck, Send } from "lucide-react";
+import { Clock, UserCheck, FileCheck, Send, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import useAlertStore from "@/app/store/alerts";
 
 const timelineEvents = [
   {
@@ -35,6 +36,8 @@ const timelineEvents = [
 ];
 
 export function ActivityTimeline() {
+  const { details } = useAlertStore();
+  console.log("details", details?.activity);
   return (
     <Card className="bg-card border-border">
       <CardHeader>
@@ -44,11 +47,11 @@ export function ActivityTimeline() {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {timelineEvents.map((event, index) => {
-            const Icon = event.icon;
+          {details?.activity?.map((event, index) => {
+            const Icon = AlertCircle;
             return (
               <div key={index} className="flex gap-4 relative">
-                {index !== timelineEvents.length - 1 && (
+                {index !== details?.activity?.length - 1 && (
                   <div className="absolute left-5 top-12 bottom-0 w-px bg-border" />
                 )}
                 <div
@@ -81,7 +84,7 @@ export function ActivityTimeline() {
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {event.description}
+                    {event.details}
                   </p>
                   <p className="text-xs font-mono text-muted-foreground">
                     {event.timestamp}

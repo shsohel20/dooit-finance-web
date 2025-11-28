@@ -2,14 +2,18 @@ import { CaseHeader } from "@/views/monitoring-and-cases/case-details/CaseHeader
 import CaseTabs from "@/views/monitoring-and-cases/case-details/CaseTabs";
 import React from "react";
 
-export default function CaseListDetails() {
+export default async function CaseListDetails({ params, searchParams }) {
+  const { id } = await params;
+  const { caseNumber } = await searchParams;
+  console.log("alerts id", id);
+  console.log("alerts caseNumber", caseNumber);
   return (
     <div>
       <div className="min-h-screen bg-background">
         <CaseHeader />
         <div className="border-b border-border">
           <div className="container mx-auto ">
-            <CaseTabs />
+            <CaseTabs caseNumber={caseNumber} id={id}/>
           </div>
         </div>
         {/* <main className="container mx-auto px-6 py-8">

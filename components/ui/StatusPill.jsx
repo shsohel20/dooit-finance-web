@@ -14,15 +14,15 @@ const statusPillVariants = cva(
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground [&>svg]:text-foreground [&>svg]:fill-foreground before:bg-foreground",
         warning:
-          "before:bg-warning [&>svg]:text-warning [&>svg]:fill-warning before:bg-warning",
+          "before:bg-warning [&>svg]:text-warning [&>svg]:fill-warning before:bg-warning bg-warning/10 border-warning/10 text-warning",
         success:
-          "before:bg-success [&>svg]:text-success [&>svg]:fill-success before:bg-success",
-        info: "before:bg-info [&>svg]:text-info [&>svg]:fill-info before:bg-info",
+          "before:bg-success [&>svg]:text-success [&>svg]:fill-success before:bg-success bg-success/10 border-success/10 text-success",
+        info: "before:bg-info [&>svg]:text-info [&>svg]:fill-info before:bg-info bg-info/10 border-info/10 text-info",
         danger:
-          "before:bg-danger [&>svg]:text-danger [&>svg]:fill-danger before:bg-danger",
-        dark: "border-transparent bg-dark text-white [a&]:hover:bg-dark/90 [&>svg]:text-dark [&>svg]:fill-dark before:bg-dark",
+          "before:bg-danger [&>svg]:text-danger [&>svg]:fill-danger before:bg-danger bg-danger/10 border-danger/10 text-danger",
+        dark: "border-transparent bg-dark text-white [a&]:hover:bg-dark/90 [&>svg]:text-dark [&>svg]:fill-dark before:bg-dark bg-dark/10 border-dark/10 text-dark",
         muted:
-          "border-transparent bg-muted text-white [a&]:hover:bg-muted/90 [&>svg]:text-muted [&>svg]:fill-muted before:bg-muted",
+          "border-transparent bg-muted text-white [a&]:hover:bg-muted/90 [&>svg]:text-muted [&>svg]:fill-muted before:bg-muted bg-muted/10 border-muted/10 text-muted",
       },
     },
     defaultVariants: {

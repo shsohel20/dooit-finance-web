@@ -13,8 +13,10 @@ import {
   FileText,
   ChevronRight,
 } from "lucide-react";
+import useAlertStore from "@/app/store/alerts";
 
 export default function CustomerProfile() {
+  const { details } = useAlertStore();
   const customerData = {
     fullName: "John Smith",
     dateOfBirth: "1985-03-15",
@@ -49,6 +51,10 @@ export default function CustomerProfile() {
     return "Low Risk";
   };
 
+  const customer_details =
+    details?.customer?.personalKyc?.personal_form?.customer_details;
+  const employment_details =
+    details?.customer?.personalKyc?.personal_form?.employment_details;
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="grid gap-6 lg:grid-cols-3">
@@ -68,7 +74,8 @@ export default function CustomerProfile() {
                     Full Name
                   </p>
                   <p className="text-sm font-medium text-foreground">
-                    {customerData.fullName}
+                    {customer_details?.given_name}{" "}
+                    {customer_details?.middle_name}
                   </p>
                 </div>
               </div>
@@ -80,7 +87,7 @@ export default function CustomerProfile() {
                     Date of Birth
                   </p>
                   <p className="text-sm text-foreground">
-                    {customerData.dateOfBirth}
+                    {/* {customerData.dateOfBirth} */}
                   </p>
                 </div>
               </div>
@@ -92,7 +99,7 @@ export default function CustomerProfile() {
                     Nationality
                   </p>
                   <p className="text-sm text-foreground">
-                    {customerData.nationality}
+                    {/* {customerData.nationality} */}
                   </p>
                 </div>
               </div>
@@ -104,7 +111,7 @@ export default function CustomerProfile() {
                     Occupation
                   </p>
                   <p className="text-sm text-foreground">
-                    {customerData.occupation}
+                    {employment_details?.occupation}
                   </p>
                 </div>
               </div>
@@ -119,7 +126,7 @@ export default function CustomerProfile() {
                     variant="outline"
                     className="h-6 border-success/30 bg-success/10 text-success"
                   >
-                    {customerData.accountStatus}
+                    {details?.customer?.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
               </div>

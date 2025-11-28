@@ -16,14 +16,28 @@ import {
 } from "@/components/ui/select";
 import { StatusPill } from "@/components/ui/StatusPill";
 import {
+  IconDotsVertical,
   IconEye,
+  IconFile,
+  IconFilePlus,
   IconGridDots,
   IconList,
+  IconPencil,
   IconPennant,
   IconSearch,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { getCaseList } from "./actions";
+import ResizableTable from "@/components/ui/Resizabletable";
+import { ArrowRight } from "lucide-react";
+import { formatDateTime } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 const cases = [
   {
     caseId: "#CA-1234567890",
@@ -297,7 +311,8 @@ const cases = [
   },
 ];
 
-const ListView = () => {
+const ListView = ({ data, loading }) => {
+  console.log("list data", data);
   const router = useRouter();
   const riskVariants = {
     Low: "info",
@@ -310,73 +325,160 @@ const ListView = () => {
     Rejected: "danger",
     "In Review": "warning",
   };
+  const handleEdit = (caseNumber) => {
+    // console.log("caseNumber", caseNumber);
+    router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`);
+}
   const columns = [
     {
-      header: "Case ID",
-      accessorKey: "caseId",
+      header: "Actions",
+      cell: ({ row }) => (
+        <>
+          <div className="flex justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  // size="sm"
+                  className="!py-2 h-auto "
+                >
+                  <IconDotsVertical />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem
+                  onClick={() =>
+                    router.push(
+                      `/dashboard/client/monitoring-and-cases/case-list/details/${row?.original?._id}`
+                    )
+                  }
+                >
+                  <IconEye className="mr-2 size-3 text-muted-foreground/70" />
+                  View
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    handleEdit(row?.original?.uid)
+                  }
+                >
+                  <IconFilePlus className="mr-2 size-3 " />
+                  Generate ECDD
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </>
+      ),
     },
     {
-      header: "Client Name",
-      accessorKey: "name",
+      header: "Case ID",
+      accessorKey: "uid",
+    },
+
+    {
+      header: "Transaction",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <div>
+            <p className="">{row?.original?.transaction?.sender?.name}</p>
+            <p className="text-muted-foreground text-xs">
+              {row?.original?.transaction?.sender?.account}
+            </p>
+          </div>
+          <span>
+            <ArrowRight className="size-4 text-green-500" />
+          </span>
+          <div>
+            <p className="">{row?.original?.transaction?.receiver?.name}</p>
+            <p className="text-muted-foreground text-xs">
+              {row?.original?.transaction?.receiver?.account}
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Transaction Amount",
+      accessorKey: "transaction.amount",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.transaction?.amount}</p>
+        </div>
+      ),
+    },
+    {
+      header: "Transaction Date",
+      accessorKey: "transaction.timestamp",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">
+            {formatDateTime(row?.original?.transaction?.timestamp)?.date}
+          </p>
+          <p className="text-muted-foreground text-xs text-end">
+            {formatDateTime(row?.original?.transaction?.timestamp)?.time}
+          </p>
+        </div>
+      ),
+    },
+    {
+      header: "Analyst",
+      accessorKey: "analyst.name",
     },
     {
       header: "Risk",
       accessorKey: "risk",
-      cell: (row) => (
-        <StatusPill icon={<IconPennant />} variant={riskVariants[row.risk]}>
-          {row.risk}
+      cell: ({ row }) => (
+        <StatusPill
+          icon={<IconPennant />}
+          variant={riskVariants[row?.original?.riskLabel]}
+        >
+          {row?.original?.riskLabel}
         </StatusPill>
       ),
     },
     {
       header: "Alert Type",
-      accessorKey: "alertType",
+      accessorKey: "caseType",
     },
     {
       header: "Status",
       accessorKey: "status",
-      cell: (row) => (
-        <StatusPill variant={statusVariants[row.status]} i>
-          {row.status}
+      cell: ({ row }) => (
+        <StatusPill variant={statusVariants[row.original.status]} i>
+          {row.original.status}
         </StatusPill>
-      ),
-    },
-    {
-      header: "Assigned Analyst",
-      accessorKey: "assignedAnalyst",
-    },
-    {
-      header: "Last Updated",
-      accessorKey: "lastUpdated",
-    },
-    {
-      header: "Actions",
-      cell: (row) => (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() =>
-            router.push(
-              `/dashboard/client/monitoring-and-cases/case-list/details/1`
-            )
-          }
-        >
-          <IconEye />
-        </Button>
       ),
     },
   ];
   return (
     <div>
-      <CustomDatatable data={cases} columns={columns} />
+      <ResizableTable data={data} columns={columns} loading={loading} />
     </div>
   );
 };
 export default function CaseList() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await getCaseList();
+        
+        setData(response?.data || []);
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center justify-between bg-white shadow-sm rounded-md p-4">
+        <div className="flex items-center gap-2  ">
           <InputGroup className={"max-w-64"}>
             <InputGroupInput placeholder="Search..." />
             <InputGroupAddon>
@@ -444,7 +546,7 @@ export default function CaseList() {
           </ButtonGroup>
         </div>
       </div>
-      <ListView />
+      <ListView data={data} loading={loading} />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
   Calendar,
   FileText,
   Users,
+  ChevronsRight,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -23,13 +24,11 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const TransactionDetailView = ({ open, setOpen, currentItem }) => {
-  console.log('currentItem', currentItem);
   const [viewReport, setViewReport] = useState(false);
   const [customer, setCustomer] = useState(null);
 
   console.log('customer', customer);
   useEffect(() => {
-
     if (currentItem) {
       fetchDetails();
     }
@@ -96,6 +95,8 @@ const TransactionDetailView = ({ open, setOpen, currentItem }) => {
       day: "numeric",
     })
   }
+
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetContent className='sm:max-w-5xl w-full overflow-y-auto '>
@@ -167,70 +168,45 @@ const TransactionDetailView = ({ open, setOpen, currentItem }) => {
             </div>
           </div>
         </div> */}
-        <div className='grid grid-cols-2 gap-4 px-4'>
+        <div className='flex flex-row items-center gap-4 px-4'>
           {/* Sender */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="space-y-3 w-full">
+            <div className="flex items-center  gap-2 text-muted-foreground">
               <User className="size-4" />
               <p className="text-sm font-medium">SENDER</p>
             </div>
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-3">
               <div>
                 <p className=" font-semibold text-balance">
-                  {customer?.client?.name}{" "}
-
+                  {customer?.sender?.name}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {customer?.sender?.name}</p>
+                  {customer?.sender?.account}
+                </p>
               </div>
-              <Separator />
-              <div className="space-y-2">
-                {/* <div className="flex items-center gap-2 text-sm">
-                  <Mail className="size-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    {customer.personalKyc.personal_form.contact_details.email}
-                  </span>
-                </div> */}
-                <div className="flex items-center gap-2 text-sm">
-                  <Phone className="size-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    {customer?.sender?.account}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="size-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    {customer?.sender?.address || 'N/A'}
-                  </span>
-                </div>
-              </div>
+
             </div>
+          </div>
+          <div className='size-4'>
+            <ChevronsRight className='size-4 text-green-500' />
           </div>
 
           {/* Receiver */}
-          <div className="space-y-3">
+          <div className="space-y-3 w-full">
             <div className="flex items-center gap-2 text-muted-foreground">
               <User className="size-4" />
               <p className="text-sm font-medium">RECEIVER</p>
             </div>
             <div className="rounded-lg bg-secondary/50 border p-4 space-y-3">
               <div>
-                <p className=" font-semibold text-balance">{customer?.receiver?.institution}</p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className=" font-semibold text-balance">
                   {customer?.receiver?.name}
                 </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {customer?.receiver?.account}
+                </p>
               </div>
-              <Separator />
-              <div className="space-y-2">
 
-                <div className="flex items-center gap-2 text-sm">
-                  <Briefcase className="size-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    {customer?.receiver?.account}
-                  </span>
-                </div>
-
-              </div>
             </div>
           </div>
         </div>
@@ -275,27 +251,36 @@ const TransactionDetailView = ({ open, setOpen, currentItem }) => {
                     <CardDescription>Automated security screening results</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Risk Score</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary transition-all"
+                            style={{ width: `${customer?.forensic?.chainalysisScore}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-semibold">{customer?.forensic?.chainalysisScore}</span>
+                      </div>
+                    </div>
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Wallet Cluster</p>
                         <p className="mt-1 font-mono text-sm">{customer?.forensic?.walletCluster}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Risk Score</p>
-                        <div className="mt-1 flex items-center gap-2">
-                          <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-primary transition-all"
-                              style={{ width: `${customer?.forensic?.chainalysisScore}%` }}
-                            />
-                          </div>
-                          <span className="text-sm font-semibold">{customer?.forensic?.chainalysisScore}</span>
-                        </div>
+                        <p className="text-sm font-medium text-muted-foreground">Device ID</p>
+                        <p className="mt-1 font-mono text-sm">{customer?.metadata?.deviceId}</p>
                       </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">IP Address</p>
+                        <p className="mt-1 font-mono text-sm">{customer?.metadata?.ip}</p>
+                      </div>
+
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Analysis Notes</p>
-                      <p className="mt-1 text-sm">{customer?.forensic?.notes}</p>
+                      <p className="mt-1 text-xs">{customer?.forensic?.notes}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -321,26 +306,27 @@ const TransactionDetailView = ({ open, setOpen, currentItem }) => {
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Full Name</p>
                             <p className="mt-1">
-                              {customer?.personalKyc?.personal_form?.customer_details?.given_name}{" "}
-                              {customer?.personalKyc?.personal_form?.customer_details?.middle_name}{" "}
-                              {customer?.personalKyc?.personal_form?.customer_details?.surname}
+                              {customer?.customer?.personalKyc?.personal_form?.customer_details?.given_name}{" "}
+                              {customer?.customer?.personalKyc?.personal_form?.contact_details?.middle_name}{" "}
+                              {customer?.customer?.personalKyc?.personal_form?.customer_details?.surname}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Also Known As</p>
                             <p className="mt-1">
-                              {customer?.personalKyc?.personal_form?.customer_details?.other_names || "N/A"}
+                              {customer?.customer?.personalKyc?.personal_form?.customer_details?.given_name || "N/A"}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
                             <p className="mt-1">
-                              {formatDate(customer?.personalKyc?.personal_form?.customer_details?.date_of_birth)}
+                              {formatDate(customer?.customer?.personalKyc?.personal_form?.customer_details?.date_of_birth)}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Referral Source</p>
-                            <p className="mt-1">{customer?.personalKyc?.personal_form?.customer_details?.referral}</p>
+                            <p className="mt-1">{customer?.customer?.personalKyc?.personal_form?.customer_details?.referral}
+                            </p>
                           </div>
                         </div>
 
@@ -407,23 +393,23 @@ const TransactionDetailView = ({ open, setOpen, currentItem }) => {
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Occupation</p>
                             <p className="mt-1 text-lg font-medium">
-                              {customer?.personalKyc?.personal_form?.employment_details?.occupation}
+                              {customer?.customer?.personalKyc?.personal_form?.employment_details?.occupation}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Industry</p>
                             <p className="mt-1 text-lg font-medium">
-                              {customer?.personalKyc?.personal_form?.employment_details?.industry}
+                              {customer?.customer?.personalKyc?.personal_form?.employment_details?.industry}
                             </p>
                           </div>
                           <div className="sm:col-span-2">
                             <p className="text-sm font-medium text-muted-foreground">Employer</p>
-                            <div className="mt-2 flex items-center gap-2 rounded-lg bg-muted/50 p-3">
+                            {/* <div className="mt-2 flex items-center gap-2 rounded-lg bg-muted/50 p-3">
                               <Building2 className="size-5 text-muted-foreground" />
                               <p className="font-medium">
                                 {customer?.personalKyc?.personal_form?.employment_details?.employer_name}
                               </p>
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                       </CardContent>
@@ -442,21 +428,21 @@ const TransactionDetailView = ({ open, setOpen, currentItem }) => {
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Source of Funds</p>
-                            <p className="mt-1">{customer?.personalKyc?.funds_wealth?.source_of_funds}</p>
+                            <p className="mt-1">{customer?.customer?.personalKyc?.funds_wealth?.source_of_funds}</p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Source of Wealth</p>
-                            <p className="mt-1">{customer?.personalKyc?.funds_wealth?.source_of_wealth}</p>
+                            <p className="mt-1">{customer?.customer?.personalKyc?.funds_wealth?.source_of_wealth}</p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Account Purpose</p>
-                            <p className="mt-1">{customer?.personalKyc?.funds_wealth?.account_purpose}</p>
+                            <p className="mt-1">{customer?.customer?.personalKyc?.funds_wealth?.account_purpose}</p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Estimated Trading Volume</p>
                             <p className="mt-1 text-lg font-semibold">
                               $
-                              {Number.parseInt(customer?.personalKyc?.funds_wealth?.estimated_trading_volume).toLocaleString()}
+                              {customer?.customer?.personalKyc?.funds_wealth?.estimated_trading_volume}
                             </p>
                           </div>
                         </div>
