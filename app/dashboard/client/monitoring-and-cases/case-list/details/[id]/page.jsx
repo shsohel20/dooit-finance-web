@@ -10,7 +10,7 @@ export default async function CaseListDetails({ params, searchParams }) {
   return (
     <div>
       <div className="min-h-screen bg-background">
-        <CaseHeader />
+        {/* <CaseHeader /> */}
         <div className="border-b border-border">
           <div className="container mx-auto ">
             <CaseTabs caseNumber={caseNumber} id={id}/>

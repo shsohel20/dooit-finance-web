@@ -13,3 +13,17 @@ export const getCaseList = async () => {
   const response = await fetchWithAuth(`${endpoint}`);
   return response.json();
 }
+
+
+export const createRFI = async (data) => {
+  const response = await fetchWithAuth(`rfi/new`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export const getRFIList = async () => {
+  const response = await fetchWithAuth(`rfi`);
+  return response.json();
+}

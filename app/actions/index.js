@@ -18,3 +18,8 @@ export const fileUploadOnCloudinary = async (file) => {
   })
   return res.json();
 }
+
+export const getLoggedInUser = async () => {
+  const response = await fetchWithAuth('auth/me')
+  return response.json()
+}

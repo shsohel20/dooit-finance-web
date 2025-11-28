@@ -1,5 +1,5 @@
 "use client";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import useAlertStore from "@/app/store/alerts";
 import { getEcddByCaseNumber } from "@/app/dashboard/client/report-compliance/ecdd/actions";
@@ -11,6 +11,7 @@ import { EmploymentDetails } from "./ecdd/Employeedetails";
 import { FundsWealth } from "./ecdd/FundsWealth";
 import { Declaration } from "./ecdd/declaration";
 import { ClientRelations } from "./ecdd/ClientRelations";
+import { Button } from "@/components/ui/button";
 
 const Ecdd = () => {
   const [ecddData, setEcddData] = useState(null);
@@ -18,6 +19,7 @@ const Ecdd = () => {
   const query = useSearchParams();
   const caseNumber = query.get("caseNumber");
   const { details } = useAlertStore();
+  const router = useRouter();
   console.log("details", details);
   const fetchEcddData = async () => {
     try {
@@ -31,9 +33,14 @@ const Ecdd = () => {
   useEffect(() => {
     fetchEcddData();
   }, [details?.uid]);
+
+  const handleNewEcdd = () => {
+    router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`);
+  };
   return (
     <div>
       <div className="min-h-screen bg-background">
+        <div className="flex justify-end mb-4"><Button onClick={handleNewEcdd}>New ECDD</Button></div>
         <div className="">
           <CustomerHeader customer={ecddData} />
 

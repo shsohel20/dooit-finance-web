@@ -44,6 +44,13 @@ export default function CaseTabs({ caseNumber, id }) {
   const [activeTab, setActiveTab] = useState(tabs[0]);
 
   useEffect(() => {
+   return () => {
+    setDetails(null);
+    setFetching(false);
+   }
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       setFetching(true);
       try {
