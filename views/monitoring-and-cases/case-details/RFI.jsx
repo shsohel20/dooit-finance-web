@@ -50,21 +50,27 @@ export default function RFI() {
   }, []);
   const columns = [
     {
-      header: "Date",
-      accessorKey: "date",
+      header: "Id",
+      accessorKey: "uid",
     },
     {
       header: "Status",
       accessorKey: "status",
     },
     {
-      header: "Subject",
-      accessorKey: "subject",
+      header: "Description",
+      accessorKey: "requestedItems?.[0]?.text",
+      cell: ({row})=>{
+        const texts=row?.original?.requestedItems.map(itm=>itm.text)
+        return (
+          <p>{texts.join(',')}</p>
+        )
+      }
     },
-    {
-      header: "Deadline",
-      accessorKey: "deadline",
-    },
+    // {
+    //   header: "Deadline",
+    //   accessorKey: "deadline",
+    // },
     {
       header: "Actions",
       accessorKey: "actions",

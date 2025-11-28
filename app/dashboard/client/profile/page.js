@@ -37,9 +37,9 @@ export default function CustomerProfile() {
             <h1 className="text-4xl font-bold tracking-tight mb-2">Customer Profile</h1>
             <p className="text-muted-foreground text-lg">View and manage customer information</p>
           </div>
-          <Button variant="outline" size="sm">
+          {/* <Button variant="outline" size="sm">
             Edit Profile
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -194,10 +194,10 @@ export default function CustomerProfile() {
               <CardTitle className="text-lg">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full justify-start bg-transparent">
+              {/* <Button variant="outline" className="w-full justify-start bg-transparent">
                 <Mail className="h-4 w-4 mr-2" />
                 Send Email
-              </Button>
+              </Button> */}
               <Button variant="outline" className="w-full justify-start bg-transparent">
                 <Shield className="h-4 w-4 mr-2" />
                 Manage Permissions

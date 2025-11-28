@@ -80,7 +80,7 @@ export function NavUser({ user }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+              <DropdownMenuItem onClick={() => router.push('/dashboard/client/profile')}>
                 <IconUserCircle />
                 Account
               </DropdownMenuItem>

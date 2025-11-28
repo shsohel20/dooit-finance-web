@@ -2,6 +2,7 @@
 import React from 'react'
 import { useLoggedInUserStore } from '@/app/store/useLoggedInUser'
 import { getLoggedInUser } from '@/app/actions'
+import Link from 'next/link'
 export default function Home() {
 
   return (

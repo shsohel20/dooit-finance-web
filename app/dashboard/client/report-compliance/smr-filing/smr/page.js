@@ -3,33 +3,46 @@ import { PageDescription, PageHeader, PageTitle } from '@/components/common'
 import { Button } from '@/components/ui/button'
 import ResizableTable from '@/components/ui/Resizabletable'
 import { useRouter } from 'next/navigation'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { getSMRList } from './actions'
+import { formatDateTime } from '@/lib/utils'
 export default function SMRPage() {
   const router = useRouter()
+  const [data,setData]=useState([])
+  const [loading,setLoading]=useState(false)
   const columns = [
     {
       header: 'Case ID',
-      accessorKey: 'caseId',
+      accessorKey: 'uid',
     },
     {
       header: 'Customer Name',
-      accessorKey: 'customerName',
+      accessorKey: 'partC.personOrganisation.name',
     },
-    {
-      header: 'Customer ID',
-      accessorKey: 'customerId',
-    },
+    // {
+    //   header: 'Customer ID',
+    //   accessorKey: 'partC.personOrganisation.id',
+    // },
     {
       header: 'Suspicion Date',
-      accessorKey: 'suspicionDate',
+      accessorKey: 'updatedAt',
+      cell: ({row})=>{
+        return (
+          <div>
+            <p>{formatDateTime(row?.updatedAt)?.date}</p>
+            <span className='text-muted-foreground'>{formatDateTime(row.updatedAt)?.time}</span>
+          </div>
+        )
+      }
     },
     {
       header: 'Analyst',
       accessorKey: 'analyst',
     },
     {
-      header: 'Decision',
-      accessorKey: 'decision',
+      header: 'Suspicious Activity',
+      accessorKey: 'partB.groundsForSuspicion',
+      size: 200
     },
     {
       header: 'Status',
@@ -40,28 +53,23 @@ export default function SMRPage() {
       accessorKey: 'verified',
     },
   ]
-  const data = [
-    {
-      caseId: '1234567890',
-      customerName: 'John Doe',
-      customerId: '1234567890',
-      suspicionDate: '2021-01-01',
-      analyst: 'John Doe',
-      decision: 'Reportable',
-      status: 'Pending',
-      verified: true,
-    },
-    {
-      caseId: '1234567890',
-      customerName: 'Jane Doe',
-      customerId: '1234567890',
-      suspicionDate: '2021-01-01',
-      analyst: 'Jane Doe',
-      decision: 'Not Reportable',
-      status: 'Pending',
-      verified: false,
-    },
-  ]
+const getSmr=async()=>{
+  setLoading(true)
+  try {
+    const response= await getSMRList();
+    console.log('smr', response)
+    if(response.success){
+      setData(response.data)
+    }
+  } catch (error) {
+    console.log('error', error)
+  }finally{
+    setLoading(false)
+  }
+}
+  useEffect(()=>{
+    getSmr()
+  },[])
   const handleNewSMR = () => {
     router.push('/dashboard/client/report-compliance/smr-filing/smr/form')
   }
@@ -71,7 +79,7 @@ export default function SMRPage() {
         <PageTitle>Suspicious Matter Report</PageTitle>
         <PageDescription>Manage and track all Suspicious Matter Reports</PageDescription>
       </PageHeader>
-      <ResizableTable columns={columns} data={data} actions={<Button size='sm' onClick={handleNewSMR}>Add New</Button>} />
+      <ResizableTable loading={loading} columns={columns} data={data} actions={<Button size='sm' onClick={handleNewSMR}>Add New</Button>} />
     </div>
   )
 }
