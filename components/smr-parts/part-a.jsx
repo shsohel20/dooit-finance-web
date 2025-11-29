@@ -114,7 +114,7 @@ export function PartA({ data, updateData }) {
       {/* Question 1 */}
       <div className="space-y-4">
         <div className="flex items-start gap-2">
-          <Label className="text-base font-bold text-primary">
+          <Label className="text-base font-bold ">
             1. Please specify the designated service(s) to which the suspicious
             matter relates
           </Label>
@@ -176,9 +176,9 @@ export function PartA({ data, updateData }) {
       </div>
 
       {/* Question 2 */}
-      <div className="space-y-4 pt-6 border-t-2 border-primary/20">
+      <div className="space-y-4 pt-6 border-t-2 ">
         <div className="flex items-start gap-2">
-          <Label className="text-base font-bold text-primary">
+          <Label className="text-base font-bold ">
             2. Please specify the reason(s) for the suspicion, which may include
           </Label>
           <HelpCircle className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
@@ -211,7 +211,7 @@ export function PartA({ data, updateData }) {
               value={reason}
               onChange={(e) => updateOtherReason(index, e.target.value)}
               placeholder="Specify other reason for suspicion"
-              className="border-2 border-primary"
+              className="border-2 "
             />
           ))}
           <Button
@@ -219,7 +219,7 @@ export function PartA({ data, updateData }) {
             onClick={addOtherReason}
             variant="outline"
             size="sm"
-            className="border-primary bg-transparent"
+            className=" bg-transparent"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add another reason for suspicion

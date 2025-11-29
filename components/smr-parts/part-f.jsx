@@ -17,12 +17,12 @@ export function PartF({ data, updateData }) {
       completed: true,
       referenceNumber: "",
       totalAmount: { currencyCode: "AUD", amount: 0 },
-      cashAmount: { currencyCode: "AUD", amount: 0 },
-      foreignCurrencies: [],
-      digitalCurrencies: [],
-      sender: { name: "", institutions: [] },
-      payee: { name: "", institutions: [] },
-      beneficiary: { name: "", institutions: [] },
+      // cashAmount: { currencyCode: "AUD", amount: 0 },
+      // foreignCurrencies: [],
+      // digitalCurrencies: [],
+      // sender: { name: "", institutions: [] },
+      // payee: { name: "", institutions: [] },
+      // beneficiary: { name: "", institutions: [] },
     };
   }
 
@@ -53,9 +53,7 @@ export function PartF({ data, updateData }) {
           className="p-6 bg-secondary/30 rounded-lg border-2 border-muted"
         >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-primary">
-              Transaction {index + 1}
-            </h3>
+            <h3 className="text-lg font-bold ">Transaction {index + 1}</h3>
             {transactions.length > 1 && (
               <Button
                 type="button"
@@ -78,7 +76,7 @@ export function PartF({ data, updateData }) {
         type="button"
         onClick={handleAdd}
         variant="outline"
-        className="border-2 border-primary bg-transparent"
+        className="border bg-transparent"
       >
         <Plus className="w-4 h-4 mr-2" />
         Add another transaction

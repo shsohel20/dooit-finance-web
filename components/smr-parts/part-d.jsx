@@ -61,7 +61,7 @@ export function PartD({ data, updateData }) {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <Label className="text-base font-bold text-primary">
+        <Label className="text-base font-bold ">
           13. Are there any other parties to which the suspicious matter
           relates?
         </Label>
@@ -100,9 +100,7 @@ export function PartD({ data, updateData }) {
               className="p-6 bg-secondary/30 rounded-lg border-2 border-muted relative"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-primary">
-                  Other Party {index + 1}
-                </h3>
+                <h3 className="text-lg font-bold ">Other Party {index + 1}</h3>
                 {otherParties.length > 1 && (
                   <Button
                     type="button"
@@ -127,7 +125,7 @@ export function PartD({ data, updateData }) {
             type="button"
             onClick={handleAddParty}
             variant="outline"
-            className="border-2 border-primary bg-transparent"
+            className="border bg-transparent"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add another party

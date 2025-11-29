@@ -6,14 +6,38 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { getSMRList } from './actions'
 import { formatDateTime } from '@/lib/utils'
+import { EyeIcon } from 'lucide-react'
 export default function SMRPage() {
   const router = useRouter()
-  const [data,setData]=useState([])
-  const [loading,setLoading]=useState(false)
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(false);
+
+  const handleView = (id) => {
+    router.push(`/dashboard/client/report-compliance/smr-filing/smr/form/detail?id=${id}`)
+  }
+
   const columns = [
+    {
+      header: 'Action',
+      accessorKey: 'action',
+      size: 100,
+      cell: ({ row }) => {
+        return (
+          <div>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => handleView(row.original._id)}>
+              <EyeIcon />
+            </Button>
+          </div>
+        )
+      }
+    },
     {
       header: 'Case ID',
       accessorKey: 'uid',
+      size: 100,
     },
     {
       header: 'Customer Name',
@@ -26,7 +50,7 @@ export default function SMRPage() {
     {
       header: 'Suspicion Date',
       accessorKey: 'updatedAt',
-      cell: ({row})=>{
+      cell: ({ row }) => {
         return (
           <div>
             <p>{formatDateTime(row?.updatedAt)?.date}</p>
@@ -38,43 +62,53 @@ export default function SMRPage() {
     {
       header: 'Analyst',
       accessorKey: 'analyst',
+      size: 100,
     },
     {
       header: 'Suspicious Activity',
       accessorKey: 'partB.groundsForSuspicion',
-      size: 200
+      // size: 200
+      cell: ({ row }) => {
+        return (
+          <div className=' '>
+            <p className='max-w-[200px] text-wrap break-words'>{row.original.partB.groundsForSuspicion}</p>
+          </div>
+        )
+      }
     },
     {
       header: 'Status',
       accessorKey: 'status',
+      size: 100,
     },
     {
       header: 'Verified',
       accessorKey: 'verified',
+      size: 100,
     },
   ]
-const getSmr=async()=>{
-  setLoading(true)
-  try {
-    const response= await getSMRList();
-    console.log('smr', response)
-    if(response.success){
-      setData(response.data)
+  const getSmr = async () => {
+    setLoading(true)
+    try {
+      const response = await getSMRList();
+      console.log('smr', response)
+      if (response.success) {
+        setData(response.data)
+      }
+    } catch (error) {
+      console.log('error', error)
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.log('error', error)
-  }finally{
-    setLoading(false)
   }
-}
-  useEffect(()=>{
+  useEffect(() => {
     getSmr()
-  },[])
+  }, [])
   const handleNewSMR = () => {
     router.push('/dashboard/client/report-compliance/smr-filing/smr/form')
   }
   return (
-    <div className='p-4 border rounded-lg space-y-4'>
+    <div className='p-4 border rounded-lg space-y-4 bg-white'>
       <PageHeader>
         <PageTitle>Suspicious Matter Report</PageTitle>
         <PageDescription>Manage and track all Suspicious Matter Reports</PageDescription>

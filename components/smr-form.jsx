@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
 import { PartA } from "./smr-parts/part-a";
 import { PartB } from "./smr-parts/part-b";
 import { PartC } from "./smr-parts/part-c";
@@ -13,6 +13,9 @@ import { PartF } from "./smr-parts/part-f";
 import { PartG } from "./smr-parts/part-g";
 import { PartH } from "./smr-parts/part-h";
 import { FormProgress } from "./form-progress";
+import { createSMR } from "@/app/dashboard/client/report-compliance/smr-filing/smr/actions";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const PARTS = [
   { id: "A", title: "Details of the matter", component: PartA },
@@ -27,8 +30,30 @@ const PARTS = [
 
 export function SuspiciousMatterReportForm() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    reportingEntity: null,
+    serviceStatus: "provided",
+    suspicionReasons: [],
+    otherReasons: [],
+    designatedServices: [],
+    groundsForSuspicion: "",
+    detailsOfPersonOrganisation: "",
+    detailsOfOtherParty: "",
+    suspiciousPersonUnidentified: "",
+    transactionsRelatedToTheMatter: [],
+    previousReports: [],
+    otherGovernmentBodies: [],
+    likelyOffence: [],
+    attachments: [],
+    personOrganisation: null,
+    transactions: [],
+    otherParties: [],
+    unidentifiedPersons: [],
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+
+  const router = useRouter();
 
   const CurrentPartComponent = PARTS[currentStep].component;
 
@@ -52,9 +77,60 @@ export function SuspiciousMatterReportForm() {
     console.log("[v0] Form data saved:", formData);
   };
 
-  const handleSubmit = () => {
-    console.log("[v0] Form submitted:", formData);
-    alert("Suspicious Matter Report submitted successfully!");
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    const submittedData = {
+      status: "draft",
+      partA: {
+        serviceStatus: formData.serviceStatus,
+        designatedServices: formData.designatedServices,
+        suspicionReasons: formData.suspicionReasons,
+        otherReasons: formData.otherReasons,
+      },
+      partB: {
+        groundsForSuspicion: formData.groundsForSuspicion,
+      },
+      partC: {
+        personOrganisation: formData.personOrganisation,
+      },
+      partD: {
+        otherParties: formData.otherParties,
+        hasOtherParties: formData.otherParties.length > 0 ? true : false,
+      },
+      partE: {
+        unidentifiedPersons: formData.unidentifiedPersons,
+        hasUnidentifiedPersons:
+          formData.unidentifiedPersons.length > 0 ? true : false,
+      },
+      partF: {
+        transactions: formData.transactions,
+      },
+      partG: {
+        likelyOffence: formData.likelyOffence,
+        previousReports: formData.previousReports,
+        otherGovernmentBodies: formData.otherGovernmentBodies,
+        attachments: formData.attachments,
+      },
+      partH: {
+        reportingEntity: formData.reportingEntity,
+      },
+    };
+    console.log("[v0] Form submitted:", JSON.stringify(submittedData, null, 2));
+    try {
+      const response = await createSMR(submittedData);
+      console.log("submit response", response);
+      if (response.success || response.succeed) {
+        toast.success("Suspicious Matter Report submitted successfully!");
+        localStorage.setItem("newId", response.id);
+        router.push("/dashboard/client/report-compliance/smr-filing/smr");
+      } else {
+        toast.error("Failed to submit Suspicious Matter Report!");
+      }
+    } catch (error) {
+      toast.error("Failed to submit Suspicious Matter Report!");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const updateFormData = (partData) => {
@@ -65,7 +141,7 @@ export function SuspiciousMatterReportForm() {
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-primary mb-2">
+        <h1 className="text-4xl font-bold text-zinc-800 mb-2">
           Suspicious Matter Report
         </h1>
         <p className="text-muted-foreground">
@@ -87,13 +163,13 @@ export function SuspiciousMatterReportForm() {
       />
 
       {/* Form Content */}
-      <Card className="border-2 border-primary p-6 md:p-8 mb-6">
+      <Card className="border p-6 md:p-8 mb-6">
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
               {PARTS[currentStep].id}
             </div>
-            <h2 className="text-2xl font-bold text-primary">
+            <h2 className="text-2xl font-bold">
               PART {PARTS[currentStep].id} -{" "}
               {PARTS[currentStep].title.toUpperCase()}
             </h2>
@@ -140,8 +216,13 @@ export function SuspiciousMatterReportForm() {
             onClick={handleSubmit}
             size="lg"
             className="bg-accent text-accent-foreground hover:bg-accent/90"
+            disabled={isSubmitting}
           >
-            Submit Report
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              "Submit Report"
+            )}
           </Button>
         )}
       </div>

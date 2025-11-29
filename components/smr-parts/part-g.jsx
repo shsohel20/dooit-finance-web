@@ -40,7 +40,7 @@ export function PartG({ data, updateData }) {
     <div className="space-y-8">
       {/* Question 43 */}
       <div className="space-y-4">
-        <Label className="text-base font-bold text-primary">
+        <Label className="text-base font-bold ">
           43. Provide the most likely offence to which the suspicious matter
           relates
         </Label>
@@ -61,8 +61,8 @@ export function PartG({ data, updateData }) {
       </div>
 
       {/* Question 44 */}
-      <div className="space-y-4 pt-6 border-t-2 border-primary/20">
-        <Label className="text-base font-bold text-primary">
+      <div className="space-y-4 pt-6 border-t-2 ">
+        <Label className="text-base font-bold ">
           44. If a suspicious matter relating to the person/organisation has
           previously been reported to AUSTRAC, please specify
         </Label>
@@ -82,7 +82,7 @@ export function PartG({ data, updateData }) {
                   setPreviousReports(updated);
                   updateData({ previousReports: updated });
                 }}
-                className="mt-1 border-2 border-primary"
+                className="mt-1 border"
               />
             </div>
             <div>
@@ -95,7 +95,7 @@ export function PartG({ data, updateData }) {
                   setPreviousReports(updated);
                   updateData({ previousReports: updated });
                 }}
-                className="mt-1 border-2 border-primary"
+                className="mt-1 border"
               />
             </div>
             {previousReports.length > 1 && (
@@ -135,8 +135,8 @@ export function PartG({ data, updateData }) {
       </div>
 
       {/* Question 45 */}
-      <div className="space-y-4 pt-6 border-t-2 border-primary/20">
-        <Label className="text-base font-bold text-primary">
+      <div className="space-y-4 pt-6 border-t/20">
+        <Label className="text-base font-bold ">
           45. If the details of the matter have been, or are to be, reported to
           another Australian government body, please specify
         </Label>
@@ -156,7 +156,7 @@ export function PartG({ data, updateData }) {
                     setGovernmentBodies(updated);
                     updateData({ otherGovernmentBodies: updated });
                   }}
-                  className="mt-1 border-2 border-primary"
+                  className="mt-1 border"
                 />
               </div>
               <div>
@@ -170,7 +170,7 @@ export function PartG({ data, updateData }) {
                     setGovernmentBodies(updated);
                     updateData({ otherGovernmentBodies: updated });
                   }}
-                  className="mt-1 border-2 border-primary"
+                  className="mt-1 border"
                 />
               </div>
             </div>
@@ -184,7 +184,7 @@ export function PartG({ data, updateData }) {
                   setGovernmentBodies(updated);
                   updateData({ otherGovernmentBodies: updated });
                 }}
-                className="mt-1 border-2 border-primary"
+                className="mt-1 border"
               />
             </div>
             {governmentBodies.length > 1 && (
@@ -237,8 +237,8 @@ export function PartG({ data, updateData }) {
       </div>
 
       {/* Attachments */}
-      <div className="space-y-4 pt-6 border-t-2 border-primary/20">
-        <Label className="text-base font-bold text-primary">
+      <div className="space-y-4 pt-6 border-t/20">
+        <Label className="text-base font-bold ">
           Additional information or supporting documentation
         </Label>
         <p className="text-sm text-muted-foreground">
@@ -246,10 +246,7 @@ export function PartG({ data, updateData }) {
         </p>
         <div className="border-2 border-dashed border-primary rounded-lg p-8 text-center">
           <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <Button
-            variant="outline"
-            className="border-2 border-primary bg-transparent"
-          >
+          <Button variant="outline" className="border bg-transparent">
             <Upload className="w-4 h-4 mr-2" />
             Add file
           </Button>

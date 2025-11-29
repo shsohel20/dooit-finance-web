@@ -16,8 +16,8 @@ export function PartH({ data, updateData }) {
         postcode: "",
         country: "Australia",
       },
-      branchName: "",
-      internalReference: "",
+      // branchName: "",
+      // internalReference: "",
       completedBy: { name: "", jobTitle: "", phone: "", email: "" },
     }
   );
@@ -38,20 +38,20 @@ export function PartH({ data, updateData }) {
     <div className="space-y-6">
       {/* Question 46 */}
       <div className="space-y-2">
-        <Label className="text-base font-bold text-primary">
+        <Label className="text-base font-bold ">
           46. Name of reporting entity
         </Label>
         <Input
           value={entity.name}
           onChange={(e) => handleUpdate("name", e.target.value)}
           placeholder="Company Name"
-          className="border-2 border-primary"
+          className="border"
         />
       </div>
 
       {/* Question 47 */}
       <div className="space-y-3">
-        <Label className="text-base font-bold text-primary">
+        <Label className="text-base font-bold ">
           47. Business/residential address (cannot be a post box address)
         </Label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -60,7 +60,7 @@ export function PartH({ data, updateData }) {
             <Input
               value={entity.address.street}
               onChange={(e) => handleUpdate("address.street", e.target.value)}
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
           <div>
@@ -68,7 +68,7 @@ export function PartH({ data, updateData }) {
             <Input
               value={entity.address.city}
               onChange={(e) => handleUpdate("address.city", e.target.value)}
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
           <div>
@@ -76,7 +76,7 @@ export function PartH({ data, updateData }) {
             <Input
               value={entity.address.state}
               onChange={(e) => handleUpdate("address.state", e.target.value)}
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
           <div>
@@ -84,7 +84,7 @@ export function PartH({ data, updateData }) {
             <Input
               value={entity.address.postcode}
               onChange={(e) => handleUpdate("address.postcode", e.target.value)}
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
           <div>
@@ -92,16 +92,16 @@ export function PartH({ data, updateData }) {
             <Input
               value={entity.address.country}
               onChange={(e) => handleUpdate("address.country", e.target.value)}
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
         </div>
       </div>
 
       {/* Question 48 */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <Label className="text-base font-bold text-primary">
+          <Label className="text-base font-bold ">
             48. Name of branch/office/retail outlet or location where the matter
             was identified
           </Label>
@@ -110,14 +110,14 @@ export function PartH({ data, updateData }) {
         <Input
           value={entity.branchName}
           onChange={(e) => handleUpdate("branchName", e.target.value)}
-          className="border-2 border-primary"
+          className="border"
         />
-      </div>
+      </div> */}
 
       {/* Question 49 */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <Label className="text-base font-bold text-primary">
+          <Label className="text-base font-bold ">
             49. Reporting entity's internal reference number (if applicable)
           </Label>
           <HelpCircle className="w-4 h-4 text-muted-foreground" />
@@ -125,14 +125,14 @@ export function PartH({ data, updateData }) {
         <Input
           value={entity.internalReference}
           onChange={(e) => handleUpdate("internalReference", e.target.value)}
-          className="border-2 border-primary"
+          className="border"
         />
-      </div>
+      </div> */}
 
       {/* Question 50 */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <Label className="text-base font-bold text-primary">
+          <Label className="text-base font-bold ">
             50. Details of person completing this report
           </Label>
           <HelpCircle className="w-4 h-4 text-muted-foreground" />
@@ -143,7 +143,7 @@ export function PartH({ data, updateData }) {
             <Input
               value={entity.completedBy.name}
               onChange={(e) => handleUpdate("completedBy.name", e.target.value)}
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
           <div>
@@ -153,7 +153,7 @@ export function PartH({ data, updateData }) {
               onChange={(e) =>
                 handleUpdate("completedBy.jobTitle", e.target.value)
               }
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
           <div>
@@ -163,7 +163,7 @@ export function PartH({ data, updateData }) {
               onChange={(e) =>
                 handleUpdate("completedBy.phone", e.target.value)
               }
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
           <div>
@@ -174,14 +174,14 @@ export function PartH({ data, updateData }) {
               onChange={(e) =>
                 handleUpdate("completedBy.email", e.target.value)
               }
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
         </div>
       </div>
 
       {/* Acknowledgment */}
-      <div className="pt-6 border-t-2 border-primary/20 space-y-4">
+      <div className="pt-6 border-t/20 space-y-4">
         <div className="p-4 bg-secondary/50 rounded-md border border-muted">
           <p className="text-sm font-medium">
             This report is made pursuant to the requirements of applicable law.
