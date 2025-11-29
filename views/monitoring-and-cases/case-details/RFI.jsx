@@ -10,18 +10,14 @@ import {
   AlertCircle,
   Eye,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import ResizableTable from "@/components/ui/Resizabletable";
+import { useState } from "react";
+import { CaseRequestForm } from "./ecdd/RFIForm";
+import { getRFIList } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
+import { useEffect } from "react";
 const data = [
   {
     date: "2025-01-01",
@@ -32,23 +28,49 @@ const data = [
 ];
 
 export default function RFI() {
+  const [open, setOpen] = useState(false);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const getRFI = async () => {
+    try {
+      setLoading(true);
+      const response = await getRFIList();
+      console.log("rfi list response", response);
+    if(response.success){
+      setData(response.data);
+      setLoading(false);
+    }
+    } catch (error) {
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    getRFI();
+  }, []);
   const columns = [
     {
-      header: "Date",
-      accessorKey: "date",
+      header: "Id",
+      accessorKey: "uid",
     },
     {
       header: "Status",
       accessorKey: "status",
     },
     {
-      header: "Subject",
-      accessorKey: "subject",
+      header: "Description",
+      accessorKey: "requestedItems?.[0]?.text",
+      cell: ({row})=>{
+        const texts=row?.original?.requestedItems.map(itm=>itm.text)
+        return (
+          <p>{texts.join(',')}</p>
+        )
+      }
     },
-    {
-      header: "Deadline",
-      accessorKey: "deadline",
-    },
+    // {
+    //   header: "Deadline",
+    //   accessorKey: "deadline",
+    // },
     {
       header: "Actions",
       accessorKey: "actions",
@@ -59,6 +81,9 @@ export default function RFI() {
       ),
     },
   ];
+  const handleNewRFI = () => {
+    setOpen(true);
+  }
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -73,9 +98,9 @@ export default function RFI() {
                 Manage and track all RFI requests and responses
               </p>
             </div>
-            <Button className="gap-2 bg-primary hover:bg-primary/90">
+            <Button onClick={handleNewRFI} className="gap-2 bg-primary hover:bg-primary/90">
               <Plus className="h-4 w-4" />
-              Draft new RFI
+               New RFI
             </Button>
           </div>
         </div>
@@ -129,7 +154,7 @@ export default function RFI() {
           <Card className=" ">
             <CardContent className="p-2">
               <div className="overflow-x-auto mb-4">
-                <ResizableTable columns={columns} data={data} />
+                <ResizableTable columns={columns} data={data} loading={loading}/>
               </div>
 
               {/* Pagination */}
@@ -193,78 +218,86 @@ export default function RFI() {
           </Card>
 
           {/* Response Tracker */}
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight mb-6">
-              Response Tracker
-            </h2>
-            <Card className="border shadow-sm">
-              <CardContent className="p-8">
-                <div className="space-y-8">
-                  {/* Timeline Item 1 */}
-                  <div className="flex gap-6">
-                    <div className="flex flex-col items-center">
-                      <div className="h-10 w-10 rounded-full bg-success/10 border-2 border-success flex items-center justify-center">
-                        <CheckCircle2 className="h-5 w-5 text-success" />
-                      </div>
-                      <div className="h-16 w-0.5 bg-border mt-2"></div>
-                    </div>
-                    <div className="pb-8">
-                      <p className="font-semibold text-foreground">
-                        RFI Response Received
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Customer provided documentation for source of funds
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-3">
-                        2023-04-28 11:15 AM
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Timeline Item 2 */}
-                  <div className="flex gap-6">
-                    <div className="flex flex-col items-center">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
-                        <FileText className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="h-16 w-0.5 bg-border mt-2"></div>
-                    </div>
-                    <div className="pb-8">
-                      <p className="font-semibold text-foreground">RFI Sent</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Request for Information sent to customer
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-3">
-                        2023-04-20 02:30 PM
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Timeline Item 3 */}
-                  <div className="flex gap-6">
-                    <div className="flex flex-col items-center">
-                      <div className="h-10 w-10 rounded-full bg-muted border-2 border-muted-foreground flex items-center justify-center">
-                        <Clock className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">
-                        RFI Drafted
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Drafted request for source of funds verification
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-3">
-                        2023-04-19 10:45 AM
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+         {/* <ResponseTracker /> */}
         </div>
       </div>
+      <CaseRequestForm open={open} setOpen={setOpen} />
     </div>
   );
+}
+
+
+const ResponseTracker = () => {
+  return (
+    <div>
+    <h2 className="text-lg font-semibold tracking-tight mb-6">
+      Response Tracker
+    </h2>
+    <Card className="border shadow-sm">
+      <CardContent className="p-8">
+        <div className="space-y-8">
+          {/* Timeline Item 1 */}
+          <div className="flex gap-6">
+            <div className="flex flex-col items-center">
+              <div className="h-10 w-10 rounded-full bg-success/10 border-2 border-success flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+              </div>
+              <div className="h-16 w-0.5 bg-border mt-2"></div>
+            </div>
+            <div className="pb-8">
+              <p className="font-semibold text-foreground">
+                RFI Response Received
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Customer provided documentation for source of funds
+              </p>
+              <p className="text-xs text-muted-foreground mt-3">
+                2023-04-28 11:15 AM
+              </p>
+            </div>
+          </div>
+
+          {/* Timeline Item 2 */}
+          <div className="flex gap-6">
+            <div className="flex flex-col items-center">
+              <div className="h-10 w-10 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+                <FileText className="h-5 w-5 text-primary" />
+              </div>
+              <div className="h-16 w-0.5 bg-border mt-2"></div>
+            </div>
+            <div className="pb-8">
+              <p className="font-semibold text-foreground">RFI Sent</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Request for Information sent to customer
+              </p>
+              <p className="text-xs text-muted-foreground mt-3">
+                2023-04-20 02:30 PM
+              </p>
+            </div>
+          </div>
+
+          {/* Timeline Item 3 */}
+          <div className="flex gap-6">
+            <div className="flex flex-col items-center">
+              <div className="h-10 w-10 rounded-full bg-muted border-2 border-muted-foreground flex items-center justify-center">
+                <Clock className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">
+                RFI Drafted
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Drafted request for source of funds verification
+              </p>
+              <p className="text-xs text-muted-foreground mt-3">
+                2023-04-19 10:45 AM
+              </p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+  )
 }

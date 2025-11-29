@@ -7,9 +7,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { IconHelpCircle } from "@tabler/icons-react";
-
+import { useRouter } from "next/navigation";
 export function SiteHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const routes = [
     {
       name: "Customers",
@@ -57,7 +58,7 @@ export function SiteHeader() {
           <Button variant="secondary" size="sm">
             Help <IconHelpCircle />
           </Button>
-          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
+          <Button onClick={() => router.push('/dashboard/client/profile')} variant="ghost" asChild size="sm" className="hidden sm:flex cursor-pointer">
             <span>
               <Avatar>
                 <AvatarImage src="https://github.com/shadcn.png" />
