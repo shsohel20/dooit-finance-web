@@ -295,12 +295,16 @@ ${
     link.click();
   };
 
+  const handleSubmit = () => {
+    console.log("formData", formData);
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <Card className="p-8 border-2 border-primary/20">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-primary">
+            <h2 className="text-2xl font-bold ">
               Grounds for Suspicion (GFS) Generator
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
@@ -332,7 +336,7 @@ ${
         <div className="space-y-8">
           {/* Suspicion Details */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2">
+            <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2">
               Suspicion Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -390,7 +394,7 @@ ${
 
           {/* Customer Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2">
+            <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2">
               Customer Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -475,7 +479,7 @@ ${
 
           {/* Transaction Review Period */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2">
+            <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2">
               Transaction Review Period
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -531,7 +535,7 @@ ${
           {/* Other Financial Institutions */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2 flex-1">
+              <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2 flex-1">
                 Other Financial Institutions (OFI)
               </h3>
               <Button
@@ -594,7 +598,7 @@ ${
           {/* Transactions */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2 flex-1">
+              <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2 flex-1">
                 Transactions
               </h3>
               <Button
@@ -756,7 +760,7 @@ ${
           {/* Crypto Addresses */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2 flex-1">
+              <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2 flex-1">
                 Crypto Wallet Addresses
               </h3>
               <Button
@@ -790,7 +794,7 @@ ${
           {/* IP Addresses */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2 flex-1">
+              <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2 flex-1">
                 IP Addresses
               </h3>
               <Button
@@ -852,7 +856,7 @@ ${
 
           {/* Additional Notes */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2">
+            <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2">
               Additional Notes
             </h3>
             <Textarea
@@ -867,11 +871,12 @@ ${
           <div className="flex gap-4">
             <Button
               onClick={generateReport}
-              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="flex-1 bg-primary -foreground hover:bg-primary/90"
             >
               <FileText className="w-4 h-4 mr-2" />
               Generate Report
             </Button>
+            <Button onClick={handleSubmit}>Submit</Button>
             {generatedReport && (
               <Button
                 onClick={exportReport}
@@ -887,9 +892,7 @@ ${
           {/* Generated Report Display */}
           {generatedReport && (
             <Card className="p-6 bg-muted/50">
-              <h3 className="text-lg font-semibold text-primary mb-4">
-                Generated Report
-              </h3>
+              <h3 className="text-lg font-semibold  mb-4">Generated Report</h3>
               <div className="whitespace-pre-wrap text-sm leading-relaxed font-mono bg-background p-4 rounded border">
                 {generatedReport}
               </div>
