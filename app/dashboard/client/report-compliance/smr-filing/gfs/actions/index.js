@@ -3,7 +3,7 @@
 import { fetchWithAuth } from '@/services/serverApi';
 
 export const createGFS = async (formData) => {
-  const response = await fetchWithAuth('gfs-report', {
+  const response = await fetchWithAuth('gfs-report/new', {
     method: 'POST',
     body: JSON.stringify(formData)
   })
@@ -12,5 +12,10 @@ export const createGFS = async (formData) => {
 
 export const getGFSById = async (id) => {
   const response = await fetchWithAuth(`gfs-report/${id}`);
+  return response.json();
+}
+
+export const getGFSList = async () => {
+  const response = await fetchWithAuth('gfs-report');
   return response.json();
 }
