@@ -300,6 +300,7 @@ export function GFSForm() {
                 <Label>Suspicion Dates</Label>
                 <Input
                   value={formData.suspicionDates}
+                  type="date"
                   onChange={(e) =>
                     updateField("suspicionDates", e.target.value)
                   }

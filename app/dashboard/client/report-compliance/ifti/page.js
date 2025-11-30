@@ -2,42 +2,36 @@
 import { PageDescription, PageHeader, PageTitle } from '@/components/common'
 import { Button } from '@/components/ui/button'
 import ResizableTable from '@/components/ui/Resizabletable'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { getIFTIList } from './actions'
 
 const columns = [
   {
     header: 'Case ID',
-    accessorKey: 'caseId',
+    accessorKey: 'uid',
+  },
+
+  {
+    header: 'Sender',
+    accessorKey: 'orderingCustomer.fullName',
   },
   {
-    header: 'Customer Name',
-    accessorKey: 'customerName',
+    header: 'Receiver',
+    accessorKey: 'beneficiaryCustomer.fullName',
   },
   {
-    header: 'Customer ID',
-    accessorKey: 'customerId',
+    header: 'Transaction Amount',
+    accessorKey: 'transaction.totalAmount',
   },
   {
-    header: 'Suspicion Date',
-    accessorKey: 'suspicionDate',
+    header: 'Transfer Type',
+    accessorKey: 'transaction.transferType',
   },
-  {
-    header: 'Analyst',
-    accessorKey: 'analyst',
-  },
-  {
-    header: 'Decision',
-    accessorKey: 'decision',
-  },
-  {
-    header: 'Status',
-    accessorKey: 'status',
-  },
-  {
-    header: 'Verified',
-    accessorKey: 'verified',
-  },
+  // {
+  //   header: 'Transfer Reason',
+  //   accessorKey: 'reportCompletion.transferReason',
+  // },
 ]
 const data = [
   {
@@ -62,6 +56,27 @@ const data = [
   },
 ]
 export default function IFTIPage() {
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(false)
+  console.log("data", data)
+
+  const getData = async () => {
+    setLoading(true)
+    try {
+      const response = await getIFTIList()
+      console.log("response", response)
+      if (response.success) {
+        setData(response.data)
+      }
+    } catch (error) {
+      console.error("error", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    getData()
+  }, [])
   const router = useRouter()
   const handleNewIFTI = () => {
     router.push('/dashboard/client/report-compliance/ifti/form')

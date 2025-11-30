@@ -24,6 +24,7 @@ import { formatAUD, formatDateTime } from '@/lib/utils';
 import TransactionDetailView from '../form/Details';
 import { getTransactions } from '@/app/dashboard/client/transactions/actions';
 import TransactionReportingModal from '../form/ReportingModal';
+import { TransactionDashboard } from './Dashboard';
 
 
 const TransactionListView = () => {
@@ -33,6 +34,8 @@ const TransactionListView = () => {
   const [currentItemReport, setCurrentItemReport] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [fetching, setFetching] = useState(false);
+
+  console.log('transactions', transactions);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -247,6 +250,7 @@ const TransactionListView = () => {
           View and manage transaction history for your clients.
         </PageDescription>
       </PageHeader>
+      <TransactionDashboard transactions={transactions} />
 
       <div className='flex items-center justify-between bg-white shadow-sm rounded-md p-4'>
         <div className='flex items-center gap-2   '>

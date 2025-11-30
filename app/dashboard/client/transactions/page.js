@@ -19,7 +19,7 @@ export default function TransactionList() {
   ]
   return (
     <div>
-      <Card className="border-border/50 mb-4">
+      {/* <Card className="border-border/50 mb-4">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -93,7 +93,7 @@ export default function TransactionList() {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
       <TransactionListView />
     </div>
   )

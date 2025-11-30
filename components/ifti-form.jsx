@@ -14,7 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Download, Save, FileText } from "lucide-react";
+import { Upload, Download, Save, FileText, Loader2 } from "lucide-react";
+import { createIFTI } from "@/app/dashboard/client/report-compliance/ifti/actions";
+import { toast } from "sonner";
 
 const INITIAL_FORM_DATA = {
   transaction: {
@@ -23,13 +25,11 @@ const INITIAL_FORM_DATA = {
     currencyCode: "",
     totalAmount: "",
     transferType: "",
-    propertyDescription: "",
+    // propertyDescription: "",
     referenceNumber: "",
   },
   orderingCustomer: {
     fullName: "",
-    otherName: "",
-    dateOfBirth: "",
     address: "",
     city: "",
     state: "",
@@ -38,31 +38,33 @@ const INITIAL_FORM_DATA = {
     phone: "",
     email: "",
     occupation: "",
-    abnAcnArbn: "",
-    customerNumber: "",
-    accountNumber: "",
-    businessStructure: "",
+    // otherName: "",
+    // dateOfBirth: "",
+    // abnAcnArbn: "",
+    // customerNumber: "",
+    // accountNumber: "",
+    // businessStructure: "",
   },
   beneficiaryCustomer: {
     fullName: "",
-    dateOfBirth: "",
-    businessName: "",
     address: "",
     city: "",
-    state: "",
-    postcode: "",
     country: "",
-    phone: "",
-    email: "",
-    occupation: "",
-    abnAcnArbn: "",
-    businessStructure: "",
     accountNumber: "",
-    institutionName: "",
-    institutionCity: "",
-    institutionCountry: "",
+    // dateOfBirth: "",
+    // businessName: "",
+    // state: "",
+    // postcode: "",
+    // phone: "",
+    // email: "",
+    // occupation: "",
+    // abnAcnArbn: "",
+    // businessStructure: "",
+    // institutionName: "",
+    // institutionCity: "",
+    // institutionCountry: "",
   },
-  intermediaries: {},
+  intermediaries: [],
   reportCompletion: {
     transferReason: "",
     completedBy: {
@@ -99,6 +101,7 @@ const ID_TYPES = [
 export function IFTIForm() {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [currentSection, setCurrentSection] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [showIntermediaries, setShowIntermediaries] = useState({
     acceptingInstruction: false,
     acceptingMoney: false,
@@ -312,6 +315,36 @@ End of Report
     link.click();
   };
 
+  const handleSaveProgress = async () => {
+    setLoading(true);
+    try {
+      const response = await createIFTI(formData);
+      console.log("response", response);
+      if (response.success || response.succeed) {
+        toast.success("IFTI report created successfully");
+      } else {
+        toast.error("Failed to create IFTI report");
+      }
+    } catch (error) {
+      // toast.error("Failed to create IFTI report");
+      console.error("error", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleIntermediaryChange = (key, name, value) => {
+    const updated = formData.intermediaries.map((itm) =>
+      itm.key === key ? { ...itm, [name]: value, present: true } : itm
+    );
+    if (value) {
+      setFormData({
+        ...formData,
+        intermediaries: updated,
+      });
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <Card className="p-8  ">
@@ -357,8 +390,16 @@ End of Report
             <FileText className="w-4 h-4" />
             Generate Report
           </Button>
-          <Button variant="outline" className="gap-2 bg-transparent">
-            <Save className="w-4 h-4" />
+          <Button
+            onClick={handleSaveProgress}
+            variant="outline"
+            className="gap-2 bg-transparent"
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
             Save Progress
           </Button>
         </div>
@@ -516,7 +557,7 @@ End of Report
                 />
               </div>
             </div>
-            <div>
+            {/* <div>
               <Label htmlFor="propertyDescription">
                 Description of Property (if not money)
               </Label>
@@ -534,7 +575,7 @@ End of Report
                   })
                 }
               />
-            </div>
+            </div> */}
           </div>
         )}
 
@@ -562,7 +603,7 @@ End of Report
                   }
                 />
               </div>
-              <div>
+              {/* <div>
                 <Label htmlFor="ocOtherName">Other Name</Label>
                 <Input
                   id="ocOtherName"
@@ -578,8 +619,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="ocDob">Date of Birth</Label>
                 <Input
                   id="ocDob"
@@ -595,7 +636,7 @@ End of Report
                     })
                   }
                 />
-              </div>
+              </div> */}
               <div className="md:col-span-2">
                 <Label htmlFor="ocAddress">
                   Business/Residential Address *
@@ -731,7 +772,7 @@ End of Report
                   }
                 />
               </div>
-              <div>
+              {/* <div>
                 <Label htmlFor="ocAbn">ABN/ACN/ARBN</Label>
                 <Input
                   id="ocAbn"
@@ -746,8 +787,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="ocCustomerNumber">Customer Number</Label>
                 <Input
                   id="ocCustomerNumber"
@@ -762,8 +803,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="ocAccountNumber">Account Number</Label>
                 <Input
                   id="ocAccountNumber"
@@ -778,8 +819,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="ocBusinessStructure">Business Structure</Label>
                 <Select
                   value={formData.orderingCustomer.businessStructure}
@@ -804,7 +845,7 @@ End of Report
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
@@ -833,7 +874,7 @@ End of Report
                   }
                 />
               </div>
-              <div>
+              {/* <div>
                 <Label htmlFor="bcDob">Date of Birth</Label>
                 <Input
                   id="bcDob"
@@ -849,8 +890,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="bcBusinessName">Business Name</Label>
                 <Input
                   id="bcBusinessName"
@@ -865,7 +906,7 @@ End of Report
                     })
                   }
                 />
-              </div>
+              </div> */}
               <div className="md:col-span-2">
                 <Label htmlFor="bcAddress">
                   Business/Residential Address *
@@ -901,7 +942,7 @@ End of Report
                   }
                 />
               </div>
-              <div>
+              {/* <div>
                 <Label htmlFor="bcState">State</Label>
                 <Input
                   id="bcState"
@@ -916,8 +957,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="bcPostcode">Postcode</Label>
                 <Input
                   id="bcPostcode"
@@ -932,7 +973,7 @@ End of Report
                     })
                   }
                 />
-              </div>
+              </div> */}
               <div>
                 <Label htmlFor="bcCountry">Country</Label>
                 <Input
@@ -949,7 +990,7 @@ End of Report
                   }
                 />
               </div>
-              <div>
+              {/* <div>
                 <Label htmlFor="bcPhone">Phone</Label>
                 <Input
                   id="bcPhone"
@@ -965,8 +1006,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="bcEmail">Email</Label>
                 <Input
                   id="bcEmail"
@@ -982,8 +1023,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="bcOccupation">
                   Occupation/Business/Principal Activity
                 </Label>
@@ -1000,8 +1041,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="bcAbn">ABN/ACN/ARBN</Label>
                 <Input
                   id="bcAbn"
@@ -1016,8 +1057,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="bcBusinessStructure">Business Structure</Label>
                 <Select
                   value={formData.beneficiaryCustomer.businessStructure}
@@ -1042,7 +1083,7 @@ End of Report
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
               <div>
                 <Label htmlFor="bcAccountNumber">Account Number</Label>
                 <Input
@@ -1059,7 +1100,7 @@ End of Report
                   }
                 />
               </div>
-              <div>
+              {/* <div>
                 <Label htmlFor="bcInstitutionName">Institution Name</Label>
                 <Input
                   id="bcInstitutionName"
@@ -1075,8 +1116,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="bcInstitutionCity">Institution City</Label>
                 <Input
                   id="bcInstitutionCity"
@@ -1091,8 +1132,8 @@ End of Report
                     })
                   }
                 />
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label htmlFor="bcInstitutionCountry">
                   Institution Country
                 </Label>
@@ -1109,7 +1150,7 @@ End of Report
                     })
                   }
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         )}
@@ -1156,12 +1197,35 @@ End of Report
                     <Checkbox
                       id={key}
                       checked={showIntermediaries[key]}
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={(checked) => {
                         setShowIntermediaries({
                           ...showIntermediaries,
                           [key]: checked,
-                        })
-                      }
+                        });
+                        const obj = {
+                          key,
+                          fullName: "",
+                          address: "",
+                          city: "",
+                          state: "",
+                          postcode: "",
+                          country: "",
+                          present: false,
+                        };
+                        if (checked) {
+                          setFormData({
+                            ...formData,
+                            intermediaries: [...formData.intermediaries, obj],
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            intermediaries: formData.intermediaries.filter(
+                              (itm) => itm.key !== key
+                            ),
+                          });
+                        }
+                      }}
                     />
                     <Label htmlFor={key} className="font-medium cursor-pointer">
                       {label}
@@ -1171,27 +1235,107 @@ End of Report
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 pl-6">
                       <div className="md:col-span-2">
                         <Label>Full Name</Label>
-                        <Input placeholder="Full name" />
+                        <Input
+                          placeholder="Full name"
+                          value={
+                            formData.intermediaries.find(
+                              (itm) => itm.key === key
+                            )?.fullName
+                          }
+                          onChange={(e) =>
+                            handleIntermediaryChange(
+                              key,
+                              "fullName",
+                              e.target.value
+                            )
+                          }
+                        />
                       </div>
                       <div className="md:col-span-2">
                         <Label>Address</Label>
-                        <Input placeholder="Street address" />
+                        <Input
+                          placeholder="Street address"
+                          value={
+                            formData.intermediaries.find(
+                              (itm) => itm.key === key
+                            )?.address
+                          }
+                          onChange={(e) =>
+                            handleIntermediaryChange(
+                              key,
+                              "address",
+                              e.target.value
+                            )
+                          }
+                        />
                       </div>
                       <div>
                         <Label>City</Label>
-                        <Input />
+                        <Input
+                          value={
+                            formData.intermediaries.find(
+                              (itm) => itm.key === key
+                            )?.city
+                          }
+                          onChange={(e) =>
+                            handleIntermediaryChange(
+                              key,
+                              "city",
+                              e.target.value
+                            )
+                          }
+                        />
                       </div>
                       <div>
                         <Label>State</Label>
-                        <Input />
+                        <Input
+                          value={
+                            formData.intermediaries.find(
+                              (itm) => itm.key === key
+                            )?.state
+                          }
+                          onChange={(e) =>
+                            handleIntermediaryChange(
+                              key,
+                              "state",
+                              e.target.value
+                            )
+                          }
+                        />
                       </div>
                       <div>
                         <Label>Postcode</Label>
-                        <Input />
+                        <Input
+                          value={
+                            formData.intermediaries.find(
+                              (itm) => itm.key === key
+                            )?.postcode
+                          }
+                          onChange={(e) =>
+                            handleIntermediaryChange(
+                              key,
+                              "postcode",
+                              e.target.value
+                            )
+                          }
+                        />
                       </div>
                       <div>
                         <Label>Country</Label>
-                        <Input />
+                        <Input
+                          value={
+                            formData.intermediaries.find(
+                              (itm) => itm.key === key
+                            )?.country
+                          }
+                          onChange={(e) =>
+                            handleIntermediaryChange(
+                              key,
+                              "country",
+                              e.target.value
+                            )
+                          }
+                        />
                       </div>
                     </div>
                   )}

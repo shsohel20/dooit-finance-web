@@ -6,6 +6,7 @@ import { EyeIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { getGFSList } from './actions'
+import { SuspicionDashboard } from './dashboard'
 
 
 const handleColumns = (handleView) => {
@@ -70,6 +71,8 @@ export default function GFSPage() {
       setData(response?.data)
     } catch (error) {
 
+    } finally {
+      setLoading(false)
     }
     // setData(response.data)
   }
@@ -90,11 +93,13 @@ export default function GFSPage() {
         <PageTitle>Grounds for Suspicion (GFS)</PageTitle>
         <PageDescription>Manage and track all Grounds for Suspicion (GFS)</PageDescription>
       </PageHeader>
+      <SuspicionDashboard data={data} />
       <ResizableTable
         columns={handleColumns(handleView)}
         data={data}
         actions={<Button size='sm'
           onClick={handleNewGFS}>Add New</Button>}
+        loading={loading}
       />
     </div>
   )
