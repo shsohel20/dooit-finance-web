@@ -11,7 +11,7 @@ import { useEffect, useState } from "react"
 export default function ReportDetailView() {
   const [data, setData] = useState(null);
   const id = useSearchParams().get('id');
-  console.log('id', id);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,7 +64,7 @@ export default function ReportDetailView() {
             <h2 className="text-xl font-semibold">Part A: Service Details</h2>
           </div>
           <Separator className="mb-4" />
-          <div className="space-y-4">
+          <div className="grid grid-cols-3">
             <InfoRow label="Service Status" value={data?.partA?.serviceStatus} />
             <InfoRow label="Designated Services" value={data?.partA?.designatedServices?.join(", ")} />
             <InfoRow label="Suspicion Reasons" value={data?.partA?.suspicionReasons?.join(", ")} highlight />
@@ -94,7 +94,7 @@ export default function ReportDetailView() {
             <h2 className="text-xl font-semibold">Part C: Person/Organisation Details</h2>
           </div>
           <Separator className="mb-4" />
-          <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
             <InfoRow label="Name" value={data?.partC?.personOrganisation?.name} />
             <InfoRow label="Business Address" value={formatAddress(data?.partC?.personOrganisation?.businessAddress)} />
             <InfoRow label="Phone Numbers" value={data?.partC?.personOrganisation?.phoneNumbers?.join(", ")} />
@@ -191,7 +191,7 @@ export default function ReportDetailView() {
             <h2 className="text-xl font-semibold">Part G: Offence Information</h2>
           </div>
           <Separator className="mb-4" />
-          <div className="space-y-4">
+          <div className="grid grid-cols-4 gap-4">
             <InfoRow label="Likely Offence" value={data?.partG?.likelyOffence?.join(", ")} highlight />
             <InfoRow label="Previous Reports" value={data?.partG?.previousReports?.length > 0 ? "Yes" : "None"} />
             <InfoRow
@@ -217,7 +217,7 @@ export default function ReportDetailView() {
           <div className="space-y-5">
             <div>
               <h3 className="font-medium text-foreground mb-3">Entity Details</h3>
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
                 <InfoRow label="Name" value={data?.partH?.reportingEntity?.name} />
                 <InfoRow label="Address" value={formatAddress(data?.partH?.reportingEntity?.address)} />
               </div>
@@ -225,7 +225,7 @@ export default function ReportDetailView() {
             <Separator />
             <div>
               <h3 className="font-medium text-foreground mb-3">Completed By</h3>
-              <div className="space-y-3">
+              <div className="grid grid-cols-4 gap-4">
                 <InfoRow label="Name" value={data?.partH?.reportingEntity?.completedBy?.name} />
                 <InfoRow label="Job Title" value={data?.partH?.reportingEntity?.completedBy?.jobTitle} />
                 <InfoRow label="Phone" value={data?.partH?.reportingEntity?.completedBy?.phone} />
@@ -243,8 +243,8 @@ export default function ReportDetailView() {
 function InfoRow({ label, value, highlight = false, compact = false }) {
   return (
     <div className={compact ? "space-y-1" : "space-y-2"}>
-      <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
-      <dd className={`${compact ? "text-sm" : "text-base"} text-foreground ${highlight ? "font-medium" : ""}`}>
+      <dt className="font-medium text-muted-foreground">{label}</dt>
+      <dd className={` text-foreground font-semibold`}>
         {value}
       </dd>
     </div>

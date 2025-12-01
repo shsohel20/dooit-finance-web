@@ -5,56 +5,49 @@ import ResizableTable from '@/components/ui/Resizabletable'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getIFTIList } from './actions'
+import { EyeIcon } from 'lucide-react'
 
-const columns = [
-  {
-    header: 'Case ID',
-    accessorKey: 'uid',
-  },
+const columns = (handleView) => {
+  return [
+    {
+      header: 'Action',
+      accessorKey: 'action',
+      size: 100,
+      cell: ({ row }) => {
+        return (
+          <Button variant='outline' size='sm' onClick={() => handleView(row.original._id)}>
+            <EyeIcon />
+          </Button>
+        )
+      }
+    },
+    {
+      header: 'Case ID',
+      accessorKey: 'uid',
+    },
+    {
+      header: 'Sender',
+      accessorKey: 'orderingCustomer.fullName',
+    },
+    {
+      header: 'Receiver',
+      accessorKey: 'beneficiaryCustomer.fullName',
+    },
+    {
+      header: 'Transaction Amount',
+      accessorKey: 'transaction.totalAmount',
+    },
+    {
+      header: 'Transfer Type',
+      accessorKey: 'transaction.transferType',
+    },
+    // {
+    //   header: 'Transfer Reason',
+    //   accessorKey: 'reportCompletion.transferReason',
+    // },
+  ]
+}
 
-  {
-    header: 'Sender',
-    accessorKey: 'orderingCustomer.fullName',
-  },
-  {
-    header: 'Receiver',
-    accessorKey: 'beneficiaryCustomer.fullName',
-  },
-  {
-    header: 'Transaction Amount',
-    accessorKey: 'transaction.totalAmount',
-  },
-  {
-    header: 'Transfer Type',
-    accessorKey: 'transaction.transferType',
-  },
-  // {
-  //   header: 'Transfer Reason',
-  //   accessorKey: 'reportCompletion.transferReason',
-  // },
-]
-const data = [
-  {
-    caseId: '1234567890',
-    customerName: 'John Doe',
-    customerId: '1234567890',
-    suspicionDate: '2021-01-01',
-    analyst: 'John Doe',
-    decision: 'Reportable',
-    status: 'Pending',
-    verified: true,
-  },
-  {
-    caseId: '1234567890',
-    customerName: 'Jane Doe',
-    customerId: '1234567890',
-    suspicionDate: '2021-01-01',
-    analyst: 'Jane Doe',
-    decision: 'Not Reportable',
-    status: 'Pending',
-    verified: false,
-  },
-]
 export default function IFTIPage() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
@@ -81,6 +74,9 @@ export default function IFTIPage() {
   const handleNewIFTI = () => {
     router.push('/dashboard/client/report-compliance/ifti/form')
   }
+  const handleView = (id) => {
+    router.push(`/dashboard/client/report-compliance/ifti/form/detail?id=${id}`)
+  }
   return (
     <div className='p-4 border rounded-lg space-y-4'>
       <PageHeader>
@@ -88,8 +84,9 @@ export default function IFTIPage() {
         <PageDescription>Manage and track all International Funds Transfer Instructions (IFTI)</PageDescription>
       </PageHeader>
       <ResizableTable
-        columns={columns}
+        columns={columns(handleView)}
         data={data}
+        loading={loading}
         actions={
           <Button
             size='sm'

@@ -2,8 +2,9 @@
 import { PageDescription, PageHeader, PageTitle } from '@/components/common'
 import { Button } from '@/components/ui/button'
 import ResizableTable from '@/components/ui/Resizabletable'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { getTTRList } from './actions'
 const columns = [
   {
     header: 'Case ID',
@@ -61,6 +62,23 @@ const data = [
   },
 ]
 export default function TTRPage() {
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(false)
+  const getData = async () => {
+    setLoading(true)
+    try {
+      const response = await getTTRList();
+      console.log('response', response)
+      setData(response.data)
+    } catch (error) {
+      console.error('error', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    getData()
+  }, [])
   const router = useRouter()
   const handleNewTTR = () => {
     router.push('/dashboard/client/report-compliance/ttr/form')
@@ -74,6 +92,7 @@ export default function TTRPage() {
       <ResizableTable
         columns={columns}
         data={data}
+        loading={loading}
         actions={
           <Button
             size='sm'

@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, Download, Save, FileText, Loader2 } from "lucide-react";
 import { createIFTI } from "@/app/dashboard/client/report-compliance/ifti/actions";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const INITIAL_FORM_DATA = {
   transaction: {
@@ -99,6 +100,7 @@ const ID_TYPES = [
 ];
 
 export function IFTIForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [currentSection, setCurrentSection] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -317,11 +319,14 @@ End of Report
 
   const handleSaveProgress = async () => {
     setLoading(true);
+    console.log("formData", JSON.stringify(formData, null, 2));
     try {
       const response = await createIFTI(formData);
       console.log("response", response);
       if (response.success || response.succeed) {
+        localStorage.setItem("newId", response.id);
         toast.success("IFTI report created successfully");
+        router.push(`/dashboard/client/report-compliance/ifti`);
       } else {
         toast.error("Failed to create IFTI report");
       }
@@ -389,18 +394,6 @@ End of Report
           >
             <FileText className="w-4 h-4" />
             Generate Report
-          </Button>
-          <Button
-            onClick={handleSaveProgress}
-            variant="outline"
-            className="gap-2 bg-transparent"
-          >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            Save Progress
           </Button>
         </div>
 
@@ -1466,17 +1459,33 @@ End of Report
           >
             Previous
           </Button>
-          <Button
-            onClick={() =>
-              setCurrentSection(
-                Math.min(sections.length - 1, currentSection + 1)
-              )
-            }
-            disabled={currentSection === sections.length - 1}
-            className="bg-accent text-accent-foreground hover:bg-accent/90"
-          >
-            Next
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() =>
+                setCurrentSection(
+                  Math.min(sections.length - 1, currentSection + 1)
+                )
+              }
+              disabled={currentSection === sections.length - 1}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              Next
+            </Button>
+            {currentSection === sections.length - 1 ? (
+              <Button
+                onClick={handleSaveProgress}
+                // variant="outline"
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                Save
+              </Button>
+            ) : null}
+          </div>
         </div>
       </Card>
     </div>
