@@ -277,6 +277,7 @@ export function TTRForm() {
       partB: {
         type: formData?.individualConducting?.type,
         customerIndex: formData?.individualConducting?.customerIndex,
+        //TODO: Add the details of the individual conducting the transaction
         details: {
           fullName: "John Doe",
           dateOfBirth: "1980-05-15T00:00:00Z",
