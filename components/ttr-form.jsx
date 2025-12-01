@@ -1,5 +1,6 @@
 "use client";
 
+import { createTTR } from "@/app/dashboard/client/report-compliance/ttr/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,8 +19,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Download, FileText, Plus, Trash2, Upload } from "lucide-react";
+import {
+  Download,
+  FileText,
+  Loader2,
+  Plus,
+  Save,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const initialCustomer = {
   fullName: "",
@@ -42,12 +53,15 @@ const initialCustomer = {
     electronicDataSource: [],
     deviceIdentifiers: [],
   },
+  businessStructure: "",
+  abn: "",
 };
 
 const initialFormData = {
   referenceNumber: "",
   customers: [initialCustomer],
   transactionConductMethod: "individual",
+  transactionConductDescription: "",
   transaction: {
     date: "",
     referenceNumber: "",
@@ -95,6 +109,9 @@ export function TTRForm() {
   const [formData, setFormData] = useState(initialFormData);
   const [currentPart, setCurrentPart] = useState("A");
   const [currentCustomerIndex, setCurrentCustomerIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   const handleFileUpload = (event) => {
     const file = event.target.files?.[0];
@@ -244,10 +261,60 @@ export function TTRForm() {
     });
   };
 
+  const handleSave = async () => {
+    setLoading(true);
+    const data = {
+      referenceNumber: formData.referenceNumber,
+      completionDate: formData.completionDate,
+      status: "draft",
+      partA: [
+        {
+          customers: formData.customers[0],
+          transactionConductMethod: formData.transactionConductMethod,
+          transactionConductDescription: formData.transactionConductDescription,
+        },
+      ],
+      partB: {
+        type: formData?.individualConducting?.type,
+        customerIndex: formData?.individualConducting?.customerIndex,
+        //TODO: Add the details of the individual conducting the transaction
+        details: {
+          fullName: formData?.individualConducting?.details?.fullName,
+          dateOfBirth: formData?.individualConducting?.details?.dateOfBirth,
+          occupation: formData?.individualConducting?.details?.occupation,
+          relationshipToCustomer: formData?.individualConducting?.details?.relationshipToCustomer,
+        },
+      },
+      partC: {
+        transaction: formData?.transaction,
+        recipients: formData?.recipients,
+      },
+      partD: formData?.reportingEntity,
+    };
+    console.log("data", JSON.stringify(data, null, 2));
+
+    try {
+      const response = await createTTR(data);
+      console.log("response", response);
+      if (response.success || response.succeed) {
+        toast.success("TTR report created successfully");
+        localStorage.setItem("newId", response.id);
+        router.push("/dashboard/client/report-compliance/ttr");
+      } else {
+        toast.error("Failed to create TTR report");
+      }
+    } catch (error) {
+      // toast.error("Failed to create TTR report");
+      console.error("error", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const currentCustomer = formData.customers[currentCustomerIndex];
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto  space-y-6">
       <Card className="border-primary">
         <CardHeader className="bg-primary/5">
           <CardTitle className="text-2xl font-bold text-primary">
@@ -299,7 +366,7 @@ export function TTRForm() {
                 onClick={() => setCurrentPart(part)}
                 className={`px-4 py-2 font-medium transition-colors ${
                   currentPart === part
-                    ? "border-b-2 border-accent text-accent"
+                    ? "border-b-2 border-primary text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -310,7 +377,7 @@ export function TTRForm() {
 
           {currentPart === "A" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              {/* <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">
                   Part A - Details of the Customer(s)
                 </h3>
@@ -318,6 +385,19 @@ export function TTRForm() {
                   <Plus className="h-4 w-4" />
                   Add Customer
                 </Button>
+              </div> */}
+              <div>
+                <Label htmlFor="referenceNumber">Reference Number</Label>
+                <Input
+                  id="referenceNumber"
+                  value={formData.referenceNumber}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      referenceNumber: e.target.value,
+                    })
+                  }
+                />
               </div>
 
               {formData.customers.length > 1 && (
@@ -490,30 +570,6 @@ export function TTRForm() {
                       }
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="acn">ACN</Label>
-                    <Input
-                      id="acn"
-                      value={currentCustomer.acn}
-                      onChange={(e) =>
-                        updateCustomer(currentCustomerIndex, {
-                          acn: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="arbn">ARBN</Label>
-                    <Input
-                      id="arbn"
-                      value={currentCustomer.arbn}
-                      onChange={(e) =>
-                        updateCustomer(currentCustomerIndex, {
-                          arbn: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -668,7 +724,7 @@ export function TTRForm() {
                   </Select>
                 </div>
 
-                {formData.individualConducting?.type === "customer" && (
+                {/* {formData.individualConducting?.type === "customer" && (
                   <div className="space-y-2">
                     <Label>Select Customer</Label>
                     <Select
@@ -695,10 +751,10 @@ export function TTRForm() {
                       </SelectContent>
                     </Select>
                   </div>
-                )}
+                )} */}
 
                 {(formData.individualConducting?.type === "employee" ||
-                  formData.individualConducting?.type === "other") && (
+                  formData.individualConducting?.type === "other" || formData.individualConducting?.type === "customer") && (
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
                       Please provide details of the individual conducting the
@@ -707,19 +763,30 @@ export function TTRForm() {
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
                         <Label>Full Name</Label>
-                        <Input placeholder="Full name" />
+                        <Input placeholder="Full name"
+                         value={formData.individualConducting?.details?.fullName}
+                          onChange={(e) => setFormData({ ...formData, individualConducting: { ...formData.individualConducting, details: { ...formData.individualConducting.details, fullName: e.target.value } } })} />
                       </div>
                       <div className="space-y-2">
                         <Label>Date of Birth</Label>
-                        <Input type="date" />
+                        <Input type="date"
+                         value={formData.individualConducting?.details?.dateOfBirth}
+                          onChange={(e) => setFormData({ ...formData, individualConducting: { ...formData.individualConducting, details: { ...formData.individualConducting.details, dateOfBirth: e.target.value } } })} />
                       </div>
                       <div className="space-y-2">
                         <Label>Occupation</Label>
-                        <Input placeholder="Occupation" />
+                        <Input placeholder="Occupation"
+                         value={formData.individualConducting?.details?.occupation}
+                          onChange={(e) => 
+                          setFormData({ ...formData, individualConducting: 
+                          { ...formData.individualConducting, 
+                          details: { ...formData.individualConducting.details, occupation: e.target.value } } })} />
                       </div>
                       <div className="space-y-2">
                         <Label>Relationship to Customer</Label>
-                        <Input placeholder="e.g., Employee, Agent, Representative" />
+                        <Input placeholder="e.g., Employee, Agent, Representative"
+                         value={formData.individualConducting?.details?.relationshipToCustomer}
+                          onChange={(e) => setFormData({ ...formData, individualConducting: { ...formData.individualConducting, details: { ...formData.individualConducting.details, relationshipToCustomer: e.target.value } } })} />
                       </div>
                     </div>
                   </div>
@@ -1425,17 +1492,28 @@ export function TTRForm() {
             >
               Previous
             </Button>
-            <Button
-              onClick={() => {
-                const parts = ["A", "B", "C", "D"];
-                const currentIndex = parts.indexOf(currentPart);
-                if (currentIndex < parts.length - 1)
-                  setCurrentPart(parts[currentIndex + 1]);
-              }}
-              disabled={currentPart === "D"}
-            >
-              Next
-            </Button>
+            {currentPart === "D" ? (
+              <Button disabled={loading} onClick={handleSave}>
+                {loading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Save className="w-5 h-5 " />
+                )}
+                Save
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  const parts = ["A", "B", "C", "D"];
+                  const currentIndex = parts.indexOf(currentPart);
+                  if (currentIndex < parts.length - 1)
+                    setCurrentPart(parts[currentIndex + 1]);
+                }}
+                disabled={currentPart === "D"}
+              >
+                Next
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

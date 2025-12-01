@@ -16,7 +16,7 @@ export function PersonOrganisationForm({
   const [formData, setFormData] = useState(
     data || {
       name: "",
-      otherNames: [],
+      // otherNames: [],
       businessAddress: {
         street: "",
         city: "",
@@ -26,17 +26,17 @@ export function PersonOrganisationForm({
       },
       phoneNumbers: [""],
       emails: [""],
-      accounts: [],
-      digitalWallets: [],
-      occupation: "",
-      beneficialOwners: [],
-      officeHolders: [],
-      documentation: "",
-      identityVerification: {
-        documents: [],
-        electronicSources: [],
-        deviceIdentifiers: [],
-      },
+      // accounts: [],
+      // digitalWallets: [],
+      // occupation: "",
+      // beneficialOwners: [],
+      // officeHolders: [],
+      // documentation: "",
+      // identityVerification: {
+      //   documents: [],
+      //   electronicSources: [],
+      //   deviceIdentifiers: [],
+      // },
       isCustomer: false,
     }
   );
@@ -86,9 +86,9 @@ export function PersonOrganisationForm({
           value={formData.name}
           onChange={(e) => handleChange("name", e.target.value)}
           placeholder="Full name or organisation name"
-          className="border-2 border-primary"
+          className="border"
         />
-        <div className="space-y-2 mt-3">
+        {/* <div className="space-y-2 mt-3">
           <Label className="text-sm">
             If known by any other name, please specify
           </Label>
@@ -100,7 +100,7 @@ export function PersonOrganisationForm({
                   updateArrayItem("otherNames", index, e.target.value)
                 }
                 placeholder="Other name"
-                className="border-2 border-primary"
+                className="border"
               />
               <Button
                 type="button"
@@ -122,7 +122,7 @@ export function PersonOrganisationForm({
             <Plus className="w-4 h-4 mr-2" />
             Add another name
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* Individual details */}
@@ -137,7 +137,7 @@ export function PersonOrganisationForm({
               type="date"
               value={formData.dateOfBirth}
               onChange={(e) => handleChange("dateOfBirth", e.target.value)}
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
           <div>
@@ -145,7 +145,7 @@ export function PersonOrganisationForm({
             <Input
               value={formData.citizenship}
               onChange={(e) => handleChange("citizenship", e.target.value)}
-              className="mt-1 border-2 border-primary"
+              className="mt-1 border"
             />
           </div>
         </div>
@@ -162,32 +162,32 @@ export function PersonOrganisationForm({
                 value={formData.businessAddress?.street}
                 onChange={(e) => handleAddressChange("street", e.target.value)}
                 placeholder="Full street address"
-                className="border-2 border-primary"
+                className="border"
               />
             </div>
             <Input
               value={formData.businessAddress?.city}
               onChange={(e) => handleAddressChange("city", e.target.value)}
               placeholder="City/town/suburb"
-              className="border-2 border-primary"
+              className="border"
             />
             <Input
               value={formData.businessAddress?.state}
               onChange={(e) => handleAddressChange("state", e.target.value)}
               placeholder="State"
-              className="border-2 border-primary"
+              className="border"
             />
             <Input
               value={formData.businessAddress?.postcode}
               onChange={(e) => handleAddressChange("postcode", e.target.value)}
               placeholder="Postcode"
-              className="border-2 border-primary"
+              className="border"
             />
             <Input
               value={formData.businessAddress?.country}
               onChange={(e) => handleAddressChange("country", e.target.value)}
               placeholder="Country"
-              className="border-2 border-primary"
+              className="border"
             />
           </div>
         </div>
@@ -202,7 +202,7 @@ export function PersonOrganisationForm({
                   updateArrayItem("phoneNumbers", index, e.target.value)
                 }
                 placeholder="Phone number"
-                className="border-2 border-primary"
+                className="border"
               />
               {(formData.phoneNumbers?.length || 0) > 1 && (
                 <Button
@@ -239,7 +239,7 @@ export function PersonOrganisationForm({
                   updateArrayItem("emails", index, e.target.value)
                 }
                 placeholder="Email address"
-                className="border-2 border-primary"
+                className="border"
               />
               {(formData.emails?.length || 0) > 1 && (
                 <Button
@@ -267,16 +267,16 @@ export function PersonOrganisationForm({
       </div>
 
       {/* Occupation */}
-      <div className="space-y-2 pt-4 border-t border-muted">
+      {/* <div className="space-y-2 pt-4 border-t border-muted">
         <Label className="font-semibold">
           8. Occupation, business or principal activity
         </Label>
         <Input
           value={formData.occupation}
           onChange={(e) => handleChange("occupation", e.target.value)}
-          className="border-2 border-primary"
+          className="border"
         />
-      </div>
+      </div> */}
 
       {/* Customer question */}
       {showCustomerQuestion && (

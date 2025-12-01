@@ -11,15 +11,10 @@ import TransactionListView from '@/views/transactions/list';
 
 
 export default function TransactionList() {
-  const riskData = [
-    { name: "Pending", value: 8, color: "var(--chart-3)" },
-    { name: "Approved", value: 15, color: "var(--chart-2)" },
-    { name: "Flagged", value: 3, color: "var(--chart-5)" },
-    { name: "Rejected", value: 2, color: "var(--chart-1)" },
-  ]
+
   return (
     <div>
-      <Card className="border-border/50 mb-4">
+      {/* <Card className="border-border/50 mb-4">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -93,7 +88,7 @@ export default function TransactionList() {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
       <TransactionListView />
     </div>
   )

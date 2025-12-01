@@ -53,7 +53,7 @@ export function TransactionForm({ data, onUpdate }) {
             type="date"
             value={transaction.date}
             onChange={(e) => handleChange("date", e.target.value)}
-            className="mt-1 border-2 border-primary"
+            className="mt-1 border"
           />
         </div>
         <div>
@@ -64,7 +64,7 @@ export function TransactionForm({ data, onUpdate }) {
             value={transaction.type}
             onValueChange={(value) => handleChange("type", value)}
           >
-            <SelectTrigger className="mt-1 border-2 border-primary">
+            <SelectTrigger className="mt-1 border">
               <SelectValue placeholder="Select transaction type" />
             </SelectTrigger>
             <SelectContent>
@@ -112,7 +112,7 @@ export function TransactionForm({ data, onUpdate }) {
         <Input
           value={transaction.referenceNumber}
           onChange={(e) => handleChange("referenceNumber", e.target.value)}
-          className="mt-1 border-2 border-primary"
+          className="mt-1 border"
         />
       </div>
 
@@ -132,10 +132,10 @@ export function TransactionForm({ data, onUpdate }) {
               )
             }
             placeholder="0.00"
-            className="mt-1 border-2 border-primary"
+            className="mt-1 border"
           />
         </div>
-        <div>
+        {/* <div>
           <Label className="text-sm font-semibold">
             30. Total cash involved (AUD)
           </Label>
@@ -149,43 +149,43 @@ export function TransactionForm({ data, onUpdate }) {
               )
             }
             placeholder="0.00"
-            className="mt-1 border-2 border-primary"
+            className="mt-1 border"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Sender */}
-      <div className="space-y-2 pt-4 border-t border-muted">
+      {/* <div className="space-y-2 pt-4 border-t border-muted">
         <Label className="text-sm font-semibold">Sender/drawer/issuer</Label>
         <Input
           value={transaction.sender.name}
           onChange={(e) => handleChange("sender.name", e.target.value)}
           placeholder="Name of sender"
-          className="border-2 border-primary"
+          className="border"
         />
-      </div>
+      </div> */}
 
       {/* Payee */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <Label className="text-sm font-semibold">Payee</Label>
         <Input
           value={transaction.payee.name}
           onChange={(e) => handleChange("payee.name", e.target.value)}
           placeholder="Name of payee"
-          className="border-2 border-primary"
+          className="border"
         />
-      </div>
+      </div> */}
 
       {/* Beneficiary */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <Label className="text-sm font-semibold">Beneficiary</Label>
         <Input
           value={transaction.beneficiary.name}
           onChange={(e) => handleChange("beneficiary.name", e.target.value)}
           placeholder="Name of beneficiary"
-          className="border-2 border-primary"
+          className="border"
         />
-      </div>
+      </div> */}
     </div>
   );
 }

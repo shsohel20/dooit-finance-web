@@ -1,11 +1,23 @@
 'use server'
 import { fetchWithAuth } from '@/services/serverApi';
-import { revalidateTag } from 'next/cache';
 
-export const getSMRList=async()=>{
-    const response=await fetchWithAuth('smr-report',{
-        next: {tags: ['smr-list']}
+
+export const getSMRList = async () => {
+    const response = await fetchWithAuth('smr-report');
+    return response.json();
+}
+
+export const createSMR = async (formData) => {
+    const response = await fetchWithAuth('smr-report/new', {
+        method: 'POST',
+        body: JSON.stringify(formData)
     });
-    revalidateTag('smr-list');
+    // revalidateTag('smr-list');
+    return response.json();
+}
+
+
+export const getSMRById = async (id) => {
+    const response = await fetchWithAuth(`smr-report/${id}`);
     return response.json();
 }

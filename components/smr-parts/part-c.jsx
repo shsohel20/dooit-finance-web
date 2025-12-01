@@ -4,7 +4,7 @@ import { PersonOrganisationForm } from "../person-organisation-form";
 
 export function PartC({ data, updateData }) {
   const handleUpdate = (person) => {
-    updateData({ personOrganisation: [person] });
+    updateData({ personOrganisation: person });
   };
 
   return (
@@ -15,7 +15,7 @@ export function PartC({ data, updateData }) {
         in Part E.
       </p>
       <PersonOrganisationForm
-        data={data.personOrganisation?.[0]}
+        data={data.personOrganisation}
         onUpdate={handleUpdate}
         showCustomerQuestion
       />

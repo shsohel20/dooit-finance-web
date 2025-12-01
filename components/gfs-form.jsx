@@ -6,37 +6,52 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Download, Upload, FileText } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Download,
+  Upload,
+  FileText,
+  Loader2,
+} from "lucide-react";
+import { createGFS } from "@/app/dashboard/client/report-compliance/smr-filing/gfs/actions";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export const defaultGFSData = {
   suspicionType: "Offence against a Commonwealth, State or Territory Law",
   suspicionReason: "",
-  suspicionDates: "",
-  suspicionIntensity: "",
-  suspicionBehaviour: "",
   customerName: "",
   customerUID: "",
   companyName: "",
   customerAge: 0,
+  suspicionDates: "",
   accountOpeningDate: "",
   sourceOfFunds: "",
   accountOpeningPurpose: "",
   reviewStartDate: "",
   reviewEndDate: "",
   totalDeposited: 0,
-  totalWithdrawn: 0,
-  transactions: [],
+  totalSuspicionAmount: 0,
   ofis: [],
-  pois: [],
+  transactions: [],
   cryptoAddresses: [],
   ipAddresses: [],
-  totalSuspicionAmount: 0,
-  customerCountry: "Australia",
   additionalNotes: "",
+
+  // suspicionIntensity: "",
+  // suspicionBehaviour: "",
+  // totalWithdrawn: 0,
+  // pois: [],
+  // customerCountry: "Australia",
 };
+//accountOpeningPurpose,
 export function GFSForm() {
   const [formData, setFormData] = useState(defaultGFSData);
   const [generatedReport, setGeneratedReport] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   const updateField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -166,96 +181,6 @@ export function GFSForm() {
     );
   };
 
-  const generateReport = () => {
-    const report = `This report is in relation to suspicion for ${
-      formData.suspicionReason
-    } related to "${
-      formData.customerName
-    }". It appears that the above-mentioned customer's identity might have been used to attempt to transfer funds of fraudulent origin.
-
-Customer Profile:
-
-"${formData.companyName}" account "${formData.customerUID}" in the name of "${
-      formData.customerName
-    }", aged ${formData.customerAge} years, was opened on "${
-      formData.accountOpeningDate
-    }". Source of funds was selected as ${
-      formData.sourceOfFunds
-    }. Account opening purpose is selected as ${formData.accountOpeningPurpose}.
-
-Transaction Analysis:
-
-Transaction review of "${formData.companyName}" account "${
-      formData.customerUID
-    }" from "${formData.reviewStartDate}" till "${
-      formData.reviewEndDate
-    }" reveals that a total of $${formData.totalDeposited.toLocaleString()} was deposited followed by rapid purchases and withdrawals of cryptocurrencies within a few days.
-
-${formData.ofis
-  .map(
-    (ofi) =>
-      `On ${ofi.reportDate}, "${formData.companyName}" received multiple third-party requests from ${ofi.name} pertaining to fraudulent transactions related to ${ofi.scamType}.`
-  )
-  .join("\n\n")}
-
-Upon investigation into "${formData.companyName}" account "${
-      formData.customerUID
-    }" reveals that:
-
-${formData.transactions
-  .map(
-    (t, i) =>
-      `• ${t.type} of $${t.amount.toLocaleString()} from ${
-        t.fromBank
-      } account ${t.fromAccount} in the name of "${t.fromName}" to "${
-        formData.companyName
-      }" account "${t.toAccount}" on "${t.date}"${
-        t.reference
-          ? ` which was reported as a fraudulent transaction by ${
-              formData.ofis[0]?.name || "OFI"
-            } with reference number "${t.reference}"`
-          : ""
-      }.`
-  )
-  .join("\n\n")}
-
-"${formData.companyName}" system shows that all the funds were transferred to ${
-      formData.cryptoAddresses.length
-    } crypto wallet address${
-      formData.cryptoAddresses.length > 1 ? "es" : ""
-    } ${formData.cryptoAddresses.map((addr) => `"${addr}"`).join(", ")}.
-
-Conclusion:
-
-It was reported by ${formData.ofis
-      .map((ofi) => `"${ofi.name}"`)
-      .join(", ")} that the account held by "${
-      formData.customerName
-    }" is the recipient of funds of fraud origin totalling $${formData.totalSuspicionAmount.toLocaleString()} which are subjected to fraudulent investigations related to ${formData.ofis
-      .map((ofi) => ofi.scamType)
-      .join(", ")}.
-
-The accounts held by "${formData.customerName}" is unusual because ${
-      formData.transactions.length > 0
-        ? "a " + formData.transactions[0].type + " was conducted"
-        : "transactions were conducted"
-    } followed by rapid purchase of cryptocurrency and withdrawal within few days.
-
-${
-  formData.ipAddresses.length > 0
-    ? `In addition to that all IP addresses used by "${formData.customerName}" accounts were located only within ${formData.ipAddresses[0].country} whereas his identification is from ${formData.customerCountry}, which further adds to the suspicion.`
-    : ""
-}
-
-${
-  formData.additionalNotes
-    ? `\nAdditional Notes:\n${formData.additionalNotes}`
-    : ""
-}`;
-
-    setGeneratedReport(report);
-  };
-
   const handleFileUpload = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -295,12 +220,29 @@ ${
     link.click();
   };
 
+  const handleSubmit = async () => {
+    console.log("formData", JSON.stringify(formData, null, 2));
+    setLoading(true);
+    try {
+      const response = await createGFS(formData);
+      console.log("response", response);
+      if (response.success || response.succeed) {
+        toast.success("GFS report created successfully");
+        router.push("/dashboard/client/report-compliance/smr-filing/gfs");
+      } else {
+        toast.error("Failed to create GFS report");
+      }
+    } catch (error) {
+      console.error("error", error);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <Card className="p-8 border-2 border-primary/20">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-primary">
+            <h2 className="text-2xl font-bold ">
               Grounds for Suspicion (GFS) Generator
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
@@ -332,7 +274,7 @@ ${
         <div className="space-y-8">
           {/* Suspicion Details */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2">
+            <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2">
               Suspicion Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -358,13 +300,14 @@ ${
                 <Label>Suspicion Dates</Label>
                 <Input
                   value={formData.suspicionDates}
+                  type="date"
                   onChange={(e) =>
                     updateField("suspicionDates", e.target.value)
                   }
                   placeholder="Date range of suspicious activity"
                 />
               </div>
-              <div>
+              {/* <div>
                 <Label>Suspicion Intensity</Label>
                 <Input
                   value={formData.suspicionIntensity}
@@ -373,9 +316,9 @@ ${
                   }
                   placeholder="e.g., High, Medium, Low"
                 />
-              </div>
+              </div> */}
             </div>
-            <div>
+            {/* <div>
               <Label>Suspicion Behaviour</Label>
               <Textarea
                 value={formData.suspicionBehaviour}
@@ -385,12 +328,12 @@ ${
                 placeholder="Describe the suspicious behaviour"
                 rows={3}
               />
-            </div>
+            </div> */}
           </div>
 
           {/* Customer Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2">
+            <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2">
               Customer Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -460,7 +403,7 @@ ${
                   placeholder="e.g., Personal banking, Investment"
                 />
               </div>
-              <div>
+              {/* <div>
                 <Label>Customer Country</Label>
                 <Input
                   value={formData.customerCountry}
@@ -469,13 +412,13 @@ ${
                   }
                   placeholder="Country of identification"
                 />
-              </div>
+              </div> */}
             </div>
           </div>
 
           {/* Transaction Review Period */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2">
+            <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2">
               Transaction Review Period
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -531,7 +474,7 @@ ${
           {/* Other Financial Institutions */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2 flex-1">
+              <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2 flex-1">
                 Other Financial Institutions (OFI)
               </h3>
               <Button
@@ -594,7 +537,7 @@ ${
           {/* Transactions */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2 flex-1">
+              <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2 flex-1">
                 Transactions
               </h3>
               <Button
@@ -756,7 +699,7 @@ ${
           {/* Crypto Addresses */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2 flex-1">
+              <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2 flex-1">
                 Crypto Wallet Addresses
               </h3>
               <Button
@@ -790,7 +733,7 @@ ${
           {/* IP Addresses */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2 flex-1">
+              <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2 flex-1">
                 IP Addresses
               </h3>
               <Button
@@ -852,7 +795,7 @@ ${
 
           {/* Additional Notes */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-primary border-b border-primary/20 pb-2">
+            <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2">
               Additional Notes
             </h3>
             <Textarea
@@ -865,12 +808,19 @@ ${
 
           {/* Generate Report Button */}
           <div className="flex gap-4">
-            <Button
+            {/* <Button
               onClick={generateReport}
-              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="flex-1 bg-primary -foreground hover:bg-primary/90"
             >
               <FileText className="w-4 h-4 mr-2" />
               Generate Report
+            </Button> */}
+            <Button onClick={handleSubmit} disabled={loading}>
+              {loading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                "Submit"
+              )}
             </Button>
             {generatedReport && (
               <Button
@@ -887,9 +837,7 @@ ${
           {/* Generated Report Display */}
           {generatedReport && (
             <Card className="p-6 bg-muted/50">
-              <h3 className="text-lg font-semibold text-primary mb-4">
-                Generated Report
-              </h3>
+              <h3 className="text-lg font-semibold  mb-4">Generated Report</h3>
               <div className="whitespace-pre-wrap text-sm leading-relaxed font-mono bg-background p-4 rounded border">
                 {generatedReport}
               </div>
@@ -900,3 +848,93 @@ ${
     </div>
   );
 }
+
+const generateReport = () => {
+  const report = `This report is in relation to suspicion for ${
+    formData.suspicionReason
+  } related to "${
+    formData.customerName
+  }". It appears that the above-mentioned customer's identity might have been used to attempt to transfer funds of fraudulent origin.
+
+Customer Profile:
+
+"${formData.companyName}" account "${formData.customerUID}" in the name of "${
+    formData.customerName
+  }", aged ${formData.customerAge} years, was opened on "${
+    formData.accountOpeningDate
+  }". Source of funds was selected as ${
+    formData.sourceOfFunds
+  }. Account opening purpose is selected as ${formData.accountOpeningPurpose}.
+
+Transaction Analysis:
+
+Transaction review of "${formData.companyName}" account "${
+    formData.customerUID
+  }" from "${formData.reviewStartDate}" till "${
+    formData.reviewEndDate
+  }" reveals that a total of $${formData.totalDeposited.toLocaleString()} was deposited followed by rapid purchases and withdrawals of cryptocurrencies within a few days.
+
+${formData.ofis
+  .map(
+    (ofi) =>
+      `On ${ofi.reportDate}, "${formData.companyName}" received multiple third-party requests from ${ofi.name} pertaining to fraudulent transactions related to ${ofi.scamType}.`
+  )
+  .join("\n\n")}
+
+Upon investigation into "${formData.companyName}" account "${
+    formData.customerUID
+  }" reveals that:
+
+${formData.transactions
+  .map(
+    (t, i) =>
+      `• ${t.type} of $${t.amount.toLocaleString()} from ${
+        t.fromBank
+      } account ${t.fromAccount} in the name of "${t.fromName}" to "${
+        formData.companyName
+      }" account "${t.toAccount}" on "${t.date}"${
+        t.reference
+          ? ` which was reported as a fraudulent transaction by ${
+              formData.ofis[0]?.name || "OFI"
+            } with reference number "${t.reference}"`
+          : ""
+      }.`
+  )
+  .join("\n\n")}
+
+"${formData.companyName}" system shows that all the funds were transferred to ${
+    formData.cryptoAddresses.length
+  } crypto wallet address${
+    formData.cryptoAddresses.length > 1 ? "es" : ""
+  } ${formData.cryptoAddresses.map((addr) => `"${addr}"`).join(", ")}.
+
+Conclusion:
+
+It was reported by ${formData.ofis
+    .map((ofi) => `"${ofi.name}"`)
+    .join(", ")} that the account held by "${
+    formData.customerName
+  }" is the recipient of funds of fraud origin totalling $${formData.totalSuspicionAmount.toLocaleString()} which are subjected to fraudulent investigations related to ${formData.ofis
+    .map((ofi) => ofi.scamType)
+    .join(", ")}.
+
+The accounts held by "${formData.customerName}" is unusual because ${
+    formData.transactions.length > 0
+      ? "a " + formData.transactions[0].type + " was conducted"
+      : "transactions were conducted"
+  } followed by rapid purchase of cryptocurrency and withdrawal within few days.
+
+${
+  formData.ipAddresses.length > 0
+    ? `In addition to that all IP addresses used by "${formData.customerName}" accounts were located only within ${formData.ipAddresses[0].country} whereas his identification is from ${formData.customerCountry}, which further adds to the suspicion.`
+    : ""
+}
+
+${
+  formData.additionalNotes
+    ? `\nAdditional Notes:\n${formData.additionalNotes}`
+    : ""
+}`;
+
+  setGeneratedReport(report);
+};

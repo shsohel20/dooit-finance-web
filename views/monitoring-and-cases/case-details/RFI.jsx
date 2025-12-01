@@ -18,6 +18,7 @@ import { useState } from "react";
 import { CaseRequestForm } from "./ecdd/RFIForm";
 import { getRFIList } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
 import { useEffect } from "react";
+import  RFIDetails  from "./ecdd/RFIDetails";
 const data = [
   {
     date: "2025-01-01",
@@ -31,7 +32,14 @@ export default function RFI() {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [rfiId, setRfiId] = useState(null);
+  const [openDetails, setOpenDetails] = useState(false);
 
+  const handleOpenDetails = (id) => {
+    console.log("id", id);
+    setRfiId(id);
+    setOpenDetails(true);
+  }
   const getRFI = async () => {
     try {
       setLoading(true);
@@ -75,7 +83,7 @@ export default function RFI() {
       header: "Actions",
       accessorKey: "actions",
       cell: ({ row }) => (
-        <Button variant="outline" size="icon">
+        <Button variant="outline" size="icon" onClick={() => handleOpenDetails(row.original._id)}>
           <Eye className="h-4 w-4" />
         </Button>
       ),
@@ -221,83 +229,10 @@ export default function RFI() {
          {/* <ResponseTracker /> */}
         </div>
       </div>
-      <CaseRequestForm open={open} setOpen={setOpen} />
+      <CaseRequestForm open={open} setOpen={setOpen} getRFI={getRFI} />
+      {openDetails && <RFIDetails open={openDetails} onOpenChange={setOpenDetails} id={rfiId} setId={setRfiId} />}
     </div>
   );
 }
 
 
-const ResponseTracker = () => {
-  return (
-    <div>
-    <h2 className="text-lg font-semibold tracking-tight mb-6">
-      Response Tracker
-    </h2>
-    <Card className="border shadow-sm">
-      <CardContent className="p-8">
-        <div className="space-y-8">
-          {/* Timeline Item 1 */}
-          <div className="flex gap-6">
-            <div className="flex flex-col items-center">
-              <div className="h-10 w-10 rounded-full bg-success/10 border-2 border-success flex items-center justify-center">
-                <CheckCircle2 className="h-5 w-5 text-success" />
-              </div>
-              <div className="h-16 w-0.5 bg-border mt-2"></div>
-            </div>
-            <div className="pb-8">
-              <p className="font-semibold text-foreground">
-                RFI Response Received
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Customer provided documentation for source of funds
-              </p>
-              <p className="text-xs text-muted-foreground mt-3">
-                2023-04-28 11:15 AM
-              </p>
-            </div>
-          </div>
-
-          {/* Timeline Item 2 */}
-          <div className="flex gap-6">
-            <div className="flex flex-col items-center">
-              <div className="h-10 w-10 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
-                <FileText className="h-5 w-5 text-primary" />
-              </div>
-              <div className="h-16 w-0.5 bg-border mt-2"></div>
-            </div>
-            <div className="pb-8">
-              <p className="font-semibold text-foreground">RFI Sent</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Request for Information sent to customer
-              </p>
-              <p className="text-xs text-muted-foreground mt-3">
-                2023-04-20 02:30 PM
-              </p>
-            </div>
-          </div>
-
-          {/* Timeline Item 3 */}
-          <div className="flex gap-6">
-            <div className="flex flex-col items-center">
-              <div className="h-10 w-10 rounded-full bg-muted border-2 border-muted-foreground flex items-center justify-center">
-                <Clock className="h-5 w-5 text-muted-foreground" />
-              </div>
-            </div>
-            <div>
-              <p className="font-semibold text-foreground">
-                RFI Drafted
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Drafted request for source of funds verification
-              </p>
-              <p className="text-xs text-muted-foreground mt-3">
-                2023-04-19 10:45 AM
-              </p>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-  )
-}

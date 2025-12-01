@@ -11,7 +11,7 @@ export function PartB({ data, updateData }) {
   return (
     <div className="space-y-4">
       <div className="flex items-start gap-2">
-        <Label htmlFor="grounds" className="text-base font-bold text-primary">
+        <Label htmlFor="grounds" className="text-base font-bold ">
           3. Provide details of the nature and circumstances surrounding the
           matter
         </Label>
@@ -29,7 +29,7 @@ export function PartB({ data, updateData }) {
           updateData({ groundsForSuspicion: e.target.value });
         }}
         placeholder="Describe the nature and circumstances of the suspicious matter..."
-        className="min-h-[300px] border-2 border-primary"
+        className="min-h-[300px] border"
       />
     </div>
   );

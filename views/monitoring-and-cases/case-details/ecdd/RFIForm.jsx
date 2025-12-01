@@ -45,7 +45,7 @@ const defaultValues = {
 
 }
 
-export function CaseRequestForm({ open, setOpen }) {
+export function CaseRequestForm({ open, setOpen, getRFI }) {
     const { details } = useAlertStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
     console.log("in rfi form details", details);
@@ -84,7 +84,7 @@ export function CaseRequestForm({ open, setOpen }) {
             toast.success("RFI created successfully");
         setIsSubmitting(false);
             setOpen(false);
-
+            getRFI();
         } else {
             toast.error("Failed to create RFI");
         }

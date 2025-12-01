@@ -37,7 +37,7 @@ export function PartE({ data, updateData }) {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <Label className="text-base font-bold text-primary">
+        <Label className="text-base font-bold ">
           24. Is there any suspicious person whose identity could not be
           established in Part C or Part D and they are not known to the
           reporting entity?
@@ -78,7 +78,7 @@ export function PartE({ data, updateData }) {
               className="p-6 bg-secondary/30 rounded-lg border-2 border-muted"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-primary">
+                <h3 className="text-lg font-bold ">
                   Unidentified Person {index + 1}
                 </h3>
                 {persons.length > 1 && (
@@ -102,7 +102,7 @@ export function PartE({ data, updateData }) {
                       handleUpdate(index, "description", e.target.value)
                     }
                     placeholder="Provide physical description, behavior, or any identifying characteristics..."
-                    className="mt-2 border-2 border-primary"
+                    className="mt-2 border"
                   />
                 </div>
                 <div>
@@ -113,7 +113,7 @@ export function PartE({ data, updateData }) {
                       handleUpdate(index, "documentation", e.target.value)
                     }
                     placeholder="List any documentation (e.g., video, photograph, application form, etc.)"
-                    className="mt-2 border-2 border-primary"
+                    className="mt-2 border"
                   />
                 </div>
               </div>
@@ -123,7 +123,7 @@ export function PartE({ data, updateData }) {
             type="button"
             onClick={handleAdd}
             variant="outline"
-            className="border-2 border-primary bg-transparent"
+            className="border bg-transparent"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add another unidentified person
