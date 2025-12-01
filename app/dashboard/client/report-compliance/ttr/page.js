@@ -5,70 +5,80 @@ import ResizableTable from '@/components/ui/Resizabletable'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getTTRList } from './actions'
+import { Badge } from '@/components/ui/badge'
 const columns = [
   {
-    header: 'Case ID',
-    accessorKey: 'caseId',
+    header: 'UID',
+    accessorKey: 'uid',
   },
   {
     header: 'Customer Name',
-    accessorKey: 'customerName',
+    accessorKey: 'partB.details.fullName',
+    cell: ({ row }) => {
+      return (
+        <div>
+          <p className='font-semibold'>{row.original.partB.details.fullName}</p>
+          <p className='text-muted-foreground text-xs'>{row.original.partB.details.occupation}</p>
+        </div>
+      )
+    }
   },
   {
-    header: 'Customer ID',
-    accessorKey: 'customerId',
+    header: 'Type',
+    accessorKey: 'partC.transaction.designatedService',
   },
   {
-    header: 'Suspicion Date',
-    accessorKey: 'suspicionDate',
+    header: 'Received($)',
+    accessorKey: 'partC.transaction.moneyReceived.australianDollars.amount',
+    cell: ({ row }) => {
+      return (
+        <div>
+          <p className='font-semibold text-right'>{row.original.partC.transaction.moneyReceived.australianDollars.amount}</p>
+        </div>
+      )
+    }
   },
   {
-    header: 'Analyst',
-    accessorKey: 'analyst',
+    header: 'Provided($)',
+    accessorKey: 'partC.transaction.moneyProvided.australianDollars.amount',
+    cell: ({ row }) => {
+      return (
+        <div>
+          <p className='font-semibold text-right'>{row.original.partC.transaction.moneyProvided.australianDollars.amount}</p>
+        </div>
+      )
+    }
   },
   {
-    header: 'Decision',
-    accessorKey: 'decision',
+    header: 'Ref',
+    accessorKey: 'metadata.austracReference',
   },
+
   {
     header: 'Status',
     accessorKey: 'status',
+    cell: ({ row }) => {
+      return (
+        <div>
+          <Badge variant='outline'>{row.original.status}</Badge>
+        </div>
+      )
+    }
   },
-  {
-    header: 'Verified',
-    accessorKey: 'verified',
-  },
+
 ]
-const data = [
-  {
-    caseId: '1234567890',
-    customerName: 'John Doe',
-    customerId: '1234567890',
-    suspicionDate: '2021-01-01',
-    analyst: 'John Doe',
-    decision: 'Reportable',
-    status: 'Pending',
-    verified: true,
-  },
-  {
-    caseId: '1234567890',
-    customerName: 'Jane Doe',
-    customerId: '1234567890',
-    suspicionDate: '2021-01-01',
-    analyst: 'Jane Doe',
-    decision: 'Not Reportable',
-    status: 'Pending',
-    verified: false,
-  },
-]
+
 export default function TTRPage() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
+
+  const router = useRouter()
+
   const getData = async () => {
     setLoading(true)
     try {
       const response = await getTTRList();
-      console.log('response', response)
+      console.log('ttr list response', response)
       setData(response.data)
     } catch (error) {
       console.error('error', error)
@@ -79,7 +89,7 @@ export default function TTRPage() {
   useEffect(() => {
     getData()
   }, [])
-  const router = useRouter()
+
   const handleNewTTR = () => {
     router.push('/dashboard/client/report-compliance/ttr/form')
   }
@@ -96,6 +106,7 @@ export default function TTRPage() {
         actions={
           <Button
             size='sm'
+            // variant='outline'
             onClick={handleNewTTR}
           >
             Add New

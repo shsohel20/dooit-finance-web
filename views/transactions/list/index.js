@@ -186,7 +186,7 @@ const TransactionListView = () => {
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
-          title="Risk"
+          title="Status"
         />
       ),
       accessorKey: 'Status',

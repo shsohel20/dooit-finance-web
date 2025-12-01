@@ -7,6 +7,9 @@ import React, { useEffect, useState } from 'react'
 import { getSMRList } from './actions'
 import { formatDateTime } from '@/lib/utils'
 import { EyeIcon } from 'lucide-react'
+import { SMRDashboard } from './Dashboard'
+import { SMRHeatmap } from './HeatMap'
+
 export default function SMRPage() {
   const router = useRouter()
   const [data, setData] = useState([])
@@ -101,19 +104,29 @@ export default function SMRPage() {
       setLoading(false)
     }
   }
+  console.log('data', JSON.stringify(data, null, 2))
   useEffect(() => {
     getSmr()
   }, [])
+
   const handleNewSMR = () => {
     router.push('/dashboard/client/report-compliance/smr-filing/smr/form')
   }
+
   return (
     <div className='p-4 border rounded-lg space-y-4 bg-white'>
       <PageHeader>
         <PageTitle>Suspicious Matter Report</PageTitle>
         <PageDescription>Manage and track all Suspicious Matter Reports</PageDescription>
       </PageHeader>
-      <ResizableTable loading={loading} columns={columns} data={data} actions={<Button size='sm' onClick={handleNewSMR}>Add New</Button>} />
+      <SMRHeatmap />
+      <SMRDashboard />
+      <ResizableTable
+        loading={loading}
+        columns={columns}
+        data={data}
+        actions={<Button size='sm' onClick={handleNewSMR}>Add New</Button>}
+      />
     </div>
   )
 }
