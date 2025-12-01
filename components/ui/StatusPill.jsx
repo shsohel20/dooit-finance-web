@@ -37,7 +37,7 @@ function StatusPill({ className, variant, asChild = false, icon, ...props }) {
   return (
     <div
       className={cn(statusPillVariants({ variant }), className, {
-        "before:content-[''] before:absolute before:top-1/2 before:translate-y-[-50%] pl-4 before:left-1 before:size-2 before:rounded-full before:bg-current ":
+        "before:content-[''] text-xs before:absolute before:top-1/2 before:translate-y-[-50%] pl-4 before:left-1 before:size-2 before:rounded-full before:bg-current ":
           !icon,
       })}
     >

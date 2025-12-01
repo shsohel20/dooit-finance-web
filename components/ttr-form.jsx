@@ -279,10 +279,10 @@ export function TTRForm() {
         customerIndex: formData?.individualConducting?.customerIndex,
         //TODO: Add the details of the individual conducting the transaction
         details: {
-          fullName: "John Doe",
-          dateOfBirth: "1980-05-15T00:00:00Z",
-          occupation: "Accountant",
-          relationshipToCustomer: "self",
+          fullName: formData?.individualConducting?.details?.fullName,
+          dateOfBirth: formData?.individualConducting?.details?.dateOfBirth,
+          occupation: formData?.individualConducting?.details?.occupation,
+          relationshipToCustomer: formData?.individualConducting?.details?.relationshipToCustomer,
         },
       },
       partC: {
@@ -724,7 +724,7 @@ export function TTRForm() {
                   </Select>
                 </div>
 
-                {formData.individualConducting?.type === "customer" && (
+                {/* {formData.individualConducting?.type === "customer" && (
                   <div className="space-y-2">
                     <Label>Select Customer</Label>
                     <Select
@@ -751,10 +751,10 @@ export function TTRForm() {
                       </SelectContent>
                     </Select>
                   </div>
-                )}
+                )} */}
 
                 {(formData.individualConducting?.type === "employee" ||
-                  formData.individualConducting?.type === "other") && (
+                  formData.individualConducting?.type === "other" || formData.individualConducting?.type === "customer") && (
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
                       Please provide details of the individual conducting the
@@ -763,19 +763,30 @@ export function TTRForm() {
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
                         <Label>Full Name</Label>
-                        <Input placeholder="Full name" />
+                        <Input placeholder="Full name"
+                         value={formData.individualConducting?.details?.fullName}
+                          onChange={(e) => setFormData({ ...formData, individualConducting: { ...formData.individualConducting, details: { ...formData.individualConducting.details, fullName: e.target.value } } })} />
                       </div>
                       <div className="space-y-2">
                         <Label>Date of Birth</Label>
-                        <Input type="date" />
+                        <Input type="date"
+                         value={formData.individualConducting?.details?.dateOfBirth}
+                          onChange={(e) => setFormData({ ...formData, individualConducting: { ...formData.individualConducting, details: { ...formData.individualConducting.details, dateOfBirth: e.target.value } } })} />
                       </div>
                       <div className="space-y-2">
                         <Label>Occupation</Label>
-                        <Input placeholder="Occupation" />
+                        <Input placeholder="Occupation"
+                         value={formData.individualConducting?.details?.occupation}
+                          onChange={(e) => 
+                          setFormData({ ...formData, individualConducting: 
+                          { ...formData.individualConducting, 
+                          details: { ...formData.individualConducting.details, occupation: e.target.value } } })} />
                       </div>
                       <div className="space-y-2">
                         <Label>Relationship to Customer</Label>
-                        <Input placeholder="e.g., Employee, Agent, Representative" />
+                        <Input placeholder="e.g., Employee, Agent, Representative"
+                         value={formData.individualConducting?.details?.relationshipToCustomer}
+                          onChange={(e) => setFormData({ ...formData, individualConducting: { ...formData.individualConducting, details: { ...formData.individualConducting.details, relationshipToCustomer: e.target.value } } })} />
                       </div>
                     </div>
                   </div>
