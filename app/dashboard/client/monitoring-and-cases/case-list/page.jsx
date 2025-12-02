@@ -209,8 +209,6 @@ const ListView = ({}) => {
   );
 };
 export default function CaseList() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
   const { currentPage, limit, setAlerts, setFetching, setTotalItems } =
     useAlertStore();
 
