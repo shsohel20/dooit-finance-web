@@ -1,10 +1,12 @@
 'use server'
 
+import { getQueryString } from "@/lib/utils";
 import { fetchWithAuth } from "@/services/serverApi"
 
 
-export const getTransactions = async () => {
-  const response = await fetchWithAuth('transaction', {
+export const getTransactions = async (queryParams) => {
+  const queryString = getQueryString(queryParams);
+  const response = await fetchWithAuth(`transaction?${queryString}`, {
     method: 'GET',
   })
   return response.json()

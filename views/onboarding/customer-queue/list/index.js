@@ -102,7 +102,7 @@ const GridView = () => {
 
 const ListView = () => {
   const { customers, fetching, currentPage, limit, totalItems, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems } = useCustomerStore();
-  console.log('customers => ', customers);
+
 
 
   const [openReporting, setOpenReporting] = useState(false);
@@ -291,21 +291,26 @@ const ListView = () => {
 export default function CustomerQueueList({ variant, data, kycStatus }) {
   const [view, setView] = useState('list')
   const { currentPage, limit, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems } = useCustomerStore();
+
+
   const fetchData = async () => {
     setFetching(true);
+
     const queryParams = objWithValidValues({
       page: currentPage,
       limit: limit,
       kycStatus: kycStatus
     });
+    console.log('queryParams => ', queryParams);
 
 
     const response = await getCustomers(queryParams);
+    console.log('customer response => ', response);
     setFetching(false);
     setCustomers(response.data);
     setTotalItems(response.totalRecords);
-    setCurrentPage(response.currentPage);
-    setLimit(response.limit);
+
+
   }
 
   useEffect(() => {

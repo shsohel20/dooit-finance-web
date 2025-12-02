@@ -38,281 +38,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-const cases = [
-  {
-    caseId: "#CA-1234567890",
-    name: "John Doe",
-    risk: "High",
-    alertType: "Transaction Monitoring",
-    status: "Pending",
-    assignedAnalyst: "Peter Parker",
-    lastUpdated: "12/08/2025",
-  },
-  {
-    caseId: "#CA-1234567891",
-    name: "Jane Smith",
-    risk: "Medium",
-    alertType: "KYC Review",
-    status: "Approved",
-    assignedAnalyst: "Tony Stark",
-    lastUpdated: "11/08/2025",
-  },
-  {
-    caseId: "#CA-1234567892",
-    name: "Michael Johnson",
-    risk: "Low",
-    alertType: "Sanctions Screening",
-    status: "Rejected",
-    assignedAnalyst: "Natasha Romanoff",
-    lastUpdated: "10/08/2025",
-  },
-  {
-    caseId: "#CA-1234567893",
-    name: "Emily Davis",
-    risk: "High",
-    alertType: "Transaction Monitoring",
-    status: "Pending",
-    assignedAnalyst: "Steve Rogers",
-    lastUpdated: "09/08/2025",
-  },
-  {
-    caseId: "#CA-1234567894",
-    name: "Robert Brown",
-    risk: "Medium",
-    alertType: "AML Alert",
-    status: "In Review",
-    assignedAnalyst: "Bruce Banner",
-    lastUpdated: "08/08/2025",
-  },
-  {
-    caseId: "#CA-1234567895",
-    name: "Laura Wilson",
-    risk: "High",
-    alertType: "KYC Review",
-    status: "Pending",
-    assignedAnalyst: "Wanda Maximoff",
-    lastUpdated: "07/08/2025",
-  },
-  {
-    caseId: "#CA-1234567896",
-    name: "James Anderson",
-    risk: "Low",
-    alertType: "Sanctions Screening",
-    status: "Approved",
-    assignedAnalyst: "Clint Barton",
-    lastUpdated: "06/08/2025",
-  },
-  {
-    caseId: "#CA-1234567897",
-    name: "Sarah Martinez",
-    risk: "Medium",
-    alertType: "Transaction Monitoring",
-    status: "Rejected",
-    assignedAnalyst: "Scott Lang",
-    lastUpdated: "05/08/2025",
-  },
-  {
-    caseId: "#CA-1234567898",
-    name: "William Garcia",
-    risk: "High",
-    alertType: "KYC Review",
-    status: "Pending",
-    assignedAnalyst: "Peter Parker",
-    lastUpdated: "04/08/2025",
-  },
-  {
-    caseId: "#CA-1234567899",
-    name: "Olivia Rodriguez",
-    risk: "Low",
-    alertType: "AML Alert",
-    status: "Approved",
-    assignedAnalyst: "Tony Stark",
-    lastUpdated: "03/08/2025",
-  },
-  {
-    caseId: "#CA-1234567900",
-    name: "Daniel Lee",
-    risk: "High",
-    alertType: "Transaction Monitoring",
-    status: "In Review",
-    assignedAnalyst: "Steve Rogers",
-    lastUpdated: "02/08/2025",
-  },
-  {
-    caseId: "#CA-1234567901",
-    name: "Sophia Perez",
-    risk: "Medium",
-    alertType: "Sanctions Screening",
-    status: "Pending",
-    assignedAnalyst: "Natasha Romanoff",
-    lastUpdated: "01/08/2025",
-  },
-  {
-    caseId: "#CA-1234567902",
-    name: "David Thompson",
-    risk: "Low",
-    alertType: "KYC Review",
-    status: "Approved",
-    assignedAnalyst: "Bruce Banner",
-    lastUpdated: "30/07/2025",
-  },
-  {
-    caseId: "#CA-1234567903",
-    name: "Ella White",
-    risk: "High",
-    alertType: "AML Alert",
-    status: "Rejected",
-    assignedAnalyst: "Wanda Maximoff",
-    lastUpdated: "29/07/2025",
-  },
-  {
-    caseId: "#CA-1234567904",
-    name: "Henry Harris",
-    risk: "Medium",
-    alertType: "Transaction Monitoring",
-    status: "In Review",
-    assignedAnalyst: "Clint Barton",
-    lastUpdated: "28/07/2025",
-  },
-  {
-    caseId: "#CA-1234567905",
-    name: "Grace Clark",
-    risk: "Low",
-    alertType: "Sanctions Screening",
-    status: "Pending",
-    assignedAnalyst: "Scott Lang",
-    lastUpdated: "27/07/2025",
-  },
-  {
-    caseId: "#CA-1234567906",
-    name: "Christopher Lewis",
-    risk: "High",
-    alertType: "KYC Review",
-    status: "Approved",
-    assignedAnalyst: "Peter Parker",
-    lastUpdated: "26/07/2025",
-  },
-  {
-    caseId: "#CA-1234567907",
-    name: "Victoria Walker",
-    risk: "Medium",
-    alertType: "AML Alert",
-    status: "Rejected",
-    assignedAnalyst: "Tony Stark",
-    lastUpdated: "25/07/2025",
-  },
-  {
-    caseId: "#CA-1234567908",
-    name: "Benjamin Hall",
-    risk: "Low",
-    alertType: "Transaction Monitoring",
-    status: "Pending",
-    assignedAnalyst: "Steve Rogers",
-    lastUpdated: "24/07/2025",
-  },
-  {
-    caseId: "#CA-1234567909",
-    name: "Mia Allen",
-    risk: "High",
-    alertType: "Sanctions Screening",
-    status: "In Review",
-    assignedAnalyst: "Natasha Romanoff",
-    lastUpdated: "23/07/2025",
-  },
-  {
-    caseId: "#CA-1234567910",
-    name: "Jack Young",
-    risk: "Medium",
-    alertType: "KYC Review",
-    status: "Approved",
-    assignedAnalyst: "Bruce Banner",
-    lastUpdated: "22/07/2025",
-  },
-  {
-    caseId: "#CA-1234567911",
-    name: "Ava Hernandez",
-    risk: "Low",
-    alertType: "AML Alert",
-    status: "Pending",
-    assignedAnalyst: "Wanda Maximoff",
-    lastUpdated: "21/07/2025",
-  },
-  {
-    caseId: "#CA-1234567912",
-    name: "Lucas King",
-    risk: "High",
-    alertType: "Transaction Monitoring",
-    status: "In Review",
-    assignedAnalyst: "Clint Barton",
-    lastUpdated: "20/07/2025",
-  },
-  {
-    caseId: "#CA-1234567913",
-    name: "Chloe Scott",
-    risk: "Medium",
-    alertType: "Sanctions Screening",
-    status: "Rejected",
-    assignedAnalyst: "Scott Lang",
-    lastUpdated: "19/07/2025",
-  },
-  {
-    caseId: "#CA-1234567914",
-    name: "Matthew Green",
-    risk: "Low",
-    alertType: "KYC Review",
-    status: "Approved",
-    assignedAnalyst: "Peter Parker",
-    lastUpdated: "18/07/2025",
-  },
-  {
-    caseId: "#CA-1234567915",
-    name: "Isabella Adams",
-    risk: "High",
-    alertType: "AML Alert",
-    status: "Pending",
-    assignedAnalyst: "Tony Stark",
-    lastUpdated: "17/07/2025",
-  },
-  {
-    caseId: "#CA-1234567916",
-    name: "Ethan Baker",
-    risk: "Medium",
-    alertType: "Transaction Monitoring",
-    status: "Approved",
-    assignedAnalyst: "Steve Rogers",
-    lastUpdated: "16/07/2025",
-  },
-  {
-    caseId: "#CA-1234567917",
-    name: "Amelia Gonzalez",
-    risk: "Low",
-    alertType: "Sanctions Screening",
-    status: "Rejected",
-    assignedAnalyst: "Natasha Romanoff",
-    lastUpdated: "15/07/2025",
-  },
-  {
-    caseId: "#CA-1234567918",
-    name: "Jacob Nelson",
-    risk: "High",
-    alertType: "KYC Review",
-    status: "In Review",
-    assignedAnalyst: "Bruce Banner",
-    lastUpdated: "14/07/2025",
-  },
-  {
-    caseId: "#CA-1234567919",
-    name: "Charlotte Carter",
-    risk: "Medium",
-    alertType: "AML Alert",
-    status: "Pending",
-    assignedAnalyst: "Wanda Maximoff",
-    lastUpdated: "13/07/2025",
-  },
-];
+import CustomPagination from "@/components/CustomPagination";
+import { useAlertStore } from "@/app/store/useAlertStore";
 
-const ListView = ({ data, loading }) => {
-  console.log("list data", data);
+const ListView = ({}) => {
+  const {
+    alerts,
+    fetching,
+    totalItems,
+    currentPage,
+    limit,
+    setCurrentPage,
+    setLimit,
+  } = useAlertStore();
   const router = useRouter();
   const riskVariants = {
     Low: "info",
@@ -327,8 +65,10 @@ const ListView = ({ data, loading }) => {
   };
   const handleEdit = (caseNumber) => {
     // console.log("caseNumber", caseNumber);
-    router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`);
-}
+    router.push(
+      `/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`
+    );
+  };
   const columns = [
     {
       header: "Actions",
@@ -357,9 +97,7 @@ const ListView = ({ data, loading }) => {
                   View
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() =>
-                    handleEdit(row?.original?.uid)
-                  }
+                  onClick={() => handleEdit(row?.original?.uid)}
                 >
                   <IconFilePlus className="mr-2 size-3 " />
                   Generate ECDD
@@ -450,30 +188,52 @@ const ListView = ({ data, loading }) => {
       ),
     },
   ];
+  const handlePageChange = (page) => {
+    setCurrentPage(page.selected + 1);
+  };
+  const handleLimitChange = (limit) => {
+    setLimit(limit);
+    setCurrentPage(1);
+  };
   return (
     <div>
-      <ResizableTable data={data} columns={columns} loading={loading} />
+      <ResizableTable data={alerts} columns={columns} loading={fetching} />
+      <CustomPagination
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        totalItems={totalItems}
+        limit={limit}
+        onChangeLimit={handleLimitChange}
+      />
     </div>
   );
 };
 export default function CaseList() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+  const { currentPage, limit, setAlerts, setFetching, setTotalItems } =
+    useAlertStore();
+
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
+      setFetching(true);
       try {
-        const response = await getCaseList();
-        
-        setData(response?.data || []);
-        setLoading(false);
+        const queryParams = {
+          page: currentPage,
+          limit: limit,
+        };
+        const response = await getCaseList(queryParams);
+
+        setAlerts(response?.data);
+        setTotalItems(response?.totalRecords);
       } catch (error) {
-        setLoading(false);
+        console.error("Failed to get data", error);
+      } finally {
+        setFetching(false);
       }
     };
     fetchData();
-  }, []);
+  }, [currentPage, limit]);
 
   return (
     <div>
@@ -546,7 +306,7 @@ export default function CaseList() {
           </ButtonGroup>
         </div>
       </div>
-      <ListView data={data} loading={loading} />
+      <ListView />
     </div>
   );
 }
