@@ -15,7 +15,7 @@ export default function TransactionDetails() {
       try {
         const response = await getTTRById(id);
         console.log('response', response);
-        setReportData(response);
+        setReportData(response?.data);
       } catch (error) {
         console.error('error', error);
       }
@@ -39,7 +39,7 @@ export default function TransactionDetails() {
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="mx-auto max-w-7xl space-y-6">
+      <div className="mx-auto max-w-7xl space-y-6 text-xs">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -49,11 +49,11 @@ export default function TransactionDetails() {
                 {reportData?.status?.toUpperCase()}
               </Badge>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2  text-muted-foreground">
               Reference Number: <span className="font-medium text-foreground">{reportData?.referenceNumber}</span>
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2  text-muted-foreground">
             <Calendar className="h-4 w-4" />
             <span>Completed: {formatDate(reportData?.completionDate)}</span>
           </div>
@@ -72,30 +72,30 @@ export default function TransactionDetails() {
               <div key={index} className="space-y-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Full Name</p>
-                    <p className="text-base text-foreground">{part?.customers?.fullName}</p>
+                    <p className=" text-xs text-muted-foreground">Full Name</p>
+                    <p className=" font-semibold text-xs">{part?.customers?.fullName}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
-                    <p className="text-base text-foreground">{formatDate(part?.customers?.dateOfBirth)}</p>
+                    <p className=" font-medium text-muted-foreground">Date of Birth</p>
+                    <p className=" font-semibold text-xs">{formatDate(part?.customers?.dateOfBirth)}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Occupation</p>
-                    <p className="text-base text-foreground">{part?.customers?.occupation}</p>
+                    <p className=" font-medium text-muted-foreground">Occupation</p>
+                    <p className=" font-semibold text-xs">{part?.customers?.occupation}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Business Structure</p>
-                    <p className="text-base capitalize text-foreground">{part?.customers?.businessStructure}</p>
+                    <p className=" font-medium text-muted-foreground">Business Structure</p>
+                    <p className=" capitalize font-semibold text-xs">{part?.customers?.businessStructure}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">ABN</p>
-                    <p className="text-base text-foreground">{part?.customers?.abn}</p>
+                    <p className=" font-medium text-muted-foreground">ABN</p>
+                    <p className=" font-semibold text-xs">{part?.customers?.abn}</p>
                   </div>
                 </div>
 
                 <div className="space-y-2 rounded-lg bg-muted/30 p-4">
-                  <p className="text-sm font-medium text-foreground">Business Address</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className=" font-medium text-foreground">Business Address</p>
+                  <p className=" text-muted-foreground">
                     {part?.customers?.businessAddress?.fullStreetAddress}
                     <br />
                     {part?.customers?.businessAddress?.city}, {part?.customers?.businessAddress?.state}{" "}
@@ -107,18 +107,18 @@ export default function TransactionDetails() {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Phone Numbers</p>
-                    <p className="text-base text-foreground">{part?.customers?.phoneNumbers?.join(", ")}</p>
+                    <p className=" font-medium text-muted-foreground">Phone Numbers</p>
+                    <p className=" font-semibold text-xs">{part?.customers?.phoneNumbers?.join(", ")}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Email Addresses</p>
-                    <p className="text-base text-foreground">{part?.customers?.emailAddresses?.join(", ")}</p>
+                    <p className=" font-medium text-muted-foreground">Email Addresses</p>
+                    <p className=" font-semibold text-xs">{part?.customers?.emailAddresses?.join(", ")}</p>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">Transaction Conduct Method</p>
-                  <p className="text-base capitalize text-foreground">{part?.transactionConductMethod}</p>
+                  <p className=" font-medium text-muted-foreground">Transaction Conduct Method</p>
+                  <p className=" capitalize font-semibold text-xs">{part?.transactionConductMethod}</p>
                 </div>
               </div>
             ))}
@@ -136,24 +136,24 @@ export default function TransactionDetails() {
           <CardContent>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Type</p>
-                <p className="text-base capitalize text-foreground">{reportData?.partB?.type}</p>
+                <p className=" font-medium text-muted-foreground">Type</p>
+                <p className=" capitalize font-semibold text-xs">{reportData?.partB?.type}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Full Name</p>
-                <p className="text-base text-foreground">{reportData?.partB?.details?.fullName}</p>
+                <p className=" font-medium text-muted-foreground">Full Name</p>
+                <p className=" font-semibold text-xs">{reportData?.partB?.details?.fullName}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
-                <p className="text-base text-foreground">{formatDate(reportData?.partB?.details?.dateOfBirth)}</p>
+                <p className=" font-medium text-muted-foreground">Date of Birth</p>
+                <p className=" font-semibold text-xs">{formatDate(reportData?.partB?.details?.dateOfBirth)}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Occupation</p>
-                <p className="text-base text-foreground">{reportData?.partB?.details?.occupation}</p>
+                <p className=" font-medium text-muted-foreground">Occupation</p>
+                <p className=" font-semibold text-xs">{reportData?.partB?.details?.occupation}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Relationship to Customer</p>
-                <p className="text-base capitalize text-foreground">
+                <p className=" font-medium text-muted-foreground">Relationship to Customer</p>
+                <p className=" capitalize font-semibold text-xs">
                   {reportData?.partB?.details?.relationshipToCustomer}
                 </p>
               </div>
@@ -172,22 +172,22 @@ export default function TransactionDetails() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Transaction Date</p>
-                <p className="text-base text-foreground">{formatDate(reportData?.partC?.transaction?.date)}</p>
+                <p className=" font-medium text-muted-foreground">Transaction Date</p>
+                <p className=" font-semibold text-xs">{formatDate(reportData?.partC?.transaction?.date)}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Reference Number</p>
-                <p className="text-base text-foreground">{reportData?.partC?.transaction?.referenceNumber}</p>
+                <p className=" font-medium text-muted-foreground">Reference Number</p>
+                <p className=" font-semibold text-xs">{reportData?.partC?.transaction?.referenceNumber}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Designated Service</p>
-                <p className="text-base capitalize text-foreground">
+                <p className=" font-medium text-muted-foreground">Designated Service</p>
+                <p className=" capitalize font-semibold text-xs">
                   {reportData?.partC?.transaction?.designatedService?.replace("-", " ")}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
-                <p className="text-base font-semibold text-foreground">
+                <p className=" font-medium text-muted-foreground">Total Amount</p>
+                <p className=" font-semibold text-xs">
                   {formatCurrency(
                     reportData?.partC?.transaction?.totalAmount?.amount,
                     reportData?.partC?.transaction?.totalAmount?.currencyCode,
@@ -198,7 +198,7 @@ export default function TransactionDetails() {
 
             {/* Transaction Flow Visualization */}
             <div className="rounded-lg bg-muted/30 p-6">
-              <p className="mb-4 text-sm font-medium text-foreground">Transaction Flow</p>
+              <p className="mb-4  font-medium text-foreground">Transaction Flow</p>
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1 space-y-2 rounded-lg bg-card p-4 border border-border">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Money Received</p>
@@ -224,21 +224,21 @@ export default function TransactionDetails() {
 
             {/* Recipients */}
             <div className="space-y-3">
-              <p className="text-sm font-medium text-foreground">Recipients</p>
+              <p className=" font-medium text-foreground">Recipients</p>
               {reportData?.partC?.recipients?.map((recipient, index) => (
                 <div key={index} className="rounded-lg border border-border bg-card p-4">
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-muted-foreground">Full Name</p>
-                      <p className="text-sm text-foreground">{recipient?.fullName}</p>
+                      <p className=" font-semibold text-xs">{recipient?.fullName}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-muted-foreground">Occupation</p>
-                      <p className="text-sm text-foreground">{recipient?.occupation}</p>
+                      <p className=" font-semibold text-xs">{recipient?.occupation}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-muted-foreground">Is Customer</p>
-                      <p className="text-sm text-foreground">{recipient?.isCustomer ? "Yes" : "No"}</p>
+                      <p className=" font-semibold text-xs">{recipient?.isCustomer ? "Yes" : "No"}</p>
                     </div>
                   </div>
                 </div>
@@ -258,31 +258,31 @@ export default function TransactionDetails() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Entity Name</p>
-                <p className="text-base text-foreground">{reportData?.partD?.name}</p>
+                <p className=" font-medium text-muted-foreground">Entity Name</p>
+                <p className=" font-semibold text-xs">{reportData?.partD?.name}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Identification Number</p>
-                <p className="text-base text-foreground">{reportData?.partD?.identificationNumber}</p>
+                <p className=" font-medium text-muted-foreground">Identification Number</p>
+                <p className=" font-semibold text-xs">{reportData?.partD?.identificationNumber}</p>
               </div>
             </div>
 
             {/* Branch Information */}
             <div className="space-y-3 rounded-lg bg-muted/30 p-4">
-              <p className="text-sm font-medium text-foreground">Branch Information</p>
+              <p className=" font-medium text-foreground">Branch Information</p>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Branch Name</p>
-                  <p className="text-sm text-foreground">{reportData?.partD?.branch?.name}</p>
+                  <p className=" font-semibold text-xs">{reportData?.partD?.branch?.name}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Branch ID</p>
-                  <p className="text-sm text-foreground">{reportData?.partD?.branch?.identificationNumber}</p>
+                  <p className=" font-semibold text-xs">{reportData?.partD?.branch?.identificationNumber}</p>
                 </div>
               </div>
               <div className="space-y-1">
                 <p className="text-xs font-medium text-muted-foreground">Branch Address</p>
-                <p className="text-sm text-foreground">
+                <p className=" font-semibold text-xs">
                   {reportData?.partD?.branch?.address?.fullStreetAddress}
                   <br />
                   {reportData?.partD?.branch?.address?.city}, {reportData?.partD?.branch?.address?.state}{" "}
@@ -295,24 +295,24 @@ export default function TransactionDetails() {
             <div className="space-y-3 rounded-lg border border-border bg-card p-4">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm font-medium text-foreground">Person Completing Report</p>
+                <p className=" font-medium text-foreground">Person Completing Report</p>
               </div>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Name</p>
-                  <p className="text-sm text-foreground">{reportData?.partD?.personCompleting?.name}</p>
+                  <p className=" font-semibold text-xs">{reportData?.partD?.personCompleting?.name}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Job Title</p>
-                  <p className="text-sm text-foreground">{reportData?.partD?.personCompleting?.jobTitle}</p>
+                  <p className=" font-semibold text-xs">{reportData?.partD?.personCompleting?.jobTitle}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Phone</p>
-                  <p className="text-sm text-foreground">{reportData?.partD?.personCompleting?.phone}</p>
+                  <p className=" font-semibold text-xs">{reportData?.partD?.personCompleting?.phone}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Email</p>
-                  <p className="text-sm text-foreground">{reportData?.partD?.personCompleting?.email}</p>
+                  <p className=" font-semibold text-xs">{reportData?.partD?.personCompleting?.email}</p>
                 </div>
               </div>
             </div>

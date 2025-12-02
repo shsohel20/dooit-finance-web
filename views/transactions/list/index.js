@@ -64,6 +64,12 @@ const TransactionListView = () => {
     Medium: 'warning',
     High: 'danger',
   };
+  const statusVariants = {
+    pending: 'info',
+    completed: 'success',
+    flagged: 'warning',
+    rejected: 'danger',
+  };
   const handleViewClick = (item) => {
     setCurrentItem(item);
     setOpenDetailView(true);
@@ -201,7 +207,7 @@ const TransactionListView = () => {
         return <>
           <StatusPill
             icon={<IconPennant />}
-            variant={riskVariants[row.original.status]}
+            variant={statusVariants[row.original.status]}
           >
             {row.original.status}
           </StatusPill>

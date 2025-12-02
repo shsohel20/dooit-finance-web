@@ -29,3 +29,8 @@ export const getRFIList = async () => {
   const response = await fetchWithAuth(`rfi`);
   return response.json();
 }
+
+export const getRFIById = async (id) => {
+  const response = await fetchWithAuth(`rfi/${id}`);
+  return response.json();
+}

@@ -35,7 +35,7 @@ const Ecdd = () => {
   }, [details?.uid]);
 
   const handleNewEcdd = () => {
-    router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`);
+    router.push(`/dashboard/client/report-compliance/ecdd/form`);
   };
   return (
     <div>
