@@ -1,155 +1,146 @@
-"use client"
+"use client";
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Info } from "lucide-react";
+import { useState } from "react";
+import CustomDropZone from "@/components/ui/DropZone";
+import FormTitle from "./FormTitle";
+import { checkImageLiveness } from "@/app/customer/registration/actions";
+import { toast } from "sonner";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Upload, CheckCircle2, Info } from "lucide-react"
-import { useState } from "react"
-import CustomDropZone from "@/components/ui/DropZone"
-import FormTitle from "./FormTitle"
-import { checkImageLiveness } from "@/app/customer/registration/actions"
-
-const getBase64 = (file) => {
-  const realFile = file instanceof File ? file : file?.[0] || file.file;
-  return new Promise((resolve, reject) => {
+const getBase64 = (file) =>
+  new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve(reader.result);
     reader.onerror = reject;
-    reader.readAsDataURL(realFile);
+    reader.readAsDataURL(file);
   });
-}
 
 export default function CheckLiveness() {
-  const [frontProfile, setFrontProfile] = useState({ file: null, preview: null })
-  const [rightProfile, setRightProfile] = useState({ file: null, preview: null })
+  const [frontProfile, setFrontProfile] = useState(null); // base64 only
+  const [rightProfile, setRightProfile] = useState(null); // base64 only
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleFrontChange = (file) => {
-    console.log("File:", file);
-    getBase64(file).then(base64String => {
-      console.log("Base64:", base64String);
-      setFrontProfile({ file, preview: base64String });
-    });
-  };
-  const handleRightProfileChange = (file) => {
-    getBase64(file).then(base64String => {
-      console.log("Base64:", base64String);
-      setRightProfile({ file, preview: base64String });
-    });
+  const extractFile = (file) => {
+    // ensures compatibility with DropZone/FileWithPath/Drag&Drop
+    if (file instanceof File) return file;
+    if (Array.isArray(file)) return file[0];
+    if (file?.file instanceof File) return file.file;
+    return null;
   };
 
+  const handleFrontChange = async (file) => {
+    const realFile = extractFile(file);
+    if (!realFile) return;
 
+    const base64 = await getBase64(realFile);
+    setFrontProfile(base64);
+  };
 
+  const handleRightChange = async (file) => {
+    const realFile = extractFile(file);
+    if (!realFile) return;
 
-
-
-  const requirements = [
-    { text: "Clear right profile (90° turned to the right)", icon: CheckCircle2 },
-    { text: "Same Person as Image 1", icon: CheckCircle2 },
-    { text: "Same lighting and quality requirements as Image 1", icon: CheckCircle2 },
-    { text: "Clear frontal face view", icon: CheckCircle2 },
-    { text: "Face must be centered and well-lit", icon: CheckCircle2 },
-    { text: "Eyes must be open", icon: CheckCircle2 },
-    { text: "No glasses, masks, or hands in frame", icon: CheckCircle2 },
-    { text: "Good lighting conditions", icon: CheckCircle2 },
-    { text: "No blur", icon: CheckCircle2 },
-  ]
+    const base64 = await getBase64(realFile);
+    setRightProfile(base64);
+  };
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
-      const data = {
-        img1_base64: frontProfile.preview,
-        img2_base64: rightProfile.preview
+      const res = await checkImageLiveness({
+        img1_base64: frontProfile,
+        img2_base64: rightProfile,
+      });
+
+      if (res.error) {
+        toast.error(res.error);
+        setError(res.error);
       }
-      console.log('data', JSON.stringify(data))
-      //this is server action
-      const res = await checkImageLiveness(data)
-      console.log('res', res)
-    } catch (error) {
-      console.log('error', error)
+    } catch (err) {
+      console.error("Submit error:", err);
     }
-  }
+    setLoading(false);
+  };
+
+  const requirements = [
+    "Clear right profile (90° turned to the right)",
+    "Same person as Image 1",
+    "Clear frontal face view",
+    "Well-lit face, centered, eyes open",
+    "No blur, no glasses, no mask",
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 mt-4">
-      <div className=" space-y-8">
+      <div className="space-y-8">
+
         {/* Header */}
         <div className="space-y-2">
           <FormTitle>Profile Image Upload</FormTitle>
-          <p className="text-muted-foreground ">
+          <p className="text-muted-foreground">
             Upload clear, high-quality photos for identity verification
           </p>
         </div>
 
-        {/* Requirements Card */}
+        {/* Requirements */}
         <Card className="border-2 border-primary/20 bg-card/50 backdrop-blur">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Info className="w-5 h-5 text-primary" />
-              <CardTitle className="text-xl">
-                Image Requirements
-              </CardTitle>
+              <CardTitle className="text-xl">Image Requirements</CardTitle>
             </div>
             <CardDescription>
-              Please ensure your photos meet these criteria for successful verification
+              Ensure your images meet these criteria for verification
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 gap-3">
-              {requirements.map((req, index) => (
-                <div key={index} className="flex items-start gap-2">
-                  <req.icon className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">{req.text}</span>
-                </div>
+            <ul className="space-y-2 list-disc pl-5">
+              {requirements.map((req, i) => (
+                <li key={i} className="text-sm">{req}</li>
               ))}
-            </div>
+            </ul>
           </CardContent>
         </Card>
-
-        {/* Upload Areas */}
+        <div>
+          {error && <Alert variant="destructive">
+            <AlertTitle>{error}</AlertTitle>
+          </Alert>}
+        </div>
+        {/* Upload Section */}
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Front Profile Upload */}
+
+          {/* Front */}
           <Card className="border-2 hover:border-primary/50 transition-colors">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                Front Profile (Image 1)
-                <span className="text-xs font-normal text-muted-foreground bg-muted px-2 py-1 rounded">Required</span>
-              </CardTitle>
-              <CardDescription>Clear frontal face view with centered positioning</CardDescription>
+              <CardTitle className="text-lg">Front Profile (Required)</CardTitle>
+              <CardDescription>Clear frontal face view</CardDescription>
             </CardHeader>
             <CardContent>
               <CustomDropZone
                 handleChange={handleFrontChange}
-                url={frontProfile.preview || ''}
+                url={frontProfile || ""}
               >
-                <div className="space-y-1">
-                  <p className="font-medium">Drag and drop your document here</p>
-                  <p className="text-sm text-muted-foreground">or click to upload</p>
-                </div>
+                <p className="font-medium">Drag & drop or click to upload</p>
               </CustomDropZone>
             </CardContent>
           </Card>
 
-          {/* Right Profile Upload */}
+          {/* Right */}
           <Card className="border-2 hover:border-primary/50 transition-colors">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                Right Profile (Image 2)
-                <span className="text-xs font-normal text-muted-foreground bg-muted px-2 py-1 rounded">Required</span>
-              </CardTitle>
-              <CardDescription>90° right profile view of the same person</CardDescription>
+              <CardTitle className="text-lg">Right Profile (Required)</CardTitle>
+              <CardDescription>90° turn to the right</CardDescription>
             </CardHeader>
             <CardContent>
               <CustomDropZone
-                handleChange={handleRightProfileChange}
-                url={rightProfile.preview || ''}
+                handleChange={handleRightChange}
+                url={rightProfile || ""}
               >
-
-                <div className="space-y-1">
-                  <p className="font-medium">Drag and drop your document here</p>
-                  <p className="text-sm text-muted-foreground">or click to upload</p>
-
-
-
-                </div>
+                <p className="font-medium">Drag & drop or click to upload</p>
               </CustomDropZone>
             </CardContent>
           </Card>
@@ -159,13 +150,14 @@ export default function CheckLiveness() {
         <div className="flex justify-center pt-4">
           <Button
             onClick={handleSubmit}
-            disabled={!frontProfile.file || !rightProfile.file}
-            className="px-12 text-lg h-12 shadow-lg hover:shadow-xl transition-shadow"
+            disabled={!frontProfile || !rightProfile || loading}
+            className=""
           >
-            Submit for Verification
+            {loading ? "Processing..." : "Submit for Verification"}
           </Button>
         </div>
+
       </div>
-    </div >
-  )
+    </div>
+  );
 }

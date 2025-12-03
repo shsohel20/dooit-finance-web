@@ -11,9 +11,12 @@ export const customerOnboarding = async (data) => {
 }
 
 export const checkImageLiveness = async (data) => {
-  const response = fetch('http://4.227.188.44:5030/liveness-detection', {
+  const response = await fetch('http://4.227.188.44:5030/liveness-detection', {
     method: 'POST',
-    body: JSON.stringify(data)
-  })
-  return response
-}
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  const json = await response.json();
+  return json; // must return plain object
+};
