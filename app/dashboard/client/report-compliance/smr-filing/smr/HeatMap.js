@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { getRandomNumber } from "@/lib/utils"
 import { useState } from "react"
 
 // Sample SMR case data with urgency levels
@@ -22,17 +23,17 @@ const smrCases = [
 function GaugeChart({ value, caseId }) {
   // Determine urgency level
   const getUrgencyLevel = (hours) => {
-    if (hours >= 48) return { level: "Safe", color: "#22c55e", range: "48+ hrs" }
-    if (hours >= 24) return { level: "Moderate", color: "#eab308", range: "24-48 hrs" }
-    if (hours >= 12) return { level: "Urgent", color: "#f97316", range: "12-24 hrs" }
-    return { level: "Critical", color: "#ef4444", range: "0-12 hrs" }
+    if (hours >= 48) return { level: "Safe", color: "#22c55e", range: "48+ hrs", startAngle: 0, endAngle: 60, }
+    if (hours >= 24) return { level: "Moderate", color: "#eab308", range: "24-48 hrs", startAngle: 60, endAngle: 120, }
+    if (hours >= 12) return { level: "Urgent", color: "#f97316", range: "12-24 hrs", startAngle: 120, endAngle: 150, }
+    return { level: "Critical", color: "#ef4444", range: "0-12 hrs", startAngle: 150, endAngle: 180, }
   }
 
   const urgency = getUrgencyLevel(value)
 
   // Map 0-72 hours to 0-180 degrees (left to right)
   const percentage = Math.min(value / 72, 1)
-  const needleAngle = percentage * 180
+  const needleAngle = 90 + getRandomNumber(urgency.startAngle, urgency.endAngle)
 
   const segments = [
     { color: "#22c55e", startAngle: 0, endAngle: 60, label: "Safe" },
