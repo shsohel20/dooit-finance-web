@@ -12,6 +12,7 @@ import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
 import IdentificationDocuments from '@/views/customer-registration/common/IdentificationDocuments';
 import PersonalInfo from '@/views/customer-registration/individual/PersonalInfo';
 import OtherInfo from '@/views/customer-registration/individual/OtherInfo';
+import CheckLiveness from '@/views/customer-registration/common/CheckLiveness';
 
 
 const personalInfoSchema = z.object({
@@ -96,7 +97,7 @@ const personalInfoSchema = z.object({
         ,
     }),
 });
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 const CustomerRegistration = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const { customerRegisterData, setCustomerRegisterData, registerType, country } = useCustomerRegisterStore();
@@ -141,10 +142,11 @@ const CustomerRegistration = () => {
             </div>
             {/* content */}
             <div>
-                {currentStep === 1 && <IdentificationDocuments control={control} errors={errors} />}
-                {currentStep === 2 && <PersonalInfo control={control} errors={errors} />}
+                {currentStep === 1 && <CheckLiveness />}
+                {currentStep === 2 && <IdentificationDocuments control={control} errors={errors} />}
+                {currentStep === 3 && <PersonalInfo control={control} errors={errors} />}
 
-                {currentStep === 3 && <OtherInfo control={control} errors={errors} setValue={setValue} />}
+                {currentStep === 4 && <OtherInfo control={control} errors={errors} setValue={setValue} />}
             </div>
             <div className='flex justify-end gap-2 my-8'>
                 {currentStep > 1 && <Button

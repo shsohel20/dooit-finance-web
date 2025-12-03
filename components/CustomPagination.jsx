@@ -45,7 +45,7 @@ export default function CustomPagination(props) {
           </SelectContent>
         </Select>{" "}
         <span className="text-xs text-nowrap">
-          Showing {limit} of {totalItems} items
+          Showing {currentPage} of {pageCount} pages
         </span>
       </div>
       <ReactPaginate

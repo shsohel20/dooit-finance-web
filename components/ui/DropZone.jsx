@@ -33,7 +33,7 @@ const CustomDropZone = ({
     <DragDrop classes="" disabled={disabled} handleChange={handleChange}>
       <div
         className={cn(
-          "border-2 min-h-[400px] w-full border-dashed rounded-xl flex flex-col items-center justify-center gap-2 relative z-2 overflow-hidden",
+          "border-2 min-h-[200px] py-6 w-full border-dashed rounded-xl flex flex-col items-center justify-center gap-2 relative z-2 overflow-hidden bg-primary/5",
           disabled ? "opacity-50" : "",
           {
             "bg-green-50/20 border-green-400": url && !error,

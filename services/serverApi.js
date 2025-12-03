@@ -6,11 +6,11 @@ export const AI_URL = process.env.NEXT_PUBLIC_AI_BASE_URL || "http://4.227.188.4
 
 import { auth } from "@/auth";
 
-export async function fetchWithAuth( endpoint, options = {}, isAi = false ) {
+export async function fetchWithAuth(endpoint, options = {}, isAi = false) {
   const session = await auth(); // ✅ works anywhere on the server
   const token = session?.user?.accessToken;
-  if ( !token ) {
-    throw new Error( "No valid token found. User might not be logged in." );
+  if (!token) {
+    console.log("No valid token found. User might not be logged in.");
   }
   const allOptions = {
     headers: {
@@ -21,10 +21,9 @@ export async function fetchWithAuth( endpoint, options = {}, isAi = false ) {
     ...options,
   }
 
-  const res = await fetch( `${isAi ? AI_URL : BASE_URL}${endpoint}`, {
+  const res = await fetch(`${isAi ? AI_URL : BASE_URL}${endpoint}`, {
     ...allOptions,
-  } );
-  console.log( "allOptions", allOptions );
+  });
 
   return res;
 }
