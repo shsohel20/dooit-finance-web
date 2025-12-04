@@ -42,11 +42,12 @@ export function LoginForm({ className, token, cid, ...props }) {
       password: "",
     },
   });
+  console.log("login page session", session);
   useEffect(() => {
     if (session.data) {
       if (session.data?.user?.userType === "dooit") {
         router.replace("/dashboard/admin");
-      } else if (session.data?.user?.userType === "admin") {
+      } else if (session.data?.user?.userType === "client") {
         router.replace("/dashboard/client");
       } else if (session.data.user.role === "customer" && token) {
         router.replace("/auth/registration-type");
