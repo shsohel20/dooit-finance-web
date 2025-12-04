@@ -18,5 +18,6 @@ export const checkImageLiveness = async (data) => {
   });
 
   const json = await response.json();
+  console.log("checkImageLiveness response", json);
   return json; // must return plain object
 };

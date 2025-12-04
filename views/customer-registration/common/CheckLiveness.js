@@ -9,6 +9,8 @@ import FormTitle from "./FormTitle";
 import { checkImageLiveness } from "@/app/customer/registration/actions";
 import { toast } from "sonner";
 import { Alert, AlertTitle } from "@/components/ui/alert";
+import FaceCapture from "./FaceCapture";
+
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -32,12 +34,13 @@ export default function CheckLiveness() {
     return null;
   };
 
-  const handleFrontChange = async (file) => {
-    const realFile = extractFile(file);
-    if (!realFile) return;
+  const handleFrontChange = async (src) => {
+    // const realFile = extractFile(file);
+    // if (!realFile) return;
 
-    const base64 = await getBase64(realFile);
-    setFrontProfile(base64);
+    // const base64 = await getBase64(realFile);
+    // setFrontProfile(base64);
+    setFrontProfile(src);
   };
 
   const handleRightChange = async (file) => {
@@ -67,15 +70,16 @@ export default function CheckLiveness() {
   };
 
   const requirements = [
-    "Clear right profile (90° turned to the right)",
-    "Same person as Image 1",
-    "Clear frontal face view",
-    "Well-lit face, centered, eyes open",
-    "No blur, no glasses, no mask",
+    "Sit in a bright area with a clean background.",
+    "Hold your phone straight at eye level.",
+    "Make sure your entire face is visible (remove hats, masks, or glasses).",
+    "Keep your face centered inside the frame shown.",
+    "When the first 3-second countdown begins, look directly at the camera and remain still.",
+    "When the second 3-second countdown starts, slowly turn your head to the right and hold that position.",
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 mt-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 mt-4 pb-10">
       <div className="space-y-8">
 
         {/* Header */}
@@ -120,12 +124,16 @@ export default function CheckLiveness() {
               <CardDescription>Clear frontal face view</CardDescription>
             </CardHeader>
             <CardContent>
-              <CustomDropZone
+              {/* <CustomDropZone
                 handleChange={handleFrontChange}
                 url={frontProfile || ""}
               >
                 <p className="font-medium">Drag & drop or click to upload</p>
-              </CustomDropZone>
+              </CustomDropZone> */}
+              <FaceCapture
+                image={frontProfile}
+                onCapture={handleFrontChange}
+              />
             </CardContent>
           </Card>
 

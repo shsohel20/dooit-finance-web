@@ -12,6 +12,7 @@ const CustomDropZone = ({
   className = "",
   imageContainerClassName = "",
   handleChange = () => {},
+  ...props
 }) => {
   const renderIcon = () => {
     if (loading === true) {
@@ -30,7 +31,12 @@ const CustomDropZone = ({
   };
 
   return (
-    <DragDrop classes="" disabled={disabled} handleChange={handleChange}>
+    <DragDrop
+      classes=""
+      disabled={disabled}
+      handleChange={handleChange}
+      {...props}
+    >
       <div
         className={cn(
           "border-2 min-h-[200px] py-6 w-full border-dashed rounded-xl flex flex-col items-center justify-center gap-2 relative z-2 overflow-hidden bg-primary/5",
