@@ -47,7 +47,7 @@ export function LoginForm({ className, token, cid, ...props }) {
     if (session.data) {
       if (session.data?.user?.userType === "dooit") {
         router.replace("/dashboard/admin");
-      } else if (session.data?.user?.userType === "client") {
+      } else if (session.data?.user?.userType === "client" || "branch") {
         router.replace("/dashboard/client");
       } else if (session.data.user.role === "customer" && token) {
         router.replace("/auth/registration-type");
