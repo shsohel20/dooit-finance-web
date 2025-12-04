@@ -1,5 +1,6 @@
 'use server'
 
+import { getQueryString } from "@/lib/utils";
 import { fetchWithAuth } from "@/services/serverApi";
 
 const endpoint = 'alert'
@@ -9,8 +10,9 @@ export const getCaseDetails = async (id) => {
   return response.json();
 }
 
-export const getCaseList = async () => {
-  const response = await fetchWithAuth(`${endpoint}`);
+export const getCaseList = async (queryParams) => {
+  const queryString = getQueryString(queryParams);
+  const response = await fetchWithAuth(`${endpoint}?${queryString}`);
   return response.json();
 }
 

@@ -8,7 +8,7 @@ import { getSMRList } from './actions'
 import { formatDateTime } from '@/lib/utils'
 import { EyeIcon } from 'lucide-react'
 import { SMRDashboard } from './Dashboard'
-import { SMRHeatmap } from './HeatMap'
+import SMRHeatmap from './HeatMap'
 
 export default function SMRPage() {
   const router = useRouter()

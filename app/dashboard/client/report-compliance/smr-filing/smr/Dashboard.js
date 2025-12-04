@@ -107,10 +107,7 @@ export function SMRDashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">SMR Analytics Dashboard</h1>
-        <p className="text-muted-foreground">Comprehensive overview of suspicious matter reports and key insights</p>
-      </div>
+
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

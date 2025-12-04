@@ -1,12 +1,10 @@
-import { CheckCircle, Loader2, Upload, XCircle } from 'lucide-react';
 import React, { useState } from 'react';
 import FormTitle from './FormTitle';
-import DragDrop from '@/components/DragDop';
 import { Controller, useFieldArray, useWatch } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
-
 import { fileUploadOnCloudinary } from '@/app/actions';
 import CustomDropZone from '@/components/ui/DropZone';
+
 
 const documentTypes = [
     { label: 'National ID', value: 'nid' },
@@ -58,6 +56,7 @@ const IdentificationDocuments = ({ control, errors }) => {
         }
         setFrontLoading(false);
     }
+
     const handleBackChange = async (file) => {
         setBackLoading(true);
         const response = await fileUploadOnCloudinary(file);
@@ -94,50 +93,53 @@ const IdentificationDocuments = ({ control, errors }) => {
         });
     }
     return (
-        <div className='mt-4'>
-            <FormTitle>Identification Documents</FormTitle>
-            <div className='max-w-56 my-4 relative z-3'>
-                <Controller
-                    control={control}
-                    name='document_type'
-                    render={({ field }) => (
-                        <CustomSelect
-                            label='Select Document Type'
-                            options={documentTypes}
-                            value={field.value}
-                            placeholder='Select Document Type'
-                            error={errors.document_type?.message}
-                            onChange={(e) => handleDocumentTypeChange(e, field.onChange)}
-                        />
-                    )}
-                />
-            </div>
-            <div className='flex gap-4'>
-                <div className='w-full'>
+        <div className='mt-4 '>
 
-                    <CustomDropZone
-                        handleChange={handleFrontChange}
-                        disabled={!documentTypeValue}
-                        loading={frontLoading}
-                        url={fields.find(field => field.type === 'front')?.url}
-                        error={frontError}
-                    >
-                        <p className='font-bold'>Front of document</p>
-                        <p className='text-sm text-muted-foreground'>Drag and drop your document here or click to upload</p>
-                    </CustomDropZone>
-
+            <div>
+                <FormTitle>Identification Documents</FormTitle>
+                <div className='max-w-56 my-4 relative z-3'>
+                    <Controller
+                        control={control}
+                        name='document_type'
+                        render={({ field }) => (
+                            <CustomSelect
+                                label='Select Document Type'
+                                options={documentTypes}
+                                value={field.value}
+                                placeholder='Select Document Type'
+                                error={errors.document_type?.message}
+                                onChange={(e) => handleDocumentTypeChange(e, field.onChange)}
+                            />
+                        )}
+                    />
                 </div>
-                <div className='w-full'>
+                <div className='flex gap-4'>
+                    <div className='w-full'>
 
-                    <CustomDropZone
-                        disabled={!documentTypeValue}
-                        handleChange={handleBackChange}
-                        loading={backLoading}
-                        url={fields.find(field => field.type === 'back')?.url}
-                        error={backError}>
-                        <p className='font-bold'>Back of document</p>
-                        <p className='text-sm text-muted-foreground'>Drag and drop your document here or click to upload</p>
-                    </CustomDropZone>
+                        <CustomDropZone
+                            handleChange={handleFrontChange}
+                            disabled={!documentTypeValue}
+                            loading={frontLoading}
+                            url={fields.find(field => field.type === 'front')?.url}
+                            error={frontError}
+                        >
+                            <p className='font-bold'>Front of document</p>
+                            <p className='text-sm text-muted-foreground'>Drag and drop your document here or click to upload</p>
+                        </CustomDropZone>
+
+                    </div>
+                    <div className='w-full'>
+
+                        <CustomDropZone
+                            disabled={!documentTypeValue}
+                            handleChange={handleBackChange}
+                            loading={backLoading}
+                            url={fields.find(field => field.type === 'back')?.url}
+                            error={backError}>
+                            <p className='font-bold'>Back of document</p>
+                            <p className='text-sm text-muted-foreground'>Drag and drop your document here or click to upload</p>
+                        </CustomDropZone>
+                    </div>
                 </div>
             </div>
 

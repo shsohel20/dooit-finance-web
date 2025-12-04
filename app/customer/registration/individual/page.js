@@ -12,6 +12,7 @@ import { useCustomerRegisterStore } from '@/app/store/useCustomerRegister';
 import IdentificationDocuments from '@/views/customer-registration/common/IdentificationDocuments';
 import PersonalInfo from '@/views/customer-registration/individual/PersonalInfo';
 import OtherInfo from '@/views/customer-registration/individual/OtherInfo';
+import CheckLiveness from '@/views/customer-registration/common/CheckLiveness';
 
 
 const personalInfoSchema = z.object({
@@ -141,6 +142,7 @@ const CustomerRegistration = () => {
             </div>
             {/* content */}
             <div>
+                
                 {currentStep === 1 && <IdentificationDocuments control={control} errors={errors} />}
                 {currentStep === 2 && <PersonalInfo control={control} errors={errors} />}
 

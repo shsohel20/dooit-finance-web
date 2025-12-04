@@ -4,11 +4,13 @@ import { fetchWithAuth } from "@/services/serverApi";
 
 export async function getCustomers(queryParams) {
   const queryString = getQueryString(queryParams);
-  const response = await fetchWithAuth(`customer?isActive=true&${queryString}`, {
+  const url = `customer?isActive=true&${queryString}`;
+  console.log('url => ', url);
+  const response = await fetchWithAuth(url, {
     method: "GET",
   });
-  return response.json();
 
+  return response.json();
 }
 
 export const sendInvite = async (inviteData) => {

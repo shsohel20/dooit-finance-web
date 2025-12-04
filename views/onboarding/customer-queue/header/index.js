@@ -44,7 +44,7 @@ const InvitationForm = ({ open, setOpen }) => {
     phone: '',
     notes: '',
   }
-  console.log('session => ', session);
+
   const [formData, setFormData] = useState(initialValues);
   const [loading, setLoading] = useState(false);
   const { control, handleSubmit, formState: { errors }, reset } = useForm({

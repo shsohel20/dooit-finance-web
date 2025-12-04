@@ -20,11 +20,12 @@ import { IconDotsVertical, IconDownload, IconEye, IconGridDots, IconList, IconPe
 import React, { useEffect, useState } from 'react'
 
 import { ArrowRight, Plus } from 'lucide-react';
-import { formatAUD, formatDateTime } from '@/lib/utils';
+import { formatAUD, formatDateTime, objWithValidValues } from '@/lib/utils';
 import TransactionDetailView from '../form/Details';
 import { getTransactions } from '@/app/dashboard/client/transactions/actions';
 import TransactionReportingModal from '../form/ReportingModal';
 import { TransactionDashboard } from './Dashboard';
+import CustomPagination from '@/components/CustomPagination';
 
 
 const TransactionListView = () => {
@@ -32,20 +33,26 @@ const TransactionListView = () => {
   const [currentItem, setCurrentItem] = useState(null);
   const [viewReport, setViewReport] = useState(false);
   const [currentItemReport, setCurrentItemReport] = useState(null);
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState(null);
   const [fetching, setFetching] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const totalItems = transactions?.totalRecords || 0;
 
-  console.log('transactions', transactions);
 
   useEffect(() => {
     const fetchTransactions = async () => {
       setFetching(true);
-      const transactions = await getTransactions();
+      const queryParams = {
+        page: currentPage,
+        limit: limit,
+      };
+      const transactions = await getTransactions(queryParams);
       setFetching(false);
-      setTransactions(transactions?.data || []);
+      setTransactions(transactions);
     }
     fetchTransactions();
-  }, []);
+  }, [currentPage, limit]);
 
   const handleViewReportClick = (item) => {
     setCurrentItemReport(item);
@@ -245,6 +252,13 @@ const TransactionListView = () => {
     )
   }
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page.selected + 1);
+  }
+  const handleLimitChange = (limit) => {
+    setLimit(limit);
+    setCurrentPage(1);
+  }
 
 
 
@@ -256,7 +270,7 @@ const TransactionListView = () => {
           View and manage transaction history for your clients.
         </PageDescription>
       </PageHeader>
-      <TransactionDashboard transactions={transactions} />
+      <TransactionDashboard transactions={transactions?.data || []} />
 
       <div className='flex items-center justify-between bg-white shadow-sm rounded-md p-4'>
         <div className='flex items-center gap-2   '>
@@ -325,10 +339,17 @@ const TransactionListView = () => {
       {/* <CustomDatatable data={transactions} columns={columns} onDoubleClick={handleViewReportClick} /> */}
       <ResizableTable
         columns={columns}
-        data={transactions}
+        data={transactions?.data || []}
         onDoubleClick={handleViewReportClick}
         loading={fetching}
         actions={<Actions />}
+      />
+      <CustomPagination
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        totalItems={totalItems}
+        limit={limit}
+        onChangeLimit={handleLimitChange}
       />
       <TransactionDetailView
         open={openDetailView}

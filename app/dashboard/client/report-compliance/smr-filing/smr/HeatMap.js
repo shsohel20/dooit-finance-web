@@ -1,148 +1,182 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { getRandomNumber } from "@/lib/utils"
 import { useState } from "react"
 
-// Mock SMR cases with different remaining hours
-const mockCases = [
-  { id: "SMR_1764402006593", remainingHours: 68 },
-  { id: "SMR_1764389124821", remainingHours: 52 },
-  { id: "SMR_1764376543210", remainingHours: 38 },
-  { id: "SMR_1764363982741", remainingHours: 24 },
-  { id: "SMR_1764351421089", remainingHours: 15 },
-  { id: "SMR_1764338859437", remainingHours: 8 },
-  { id: "SMR_1764326297785", remainingHours: 3 },
-  { id: "SMR_1764313736133", remainingHours: 71 },
-  { id: "SMR_1764301174481", remainingHours: 45 },
-  { id: "SMR_1764288612829", remainingHours: 19 },
+// Sample SMR case data with urgency levels
+const smrCases = [
+  { id: "SMR_176440200659", remaining: 68, urgency: "safe" },
+  { id: "SMR_176438912482", remaining: 52, urgency: "moderate" },
+  { id: "SMR_176437654321", remaining: 38, urgency: "moderate" },
+  { id: "SMR_176436398274", remaining: 24, urgency: "urgent" },
+  { id: "SMR_176435142108", remaining: 15, urgency: "urgent" },
+  { id: "SMR_176433885943", remaining: 8, urgency: "critical" },
+  { id: "SMR_176432629778", remaining: 3, urgency: "critical" },
+  { id: "SMR_176431373613", remaining: 71, urgency: "safe" },
+  { id: "SMR_176430117448", remaining: 45, urgency: "moderate" },
+  { id: "SMR_176428861282", remaining: 19, urgency: "urgent" },
 ]
 
-// Helper function to get color based on urgency
-const getUrgencyColor = (currentHour, remainingHours) => {
-  const hoursLeft = remainingHours - currentHour
 
-  if (hoursLeft > 48) return "bg-green-500/80" // Green: Safe zone
-  if (hoursLeft > 24) return "bg-yellow-500/80" // Yellow: Moderate
-  if (hoursLeft > 12) return "bg-orange-500/80" // Orange: Urgent
-  if (hoursLeft > 0) return "bg-red-500/80" // Red: Critical
-  return "bg-gray-800" // Expired
-}
+function GaugeChart({ value, caseId }) {
+  // Determine urgency level
+  const getUrgencyLevel = (hours) => {
+    if (hours >= 48) return { level: "Safe", color: "#22c55e", range: "48+ hrs", startAngle: 0, endAngle: 60, }
+    if (hours >= 24) return { level: "Moderate", color: "#eab308", range: "24-48 hrs", startAngle: 60, endAngle: 120, }
+    if (hours >= 12) return { level: "Urgent", color: "#f97316", range: "12-24 hrs", startAngle: 120, endAngle: 150, }
+    return { level: "Critical", color: "#ef4444", range: "0-12 hrs", startAngle: 150, endAngle: 180, }
+  }
 
-// Helper to get readable label
-const getUrgencyLabel = (currentHour, remainingHours) => {
-  const hoursLeft = remainingHours - currentHour
+  const urgency = getUrgencyLevel(value)
 
-  if (hoursLeft > 48) return "Safe"
-  if (hoursLeft > 24) return "Moderate"
-  if (hoursLeft > 12) return "Urgent"
-  if (hoursLeft > 0) return "Critical"
-  return "Expired"
-}
+  // Map 0-72 hours to 0-180 degrees (left to right)
+  const percentage = Math.min(value / 72, 1)
+  const needleAngle = 90 + getRandomNumber(urgency.startAngle, urgency.endAngle)
 
-export function SMRHeatmap() {
-  const [hoveredCell, setHoveredCell] = useState(null)
-
-  // Generate hour markers (every 6 hours)
-  const hourMarkers = Array.from({ length: 13 }, (_, i) => i * 6)
+  const segments = [
+    { color: "#22c55e", startAngle: 0, endAngle: 60, label: "Safe" },
+    { color: "#eab308", startAngle: 60, endAngle: 120, label: "Moderate" },
+    { color: "#f97316", startAngle: 120, endAngle: 150, label: "Urgent" },
+    { color: "#ef4444", startAngle: 150, endAngle: 180, label: "Critical" },
+  ]
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">SMR 72-Hour Countdown</h1>
-        <p className="text-muted-foreground">Real-time urgency tracking for suspicious matter reports</p>
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative w-full max-w-md aspect-[2/1]">
+        <svg viewBox="0 0 200 120" className="w-full h-full">
+          {/* Draw gauge segments */}
+          {segments.map((segment, i) => {
+            const startRad = (segment.startAngle * Math.PI) / 180
+            const endRad = (segment.endAngle * Math.PI) / 180
+            const largeArcFlag = segment.endAngle - segment.startAngle > 180 ? 1 : 0
+
+            const x1 = 100 + 80 * Math.cos(Math.PI - startRad)
+            const y1 = 100 - 80 * Math.sin(Math.PI - startRad)
+            const x2 = 100 + 80 * Math.cos(Math.PI - endRad)
+            const y2 = 100 - 80 * Math.sin(Math.PI - endRad)
+
+            const innerX1 = 100 + 60 * Math.cos(Math.PI - startRad)
+            const innerY1 = 100 - 60 * Math.sin(Math.PI - startRad)
+            const innerX2 = 100 + 60 * Math.cos(Math.PI - endRad)
+            const innerY2 = 100 - 60 * Math.sin(Math.PI - endRad)
+
+            const pathData = `
+              M ${x1} ${y1}
+              A 80 80 0 ${largeArcFlag} 1 ${x2} ${y2}
+              L ${innerX2} ${innerY2}
+              A 60 60 0 ${largeArcFlag} 0 ${innerX1} ${innerY1}
+              Z
+            `
+
+            return <path key={i} d={pathData} fill={segment.color} opacity="0.8" />
+          })}
+
+          <g transform={`rotate(${needleAngle - 180}, 100, 100)`}>
+            <line x1="100" y1="100" x2="100" y2="30" stroke={urgency.color} strokeWidth="3" strokeLinecap="round" />
+            <circle cx="100" cy="100" r="6" fill={urgency.color} />
+          </g>
+
+          {/* Center circle */}
+          <circle cx="100" cy="100" r="4" fill="white" />
+
+          {/* Value text */}
+          <text x="100" y="95" textAnchor="middle" className="fill-foreground font-bold text-2xl">
+            {value}
+          </text>
+          <text x="100" y="108" textAnchor="middle" className="fill-muted-foreground text-xs">
+            hours
+          </text>
+        </svg>
       </div>
 
-      <Card className="border-border">
-        <CardHeader>
-          <CardTitle>Case Timeline Overview</CardTitle>
-          <CardDescription>Each row represents an SMR case with hourly urgency status</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* Legend */}
-          <div className="flex items-center gap-6 mb-6 pb-4 border-b border-border">
-            <span className="text-sm font-medium text-muted-foreground">Urgency Level:</span>
-            <div className="flex items-center gap-2">
-              <div className="size-4 rounded bg-green-500/80" />
-              <span className="text-xs text-muted-foreground">Safe (48+ hrs)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="size-4 rounded bg-yellow-500/80" />
-              <span className="text-xs text-muted-foreground">Moderate (24-48 hrs)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="size-4 rounded bg-orange-500/80" />
-              <span className="text-xs text-muted-foreground">Urgent (12-24 hrs)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="size-4 rounded bg-red-500/80" />
-              <span className="text-xs text-muted-foreground">Critical (0-12 hrs)</span>
-            </div>
-          </div>
+      <div className="text-center space-y-1">
+        <div className="flex items-center justify-center gap-2">
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: urgency.color }} />
+          <span className="font-semibold text-lg">{urgency.level}</span>
+          <span className="text-sm text-muted-foreground">({urgency.range})</span>
+        </div>
+        <p className="text-sm text-muted-foreground">{caseId}</p>
+      </div>
+    </div>
+  )
+}
 
-          {/* Heatmap */}
-          <div className="relative overflow-x-auto">
-            <div className="min-w-max">
-              {/* Hour markers */}
-              <div className="flex items-center mb-2">
-                <div className="w-40 shrink-0" />
-                <div className="flex items-center gap-px">
-                  {hourMarkers.map((hour) => (
-                    <div key={hour} className="w-16 text-center text-xs text-muted-foreground">
-                      {hour}h
-                    </div>
+export default function HeatMap() {
+  const [selectedCase, setSelectedCase] = useState(smrCases[0].id)
+  const currentCase = smrCases.find((c) => c.id === selectedCase) || smrCases[0]
+
+  return (
+    <div className=" p-4 bg-background">
+      <div className="max-w-2xl space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Case Urgency Gauge</CardTitle>
+            <CardDescription>
+              Monitor SMR case urgency levels with real-time remaining time visualization
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select SMR Case</label>
+              <Select value={selectedCase} onValueChange={setSelectedCase}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {smrCases.map((smrCase) => (
+                    <SelectItem key={smrCase.id} value={smrCase.id}>
+                      {smrCase.id} - {smrCase.remaining}h remaining
+                    </SelectItem>
                   ))}
-                </div>
-              </div>
-
-              {/* Cases */}
-              {mockCases.map((smrCase) => (
-                <div key={smrCase.id} className="flex items-center gap-2 mb-1">
-                  {/* Case ID and Remaining Hours */}
-                  <div className="w-40 shrink-0 pr-4">
-                    <div className="text-sm font-medium">{smrCase.id}</div>
-                    <div className="text-xs text-muted-foreground">{smrCase.remainingHours}h remaining</div>
-                  </div>
-
-                  {/* Hour cells */}
-                  <div className="flex items-center gap-px">
-                    {Array.from({ length: 72 }, (_, i) => i + 1).map((hour) => (
-                      <div
-                        key={hour}
-                        className={`h-10 w-2 rounded-sm transition-all cursor-pointer ${getUrgencyColor(
-                          hour,
-                          smrCase.remainingHours,
-                        )} hover:ring-2 hover:ring-white hover:scale-110`}
-                        onMouseEnter={() => setHoveredCell({ caseId: smrCase.id, hour })}
-                        onMouseLeave={() => setHoveredCell(null)}
-                        title={`Hour ${hour}: ${getUrgencyLabel(hour, smrCase.remainingHours)} (${smrCase.remainingHours - hour
-                          }h left)`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Tooltip */}
-            {hoveredCell && (
-              <div className="fixed z-50 pointer-events-none bg-popover text-popover-foreground border border-border rounded-lg shadow-lg p-3 text-sm top-1/2">
-                <div className="font-medium">{hoveredCell.caseId}</div>
-                <div className="text-muted-foreground">
-                  Hour {hoveredCell.hour} •{" "}
-                  {mockCases.find((c) => c.id === hoveredCell.caseId).remainingHours - hoveredCell.hour}h remaining
-                </div>
-                <div className="text-xs mt-1">
-                  Status:{" "}
-                  {getUrgencyLabel(
-                    hoveredCell.hour,
-                    mockCases.find((c) => c.id === hoveredCell.caseId).remainingHours,
-                  )}
+            <GaugeChart value={currentCase.remaining} caseId={currentCase.id} />
+          </CardContent>
+        </Card>
+
+        {/* Legend */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Urgency Levels</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-[#22c55e]" />
+                <div>
+                  <p className="font-medium text-sm">Safe</p>
+                  <p className="text-xs text-muted-foreground">48+ hours</p>
                 </div>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-[#eab308]" />
+                <div>
+                  <p className="font-medium text-sm">Moderate</p>
+                  <p className="text-xs text-muted-foreground">24-48 hours</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-[#f97316]" />
+                <div>
+                  <p className="font-medium text-sm">Urgent</p>
+                  <p className="text-xs text-muted-foreground">12-24 hours</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-[#ef4444]" />
+                <div>
+                  <p className="font-medium text-sm">Critical</p>
+                  <p className="text-xs text-muted-foreground">0-12 hours</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
