@@ -87,7 +87,7 @@ export default function FaceCapture({ image, onCapture }) {
         onClick={startCountdown}
         className="px-4 py-2 bg-blue-600 text-white rounded"
       >
-        Start Countdown
+        {image ? "Retake" : "Start Countdown"}
       </button>
 
       {captured && (

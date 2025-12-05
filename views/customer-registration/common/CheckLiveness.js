@@ -35,6 +35,7 @@ export default function CheckLiveness() {
   };
 
   const handleFrontChange = async (src) => {
+    console.log("Front change", src);
     // const realFile = extractFile(file);
     // if (!realFile) return;
 
@@ -43,12 +44,9 @@ export default function CheckLiveness() {
     setFrontProfile(src);
   };
 
-  const handleRightChange = async (file) => {
-    const realFile = extractFile(file);
-    if (!realFile) return;
-
-    const base64 = await getBase64(realFile);
-    setRightProfile(base64);
+  const handleRightChange = async (src) => {
+    console.log("Right change", src);
+    setRightProfile(src);
   };
 
   const handleSubmit = async () => {
@@ -58,7 +56,10 @@ export default function CheckLiveness() {
         img1_base64: frontProfile,
         img2_base64: rightProfile,
       });
-
+console.log("res", res);
+if(res.verdict){
+  toast.success(res.verdict);
+}
       if (res.error) {
         toast.error(res.error);
         setError(res.error);
@@ -144,12 +145,16 @@ export default function CheckLiveness() {
               <CardDescription>90° turn to the right</CardDescription>
             </CardHeader>
             <CardContent>
-              <CustomDropZone
-                handleChange={handleRightChange}
-                url={rightProfile || ""}
-              >
-                <p className="font-medium">Drag & drop or click to upload</p>
-              </CustomDropZone>
+                {/* <CustomDropZone
+                  handleChange={handleRightChange}
+                  url={rightProfile || ""}
+                >
+                  <p className="font-medium">Drag & drop or click to upload</p>
+                </CustomDropZone> */}
+                <FaceCapture
+                  image={rightProfile}
+                  onCapture={handleRightChange}
+                />
             </CardContent>
           </Card>
         </div>
