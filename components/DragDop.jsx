@@ -5,7 +5,7 @@ function DragDrop({
   file = null,
   handleChange,
   children,
-  fileTypes = ["JPG", "PNG", "GIF"],
+  fileTypes = ["JPG", "PNG", "GIF", "JPEG"],
   ...props
 }) {
   return (
