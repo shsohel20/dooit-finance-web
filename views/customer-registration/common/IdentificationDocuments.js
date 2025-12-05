@@ -15,9 +15,27 @@ const documentTypes = [
     { label: 'Medical Card', value: 'Medical Card' },
 ]
 
-
-const IdentificationDocuments = ({ control, errors }) => {
-
+function formatDate(dateString) {
+    console.log('dateString', dateString);
+    if (!dateString) return "";
+  
+    const [day, mon, year] = dateString.split(" ");
+  
+    const months = {
+      JAN: "01", FEB: "02", MAR: "03", APR: "04", MAY: "05", JUN: "06",
+      JUL: "07", AUG: "08", SEP: "09", OCT: "10", NOV: "11", DEC: "12"
+    };
+  
+    const month = months[mon];
+    if (!month) return ""; // invalid month
+  
+    const formattedDate = `${year}-${month}-${day.padStart(2, "0")}`;
+    console.log('formattedDate', formattedDate);
+    return formattedDate;
+  }
+  
+const IdentificationDocuments = ({ control, errors, setValue }) => {
+const [isSaving, setIsSaving] = useState(false);
     //front
     const [frontLoading, setFrontLoading] = useState(false);
     const [frontError, setFrontError] = useState(false);
@@ -100,21 +118,31 @@ const IdentificationDocuments = ({ control, errors }) => {
     }
     const handleSave = async () => {
         const formData = new FormData();
-        console.log(
-            {
-                image: frontFile,
-                card_type: documentTypeValue?.value,
-            }
-        )
         formData.append('image', frontFile);
         formData.append('card_type', documentTypeValue?.value);
+       try {
+        setIsSaving(true);
         const response = await getDataFromDocuments(formData);
-        console.log('getDataFromDocuments response', response);
-        // if (response.success) {
-        //     toast.success('Identification documents saved successfully');
-        // } else {
-        //     toast.error('Failed to save identification documents');
-        // }
+        console.log('response', response);
+        if(response.success){
+            const [given_name, middle_name, surname] = response.data.full_name?.split(' ');
+            //23-dec-1990 to yyyy-mm-dd
+            const date_of_birth = formatDate(response.data.date_of_birth);
+            console.log('date_of_birth', date_of_birth);
+            setValue('customer_details.given_name', given_name || '');
+            setValue('customer_details.middle_name', middle_name || '');
+            setValue('customer_details.surname', surname || '');
+            setValue('residential_address.address', response.data.address || '');
+            setValue('customer_details.date_of_birth', date_of_birth || '');
+
+        }
+       
+       } catch (error) {
+        toast.error('Failed to save identification documents');
+       } finally {
+        setIsSaving(false);
+       }
+       
     }
     return (
         <div className='mt-4 '>
@@ -166,7 +194,9 @@ const IdentificationDocuments = ({ control, errors }) => {
                     </div>
                 </div>
             </div>
-<Button onClick={handleSave}>Save</Button>
+<div className='py-6 flex justify-end'>
+    <Button onClick={handleSave}>{isSaving ? 'Please wait...' : 'Auto Fill'}</Button>
+</div>
         </div>
     );
 };
