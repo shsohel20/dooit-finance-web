@@ -195,7 +195,7 @@ const [isSaving, setIsSaving] = useState(false);
                 </div>
             </div>
 <div className='py-6 flex justify-end'>
-    <Button onClick={handleSave}>{isSaving ? 'Please wait...' : 'Auto Fill'}</Button>
+    <Button disabled={isSaving} onClick={handleSave}>{isSaving ? 'Please wait...' : 'Upload'}</Button>
 </div>
         </div>
     );
