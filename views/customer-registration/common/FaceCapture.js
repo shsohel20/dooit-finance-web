@@ -60,6 +60,7 @@ export default function FaceCapture({ image, onCapture }) {
   return (
     <div className="flex flex-col items-center gap-4 border-2 border-primary/20 rounded-md p-4">
       <Webcam
+      mirrored={true}
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"

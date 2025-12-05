@@ -4,12 +4,15 @@ import { Controller, useFieldArray, useWatch } from 'react-hook-form';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { fileUploadOnCloudinary } from '@/app/actions';
 import CustomDropZone from '@/components/ui/DropZone';
+import { Button } from '@/components/ui/button';
+import { getDataFromDocuments } from '@/app/customer/registration/actions';
+import { toast } from 'sonner';
 
 
 const documentTypes = [
-    { label: 'National ID', value: 'nid' },
-    { label: 'Passport', value: 'passport' },
-    { label: 'Driving License', value: 'driving_license' },
+    { label: 'Passport', value: 'Passport' },
+    { label: 'Driving License', value: 'Driving License' },
+    { label: 'Medical Card', value: 'Medical Card' },
 ]
 
 
@@ -18,6 +21,7 @@ const IdentificationDocuments = ({ control, errors }) => {
     //front
     const [frontLoading, setFrontLoading] = useState(false);
     const [frontError, setFrontError] = useState(false);
+    const [frontFile, setFrontFile] = useState(null);
     //back
     const [backLoading, setBackLoading] = useState(false);
     const [backError, setBackError] = useState(false);
@@ -29,8 +33,10 @@ const IdentificationDocuments = ({ control, errors }) => {
         control,
         name: "document_type",
     });
+    console.log('front image error', frontError);
 
     const handleFrontChange = async (file) => {
+        setFrontFile(file);
         setFrontLoading(true);
         const response = await fileUploadOnCloudinary(file);
         if (response.success) {
@@ -92,6 +98,24 @@ const IdentificationDocuments = ({ control, errors }) => {
             remove(field.id);
         });
     }
+    const handleSave = async () => {
+        const formData = new FormData();
+        console.log(
+            {
+                image: frontFile,
+                card_type: documentTypeValue?.value,
+            }
+        )
+        formData.append('image', frontFile);
+        formData.append('card_type', documentTypeValue?.value);
+        const response = await getDataFromDocuments(formData);
+        console.log('getDataFromDocuments response', response);
+        // if (response.success) {
+        //     toast.success('Identification documents saved successfully');
+        // } else {
+        //     toast.error('Failed to save identification documents');
+        // }
+    }
     return (
         <div className='mt-4 '>
 
@@ -142,7 +166,7 @@ const IdentificationDocuments = ({ control, errors }) => {
                     </div>
                 </div>
             </div>
-
+<Button onClick={handleSave}>Save</Button>
         </div>
     );
 };

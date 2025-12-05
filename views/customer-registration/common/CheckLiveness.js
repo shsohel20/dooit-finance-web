@@ -10,6 +10,7 @@ import { checkImageLiveness } from "@/app/customer/registration/actions";
 import { toast } from "sonner";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import FaceCapture from "./FaceCapture";
+import { useRouter } from "next/navigation";
 
 
 const getBase64 = (file) =>
@@ -25,22 +26,12 @@ export default function CheckLiveness() {
   const [rightProfile, setRightProfile] = useState(null); // base64 only
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
-  const extractFile = (file) => {
-    // ensures compatibility with DropZone/FileWithPath/Drag&Drop
-    if (file instanceof File) return file;
-    if (Array.isArray(file)) return file[0];
-    if (file?.file instanceof File) return file.file;
-    return null;
-  };
+
 
   const handleFrontChange = async (src) => {
     console.log("Front change", src);
-    // const realFile = extractFile(file);
-    // if (!realFile) return;
-
-    // const base64 = await getBase64(realFile);
-    // setFrontProfile(base64);
     setFrontProfile(src);
   };
 
@@ -51,16 +42,21 @@ export default function CheckLiveness() {
 
   const handleSubmit = async () => {
     setLoading(true);
+    const data ={
+      img1_base64: frontProfile.replace('data:image/jpeg;base64,', ''),
+      img2_base64: rightProfile.replace('data:image/jpeg;base64,', ''),
+    }
+    // console.log('checkImageLiveness data', JSON.stringify(data, null, 2))
     try {
-      const res = await checkImageLiveness({
-        img1_base64: frontProfile,
-        img2_base64: rightProfile,
-      });
-console.log("res", res);
-if(res.verdict){
+      const res = await checkImageLiveness(data);
+      console.log('checkImageLiveness response', JSON.stringify(res, null, 2))
+
+    if(res.verdict){
+  localStorage.setItem('liveness_verdict', true);
+  localStorage.setItem('live_photo', frontProfile);
   toast.success(res.verdict);
-}
-      if (res.error) {
+  router.push('/customer/registration/individual');
+  }else if (res.error) {
         toast.error(res.error);
         setError(res.error);
       }
