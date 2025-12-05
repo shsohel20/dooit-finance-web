@@ -57,6 +57,9 @@ export default function CheckLiveness() {
         img2_base64: rightProfile,
       });
 console.log("res", res);
+if(res.verdict){
+  toast.success(res.verdict);
+}
       if (res.error) {
         toast.error(res.error);
         setError(res.error);
