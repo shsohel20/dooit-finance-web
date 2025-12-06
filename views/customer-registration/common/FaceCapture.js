@@ -11,21 +11,21 @@ export default function FaceCapture({ image, onCapture }) {
   const [hasPermission, setHasPermission] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    // Ask for permission first
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then(() => {
-        setHasPermission(true);
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
-  }, []);
+  // useEffect(() => {
+  //   // Ask for permission first
+  //   navigator.mediaDevices
+  //     .getUserMedia({ video: true })
+  //     .then(() => {
+  //       setHasPermission(true);
+  //     })
+  //     .catch((err) => {
+  //       setError(err.message);
+  //     });
+  // }, []);
 
-  if (error) return <p style={{ color: "red" }}>Camera Error: {error}</p>;
+  // if (error) return <p style={{ color: "red" }}>Camera Error: {error}</p>;
 
-  if (!hasPermission) return <p>Requesting camera permission...</p>;
+  // if (!hasPermission) return <p>Requesting camera permission...</p>;
 
   const startCountdown = () => {
     setCaptured(false);
@@ -60,6 +60,7 @@ export default function FaceCapture({ image, onCapture }) {
   return (
     <div className="flex flex-col items-center gap-4 border-2 border-primary/20 rounded-md p-4">
       <Webcam
+      mirrored={true}
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
@@ -87,7 +88,7 @@ export default function FaceCapture({ image, onCapture }) {
         onClick={startCountdown}
         className="px-4 py-2 bg-blue-600 text-white rounded"
       >
-        Start Countdown
+        {image ? "Retake" : "Start Countdown"}
       </button>
 
       {captured && (

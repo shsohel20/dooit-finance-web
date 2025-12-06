@@ -97,7 +97,7 @@ const personalInfoSchema = z.object({
         ,
     }),
 });
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 2;
 const CustomerRegistration = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const { customerRegisterData, setCustomerRegisterData, registerType, country } = useCustomerRegisterStore();
@@ -137,16 +137,18 @@ const CustomerRegistration = () => {
     return (
         <div className='container'>
             {/* stepper */}
+            
+            {/* content */}
+            <div>
+                <IdentificationDocuments control={control} errors={errors} setValue={setValue}/>
+            </div>
+           
             <div>
                 <Stepper currentStep={currentStep} totalSteps={TOTAL_STEPS} handleStep={handleStep} />
             </div>
-            {/* content */}
             <div>
-                
-                {currentStep === 1 && <IdentificationDocuments control={control} errors={errors} />}
-                {currentStep === 2 && <PersonalInfo control={control} errors={errors} />}
-
-                {currentStep === 3 && <OtherInfo control={control} errors={errors} setValue={setValue} />}
+                {currentStep === 1 && <PersonalInfo control={control} errors={errors} />}
+                {currentStep === 2 && <OtherInfo control={control} errors={errors} setValue={setValue} />}
             </div>
             <div className='flex justify-end gap-2 my-8'>
                 {currentStep > 1 && <Button
