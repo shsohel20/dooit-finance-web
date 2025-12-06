@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label'
 import ResizableTable from '@/components/ui/Resizabletable'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { StatusPill } from '@/components/ui/StatusPill'
 
 import { Textarea } from '@/components/ui/textarea'
 import { dateShowFormat, dateShowFormatWithTime, objWithValidValues } from '@/lib/utils'
@@ -26,16 +27,17 @@ import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 const statusVariants = {
-  Pending: 'outline',
-  Rejected: 'danger',
-  Approved: 'success',
-  'In Review': 'warning',
-  Closed: 'secondary',
+  pending: 'warning',
+  rejected: 'danger',
+  approved: 'success',
+  'in_review': 'info',
+  closed: 'muted',
 }
 export const riskLevelVariants = {
-  Low: 'info',
+  Low: 'success',
   Medium: 'warning',
   High: 'danger',
+  Unacceptable: 'danger',
 }
 
 const GridView = () => {
@@ -103,13 +105,32 @@ const GridView = () => {
 const ListView = () => {
   const { customers, fetching, currentPage, limit, totalItems, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems } = useCustomerStore();
 
-
-
   const [openReporting, setOpenReporting] = useState(false);
   const [openDetailView, setOpenDetailView] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
   const columns = [
+    {
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Actions"
+        />
+      ),
+      accessorKey: 'actions',
+      size: 100,
+      cell: ({ row }) => (
+        <div className='flex items-center justify-center'>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleViewClick(row.original.id)}
+          >
+            <IconEye />
+          </Button>
+        </div>
+      ),
+    },
     {
       header: ({ column }) => (
         <DataTableColumnHeader
@@ -152,9 +173,9 @@ const ListView = () => {
       accessorKey: 'kycStatus',
       size: 100,
       cell: ({ row }) => (
-        <Badge variant={statusVariants[row.original.kycStatus]} >
+        <StatusPill variant={statusVariants[row.original.kycStatus]} >
           {row.original.kycStatus}
-        </Badge>
+        </StatusPill>
       ),
     },
     {
@@ -181,10 +202,9 @@ const ListView = () => {
       accessorKey: 'riskLabel',
       size: 100,
       cell: ({ row }) => (
-        <Badge variant={riskLevelVariants[row.original.riskLabel]} >
-          <IconPennant />
+        <StatusPill icon={<IconPennant />} variant={riskLevelVariants[row.original.riskLabel]} >
           {row.original.riskLabel}
-        </Badge>
+        </StatusPill>
       ),
     },
     {
@@ -213,25 +233,7 @@ const ListView = () => {
         <span>{dateShowFormatWithTime(row.original.updatedAt)}</span>
       ),
     },
-    {
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title="Actions"
-        />
-      ),
-      accessorKey: 'actions',
-      size: 100,
-      cell: ({ row }) => (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => handleViewClick(row.original.id)}
-        >
-          <IconEye />
-        </Button>
-      ),
-    }
+
 
   ]
   const handleDoubleClick = (item) => {
@@ -301,11 +303,7 @@ export default function CustomerQueueList({ variant, data, kycStatus }) {
       limit: limit,
       kycStatus: kycStatus
     });
-    console.log('queryParams => ', queryParams);
-
-
     const response = await getCustomers(queryParams);
-    console.log('customer response => ', response);
     setFetching(false);
     setCustomers(response.data);
     setTotalItems(response.totalRecords);
@@ -424,6 +422,8 @@ export const DetailViewModal = ({ open, setOpen, currentId }) => {
   const [details, setDetails] = useState(null);
   const currentItem = null;
 
+  console.log('details => ', details);
+
 
   const fetchDetails = async () => {
     const response = await getCustomerById(currentId);
@@ -499,22 +499,22 @@ export const DetailViewModal = ({ open, setOpen, currentId }) => {
                   <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className='space-y-2'>
+                  <div className=' divide-y divide-dark-500'>
 
-                    <div className='flex items-center gap-2'>
-                      <h4 className='font-bold w-[80px] '>Phone</h4>
-                      <p>{details?.user?.phone}</p>
+                    <div className='flex items-center gap-2 py-4'>
+                      <h4 className='font-bold w-[120px] '>Phone</h4>
+                      <p>{details?.personalKyc?.personal_form?.contact_details?.phone}</p>
                     </div>
-                    <div className='flex items-center gap-2'>
-                      <h4 className='font-bold w-[80px]'>Date of Birth</h4>
+                    <div className='flex items-center gap-2 py-4'>
+                      <h4 className='font-bold w-[120px]'>Date of Birth</h4>
                       <p>12 Aug 2025</p>
                     </div>
-                    <div className='flex items-center gap-2'>
-                      <h4 className='font-bold w-[80px] '>Country</h4>
+                    <div className='flex items-center gap-2 py-4'>
+                      <h4 className='font-bold w-[120px] '>Country</h4>
                       <p>{details?.country}</p>
                     </div>
-                    <div className='flex items-center gap-2'>
-                      <h4 className='font-bold w-[80px] flex-shrink-0'>Address</h4>
+                    <div className='flex items-center gap-2 py-4'>
+                      <h4 className='font-bold w-[120px] flex-shrink-0'>Address</h4>
                       <p> Apartment 4A, Green View Residences, 25 Wentworth Avenue, Sydney NSW 2000</p>
                     </div>
                   </div>

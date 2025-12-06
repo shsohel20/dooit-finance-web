@@ -13,7 +13,7 @@ export default function DashboardLayout({
   return (
     <div className="relative">
       {children}
-      <ChatBot />
+      {/* <ChatBot /> */}
     </div>
   );
 }
