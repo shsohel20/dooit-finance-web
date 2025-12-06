@@ -258,7 +258,7 @@ const ListView = () => {
     setOpenReporting(true);
   }
   const handleViewClick = (id) => {
-    router.push(`/onboarding/customer-queue/details?id=${id}`);
+    router.push(`/dashboard/client/onboarding/customer-queue/details?id=${id}`);
     // setCurrentItem(id);
     // setOpenDetailView(true);
   }
@@ -303,7 +303,7 @@ const ListView = () => {
       />
       {/* <CustomDatatable data={data} columns={columns} onDoubleClick={handleDoubleClick} /> */}
       <ReportingModal open={openReporting} setOpen={setOpenReporting} currentItem={currentItem} />
-      <DetailViewModal open={openDetailView} setOpen={setOpenDetailView} currentId={currentItem} />
+      {/* <DetailViewModal open={openDetailView} setOpen={setOpenDetailView} currentId={currentItem} /> */}
     </>
   )
 }
