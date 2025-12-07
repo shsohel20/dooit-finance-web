@@ -6,13 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Shield, User, Calendar, Clock, Globe, MapPin, Phone, FileText, ChevronRight, TrendingUp, AlertCircle, CheckCircle2, BarChart3, AlertTriangle } from 'lucide-react'
+import { Shield, User, Calendar, Clock, Globe, MapPin, Phone, FileText, ChevronRight, TrendingUp, AlertCircle, CheckCircle2, BarChart3, AlertTriangle, ShieldAlert, ImageIcon, Download } from 'lucide-react'
 import { getCustomerById } from '@/app/dashboard/client/onboarding/customer-queue/actions'
 import { cn, dateShowFormat } from "@/lib/utils";
 
-export const DetailViewModal = ({ open, setOpen, currentId }) => {
+export const DetailViewModal = ({ currentId }) => {
   const [details, setDetails] = useState(null);
-  const currentItem = null;
+  const [reviewDocuments, setReviewDocuments] = useState(false);
+
 
   console.log('details => ', details);
 
@@ -55,13 +56,22 @@ export const DetailViewModal = ({ open, setOpen, currentId }) => {
     return "bg-danger/15 text-danger border-danger/30"
   }
 
+  const isPep = details?.isPEP;
+  const isSanctioned = details?.sanction;
+  const getDocumentTypeLabel = (type) => {
+    return type
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+  }
+
   return (
 
-    <div className='grid flex-1 auto-rows-min gap-6 '>
-      <div className="">
+    <div className='grid grid-cols-12 gap-4 '>
+      <div className="col-span-8">
 
 
-        <div className="px-8 mx-auto ">
+        <div className=" mx-auto ">
           {/* User Profile Section */}
           <Card className="mb-6 overflow-hidden border-border/50">
             <div className="p-6">
@@ -105,7 +115,7 @@ export const DetailViewModal = ({ open, setOpen, currentId }) => {
           </Card>
 
           {/* Status Cards Grid */}
-          <div className="grid gap-4 md:grid-cols-2 mb-6">
+          <div className="grid gap-4 md:grid-cols-4 mb-6">
             {/* Current Status Card */}
             <Card className="border-border/50 hover:border-primary/30 transition-colors">
               <div className="p-5">
@@ -147,12 +157,75 @@ export const DetailViewModal = ({ open, setOpen, currentId }) => {
                 </p>
               </div>
             </Card>
+            <Card
+              className={`border-border/50 transition-colors ${isPep ? "hover:border-warning/30" : "hover:border-border"}`}
+            >
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className={`p-2 rounded-lg ${isPep ? "bg-warning/15" : "bg-muted"}`}>
+                      <AlertTriangle
+                        className={`size-5 ${isPep ? "text-warning-foreground" : "text-muted-foreground"}`}
+                      />
+                    </div>
+                    <h3 className="font-semibold">PEP Status</h3>
+                  </div>
+                  {isPep ? (
+                    <Badge className="bg-warning/15 text-warning-foreground hover:bg-warning/20 border-warning/30">
+                      <AlertTriangle className="size-3 mr-1" />
+                      PEP
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-muted text-muted-foreground hover:bg-muted border-border">
+                      <CheckCircle2 className="size-3 mr-1" />
+                      Clear
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {isPep
+                    ? "User identified as politically exposed person. Enhanced due diligence required."
+                    : "No politically exposed person indicators detected."}
+                </p>
+              </div>
+            </Card>
+
+            <Card
+              className={`border-border/50 transition-colors ${isSanctioned ? "hover:border-destructive/30" : "hover:border-border"}`}
+            >
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className={`p-2 rounded-lg ${isSanctioned ? "bg-destructive/15" : "bg-muted"}`}>
+                      <ShieldAlert className={`size-5 ${isSanctioned ? "text-destructive" : "text-muted-foreground"}`} />
+                    </div>
+                    <h3 className="font-semibold">Sanctions</h3>
+                  </div>
+                  {isSanctioned ? (
+                    <Badge className="bg-destructive/15 text-destructive hover:bg-destructive/20 border-destructive/30">
+                      <ShieldAlert className="size-3 mr-1" />
+                      Flagged
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-muted text-muted-foreground hover:bg-muted border-border">
+                      <CheckCircle2 className="size-3 mr-1" />
+                      Clear
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {isSanctioned
+                    ? "User appears on sanctions list. Immediate review required."
+                    : "No matches found on sanctions or watchlists."}
+                </p>
+              </div>
+            </Card>
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-2">
             {/* Left Column - Personal Information */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="">
               {/* Personal Information */}
               <Card className="border-border/50">
                 <div className="p-6">
@@ -198,63 +271,7 @@ export const DetailViewModal = ({ open, setOpen, currentId }) => {
                 </div>
               </Card>
 
-              {/* Document Verification Status */}
-              <Card className="border-border/50">
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                    <FileText className="size-5 text-primary" />
-                    Document Verification Status
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-success/5 border border-success/20">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-success/15">
-                          <CheckCircle2 className="size-4 text-success" />
-                        </div>
-                        <span className="font-medium">Identity Proof</span>
-                      </div>
-                      <Badge className="bg-success text-success-foreground">Passed</Badge>
-                    </div>
 
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-warning/5 border border-warning/20">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-warning/15">
-                          <Clock className="size-4 text-warning-foreground" />
-                        </div>
-                        <span className="font-medium">Address Proof</span>
-                      </div>
-                      <Badge className="bg-warning text-warning-foreground">Pending</Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-success/5 border border-success/20">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-success/15">
-                          <CheckCircle2 className="size-4 text-success" />
-                        </div>
-                        <span className="font-medium">Source of Funds Declaration</span>
-                      </div>
-                      <Badge className="bg-success text-success-foreground">Passed</Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-primary/5 border border-primary/20">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-primary/15">
-                          <Clock className="size-4 text-primary" />
-                        </div>
-                        <span className="font-medium">Facial Recognition Check</span>
-                      </div>
-                      <Badge className="bg-primary text-primary-foreground">Pending</Badge>
-                    </div>
-                  </div>
-
-                  <Separator className="my-5" />
-
-                  <Button variant="outline" className="w-full bg-transparent">
-                    Review Upload Documents
-                    <ChevronRight className="size-4 ml-2" />
-                  </Button>
-                </div>
-              </Card>
             </div>
 
             {/* Right Column - Timeline & Activity */}
@@ -289,8 +306,11 @@ export const DetailViewModal = ({ open, setOpen, currentId }) => {
                 </div>
               </Card>
 
+
+            </div>
+            <div>
               {/* Activity Log */}
-              <Card className="border-border/50">
+              {/* <Card className="border-border/50">
                 <div className="p-6">
                   <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
                     <TrendingUp className="size-5 text-primary" />
@@ -338,155 +358,277 @@ export const DetailViewModal = ({ open, setOpen, currentId }) => {
                     </div>
                   </div>
                 </div>
-              </Card>
+              </Card> */}
             </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3 mt-6">
+            {/* Document Verification Status */}
+            <Card className="border-border/50 col-span-2">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                  <FileText className="size-5 text-primary" />
+                  Document Verification Status
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-success/5 border border-success/20">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-full bg-success/15">
+                        <CheckCircle2 className="size-4 text-success" />
+                      </div>
+                      <span className="font-medium">Identity Proof</span>
+                    </div>
+                    <Badge className="bg-success text-success-foreground">Passed</Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-warning/5 border border-warning/20">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-full bg-warning/15">
+                        <Clock className="size-4 text-warning-foreground" />
+                      </div>
+                      <span className="font-medium">Address Proof</span>
+                    </div>
+                    <Badge className="bg-warning text-warning-foreground">Pending</Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-success/5 border border-success/20">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-full bg-success/15">
+                        <CheckCircle2 className="size-4 text-success" />
+                      </div>
+                      <span className="font-medium">Source of Funds Declaration</span>
+                    </div>
+                    <Badge className="bg-success text-success-foreground">Passed</Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-primary/5 border border-primary/20">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-full bg-primary/15">
+                        <Clock className="size-4 text-primary" />
+                      </div>
+                      <span className="font-medium">Facial Recognition Check</span>
+                    </div>
+                    <Badge className="bg-primary text-primary-foreground">Pending</Badge>
+                  </div>
+                </div>
+
+                <Separator className="my-5" />
+
+                <Button variant="outline" className="w-full bg-transparent" onClick={() => setReviewDocuments(prev => !prev)}>
+                  Review Upload Documents
+                  <ChevronRight className="size-4 ml-2" />
+                </Button>
+                {
+                  reviewDocuments ? <div className="border rounded-md p-4 mt-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {details?.documents.map((doc, index) => (
+                        <Card
+                          key={index}
+                          className="overflow-hidden bg-card border-border hover:border-primary/50 transition-colors"
+                        >
+                          {/* Document Preview */}
+                          <div className="aspect-video bg-muted/50 relative group">
+                            <img src={doc.url || "/placeholder.svg"} alt={doc.name} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Button size="sm" variant="secondary" asChild>
+                                <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                                  <ImageIcon className="h-4 w-4 mr-2" />
+                                  View Full Size
+                                </a>
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Document Details */}
+                          <div className="p-4 space-y-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="space-y-1 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-muted-foreground" />
+                                  <h4 className="font-medium text-foreground">{doc.name}</h4>
+                                </div>
+                                <p className="text-xs text-muted-foreground">{getDocumentTypeLabel(doc.type)}</p>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {doc.docType.toUpperCase()}
+                              </Badge>
+                            </div>
+
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t border-border">
+                              <div className="flex items-center gap-1.5">
+                                <Calendar className="h-3.5 w-3.5" />
+                                <span>{dateShowFormat(doc.uploadedAt)}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <FileText className="h-3.5 w-3.5" />
+                                <span>{doc.mimeType.split("/")[1].toUpperCase()}</span>
+                              </div>
+                            </div>
+
+                            <Button variant="outline" size="sm" className="w-full bg-transparent" asChild>
+                              <a href={doc.url} download>
+                                <Download className="h-3.5 w-3.5 mr-2" />
+                                Download
+                              </a>
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div> : null
+                }
+              </div>
+            </Card>
+
           </div>
         </div>
       </div>
-      <Card className="border-border/50">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <BarChart3 className="size-5 text-primary" />
-              Risk Assessment Breakdown
-            </h3>
-            <div className="flex items-center gap-3">
-              <Badge className={getLabelColor(riskAssessment?.pibLabel)} variant="outline">
-                {riskAssessment?.pibLabel}
-              </Badge>
-              <div className="text-right">
-                <div className="text-xs text-muted-foreground">Total Score</div>
-                <div className={`text-2xl font-bold ${getRiskColor(totalRiskScore)}`}>{totalRiskScore}</div>
+      <div className="col-span-4">
+        <Card className="border-border/50 ">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <BarChart3 className="size-5 text-primary" />
+                Risk Assessment Breakdown
+              </h3>
+              <div className="flex items-center gap-3">
+                <Badge className={getLabelColor(riskAssessment?.pibLabel)} variant="outline">
+                  {riskAssessment?.pibLabel}
+                </Badge>
+                <div className="text-right">
+                  <div className="text-xs text-muted-foreground">Total Score</div>
+                  <div className={`text-2xl font-bold ${getRiskColor(totalRiskScore)}`}>{totalRiskScore}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">Channel</span>
+                    {riskAssessment?.channel?.score > 0 && <AlertCircle className="size-3 text-warning-foreground" />}
+                  </div>
+                  <div className="text-xs text-muted-foreground capitalize">{riskAssessment?.channel?.value}</div>
+                </div>
+                <Badge className={getRiskBadgeColor(riskAssessment?.channel?.score)} variant="outline">
+                  Score: {riskAssessment?.channel?.score}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">Customer Retention</span>
+                    {riskAssessment?.customerRetention?.score > 0 && (
+                      <AlertCircle className="size-3 text-warning-foreground" />
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground capitalize">
+                    {riskAssessment?.customerRetention?.value}
+                  </div>
+                </div>
+                <Badge className={getRiskBadgeColor(riskAssessment?.customerRetention?.score)} variant="outline">
+                  Score: {riskAssessment?.customerRetention?.score}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">Customer Type</span>
+                    {riskAssessment?.customerType?.score > 0 && (
+                      <AlertCircle className="size-3 text-warning-foreground" />
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground capitalize">
+                    {riskAssessment?.customerType?.value}
+                  </div>
+                </div>
+                <Badge className={getRiskBadgeColor(riskAssessment?.customerType?.score)} variant="outline">
+                  Score: {riskAssessment?.customerType?.score}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">Industry</span>
+                    {riskAssessment?.industry?.score > 0 && (
+                      <AlertCircle className="size-3 text-warning-foreground" />
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground capitalize">{riskAssessment?.industry?.value}</div>
+                </div>
+                <Badge className={getRiskBadgeColor(riskAssessment?.industry?.score)} variant="outline">
+                  Score: {riskAssessment?.industry?.score}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-lg bg-destructive/5 border border-destructive/30">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">Jurisdiction</span>
+                    <AlertTriangle className="size-4 text-destructive" />
+                  </div>
+                  <div className="text-xs text-muted-foreground capitalize flex items-center gap-2">
+                    {riskAssessment?.jurisdiction?.value}
+                    <Badge className="bg-destructive/20 text-destructive text-[10px] px-1.5 py-0" variant="outline">
+                      {riskAssessment?.jurisdiction?.band}
+                    </Badge>
+                  </div>
+                </div>
+                <Badge className="bg-destructive/15 text-destructive border-destructive/30" variant="outline">
+                  Score: {riskAssessment?.jurisdiction?.score}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">Occupation</span>
+                    {riskAssessment?.occupation?.score > 0 && (
+                      <AlertCircle className="size-3 text-warning-foreground" />
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground capitalize">{riskAssessment?.occupation?.value}</div>
+                </div>
+                <Badge className={getRiskBadgeColor(riskAssessment?.occupation?.score)} variant="outline">
+                  Score: {riskAssessment?.occupation?.score}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">Product</span>
+                    {riskAssessment?.product?.score > 0 && <AlertCircle className="size-3 text-warning-foreground" />}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {riskAssessment?.product?.value || "Not specified"}
+                  </div>
+                </div>
+                <Badge className={getRiskBadgeColor(riskAssessment?.product?.score)} variant="outline">
+                  Score: {riskAssessment?.product?.score}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="mt-6 p-4 rounded-lg bg-muted/50 border border-border">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="size-5 text-destructive mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">High-Risk Jurisdiction Detected</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    The customer is from Afghanistan, classified as UHRC (Ultra High Risk Country). Enhanced due
+                    diligence and additional verification measures are required before account activation.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium">Channel</span>
-                  {riskAssessment?.channel?.score > 0 && <AlertCircle className="size-3 text-warning-foreground" />}
-                </div>
-                <div className="text-xs text-muted-foreground capitalize">{riskAssessment?.channel?.value}</div>
-              </div>
-              <Badge className={getRiskBadgeColor(riskAssessment?.channel?.score)} variant="outline">
-                Score: {riskAssessment?.channel?.score}
-              </Badge>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium">Customer Retention</span>
-                  {riskAssessment?.customerRetention?.score > 0 && (
-                    <AlertCircle className="size-3 text-warning-foreground" />
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground capitalize">
-                  {riskAssessment?.customerRetention?.value}
-                </div>
-              </div>
-              <Badge className={getRiskBadgeColor(riskAssessment?.customerRetention?.score)} variant="outline">
-                Score: {riskAssessment?.customerRetention?.score}
-              </Badge>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium">Customer Type</span>
-                  {riskAssessment?.customerType?.score > 0 && (
-                    <AlertCircle className="size-3 text-warning-foreground" />
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground capitalize">
-                  {riskAssessment?.customerType?.value}
-                </div>
-              </div>
-              <Badge className={getRiskBadgeColor(riskAssessment?.customerType?.score)} variant="outline">
-                Score: {riskAssessment?.customerType?.score}
-              </Badge>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium">Industry</span>
-                  {riskAssessment?.industry?.score > 0 && (
-                    <AlertCircle className="size-3 text-warning-foreground" />
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground capitalize">{riskAssessment?.industry?.value}</div>
-              </div>
-              <Badge className={getRiskBadgeColor(riskAssessment?.industry?.score)} variant="outline">
-                Score: {riskAssessment?.industry?.score}
-              </Badge>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-lg bg-destructive/5 border border-destructive/30">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium">Jurisdiction</span>
-                  <AlertTriangle className="size-4 text-destructive" />
-                </div>
-                <div className="text-xs text-muted-foreground capitalize flex items-center gap-2">
-                  {riskAssessment?.jurisdiction?.value}
-                  <Badge className="bg-destructive/20 text-destructive text-[10px] px-1.5 py-0" variant="outline">
-                    {riskAssessment?.jurisdiction?.band}
-                  </Badge>
-                </div>
-              </div>
-              <Badge className="bg-destructive/15 text-destructive border-destructive/30" variant="outline">
-                Score: {riskAssessment?.jurisdiction?.score}
-              </Badge>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium">Occupation</span>
-                  {riskAssessment?.occupation?.score > 0 && (
-                    <AlertCircle className="size-3 text-warning-foreground" />
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground capitalize">{riskAssessment?.occupation?.value}</div>
-              </div>
-              <Badge className={getRiskBadgeColor(riskAssessment?.occupation?.score)} variant="outline">
-                Score: {riskAssessment?.occupation?.score}
-              </Badge>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium">Product</span>
-                  {riskAssessment?.product?.score > 0 && <AlertCircle className="size-3 text-warning-foreground" />}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {riskAssessment?.product?.value || "Not specified"}
-                </div>
-              </div>
-              <Badge className={getRiskBadgeColor(riskAssessment?.product?.score)} variant="outline">
-                Score: {riskAssessment?.product?.score}
-              </Badge>
-            </div>
-          </div>
-
-          <div className="mt-6 p-4 rounded-lg bg-muted/50 border border-border">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="size-5 text-destructive mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-sm mb-1">High-Risk Jurisdiction Detected</h4>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  The customer is from Afghanistan, classified as UHRC (Ultra High Risk Country). Enhanced due
-                  diligence and additional verification measures are required before account activation.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
     </div>
 
 

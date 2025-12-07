@@ -7,7 +7,7 @@ export default function CustomerQueueDetails() {
   const id = useSearchParams().get('id');
   return (
     <div>
-      <DetailViewModal open={open} setOpen={setOpen} currentId={id} />
+      <DetailViewModal currentId={id} />
     </div>
   )
 }
