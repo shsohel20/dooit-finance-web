@@ -16,8 +16,8 @@ export async function createEcdd(formData) {
 
 export async function getEcdds() {
     try {
-        const response = await fetchWithAuth('ecdd-report',{
-            next: {tags: ['ecdds']}
+        const response = await fetchWithAuth('ecdd-report', {
+            next: { tags: ['ecdds'] }
         });
         return response.json();
     } catch (error) {
@@ -31,7 +31,7 @@ export async function getEcddById(id) {
 }
 
 export async function updateEcdd(formData) {
-    const {id, ...data} = formData;
+    const { id, ...data } = formData;
     const response = await fetchWithAuth(`ecdd-report/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data)
@@ -50,10 +50,15 @@ export async function deleteEcdd(id) {
 
 //auto populate form data
 export const autoPopulatedEcddData = async (caseNumber) => {
-    const response = await fetchWithAuth(`eccd_endpoint`, {
+    const data = { uid: caseNumber }
+    console.log("data", data);
+    const response = await fetch(`http://4.227.188.44:8000/ecdd_report`, {
         method: 'POST',
-        body: JSON.stringify({ case_id: caseNumber })
-    }, true)
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
     return response.json();
 }
 

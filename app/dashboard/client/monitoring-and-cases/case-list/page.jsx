@@ -72,6 +72,7 @@ const ListView = ({}) => {
   const columns = [
     {
       header: "Actions",
+      size: 40,
       cell: ({ row }) => (
         <>
           <div className="flex justify-center">
