@@ -9,27 +9,16 @@ import { Separator } from '@/components/ui/separator'
 import { Shield, User, Calendar, Clock, Globe, MapPin, Phone, FileText, ChevronRight, TrendingUp, AlertCircle, CheckCircle2, BarChart3, AlertTriangle, ShieldAlert, ImageIcon, Download } from 'lucide-react'
 import { getCustomerById } from '@/app/dashboard/client/onboarding/customer-queue/actions'
 import { cn, dateShowFormat } from "@/lib/utils";
+import { RelationsTree } from "./RelationsTree";
 
-export const DetailViewModal = ({ currentId }) => {
-  const [details, setDetails] = useState(null);
+export const DetailViewModal = ({ details, fetching }) => {
+
   const [reviewDocuments, setReviewDocuments] = useState(false);
 
 
   console.log('details => ', details);
 
 
-  const fetchDetails = async () => {
-    const response = await getCustomerById(currentId);
-    if (response.success) {
-      setDetails(response.data);
-    }
-  }
-
-  useEffect(() => {
-    if (currentId) {
-      fetchDetails();
-    }
-  }, [currentId]);
 
   const riskAssessment = details?.riskAssessment || {};
 
@@ -629,6 +618,7 @@ export const DetailViewModal = ({ currentId }) => {
           </div>
         </Card>
       </div>
+
     </div>
 
 

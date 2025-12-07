@@ -166,7 +166,6 @@ export function ECDDForm({ caseNumber, id }) {
     resolver: zodResolver(formSchema),
     defaultValues: formData,
   });
-  console.log("errors", errors);
 
   useEffect(() => {
     if (id) {
@@ -180,7 +179,6 @@ export function ECDDForm({ caseNumber, id }) {
     setFetching(true);
     try {
       const response = await autoPopulatedEcddData(caseNumber);
-      console.log("caseNumber", caseNumber);
       console.log("response from ai analysis", response);
       const formattedData = getFormattedData(response);
       reset(formattedData);

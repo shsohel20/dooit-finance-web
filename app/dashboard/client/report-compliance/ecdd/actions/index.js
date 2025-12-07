@@ -51,7 +51,6 @@ export async function deleteEcdd(id) {
 //auto populate form data
 export const autoPopulatedEcddData = async (caseNumber) => {
     const data = { uid: caseNumber }
-    console.log("data", data);
     const response = await fetch(`http://4.227.188.44:8000/ecdd_report`, {
         method: 'POST',
         headers: {
