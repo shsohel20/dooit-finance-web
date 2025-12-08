@@ -71,17 +71,17 @@ const TIMEZONES = [
 
 const formSchema = z.object({
   name: z.string().min(1),
-  branchCode: z.string().min(1),
-  branchType: z.string().min(1),
+  branchCode: z.string(),
+  branchType: z.string(),
   email: z.string().email(),
-  phone: z.string().min(1),
-  website: z.string().url(),
+  phone: z.string(),
+  website: z.string(),
   address: z.object({
     street: z.string().min(1),
     city: z.string().min(1),
-    state: z.string().min(1),
+    state: z.string(),
     country: z.string().min(1),
-    zipcode: z.string().min(1),
+    zipcode: z.string(),
   }),
   contacts: z.array(z.object({
     name: z.string().optional(),
@@ -90,8 +90,8 @@ const formSchema = z.object({
     phone: z.string().optional(),
   })),
   manager: z.object({
-    name: z.string().min(1),
-    employeeId: z.string().min(1),
+    name: z.string(),
+    employeeId: z.string(),
     email: z.string().email(),
     phone: z.string().min(1),
   }),
@@ -101,8 +101,8 @@ const formSchema = z.object({
     locationDescription: z.string().optional(),
     cashAvailability: z.boolean().optional(),
   }),
-  currency: z.string().min(1),
-  timezone: z.string().min(1),
+  currency: z.string().optional(),
+  timezone: z.string().optional(),
   workingHours: z.object({
     monday: z.object({
       closed: z.boolean().optional(),
@@ -291,6 +291,7 @@ export function BranchDialog({ open, onOpenChange }) {
                         {...field}
 
                         placeholder="e.g., Main Corporate Branch"
+                        error={errors.name?.message}
                       />
                     </div>
                   )}
@@ -347,6 +348,7 @@ export function BranchDialog({ open, onOpenChange }) {
                         type="email"
                         {...field}
                         placeholder="branch@company.com"
+                        error={errors.email?.message}
                       />
                     </div>
                   )}
@@ -405,6 +407,7 @@ export function BranchDialog({ open, onOpenChange }) {
                       name="address.street"
                       {...field}
                       placeholder="House number, Road, Area"
+                      error={errors.address?.street?.message}
                     />
                   </div>
                 )}
@@ -422,6 +425,7 @@ export function BranchDialog({ open, onOpenChange }) {
                         name="address.city"
                         {...field}
                         placeholder="e.g., Dhaka"
+                        error={errors.address?.city?.message}
                       />
                     </div>
                   )}
@@ -437,6 +441,7 @@ export function BranchDialog({ open, onOpenChange }) {
                         name="address.state"
                         {...field}
                         placeholder="e.g., Dhaka Division"
+                        error={errors.address?.state?.message}
                       />
                     </div>
                   )}
@@ -578,7 +583,7 @@ export function BranchDialog({ open, onOpenChange }) {
           </Card>
 
           {/* ATM Details */}
-          <Card className=" shadow-none">
+          {/* <Card className=" shadow-none">
             <CardHeader>
               <CardTitle className="text-base">ATM & Facilities</CardTitle>
             </CardHeader>
@@ -644,7 +649,7 @@ export function BranchDialog({ open, onOpenChange }) {
                 </div>
               )}
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Working Hours */}
           <Card className=" shadow-none">

@@ -23,10 +23,10 @@ export function RiskAssessmentDashboard() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="matrices">Matrices</TabsTrigger>
-          <TabsTrigger value="institutional">Institutional Risk</TabsTrigger>
           <TabsTrigger value="customer">Customer Risk</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="institutional">Institutional Risk</TabsTrigger>
+          <TabsTrigger value="matrices">Matrices</TabsTrigger>
+          {/* <TabsTrigger value="reports">Reports</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">

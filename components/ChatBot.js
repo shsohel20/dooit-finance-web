@@ -5,6 +5,7 @@ import { IconMessageCircle, IconSend, IconX } from '@tabler/icons-react'
 import React, { useEffect, useRef, useState } from 'react'
 import { Input } from './ui/input';
 import useOutsideClick from '@/hooks/useOutsideClick';
+import { Mic } from 'lucide-react';
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +33,7 @@ export default function ChatBot() {
 
         {/* input and send button */}
         <div className=' flex  gap-2 w-full absolute bg-white border left-0 right-0 bottom-0 py-2 px-2'>
+          <Button size='icon' variant='outline' disabled><Mic/></Button>
           <div className='flex-1 w-full'>
             <Input type='textarea' className={'min-h-2'} placeholder='Ask me anything' rows={1} />
           </div>

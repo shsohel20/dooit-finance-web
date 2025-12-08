@@ -7,9 +7,7 @@ import { DataTableColumnHeader } from '@/components/DatatableColumnHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
@@ -22,20 +20,9 @@ import { StatusPill } from '@/components/ui/StatusPill'
 
 import { Textarea } from '@/components/ui/textarea'
 import { dateShowFormat, dateShowFormatWithTime, objWithValidValues } from '@/lib/utils'
-import { IconChevronDown, IconChevronRight, IconDownload, IconEye, IconGrid3x3, IconGridDots, IconList, IconPennant, IconSearch, IconUpload, } from '@tabler/icons-react'
+import { IconChevronRight, IconDownload, IconEye, IconGridDots, IconList, IconPennant, IconSearch, IconUpload, } from '@tabler/icons-react'
 import {
-  Plus, AlertCircle,
-  CheckCircle2,
-  Clock,
-  MapPin,
-  Phone,
-  Calendar,
-  Globe,
-  FileText,
-  ChevronRight,
-  User,
-  Shield,
-  TrendingUp
+  Plus
 } from 'lucide-react'
 
 import React, { useEffect, useState } from 'react'
@@ -119,9 +106,8 @@ const GridView = () => {
 
 const ListView = () => {
   const { customers, fetching, currentPage, limit, totalItems, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems } = useCustomerStore();
-
+console.log('customers', customers);
   const [openReporting, setOpenReporting] = useState(false);
-  const [openDetailView, setOpenDetailView] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
   const router = useRouter();
@@ -135,9 +121,9 @@ const ListView = () => {
         />
       ),
       accessorKey: 'actions',
-      size: 100,
+      size: 20,
       cell: ({ row }) => (
-        <div className='flex items-center justify-center'>
+        <div className='flex items-center justify-center w-max'>
           <Button
             variant="outline"
             size="icon"
@@ -155,6 +141,7 @@ const ListView = () => {
           title="Customer"
         />
       ),
+      size: 100,
       accessorKey: 'user.name',
       cell: ({ row }) => (
         <div className='flex items-center gap-2'>
