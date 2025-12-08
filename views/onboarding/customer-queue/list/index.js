@@ -28,6 +28,7 @@ import {
 import React, { useEffect, useState } from 'react'
 import { DetailViewModal } from '../details'
 import { useRouter } from 'next/navigation'
+import CustomerDashboard from './Dashboard'
 const statusVariants = {
   pending: 'warning',
   rejected: 'danger',
@@ -325,6 +326,7 @@ export default function CustomerQueueList({ variant, data, kycStatus }) {
 
   return (
     <div className='my-2'>
+      <CustomerDashboard />
       <div className='flex items-center justify-between  py-4 bg-white rounded-md px-4 shadow'>
         {/* Search and Filter */}
         <div className='flex items-center gap-2  '>
