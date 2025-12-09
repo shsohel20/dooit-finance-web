@@ -48,7 +48,7 @@ export const caseRequestSchema = z.object({
 const defaultValues = {
   primaryContactName: "",
   replyToEmail: "",
-  requestedItems: [{ text: "" }],
+  requestedItems: [],
 };
 
 export function CaseRequestForm({ open, setOpen, getRFI }) {
@@ -76,7 +76,7 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
       const response = await autoPopulateRFI(details?.uid);
       setValue("primaryContactName", response.primary_contact_name);
       setValue("replyToEmail", response.reply_to_email);
-      response.requested_items.forEach((item) => {
+      response.requested_items?.forEach((item) => {
         if (!fields.some((row) => row.text === item)) {
           append({ text: item });
         }
