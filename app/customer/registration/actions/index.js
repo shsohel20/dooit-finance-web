@@ -33,3 +33,12 @@ export const getDataFromDocuments = async (formData) => {
   return json;
 }
 
+export const verifyDocument = async (data) => {
+  const response = await fetch('http://4.227.188.44:5005/verify', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: { "Content-Type": "application/json" },
+  });
+  const json = await response.json();
+  return json;
+}
