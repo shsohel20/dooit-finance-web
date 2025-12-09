@@ -26,9 +26,71 @@ import {
   ZoomOut,
 } from "lucide-react"
 
+const sampleRelationsData = [
+  {
+    active: true,
+    client: "69246e8ea7290611c64300",
+    id: "69292461fc63b70e30fbb9b5",
+    inviteCreatedAt: null,
+    inviteToken: null,
+    inviteTokenExpire: null,
+    invitedBy: null,
+    notes: "",
+    onboardingChannel: "API",
+    registeredAt: "2025-11-28T04:26:09.235Z",
+    source: "api",
+    type: "individual",
+    _id: "69292461fc63b70e30fbb9b5",
+  },
+  {
+    active: true,
+    client: "69246e8ea7290611c64300",
+    id: "69292461fc63b70e30fbb9b6",
+    inviteCreatedAt: "2025-11-20T10:15:30.123Z",
+    inviteToken: "inv_abc123xyz",
+    inviteTokenExpire: "2025-12-20T10:15:30.123Z",
+    invitedBy: "69292461fc63b70e30fbb9b5",
+    notes: "Referred by primary account holder. High-value client prospect.",
+    onboardingChannel: "Referral",
+    registeredAt: "2025-11-25T14:30:45.789Z",
+    source: "referral",
+    type: "individual",
+    _id: "69292461fc63b70e30fbb9b6",
+  },
+  {
+    active: true,
+    client: "69246e8ea7290611c64301",
+    id: "69292461fc63b70e30fbb9b7",
+    inviteCreatedAt: "2025-11-22T08:20:15.456Z",
+    inviteToken: "inv_def456uvw",
+    inviteTokenExpire: "2025-12-22T08:20:15.456Z",
+    invitedBy: "69292461fc63b70e30fbb9b6",
+    notes: "Second-tier referral. Standard onboarding process.",
+    onboardingChannel: "Referral",
+    registeredAt: "2025-11-26T16:45:20.234Z",
+    source: "referral",
+    type: "business",
+    _id: "69292461fc63b70e30fbb9b7",
+  },
+  {
+    active: false,
+    client: "69246e8ea7290611c64302",
+    id: "69292461fc63b70e30fbb9b8",
+    inviteCreatedAt: "2025-11-18T12:00:00.000Z",
+    inviteToken: "inv_ghi789rst",
+    inviteTokenExpire: "2025-12-18T12:00:00.000Z",
+    invitedBy: "69292461fc63b70e30fbb9b5",
+    notes: "Invite expired. Follow-up required.",
+    onboardingChannel: "Email",
+    registeredAt: "2025-11-27T09:30:15.567Z",
+    source: "email",
+    type: "individual",
+    _id: "69292461fc63b70e30fbb9b8",
+  },
+]
 
-
-export function RelationsTree({ relations }) {
+export function RelationsTree() {
+  const relations = sampleRelationsData
   // Group relations by invitedBy to create tree structure
   const rootNodes = relations?.filter((r) => !r.invitedBy || r.invitedBy === "null")
   const childNodes = relations?.filter((r) => r.invitedBy && r.invitedBy !== "null")

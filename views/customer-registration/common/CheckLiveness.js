@@ -42,7 +42,7 @@ export default function CheckLiveness() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const data ={
+    const data = {
       img1_base64: frontProfile.replace('data:image/jpeg;base64,', ''),
       img2_base64: rightProfile.replace('data:image/jpeg;base64,', ''),
     }
@@ -51,12 +51,12 @@ export default function CheckLiveness() {
       const res = await checkImageLiveness(data);
       console.log('checkImageLiveness response', JSON.stringify(res, null, 2))
 
-    if(res.verdict){
-  localStorage.setItem('liveness_verdict', true);
-  localStorage.setItem('live_photo', frontProfile);
-  toast.success(res.verdict);
-  router.push('/customer/registration/individual');
-  }else if (res.error) {
+      if (res.verdict) {
+        localStorage.setItem('liveness_verdict', true);
+        localStorage.setItem('live_photo', frontProfile);
+        toast.success(res.verdict);
+        router.push('/customer/registration/individual');
+      } else if (res.error) {
         toast.error(res.error);
         setError(res.error);
       }
@@ -141,16 +141,16 @@ export default function CheckLiveness() {
               <CardDescription>90° turn to the right</CardDescription>
             </CardHeader>
             <CardContent>
-                {/* <CustomDropZone
+              {/* <CustomDropZone
                   handleChange={handleRightChange}
                   url={rightProfile || ""}
                 >
                   <p className="font-medium">Drag & drop or click to upload</p>
                 </CustomDropZone> */}
-                <FaceCapture
-                  image={rightProfile}
-                  onCapture={handleRightChange}
-                />
+              <FaceCapture
+                image={rightProfile}
+                onCapture={handleRightChange}
+              />
             </CardContent>
           </Card>
         </div>

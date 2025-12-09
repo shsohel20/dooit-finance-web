@@ -26,18 +26,9 @@ export function PersonOrganisationForm({
       },
       phoneNumbers: [""],
       emails: [""],
-      // accounts: [],
-      // digitalWallets: [],
-      // occupation: "",
-      // beneficialOwners: [],
-      // officeHolders: [],
-      // documentation: "",
-      // identityVerification: {
-      //   documents: [],
-      //   electronicSources: [],
-      //   deviceIdentifiers: [],
-      // },
       isCustomer: false,
+      dateOfBirth: "",
+      citizenship: "",
     }
   );
 

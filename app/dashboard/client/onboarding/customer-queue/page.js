@@ -8,6 +8,7 @@ import PendingCollection from '@/views/onboarding/customer-queue/list/PendingCol
 import Rejected from '@/views/onboarding/customer-queue/list/Rejected';
 import Verified from '@/views/onboarding/customer-queue/list/Verified';
 import { Card } from '@/components/ui/card';
+import CustomerDashboard from '@/views/onboarding/customer-queue/list/Dashboard';
 
 export default function Page() {
 
@@ -15,7 +16,7 @@ export default function Page() {
     <div>
       <div>
         <CustomerQueueHeader />
-
+        <CustomerDashboard />
         <Tabs defaultValue="pending-collection">
           <TabsList>
             <TabsTrigger value="all-applications">

@@ -108,8 +108,8 @@ export default function HeatMap() {
   const currentCase = smrCases.find((c) => c.id === selectedCase) || smrCases[0]
 
   return (
-    <div className=" p-4 bg-background">
-      <div className="max-w-2xl space-y-6">
+    <div className="">
+      <div className=" space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Case Urgency Gauge</CardTitle>

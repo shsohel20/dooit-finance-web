@@ -72,9 +72,9 @@ const RegistrationType = () => {
             setRegisterType(selectedType?.value);
             setCountryStore(country?.value?.toLowerCase());
 
-            if (user?.kycStatus === 'pending') {
+            if (user?.kycStatus === 'pending' && selectedType?.value === 'individual') {
                 //TODO:Will add additional logic later.
-                router.push(`/customer/registration/${selectedType?.value}`);
+                router.push(`/customer/registration/individual/liveness-detection`);
             } else {
                 router.push(`/customer/registration/${selectedType?.value}`);
             }

@@ -9,17 +9,15 @@ import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
-import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemHeader, ItemMedia, ItemTitle } from '@/components/ui/item'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Item, ItemContent, ItemDescription, ItemFooter, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { Label } from '@/components/ui/label'
 import ResizableTable from '@/components/ui/Resizabletable'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { StatusPill } from '@/components/ui/StatusPill'
 
 import { Textarea } from '@/components/ui/textarea'
-import { dateShowFormat, dateShowFormatWithTime, objWithValidValues } from '@/lib/utils'
+import { dateShowFormatWithTime, objWithValidValues } from '@/lib/utils'
 import { IconChevronRight, IconDownload, IconEye, IconGridDots, IconList, IconPennant, IconSearch, IconUpload, } from '@tabler/icons-react'
 import {
   Plus
@@ -28,7 +26,6 @@ import {
 import React, { useEffect, useState } from 'react'
 import { DetailViewModal } from '../details'
 import { useRouter } from 'next/navigation'
-import CustomerDashboard from './Dashboard'
 const statusVariants = {
   pending: 'warning',
   rejected: 'danger',
@@ -107,7 +104,6 @@ const GridView = () => {
 
 const ListView = () => {
   const { customers, fetching, currentPage, limit, totalItems, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems } = useCustomerStore();
-console.log('customers', customers);
   const [openReporting, setOpenReporting] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
@@ -124,7 +120,7 @@ console.log('customers', customers);
       accessorKey: 'actions',
       size: 20,
       cell: ({ row }) => (
-        <div className='flex items-center justify-center w-max'>
+        <div className='flex items-center justify-center '>
           <Button
             variant="outline"
             size="icon"
@@ -326,7 +322,7 @@ export default function CustomerQueueList({ variant, data, kycStatus }) {
 
   return (
     <div className='my-2'>
-      <CustomerDashboard />
+      {/* <CustomerDashboard /> */}
       <div className='flex items-center justify-between  py-4 bg-white rounded-md px-4 shadow'>
         {/* Search and Filter */}
         <div className='flex items-center gap-2  '>

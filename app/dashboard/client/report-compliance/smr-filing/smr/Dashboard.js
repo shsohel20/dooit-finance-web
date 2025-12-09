@@ -106,19 +106,27 @@ export function SMRDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-
-
+    <div className=" space-y-6">
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
+          <CardHeader
+            className="flex flex-row items-center justify-between space-y-0 pb-2"
+          >
+            <CardTitle
+              className="text-sm font-medium"
+            >
+              Total Reports
+            </CardTitle>
             <FileText className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockData.totalReports.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div
+              className="text-2xl font-bold">
+              {mockData.totalReports.toLocaleString()}
+            </div>
+            <p
+              className="text-xs text-muted-foreground mt-1">
               {mockData.completedReports} completed, {mockData.draftReports} draft
             </p>
           </CardContent>
@@ -160,12 +168,12 @@ export function SMRDashboard() {
 
       {/* Charts Row 1 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="border-border">
+        <Card className="border-border h-full">
           <CardHeader>
             <CardTitle className="text-base">Status Distribution</CardTitle>
             <CardDescription>Reports by completion status</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent >
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie
@@ -190,7 +198,7 @@ export function SMRDashboard() {
                 />
               </PieChart>
             </ResponsiveContainer>
-            <div className="flex justify-center gap-4 mt-2">
+            <div className="flex justify-center gap-4 mt-2 ">
               {statusData.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="size-3 rounded-full" style={{ backgroundColor: item.color }} />
@@ -234,7 +242,7 @@ export function SMRDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border">
+        <Card className="border-border h-full">
           <CardHeader>
             <CardTitle className="text-base">Likely Offences</CardTitle>
             <CardDescription>Reported offence breakdown</CardDescription>
@@ -271,7 +279,7 @@ export function SMRDashboard() {
 
 
       {/* Summary Cards Row */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-border">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -331,7 +339,7 @@ export function SMRDashboard() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
 
 

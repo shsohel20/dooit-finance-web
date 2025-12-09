@@ -80,7 +80,6 @@ const formSchema = z.object({
 });
 
 export function ECDDForm({ caseNumber, id }) {
-  const [data, setData] = useState(null);
   const [formData, setFormData] = useState({
     isPEP: "No",
     isSanctioned: "No",
@@ -190,8 +189,6 @@ export function ECDDForm({ caseNumber, id }) {
     }
   };
 
-  console.log("formData", formData);
-
   const getDataById = async () => {
     setFetching(true);
     try {
@@ -235,7 +232,7 @@ export function ECDDForm({ caseNumber, id }) {
       withdrawalDetails: data.withdrawal_details,
       depositDetails: data.deposit_details,
       profileSummary: data.recommendation,
-      additionalInfo: data.additonal_information,
+      additionalInfo: data.additional_information,
       behavioralAnalysis: data.behavioral_analysis,
       analystName: data.analyst_name,
       position: "Compliance Officer",
@@ -261,11 +258,12 @@ export function ECDDForm({ caseNumber, id }) {
       annualIncome: data.annual_income,
       beneficialOwner: data.beneficial_owner,
       analysisEndDate: data.analysis_end_date,
+
       caseNumber: {
         label: caseNumber,
         value: caseNumber,
       },
-      customer: "6906cf020acf10ef6ab1ffd3",
+      customer: data?.user_id,
       analyst: "6906ef042b25d3502f3a6915",
       generatedBy: "6906ef042b25d3502f3a6915",
       transaction: "690fd9dbfc65168c8a447a8a",
