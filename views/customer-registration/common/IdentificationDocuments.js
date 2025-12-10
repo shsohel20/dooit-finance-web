@@ -5,7 +5,7 @@ import CustomSelect from '@/components/ui/CustomSelect';
 import { fileUploadOnCloudinary } from '@/app/actions';
 import CustomDropZone from '@/components/ui/DropZone';
 import { Button } from '@/components/ui/button';
-import { getDataFromDocuments } from '@/app/customer/registration/actions';
+import { getDataFromDocuments, verifyDocument } from '@/app/customer/registration/actions';
 import { toast } from 'sonner';
 
 
@@ -34,12 +34,21 @@ function formatDate(dateString) {
     return formattedDate;
 }
 
+const getBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
 const IdentificationDocuments = ({ control, errors, setValue }) => {
     const [isSaving, setIsSaving] = useState(false);
     //front
     const [frontLoading, setFrontLoading] = useState(false);
     const [frontError, setFrontError] = useState(false);
     const [frontFile, setFrontFile] = useState(null);
+    const [frontBase64, setFrontBase64] = useState(null);
     //back
     const [backLoading, setBackLoading] = useState(false);
     const [backError, setBackError] = useState(false);
@@ -55,6 +64,8 @@ const IdentificationDocuments = ({ control, errors, setValue }) => {
 
     const handleFrontChange = async (file) => {
         setFrontFile(file);
+        const base64 = await getBase64(file);
+        setFrontBase64(base64.replace('data:image/jpeg;base64,', ''));
         setFrontLoading(true);
         try {
             const response = await fileUploadOnCloudinary(file);
@@ -133,28 +144,44 @@ const IdentificationDocuments = ({ control, errors, setValue }) => {
         const formData = new FormData();
         formData.append('image', frontFile);
         formData.append('card_type', documentTypeValue?.value);
+        const live_photo = localStorage.getItem('live_photo').replace('data:image/jpeg;base64,', '');
+        const verify_data={
+            app_id: 1,
+            image_1: frontBase64,
+            image_2: live_photo,
+            hash: ''
+        }
         try {
-            setIsSaving(true);
-            const response = await getDataFromDocuments(formData);
-            console.log('response', response);
-            if (response.success) {
-                const [given_name, middle_name, surname] = response.data.full_name?.split(' ');
-                //23-dec-1990 to yyyy-mm-dd
-                const date_of_birth = formatDate(response.data.date_of_birth);
-                console.log('date_of_birth', date_of_birth);
-                setValue('customer_details.given_name', given_name || '');
-                setValue('customer_details.middle_name', middle_name || '');
-                setValue('customer_details.surname', surname || '');
-                setValue('residential_address.address', response.data.address || '');
-                setValue('customer_details.date_of_birth', date_of_birth || '');
-
+            console.log('verifying', JSON.stringify(verify_data, null, 2));
+            const verify_response= await verifyDocument(verify_data);
+            console.log('verify_response', verify_response);
+            if(verify_response?.error?.length > 0){
+                toast.error("Not Verified");
+                return;
+            }else{
+                setIsSaving(true);
+                const response = await getDataFromDocuments(formData);
+                console.log('response', response);
+                if (response.success) {
+                    const [given_name, middle_name, surname] = response.data.full_name?.split(' ');
+                    //23-dec-1990 to yyyy-mm-dd
+                    const date_of_birth = formatDate(response.data.date_of_birth);
+                    console.log('date_of_birth', date_of_birth);
+                    setValue('customer_details.given_name', given_name || '');
+                    setValue('customer_details.middle_name', middle_name || '');
+                    setValue('customer_details.surname', surname || '');
+                    setValue('residential_address.address', response.data.address || '');
+                    setValue('customer_details.date_of_birth', date_of_birth || '');
+    
+                }
             }
-
         } catch (error) {
             toast.error('Failed to save identification documents');
         } finally {
             setIsSaving(false);
         }
+
+        
 
     }
     return (

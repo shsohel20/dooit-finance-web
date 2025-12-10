@@ -78,6 +78,7 @@ const TransactionListView = () => {
     {
       header: 'Actions',
       accessorKey: 'actions',
+      size: 60,
       cell: ({ row }) => (
         <div className='flex justify-center'>
           <DropdownMenu>
