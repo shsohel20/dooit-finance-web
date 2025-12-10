@@ -264,7 +264,12 @@ export default function ClientSidebar({ ...props }) {
           title: 'Transaction Rule Editor',
           url: '/dashboard/client/risk-rule-engine/transaction-rule-editor',
           icon: IconDatabase,
-        }
+        },
+        {
+          title: 'Training Module',
+          url: '/dashboard/client/risk-rule-engine/training-module',
+          icon: IconDatabase,
+        },
       ]
     },
     {
