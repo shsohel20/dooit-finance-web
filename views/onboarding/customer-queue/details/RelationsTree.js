@@ -201,9 +201,23 @@ export function RelationsTree() {
               }}
             >
               <defs>
-                <linearGradient id={`gradient-${relation.id}-${child.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
+                <linearGradient
+                  id={`gradient-${relation.id}-${child.id}`}
+                  x1="0%"
+                  y1="0%"
+                  x2="0%"
+                  y2="100%"
+                >
+                  <stop
+                    offset="0%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity="0.4"
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity="0.2"
+                  />
                 </linearGradient>
               </defs>
               <path

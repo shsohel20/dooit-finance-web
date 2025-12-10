@@ -20,6 +20,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { IconLoaderQuarter } from "@tabler/icons-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -130,7 +131,10 @@ export function LoginForm({ className, token, cid, ...props }) {
                 </a>
                 <Button className="w-full" type="submit" disabled={isLoading}>
                   {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="flex items-center gap-2">
+                      <IconLoaderQuarter className="w-4 h-4 animate-spin " />
+                      Processing...
+                    </span>
                   ) : (
                     "Login"
                   )}
