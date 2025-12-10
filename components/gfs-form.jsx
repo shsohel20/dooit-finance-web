@@ -14,9 +14,13 @@ import {
   FileText,
   Loader2,
 } from "lucide-react";
-import { createGFS } from "@/app/dashboard/client/report-compliance/smr-filing/gfs/actions";
+import {
+  autoPopulatedGFSData,
+  createGFS,
+} from "@/app/dashboard/client/report-compliance/smr-filing/gfs/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import SelectCaseList from "./ui/SelectCaseList";
 
 export const defaultGFSData = {
   suspicionType: "Offence against a Commonwealth, State or Territory Law",
@@ -50,6 +54,7 @@ export function GFSForm() {
   const [formData, setFormData] = useState(defaultGFSData);
   const [generatedReport, setGeneratedReport] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
 
   const router = useRouter();
 
@@ -57,7 +62,7 @@ export function GFSForm() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const addTransaction = () => {
+  const addTransaction = (obj) => {
     const newTransaction = {
       id: Date.now().toString(),
       date: "",
@@ -69,6 +74,7 @@ export function GFSForm() {
       toAccount: formData.customerUID,
       reference: "",
       cryptoAddress: "",
+      ...(obj ? obj : {}),
     };
     updateField("transactions", [...formData.transactions, newTransaction]);
   };
@@ -138,12 +144,13 @@ export function GFSForm() {
     );
   };
 
-  const addIPAddress = () => {
+  const addIPAddress = (obj) => {
     const newIP = {
       id: Date.now().toString(),
       address: "",
       country: "",
       date: "",
+      ...(obj ? obj : {}),
     };
     updateField("ipAddresses", [...formData.ipAddresses, newIP]);
   };
@@ -237,6 +244,49 @@ export function GFSForm() {
     }
   };
 
+  const handleCaseNumberChange = async (value) => {
+    console.log("value", value);
+    setFetching(true);
+    try {
+      const response = await autoPopulatedGFSData(value);
+      setFormData({
+        ...formData,
+        suspicionReason: response.suspicionSummary,
+        customerName: response.customerName,
+        customerUID: response.customerUID,
+        accountOpeningPurpose: response.accountOpeningPurpose,
+        accountOpeningDate: response.accountOpeningDate,
+        companyName: response.companyName ?? "",
+        sourceOfFunds: response.sourceOfFunds ?? "",
+        customerAge: response.customerAge,
+        reviewStartDate: response.reviewStartDate,
+        reviewEndDate: response.reviewEndDate,
+        totalDeposited: response.totalDeposited,
+        totalSuspicionAmount: response.totalSuspicionAmount,
+      });
+      response.transactions.forEach((transaction) => {
+        addTransaction({
+          date: transaction.date,
+          amount: transaction.amount,
+          reference: transaction.tx_idk,
+          type: `${transaction.subtype} ${transaction.type}`,
+        });
+      });
+      response.ipAddresses.forEach((ipAddress) => {
+        addIPAddress({
+          address: ipAddress.ip,
+          country: ipAddress.geolocation,
+          date: "",
+        });
+      });
+      console.log("response", response);
+    } catch (error) {
+      console.error("error", error);
+    } finally {
+      setFetching(false);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <Card className="p-8 border-2 border-primary/20">
@@ -272,21 +322,29 @@ export function GFSForm() {
         </div>
 
         <div className="space-y-8">
+          <div className="max-w-sm">
+            <SelectCaseList
+              label="Case Number"
+              onChange={handleCaseNumberChange}
+              value={formData.caseNumber}
+            />
+          </div>
           {/* Suspicion Details */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold  border-b border-primary/20 pb-2">
               Suspicion Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Suspicion Type</Label>
                 <Input
                   value={formData.suspicionType}
                   onChange={(e) => updateField("suspicionType", e.target.value)}
                   placeholder="e.g., Offence against a Commonwealth Law"
+                  disabled={fetching}
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Suspicion Reason</Label>
                 <Input
                   value={formData.suspicionReason}
@@ -296,7 +354,7 @@ export function GFSForm() {
                   placeholder="e.g., Person/agent is not who they claim to be"
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Suspicion Dates</Label>
                 <Input
                   value={formData.suspicionDates}
@@ -337,7 +395,7 @@ export function GFSForm() {
               Customer Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Customer Name</Label>
                 <Input
                   value={formData.customerName}
@@ -345,7 +403,7 @@ export function GFSForm() {
                   placeholder="Full name"
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Customer UID</Label>
                 <Input
                   value={formData.customerUID}
@@ -353,7 +411,7 @@ export function GFSForm() {
                   placeholder="Account/Customer ID"
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Company Name</Label>
                 <Input
                   value={formData.companyName}
@@ -361,7 +419,7 @@ export function GFSForm() {
                   placeholder="Financial institution name"
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Customer Age</Label>
                 <Input
                   type="number"
@@ -375,7 +433,7 @@ export function GFSForm() {
                   placeholder="Age in years"
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Account Opening Date</Label>
                 <Input
                   type="date"
@@ -385,7 +443,7 @@ export function GFSForm() {
                   }
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Source of Funds</Label>
                 <Input
                   value={formData.sourceOfFunds}
@@ -393,7 +451,7 @@ export function GFSForm() {
                   placeholder="e.g., Employment, Business"
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Account Opening Purpose</Label>
                 <Input
                   value={formData.accountOpeningPurpose}
@@ -422,7 +480,7 @@ export function GFSForm() {
               Transaction Review Period
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Review Start Date</Label>
                 <Input
                   type="date"
@@ -432,7 +490,7 @@ export function GFSForm() {
                   }
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Review End Date</Label>
                 <Input
                   type="date"
@@ -440,7 +498,7 @@ export function GFSForm() {
                   onChange={(e) => updateField("reviewEndDate", e.target.value)}
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Total Deposited ($)</Label>
                 <Input
                   type="number"
@@ -454,7 +512,7 @@ export function GFSForm() {
                   placeholder="0.00"
                 />
               </div>
-              <div>
+              <div className={fetching ? " animate-pulse" : ""}>
                 <Label>Total Suspicion Amount ($)</Label>
                 <Input
                   type="number"

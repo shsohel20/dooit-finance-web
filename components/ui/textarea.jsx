@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-function Textarea({ className, error, ...props }) {
+function Textarea({ className, error, isLoading = false, ...props }) {
   return (
     <>
       <textarea
@@ -12,9 +12,11 @@ function Textarea({ className, error, ...props }) {
           className,
           {
             "border-red-500": error,
+            "opacity-70 animate-pulse cursor-not-allowed": isLoading,
           }
         )}
         {...props}
+        value={isLoading ? "Thinking..." : props.value}
       />
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </>

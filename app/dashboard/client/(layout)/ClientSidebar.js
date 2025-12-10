@@ -60,12 +60,12 @@ export default function ClientSidebar({ ...props }) {
           icon: IconPentagonX,
           current: true,
         },
-        {
-          title: 'Verified',
-          url: '/dashboard/client/onboarding/customer-queue/verified',
-          icon: IconCircleDashedCheck,
-          current: true,
-        },
+        // {
+        //   title: 'Verified',
+        //   url: '/dashboard/client/onboarding/customer-queue/verified',
+        //   icon: IconCircleDashedCheck,
+        //   current: true,
+        // },
         {
           title: 'In Review',
           url: '/dashboard/client/onboarding/customer-queue/in-review',

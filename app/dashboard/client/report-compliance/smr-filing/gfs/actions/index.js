@@ -19,3 +19,14 @@ export const getGFSList = async () => {
   const response = await fetchWithAuth('gfs-report');
   return response.json();
 }
+
+export const autoPopulatedGFSData = async (caseNumber) => {
+  const response = await fetch(`http://4.227.188.44:8000/gfs_report`, {
+    method: 'POST',
+    body: JSON.stringify({ uid: caseNumber }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}

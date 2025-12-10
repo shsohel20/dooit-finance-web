@@ -34,3 +34,14 @@ export const getRFIById = async (id) => {
   const response = await fetchWithAuth(`rfi/${id}`);
   return response.json();
 }
+
+export const autoPopulateRFI = async (data) => {
+  const response = await fetch(`http://4.227.188.44:8000/rfi_report`, {
+    method: "POST",
+    body: JSON.stringify({ uid: data }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.json();
+}

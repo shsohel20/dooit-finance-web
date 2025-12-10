@@ -23,10 +23,10 @@ export default function SMRPage() {
     {
       header: 'Action',
       accessorKey: 'action',
-      size: 100,
+      size: 40,
       cell: ({ row }) => {
         return (
-          <div>
+          <div className='flex items-center justify-center'>
             <Button
               variant='outline'
               size='sm'
@@ -74,7 +74,7 @@ export default function SMRPage() {
       cell: ({ row }) => {
         return (
           <div className=' '>
-            <p className='max-w-[200px] text-wrap break-words'>{row.original.partB.groundsForSuspicion}</p>
+            <p className='max-w-[200px] text-wrap break-words line-clamp-2 text-ellipsis overflow-hidden'>{row.original.partB.groundsForSuspicion}</p>
           </div>
         )
       }
@@ -114,13 +114,19 @@ export default function SMRPage() {
   }
 
   return (
-    <div className='p-4 border rounded-lg space-y-4 bg-white'>
+    <div className='  rounded-lg space-y-4'>
       <PageHeader>
         <PageTitle>Suspicious Matter Report</PageTitle>
         <PageDescription>Manage and track all Suspicious Matter Reports</PageDescription>
       </PageHeader>
-      <SMRHeatmap />
-      <SMRDashboard />
+      <div className='grid grid-cols-3 gap-4'>
+        <div>
+          <SMRHeatmap />
+        </div>
+        <div className='col-span-2'>
+          <SMRDashboard />
+        </div>
+      </div>
       <ResizableTable
         loading={loading}
         columns={columns}

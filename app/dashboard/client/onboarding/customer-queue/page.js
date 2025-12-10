@@ -8,6 +8,7 @@ import PendingCollection from '@/views/onboarding/customer-queue/list/PendingCol
 import Rejected from '@/views/onboarding/customer-queue/list/Rejected';
 import Verified from '@/views/onboarding/customer-queue/list/Verified';
 import { Card } from '@/components/ui/card';
+import CustomerDashboard from '@/views/onboarding/customer-queue/list/Dashboard';
 
 export default function Page() {
 
@@ -15,7 +16,7 @@ export default function Page() {
     <div>
       <div>
         <CustomerQueueHeader />
-
+        <CustomerDashboard />
         <Tabs defaultValue="pending-collection">
           <TabsList>
             <TabsTrigger value="all-applications">
@@ -29,8 +30,8 @@ export default function Page() {
             <TabsTrigger value="rejected-applications">
               Rejected
             </TabsTrigger>
-            <TabsTrigger value="ready-for-verification">
-              Ready for Verification
+            <TabsTrigger value="in_review">
+              In Review
             </TabsTrigger>
           </TabsList>
           <TabsContent value="all-applications">
@@ -42,7 +43,7 @@ export default function Page() {
           <TabsContent value="rejected-applications">
             <Rejected kycStatus='rejected' />
           </TabsContent>
-          <TabsContent value="ready-for-verification">
+          <TabsContent value="in_review">
             <Verified kycStatus='verified' />
           </TabsContent>
         </Tabs>

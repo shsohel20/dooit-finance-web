@@ -14,7 +14,7 @@ const statusPillVariants = cva(
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground [&>svg]:text-foreground [&>svg]:fill-foreground before:bg-foreground",
         warning:
-          "before:bg-warning [&>svg]:text-warning [&>svg]:fill-warning before:bg-warning bg-warning/10 border-warning/10 text-warning",
+          "before:bg-warning [&>svg]:text-warning [&>svg]:fill-warning before:bg-warning bg-warning/10 border-warning/10 text-yellow-700",
         success:
           "before:bg-success [&>svg]:text-success [&>svg]:fill-success before:bg-success bg-success/10 border-success/10 text-success",
         info: "before:bg-info [&>svg]:text-info [&>svg]:fill-info before:bg-info bg-info/10 border-info/10 text-info",
