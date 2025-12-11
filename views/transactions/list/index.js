@@ -24,7 +24,7 @@ import { formatAUD, formatDateTime, objWithValidValues } from '@/lib/utils';
 import TransactionDetailView from '../form/Details';
 import { getTransactions } from '@/app/dashboard/client/transactions/actions';
 import TransactionReportingModal from '../form/ReportingModal';
-import { TransactionDashboard } from './Dashboard';
+import TransactionDashboard from './Dashboard';
 import CustomPagination from '@/components/CustomPagination';
 
 
