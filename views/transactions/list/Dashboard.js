@@ -70,7 +70,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="mb-4 bg-gradient-to-br from-background via-background to-muted/20">
 
 
       <main className=" ">
@@ -85,7 +85,7 @@ export default function DashboardPage() {
                 <ArrowUpRight className="h-5 w-5 text-blue-500" />
               </div>
               <p className="text-sm font-medium text-muted-foreground mb-1">Total Transactions</p>
-              <p className="text-4xl font-bold text-foreground">{transactionData.length}</p>
+              <p className="text-4xl font-bold text-foreground">89,589</p>
             </CardContent>
           </Card>
 
@@ -144,9 +144,9 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="">
           {/* Left Column - Key Insights */}
-          <div className="lg:col-span-1">
+          {/* <div className="lg:col-span-1">
             <Card className="border-0  h-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -224,10 +224,10 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
 
           {/* Right Column - Pie Charts */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-3 gap-6 ">
             {/* Transaction Status Chart */}
             <Card className="border-0 ">
               <CardHeader>
@@ -291,9 +291,9 @@ export default function DashboardPage() {
             </Card>
 
             {/* Two Charts Side by Side */}
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="">
               {/* Transaction Type Chart */}
-              <Card className="border-0 ">
+              <Card className="border-0 h-full">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <DollarSign className="h-4 w-4 text-primary" />
@@ -339,6 +339,9 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
+
+            </div>
+            <div>
               {/* Geographic Distribution Chart */}
               <Card className="border-0 ">
                 <CardHeader>
