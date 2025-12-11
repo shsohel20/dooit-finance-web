@@ -1,8 +1,6 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import {
   Building2,
   Home,
@@ -20,8 +18,12 @@ import {
   Globe,
   ArrowRight,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
-export default function TrainingModule() {
+export default function AntiMoneyLaunderingPage() {
+  const router = useRouter()
+
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -50,10 +52,10 @@ export default function TrainingModule() {
             <span className="text-muted-foreground">•</span>
             <span className="text-sm text-muted-foreground">3 sections</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4 text-balance">
+          <h2 className="text-lg  font-bold text-foreground  text-balance">
             The Story of Financial Crime
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl text-pretty leading-relaxed">
+          <p className="text-muted-foreground max-w-3xl text-pretty leading-relaxed">
             Understanding money laundering and why your role matters in protecting our financial system
           </p>
         </div>
@@ -615,12 +617,14 @@ export default function TrainingModule() {
 
               {/* Complete Module Button */}
               <div className="flex justify-end mt-8">
-                <Link href="/dashboard/client/risk-rule-engine/training-module/assessment">
-                  <Button size="lg" className="group">
-                    Continue to Assessment
-                    <ArrowRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
+                <button
+                  className="flex items-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+                  onClick={() => {
+                    router.push('/dashboard/client/risk-rule-engine/training-module/anti-money-laundering/assessment')
+                  }}>
+                  Complete This Module
+                  <ArrowRight className="size-5" />
+                </button>
               </div>
             </div>
           </Card>
