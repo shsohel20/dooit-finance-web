@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { BookOpen, Clock, CheckCircle2, ArrowRight, AlertCircle, Shield, XCircle } from "lucide-react"
 import Link from "next/link"
 
+
 export default function AssessmentPage() {
   const [selectedAnswers, setSelectedAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
