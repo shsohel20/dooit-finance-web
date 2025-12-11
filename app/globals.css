@@ -54,6 +54,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
+
 .border-red {
   border-color: var(--danger);
   border-width: 5px;

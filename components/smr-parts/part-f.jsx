@@ -17,12 +17,12 @@ export function PartF({ data, updateData }) {
       completed: true,
       referenceNumber: "",
       totalAmount: { currencyCode: "AUD", amount: 0 },
-      // cashAmount: { currencyCode: "AUD", amount: 0 },
-      // foreignCurrencies: [],
-      // digitalCurrencies: [],
-      // sender: { name: "", institutions: [] },
-      // payee: { name: "", institutions: [] },
-      // beneficiary: { name: "", institutions: [] },
+      cashAmount: { currencyCode: "AUD", amount: 0 },
+      foreignCurrencies: [],
+      digitalCurrencies: [],
+      sender: { name: "", institutions: [] },
+      payee: { name: "", institutions: [] },
+      beneficiary: { name: "", institutions: [] },
     };
   }
 

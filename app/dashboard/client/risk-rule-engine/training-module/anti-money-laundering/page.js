@@ -25,7 +25,7 @@ export default function AntiMoneyLaunderingPage() {
 
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">

@@ -38,7 +38,7 @@ const TransactionListView = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const totalItems = transactions?.totalRecords || 0;
-
+  console.log('transactions', transactions)
 
   useEffect(() => {
     const fetchTransactions = async () => {

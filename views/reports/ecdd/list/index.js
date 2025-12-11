@@ -17,14 +17,13 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-  } from "@/components/ui/alert-dialog"
-  import { deleteEcdd } from '@/app/dashboard/client/report-compliance/ecdd/actions';
+} from "@/components/ui/alert-dialog"
+import { deleteEcdd } from '@/app/dashboard/client/report-compliance/ecdd/actions';
 import { toast } from 'sonner';
 
 const EcddList = () => {
     const router = useRouter();
     const [data, setData] = useState([]);
-    console.log("data", data);
     const [loading, setLoading] = useState(false)
     const [deleteId, setDeleteId] = useState(null);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -32,7 +31,6 @@ const EcddList = () => {
     const getData = async () => {
         setLoading(true)
         try {
-
             const res = await getEcdds();
             setData(res?.data)
         } catch (error) {
@@ -126,41 +124,41 @@ const EcddList = () => {
 
 export default EcddList;
 
-const DeleteModal = ({open, setOpen, id}) => {
+const DeleteModal = ({ open, setOpen, id }) => {
     const [deleting, setDeleting] = useState(false);
 
     const handleDelete = async () => {
         setDeleting(true);
-       try {
-        const res = await deleteEcdd(id);
-        console.log("res", res);
-        if (res.success) {
-            setOpen(false);
-           
-            toast.success('ECDD deleted successfully');
-        }
-       } catch (error) {
-        toast.error(error?.response?.data?.message || 'Failed to delete ECDD');
-       }finally{
+        try {
+            const res = await deleteEcdd(id);
+            console.log("res", res);
+            if (res.success) {
+                setOpen(false);
+
+                toast.success('ECDD deleted successfully');
+            }
+        } catch (error) {
+            toast.error(error?.response?.data?.message || 'Failed to delete ECDD');
+        } finally {
             setDeleting(false);
-       }
+        }
     }
     return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the ECDD and remove the data from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} disabled={deleting}>{deleting ? <Loader2 className="size-4 animate-spin" /> : 'Continue'}</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        <AlertDialog open={open} onOpenChange={setOpen}>
+
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the ECDD and remove the data from our servers.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={deleting}>{deleting ? <Loader2 className="size-4 animate-spin" /> : 'Continue'}</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
 
     )
 }
