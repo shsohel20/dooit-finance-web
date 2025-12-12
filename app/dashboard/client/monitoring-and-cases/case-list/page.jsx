@@ -183,7 +183,7 @@ const ListView = ({}) => {
       header: "Status",
       accessorKey: "status",
       cell: ({ row }) => (
-        <StatusPill variant={statusVariants[row.original.status]} i>
+        <StatusPill variant={statusVariants[row.original.status]}>
           {row.original.status}
         </StatusPill>
       ),

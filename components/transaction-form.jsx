@@ -135,7 +135,7 @@ export function TransactionForm({ data, onUpdate }) {
             className="mt-1 border"
           />
         </div>
-        {/* <div>
+        <div>
           <Label className="text-sm font-semibold">
             30. Total cash involved (AUD)
           </Label>
@@ -151,11 +151,11 @@ export function TransactionForm({ data, onUpdate }) {
             placeholder="0.00"
             className="mt-1 border"
           />
-        </div> */}
+        </div>
       </div>
 
       {/* Sender */}
-      {/* <div className="space-y-2 pt-4 border-t border-muted">
+      <div className="space-y-2 pt-4 border-t border-muted">
         <Label className="text-sm font-semibold">Sender/drawer/issuer</Label>
         <Input
           value={transaction.sender.name}
@@ -163,10 +163,10 @@ export function TransactionForm({ data, onUpdate }) {
           placeholder="Name of sender"
           className="border"
         />
-      </div> */}
+      </div>
 
       {/* Payee */}
-      {/* <div className="space-y-2">
+      <div className="space-y-2">
         <Label className="text-sm font-semibold">Payee</Label>
         <Input
           value={transaction.payee.name}
@@ -174,10 +174,10 @@ export function TransactionForm({ data, onUpdate }) {
           placeholder="Name of payee"
           className="border"
         />
-      </div> */}
+      </div>
 
       {/* Beneficiary */}
-      {/* <div className="space-y-2">
+      <div className="space-y-2">
         <Label className="text-sm font-semibold">Beneficiary</Label>
         <Input
           value={transaction.beneficiary.name}
@@ -185,7 +185,7 @@ export function TransactionForm({ data, onUpdate }) {
           placeholder="Name of beneficiary"
           className="border"
         />
-      </div> */}
+      </div>
     </div>
   );
 }

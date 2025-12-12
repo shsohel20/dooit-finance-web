@@ -264,6 +264,29 @@ export default function ClientSidebar({ ...props }) {
           title: 'Transaction Rule Editor',
           url: '/dashboard/client/risk-rule-engine/transaction-rule-editor',
           icon: IconDatabase,
+        },
+
+      ]
+    },
+    {
+      title: 'Training Module',
+      url: '/dashboard/client/risk-rule-engine/training-module',
+      icon: IconDatabase,
+      children: [
+        {
+          title: 'Anti-Money Laundering Training',
+          url: '/dashboard/client/risk-rule-engine/training-module/anti-money-laundering',
+          icon: IconDatabase,
+        },
+        {
+          title: 'AML Red Flags',
+          url: '/dashboard/client/risk-rule-engine/training-module/aml-red-flags',
+          icon: IconAlertTriangle
+        },
+        {
+          title: 'Our Ecosystem',
+          url: '/dashboard/client/risk-rule-engine/training-module/our-ecosystem',
+          icon: IconDatabase,
         }
       ]
     },

@@ -24,7 +24,7 @@ import { formatAUD, formatDateTime, objWithValidValues } from '@/lib/utils';
 import TransactionDetailView from '../form/Details';
 import { getTransactions } from '@/app/dashboard/client/transactions/actions';
 import TransactionReportingModal from '../form/ReportingModal';
-import { TransactionDashboard } from './Dashboard';
+import TransactionDashboard from './Dashboard';
 import CustomPagination from '@/components/CustomPagination';
 
 
@@ -38,7 +38,7 @@ const TransactionListView = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const totalItems = transactions?.totalRecords || 0;
-
+  console.log('transactions', transactions)
 
   useEffect(() => {
     const fetchTransactions = async () => {

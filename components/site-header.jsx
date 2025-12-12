@@ -27,7 +27,7 @@ export function SiteHeader() {
     },
   ];
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) bg-white">
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) bg-white sticky top-0 z-10">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator
@@ -58,7 +58,13 @@ export function SiteHeader() {
           <Button variant="secondary" size="sm">
             Help <IconHelpCircle />
           </Button>
-          <Button onClick={() => router.push('/dashboard/client/profile')} variant="ghost" asChild size="sm" className="hidden sm:flex cursor-pointer">
+          <Button
+            onClick={() => router.push("/dashboard/client/profile")}
+            variant="ghost"
+            asChild
+            size="sm"
+            className="hidden sm:flex cursor-pointer"
+          >
             <span>
               <Avatar>
                 <AvatarImage src="https://github.com/shadcn.png" />
