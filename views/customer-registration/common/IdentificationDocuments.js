@@ -42,7 +42,7 @@ const getBase64 = (file) => {
         reader.readAsDataURL(file);
     });
 }
-const IdentificationDocuments = ({ control, errors, setValue }) => {
+const IdentificationDocuments = ({ control, errors, setValue, setVerifyingStatus }) => {
     const [isSaving, setIsSaving] = useState(false);
     //front
     const [frontLoading, setFrontLoading] = useState(false);
@@ -60,7 +60,7 @@ const IdentificationDocuments = ({ control, errors, setValue }) => {
         control,
         name: "document_type",
     });
-    console.log('front image error', frontError);
+   
 
     const handleFrontChange = async (file) => {
         setFrontFile(file);
@@ -152,14 +152,15 @@ const IdentificationDocuments = ({ control, errors, setValue }) => {
             hash: ''
         }
         try {
-            console.log('verifying', JSON.stringify(verify_data, null, 2));
+            setIsSaving(true);
+            setVerifyingStatus('verifying');
             const verify_response= await verifyDocument(verify_data);
-            console.log('verify_response', verify_response);
+            
             if(verify_response?.error?.length > 0){
-                toast.error("Not Verified");
+                toast.error("Documents are not verified");
+                setVerifyingStatus('idle');
                 return;
             }else{
-                setIsSaving(true);
                 const response = await getDataFromDocuments(formData);
                 console.log('response', response);
                 if (response.success) {
@@ -179,6 +180,7 @@ const IdentificationDocuments = ({ control, errors, setValue }) => {
             toast.error('Failed to save identification documents');
         } finally {
             setIsSaving(false);
+            setVerifyingStatus('verified');
         }
 
         

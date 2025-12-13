@@ -3,8 +3,6 @@ import { Button } from '@/components/ui/button';
 import Stepper from '@/components/ui/Stepper';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,6 +11,8 @@ import IdentificationDocuments from '@/views/customer-registration/common/Identi
 import PersonalInfo from '@/views/customer-registration/individual/PersonalInfo';
 import OtherInfo from '@/views/customer-registration/individual/OtherInfo';
 import CheckLiveness from '@/views/customer-registration/common/CheckLiveness';
+import { Loader2 } from 'lucide-react';
+import { IconRefresh } from '@tabler/icons-react';
 
 
 const personalInfoSchema = z.object({
@@ -101,6 +101,8 @@ const TOTAL_STEPS = 2;
 const CustomerRegistration = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const { customerRegisterData, setCustomerRegisterData, registerType, country } = useCustomerRegisterStore();
+    const [verifyingStatus, setVerifyingStatus] = useState('idle');
+
 
 
     const { handleSubmit, control, formState: { errors, }, setValue } = useForm({
@@ -139,11 +141,19 @@ const CustomerRegistration = () => {
             {/* stepper */}
             
             {/* content */}
-            <div>
-                <IdentificationDocuments control={control} errors={errors} setValue={setValue}/>
-            </div>
+          {  verifyingStatus === 'idle' && <div>
+                <IdentificationDocuments control={control} errors={errors} setValue={setValue} setVerifyingStatus={setVerifyingStatus}/>
+            </div>}
            
-            <div>
+           {
+            verifyingStatus === 'verifying' && <div className='flex flex-col items-center justify-center gap-4 min-h-[500px]'>
+                <IconRefresh className="size-20 animate-spin" />
+                Verifying documents...
+            </div>
+           }
+           {
+            verifyingStatus === 'verified' && <>
+                 <div>
                 <Stepper currentStep={currentStep} totalSteps={TOTAL_STEPS} handleStep={handleStep} />
             </div>
             <div>
@@ -170,6 +180,8 @@ const CustomerRegistration = () => {
                     Preview
                 </Button>}
             </div>
+            </>
+           }
         </div>
     );
 };
