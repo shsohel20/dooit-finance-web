@@ -60,6 +60,11 @@ export default function DooitEcosystemPage() {
 
       {/* Main Content */}
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <Card className="mb-12 bg-primary/5 border-primary/20">
+          <div className="h-[380px] aspect-video">
+            <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" className="w-full h-full" />
+          </div>
+        </Card>
         {/* Module Timeline */}
         <div className="flex items-center gap-2 mb-6">
           <Clock className="size-5 text-muted-foreground" />

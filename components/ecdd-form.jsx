@@ -28,6 +28,7 @@ import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getEcddById } from "@/app/dashboard/client/report-compliance/ecdd/actions";
+import SelectCaseList from "./ui/SelectCaseList";
 
 const formSchema = z.object({
   caseNumber: z.object({
@@ -517,41 +518,54 @@ ${formData.recommendation || "_________________________"}
     const kycData = value?.customer?.personalKyc;
 
     setValue("caseNumber", value, { shouldValidate: true });
-    setValue("analystName", value?.analyst?.name, { shouldValidate: true });
-    setValue(
-      "fullName",
-      `${kycData?.personal_form?.customer_details?.given_name} ${kycData?.personal_form?.customer_details?.surname}`,
-      { shouldValidate: true }
-    );
-    setValue("accountPurpose", kycData?.funds_wealth?.account_purpose, {
-      shouldValidate: true,
-    });
-    setValue("onboardingDate", value?.customer?.createdAt?.split("T")[0], {
-      shouldValidate: true,
-    });
-    setValue(
-      "expectedVolume",
-      kycData?.funds_wealth?.estimated_trading_volume,
-      { shouldValidate: true }
-    );
-    setValue("beneficialOwner", value?.transaction?.beneficiary?.name, {
-      shouldValidate: true,
-    });
-    setValue("transaction", value?.transaction?._id, { shouldValidate: true });
-    setValue("generatedBy", value?.analyst?._id, { shouldValidate: true });
-    setValue("analyst", value?.analyst?._id, { shouldValidate: true });
-    setValue("customer", value?.customer?._id, { shouldValidate: true });
-    setValue("isPEP", value?.customer?.isPep ? "Yes" : "No", {
-      shouldValidate: true,
-    });
-    setValue("isSanctioned", value?.customer?.sanction ? "Yes" : "No", {
-      shouldValidate: true,
-    });
-    setValue(
-      "registeredAddress",
-      kycData?.personal_form?.residential_address?.address,
-      { shouldValidate: true }
-    );
+    if (value?.new) {
+      setValue(
+        "caseNumber",
+        {
+          label: value.label,
+          value: value.value,
+        },
+        { shouldValidate: true }
+      );
+    } else {
+      setValue("analystName", value?.analyst?.name, { shouldValidate: true });
+      setValue(
+        "fullName",
+        `${kycData?.personal_form?.customer_details?.given_name} ${kycData?.personal_form?.customer_details?.surname}`,
+        { shouldValidate: true }
+      );
+      setValue("accountPurpose", kycData?.funds_wealth?.account_purpose, {
+        shouldValidate: true,
+      });
+      setValue("onboardingDate", value?.customer?.createdAt?.split("T")[0], {
+        shouldValidate: true,
+      });
+      setValue(
+        "expectedVolume",
+        kycData?.funds_wealth?.estimated_trading_volume,
+        { shouldValidate: true }
+      );
+      setValue("beneficialOwner", value?.transaction?.beneficiary?.name, {
+        shouldValidate: true,
+      });
+      setValue("transaction", value?.transaction?._id, {
+        shouldValidate: true,
+      });
+      setValue("generatedBy", value?.analyst?._id, { shouldValidate: true });
+      setValue("analyst", value?.analyst?._id, { shouldValidate: true });
+      setValue("customer", value?.customer?._id, { shouldValidate: true });
+      setValue("isPEP", value?.customer?.isPep ? "Yes" : "No", {
+        shouldValidate: true,
+      });
+      setValue("isSanctioned", value?.customer?.sanction ? "Yes" : "No", {
+        shouldValidate: true,
+      });
+      setValue(
+        "registeredAddress",
+        kycData?.personal_form?.residential_address?.address,
+        { shouldValidate: true }
+      );
+    }
   };
 
   return (
@@ -666,7 +680,7 @@ ${formData.recommendation || "_________________________"}
                   control={control}
                   name="caseNumber"
                   render={({ field }) => (
-                    <CustomSelect
+                    <SelectCaseList
                       label="Case Number"
                       options={caseNumbers}
                       value={field.value || null}
