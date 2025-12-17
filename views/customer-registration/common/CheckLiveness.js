@@ -46,7 +46,7 @@ export default function CheckLiveness() {
       img1_base64: frontProfile.replace('data:image/jpeg;base64,', ''),
       img2_base64: rightProfile.replace('data:image/jpeg;base64,', ''),
     }
-    // console.log('checkImageLiveness data', JSON.stringify(data, null, 2))
+    console.log('checkImageLiveness data', JSON.stringify(data, null, 2))
     try {
       const res = await checkImageLiveness(data);
       console.log('checkImageLiveness response', JSON.stringify(res, null, 2))

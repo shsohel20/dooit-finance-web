@@ -61,6 +61,7 @@ const Preview = () => {
             localStorage.removeItem('invite_cid');
             toast.success('Welcome onboard!');
             localStorage.removeItem('live_photo');
+            localStorage.removeItem('liveness_verdict');
         }
     }
     return (

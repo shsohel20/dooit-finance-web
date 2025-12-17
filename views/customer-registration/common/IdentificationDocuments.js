@@ -7,6 +7,8 @@ import CustomDropZone from '@/components/ui/DropZone';
 import { Button } from '@/components/ui/button';
 import { getDataFromDocuments, verifyDocument } from '@/app/customer/registration/actions';
 import { toast } from 'sonner';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useEffect } from 'react';
 
 
 const documentTypes = [
@@ -16,7 +18,6 @@ const documentTypes = [
 ]
 
 function formatDate(dateString) {
-    console.log('dateString', dateString);
     if (!dateString) return "";
 
     const [day, mon, year] = dateString.split(" ");
@@ -43,6 +44,7 @@ const getBase64 = (file) => {
     });
 }
 const IdentificationDocuments = ({ control, errors, setValue, setVerifyingStatus }) => {
+    const [livenessVerdict, setLivenessVerdict] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     //front
     const [frontLoading, setFrontLoading] = useState(false);
@@ -61,7 +63,12 @@ const IdentificationDocuments = ({ control, errors, setValue, setVerifyingStatus
         name: "document_type",
     });
    
-
+    useEffect(() => {
+        const livenessVerdict = localStorage.getItem('liveness_verdict');
+        if (livenessVerdict) {
+            setLivenessVerdict(livenessVerdict);
+        }
+    }, []);
     const handleFrontChange = async (file) => {
         setFrontFile(file);
         const base64 = await getBase64(file);
@@ -69,6 +76,7 @@ const IdentificationDocuments = ({ control, errors, setValue, setVerifyingStatus
         setFrontLoading(true);
         try {
             const response = await fileUploadOnCloudinary(file);
+            console.log('response', response);
             if (response.success) {
                 const existingFrontIndex = fields.findIndex((item) => item.type === 'front');
                 if (existingFrontIndex !== -1) {
@@ -187,8 +195,26 @@ const IdentificationDocuments = ({ control, errors, setValue, setVerifyingStatus
 
     }
     return (
-        <div className='mt-4 '>
-
+        <div className='mt-4 space-y-4'>
+<div>
+{
+    livenessVerdict ? (
+        <Alert variant='success'>
+            <AlertTitle>Success</AlertTitle>
+            <AlertDescription>
+                Liveness verification successful
+            </AlertDescription>
+        </Alert>
+    ) : (
+        <Alert variant='destructive'>
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+                Liveness verification failed
+            </AlertDescription>
+        </Alert>
+    )
+}
+</div>
             <div>
                 <FormTitle>Identification Documents</FormTitle>
                 <div className='max-w-56 my-4 relative z-3'>
