@@ -1,104 +1,141 @@
-'use client'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import ResizableTable from '@/components/ui/Resizabletable'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { cn } from '@/lib/utils'
-import { IconEdit, IconEye } from '@tabler/icons-react'
-import { AlertCircle, AlertTriangle, Building2, CheckCircle2, Clock, Download, FileText, FileUp, MoreHorizontalIcon, TrendingUp, User, UserCheck, Users } from 'lucide-react'
-import React, { useState } from 'react'
+"use client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import ResizableTable from "@/components/ui/Resizabletable";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
+import { IconEdit, IconEye } from "@tabler/icons-react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  Building2,
+  CheckCircle2,
+  Clock,
+  Download,
+  FileText,
+  FileUp,
+  MoreHorizontalIcon,
+  TrendingUp,
+  User,
+  UserCheck,
+  Users,
+} from "lucide-react";
+import React, { useState } from "react";
 
 function getStatusIcon(status) {
   switch (status) {
     case "match":
-      return <AlertCircle className="w-5 h-5 text-error" />
+      return <AlertCircle className="w-5 h-5 text-error" />;
     case "clear":
-      return <CheckCircle2 className="w-5 h-5 text-success" />
+      return <CheckCircle2 className="w-5 h-5 text-success" />;
     case "pending":
-      return <Clock className="w-5 h-5 text-warning" />
+      return <Clock className="w-5 h-5 text-warning" />;
     default:
-      return null
+      return null;
   }
 }
 
 function getStatusColor(status) {
   switch (status) {
     case "Active":
-      return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+      return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
     case "Monitored":
-      return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+      return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
     case "Inactive":
-      return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+      return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
     default:
-      return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+      return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400";
   }
 }
 function getRiskBadgeColor(riskLevel) {
   switch (riskLevel) {
     case "low":
-      return "bg-success/15 text-success border border-success/30"
+      return "bg-success/15 text-success border border-success/30";
     case "medium":
-      return "bg-warning/15 text-warning border border-warning/30"
+      return "bg-warning/15 text-warning border border-warning/30";
     case "high":
-      return "bg-error/15 text-error border border-error/30"
+      return "bg-error/15 text-error border border-error/30";
     default:
-      return "bg-muted/15 text-muted-foreground border border-muted/30"
+      return "bg-muted/15 text-muted-foreground border border-muted/30";
   }
 }
 
 function getRiskIcon(riskLevel) {
   switch (riskLevel) {
     case "low":
-      return <CheckCircle2 className="w-4 h-4" />
+      return <CheckCircle2 className="w-4 h-4" />;
     case "medium":
-      return <AlertTriangle className="w-4 h-4" />
+      return <AlertTriangle className="w-4 h-4" />;
     case "high":
-      return <AlertCircle className="w-4 h-4" />
+      return <AlertCircle className="w-4 h-4" />;
     default:
-      return null
+      return null;
   }
 }
 
 function getRiskLabel(riskLevel) {
   switch (riskLevel) {
     case "low":
-      return "Low Risk"
+      return "Low Risk";
     case "medium":
-      return "Medium Risk"
+      return "Medium Risk";
     case "high":
-      return "High Risk"
+      return "High Risk";
     default:
-      return "Unknown"
+      return "Unknown";
   }
 }
 
-
 export default function InternalBlacklistPage() {
-  const [openViewModal, setOpenViewModal] = useState(false)
+  const [openViewModal, setOpenViewModal] = useState(false);
   const stats = [
-    { label: "Total PEPs", value: "128", color: "from-blue-500 to-blue-600", description: "Total number of PEPs in the system" },
-    { label: "Low Risk", value: "15", color: "from-green-500 to-green-600", description: "Number of PEPs with low risk" },
-    { label: "Medium Risk", value: "102", color: "from-amber-500 to-amber-600", description: "Number of PEPs with medium risk" },
-    { label: "High Risk", value: "11", color: "from-red-500 to-red-600", description: "Number of PEPs with high risk" },
-
-  ]
+    {
+      label: "Total PEPs",
+      value: "128",
+      color: "from-blue-500 to-blue-600",
+      description: "Total number of PEPs in the system",
+    },
+    {
+      label: "Low Risk",
+      value: "15",
+      color: "from-green-500 to-green-600",
+      description: "Number of PEPs with low risk",
+    },
+    {
+      label: "Medium Risk",
+      value: "102",
+      color: "from-amber-500 to-amber-600",
+      description: "Number of PEPs with medium risk",
+    },
+    {
+      label: "High Risk",
+      value: "11",
+      color: "from-red-500 to-red-600",
+      description: "Number of PEPs with high risk",
+    },
+  ];
 
   function getRiskColor(level) {
     switch (level) {
       case "High":
-        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
       case "Medium":
-        return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+        return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
       case "Low":
-        return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+        return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
       default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+        return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400";
     }
   }
-
-
 
   const pepsData = [
     {
@@ -128,7 +165,7 @@ export default function InternalBlacklistPage() {
       lastUpdated: "05-08-2025",
       status: "Inactive",
     },
-  ]
+  ];
   const columns = [
     {
       header: "Actions",
@@ -136,28 +173,37 @@ export default function InternalBlacklistPage() {
       enableResizing: false,
       size: 100,
       cell: ({ row }) => {
-        return <div className=' flex items-center justify-center'>
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" aria-label="Open menu" size="icon">
-                <MoreHorizontalIcon size={12} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40 z-[99]" align="start">
-              <DropdownMenuLabel className={'text-xs text-muted-foreground'}> Actions</DropdownMenuLabel>
-              <DropdownMenuGroup>
-                <DropdownMenuItem onSelect={() => { setOpenViewModal(true) }}>
-                  <IconEye size={12} /> View
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => { }}>
-                  <IconEdit size={12} /> Edit
-                </DropdownMenuItem>
-                {/* <DropdownMenuItem disabled>Download</DropdownMenuItem> */}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      }
+        return (
+          <div className=" flex items-center justify-center">
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" aria-label="Open menu" size="icon">
+                  <MoreHorizontalIcon size={12} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40 z-[99]" align="start">
+                <DropdownMenuLabel className={"text-xs text-muted-foreground"}>
+                  {" "}
+                  Actions
+                </DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setOpenViewModal(true);
+                    }}
+                  >
+                    <IconEye size={12} /> View
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => {}}>
+                    <IconEdit size={12} /> Edit
+                  </DropdownMenuItem>
+                  {/* <DropdownMenuItem disabled>Download</DropdownMenuItem> */}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
     },
     {
       header: "Name",
@@ -174,9 +220,15 @@ export default function InternalBlacklistPage() {
       accessorKey: "riskLevel",
       size: 100,
       cell: ({ row }) => {
-        const riskLevel = row.original.riskLevel
-        return <span className={cn('text-xs font-medium rounded-full px-2 py-0.5', getRiskColor(riskLevel))}>{riskLevel}</span>
-      }
+        const riskLevel = row.original.riskLevel;
+        return (
+          <span
+            className={cn("text-xs font-medium rounded-full px-2 py-0.5", getRiskColor(riskLevel))}
+          >
+            {riskLevel}
+          </span>
+        );
+      },
     },
     {
       header: "Country",
@@ -193,15 +245,20 @@ export default function InternalBlacklistPage() {
       accessorKey: "status",
       size: 100,
       cell: ({ row }) => {
-        const status = row.original.status
-        return <span className={cn('text-xs font-medium rounded-full px-2 py-0.5', getStatusColor(status))}>{status}</span>
-      }
+        const status = row.original.status;
+        return (
+          <span
+            className={cn("text-xs font-medium rounded-full px-2 py-0.5", getStatusColor(status))}
+          >
+            {status}
+          </span>
+        );
+      },
     },
-
-  ]
+  ];
 
   return (
-    <div className='space-y-8'>
+    <div className="space-y-8 blurry-overlay">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <Card key={stat.label} className={`shadow-none`}>
@@ -210,17 +267,24 @@ export default function InternalBlacklistPage() {
               <CardDescription>{stat.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className={cn('text-4xl font-extrabold  bg-gradient-to-r text-transparent bg-clip-text', stat.color)}>{stat.value}</p>
+              <p
+                className={cn(
+                  "text-4xl font-extrabold  bg-gradient-to-r text-transparent bg-clip-text",
+                  stat.color,
+                )}
+              >
+                {stat.value}
+              </p>
             </CardContent>
           </Card>
         ))}
       </div>
-      <div className='py-8 rounded-md border px-4'>
+      <div className="py-8 rounded-md border px-4">
         <ResizableTable data={pepsData} columns={columns} />
       </div>
       <ViewModal open={openViewModal} setOpen={setOpenViewModal} />
     </div>
-  )
+  );
 }
 
 const Profile = () => {
@@ -246,82 +310,86 @@ const Profile = () => {
       value: "Minister of Finance",
     },
     {
-      label: 'Place of Birth',
+      label: "Place of Birth",
       value: "Sydney, Australia",
     },
     {
-      label: 'Identification Type',
+      label: "Identification Type",
       value: "Passport",
     },
     {
-      label: 'Position & Contact',
-      value: 'Minister of Finance'
+      label: "Position & Contact",
+      value: "Minister of Finance",
     },
     {
-      label: 'Country',
+      label: "Country",
       value: "Australia",
     },
     {
-      label: 'Jurisdiction',
-      value: 'Federal'
+      label: "Jurisdiction",
+      value: "Federal",
     },
     {
-      label: 'Appointment Date',
-      value: '05-08-2025',
+      label: "Appointment Date",
+      value: "05-08-2025",
     },
     {
-      label: 'Nationality',
-      value: 'Australian',
-    }
-  ]
+      label: "Nationality",
+      value: "Australian",
+    },
+  ];
   const riskFactors = [
-    { name: "Political Influence", level: "High", percentage: 85, color: 'bg-red-500' },
-    { name: "Country Risk", level: "Medium", percentage: 60, color: 'bg-amber-500' },
-    { name: "Associations", level: "High", percentage: 80, color: 'bg-red-500' },
-    { name: "Duration in Office", level: "Medium", percentage: 65, color: 'bg-amber-500' },
-  ]
+    { name: "Political Influence", level: "High", percentage: 85, color: "bg-red-500" },
+    { name: "Country Risk", level: "Medium", percentage: 60, color: "bg-amber-500" },
+    { name: "Associations", level: "High", percentage: 80, color: "bg-red-500" },
+    { name: "Duration in Office", level: "Medium", percentage: 65, color: "bg-amber-500" },
+  ];
   return (
-    <div className='space-y-4'>
+    <div className="space-y-4">
       {/* personal & contact information */}
-      <div className='space-y-4 p-4 border rounded-md'>
-        <h2 className='font-bold '>Personal & Contact Information</h2>
-        <div className='grid grid-cols-4 gap-2'>
+      <div className="space-y-4 p-4 border rounded-md">
+        <h2 className="font-bold ">Personal & Contact Information</h2>
+        <div className="grid grid-cols-4 gap-2">
           {personalInfo.map((info) => (
             <div key={info.label}>
-              <span className='text-xs text-muted-foreground'>{info.label}</span>
-              <p className='text-sm font-bold'>{info.value}</p>
+              <span className="text-xs text-muted-foreground">{info.label}</span>
+              <p className="text-sm font-bold">{info.value}</p>
             </div>
           ))}
         </div>
       </div>
-      <div className='grid grid-cols-3 gap-2'>
+      <div className="grid grid-cols-3 gap-2">
         {/* risk assessment */}
-        <div className='p-4 border rounded-md'>
-          <h2 className='font-bold '>Risk Assessment</h2>
-          <div className='pt-10 space-y-4'>
-            <div className='flex items-center flex-col justify-center '>
-              <span className='text-red-700 font-bold text-5xl'>85</span>
+        <div className="p-4 border rounded-md">
+          <h2 className="font-bold ">Risk Assessment</h2>
+          <div className="pt-10 space-y-4">
+            <div className="flex items-center flex-col justify-center ">
+              <span className="text-red-700 font-bold text-5xl">85</span>
               <span>/100</span>
             </div>
             <div>
-              <div className='bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-md px-2 py-2 text-center font-semibold'>High Risk</div>
+              <div className="bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-md px-2 py-2 text-center font-semibold">
+                High Risk
+              </div>
             </div>
             <div>
-              <p className='text-xs text-muted-foreground text-center'>Last Updated: 05-08-2025</p>
+              <p className="text-xs text-muted-foreground text-center">Last Updated: 05-08-2025</p>
             </div>
           </div>
         </div>
         {/* risk factors */}
-        <div className='p-4 border rounded-md col-span-2'>
-          <h2 className='font-bold '>Risk Factors</h2>
-          <div className='pt-4 pb-2 space-y-4 '>
+        <div className="p-4 border rounded-md col-span-2">
+          <h2 className="font-bold ">Risk Factors</h2>
+          <div className="pt-4 pb-2 space-y-4 ">
             {riskFactors.map((factor) => (
-              <div key={factor.name} className='space-y-0.5'>
-                <span className='text-xs text-muted-foreground'>{factor.name} ({factor.percentage}%)</span>
-                <p className='text-sm font-bold'>{factor.level}</p>
+              <div key={factor.name} className="space-y-0.5">
+                <span className="text-xs text-muted-foreground">
+                  {factor.name} ({factor.percentage}%)
+                </span>
+                <p className="text-sm font-bold">{factor.level}</p>
                 <div
                   style={{ width: `${factor.percentage}%` }}
-                  className={cn('h-2 rounded-full', factor.color)}
+                  className={cn("h-2 rounded-full", factor.color)}
                 />
               </div>
             ))}
@@ -329,8 +397,8 @@ const Profile = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 const Relationships = () => {
   const relationships = [
     {
@@ -366,11 +434,11 @@ const Relationships = () => {
       details: ["DOB: 1970-02-14"],
       riskLevel: "medium",
     },
-  ]
+  ];
   return (
     <div>
-      <h2 className='font-bold '>Relationships</h2>
-      <div className='pt-4 space-y-4'>
+      <h2 className="font-bold ">Relationships</h2>
+      <div className="pt-4 space-y-4">
         {relationships.map((rel) => (
           <div
             key={rel.id}
@@ -394,11 +462,16 @@ const Relationships = () => {
 
                 {/* Text Content */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-foreground mb-1 truncate">{rel.name}</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-1 truncate">
+                    {rel.name}
+                  </h3>
                   <p className="text-sm text-foreground/70 mb-2">{rel.relationship}</p>
                   <div className="flex flex-wrap gap-2">
                     {rel.details.map((detail, idx) => (
-                      <span key={idx} className="text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded">
+                      <span
+                        key={idx}
+                        className="text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded"
+                      >
                         {detail}
                       </span>
                     ))}
@@ -420,8 +493,8 @@ const Relationships = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const Documents = () => {
   const documents = [
@@ -457,36 +530,36 @@ const Documents = () => {
       verificationStatus: "verified",
       fileSize: "3.2 MB",
     },
-  ]
+  ];
   function getStatusBadgeColor(status) {
     switch (status) {
       case "verified":
-        return "bg-success/15 text-success border border-success/30"
+        return "bg-success/15 text-success border border-success/30";
       case "pending":
-        return "bg-warning/15 text-warning border border-warning/30"
+        return "bg-warning/15 text-warning border border-warning/30";
       case "rejected":
-        return "bg-error/15 text-error border border-error/30"
+        return "bg-error/15 text-error border border-error/30";
       default:
-        return "bg-muted/15 text-muted-foreground border border-muted/30"
+        return "bg-muted/15 text-muted-foreground border border-muted/30";
     }
   }
 
   function getStatusLabel(status) {
     switch (status) {
       case "verified":
-        return "Verified"
+        return "Verified";
       case "pending":
-        return "Pending"
+        return "Pending";
       case "rejected":
-        return "Rejected"
+        return "Rejected";
       default:
-        return "Unknown"
+        return "Unknown";
     }
   }
   return (
     <div>
-      <h2 className='font-bold '>Documents</h2>
-      <div className='pt-4 space-y-4'>
+      <h2 className="font-bold ">Documents</h2>
+      <div className="pt-4 space-y-4">
         {documents.map((doc) => (
           <div
             key={doc.id}
@@ -510,7 +583,9 @@ const Documents = () => {
                     <span className="text-xs text-muted-foreground/60 bg-muted/20 px-2 py-1 rounded">
                       {doc.fileSize}
                     </span>
-                    <span className="text-xs text-muted-foreground">Uploaded {doc.uploadedDate}</span>
+                    <span className="text-xs text-muted-foreground">
+                      Uploaded {doc.uploadedDate}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -526,7 +601,11 @@ const Documents = () => {
                 </div>
 
                 {/* Download Button */}
-                <Button variant="ghost" size="sm" className="gap-2 text-primary hover:bg-primary/10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 text-primary hover:bg-primary/10"
+                >
                   <Download className="w-4 h-4" />
                   <span className="hidden sm:inline">Download</span>
                 </Button>
@@ -536,8 +615,8 @@ const Documents = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 const ActivityHistory = () => {
   const activities = [
     {
@@ -580,43 +659,43 @@ const ActivityHistory = () => {
       timestamp: "2023-01-15 16:30",
       actor: "David Wilson",
     },
-  ]
+  ];
   function getActivityColor(type) {
     switch (type) {
       case "status":
-        return "bg-success/10 text-success border-success/20"
+        return "bg-success/10 text-success border-success/20";
       case "screening":
-        return "bg-warning/10 text-warning border-warning/20"
+        return "bg-warning/10 text-warning border-warning/20";
       case "document":
-        return "bg-primary/10 text-primary border-primary/20"
+        return "bg-primary/10 text-primary border-primary/20";
       case "risk":
-        return "bg-danger/5 text-error border-red-300"
+        return "bg-danger/5 text-error border-red-300";
       case "registration":
-        return "bg-muted text-muted-foreground border-muted"
+        return "bg-muted text-muted-foreground border-muted";
       default:
-        return "bg-muted/10 text-muted-foreground border-muted"
+        return "bg-muted/10 text-muted-foreground border-muted";
     }
   }
   function getActivityIcon(type) {
     switch (type) {
       case "status":
-        return <CheckCircle2 className="w-5 h-5" />
+        return <CheckCircle2 className="w-5 h-5" />;
       case "screening":
-        return <AlertCircle className="w-5 h-5" />
+        return <AlertCircle className="w-5 h-5" />;
       case "document":
-        return <FileUp className="w-5 h-5" />
+        return <FileUp className="w-5 h-5" />;
       case "risk":
-        return <TrendingUp className="w-5 h-5" />
+        return <TrendingUp className="w-5 h-5" />;
       case "registration":
-        return <UserCheck className="w-5 h-5" />
+        return <UserCheck className="w-5 h-5" />;
       default:
-        return <Clock className="w-5 h-5" />
+        return <Clock className="w-5 h-5" />;
     }
   }
   return (
     <div>
-      <h2 className='font-bold '>Activity History</h2>
-      <div className='pt-4 space-y-4'>
+      <h2 className="font-bold ">Activity History</h2>
+      <div className="pt-4 space-y-4">
         {activities.map((activity, index) => (
           <div key={activity.id} className="relative pl-20 md:pl-24">
             {/* Timeline dot */}
@@ -659,8 +738,8 @@ const ActivityHistory = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 const RiskFactors = () => {
   const results = [
     {
@@ -670,7 +749,6 @@ const RiskFactors = () => {
       status: "match",
       details: "Requires review and verification",
       timestamp: "2023-06-15 14:23",
-
     },
     {
       id: "watchlist",
@@ -695,29 +773,30 @@ const RiskFactors = () => {
       details: "Active political exposure detected",
       timestamp: "2023-06-15 14:23",
     },
-  ]
+  ];
   return (
     <div>
-      <h2 className='font-bold '>Risk Factors</h2>
-      <div className='pt-4'>
+      <h2 className="font-bold ">Risk Factors</h2>
+      <div className="pt-4">
         {/* Results Grid */}
         <div className="space-y-4">
           {results.map((result) => (
-            <div
-              key={result.id}
-              className={`border rounded-lg p-6 transition-all duration-200 `}
-            >
+            <div key={result.id} className={`border rounded-lg p-6 transition-all duration-200 `}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4 flex-1">
                   <div className="mt-1">{getStatusIcon(result.status)}</div>
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-foreground mb-1">{result.title}</h3>
                     <p className="text-foreground/80 mb-2">{result.description}</p>
-                    {result.details && <p className="text-sm text-muted-foreground">{result.details}</p>}
-                    <p className="text-xs text-muted-foreground mt-3">Screened on {result.timestamp}</p>
+                    {result.details && (
+                      <p className="text-sm text-muted-foreground">{result.details}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-3">
+                      Screened on {result.timestamp}
+                    </p>
                   </div>
                 </div>
-                <Button variant={'outline'} className="whitespace-nowrap">
+                <Button variant={"outline"} className="whitespace-nowrap">
                   {result.status === "clear" ? "Clear" : "Review"}
                 </Button>
               </div>
@@ -726,8 +805,8 @@ const RiskFactors = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 const tabs = [
   {
     title: "Profile",
@@ -755,37 +834,37 @@ export const ViewModal = ({ open, setOpen }) => {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className='sm:max-w-5xl w-full overflow-y-auto'>
+      <SheetContent className="sm:max-w-5xl w-full overflow-y-auto">
         <SheetHeader>
           <SheetTitle>View PEP</SheetTitle>
         </SheetHeader>
 
-        <div className='px-8'>
-          <div className='flex justify-between items-center'>
-            <div className='flex  gap-4'>
+        <div className="px-8">
+          <div className="flex justify-between items-center">
+            <div className="flex  gap-4">
               {/* img */}
-              <div className='size-20 rounded-md object-cover overflow-hidden'>
-                <img src="/profile.png" alt="" className='w-full h-full object-cover' />
+              <div className="size-20 rounded-md object-cover overflow-hidden">
+                <img src="/profile.png" alt="" className="w-full h-full object-cover" />
               </div>
               {/* name, role */}
               <div>
-                <h4 className='text-lg font-bold'>John Doe</h4>
-                <p className='text-sm text-muted-foreground'>Minister of Finance</p>
-                <p className='text-sm  font-bold'>Customer ID: C-10045</p>
+                <h4 className="text-lg font-bold">John Doe</h4>
+                <p className="text-sm text-muted-foreground">Minister of Finance</p>
+                <p className="text-sm  font-bold">Customer ID: C-10045</p>
               </div>
             </div>
-            <div className='space-y-0'>
+            <div className="space-y-0">
               <div>
-                <span className='text-xs text-muted-foreground'>Last Screening</span>
-                <p className='text-sm font-bold'>05-08-2025</p>
+                <span className="text-xs text-muted-foreground">Last Screening</span>
+                <p className="text-sm font-bold">05-08-2025</p>
               </div>
               <div>
-                <span className='text-xs text-muted-foreground'>New Screening Due</span>
-                <p className='text-sm font-bold'>05-08-2025</p>
+                <span className="text-xs text-muted-foreground">New Screening Due</span>
+                <p className="text-sm font-bold">05-08-2025</p>
               </div>
             </div>
           </div>
-          <div className='mt-3'>
+          <div className="mt-3">
             {tabs.map((tab) => (
               <button
                 key={tab.title}
@@ -794,7 +873,7 @@ export const ViewModal = ({ open, setOpen }) => {
                   "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative ",
                   activeTab.title === tab.title
                     ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {tab.title}
@@ -804,11 +883,9 @@ export const ViewModal = ({ open, setOpen }) => {
               </button>
             ))}
           </div>
-          <div className='py-8'>
-            {activeTab.component}
-          </div>
+          <div className="py-8">{activeTab.component}</div>
         </div>
       </SheetContent>
     </Sheet>
-  )
-}
+  );
+};
