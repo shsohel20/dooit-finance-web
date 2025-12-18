@@ -4,7 +4,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLoggedInUserStore } from "@/app/store/useLoggedInUser";
-import { Mail, Phone, Globe, MapPin, FileText, Building2, Calendar } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  Globe,
+  MapPin,
+  FileText,
+  Building2,
+  Calendar,
+} from "lucide-react";
 
 export default function CustomerProfile() {
   const { loggedInUser: userData } = useLoggedInUserStore();
@@ -51,7 +59,9 @@ export default function CustomerProfile() {
               <h1 className="text-4xl font-bold tracking-tight text-foreground">
                 {userData?.userName}
               </h1>
-              <p className="mt-2 text-lg text-muted-foreground">{userData?.name}</p>
+              <p className="mt-2 text-lg text-muted-foreground">
+                {userData?.name}
+              </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -63,7 +73,7 @@ export default function CustomerProfile() {
               </Badge>
               <Badge
                 variant="default"
-                className={userData.isActive ? "bg-green-600" : "bg-gray-600"}
+                className={userData?.isActive ? "bg-green-600" : "bg-gray-600"}
               >
                 {userData?.isActive ? "Active" : "Inactive"}
               </Badge>
@@ -92,20 +102,36 @@ export default function CustomerProfile() {
           <div className="space-y-6">
             <div className="flex items-center gap-3 border-b border-border pb-3">
               <Building2 className="h-6 w-6 text-accent" />
-              <h2 className="text-2xl font-semibold text-foreground">Organization</h2>
+              <h2 className="text-2xl font-semibold text-foreground">
+                Organization
+              </h2>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
               {/* Company Info Card */}
               <Card className="p-6 space-y-4 bg-card">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Company Details</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">
+                    Company Details
+                  </h3>
                   <div className="space-y-3">
-                    <DataRow label="Company Name" value={userData?.client?.name} />
-                    <DataRow label="Type" value={userData?.client?.clientType} />
-                    <DataRow label="Registration" value={userData?.client?.registrationNumber} />
+                    <DataRow
+                      label="Company Name"
+                      value={userData?.client?.name}
+                    />
+                    <DataRow
+                      label="Type"
+                      value={userData?.client?.clientType}
+                    />
+                    <DataRow
+                      label="Registration"
+                      value={userData?.client?.registrationNumber}
+                    />
                     <DataRow label="Tax ID" value={userData?.client?.taxId} />
-                    <DataRow label="Industry" value={userData?.client?.metadata?.industry} />
+                    <DataRow
+                      label="Industry"
+                      value={userData?.client?.metadata?.industry}
+                    />
                     <div className="flex items-center justify-between pt-2">
                       <span className=" text-muted-foreground">Status</span>
                       <Badge variant="default" className="bg-green-600">
@@ -168,9 +194,11 @@ export default function CustomerProfile() {
                         <p className=" font-semibold text-foreground">
                           {userData?.client?.address?.street}
                           <br />
-                          {userData?.client?.address?.city}, {userData?.client?.address?.state}
+                          {userData?.client?.address?.city},{" "}
+                          {userData?.client?.address?.state}
                           <br />
-                          {userData?.client?.address?.country} {userData?.client?.address?.zipcode}
+                          {userData?.client?.address?.country}{" "}
+                          {userData?.client?.address?.zipcode}
                         </p>
                       </div>
                     </div>
@@ -183,14 +211,22 @@ export default function CustomerProfile() {
                 <Card className="p-6 space-y-4 bg-card">
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-foreground">Primary Contact</h3>
+                      <h3 className="text-lg font-semibold text-foreground">
+                        Primary Contact
+                      </h3>
                       {userData.client.contacts[0].primary && (
                         <Badge variant="secondary">Primary</Badge>
                       )}
                     </div>
                     <div className="space-y-3">
-                      <DataRow label="Name" value={userData.client.contacts[0].name} />
-                      <DataRow label="Title" value={userData.client.contacts[0].title} />
+                      <DataRow
+                        label="Name"
+                        value={userData.client.contacts[0].name}
+                      />
+                      <DataRow
+                        label="Title"
+                        value={userData.client.contacts[0].title}
+                      />
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
                         <a
@@ -221,7 +257,10 @@ export default function CustomerProfile() {
                     Legal Representative
                   </h3>
                   <div className="space-y-3">
-                    <DataRow label="Name" value={userData.client.legalRepresentative.name} />
+                    <DataRow
+                      label="Name"
+                      value={userData.client.legalRepresentative.name}
+                    />
                     <DataRow
                       label="Designation"
                       value={userData.client.legalRepresentative.designation}
@@ -250,50 +289,65 @@ export default function CustomerProfile() {
             </div>
 
             {/* Documents Section */}
-            {userData.client.documents && userData.client.documents.length > 0 && (
-              <Card className="p-6 bg-card">
-                <div className="flex items-center gap-3 mb-4">
-                  <FileText className="h-5 w-5 text-accent" />
-                  <h3 className="text-lg font-semibold text-foreground">Documents</h3>
-                </div>
-                <div className="space-y-3">
-                  {userData.client.documents.map((doc, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between rounded-lg border border-border bg-background p-4"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
-                          <FileText className="h-5 w-5 text-accent" />
+            {userData.client.documents &&
+              userData.client.documents.length > 0 && (
+                <Card className="p-6 bg-card">
+                  <div className="flex items-center gap-3 mb-4">
+                    <FileText className="h-5 w-5 text-accent" />
+                    <h3 className="text-lg font-semibold text-foreground">
+                      Documents
+                    </h3>
+                  </div>
+                  <div className="space-y-3">
+                    {userData.client.documents.map((doc, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-lg border border-border bg-background p-4"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
+                            <FileText className="h-5 w-5 text-accent" />
+                          </div>
+                          <div>
+                            <p className=" font-medium text-foreground">
+                              {doc.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {doc?.type} • Uploaded{" "}
+                              {formatDate(doc?.uploadedAt)}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className=" font-medium text-foreground">{doc.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {doc?.type} • Uploaded {formatDate(doc?.uploadedAt)}
-                          </p>
-                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            View
+                          </a>
+                        </Button>
                       </div>
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                          View
-                        </a>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
+                    ))}
+                  </div>
+                </Card>
+              )}
 
             {/* Settings Card */}
             <Card className="p-6 bg-card">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Account Settings</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                Account Settings
+              </h3>
               <div className="grid gap-4 md:grid-cols-2">
                 <DataRow
                   label="Billing Cycle"
                   value={userData.client.settings.billingCycle}
                   className="capitalize"
                 />
-                <DataRow label="Currency" value={userData?.client?.settings?.currency} />
+                <DataRow
+                  label="Currency"
+                  value={userData?.client?.settings?.currency}
+                />
                 <DataRow
                   label="Source"
                   value={userData?.client?.metadata?.source}
@@ -311,7 +365,9 @@ function DataRow({ label, value, className = "" }) {
   return (
     <div className="flex items-center justify-between">
       <span className=" text-muted-foreground">{label}</span>
-      <span className={` font-medium text-foreground ${className}`}>{value}</span>
+      <span className={` font-medium text-foreground ${className}`}>
+        {value}
+      </span>
     </div>
   );
 }
