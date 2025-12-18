@@ -178,6 +178,20 @@ button {
   min-height: 10px !important;
 }
 
+.blurry-overlay{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.043);
+  z-index: 9999;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(1000px);
+  display: flex;
+ 
+}
+
 .react-select__indicator {
   padding: 7px !important;
 }

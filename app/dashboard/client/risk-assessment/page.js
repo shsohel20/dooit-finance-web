@@ -4,12 +4,14 @@ import React from 'react'
 
 export default function RiskAssesmentPage() {
   return (
-    <div>
+    <div className='relative'>
       {/* <PageHeader>
         <PageTitle>Compliance Reporting</PageTitle>
         <PageDescription>Create and manage regulatory reports for AUSTRAC compliance</PageDescription>
       </PageHeader> */}
-      <div>
+      {/* <div className='blurry-overlay'/> */}
+           
+      <div className=''>
         <RiskAssessmentSection />
       </div>
     </div>
