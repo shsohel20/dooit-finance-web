@@ -1,5 +1,9 @@
-import { EWRADashboard } from "@/views/ewra/dashboard"
+import { EWRADashboard } from "@/views/ewra/dashboard";
 
 export default function Home() {
-  return <EWRADashboard />
+  return (
+    <div className="blurry-overlay">
+      <EWRADashboard />
+    </div>
+  );
 }
