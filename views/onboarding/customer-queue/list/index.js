@@ -26,6 +26,7 @@ import {
 import React, { useEffect, useState } from 'react'
 import { DetailViewModal } from '../details'
 import { useRouter } from 'next/navigation'
+import CustomDropZone from '@/components/ui/DropZone'
 const statusVariants = {
   pending: 'warning',
   rejected: 'danger',
@@ -401,6 +402,11 @@ export default function CustomerQueueList({ variant, data, kycStatus }) {
 
 
 export const ReportingModal = ({ open, setOpen }) => {
+  const [file, setFile] = useState(null);
+  const handleFileChange = (file) => {
+    console.log(file);
+    setFile(file);
+  }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
 
@@ -409,9 +415,12 @@ export const ReportingModal = ({ open, setOpen }) => {
           <DialogTitle>Reporting</DialogTitle>
           <DialogDescription>Risk Level: Medium</DialogDescription>
         </DialogHeader>
-        <div className='flex flex-col gap-2'>
+        <div className='flex flex-col '>
           <Label className={'font-bold'}>Share your insights</Label>
           <Textarea placeholder='Share your insights' />
+        </div>
+        <div>
+          <CustomDropZone className='' handleChange={handleFileChange} file={file} setFile={setFile} />
         </div>
         <DialogFooter>
           <Button className={'w-full'}>Submit</Button>

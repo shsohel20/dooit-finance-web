@@ -12,12 +12,11 @@ export function PartB({ data, updateData }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCaseNumberChange = async (value) => {
-    console.log("value", value);
-    setCaseNumber(value);
+    setCaseNumber(value.value);
     setIsLoading(true);
     updateData({ caseNumber: value });
     try {
-      const response = await autoPopulatedSMRData(value);
+      const response = await autoPopulatedSMRData(value.value);
 
       updateData({
         groundsForSuspicion: response.narrative,

@@ -44,6 +44,11 @@ export default function AntiMoneyLaunderingPage() {
 
       {/* Main Content */}
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <Card className="mb-12 bg-primary/5 border-primary/20">
+          <div className="h-[380px] aspect-video">
+            <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" className="w-full h-full" />
+          </div>
+        </Card>
         {/* Hero Section */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-4">
@@ -147,7 +152,7 @@ export default function AntiMoneyLaunderingPage() {
         </div>
 
         {/* Module Objective */}
-        <Card className="mb-12 bg-primary/5 border-primary/20">
+        <Card className="mb-12  border-primary/20">
           <div className="p-6">
             <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
               <BookOpen className="size-5 text-primary" />
@@ -159,6 +164,7 @@ export default function AntiMoneyLaunderingPage() {
             </p>
           </div>
         </Card>
+
 
         {/* Key Industries Section */}
         <div className="mb-12">

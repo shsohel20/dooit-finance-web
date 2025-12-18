@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import Webcam from "react-webcam";
 
@@ -8,7 +9,7 @@ export default function FaceCapture({ image, onCapture }) {
   const [countdown, setCountdown] = useState(null);
   const [ready, setReady] = useState(false);
   const [captured, setCaptured] = useState(false);
-  const [hasPermission, setHasPermission] = useState(false);
+  const [startCamera, setStartCamera] = useState(false);
   const [error, setError] = useState("");
 
   // useEffect(() => {
@@ -28,6 +29,7 @@ export default function FaceCapture({ image, onCapture }) {
   // if (!hasPermission) return <p>Requesting camera permission...</p>;
 
   const startCountdown = () => {
+    setStartCamera(true);
     setCaptured(false);
     setCountdown(3); // 3-second timer
   };
@@ -59,6 +61,8 @@ export default function FaceCapture({ image, onCapture }) {
 
   return (
     <div className="flex flex-col items-center gap-4 border-2 border-primary/20 rounded-md p-4">
+      {/* <Button size="sm" variant="outline" onClick={() => setStartCamera(prev => !prev)}>Start Camera</Button> */}
+     {startCamera && <>
       <Webcam
       mirrored={true}
         audio={false}
@@ -79,17 +83,19 @@ export default function FaceCapture({ image, onCapture }) {
           height: { ideal: 360 },
         }}
       />
-
-      {countdown !== null && (
-        <div className="text-4xl font-bold">{countdown}</div>
-      )}
-
-      <button
+      
+     </>}
+     <button
         onClick={startCountdown}
         className="px-4 py-2 bg-blue-600 text-white rounded"
       >
         {image ? "Retake" : "Start Countdown"}
       </button>
+      {countdown !== null && (
+        <div className="text-4xl font-bold">{countdown}</div>
+      )}
+
+     
 
       {captured && (
         <img src={image} alt="captured" className="mt-4 w-40 border rounded" />

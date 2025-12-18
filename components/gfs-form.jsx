@@ -245,10 +245,9 @@ export function GFSForm() {
   };
 
   const handleCaseNumberChange = async (value) => {
-    console.log("value", value);
     setFetching(true);
     try {
-      const response = await autoPopulatedGFSData(value);
+      const response = await autoPopulatedGFSData(value.value);
       setFormData({
         ...formData,
         suspicionReason: response.suspicionSummary,

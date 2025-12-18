@@ -1,9 +1,13 @@
+import { IconFolder, IconFolderOpen } from "@tabler/icons-react";
 import DragDrop from "../DragDop";
+import { Button } from "./button";
 
 const { cn } = require("@/lib/utils");
-const { XCircle, Loader2, CheckCircle, Upload } = require("lucide-react");
+const { XCircle, Loader2, CheckCircle, Upload, X } = require("lucide-react");
 
 const CustomDropZone = ({
+  file,
+  setFile,
   children,
   disabled = false,
   loading = false,
@@ -14,6 +18,7 @@ const CustomDropZone = ({
   handleChange = () => {},
   ...props
 }) => {
+  console.log("dropzone file", file?.name);
   const renderIcon = () => {
     if (loading === true) {
       return <Loader2 className="w-4 h-4 animate-spin" />;
@@ -27,7 +32,7 @@ const CustomDropZone = ({
       return <CheckCircle className="w-4 h-4 text-green-500" />;
     }
 
-    return <Upload className="w-4 h-4" />;
+    return <IconFolderOpen className="size-8 fill-primary stroke-white" />;
   };
 
   return (
@@ -39,7 +44,7 @@ const CustomDropZone = ({
     >
       <div
         className={cn(
-          "border-2 min-h-[200px] py-6 w-full border-dashed rounded-xl flex flex-col items-center justify-center gap-2 relative z-2 overflow-hidden bg-primary/5",
+          "border-2 min-h-[180px] py-2 w-full border-dashed rounded-xl flex flex-col items-center justify-center gap-2 relative z-2 overflow-hidden ",
           disabled ? "opacity-50" : "",
           {
             "bg-green-50/20 border-green-400": url && !error,
@@ -49,13 +54,22 @@ const CustomDropZone = ({
           className
         )}
       >
-        <div className="bg-secondary size-10 rounded-full flex items-center justify-center">
+        <div className="  flex items-center justify-center ">
           {renderIcon()}{" "}
         </div>
 
-        {children}
+        {children ? (
+          children
+        ) : (
+          <div className="text-center">
+            <p className="font-semibold">
+              Drop your file here or click to upload
+            </p>
+            <p className="text-xs  text-muted-foreground">Or click to browse</p>
+          </div>
+        )}
         <div />
-        {url && (
+        {url ? (
           <div
             className={cn(
               "h-[250px] aspect-3/4 border rounded-md overflow-hidden",
@@ -68,7 +82,19 @@ const CustomDropZone = ({
               className="w-full h-full object-cover"
             />
           </div>
-        )}
+        ) : file ? (
+          <div className=" border rounded-md overflow-hidden bg-accent py-1 px-3 flex items-center gap-2">
+            {file?.name}
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={() => setFile(null)}
+              className={"!p-0 size-5 rounded"}
+            >
+              <X className="size-3" />
+            </Button>
+          </div>
+        ) : null}
       </div>
     </DragDrop>
   );

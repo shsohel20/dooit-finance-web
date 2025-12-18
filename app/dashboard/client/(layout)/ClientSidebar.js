@@ -216,11 +216,11 @@ export default function ClientSidebar({ ...props }) {
       icon: IconListDetails,
       url: '/dashboard/client/faq',
       children: [
-        // {
-        //   title: 'Risk Assessment',
-        //   url: '/dashboard/client/risk-assessment',
-        //   icon: IconListDetails,
-        // },
+        {
+          title: 'Dashboard',
+          url: '/dashboard/client/knowledge-hub/ewra/dashboard',
+          icon: IconListDetails,
+        },
         {
           title: 'ML Risk Assessment',
           url: '/dashboard/client/knowledge-hub/ewra/ml-risk-assesment',
