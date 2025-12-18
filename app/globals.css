@@ -181,8 +181,9 @@ button {
 .blurry-overlay {
   background: rgba(211, 204, 204, 0.047);
   /* filter: blur(820px); */
-  filter: blur(5px);
-  pointer-events: none;
+  filter: blur(10px);
+  pointer-events: none !important;
+  user-select: none;
   /* z-index: 10; */
 }
 
