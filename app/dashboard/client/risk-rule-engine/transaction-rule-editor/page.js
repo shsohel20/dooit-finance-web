@@ -3,6 +3,8 @@ import RuleConfigurationForm from './form'
 
 export default function TransactionRuleEditorPage() {
   return (
-    <RuleConfigurationForm />
+   <div className='blurry-overlay'>
+     <RuleConfigurationForm />
+   </div>
   )
 }

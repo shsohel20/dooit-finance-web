@@ -131,7 +131,7 @@ const detailedModelRiskAssessment = [
 export default function Page() {
   const [openRiskDetails, setOpenRiskDetails] = useState(false);
   return (
-    <div className=" space-y-12">
+    <div className=" space-y-12 blurry-overlay">
       <div className="">
 
         <PageHeader>

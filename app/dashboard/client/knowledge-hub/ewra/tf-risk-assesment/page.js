@@ -32,7 +32,7 @@ const fraudPatterns = [
 
 export default function TfRiskAssesmentPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground blurry-overlay">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur">
         <div className=" px-6 py-6">

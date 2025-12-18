@@ -4,7 +4,7 @@ import RiskDashboard from './form/risk-dashboard'
 
 export default function ABCRiskAssesment() {
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background blurry-overlay">
       <div className=" p-8">
         {/* Header */}
         <div className="mb-12">

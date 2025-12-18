@@ -16,7 +16,7 @@ export default function ScoringConfigurationPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-white p-8">
+    <div className="min-h-screen bg-white p-8 blurry-overlay">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
