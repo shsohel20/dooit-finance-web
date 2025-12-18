@@ -1,78 +1,78 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Edit2, Trash2, Copy, SearchIcon } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useState } from "react";
+import { Edit2, Trash2, Copy, SearchIcon } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function UserManagementDashboard() {
-  const [activeTab, setActiveTab] = useState('all-users')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [activeTab, setActiveTab] = useState("all-users");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const statCards = [
-    { label: 'Total Users', value: '42' },
-    { label: 'Active Users', value: '38' },
-    { label: 'Pending', value: '3' },
-    { label: 'Suspended', value: '2' },
-  ]
+    { label: "Total Users", value: "42" },
+    { label: "Active Users", value: "38" },
+    { label: "Pending", value: "3" },
+    { label: "Suspended", value: "2" },
+  ];
 
   const users = [
     {
       id: 1,
-      name: 'John Doe',
-      email: 'john.doe@infsecure.com',
-      role: 'System Admin',
-      department: 'IT & Security',
-      lastLogin: 'Today, 09:24 AM',
-      status: 'Active',
+      name: "John Doe",
+      email: "john.doe@infsecure.com",
+      role: "System Admin",
+      department: "IT & Security",
+      lastLogin: "Today, 09:24 AM",
+      status: "Active",
     },
     {
       id: 2,
-      name: 'Jane Smith',
-      email: 'jane.smith@infsecure.com',
-      role: 'Compliance Officer',
-      department: 'Compliance',
-      lastLogin: 'Yesterday, 03:45 PM',
-      status: 'Active',
+      name: "Jane Smith",
+      email: "jane.smith@infsecure.com",
+      role: "Compliance Officer",
+      department: "Compliance",
+      lastLogin: "Yesterday, 03:45 PM",
+      status: "Active",
     },
     {
       id: 3,
-      name: 'Mike Johnson',
-      email: 'mike.johnson@infsecure.com',
-      role: 'KYC Analyst',
-      department: 'Operations',
-      lastLogin: '2 days ago',
-      status: 'Active',
+      name: "Mike Johnson",
+      email: "mike.johnson@infsecure.com",
+      role: "KYC Analyst",
+      department: "Operations",
+      lastLogin: "2 days ago",
+      status: "Active",
     },
-  ]
+  ];
 
   const roles = [
     {
-      name: 'System Administrator',
+      name: "System Administrator",
       users: 4,
     },
     {
-      name: 'Compliance Officer',
+      name: "Compliance Officer",
       users: 8,
     },
     {
-      name: 'KYC Analyst',
+      name: "KYC Analyst",
       users: 22,
     },
-  ]
+  ];
 
   return (
-    <div className="min-h-screen ">
-
-
+    <div className="min-h-screen blurry-overlay">
       <main className="py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {statCards.map((stat) => (
             <div key={stat.label} className="bg-white border border-gray-200 rounded-lg p-4">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                {stat.label}
+              </p>
               <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
             </div>
           ))}
@@ -87,32 +87,17 @@ export default function UserManagementDashboard() {
             </Button>
           </div>
 
-          <Tabs defaultValue="all-users" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs
+            defaultValue="all-users"
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <TabsList className="border-b border-gray-200 bg-white p-0 mb-4">
-              <TabsTrigger
-                value="all-users"
-
-              >
-                All
-              </TabsTrigger>
-              <TabsTrigger
-                value="admins"
-
-              >
-                Admins
-              </TabsTrigger>
-              <TabsTrigger
-                value="compliance"
-
-              >
-                Compliance
-              </TabsTrigger>
-              <TabsTrigger
-                value="analysts"
-
-              >
-                Analysts
-              </TabsTrigger>
+              <TabsTrigger value="all-users">All</TabsTrigger>
+              <TabsTrigger value="admins">Admins</TabsTrigger>
+              <TabsTrigger value="compliance">Compliance</TabsTrigger>
+              <TabsTrigger value="analysts">Analysts</TabsTrigger>
             </TabsList>
 
             <TabsContent value="all-users" className="mt-0">
@@ -152,7 +137,9 @@ export default function UserManagementDashboard() {
                         <td className="px-4 py-3 text-gray-700">{user.department}</td>
                         <td className="px-4 py-3 text-gray-600 text-xs">{user.lastLogin}</td>
                         <td className="px-4 py-3">
-                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100">{user.status}</Badge>
+                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                            {user.status}
+                          </Badge>
                         </td>
                         <td className="px-4 py-3 flex gap-2">
                           <button className="p-1 hover:bg-gray-200 rounded transition-colors">
@@ -173,7 +160,7 @@ export default function UserManagementDashboard() {
             </TabsContent>
 
             {/* Other tab contents */}
-            {['admins', 'compliance', 'analysts'].map((tab) => (
+            {["admins", "compliance", "analysts"].map((tab) => (
               <TabsContent key={tab} value={tab} className="mt-0">
                 <div className="mb-4 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
                   <SearchIcon className="w-4 h-4 text-gray-400" />
@@ -208,5 +195,5 @@ export default function UserManagementDashboard() {
         </div>
       </main>
     </div>
-  )
+  );
 }

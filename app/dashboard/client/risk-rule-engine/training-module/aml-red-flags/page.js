@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
   BookOpen,
   Clock,
@@ -18,11 +18,11 @@ import {
   ShieldAlert,
   Info,
   ArrowRight,
-} from "lucide-react"
+} from "lucide-react";
 
 export default function RedFlagsPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background blurry-overlay">
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
@@ -31,13 +31,17 @@ export default function RedFlagsPage() {
               <Flag className="size-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-foreground">AML Red Flags & Legal Duties</h1>
+              <h1 className="text-lg font-semibold text-foreground">
+                AML Red Flags & Legal Duties
+              </h1>
               <p className="text-sm text-muted-foreground">
                 Identifying risks and understanding your compliance obligations
               </p>
             </div>
           </div>
-          <div className="text-xs font-mono bg-secondary/10 text-primary px-3 py-1 rounded">AML-TR-2023-04-B</div>
+          <div className="text-xs font-mono bg-secondary/10 text-primary px-3 py-1 rounded">
+            AML-TR-2023-04-B
+          </div>
         </div>
       </header>
 
@@ -51,7 +55,9 @@ export default function RedFlagsPage() {
         {/* Module Timeline */}
         <div className="flex items-center gap-2 mb-6">
           <Clock className="size-5 text-muted-foreground" />
-          <span className="text-sm font-medium text-muted-foreground">Module Timeline: 15:00 - 40:00</span>
+          <span className="text-sm font-medium text-muted-foreground">
+            Module Timeline: 15:00 - 40:00
+          </span>
         </div>
 
         {/* Section Navigation */}
@@ -60,7 +66,9 @@ export default function RedFlagsPage() {
             <div className="flex items-start gap-3">
               <Flag className="size-5 text-red-600 mt-1 flex-shrink-0" />
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Section 1</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                  Section 1
+                </p>
                 <h3 className="text-lg font-semibold text-foreground mb-1">Universal Red Flags</h3>
                 <p className="text-sm text-muted-foreground">15:00 - 25:00</p>
               </div>
@@ -71,8 +79,12 @@ export default function RedFlagsPage() {
             <div className="flex items-start gap-3">
               <Scale className="size-5 text-blue-600 mt-1 flex-shrink-0" />
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Section 2</p>
-                <h3 className="text-lg font-semibold text-foreground mb-1">Legal Responsibilities</h3>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                  Section 2
+                </p>
+                <h3 className="text-lg font-semibold text-foreground mb-1">
+                  Legal Responsibilities
+                </h3>
                 <p className="text-sm text-muted-foreground">25:00 - 35:00</p>
               </div>
             </div>
@@ -82,8 +94,12 @@ export default function RedFlagsPage() {
             <div className="flex items-start gap-3">
               <Users className="size-5 text-green-600 mt-1 flex-shrink-0" />
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Section 3</p>
-                <h3 className="text-lg font-semibold text-foreground mb-1">Culture of Compliance</h3>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                  Section 3
+                </p>
+                <h3 className="text-lg font-semibold text-foreground mb-1">
+                  Culture of Compliance
+                </h3>
                 <p className="text-sm text-muted-foreground">35:00 - 40:00</p>
               </div>
             </div>
@@ -98,12 +114,12 @@ export default function RedFlagsPage() {
               Module Objective
             </h3>
             <p className="text-muted-foreground leading-relaxed">
-              This module will help you recognize common money laundering red flags across different industries,
-              understand your legal obligations, and contribute to a strong compliance culture within our organization.
+              This module will help you recognize common money laundering red flags across different
+              industries, understand your legal obligations, and contribute to a strong compliance
+              culture within our organization.
             </p>
           </div>
         </Card>
-
 
         {/* Section 1: Universal Red Flags */}
         <div className="mb-12">
@@ -132,8 +148,9 @@ export default function RedFlagsPage() {
                     Visual Context: The Dooli Guide Control Room
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Imagine our Dooli Guide character in a control room with different industry scenarios appearing on
-                    monitors. These are the warning signs to look for in your sector.
+                    Imagine our Dooli Guide character in a control room with different industry
+                    scenarios appearing on monitors. These are the warning signs to look for in your
+                    sector.
                   </p>
                 </div>
               </div>
@@ -155,8 +172,8 @@ export default function RedFlagsPage() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3">Structuring Activity</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                  "A customer makes multiple transactions just below the $10,000/$1,000 threshold in a single day—a
-                  deliberate attempt to evade reporting requirements."
+                  "A customer makes multiple transactions just below the $10,000/$1,000 threshold in
+                  a single day—a deliberate attempt to evade reporting requirements."
                 </p>
               </div>
             </Card>
@@ -174,8 +191,9 @@ export default function RedFlagsPage() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3">Unusual Payment Methods</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                  "A client uses a large amount of cash for a property deposit or legal fee when paying for high-value
-                  transactions without clear legitimate source and a significant red flag."
+                  "A client uses a large amount of cash for a property deposit or legal fee when
+                  paying for high-value transactions without clear legitimate source and a
+                  significant red flag."
                 </p>
               </div>
             </Card>
@@ -193,8 +211,9 @@ export default function RedFlagsPage() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3">Financial Discrepancies</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                  "A company's financial statements don't match its actual business activity—for example, a small
-                  consulting firm showing millions in revenue with no corresponding client base or services rendered."
+                  "A company's financial statements don't match its actual business activity—for
+                  example, a small consulting firm showing millions in revenue with no corresponding
+                  client base or services rendered."
                 </p>
               </div>
             </Card>
@@ -210,10 +229,13 @@ export default function RedFlagsPage() {
                     Gambling / Casinos
                   </span>
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">Minimal Gambling Activity</h3>
+                <h3 className="text-xl font-bold text-foreground mb-3">
+                  Minimal Gambling Activity
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                  "A customer buys a large number of chips with cash, gambles minimally, and then asks for a check or
-                  wire transfer. This converts illicit cash into seemingly legitimate winnings."
+                  "A customer buys a large number of chips with cash, gambles minimally, and then
+                  asks for a check or wire transfer. This converts illicit cash into seemingly
+                  legitimate winnings."
                 </p>
               </div>
             </Card>
@@ -225,10 +247,13 @@ export default function RedFlagsPage() {
               <div className="flex items-start gap-3 mb-3">
                 <ShieldAlert className="size-6 text-orange-600 flex-shrink-0 mt-1" />
                 <div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">Customer Behavior Red Flags</h3>
+                  <h3 className="text-xl font-bold text-foreground mb-2">
+                    Customer Behavior Red Flags
+                  </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    "Any customer who is unusually secretive, uses multiple or false IDs, provides inconsistent
-                    information, or whose story doesn't add up should be treated with enhanced due diligence."
+                    "Any customer who is unusually secretive, uses multiple or false IDs, provides
+                    inconsistent information, or whose story doesn't add up should be treated with
+                    enhanced due diligence."
                   </p>
                   <p className="text-xs font-medium text-orange-700 dark:text-orange-400 mt-2">
                     Applicable to: All Industries
@@ -246,9 +271,9 @@ export default function RedFlagsPage() {
                 <div>
                   <h4 className="text-lg font-semibold text-foreground mb-2">Key Takeaway</h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Red flags are warning signs, not proof of illegal activity. Your role is to recognize these
-                    indicators and escalate them to the compliance team for further investigation. When in doubt, report
-                    it.
+                    Red flags are warning signs, not proof of illegal activity. Your role is to
+                    recognize these indicators and escalate them to the compliance team for further
+                    investigation. When in doubt, report it.
                   </p>
                 </div>
               </div>
@@ -283,8 +308,8 @@ export default function RedFlagsPage() {
                     Visual Context: Motion Graphics with Clear, Bold Text
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    The law is clear on your duties. These are non-negotiable obligations that every employee must
-                    understand and follow.
+                    The law is clear on your duties. These are non-negotiable obligations that every
+                    employee must understand and follow.
                   </p>
                 </div>
               </div>
@@ -298,10 +323,13 @@ export default function RedFlagsPage() {
                 <div className="size-12 rounded-xl bg-rose-600/20 flex items-center justify-center mb-4">
                   <BookOpen className="size-6 text-rose-600" />
                 </div>
-                <h3 className="text-lg font-bold text-foreground mb-3">Comply with AML/CTF Program</h3>
+                <h3 className="text-lg font-bold text-foreground mb-3">
+                  Comply with AML/CTF Program
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Your organization has an approved Anti-Money Laundering and Counter-Terrorism Financing program. This
-                  training is an integral part of that compliance obligation.
+                  Your organization has an approved Anti-Money Laundering and Counter-Terrorism
+                  Financing program. This training is an integral part of that compliance
+                  obligation.
                 </p>
               </div>
             </Card>
@@ -311,10 +339,13 @@ export default function RedFlagsPage() {
                 <div className="size-12 rounded-xl bg-amber-600/20 flex items-center justify-center mb-4">
                   <AlertTriangle className="size-6 text-amber-600" />
                 </div>
-                <h3 className="text-lg font-bold text-foreground mb-3">Report Suspicious Matters</h3>
+                <h3 className="text-lg font-bold text-foreground mb-3">
+                  Report Suspicious Matters
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  You must report any suspicious matters immediately. If you're a precious metal dealer and a customer
-                  wants to pay for a gold bar with a duffel bag of cash, that's a reportable suspicion.
+                  You must report any suspicious matters immediately. If you're a precious metal
+                  dealer and a customer wants to pay for a gold bar with a duffel bag of cash,
+                  that's a reportable suspicion.
                 </p>
               </div>
             </Card>
@@ -326,8 +357,8 @@ export default function RedFlagsPage() {
                 </div>
                 <h3 className="text-lg font-bold text-foreground mb-3">No Tipping Off</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  You must not "tip off" a customer. If you're a banker investigating them, you must NOT tell the
-                  client. Tipping off is itself a crime.
+                  You must not "tip off" a customer. If you're a banker investigating them, you must
+                  NOT tell the client. Tipping off is itself a crime.
                 </p>
               </div>
             </Card>
@@ -361,9 +392,9 @@ export default function RedFlagsPage() {
                     Visual Context: Live-action shot of diverse teams
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Our organization values and protects those who demonstrate compliance vigilance. Reporting
-                    suspicious activity is not just a duty—it's a protected act that contributes to our collective
-                    security.
+                    Our organization values and protects those who demonstrate compliance vigilance.
+                    Reporting suspicious activity is not just a duty—it's a protected act that
+                    contributes to our collective security.
                   </p>
                 </div>
               </div>
@@ -375,8 +406,8 @@ export default function RedFlagsPage() {
             <div className="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-950/40 dark:to-emerald-950/40 p-6 border-b border-green-200 dark:border-green-900">
               <h3 className="text-2xl font-bold text-foreground mb-2">Protected Reporting</h3>
               <p className="text-sm text-muted-foreground italic">
-                "If you're a real estate agent and you report a suspicious buyer, you are doing your job. We have a
-                culture that rewards this vigilance."
+                "If you're a real estate agent and you report a suspicious buyer, you are doing your
+                job. We have a culture that rewards this vigilance."
               </p>
             </div>
             <div className="p-6">
@@ -387,8 +418,8 @@ export default function RedFlagsPage() {
                     <span className="text-xs font-bold text-green-600">✓</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Legal Protection:</span> Whistleblower laws protect
-                    you from retaliation
+                    <span className="font-medium text-foreground">Legal Protection:</span>{" "}
+                    Whistleblower laws protect you from retaliation
                   </p>
                 </li>
                 <li className="flex items-start gap-3">
@@ -396,8 +427,8 @@ export default function RedFlagsPage() {
                     <span className="text-xs font-bold text-green-600">✓</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Internal Support:</span> Our compliance team handles
-                    all reports confidentially
+                    <span className="font-medium text-foreground">Internal Support:</span> Our
+                    compliance team handles all reports confidentially
                   </p>
                 </li>
                 <li className="flex items-start gap-3">
@@ -405,8 +436,8 @@ export default function RedFlagsPage() {
                     <span className="text-xs font-bold text-green-600">✓</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Career Advancement:</span> Vigilance is recognized in
-                    performance evaluations
+                    <span className="font-medium text-foreground">Career Advancement:</span>{" "}
+                    Vigilance is recognized in performance evaluations
                   </p>
                 </li>
                 <li className="flex items-start gap-3">
@@ -414,8 +445,8 @@ export default function RedFlagsPage() {
                     <span className="text-xs font-bold text-green-600">✓</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Industry Reputation:</span> We're known for our strong
-                    ethical standards
+                    <span className="font-medium text-foreground">Industry Reputation:</span> We're
+                    known for our strong ethical standards
                   </p>
                 </li>
               </ul>
@@ -426,13 +457,17 @@ export default function RedFlagsPage() {
           <div className="grid gap-6 lg:grid-cols-2 mb-8">
             <Card className="border-2 border-blue-200 dark:border-blue-900">
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 p-6 border-b border-blue-200 dark:border-blue-900">
-                <h3 className="text-xl font-bold text-foreground mb-2">Compliance in Action: Recognition Program</h3>
+                <h3 className="text-xl font-bold text-foreground mb-2">
+                  Compliance in Action: Recognition Program
+                </h3>
               </div>
               <div className="p-6">
-                <h4 className="font-semibold text-foreground mb-3">Quarterly Compliance Champions</h4>
+                <h4 className="font-semibold text-foreground mb-3">
+                  Quarterly Compliance Champions
+                </h4>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Each quarter, we recognize employees from different departments who demonstrated exceptional
-                  compliance vigilance. Recent winners include:
+                  Each quarter, we recognize employees from different departments who demonstrated
+                  exceptional compliance vigilance. Recent winners include:
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3 text-sm">
@@ -440,7 +475,9 @@ export default function RedFlagsPage() {
                       <span className="text-base">🏆</span>
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">Maria Rodriguez (Retail Banking)</p>
+                      <p className="font-medium text-foreground">
+                        Maria Rodriguez (Retail Banking)
+                      </p>
                       <p className="text-muted-foreground text-xs">
                         Identified structuring pattern across multiple accounts
                       </p>
@@ -452,7 +489,9 @@ export default function RedFlagsPage() {
                     </div>
                     <div>
                       <p className="font-medium text-foreground">David Chen (Commercial Lending)</p>
-                      <p className="text-muted-foreground text-xs">Flagged inconsistent business documentation</p>
+                      <p className="text-muted-foreground text-xs">
+                        Flagged inconsistent business documentation
+                      </p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3 text-sm">
@@ -460,8 +499,12 @@ export default function RedFlagsPage() {
                       <span className="text-base">🏆</span>
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">Sarah Johnson (Wealth Management)</p>
-                      <p className="text-muted-foreground text-xs">Reported unusual international transfer requests</p>
+                      <p className="font-medium text-foreground">
+                        Sarah Johnson (Wealth Management)
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        Reported unusual international transfer requests
+                      </p>
                     </div>
                   </li>
                 </ul>
@@ -489,7 +532,9 @@ export default function RedFlagsPage() {
                       2
                     </div>
                     <div className="text-sm">
-                      <p className="font-medium text-foreground">Do NOT discuss with the customer</p>
+                      <p className="font-medium text-foreground">
+                        Do NOT discuss with the customer
+                      </p>
                       <p className="text-muted-foreground text-xs">(no tipping off)</p>
                     </div>
                   </li>
@@ -498,7 +543,9 @@ export default function RedFlagsPage() {
                       3
                     </div>
                     <div className="text-sm">
-                      <p className="font-medium text-foreground">Submit a Suspicious Activity Report</p>
+                      <p className="font-medium text-foreground">
+                        Submit a Suspicious Activity Report
+                      </p>
                       <p className="text-muted-foreground text-xs">to our internal portal</p>
                     </div>
                   </li>
@@ -507,7 +554,9 @@ export default function RedFlagsPage() {
                       4
                     </div>
                     <div className="text-sm">
-                      <p className="font-medium text-foreground">Or contact the Compliance Team directly</p>
+                      <p className="font-medium text-foreground">
+                        Or contact the Compliance Team directly
+                      </p>
                       <p className="text-muted-foreground text-xs">at ext. 5555</p>
                     </div>
                   </li>
@@ -531,5 +580,5 @@ export default function RedFlagsPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
