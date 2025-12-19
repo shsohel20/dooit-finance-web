@@ -189,14 +189,7 @@ export function ECDDForm({ caseNumber, id }) {
     try {
       const response = await getEcddById(id);
       console.log("response by id", response);
-      const {
-        caseNumber,
-        transaction,
-        analyst,
-        customer,
-        customerName,
-        ...data
-      } = response?.data;
+      const { caseNumber, transaction, analyst, customer, customerName, ...data } = response?.data;
       const formattedData = {
         ...data,
         caseNumber: {
@@ -305,8 +298,7 @@ export function ECDDForm({ caseNumber, id }) {
       isSanctioned: data.isSanctioned || "No",
       relatedParty: data.relatedParty || "N/A",
       // Transaction data
-      accountCreationDate:
-        data.accountCreationDate || data.onboardingDate || "",
+      accountCreationDate: data.accountCreationDate || data.onboardingDate || "",
       analysisEndDate: data.analysisEndDate || "",
       totalDepositsAUD: data.totalDepositsAUD || "",
       totalWithdrawalsUSDT: data.totalWithdrawalsUSDT || "",
@@ -343,21 +335,19 @@ export function ECDDForm({ caseNumber, id }) {
 
     return `The customer ${data.customerName} (UID: ${
       data.userId || "UID"
-    }), ABN ${data.abn || "N/A"}, was onboarded on ${
-      data.onboardingDate || "dd/mm/yyyy"
-    }.
+    }), ABN ${data.abn || "N/A"}, was onboarded on ${data.onboardingDate || "dd/mm/yyyy"}.
 
-Account opening purpose was stated as ${
-      data.accountPurpose || "Digital Currency Exchange"
-    } and expected trading volume is listed as $${
-      data.expectedVolume || "X"
-    } and over AUD (per month), where the company annual income is over $${
-      data.annualIncome || "X"
-    } million as per onboarding document. An open media search reveals no adverse media for the customer. ${
-      data.beneficialOwner || "N/A"
-    } appears to be the BO of ${data.customerName}, where ${
-      data.directors || "N/A"
-    } are the directors of the company. No adverse media was identified for the related parties while conducting open media searches.`;
+ Account opening purpose was stated as ${
+   data.accountPurpose || "Digital Currency Exchange"
+ } and expected trading volume is listed as $${
+   data.expectedVolume || "X"
+ } and over AUD (per month), where the company annual income is over $${
+   data.annualIncome || "X"
+ } million as per onboarding document. An open media search reveals no adverse media for the customer. ${
+   data.beneficialOwner || "N/A"
+ } appears to be the BO of ${data.customerName}, where ${
+   data.directors || "N/A"
+ } are the directors of the company. No adverse media was identified for the related parties while conducting open media searches.`;
   };
 
   const generateTransactionAnalysis = (data) => {
@@ -365,9 +355,7 @@ Account opening purpose was stated as ${
 
     return `Since then account creation date on ${
       data.accountCreationDate || "dd/mm/yyyy"
-    }, until ${data.analysisEndDate || "dd/mm/yyyy"}, ${
-      data.customerName
-    } conducted a total of $${
+    }, until ${data.analysisEndDate || "dd/mm/yyyy"}, ${data.customerName} conducted a total of $${
       data.totalDepositsAUD || "X"
     } million AUD in deposits and withdrawals amounting to ${
       data.totalWithdrawalsUSDT || "X"
@@ -422,9 +410,7 @@ ${
     console.log("submit response", response);
     if (response.success) {
       localStorage.setItem("newId", response.data._id);
-      toast.success(
-        id ? "Case updated successfully" : "Case created successfully"
-      );
+      toast.success(id ? "Case updated successfully" : "Case created successfully");
       router.push(`/dashboard/client/report-compliance/ecdd`);
     } else {
       toast.error("Failed to create case");
@@ -525,14 +511,14 @@ ${formData.recommendation || "_________________________"}
           label: value.label,
           value: value.value,
         },
-        { shouldValidate: true }
+        { shouldValidate: true },
       );
     } else {
       setValue("analystName", value?.analyst?.name, { shouldValidate: true });
       setValue(
         "fullName",
         `${kycData?.personal_form?.customer_details?.given_name} ${kycData?.personal_form?.customer_details?.surname}`,
-        { shouldValidate: true }
+        { shouldValidate: true },
       );
       setValue("accountPurpose", kycData?.funds_wealth?.account_purpose, {
         shouldValidate: true,
@@ -540,11 +526,9 @@ ${formData.recommendation || "_________________________"}
       setValue("onboardingDate", value?.customer?.createdAt?.split("T")[0], {
         shouldValidate: true,
       });
-      setValue(
-        "expectedVolume",
-        kycData?.funds_wealth?.estimated_trading_volume,
-        { shouldValidate: true }
-      );
+      setValue("expectedVolume", kycData?.funds_wealth?.estimated_trading_volume, {
+        shouldValidate: true,
+      });
       setValue("beneficialOwner", value?.transaction?.beneficiary?.name, {
         shouldValidate: true,
       });
@@ -560,11 +544,9 @@ ${formData.recommendation || "_________________________"}
       setValue("isSanctioned", value?.customer?.sanction ? "Yes" : "No", {
         shouldValidate: true,
       });
-      setValue(
-        "registeredAddress",
-        kycData?.personal_form?.residential_address?.address,
-        { shouldValidate: true }
-      );
+      setValue("registeredAddress", kycData?.personal_form?.residential_address?.address, {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -576,9 +558,7 @@ ${formData.recommendation || "_________________________"}
           <h1 className="text-4xl font-bold  text-zinc-700 mb-2">
             Enhanced Customer Due Diligence
           </h1>
-          <p className="text-muted-foreground">
-            Upload data or manually complete the ECDD report
-          </p>
+          <p className="text-muted-foreground">Upload data or manually complete the ECDD report</p>
           {lastSaved && (
             <p className="text-sm text-muted-foreground mt-2">
               Last saved: {lastSaved.toLocaleString()}
@@ -624,9 +604,7 @@ ${formData.recommendation || "_________________________"}
 
         {/* Section 1: Analysis and Review */}
         <Card className="border   p-6 mb-6">
-          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
-            1. Analysis and Review
-          </h2>
+          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">1. Analysis and Review</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
@@ -650,11 +628,7 @@ ${formData.recommendation || "_________________________"}
                 render={({ field }) => (
                   <div>
                     <Label htmlFor="position">Position</Label>
-                    <Input
-                      id="position"
-                      {...field}
-                      placeholder="Enter position"
-                    />
+                    <Input id="position" {...field} placeholder="Enter position" />
                   </div>
                 )}
               />
@@ -665,12 +639,7 @@ ${formData.recommendation || "_________________________"}
                 render={({ field }) => (
                   <div>
                     <Label htmlFor="date">Date</Label>
-                    <Input
-                      id="date"
-                      {...field}
-                      placeholder="Enter date"
-                      type="date"
-                    />
+                    <Input id="date" {...field} placeholder="Enter date" type="date" />
                   </div>
                 )}
               />
@@ -699,9 +668,7 @@ ${formData.recommendation || "_________________________"}
 
         {/* Section 2: Customer Profile */}
         <Card className="border   p-6 mb-6">
-          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
-            2. Customer Profile
-          </h2>
+          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">2. Customer Profile</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
@@ -773,9 +740,7 @@ ${formData.recommendation || "_________________________"}
                 type="number"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="expectedVolume">
-                      Expected Trading Volume (AUD)
-                    </Label>
+                    <Label htmlFor="expectedVolume">Expected Trading Volume (AUD)</Label>
                     <Input
                       id="expectedVolume"
                       {...field}
@@ -791,9 +756,7 @@ ${formData.recommendation || "_________________________"}
                 name="annualIncome"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="annualIncome">
-                      Annual Income (Million AUD)
-                    </Label>
+                    <Label htmlFor="annualIncome">Annual Income (Million AUD)</Label>
                     <Input
                       id="annualIncome"
                       type="number"
@@ -882,9 +845,7 @@ ${formData.recommendation || "_________________________"}
               name="isSanctioned"
               render={({ field }) => (
                 <div>
-                  <Label htmlFor="isSanctioned">
-                    Sanctioned Customer (Y/N)
-                  </Label>
+                  <Label htmlFor="isSanctioned">Sanctioned Customer (Y/N)</Label>
                   <Select
                     value={field.value || "No"}
                     onValueChange={(value) => field.onChange(value)}
@@ -920,9 +881,7 @@ ${formData.recommendation || "_________________________"}
 
         {/* Section 6: Transaction Analysis */}
         <Card className="border   p-6 mb-6">
-          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
-            6. Transaction Analysis
-          </h2>
+          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">6. Transaction Analysis</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
@@ -930,9 +889,7 @@ ${formData.recommendation || "_________________________"}
                 name="accountCreationDate"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="accountCreationDate">
-                      Account Creation Date
-                    </Label>
+                    <Label htmlFor="accountCreationDate">Account Creation Date</Label>
                     <Input
                       id="accountCreationDate"
                       type="date"
@@ -965,9 +922,7 @@ ${formData.recommendation || "_________________________"}
                 name="totalDepositsAUD"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="totalDepositsAUD">
-                      Total Deposits (AUD)
-                    </Label>
+                    <Label htmlFor="totalDepositsAUD">Total Deposits (AUD)</Label>
                     <Input
                       id="totalDepositsAUD"
                       {...field}
@@ -982,9 +937,7 @@ ${formData.recommendation || "_________________________"}
                 name="totalWithdrawalsUSDT"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="totalWithdrawalsUSDT">
-                      Total Withdrawals (USDT)
-                    </Label>
+                    <Label htmlFor="totalWithdrawalsUSDT">Total Withdrawals (USDT)</Label>
                     <Input
                       id="totalWithdrawalsUSDT"
                       {...field}
@@ -1000,9 +953,7 @@ ${formData.recommendation || "_________________________"}
                 name="totalWithdrawalsETH"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="totalWithdrawalsETH">
-                      Total Withdrawals (ETH)
-                    </Label>
+                    <Label htmlFor="totalWithdrawalsETH">Total Withdrawals (ETH)</Label>
                     <Input
                       id="totalWithdrawalsETH"
                       {...field}
@@ -1018,9 +969,7 @@ ${formData.recommendation || "_________________________"}
                 name="totalWithdrawalsBTC"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="totalWithdrawalsBTC">
-                      Total Withdrawals (BTC)
-                    </Label>
+                    <Label htmlFor="totalWithdrawalsBTC">Total Withdrawals (BTC)</Label>
                     <Input
                       id="totalWithdrawalsBTC"
                       {...field}
@@ -1067,9 +1016,7 @@ ${formData.recommendation || "_________________________"}
               name="transactionAnalysis"
               render={({ field }) => (
                 <div>
-                  <Label htmlFor="transactionAnalysis">
-                    Transaction Analysis
-                  </Label>
+                  <Label htmlFor="transactionAnalysis">Transaction Analysis</Label>
                   <Textarea
                     id="transactionAnalysis"
                     {...field}
@@ -1100,9 +1047,7 @@ ${formData.recommendation || "_________________________"}
 
         {/* Section 7: Behavioral Analysis */}
         <Card className="border   p-6 mb-6">
-          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
-            7. Behavioral Analysis
-          </h2>
+          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">7. Behavioral Analysis</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
@@ -1127,9 +1072,7 @@ ${formData.recommendation || "_________________________"}
                 name="registeredAddress"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="registeredAddress">
-                      Registered Address
-                    </Label>
+                    <Label htmlFor="registeredAddress">Registered Address</Label>
                     <Input
                       id="registeredAddress"
                       {...field}
@@ -1145,9 +1088,7 @@ ${formData.recommendation || "_________________________"}
               name="behavioralAnalysis"
               render={({ field }) => (
                 <div>
-                  <Label htmlFor="behavioralAnalysis">
-                    Behavioral Analysis
-                  </Label>
+                  <Label htmlFor="behavioralAnalysis">Behavioral Analysis</Label>
                   <Textarea
                     id="behavioralAnalysis"
                     {...field}
@@ -1162,9 +1103,7 @@ ${formData.recommendation || "_________________________"}
 
         {/* Section 8: Recommendation */}
         <Card className="border   p-6 mb-6">
-          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
-            8. Recommendation
-          </h2>
+          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">8. Recommendation</h2>
           <Controller
             control={control}
             name="recommendation"
@@ -1192,11 +1131,7 @@ ${formData.recommendation || "_________________________"}
             disabled={loading}
           >
             <Save className="w-5 h-5 mr-2" />
-            {loading ? (
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            ) : (
-              "Save Progress"
-            )}
+            {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : "Save Progress"}
           </Button>
           {/* <Button
           onClick={handleExport}

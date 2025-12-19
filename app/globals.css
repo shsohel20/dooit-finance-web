@@ -5,6 +5,9 @@
 @import "tailwindcss";
 
 @import "tw-animate-css";
+* {
+  letter-spacing: -0.01rem;
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -77,9 +80,10 @@
 
   /* --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono); */
-  --font-mono: ui-monospace, Menlo, Monaco, "Poppins Mono", "Cascadia Mono",
-    "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace",
-    "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
+  --font-mono:
+    ui-monospace, Menlo, Monaco, "Poppins Mono", "Cascadia Mono", "Segoe UI Mono", "Roboto Mono",
+    "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro", "Fira Mono", "Droid Sans Mono",
+    "Courier New", monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -178,7 +182,7 @@ button {
   min-height: 10px !important;
 }
 
-.blurry-overlay{
+.blurry-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -189,7 +193,6 @@ button {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(1000px);
   display: flex;
- 
 }
 
 .react-select__indicator {

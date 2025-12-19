@@ -26,12 +26,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${poppins.className} antialiased`} suppressHydrationWarning>
+      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         {/* <AuthProvider> */}
 
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
         <Toaster />
         {/* </AuthProvider> */}
       </body>
