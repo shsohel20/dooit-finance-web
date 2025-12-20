@@ -58,7 +58,7 @@ const TransactionListView = () => {
   const [limit, setLimit] = useState(10);
   const totalItems = transactions?.totalRecords || 0;
   const router = useRouter();
-  console.log("transactions", transactions);
+
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -311,15 +311,15 @@ const TransactionListView = () => {
           <ButtonGroup>
             <Button
               variant="outline"
-              // onClick={() => setView('grid')}
-              // variant={view === 'grid' ? 'default' : 'outline'}
+            // onClick={() => setView('grid')}
+            // variant={view === 'grid' ? 'default' : 'outline'}
             >
               <IconGridDots />
             </Button>
             <Button
               variant="outline"
-              // variant={view === 'list' ? 'default' : 'outline'}
-              // onClick={() => setView('list')}
+            // variant={view === 'list' ? 'default' : 'outline'}
+            // onClick={() => setView('list')}
             >
               <IconList />
             </Button>

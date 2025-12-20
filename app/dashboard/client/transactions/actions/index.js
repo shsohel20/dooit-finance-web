@@ -19,3 +19,11 @@ export const getTransactionById = async (id) => {
   console.log(' transaction response', response);
   return response.json()
 }
+
+export const createTransaction = async (data) => {
+  const response = await fetchWithAuth('transaction/new', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+  return response.json()
+}
