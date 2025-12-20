@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Button } from "./button";
 
-function Input({ className, type, error, rows, ...props }) {
+function Input({ className, type, error, rows, value, ...props }) {
   const [showPassword, setShowPassword] = React.useState(false);
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -23,8 +23,9 @@ function Input({ className, type, error, rows, ...props }) {
             {
               "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive":
                 error,
-            },
+            }
           )}
+          value={value ?? ""}
           aria-invalid={error ? true : false}
           {...props}
         />
@@ -41,8 +42,9 @@ function Input({ className, type, error, rows, ...props }) {
               {
                 "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive":
                   error,
-              },
+              }
             )}
+            value={value ?? ""}
             aria-invalid={error ? true : false}
             {...props}
           />
@@ -54,7 +56,11 @@ function Input({ className, type, error, rows, ...props }) {
               onClick={togglePasswordVisibility}
               className="absolute right-2 top-1/2 -translate-y-1/2"
             >
-              {showPassword ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+              {showPassword ? (
+                <EyeOffIcon className="size-4" />
+              ) : (
+                <EyeIcon className="size-4" />
+              )}
             </Button>
           )}
           {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
