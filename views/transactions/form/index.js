@@ -71,7 +71,6 @@ const TransactionForm = ({ id }) => {
   const [isFetching, setIsFetching] = useState(false);
   const router = useRouter();
   const data = useSession();
-  console.log("user data", data);
 
   const form = useForm({
     // resolver: zodResolver(formSchema),
@@ -82,7 +81,7 @@ const TransactionForm = ({ id }) => {
     setIsFetching(true);
     try {
       const response = await getTransactionById(id);
-      console.log("response by id", response?.data);
+
       if (response.success) {
         const data = response.data;
         const formData = {
@@ -155,12 +154,14 @@ const TransactionForm = ({ id }) => {
       };
       console.log("submittedData", submittedData);
       console.log("submittedData", JSON.stringify(submittedData, null, 2));
-      const action = id ? updateTransaction : createTransaction;
-      const response = await action(submittedData);
+      const action = id ? updateTransaction(id, submittedData) : createTransaction(submittedData);
+      const response = await action;
       console.log("response", response);
 
       if (response.success) {
-        toast.success("Transaction created successfully!");
+        toast.success(
+          id ? "Transaction updated successfully!" : "Transaction created successfully!",
+        );
         localStorage.setItem("newId", response.data?._id);
         router.push(`/dashboard/client/transactions`);
       } else {
