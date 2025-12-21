@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { get } from "react-hook-form";
+import { cn } from "@/lib/utils";
 
 export function FormField({
   form,
@@ -23,6 +24,7 @@ export function FormField({
   required,
   options,
   description,
+  loading = false,
 }) {
   const {
     control,
@@ -50,7 +52,7 @@ export function FormField({
 
   if (type === "select") {
     return (
-      <div className="flex flex-col ">
+      <div className={cn("flex flex-col ", { "animate-pulse": loading })}>
         {label && (
           <Label htmlFor={name}>
             {label}
@@ -83,7 +85,7 @@ export function FormField({
 
   if (type === "textarea") {
     return (
-      <div className="flex flex-col ">
+      <div className={cn("flex flex-col ", { "animate-pulse": loading })}>
         {label && (
           <Label htmlFor={name}>
             {label}
@@ -103,7 +105,7 @@ export function FormField({
     );
   }
   return (
-    <div className="flex flex-col ">
+    <div className={cn("flex flex-col ", { "animate-pulse": loading })}>
       {label && (
         <Label htmlFor={name}>
           {label}

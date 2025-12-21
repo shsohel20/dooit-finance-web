@@ -24,7 +24,6 @@ export default function SelectCustomerList({ onChange, value, label }) {
   const hasMore = customers.length < totalItems;
   const observer = useRef();
 
-
   const fetchCustomers = async () => {
     setFetchingCustomers(true);
     try {
@@ -42,7 +41,7 @@ export default function SelectCustomerList({ onChange, value, label }) {
           ...item,
           label: name,
           value: item._id,
-        }
+        };
       });
 
       setCustomers([...customers, ...options]);
@@ -127,7 +126,7 @@ export default function SelectCustomerList({ onChange, value, label }) {
           </div> */}
           <div className="relative ">
             {customers?.length === 0 ? (
-              <div className="flex items-center gap-2 justify-center">
+              <div className="flex items-center gap-2 justify-center mt-2">
                 <IconLoader2 className="size-4 animate-spin" />
                 <span>Loading...</span>
               </div>

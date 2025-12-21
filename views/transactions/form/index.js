@@ -13,6 +13,7 @@ import { createTransaction, getTransactionById } from "@/app/dashboard/client/tr
 import { Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { updateTransaction } from "@/app/dashboard/client/transactions/actions";
 
 const initialTransactionData = {
   type: "",
@@ -24,7 +25,10 @@ const initialTransactionData = {
   status: "",
   channel: "",
   sender: {
-    id: "", //Customer Id
+    id: {
+      label: "",
+      value: "",
+    }, //Customer Id
     name: "",
     account: "",
     institution: "",
@@ -36,7 +40,10 @@ const initialTransactionData = {
     },
   },
   receiver: {
-    id: "", //Customer Id//can be
+    id: {
+      label: "",
+      value: "",
+    }, //Customer Id//can be
     name: "",
     account: "",
     institution: "",
@@ -71,7 +78,6 @@ const TransactionForm = ({ id }) => {
     defaultValues: initialTransactionData,
   });
 
-
   const fetchTransactionById = async () => {
     setIsFetching(true);
     try {
@@ -93,20 +99,20 @@ const TransactionForm = ({ id }) => {
             id: {
               label: data.sender.name,
               value: data.sender.id,
-            }
+            },
           },
           receiver: {
             ...data.receiver,
             id: {
               label: data.receiver.name,
               value: data.receiver.id,
-            }
+            },
           },
           beneficiary: data.beneficiary,
           purpose: data.purpose,
           remittancePurposeCode: data.remittancePurposeCode,
           metadata: data.metadata,
-        }
+        };
         console.log("formData", formData);
         form.reset(formData);
       } else {
@@ -119,22 +125,39 @@ const TransactionForm = ({ id }) => {
     }
     // console.log("response by id", response);
     //  form.reset(response?.data);
-  }
+  };
   useEffect(() => {
     if (id) {
       fetchTransactionById(id);
     }
   }, [id]);
 
-
   const handleSubmit = async () => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     const data = form.getValues();
 
     console.log("submittedData", data);
     const customer = data?.user?.id;
     try {
-      const response = await createTransaction({ ...data, customer });
+      const submittedData = {
+        ...data,
+        customer,
+        sender: {
+          ...data.sender,
+          id: data.sender.id.value,
+          name: data.sender.id.label,
+        },
+        receiver: {
+          ...data.receiver,
+          id: data.receiver.id.value,
+          name: data.receiver.id.label,
+        },
+      };
+      console.log("submittedData", submittedData);
+      console.log("submittedData", JSON.stringify(submittedData, null, 2));
+      const action = id ? updateTransaction : createTransaction;
+      const response = await action(submittedData);
+      console.log("response", response);
 
       if (response.success) {
         toast.success("Transaction created successfully!");
@@ -146,14 +169,13 @@ const TransactionForm = ({ id }) => {
     } catch (error) {
       toast.error("Failed to create transaction!");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   };
   return (
     <div className="mb-8">
       <Card>
         <CardContent className="space-y-6">
-
           <div className="space-y-4 border p-4 rounded-lg">
             <h4 className="text-base font-bold">Transaction Details</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ">
@@ -169,6 +191,7 @@ const TransactionForm = ({ id }) => {
                   { label: "Exchange", value: "exchange" },
                   { label: "Other", value: "other" },
                 ]}
+                loading={isFetching}
               />
               <FormField
                 form={form}
@@ -180,8 +203,15 @@ const TransactionForm = ({ id }) => {
                   { label: "Spot FX", value: "spotfx" },
                   { label: "OTC", value: "otc" },
                 ]}
+                loading={isFetching}
               />
-              <FormField form={form} name="amount" label="Amount" type="number" />
+              <FormField
+                form={form}
+                name="amount"
+                label="Amount"
+                type="number"
+                loading={isFetching}
+              />
               <FormField
                 form={form}
                 name="currency"
@@ -194,9 +224,22 @@ const TransactionForm = ({ id }) => {
                   { label: "GBP", value: "GBP" },
                   { label: "Other", value: "other" },
                 ]}
+                loading={isFetching}
               />
-              <FormField form={form} name="Reference" label="Reference" type="text" />
-              <FormField form={form} name="Narrative" label="Narrative" type="text" />
+              <FormField
+                form={form}
+                name="Reference"
+                label="Reference"
+                type="text"
+                loading={isFetching}
+              />
+              <FormField
+                form={form}
+                name="Narrative"
+                label="Narrative"
+                type="text"
+                loading={isFetching}
+              />
               <FormField
                 form={form}
                 name="status"
@@ -220,6 +263,7 @@ const TransactionForm = ({ id }) => {
                   { label: "Branch", value: "Branch" },
                   { label: "Online", value: "online" },
                 ]}
+                loading={isFetching}
               />
             </div>
           </div>
@@ -234,17 +278,48 @@ const TransactionForm = ({ id }) => {
                     name="receiver.id"
                     label="Receiver"
                     type="text"
+                    loading={isFetching}
                     onChange={(value) => {
-                      form.setValue("receiver.id", value.value);
-                      form.setValue("receiver.name", value.label);
+                      form.setValue("receiver.id", value);
+                      // form.setValue("receiver.name", value.label);
                     }}
-                    value={form.getValues("receiver.id")}
+                    value={form.watch("receiver.id")}
                   />
-                  <FormField form={form} name="receiver.account" label="Receiver Account" type="text" />
-                  <FormField form={form} name="receiver.institution" label="Receiver Institution" type="text" />
-                  <FormField form={form} name="receiver.institutionCountry" label="Receiver Institution Country" type="text" />
-                  <FormField form={form} name="receiver.bic" label="Receiver BIC" type="text" />
-                  <FormField form={form} name="receiver.address" label="Receiver Address" type="text" />
+                  <FormField
+                    form={form}
+                    name="receiver.account"
+                    label="Receiver Account"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="receiver.institution"
+                    label="Receiver Institution"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="receiver.institutionCountry"
+                    label="Receiver Institution Country"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="receiver.bic"
+                    label="Receiver BIC"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="receiver.address"
+                    label="Receiver Address"
+                    type="text"
+                    loading={isFetching}
+                  />
                 </div>
                 {/* sender */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 border p-4 rounded-lg">
@@ -252,31 +327,95 @@ const TransactionForm = ({ id }) => {
                     form={form}
                     name="sender.id"
                     label="Sender"
-                    value={form.getValues("sender.id")}
+                    value={form.watch("sender.id")}
                     onChange={(value) => {
-                      const personalDetails = value.personalKyc.personal_form?.customer_details;
-                      const name = personalDetails?.given_name + " " + personalDetails?.surname;
-                      form.setValue("sender.id", value._id);
-                      form.setValue("sender.name", name);
+                      form.setValue("sender.id", value);
+                      // form.setValue("sender.name", value.label);
                     }}
+                    loading={isFetching}
                   />
-                  <FormField form={form} name="sender.account" label="Sender Account" type="text" />
-                  <FormField form={form} name="sender.institution" label="Sender Institution" type="text" />
-                  <FormField form={form} name="sender.institutionCountry" label="Sender Institution Country" type="text" />
-                  <FormField form={form} name="sender.bic" label="Sender BIC" type="text" />
-                  <FormField form={form} name="sender.address" label="Sender Address" type="text" />
+                  <FormField
+                    form={form}
+                    name="sender.account"
+                    label="Sender Account"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="sender.institution"
+                    label="Sender Institution"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="sender.institutionCountry"
+                    label="Sender Institution Country"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="sender.bic"
+                    label="Sender BIC"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="sender.address"
+                    label="Sender Address"
+                    type="text"
+                    loading={isFetching}
+                  />
                 </div>
                 {/* beneficiary */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 border p-4 rounded-lg">
-                  <FormField form={form} name="beneficiary.name" label="Beneficiary" type="text" />
-                  <FormField form={form} name="beneficiary.account" label="Beneficiary Account" type="text" />
-                  <FormField form={form} name="beneficiary.institution" label="Beneficiary Institution" type="text" />
-                  <FormField form={form} name="beneficiary.institutionCountry" label="Beneficiary Institution Country" type="text" />
-                  <FormField form={form} name="beneficiary.bic" label="Beneficiary BIC" type="text" />
-                  <FormField form={form} name="beneficiary.address" label="Beneficiary Address" type="text" />
+                  <FormField
+                    form={form}
+                    name="beneficiary.name"
+                    label="Beneficiary"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="beneficiary.account"
+                    label="Beneficiary Account"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="beneficiary.institution"
+                    label="Beneficiary Institution"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="beneficiary.institutionCountry"
+                    label="Beneficiary Institution Country"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="beneficiary.bic"
+                    label="Beneficiary BIC"
+                    type="text"
+                    loading={isFetching}
+                  />
+                  <FormField
+                    form={form}
+                    name="beneficiary.address"
+                    label="Beneficiary Address"
+                    type="text"
+                    loading={isFetching}
+                  />
                 </div>
               </div>
-
             </div>
           </div>
           <div className="border p-4 rounded-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -285,6 +424,7 @@ const TransactionForm = ({ id }) => {
               name="Purpose"
               label="Purpose"
               type="select"
+              loading={isFetching}
               options={[
                 { label: "Supplier Payment", value: "supplier_payment" },
                 { label: "Customer Payment", value: "customer_payment" },
@@ -296,12 +436,30 @@ const TransactionForm = ({ id }) => {
               name="Remittance Purpose Code"
               label="Remittance Purpose Code"
               type="text"
+              loading={isFetching}
             />
-            <FormField form={form} name="Metadata" label="Metadata" type="text" />
-
+            <FormField
+              form={form}
+              name="Metadata"
+              label="Metadata"
+              type="text"
+              loading={isFetching}
+            />
           </div>
           <div className="flex ">
-            <Button disabled={isSubmitting} className={'w-full'} onClick={handleSubmit} type="submit">{isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {isSubmitting ? 'Saving...' : "Save"}</Button>
+            <Button
+              disabled={isSubmitting}
+              className={"w-full"}
+              onClick={handleSubmit}
+              type="submit"
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}{" "}
+              {isSubmitting ? "Saving..." : "Save"}
+            </Button>
           </div>
         </CardContent>
       </Card>
