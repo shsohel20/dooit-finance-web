@@ -1,6 +1,5 @@
 "use client";
-import React from "react";
-import { PageHeader, PageTitle, PageDescription } from "@/components/common";
+import React, { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import { FormField } from "@/components/ui/FormField";
@@ -10,14 +9,12 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import SelectCustomerList from "@/components/ui/SelectCustomerList";
 import { toast } from "sonner";
-import { createTransaction } from "@/app/dashboard/client/transactions/actions";
+import { createTransaction, getTransactionById } from "@/app/dashboard/client/transactions/actions";
 import { Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const initialTransactionData = {
-  customer: "6906cf020acf10ef6ab1ffd3",
-  client: "68fe70605a026bb521a8ae28",
-  branch: "690023e27106f190b5d1cd12",
   type: "",
   subtype: "",
   amount: 0,
@@ -62,22 +59,83 @@ const initialTransactionData = {
   },
 };
 
-const TransactionForm = () => {
-  const [formData, setFormData] = useState(initialTransactionData);
-  const [isSubmitting, setIsSubmitting] = useState(false)
+const TransactionForm = ({ id }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const router = useRouter();
+  const data = useSession();
+  console.log("user data", data);
+
   const form = useForm({
     // resolver: zodResolver(formSchema),
-    defaultValues: formData,
+    defaultValues: initialTransactionData,
   });
+
+
+  const fetchTransactionById = async () => {
+    setIsFetching(true);
+    try {
+      const response = await getTransactionById(id);
+      console.log("response by id", response?.data);
+      if (response.success) {
+        const data = response.data;
+        const formData = {
+          type: data.type,
+          subtype: data.subtype,
+          amount: data.amount,
+          currency: data.currency,
+          reference: data.reference,
+          narrative: data.narrative,
+          status: data.status,
+          channel: data.channel,
+          sender: {
+            ...data.sender,
+            id: {
+              label: data.sender.name,
+              value: data.sender.id,
+            }
+          },
+          receiver: {
+            ...data.receiver,
+            id: {
+              label: data.receiver.name,
+              value: data.receiver.id,
+            }
+          },
+          beneficiary: data.beneficiary,
+          purpose: data.purpose,
+          remittancePurposeCode: data.remittancePurposeCode,
+          metadata: data.metadata,
+        }
+        console.log("formData", formData);
+        form.reset(formData);
+      } else {
+        toast.error("Failed to fetch transaction by id");
+      }
+    } catch (error) {
+      console.error("Failed to fetch transaction by id", error);
+    } finally {
+      setIsFetching(false);
+    }
+    // console.log("response by id", response);
+    //  form.reset(response?.data);
+  }
+  useEffect(() => {
+    if (id) {
+      fetchTransactionById(id);
+    }
+  }, [id]);
+
+
   const handleSubmit = async () => {
     setIsSubmitting(true)
     const data = form.getValues();
 
     console.log("submittedData", data);
+    const customer = data?.user?.id;
     try {
-      const response = await createTransaction(data);
-      console.log("response", response);
+      const response = await createTransaction({ ...data, customer });
+
       if (response.success) {
         toast.success("Transaction created successfully!");
         localStorage.setItem("newId", response.data?._id);
@@ -171,12 +229,17 @@ const TransactionForm = () => {
               <div className="space-y-8">
                 {/* receiver */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 border p-4 rounded-lg">
-                  <SelectCustomerList form={form} name="receiver.id" label="Receiver" type="text" onChange={(value) => {
-                    const personalDetails = value.personalKyc.personal_form?.customer_details;
-                    const name = personalDetails?.given_name + " " + personalDetails?.surname;
-                    form.setValue("receiver.id", value._id);
-                    form.setValue("receiver.name", name);
-                  }} />
+                  <SelectCustomerList
+                    form={form}
+                    name="receiver.id"
+                    label="Receiver"
+                    type="text"
+                    onChange={(value) => {
+                      form.setValue("receiver.id", value.value);
+                      form.setValue("receiver.name", value.label);
+                    }}
+                    value={form.getValues("receiver.id")}
+                  />
                   <FormField form={form} name="receiver.account" label="Receiver Account" type="text" />
                   <FormField form={form} name="receiver.institution" label="Receiver Institution" type="text" />
                   <FormField form={form} name="receiver.institutionCountry" label="Receiver Institution Country" type="text" />
@@ -189,6 +252,7 @@ const TransactionForm = () => {
                     form={form}
                     name="sender.id"
                     label="Sender"
+                    value={form.getValues("sender.id")}
                     onChange={(value) => {
                       const personalDetails = value.personalKyc.personal_form?.customer_details;
                       const name = personalDetails?.given_name + " " + personalDetails?.surname;

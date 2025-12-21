@@ -24,8 +24,8 @@ export default function SelectCustomerList({ onChange, value, label }) {
   const hasMore = customers.length < totalItems;
   const observer = useRef();
 
+
   const fetchCustomers = async () => {
-    console.log("fetching customers => ", pageNo);
     setFetchingCustomers(true);
     try {
       const queryParams = {
@@ -35,11 +35,15 @@ export default function SelectCustomerList({ onChange, value, label }) {
       const response = await getCustomers(queryParams);
       console.log("customers response => ", response);
       setTotalItems(response.totalRecords);
-      const options = response.data.map((item) => ({
-        ...item,
-        label: item.uid,
-        value: item.uid,
-      }));
+      const options = response.data.map((item) => {
+        const personalDetails = item.personalKyc.personal_form?.customer_details;
+        const name = personalDetails?.given_name + " " + personalDetails?.surname;
+        return {
+          ...item,
+          label: name,
+          value: item._id,
+        }
+      });
 
       setCustomers([...customers, ...options]);
 
@@ -89,7 +93,7 @@ export default function SelectCustomerList({ onChange, value, label }) {
       {label && <Label>{label}</Label>}
       <Select
         onValueChange={(value) => onChange(customers.find((option) => option.value === value))}
-        value={value?.label || value}
+        value={value?.value || value}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select a case number" />

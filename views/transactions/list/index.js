@@ -31,6 +31,7 @@ import {
   IconEye,
   IconGridDots,
   IconList,
+  IconPencil,
   IconPennant,
   IconSearch,
   IconUpload,
@@ -94,6 +95,9 @@ const TransactionListView = () => {
     setCurrentItem(item);
     setOpenDetailView(true);
   };
+  const handleEditClick = (item) => {
+    router.push(`/dashboard/client/transactions/edit?id=${item?._id}`);
+  }
   const columns = [
     {
       header: "Actions",
@@ -115,6 +119,10 @@ const TransactionListView = () => {
               <DropdownMenuItem onClick={() => handleViewClick(row.original)}>
                 <IconEye className="mr-2 size-3 text-muted-foreground/70" />
                 View
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleEditClick(row.original)}>
+                <IconPencil className="mr-2 size-3 text-muted-foreground/70" />
+                Edit
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

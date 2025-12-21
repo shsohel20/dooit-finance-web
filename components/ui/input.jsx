@@ -4,7 +4,15 @@ import { cn } from "@/lib/utils";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Button } from "./button";
 
-function Input({ className, type, error, rows, value, ...props }) {
+function Input({
+  className,
+  type,
+  error,
+  rows,
+  value,
+  onChange = () => {},
+  ...props
+}) {
   const [showPassword, setShowPassword] = React.useState(false);
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -25,6 +33,7 @@ function Input({ className, type, error, rows, value, ...props }) {
                 error,
             }
           )}
+          onChange={onChange}
           value={value ?? ""}
           aria-invalid={error ? true : false}
           {...props}
@@ -45,6 +54,7 @@ function Input({ className, type, error, rows, value, ...props }) {
               }
             )}
             value={value ?? ""}
+            onChange={onChange}
             aria-invalid={error ? true : false}
             {...props}
           />

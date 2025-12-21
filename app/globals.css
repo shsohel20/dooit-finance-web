@@ -1,12 +1,31 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"); */
 @import url(https://fonts.googleapis.com/css?family=Satisfy);
 @import url(https://fonts.googleapis.com/css?family=Acme);
 
 @import "tailwindcss";
 
 @import "tw-animate-css";
+
+@font-face {
+  font-family: "font-1";
+  src: url("/assets/fonts/font-2.woff2") format("woff2");
+}
+@font-face {
+  font-family: font-2;
+  src: url("/fonts/font-2.woff2");
+}
+@font-face {
+  font-family: font-3;
+  src: url("/fonts/font-3.woff2");
+}
+@font-face {
+  font-family: "font-4";
+  src: url("/assets/fonts/tiktok_only.woff2") format("woff2");
+}
+
 * {
   letter-spacing: -0.01rem;
+  font-family: font-1, sans-serif;
 }
 h1,
 h2 {
@@ -31,7 +50,7 @@ h2 {
   --mute-200: #696969;
   --gray: #696969;
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.98 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -54,12 +73,16 @@ h2 {
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.985 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --font-font-1: font-1;
+  --font-font-2: font-2;
+  --font-font-3: font-3;
+  --font-font-4: font-4;
 }
 
 .border-red {

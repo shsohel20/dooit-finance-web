@@ -11,29 +11,34 @@ import {
 } from "@/components/ui/sidebar"
 import {
   IconAlertTriangle,
+  IconBook,
   IconBuildingBank,
   IconChartBar,
   IconCircleCheck,
   IconCircleDashedCheck,
+  IconCirclesRelation,
   IconDashboard,
   IconDatabase,
   IconInnerShadowTop,
+  IconLayoutDashboard,
   IconListDetails,
   IconPentagonX,
   IconProgress,
+  IconUserOff,
   IconUsers,
+  IconWorld,
 } from "@tabler/icons-react"
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
 import { useSession } from 'next-auth/react'
-import { FileInput, Newspaper, ShieldHalf, ShieldUser } from 'lucide-react'
+import { FileInput, GraduationCap, Newspaper, ShieldHalf, ShieldUser, Wallet } from 'lucide-react'
 
 export default function ClientSidebar({ ...props }) {
   const session = useSession();
   const onBoardingMenuItems = [
     {
       title: 'Dashboard',
-      icon: IconDashboard,
+      icon: IconLayoutDashboard,
       url: '/dashboard/client',
     },
 
@@ -195,7 +200,7 @@ export default function ClientSidebar({ ...props }) {
   const watchlistAndScreeningMenuItems = [
     {
       title: 'Internal Blacklist',
-      icon: IconListDetails,
+      icon: IconUserOff,
       url: '/dashboard/client/watchlist-and-screening/internal-blacklist',
     },
   ]
@@ -203,17 +208,17 @@ export default function ClientSidebar({ ...props }) {
   const knowledgeHubMenuItems = [
     {
       title: 'Policy Hub',
-      icon: IconListDetails,
+      icon: IconBook,
       url: '/dashboard/client/knowledge-hub/policy-hub',
     },
     {
       title: 'Training Hub',
-      icon: IconListDetails,
+      icon: GraduationCap,
       url: '/dashboard/client/knowledge-hub/training-hub',
     },
     {
       title: 'EWRA',
-      icon: IconListDetails,
+      icon: IconWorld,
       url: '/dashboard/client/faq',
       children: [
         {
@@ -240,7 +245,7 @@ export default function ClientSidebar({ ...props }) {
     },
     {
       title: 'Regulatory Links',
-      icon: IconListDetails,
+      icon: IconCirclesRelation,
       url: '/dashboard/client/knowledge-hub/regulatory-links',
 
     },
@@ -311,7 +316,9 @@ export default function ClientSidebar({ ...props }) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
+                <div className='bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md'>
+                  <Wallet className="!size-4" />
+                </div>
                 <span className="text-base font-semibold">Dooit Wallet.</span>
               </a>
             </SidebarMenuButton>
