@@ -1,45 +1,48 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react";
-import { PartA } from "./smr-parts/part-a";
-import { PartB } from "./smr-parts/part-b";
-import { PartC } from "./smr-parts/part-c";
-import { PartD } from "./smr-parts/part-d";
-import { PartE } from "./smr-parts/part-e";
-import { PartF } from "./smr-parts/part-f";
-import { PartG } from "./smr-parts/part-g";
-import { PartH } from "./smr-parts/part-h";
-import { FormProgress } from "./form-progress";
-import { createSMR } from "@/app/dashboard/client/report-compliance/smr-filing/smr/actions";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, Loader2, Save } from 'lucide-react';
+import { PartA } from './smr-parts/part-a';
+import { PartB } from './smr-parts/part-b';
+import { PartC } from './smr-parts/part-c';
+import { PartD } from './smr-parts/part-d';
+import { PartE } from './smr-parts/part-e';
+import { PartF } from './smr-parts/part-f';
+import { PartG } from './smr-parts/part-g';
+import { PartH } from './smr-parts/part-h';
+import { FormProgress } from './form-progress';
+import {
+  createSMR,
+  getSMRById,
+} from '@/app/dashboard/client/report-compliance/smr-filing/smr/actions';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 const PARTS = [
-  { id: "A", title: "Details of the matter", component: PartA },
-  { id: "B", title: "Grounds for suspicion", component: PartB },
-  { id: "C", title: "Details of the person/organisation", component: PartC },
-  { id: "D", title: "Details of any other party", component: PartD },
-  { id: "E", title: "Suspicious person(s) unidentified", component: PartE },
-  { id: "F", title: "Transactions related to the matter", component: PartF },
-  { id: "G", title: "Additional details", component: PartG },
-  { id: "H", title: "Details of reporting entity", component: PartH },
+  { id: 'A', title: 'Details of the matter', component: PartA },
+  { id: 'B', title: 'Grounds for suspicion', component: PartB },
+  { id: 'C', title: 'Details of the person/organisation', component: PartC },
+  { id: 'D', title: 'Details of any other party', component: PartD },
+  { id: 'E', title: 'Suspicious person(s) unidentified', component: PartE },
+  { id: 'F', title: 'Transactions related to the matter', component: PartF },
+  { id: 'G', title: 'Additional details', component: PartG },
+  { id: 'H', title: 'Details of reporting entity', component: PartH },
 ];
 
-export function SuspiciousMatterReportForm() {
+export function SuspiciousMatterReportForm({ id }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     reportingEntity: null,
-    serviceStatus: "provided",
+    serviceStatus: 'provided',
     suspicionReasons: [],
     otherReasons: [],
     designatedServices: [],
-    groundsForSuspicion: "",
-    detailsOfPersonOrganisation: "",
-    detailsOfOtherParty: "",
-    suspiciousPersonUnidentified: "",
+    groundsForSuspicion: '',
+    detailsOfPersonOrganisation: '',
+    detailsOfOtherParty: '',
+    suspiciousPersonUnidentified: '',
     transactionsRelatedToTheMatter: [],
     previousReports: [],
     otherGovernmentBodies: [],
@@ -57,30 +60,60 @@ export function SuspiciousMatterReportForm() {
 
   const CurrentPartComponent = PARTS[currentStep].component;
 
+  const getFormDataById = async () => {
+    try {
+      const response = await getSMRById(id);
+      console.log('response', response);
+      const modifiedData = {
+        ...response?.data,
+        serviceStatus: response?.data?.partA?.serviceStatus,
+        designatedServices: response?.data?.partA?.designatedServices,
+        suspicionReasons: response?.data?.partA?.suspicionReasons,
+        otherReasons: response?.data?.partA?.otherReasons,
+        groundsForSuspicion: response?.data?.partB?.groundsForSuspicion,
+        personOrganisation: response?.data?.partC?.personOrganisation,
+        otherParties: response?.data?.partD?.otherParties,
+        unidentifiedPersons: response?.data?.partE?.unidentifiedPersons,
+        transactions: response?.data?.partF?.transactions,
+        likelyOffence: response?.data?.partG?.likelyOffence,
+        previousReports: response?.data?.partG?.previousReports,
+        otherGovernmentBodies: response?.data?.partG?.otherGovernmentBodies,
+        attachments: response?.data?.partG?.attachments,
+        reportingEntity: response?.data?.partH?.reportingEntity,
+      };
+      setFormData(modifiedData);
+    } catch (error) {}
+  };
+  useEffect(() => {
+    if (id) {
+      getFormDataById();
+    }
+  }, [id]);
+
   const handleNext = () => {
     if (currentStep < PARTS.length - 1) {
       setCurrentStep(currentStep + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handleSave = () => {
     setLastSaved(new Date());
     // In a real app, this would save to backend
-    console.log("[v0] Form data saved:", formData);
+    console.log('[v0] Form data saved:', formData);
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     const submittedData = {
-      status: "draft",
+      status: 'draft',
       partA: {
         serviceStatus: formData.serviceStatus,
         designatedServices: formData.designatedServices,
@@ -115,19 +148,19 @@ export function SuspiciousMatterReportForm() {
         reportingEntity: formData.reportingEntity,
       },
     };
-    console.log("[v0] Form submitted:", JSON.stringify(submittedData, null, 2));
+    console.log('[v0] Form submitted:', JSON.stringify(submittedData, null, 2));
     try {
       const response = await createSMR(submittedData);
-      console.log("submit response", response);
+      console.log('submit response', response);
       if (response.success || response.succeed) {
-        toast.success("Suspicious Matter Report submitted successfully!");
-        localStorage.setItem("newId", response.id);
-        router.push("/dashboard/client/report-compliance/smr-filing/smr");
+        toast.success('Suspicious Matter Report submitted successfully!');
+        localStorage.setItem('newId', response.id);
+        router.push('/dashboard/client/report-compliance/smr-filing/smr');
       } else {
-        toast.error("Failed to submit Suspicious Matter Report!");
+        toast.error('Failed to submit Suspicious Matter Report!');
       }
     } catch (error) {
-      toast.error("Failed to submit Suspicious Matter Report!");
+      toast.error('Failed to submit Suspicious Matter Report!');
     } finally {
       setIsSubmitting(false);
     }
@@ -170,7 +203,7 @@ export function SuspiciousMatterReportForm() {
               {PARTS[currentStep].id}
             </div>
             <h2 className="text-2xl font-bold">
-              PART {PARTS[currentStep].id} -{" "}
+              PART {PARTS[currentStep].id} -{' '}
               {PARTS[currentStep].title.toUpperCase()}
             </h2>
           </div>
@@ -221,7 +254,7 @@ export function SuspiciousMatterReportForm() {
             {isSubmitting ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              "Submit Report"
+              'Submit Report'
             )}
           </Button>
         )}

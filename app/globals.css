@@ -23,15 +23,6 @@
   src: url("/assets/fonts/tiktok_only.woff2") format("woff2");
 }
 
-* {
-  letter-spacing: -0.01rem;
-  font-family: font-1, sans-serif;
-}
-h1,
-h2 {
-  letter-spacing: -0.06rem;
-}
-
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -104,6 +95,10 @@ h2 {
   --color-dark: var(--dark);
   --color-txt-mute: var(--txt-mute);
   --color-mute-200: var(--mute-200);
+  --font-font-1: font-1, sans-serif;
+  --font-font-2: font-2, sans-serif;
+  --font-font-3: font-3, sans-serif;
+  --font-font-4: font-4, sans-serif;
 
   /* --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono); */
@@ -146,7 +141,7 @@ h2 {
 body {
   /* background: var(--background);
   color: var(--foreground); */
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-font-2), sans-serif;
   font-size: 0.8rem;
 }
 .container {

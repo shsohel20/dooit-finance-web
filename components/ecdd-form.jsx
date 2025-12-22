@@ -1,34 +1,34 @@
-"use client";
+'use client';
 
 import {
   createEcdd,
   autoPopulatedEcddData,
   updateEcdd,
-} from "@/app/dashboard/client/report-compliance/ecdd/actions";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/app/dashboard/client/report-compliance/ecdd/actions';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Download, FileSpreadsheet, Loader2, Save, Upload } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import UILoader from "./UILoader";
-import CustomSelect from "./ui/CustomSelect";
-import { getCaseList } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
-import { z } from "zod";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { getEcddById } from "@/app/dashboard/client/report-compliance/ecdd/actions";
-import SelectCaseList from "./ui/SelectCaseList";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Download, FileSpreadsheet, Loader2, Save, Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import UILoader from './UILoader';
+import CustomSelect from './ui/CustomSelect';
+import { getCaseList } from '@/app/dashboard/client/monitoring-and-cases/case-list/actions';
+import { z } from 'zod';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { getEcddById } from '@/app/dashboard/client/report-compliance/ecdd/actions';
+import SelectCaseList from './ui/SelectCaseList';
 
 const formSchema = z.object({
   caseNumber: z.object({
@@ -71,75 +71,75 @@ const formSchema = z.object({
   generatedBy: z.string().optional(),
   analyst: z.string().optional(),
   customer: z.string().optional(),
-  date: z.string().min(1, "Date is required"),
+  date: z.string().min(1, 'Date is required'),
 });
 
 export function ECDDForm({ caseNumber, id }) {
   const [formData, setFormData] = useState({
-    isPEP: "No",
-    isSanctioned: "No",
-    relatedParty: "N/A",
-    abn: "",
+    isPEP: 'No',
+    isSanctioned: 'No',
+    relatedParty: 'N/A',
+    abn: '',
 
-    position: "Compliance Officer",
-    date: new Date().toISOString().split("T")[0],
-    analystName: "",
-    analysisEndDate: "",
-    fullName: "",
-    accountPurpose: "",
-    onboardingDate: "",
+    position: 'Compliance Officer',
+    date: new Date().toISOString().split('T')[0],
+    analystName: '',
+    analysisEndDate: '',
+    fullName: '',
+    accountPurpose: '',
+    onboardingDate: '',
     expectedVolume: 0,
-    beneficialOwner: "",
-    withdrawalDetails: "",
-    accountCreationDate: "",
+    beneficialOwner: '',
+    withdrawalDetails: '',
+    accountCreationDate: '',
     totalDepositsAUD: 0,
     totalWithdrawalsUSDT: 0,
     totalWithdrawalsETH: 0,
     totalWithdrawalsBTC: 0,
-    depositDetails: "",
-    ipLocations: "",
-    registeredAddress: "",
+    depositDetails: '',
+    ipLocations: '',
+    registeredAddress: '',
     annualIncome: 0,
-    additionalInfo: "",
-    behavioralAnalysis: "",
-    directors: "",
-    isPEP: "No",
-    isSanctioned: "No",
-    relatedParty: "N/A",
-    transaction: "",
-    generatedBy: "",
-    analyst: "",
-    customer: "",
-    profileSummary: "",
-    transactionAnalysis: "",
-    recommendation: "",
-    ipLocations: "",
-    registeredAddress: "",
-    behavioralAnalysis: "",
-    recommendation: "",
-    additionalInfo: "",
-    behavioralAnalysis: "",
-    directors: "",
-    isPEP: "No",
-    isSanctioned: "No",
-    relatedParty: "N/A",
-    transaction: "",
-    generatedBy: "",
+    additionalInfo: '',
+    behavioralAnalysis: '',
+    directors: '',
+    isPEP: 'No',
+    isSanctioned: 'No',
+    relatedParty: 'N/A',
+    transaction: '',
+    generatedBy: '',
+    analyst: '',
+    customer: '',
+    profileSummary: '',
+    transactionAnalysis: '',
+    recommendation: '',
+    ipLocations: '',
+    registeredAddress: '',
+    behavioralAnalysis: '',
+    recommendation: '',
+    additionalInfo: '',
+    behavioralAnalysis: '',
+    directors: '',
+    isPEP: 'No',
+    isSanctioned: 'No',
+    relatedParty: 'N/A',
+    transaction: '',
+    generatedBy: '',
 
-    customer: "",
-    profileSummary: "",
-    transactionAnalysis: "",
-    recommendation: "",
-    ipLocations: "",
-    registeredAddress: "",
-    behavioralAnalysis: "",
-    recommendation: "",
-    additionalInfo: "",
-    behavioralAnalysis: "",
-    directors: "",
-    isPEP: "No",
-    isSanctioned: "No",
-    relatedParty: "N/A",
+    customer: '',
+    profileSummary: '',
+    transactionAnalysis: '',
+    recommendation: '',
+    ipLocations: '',
+    registeredAddress: '',
+    behavioralAnalysis: '',
+    recommendation: '',
+    additionalInfo: '',
+    behavioralAnalysis: '',
+    directors: '',
+    isPEP: 'No',
+    isSanctioned: 'No',
+    relatedParty: 'N/A',
   });
 
   const [lastSaved, setLastSaved] = useState(null);
@@ -173,11 +173,11 @@ export function ECDDForm({ caseNumber, id }) {
     setFetching(true);
     try {
       const response = await autoPopulatedEcddData(caseNumber);
-      console.log("response from ai analysis", response);
+      console.log('response from ai analysis', response);
       const formattedData = getFormattedData(response);
       reset(formattedData);
     } catch (error) {
-      console.error("Failed to get data", error);
+      console.error('Failed to get data', error);
       // toast.error("Failed to get data");
     } finally {
       setFetching(false);
@@ -188,8 +188,15 @@ export function ECDDForm({ caseNumber, id }) {
     setFetching(true);
     try {
       const response = await getEcddById(id);
-      console.log("response by id", response);
-      const { caseNumber, transaction, analyst, customer, customerName, ...data } = response?.data;
+      console.log('response by id', response);
+      const {
+        caseNumber,
+        transaction,
+        analyst,
+        customer,
+        customerName,
+        ...data
+      } = response?.data;
       const formattedData = {
         ...data,
         caseNumber: {
@@ -199,16 +206,16 @@ export function ECDDForm({ caseNumber, id }) {
         transaction: transaction?._id,
         analyst: analyst?._id,
         customer: customer?._id,
-        onboardingDate: customer?.createdAt?.split("T")[0],
-        position: "Compliance Officer",
-        accountCreationDate: data?.accountCreationDate?.split("T")[0],
-        analysisEndDate: data?.analysisEndDate?.split("T")[0],
-        date: data?.date ? data?.date?.split("T")[0] : "",
+        onboardingDate: customer?.createdAt?.split('T')[0],
+        position: 'Compliance Officer',
+        accountCreationDate: data?.accountCreationDate?.split('T')[0] ?? '',
+        analysisEndDate: data?.analysisEndDate?.split('T')[0] ?? '',
+        date: data?.date ? data?.date?.split('T')[0] : '',
         generatedBy: data?.generatedBy?._id,
       };
       reset(formattedData);
     } catch (error) {
-      console.error("Failed to get data", error);
+      console.error('Failed to get data', error);
       // toast.error("Failed to get data");
     } finally {
       setFetching(false);
@@ -223,8 +230,8 @@ export function ECDDForm({ caseNumber, id }) {
       additionalInfo: data.additional_information,
       behavioralAnalysis: data.behavioral_analysis,
       analystName: data.analyst_name,
-      position: "Compliance Officer",
-      date: data.analysis_date || new Date().toISOString().split("T")[0],
+      position: 'Compliance Officer',
+      date: data.analysis_date || new Date().toISOString().split('T')[0],
       caseNumber: caseNumber,
       fullName: data.name,
       onboardingDate: data.onboarding_date,
@@ -239,8 +246,8 @@ export function ECDDForm({ caseNumber, id }) {
       recommendation: data.recommendation,
       transactionAnalysis: data.transaction_analysis,
       directors: data.director_name,
-      isPEP: data.pep_flag ? "Yes" : "No",
-      isSanctioned: data.sanction_flag ? "Yes" : "No",
+      isPEP: data.pep_flag ? 'Yes' : 'No',
+      isSanctioned: data.sanction_flag ? 'Yes' : 'No',
       userId: data.user_id,
       accountPurpose: data.account_purpose,
       annualIncome: data.annual_income,
@@ -252,9 +259,9 @@ export function ECDDForm({ caseNumber, id }) {
         value: caseNumber,
       },
       customer: data?.user_id,
-      analyst: "6906ef042b25d3502f3a6915",
-      generatedBy: "6906ef042b25d3502f3a6915",
-      transaction: "690fd9dbfc65168c8a447a8a",
+      analyst: '6906ef042b25d3502f3a6915',
+      generatedBy: '6906ef042b25d3502f3a6915',
+      transaction: '690fd9dbfc65168c8a447a8a',
     };
     return formattedData;
   };
@@ -270,7 +277,7 @@ export function ECDDForm({ caseNumber, id }) {
         const data = JSON.parse(content);
         populateFormFromData(data);
       } catch (error) {
-        console.error("[v0] Error parsing file:", error);
+        console.error('[v0] Error parsing file:', error);
         alert("Error parsing file. Please ensure it's valid JSON format.");
       }
     };
@@ -280,36 +287,37 @@ export function ECDDForm({ caseNumber, id }) {
   const populateFormFromData = (data) => {
     // Auto-populate form fields from uploaded data
     const populated = {
-      analystName: data.analystName || "",
-      position: data.position || "Compliance Officer",
-      date: data.date || new Date().toISOString().split("T")[0],
+      analystName: data.analystName || '',
+      position: data.position || 'Compliance Officer',
+      date: data.date || new Date().toISOString().split('T')[0],
       caseNumber: data.caseNumber || generateCaseNumber(),
       userId: data.userId || generateUserId(),
-      fullName: data.fullName || "",
-      customerName: data.customerName || data.fullName || "",
-      abn: data.abn || "",
-      onboardingDate: data.onboardingDate || "",
-      accountPurpose: data.accountPurpose || "Digital Currency Exchange",
-      expectedVolume: data.expectedVolume || "",
-      annualIncome: data.annualIncome || "",
-      beneficialOwner: data.beneficialOwner || "",
-      directors: data.directors || "",
-      isPEP: data.isPEP || "No",
-      isSanctioned: data.isSanctioned || "No",
-      relatedParty: data.relatedParty || "N/A",
+      fullName: data.fullName || '',
+      customerName: data.customerName || data.fullName || '',
+      abn: data.abn || '',
+      onboardingDate: data.onboardingDate || '',
+      accountPurpose: data.accountPurpose || 'Digital Currency Exchange',
+      expectedVolume: data.expectedVolume || '',
+      annualIncome: data.annualIncome || '',
+      beneficialOwner: data.beneficialOwner || '',
+      directors: data.directors || '',
+      isPEP: data.isPEP || 'No',
+      isSanctioned: data.isSanctioned || 'No',
+      relatedParty: data.relatedParty || 'N/A',
       // Transaction data
-      accountCreationDate: data.accountCreationDate || data.onboardingDate || "",
-      analysisEndDate: data.analysisEndDate || "",
-      totalDepositsAUD: data.totalDepositsAUD || "",
-      totalWithdrawalsUSDT: data.totalWithdrawalsUSDT || "",
-      totalWithdrawalsETH: data.totalWithdrawalsETH || "",
-      totalWithdrawalsBTC: data.totalWithdrawalsBTC || "",
-      depositDetails: data.depositDetails || "",
-      withdrawalDetails: data.withdrawalDetails || "",
-      additionalInfo: data.additionalInfo || "",
+      accountCreationDate:
+        data.accountCreationDate || data.onboardingDate || '',
+      analysisEndDate: data.analysisEndDate || '',
+      totalDepositsAUD: data.totalDepositsAUD || '',
+      totalWithdrawalsUSDT: data.totalWithdrawalsUSDT || '',
+      totalWithdrawalsETH: data.totalWithdrawalsETH || '',
+      totalWithdrawalsBTC: data.totalWithdrawalsBTC || '',
+      depositDetails: data.depositDetails || '',
+      withdrawalDetails: data.withdrawalDetails || '',
+      additionalInfo: data.additionalInfo || '',
       // Behavioral
-      ipLocations: data.ipLocations || "",
-      registeredAddress: data.registeredAddress || "",
+      ipLocations: data.ipLocations || '',
+      registeredAddress: data.registeredAddress || '',
       // Auto-generate summaries
       profileSummary: generateProfileSummary(data),
       transactionAnalysis: generateTransactionAnalysis(data),
@@ -321,7 +329,7 @@ export function ECDDForm({ caseNumber, id }) {
   };
 
   const generateCaseNumber = () => {
-    const date = new Date().toISOString().split("T")[0].replace(/-/g, "");
+    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
     return `EC_${date}_01`;
   };
 
@@ -331,48 +339,47 @@ export function ECDDForm({ caseNumber, id }) {
   };
 
   const generateProfileSummary = (data) => {
-    if (!data.customerName) return "";
-
+    if (!data.customerName) return '';
     return `The customer ${data.customerName} (UID: ${
-      data.userId || "UID"
-    }), ABN ${data.abn || "N/A"}, was onboarded on ${data.onboardingDate || "dd/mm/yyyy"}.
+      data.userId || 'UID'
+    }), ABN ${data.abn || 'N/A'}, was onboarded on ${data.onboardingDate || 'dd/mm/yyyy'}.
 
- Account opening purpose was stated as ${
-   data.accountPurpose || "Digital Currency Exchange"
- } and expected trading volume is listed as $${
-   data.expectedVolume || "X"
- } and over AUD (per month), where the company annual income is over $${
-   data.annualIncome || "X"
- } million as per onboarding document. An open media search reveals no adverse media for the customer. ${
-   data.beneficialOwner || "N/A"
- } appears to be the BO of ${data.customerName}, where ${
-   data.directors || "N/A"
- } are the directors of the company. No adverse media was identified for the related parties while conducting open media searches.`;
+     Account opening purpose was stated as ${
+       data.accountPurpose || 'Digital Currency Exchange'
+     } and expected trading volume is listed as $${
+       data.expectedVolume || 'X'
+     } and over AUD (per month), where the company annual income is over $${
+       data.annualIncome || 'X'
+     } million as per onboarding document. An open media search reveals no adverse  media for the customer. ${
+       data.beneficialOwner || 'N/A'
+     } appears to be the BO of ${data.customerName}, where ${
+       data.directors || 'N/A'
+     } are the directors of the company. No adverse media was identified for the related parties while conducting open media searches.`;
   };
 
   const generateTransactionAnalysis = (data) => {
-    if (!data.customerName) return "";
+    if (!data.customerName) return '';
 
     return `Since then account creation date on ${
-      data.accountCreationDate || "dd/mm/yyyy"
-    }, until ${data.analysisEndDate || "dd/mm/yyyy"}, ${data.customerName} conducted a total of $${
-      data.totalDepositsAUD || "X"
+      data.accountCreationDate || 'dd/mm/yyyy'
+    }, until ${data.analysisEndDate || 'dd/mm/yyyy'}, ${data.customerName} conducted a total of $${
+      data.totalDepositsAUD || 'X'
     } million AUD in deposits and withdrawals amounting to ${
-      data.totalWithdrawalsUSDT || "X"
-    } million USDT, ${data.totalWithdrawalsETH || "X"} ETH and ${
-      data.totalWithdrawalsBTC || "X"
+      data.totalWithdrawalsUSDT || 'X'
+    } million USDT, ${data.totalWithdrawalsETH || 'X'} ETH and ${
+      data.totalWithdrawalsBTC || 'X'
     } BTC. The transactions follow a pattern of high-value AUD deposits immediately converted to cryptocurrency, with consistent use of a single beneficiary wallet for USDT withdrawals.
 
-Deposit:
-${
-  data.depositDetails ||
-  "The deposits, totaling $X AUD, ranged between $X AUD and $X AUD. All deposits were from the customer and converted into USDT and BTC. Elliptic screening and World-Check results indicate no adverse findings, with funds originating from legitimate sources."
-}
+  Deposit:
+    ${
+      data.depositDetails ||
+      'The deposits, totaling $X AUD, ranged between $X AUD and $X AUD. All deposits were from the customer and converted into USDT and BTC. Elliptic screening and World-Check results indicate no adverse findings, with funds originating from legitimate sources.'
+    }
 
-Withdrawals:
+  Withdrawals:
 ${
   data.withdrawalDetails ||
-  "Withdrawals included X million USDT sent to various wallets. Elliptic screening did not identify risks for these wallets."
+  'Withdrawals included X million USDT sent to various wallets. Elliptic screening did not identify risks for these wallets.'
 }`;
   };
 
@@ -381,17 +388,17 @@ ${
       return `The customer account has recorded a total of ${
         data.ipLocations
       } different IP locations, where all the IP logins are from Australia. The customer's registered address is in ${
-        data.registeredAddress || "N/A"
+        data.registeredAddress || 'N/A'
       }.`;
     }
-    return "The customer is an OTC customer thus no IP information is available.";
+    return 'The customer is an OTC customer thus no IP information is available.';
   };
 
   const generateRecommendation = (data) => {
-    if (!data.customerName) return "";
+    if (!data.customerName) return '';
 
     return `Based on our analysis on ${data.customerName} (UID: ${
-      data.userId || "UID"
+      data.userId || 'UID'
     }) conducted multiple AUD deposits followed by USDT and BTC withdrawals where the majority of them were sourced from an external whitelisted bank account. However, the SOF and SOW needs to be collected. Thus recommending to continue the relationship as a high risk customer (HRC) and request RFI at this stage.`;
   };
 
@@ -404,28 +411,31 @@ ${
       caseNumber: data?.caseNumber?.value,
       ...(id ? { id: id } : {}),
     };
-    console.log("submittedData", JSON.stringify(submittedData, null, 2));
+
     const action = id ? updateEcdd : createEcdd;
     const response = await action(submittedData);
-    console.log("submit response", response);
+    console.log('submit response', response);
     if (response.success) {
-      localStorage.setItem("newId", response.data._id);
-      toast.success(id ? "Case updated successfully" : "Case created successfully");
+      localStorage.setItem('newId', response.data._id);
+      toast.success(
+        id ? 'Case updated successfully' : 'Case created successfully'
+      );
       router.push(`/dashboard/client/report-compliance/ecdd`);
     } else {
-      toast.error("Failed to create case");
+      console.log('submittedData', JSON.stringify(submittedData, null, 2));
+      toast.error(response?.error || 'Failed to create case');
     }
-    console.log("[v0] ECDD response", response);
+    console.log('[v0] ECDD response', response);
     setLoading(false);
   };
 
   const handleExport = () => {
     const dataStr = JSON.stringify(formData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `ECDD_${formData.caseNumber || "report"}.json`;
+    link.download = `ECDD_${formData.caseNumber || 'report'}.json`;
     link.click();
   };
 
@@ -437,47 +447,47 @@ ENHANCED CUSTOMER DUE DILIGENCE REPORT
 1. Analysis and Review
 
 1.(i) Analysed By:
-(a) Name:     ${formData.analystName || "_________________________"}
-(b) Position: ${formData.position || "_________________________"}
-(c) Date:     ${formData.date || "_________________________"}
-(d) Case Number: ${formData.caseNumber || "_________________________"}
+(a) Name:     ${formData.analystName || '_________________________'}
+(b) Position: ${formData.position || '_________________________'}
+(c) Date:     ${formData.date || '_________________________'}
+(d) Case Number: ${formData.caseNumber || '_________________________'}
 
 2. Customer Profile
 Inherent Customer risk rating:
-2.1. User_id: ${formData.userId || "_________________________"}
-2.2. Full Name: ${formData.fullName || "_________________________"}
+2.1. User_id: ${formData.userId || '_________________________'}
+2.2. Full Name: ${formData.fullName || '_________________________'}
 2.3 Profile Summary
-${formData.profileSummary || "_________________________"}
+${formData.profileSummary || '_________________________'}
 
 3. Customer is PEP (Y/N)
-${formData.isPEP || "No"}
+${formData.isPEP || 'No'}
 
 4. Sanctioned Customer (Y/N)
-${formData.isSanctioned || "No"}
+${formData.isSanctioned || 'No'}
 
 5. Related Party:
-${formData.relatedParty || "N/A"}
+${formData.relatedParty || 'N/A'}
 
 6. Transaction Analysis
 Transaction Analysis:
-${formData.transactionAnalysis || "_________________________"}
+${formData.transactionAnalysis || '_________________________'}
 
 Additional Information:
-${formData.additionalInfo || "_________________________"}
+${formData.additionalInfo || '_________________________'}
 
 7. Behavioral Analysis
-${formData.behavioralAnalysis || "_________________________"}
+${formData.behavioralAnalysis || '_________________________'}
 
 8. Recommendation
-${formData.recommendation || "_________________________"}
+${formData.recommendation || '_________________________'}
 `;
 
     // Download as text file
-    const blob = new Blob([report], { type: "text/plain" });
+    const blob = new Blob([report], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `ECDD_Report_${formData.caseNumber || "report"}.txt`;
+    link.download = `ECDD_Report_${formData.caseNumber || 'report'}.txt`;
     link.click();
   };
 
@@ -485,7 +495,7 @@ ${formData.recommendation || "_________________________"}
     setFetchingCaseNumbers(true);
     try {
       const response = await getCaseList();
-      console.log("response", response);
+      console.log('response', response);
       const options = response.data.map((item) => ({
         ...item,
         label: item.uid,
@@ -494,7 +504,7 @@ ${formData.recommendation || "_________________________"}
 
       setCaseNumbers(options);
     } catch (error) {
-      console.error("Failed to get case numbers", error);
+      console.error('Failed to get case numbers', error);
     } finally {
       setFetchingCaseNumbers(false);
     }
@@ -503,50 +513,64 @@ ${formData.recommendation || "_________________________"}
   const handleCaseNumberChange = (value) => {
     const kycData = value?.customer?.personalKyc;
 
-    setValue("caseNumber", value, { shouldValidate: true });
+    setValue('caseNumber', value, { shouldValidate: true });
     if (value?.new) {
       setValue(
-        "caseNumber",
+        'caseNumber',
         {
           label: value.label,
           value: value.value,
         },
-        { shouldValidate: true },
+        { shouldValidate: true }
       );
     } else {
-      setValue("analystName", value?.analyst?.name, { shouldValidate: true });
+      setValue('analystName', value?.analyst?.name, {
+        shouldValidate: true,
+      });
       setValue(
-        "fullName",
+        'fullName',
         `${kycData?.personal_form?.customer_details?.given_name} ${kycData?.personal_form?.customer_details?.surname}`,
-        { shouldValidate: true },
+        { shouldValidate: true }
       );
-      setValue("accountPurpose", kycData?.funds_wealth?.account_purpose, {
+      setValue('accountPurpose', kycData?.funds_wealth?.account_purpose, {
         shouldValidate: true,
       });
-      setValue("onboardingDate", value?.customer?.createdAt?.split("T")[0], {
+      setValue('onboardingDate', value?.customer?.createdAt?.split('T')[0], {
         shouldValidate: true,
       });
-      setValue("expectedVolume", kycData?.funds_wealth?.estimated_trading_volume, {
+      setValue(
+        'expectedVolume',
+        kycData?.funds_wealth?.estimated_trading_volume,
+        {
+          shouldValidate: true,
+        }
+      );
+      setValue('beneficialOwner', value?.transaction?.beneficiary?.name, {
         shouldValidate: true,
       });
-      setValue("beneficialOwner", value?.transaction?.beneficiary?.name, {
+      setValue('transaction', value?.transaction?._id, {
         shouldValidate: true,
       });
-      setValue("transaction", value?.transaction?._id, {
+      setValue('generatedBy', value?.analyst?._id, {
         shouldValidate: true,
       });
-      setValue("generatedBy", value?.analyst?._id, { shouldValidate: true });
-      setValue("analyst", value?.analyst?._id, { shouldValidate: true });
-      setValue("customer", value?.customer?._id, { shouldValidate: true });
-      setValue("isPEP", value?.customer?.isPep ? "Yes" : "No", {
+      setValue('analyst', value?.analyst?._id, { shouldValidate: true });
+      setValue('customer', value?.customer?._id, {
         shouldValidate: true,
       });
-      setValue("isSanctioned", value?.customer?.sanction ? "Yes" : "No", {
+      setValue('isPEP', value?.customer?.isPep ? 'Yes' : 'No', {
         shouldValidate: true,
       });
-      setValue("registeredAddress", kycData?.personal_form?.residential_address?.address, {
+      setValue('isSanctioned', value?.customer?.sanction ? 'Yes' : 'No', {
         shouldValidate: true,
       });
+      setValue(
+        'registeredAddress',
+        kycData?.personal_form?.residential_address?.address,
+        {
+          shouldValidate: true,
+        }
+      );
     }
   };
 
@@ -558,7 +582,9 @@ ${formData.recommendation || "_________________________"}
           <h1 className="text-4xl font-bold  text-zinc-700 mb-2">
             Enhanced Customer Due Diligence
           </h1>
-          <p className="text-muted-foreground">Upload data or manually complete the ECDD report</p>
+          <p className="text-muted-foreground">
+            Upload data or manually complete the ECDD report
+          </p>
           {lastSaved && (
             <p className="text-sm text-muted-foreground mt-2">
               Last saved: {lastSaved.toLocaleString()}
@@ -604,7 +630,9 @@ ${formData.recommendation || "_________________________"}
 
         {/* Section 1: Analysis and Review */}
         <Card className="border   p-6 mb-6">
-          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">1. Analysis and Review</h2>
+          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
+            1. Analysis and Review
+          </h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
@@ -628,7 +656,11 @@ ${formData.recommendation || "_________________________"}
                 render={({ field }) => (
                   <div>
                     <Label htmlFor="position">Position</Label>
-                    <Input id="position" {...field} placeholder="Enter position" />
+                    <Input
+                      id="position"
+                      {...field}
+                      placeholder="Enter position"
+                    />
                   </div>
                 )}
               />
@@ -639,7 +671,12 @@ ${formData.recommendation || "_________________________"}
                 render={({ field }) => (
                   <div>
                     <Label htmlFor="date">Date</Label>
-                    <Input id="date" {...field} placeholder="Enter date" type="date" />
+                    <Input
+                      id="date"
+                      {...field}
+                      placeholder="Enter date"
+                      type="date"
+                    />
                   </div>
                 )}
               />
@@ -668,7 +705,9 @@ ${formData.recommendation || "_________________________"}
 
         {/* Section 2: Customer Profile */}
         <Card className="border   p-6 mb-6">
-          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">2. Customer Profile</h2>
+          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
+            2. Customer Profile
+          </h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
@@ -740,7 +779,9 @@ ${formData.recommendation || "_________________________"}
                 type="number"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="expectedVolume">Expected Trading Volume (AUD)</Label>
+                    <Label htmlFor="expectedVolume">
+                      Expected Trading Volume (AUD)
+                    </Label>
                     <Input
                       id="expectedVolume"
                       {...field}
@@ -756,7 +797,9 @@ ${formData.recommendation || "_________________________"}
                 name="annualIncome"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="annualIncome">Annual Income (Million AUD)</Label>
+                    <Label htmlFor="annualIncome">
+                      Annual Income (Million AUD)
+                    </Label>
                     <Input
                       id="annualIncome"
                       type="number"
@@ -826,7 +869,7 @@ ${formData.recommendation || "_________________________"}
                 <div>
                   <Label htmlFor="isPEP">Customer is PEP (Y/N)</Label>
                   <Select
-                    value={field.value || "No"}
+                    value={field.value || 'No'}
                     onValueChange={(value) => field.onChange(value)}
                   >
                     <SelectTrigger id="isPEP">
@@ -845,9 +888,11 @@ ${formData.recommendation || "_________________________"}
               name="isSanctioned"
               render={({ field }) => (
                 <div>
-                  <Label htmlFor="isSanctioned">Sanctioned Customer (Y/N)</Label>
+                  <Label htmlFor="isSanctioned">
+                    Sanctioned Customer (Y/N)
+                  </Label>
                   <Select
-                    value={field.value || "No"}
+                    value={field.value || 'No'}
                     onValueChange={(value) => field.onChange(value)}
                   >
                     <SelectTrigger id="isSanctioned">
@@ -881,7 +926,9 @@ ${formData.recommendation || "_________________________"}
 
         {/* Section 6: Transaction Analysis */}
         <Card className="border   p-6 mb-6">
-          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">6. Transaction Analysis</h2>
+          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
+            6. Transaction Analysis
+          </h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
@@ -889,7 +936,9 @@ ${formData.recommendation || "_________________________"}
                 name="accountCreationDate"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="accountCreationDate">Account Creation Date</Label>
+                    <Label htmlFor="accountCreationDate">
+                      Account Creation Date
+                    </Label>
                     <Input
                       id="accountCreationDate"
                       type="date"
@@ -922,7 +971,9 @@ ${formData.recommendation || "_________________________"}
                 name="totalDepositsAUD"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="totalDepositsAUD">Total Deposits (AUD)</Label>
+                    <Label htmlFor="totalDepositsAUD">
+                      Total Deposits (AUD)
+                    </Label>
                     <Input
                       id="totalDepositsAUD"
                       {...field}
@@ -937,7 +988,9 @@ ${formData.recommendation || "_________________________"}
                 name="totalWithdrawalsUSDT"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="totalWithdrawalsUSDT">Total Withdrawals (USDT)</Label>
+                    <Label htmlFor="totalWithdrawalsUSDT">
+                      Total Withdrawals (USDT)
+                    </Label>
                     <Input
                       id="totalWithdrawalsUSDT"
                       {...field}
@@ -953,7 +1006,9 @@ ${formData.recommendation || "_________________________"}
                 name="totalWithdrawalsETH"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="totalWithdrawalsETH">Total Withdrawals (ETH)</Label>
+                    <Label htmlFor="totalWithdrawalsETH">
+                      Total Withdrawals (ETH)
+                    </Label>
                     <Input
                       id="totalWithdrawalsETH"
                       {...field}
@@ -969,7 +1024,9 @@ ${formData.recommendation || "_________________________"}
                 name="totalWithdrawalsBTC"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="totalWithdrawalsBTC">Total Withdrawals (BTC)</Label>
+                    <Label htmlFor="totalWithdrawalsBTC">
+                      Total Withdrawals (BTC)
+                    </Label>
                     <Input
                       id="totalWithdrawalsBTC"
                       {...field}
@@ -1016,7 +1073,9 @@ ${formData.recommendation || "_________________________"}
               name="transactionAnalysis"
               render={({ field }) => (
                 <div>
-                  <Label htmlFor="transactionAnalysis">Transaction Analysis</Label>
+                  <Label htmlFor="transactionAnalysis">
+                    Transaction Analysis
+                  </Label>
                   <Textarea
                     id="transactionAnalysis"
                     {...field}
@@ -1047,7 +1106,9 @@ ${formData.recommendation || "_________________________"}
 
         {/* Section 7: Behavioral Analysis */}
         <Card className="border   p-6 mb-6">
-          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">7. Behavioral Analysis</h2>
+          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
+            7. Behavioral Analysis
+          </h2>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Controller
@@ -1072,7 +1133,9 @@ ${formData.recommendation || "_________________________"}
                 name="registeredAddress"
                 render={({ field }) => (
                   <div>
-                    <Label htmlFor="registeredAddress">Registered Address</Label>
+                    <Label htmlFor="registeredAddress">
+                      Registered Address
+                    </Label>
                     <Input
                       id="registeredAddress"
                       {...field}
@@ -1088,7 +1151,9 @@ ${formData.recommendation || "_________________________"}
               name="behavioralAnalysis"
               render={({ field }) => (
                 <div>
-                  <Label htmlFor="behavioralAnalysis">Behavioral Analysis</Label>
+                  <Label htmlFor="behavioralAnalysis">
+                    Behavioral Analysis
+                  </Label>
                   <Textarea
                     id="behavioralAnalysis"
                     {...field}
@@ -1103,7 +1168,9 @@ ${formData.recommendation || "_________________________"}
 
         {/* Section 8: Recommendation */}
         <Card className="border   p-6 mb-6">
-          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">8. Recommendation</h2>
+          <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
+            8. Recommendation
+          </h2>
           <Controller
             control={control}
             name="recommendation"
@@ -1131,7 +1198,11 @@ ${formData.recommendation || "_________________________"}
             disabled={loading}
           >
             <Save className="w-5 h-5 mr-2" />
-            {loading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : "Save Progress"}
+            {loading ? (
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            ) : (
+              'Save Progress'
+            )}
           </Button>
           {/* <Button
           onClick={handleExport}

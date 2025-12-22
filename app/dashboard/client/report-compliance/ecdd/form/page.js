@@ -8,7 +8,8 @@ const EcddFormPage = async ({ searchParams }) => {
     // console.log( 'form page ecdd data', data );
     return (
         <div>
-            <ECDDForm caseNumber={caseNumber} id={id} />
+            <ECDDForm caseNumber={caseNumber}
+                id={id} />
         </div>
     )
 }

@@ -564,7 +564,7 @@ export function SuspicionDashboard({ data = sampleData }) {
             <Shield className="size-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <p className="text-sm font-medium text-balance">{mostCommonReason}</p>
+            <p className="text-sm font-medium text-balance line-clamp-3">{mostCommonReason}</p>
             <p className="mt-1 text-xs text-muted-foreground">{reasonCounts[mostCommonReason] || 0} cases</p>
           </CardContent>
         </Card>
