@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { getSMRList } from './actions'
 import { formatDateTime } from '@/lib/utils'
-import { EyeIcon } from 'lucide-react'
+import { EyeIcon, PencilIcon } from 'lucide-react'
 import { SMRDashboard } from './Dashboard'
 import SMRHeatmap from './HeatMap'
 
@@ -19,6 +19,10 @@ export default function SMRPage() {
     router.push(`/dashboard/client/report-compliance/smr-filing/smr/form/detail?id=${id}`)
   }
 
+  const handleEdit = (id) => {
+    router.push(`/dashboard/client/report-compliance/smr-filing/smr/form?id=${id}`)
+  }
+
   const columns = [
     {
       header: 'Action',
@@ -26,7 +30,13 @@ export default function SMRPage() {
       size: 40,
       cell: ({ row }) => {
         return (
-          <div className='flex items-center justify-center'>
+          <div className='flex items-center justify-center gap-2'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => handleEdit(row.original._id)}>
+              <PencilIcon />
+            </Button>
             <Button
               variant='outline'
               size='sm'
@@ -94,7 +104,6 @@ export default function SMRPage() {
     setLoading(true)
     try {
       const response = await getSMRList();
-      console.log('smr', response)
       if (response.success) {
         setData(response.data)
       }
@@ -104,7 +113,7 @@ export default function SMRPage() {
       setLoading(false)
     }
   }
-  console.log('data', JSON.stringify(data, null, 2))
+
   useEffect(() => {
     getSmr()
   }, [])

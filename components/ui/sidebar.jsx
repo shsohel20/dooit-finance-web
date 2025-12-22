@@ -430,7 +430,7 @@ function SidebarMenuItem({ className, ...props }) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-lg px-2 py-4  text-left  outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-white active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-secondary  data-[active=true]:text-sidebar-accent-foreground data-[active=true]:text-primary data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 font-medium text-zinc-700 text-[0.7rem]",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-lg px-2 py-2  text-left  outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-white active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-secondary  data-[active=true]:text-sidebar-accent-foreground data-[active=true]:text-zinc-700 data-[active=true]:font-semibold data-[active=true]:[&>svg]:text-primary data-[active=true]:border-l-[4px] data-[active=true]:border-primary   data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 font-medium text-zinc-700 text-[0.7rem] text-neutral-700",
   {
     variants: {
       variant: {
@@ -439,8 +439,8 @@ const sidebarMenuButtonVariants = cva(
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
       size: {
-        default: "h-8 text-[0.8rem]",
-        sm: "h-7 text-[0.8rem]",
+        default: "h-8 text-[0.85rem]",
+        sm: "h-7 text-[0.85rem]",
         lg: "h-12 text-[0.8rem] group-data-[collapsible=icon]:p-0!",
       },
     },

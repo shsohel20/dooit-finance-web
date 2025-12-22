@@ -1,5 +1,5 @@
 "use client";
-import CustomDatatable from "@/components/CustomDatatable";
+
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -16,13 +16,15 @@ import {
 } from "@/components/ui/select";
 import { StatusPill } from "@/components/ui/StatusPill";
 import {
+  IconCircleDottedLetterE,
   IconDotsVertical,
   IconEye,
   IconFile,
   IconFilePlus,
   IconGridDots,
+  IconLetterE,
+  IconLetterESmall,
   IconList,
-  IconPencil,
   IconPennant,
   IconSearch,
 } from "@tabler/icons-react";
@@ -63,7 +65,7 @@ const ListView = ({}) => {
     Rejected: "danger",
     "In Review": "warning",
   };
-  const handleEdit = (caseNumber) => {
+  const handleGenerateEcdd = (caseNumber) => {
     // console.log("caseNumber", caseNumber);
     router.push(
       `/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`
@@ -76,6 +78,15 @@ const ListView = ({}) => {
       cell: ({ row }) => (
         <>
           <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              title="Generate ECDD"
+              className={"rounded-full border"}
+              onClick={() => handleGenerateEcdd(row?.original?.uid)}
+            >
+              <IconLetterESmall className="size-4" />
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -98,7 +109,7 @@ const ListView = ({}) => {
                   View
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => handleEdit(row?.original?.uid)}
+                  onClick={() => handleGenerateEcdd(row?.original?.uid)}
                 >
                   <IconFilePlus className="mr-2 size-3 " />
                   Generate ECDD

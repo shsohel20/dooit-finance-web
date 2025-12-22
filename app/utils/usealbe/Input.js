@@ -18,7 +18,7 @@ const Input = ({
     error ? "border-red-500" : "",
     icon && "pl-10",
     className,
-    'placeholder:text-red-400',
+    "placeholder:text-red-400",
   );
 
   return (

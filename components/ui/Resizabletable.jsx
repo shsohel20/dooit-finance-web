@@ -70,7 +70,7 @@ export default function ResizableTable({
     },
     [setColumnSizing]
   );
-  
+
   React.useEffect(() => {
     const newId = localStorage.getItem("newId");
     if (newId) {
@@ -203,7 +203,7 @@ export default function ResizableTable({
           {loading ? (
             <>
               <TableBody>
-                {Array.from({ length: 5 }).map((_, index) => (
+                {Array.from({ length: 10 }).map((_, index) => (
                   <TableRow key={`skeleton-row-${index}`} className="">
                     {table.getVisibleLeafColumns().map((header) => {
                       return (
@@ -211,7 +211,7 @@ export default function ResizableTable({
                           key={header.id}
                           className={" border-r   first:border-l  font-bold  "}
                         >
-                          <Skeleton className="w-full h-4 animate-pulse" />
+                          <Skeleton className="w-full h-10 animate-pulse" />
                         </TableCell>
                       );
                     })}
@@ -227,12 +227,9 @@ export default function ResizableTable({
                     <TableRow
                       key={row.id}
                       data-highlighted={highlightedId === row?.original?.id}
-                      className={cn(
-                        "even:bg-muted/50 hover:bg-neutral-100  font-medium ",
-                        {
-                          "bg-blue-50 ": highlightedId === row?.original?.id,
-                        }
-                      )}
+                      className={cn(" hover:bg-neutral-100  font-medium ", {
+                        "bg-blue-50 ": highlightedId === row?.original?.id,
+                      })}
                       onDoubleClick={() => handleDoubleClick(row.original)}
                       onClick={() => handleRowClick(row.original)}
                     >

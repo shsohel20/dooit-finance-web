@@ -117,14 +117,14 @@ const EcddList = () => {
                 loading={loading}
                 actions={<Actions />}
             />
-            <DeleteModal open={openDeleteModal} setOpen={setOpenDeleteModal} id={deleteId} />
+            <DeleteModal open={openDeleteModal} setOpen={setOpenDeleteModal} id={deleteId} getData={getData} />
         </div>
     );
 };
 
 export default EcddList;
 
-const DeleteModal = ({ open, setOpen, id }) => {
+const DeleteModal = ({ open, setOpen, id, getData }) => {
     const [deleting, setDeleting] = useState(false);
 
     const handleDelete = async () => {
@@ -134,7 +134,7 @@ const DeleteModal = ({ open, setOpen, id }) => {
             console.log("res", res);
             if (res.success) {
                 setOpen(false);
-
+                getData();
                 toast.success('ECDD deleted successfully');
             }
         } catch (error) {

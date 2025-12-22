@@ -162,12 +162,12 @@ const CustomerRegistration = () => {
         </div>
       )}
 
-      {verifyingStatus === "verifying" && (
+      {/* {verifyingStatus === "verifying" && (
         <div className="flex flex-col items-center justify-center gap-4 min-h-[500px]">
           <IconRefresh className="size-20 animate-spin" />
           Verifying documents...
         </div>
-      )}
+      )} */}
       {verifiedMsg && (
         <div className="flex flex-col items-center justify-center gap-4 mt-4">
           <Alert variant="success">
@@ -182,6 +182,15 @@ const CustomerRegistration = () => {
             <Stepper currentStep={currentStep} totalSteps={TOTAL_STEPS} handleStep={handleStep} />
           </div>
           <div>
+            {/* {currentStep === 1 && (
+              <IdentificationDocuments
+                control={control}
+                errors={errors}
+                setValue={setValue}
+                setVerifyingStatus={setVerifyingStatus}
+                setVerifiedMsg={setVerifiedMsg}
+              />
+            )} */}
             {currentStep === 1 && <PersonalInfo control={control} errors={errors} />}
             {currentStep === 2 && (
               <OtherInfo control={control} errors={errors} setValue={setValue} />

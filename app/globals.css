@@ -1,10 +1,27 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"); */
 @import url(https://fonts.googleapis.com/css?family=Satisfy);
 @import url(https://fonts.googleapis.com/css?family=Acme);
 
 @import "tailwindcss";
 
 @import "tw-animate-css";
+
+@font-face {
+  font-family: "font-1";
+  src: url("/assets/fonts/font-2.woff2") format("woff2");
+}
+@font-face {
+  font-family: font-2;
+  src: url("/fonts/font-2.woff2");
+}
+@font-face {
+  font-family: font-3;
+  src: url("/fonts/font-3.woff2");
+}
+@font-face {
+  font-family: "font-4";
+  src: url("/assets/fonts/tiktok_only.woff2") format("woff2");
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -24,7 +41,7 @@
   --mute-200: #696969;
   --gray: #696969;
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.98 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -47,12 +64,16 @@
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.985 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --font-font-1: font-1;
+  --font-font-2: font-2;
+  --font-font-3: font-3;
+  --font-font-4: font-4;
 }
 
 .border-red {
@@ -74,12 +95,17 @@
   --color-dark: var(--dark);
   --color-txt-mute: var(--txt-mute);
   --color-mute-200: var(--mute-200);
+  --font-font-1: font-1, sans-serif;
+  --font-font-2: font-2, sans-serif;
+  --font-font-3: font-3, sans-serif;
+  --font-font-4: font-4, sans-serif;
 
   /* --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono); */
-  --font-mono: ui-monospace, Menlo, Monaco, "Poppins Mono", "Cascadia Mono",
-    "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace",
-    "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
+  --font-mono:
+    ui-monospace, Menlo, Monaco, "Poppins Mono", "Cascadia Mono", "Segoe UI Mono", "Roboto Mono",
+    "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro", "Fira Mono", "Droid Sans Mono",
+    "Courier New", monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -116,7 +142,7 @@
 body {
   /* background: var(--background);
   color: var(--foreground); */
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-font-2), sans-serif;
   font-size: 0.8rem;
 }
 .container {
@@ -178,7 +204,7 @@ button {
   min-height: 10px !important;
 }
 
-.blurry-overlay{
+.blurry-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -189,7 +215,6 @@ button {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(1000px);
   display: flex;
- 
 }
 
 .react-select__indicator {
@@ -207,4 +232,16 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+.scanner-effect {
+  background: linear-gradient(to right, rgba(0, 255, 0, 0.29), rgba(0, 255, 0, 0.1));
+  animation: scanner-effect 0.9s linear infinite alternate;
+}
+@keyframes scanner-effect {
+  0% {
+    height: 0;
+  }
+  100% {
+    height: 100%;
+  }
 }

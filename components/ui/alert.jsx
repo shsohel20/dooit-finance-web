@@ -1,22 +1,23 @@
-import * as React from "react";
-import { cva } from "class-variance-authority";
+import * as React from 'react';
+import { cva } from 'class-variance-authority';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
+import { CheckCircle } from 'lucide-react';
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
+  'relative w-full rounded-lg  border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground",
+        default: 'bg-card text-card-foreground',
         destructive:
-          "text-destructive bg-destructive/5 border-destructive/5 [&>svg]:text-current *data-[slot=alert-description]:text-neutral-700",
+          'text-destructive bg-destructive/5 border-destructive/5 [&>svg]:text-current *data-[slot=alert-description]:text-neutral-700',
         success:
-          "text-success bg-success/5 border-success/5 [&>svg]:text-current *data-[slot=alert-description]:text-neutral-700",
+          'text-success  border-success/5 bg-success/5 [&>svg]:text-current *data-[slot=alert-description]:text-neutral-700',
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: 'default',
     },
   }
 );
@@ -31,13 +32,20 @@ function Alert({ className, variant, ...props }) {
     />
   );
 }
+function AlertIcon({ className, ...props }) {
+  return (
+    <div data-slot="alert-icon" className={cn('size-4', className)} {...props}>
+      <CheckCircle className="size-4 text-success" />
+    </div>
+  );
+}
 
 function AlertTitle({ className, ...props }) {
   return (
     <div
       data-slot="alert-title"
       className={cn(
-        "col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight",
+        'col-start-2 line-clamp-1 min-h-4  tracking-tight font-bold',
         className
       )}
       {...props}
@@ -50,7 +58,7 @@ function AlertDescription({ className, ...props }) {
     <div
       data-slot="alert-description"
       className={cn(
-        "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
+        ' col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed',
         className
       )}
       {...props}
@@ -58,4 +66,4 @@ function AlertDescription({ className, ...props }) {
   );
 }
 
-export { Alert, AlertTitle, AlertDescription };
+export { Alert, AlertTitle, AlertDescription, AlertIcon };
