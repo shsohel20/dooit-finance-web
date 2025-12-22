@@ -52,6 +52,9 @@ const getBase64 = (file) => {
     reader.readAsDataURL(file);
   });
 };
+const Scanner = () => {
+  return <div className="scanner-effect absolute top-0 left-0 w-full h-full" />;
+};
 const IdentificationDocuments = ({
   control,
   errors,
@@ -69,6 +72,8 @@ const IdentificationDocuments = ({
   //back
   const [backLoading, setBackLoading] = useState(false);
   const [backError, setBackError] = useState(false);
+  const [userFrontImage, setUserFrontImage] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "documents",
@@ -78,6 +83,12 @@ const IdentificationDocuments = ({
     name: "document_type",
   });
 
+  useEffect(() => {
+    const live_photo = localStorage.getItem("live_photo");
+    if (live_photo) {
+      setUserFrontImage(live_photo);
+    }
+  }, []);
   useEffect(() => {
     const livenessVerdict = localStorage.getItem("liveness_verdict");
     if (livenessVerdict) {
@@ -161,6 +172,25 @@ const IdentificationDocuments = ({
       remove(field.id);
     });
   };
+
+  // const verifyingLivePhotoWithDocument = async () => {
+  //   const live_photo = localStorage.getItem("live_photo").replace("data:image/jpeg;base64,", "");
+  //   setIsVerifying(true);
+  //   const verify_data = {
+  //     app_id: 1,
+  //     image_1: frontBase64,
+  //     image_2: live_photo,
+  //   };
+  //   try {
+  //     const verify_response = await verifyDocument(verify_data);
+  //     return verify_response;
+  //   } catch (error) {
+  //     console.error("Verifying live photo with document error", error);
+  //     return false;
+  //   } finally {
+  //     setIsVerifying(false);
+  //   }
+  // };
   const handleSave = async () => {
     const formData = new FormData();
     formData.append("image", frontFile);
@@ -175,7 +205,7 @@ const IdentificationDocuments = ({
     let verifiedMsg = null;
     try {
       setIsSaving(true);
-      setVerifyingStatus("verifying");
+      // setVerifyingStatus("verifying");
       const verify_response = await verifyDocument(verify_data);
       verifiedMsg = `Found ${verify_response.data?.result?.similarity}% similarity with the document`;
 
@@ -206,6 +236,7 @@ const IdentificationDocuments = ({
       setVerifiedMsg(verifiedMsg);
     }
   };
+  const documentsAdded = fields.length === 2;
   return (
     <div className="mt-4 space-y-4">
       <div>
@@ -270,11 +301,33 @@ const IdentificationDocuments = ({
           </div>
         </div>
       </div>
-      <div className="py-6 flex justify-end">
-        <Button disabled={isSaving} onClick={handleSave}>
-          {isSaving ? "Please wait..." : "Upload"}
-        </Button>
-      </div>
+      {documentsAdded && (
+        <div>
+          <div className="flex gap-4 max-w-xl mx-auto">
+            <div className="w-full aspect-4/3 rounded-md overflow-hidden border bg-gradient-to-b from-green-500 to-green-300 relative">
+              {isSaving && <Scanner />}
+              <img
+                src={userFrontImage}
+                alt="user front image"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="w-full aspect-4/3 rounded-md overflow-hidden border relative">
+              {isSaving && <Scanner />}
+              <img
+                src={fields.find((field) => field.type === "front")?.url}
+                alt="document front"
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+          <div className="py-6 flex justify-center">
+            <Button disabled={isSaving} onClick={handleSave}>
+              {isSaving ? "Please wait..." : "Verify Documents"}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
