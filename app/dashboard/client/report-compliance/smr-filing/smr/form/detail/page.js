@@ -16,7 +16,7 @@ export default function ReportDetailView() {
   useEffect(() => {
     const fetchData = async () => {
       const response = await getSMRById(id);
-      console.log('response', response);
+      console.log('response', JSON.stringify(response.data, null, 2));
       setData(response?.data);
     }
     fetchData();

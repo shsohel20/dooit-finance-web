@@ -2,14 +2,14 @@
 import { PageDescription, PageHeader, PageTitle } from '@/components/common'
 import { Button } from '@/components/ui/button'
 import ResizableTable from '@/components/ui/Resizabletable'
-import { EyeIcon } from 'lucide-react'
+import { EyeIcon, PencilIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { getGFSList } from './actions'
 import { SuspicionDashboard } from './dashboard'
 
 
-const handleColumns = (handleView) => {
+const handleColumns = (handleView, handleEdit) => {
   return [
     {
       header: 'Action',
@@ -17,12 +17,20 @@ const handleColumns = (handleView) => {
       size: 100,
       cell: ({ row }) => {
         return (
-          <Button
-            size='sm'
-            variant='outline'
-            onClick={() => handleView(row.original?._id)}>
-            <EyeIcon />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size='sm'
+              variant='outline'
+              onClick={() => handleEdit(row.original?._id)}>
+              <PencilIcon />
+            </Button>
+            <Button
+              size='sm'
+              variant='outline'
+              onClick={() => handleView(row.original?._id)}>
+              <EyeIcon />
+            </Button>
+          </div>
         )
       }
     },
@@ -87,6 +95,9 @@ export default function GFSPage() {
   const handleView = (id) => {
     router.push(`/dashboard/client/report-compliance/smr-filing/gfs/form/detail?id=${id}`)
   }
+  const handleEdit = (id) => {
+    router.push(`/dashboard/client/report-compliance/smr-filing/gfs/form?id=${id}`)
+  }
   return (
     <div className='p-4 border rounded-lg space-y-4'>
       <PageHeader>
@@ -95,7 +106,7 @@ export default function GFSPage() {
       </PageHeader>
       <SuspicionDashboard data={data} />
       <ResizableTable
-        columns={handleColumns(handleView)}
+        columns={handleColumns(handleView, handleEdit)}
         data={data}
         actions={<Button size='sm'
           onClick={handleNewGFS}>Add New</Button>}
