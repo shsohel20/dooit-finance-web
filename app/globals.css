@@ -142,7 +142,7 @@
 body {
   /* background: var(--background);
   color: var(--foreground); */
-  font-family: var(--font-font-2), sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 0.8rem;
 }
 .container {
