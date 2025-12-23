@@ -6,18 +6,24 @@ import { HelpCircle } from 'lucide-react';
 import { useState } from 'react';
 import SelectCaseList from '../ui/SelectCaseList';
 import { autoPopulatedSMRData } from '@/app/dashboard/client/report-compliance/smr-filing/smr/actions';
+import { useEffect } from 'react';
 
 export function PartB({ data, updateData }) {
   const [caseNumber, setCaseNumber] = useState('');
+  const [groundsForSuspicion, setGroundsForSuspicion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    setCaseNumber(data?.caseNumber || '');
+    setGroundsForSuspicion(data?.groundsForSuspicion || '');
+  }, [data]);
   const handleCaseNumberChange = async (value) => {
     setCaseNumber(value.value);
     setIsLoading(true);
     updateData({ caseNumber: value });
     try {
       const response = await autoPopulatedSMRData(value.value);
-      console.log('autoPopulatedSMRData', response);
+
       updateData({
         groundsForSuspicion: response.narrative,
         personOrganisation: {
@@ -88,7 +94,7 @@ export function PartB({ data, updateData }) {
       </p>
       <Textarea
         id="grounds"
-        value={data?.groundsForSuspicion || ''}
+        value={groundsForSuspicion || ''}
         onChange={(e) => {
           // setGrounds(e.target.value);
           updateData({ groundsForSuspicion: e.target.value });
