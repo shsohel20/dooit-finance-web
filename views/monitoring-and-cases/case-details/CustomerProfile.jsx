@@ -51,31 +51,24 @@ export default function CustomerProfile() {
     return "Low Risk";
   };
 
-  const customer_details =
-    details?.customer?.personalKyc?.personal_form?.customer_details;
-  const employment_details =
-    details?.customer?.personalKyc?.personal_form?.employment_details;
+  const customer_details = details?.customer?.personalKyc?.personal_form?.customer_details;
+  const employment_details = details?.customer?.personalKyc?.personal_form?.employment_details;
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Customer Information */}
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle className="text-lg font-medium">
-              Customer Information
-            </CardTitle>
+            <CardTitle className="text-lg font-medium">Customer Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <User className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div className="flex-1 space-y-0.5">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Full Name
-                  </p>
+                  <p className="text-xs font-medium text-muted-foreground">Full Name</p>
                   <p className="text-sm font-medium text-foreground">
-                    {customer_details?.given_name}{" "}
-                    {customer_details?.middle_name}
+                    {customer_details?.given_name} {customer_details?.middle_name}
                   </p>
                 </div>
               </div>
@@ -83,45 +76,31 @@ export default function CustomerProfile() {
               <div className="flex items-start gap-3">
                 <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div className="flex-1 space-y-0.5">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Date of Birth
-                  </p>
-                  <p className="text-sm text-foreground">
-                    {/* {customerData.dateOfBirth} */}
-                  </p>
+                  <p className="text-xs font-medium text-muted-foreground">Date of Birth</p>
+                  <p className="text-sm text-foreground">{customerData.dateOfBirth}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <Globe className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div className="flex-1 space-y-0.5">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Nationality
-                  </p>
-                  <p className="text-sm text-foreground">
-                    {/* {customerData.nationality} */}
-                  </p>
+                  <p className="text-xs font-medium text-muted-foreground">Nationality</p>
+                  <p className="text-sm text-foreground">{customerData.nationality}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <Briefcase className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div className="flex-1 space-y-0.5">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Occupation
-                  </p>
-                  <p className="text-sm text-foreground">
-                    {employment_details?.occupation}
-                  </p>
+                  <p className="text-xs font-medium text-muted-foreground">Occupation</p>
+                  <p className="text-sm text-foreground">{employment_details?.occupation}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 text-success" />
                 <div className="flex-1 space-y-0.5">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Account Status
-                  </p>
+                  <p className="text-xs font-medium text-muted-foreground">Account Status</p>
                   <Badge
                     variant="outline"
                     className="h-6 border-success/30 bg-success/10 text-success"
@@ -137,9 +116,7 @@ export default function CustomerProfile() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-muted-foreground" />
-                <p className="text-xs font-medium text-muted-foreground">
-                  Associated Entities
-                </p>
+                <p className="text-xs font-medium text-muted-foreground">Associated Entities</p>
               </div>
               <div className="space-y-1.5">
                 {customerData.associatedEntities.map((entity, index) => (
@@ -164,9 +141,7 @@ export default function CustomerProfile() {
             {/* Risk Gauge */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Overall Risk Level
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">Overall Risk Level</p>
                 <span className="text-sm font-semibold text-destructive">
                   {getRiskLabel(riskData.geographicRisk)}
                 </span>
@@ -193,26 +168,20 @@ export default function CustomerProfile() {
 
             {/* Risk Categories */}
             <div className="space-y-4">
-              <p className="text-sm font-medium text-muted-foreground">
-                Risk Categories
-              </p>
+              <p className="text-sm font-medium text-muted-foreground">Risk Categories</p>
 
               <div className="space-y-4">
                 {/* Geographic Risk */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">
-                      Geographic Risk
-                    </span>
+                    <span className="text-sm font-medium text-foreground">Geographic Risk</span>
                     <span className="text-sm font-semibold text-foreground">
                       {riskData.geographicRisk}%
                     </span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className={`h-full transition-all ${getRiskColor(
-                        riskData.geographicRisk
-                      )}`}
+                      className={`h-full transition-all ${getRiskColor(riskData.geographicRisk)}`}
                       style={{ width: `${riskData.geographicRisk}%` }}
                     />
                   </div>
@@ -221,18 +190,14 @@ export default function CustomerProfile() {
                 {/* Product Risk */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">
-                      Product Risk
-                    </span>
+                    <span className="text-sm font-medium text-foreground">Product Risk</span>
                     <span className="text-sm font-semibold text-foreground">
                       {riskData.productRisk}%
                     </span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className={`h-full transition-all ${getRiskColor(
-                        riskData.productRisk
-                      )}`}
+                      className={`h-full transition-all ${getRiskColor(riskData.productRisk)}`}
                       style={{ width: `${riskData.productRisk}%` }}
                     />
                   </div>
@@ -241,18 +206,14 @@ export default function CustomerProfile() {
                 {/* Transaction Risk */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">
-                      Transaction Risk
-                    </span>
+                    <span className="text-sm font-medium text-foreground">Transaction Risk</span>
                     <span className="text-sm font-semibold text-foreground">
                       {riskData.transactionRisk}%
                     </span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className={`h-full transition-all ${getRiskColor(
-                        riskData.transactionRisk
-                      )}`}
+                      className={`h-full transition-all ${getRiskColor(riskData.transactionRisk)}`}
                       style={{ width: `${riskData.transactionRisk}%` }}
                     />
                   </div>
@@ -266,9 +227,7 @@ export default function CustomerProfile() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm font-medium text-muted-foreground">
-                  Source Documents
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">Source Documents</p>
               </div>
               <div className="space-y-2">
                 {documents.map((doc, index) => (
@@ -276,14 +235,8 @@ export default function CustomerProfile() {
                     key={index}
                     className="flex items-center justify-between rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent"
                   >
-                    <span className="text-sm font-medium text-foreground">
-                      {doc.name}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 gap-1 text-xs"
-                    >
+                    <span className="text-sm font-medium text-foreground">{doc.name}</span>
+                    <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
                       Review
                       <ChevronRight className="h-3.5 w-3.5" />
                     </Button>

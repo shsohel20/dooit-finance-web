@@ -59,7 +59,6 @@ export default function CaseTabs({ caseNumber, id, tab = "summary-and-timeline" 
     };
   }, []);
   useEffect(() => {
-    console.log("tab", tab);
     const tabObj = tabs.find((t) => t.id === tab);
 
     setActiveTab(tabObj || tabs[0]);
@@ -82,7 +81,7 @@ export default function CaseTabs({ caseNumber, id, tab = "summary-and-timeline" 
   }, [id]);
 
   return (
-    <>
+    <div className="bg-white p-4 rounded-lg">
       <nav className="flex gap-1 overflow-x-auto border-b">
         {tabs.map((tab) => (
           <button
@@ -105,6 +104,6 @@ export default function CaseTabs({ caseNumber, id, tab = "summary-and-timeline" 
       <UILoader loading={fetching} type="page">
         <main className="  py-8">{activeTab.component}</main>
       </UILoader>
-    </>
+    </div>
   );
 }

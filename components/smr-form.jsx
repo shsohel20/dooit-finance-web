@@ -16,9 +16,11 @@ import { FormProgress } from './form-progress';
 import {
   createSMR,
   getSMRById,
+  updateSMR,
 } from '@/app/dashboard/client/report-compliance/smr-filing/smr/actions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import UILoader from './UILoader';
 
 const PARTS = [
   { id: 'A', title: 'Details of the matter', component: PartA },
@@ -33,6 +35,7 @@ const PARTS = [
 
 export function SuspiciousMatterReportForm({ id }) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isFetching, setIsFetching] = useState(false);
   const [formData, setFormData] = useState({
     reportingEntity: null,
     serviceStatus: 'provided',
@@ -52,6 +55,7 @@ export function SuspiciousMatterReportForm({ id }) {
     transactions: [],
     otherParties: [],
     unidentifiedPersons: [],
+    caseNumber: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
@@ -62,6 +66,7 @@ export function SuspiciousMatterReportForm({ id }) {
 
   const getFormDataById = async () => {
     try {
+      setIsFetching(true);
       const response = await getSMRById(id);
       console.log('response', response);
       const modifiedData = {
@@ -82,7 +87,11 @@ export function SuspiciousMatterReportForm({ id }) {
         reportingEntity: response?.data?.partH?.reportingEntity,
       };
       setFormData(modifiedData);
-    } catch (error) {}
+    } catch (error) {
+      console.error('error', error);
+    } finally {
+      setIsFetching(false);
+    }
   };
   useEffect(() => {
     if (id) {
@@ -113,7 +122,9 @@ export function SuspiciousMatterReportForm({ id }) {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     const submittedData = {
+      id: id,
       status: 'draft',
+      caseNumber: formData.caseNumber?.uid,
       partA: {
         serviceStatus: formData.serviceStatus,
         designatedServices: formData.designatedServices,
@@ -136,7 +147,29 @@ export function SuspiciousMatterReportForm({ id }) {
           formData.unidentifiedPersons.length > 0 ? true : false,
       },
       partF: {
-        transactions: formData.transactions,
+        transactions: formData.transactions.map((transaction) => {
+          return {
+            ...transaction,
+            sender: {
+              ...transaction.sender,
+              institutions: transaction.sender.institutions.map((ins) => {
+                name: ins;
+              }),
+            },
+            payee: {
+              ...transaction.payee,
+              institutions: transaction.payee.institutions.map((ins) => {
+                name: ins;
+              }),
+            },
+            beneficiary: {
+              ...transaction.beneficiary,
+              institutions: transaction.beneficiary.institutions.map((ins) => {
+                name: ins;
+              }),
+            },
+          };
+        }),
       },
       partG: {
         likelyOffence: formData.likelyOffence,
@@ -150,10 +183,15 @@ export function SuspiciousMatterReportForm({ id }) {
     };
     console.log('[v0] Form submitted:', JSON.stringify(submittedData, null, 2));
     try {
-      const response = await createSMR(submittedData);
+      const action = id ? updateSMR : createSMR;
+      const response = await action(submittedData);
+
       console.log('submit response', response);
       if (response.success || response.succeed) {
-        toast.success('Suspicious Matter Report submitted successfully!');
+        const toastMessage = id
+          ? 'Suspicious Matter Report updated successfully!'
+          : 'Suspicious Matter Report submitted successfully!';
+        toast.success(toastMessage);
         localStorage.setItem('newId', response.id);
         router.push('/dashboard/client/report-compliance/smr-filing/smr');
       } else {
@@ -171,106 +209,108 @@ export function SuspiciousMatterReportForm({ id }) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-zinc-800 mb-2">
-          Suspicious Matter Report
-        </h1>
-        <p className="text-muted-foreground">
-          Complete as much of this form as possible as required under applicable
-          law
-        </p>
-        {lastSaved && (
-          <p className="text-sm text-muted-foreground mt-2">
-            Last saved: {lastSaved.toLocaleString()}
+    <UILoader loading={isFetching} type="page">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-zinc-800 mb-2">
+            Suspicious Matter Report
+          </h1>
+          <p className="text-muted-foreground">
+            Complete as much of this form as possible as required under
+            applicable law
           </p>
-        )}
-      </div>
-
-      {/* Progress Indicator */}
-      <FormProgress
-        steps={PARTS}
-        currentStep={currentStep}
-        onStepClick={setCurrentStep}
-      />
-
-      {/* Form Content */}
-      <Card className="border p-6 md:p-8 mb-6">
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
-              {PARTS[currentStep].id}
-            </div>
-            <h2 className="text-2xl font-bold">
-              PART {PARTS[currentStep].id} -{' '}
-              {PARTS[currentStep].title.toUpperCase()}
-            </h2>
-          </div>
+          {lastSaved && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Last saved: {lastSaved.toLocaleString()}
+            </p>
+          )}
         </div>
 
-        <CurrentPartComponent data={formData} updateData={updateFormData} />
-      </Card>
+        {/* Progress Indicator */}
+        <FormProgress
+          steps={PARTS}
+          currentStep={currentStep}
+          onStepClick={setCurrentStep}
+        />
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between gap-4 mb-8">
-        <Button
-          onClick={handlePrevious}
-          disabled={currentStep === 0}
-          variant="outline"
-          size="lg"
-          className="border-2 border-primary bg-transparent"
-        >
-          <ChevronLeft className="w-5 h-5 mr-2" />
-          Previous
-        </Button>
+        {/* Form Content */}
+        <Card className="border p-6 md:p-8 mb-6">
+          <div className="mb-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
+                {PARTS[currentStep].id}
+              </div>
+              <h2 className="text-2xl font-bold">
+                PART {PARTS[currentStep].id} -{' '}
+                {PARTS[currentStep].title.toUpperCase()}
+              </h2>
+            </div>
+          </div>
 
-        <Button
-          onClick={handleSave}
-          variant="outline"
-          size="lg"
-          className="border-2 border-primary bg-transparent"
-        >
-          <Save className="w-5 h-5 mr-2" />
-          Save Progress
-        </Button>
+          <CurrentPartComponent data={formData} updateData={updateFormData} />
+        </Card>
 
-        {currentStep < PARTS.length - 1 ? (
+        {/* Navigation */}
+        <div className="flex items-center justify-between gap-4 mb-8">
           <Button
-            onClick={handleNext}
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            variant="outline"
             size="lg"
-            className="bg-accent text-accent-foreground hover:bg-accent/90"
+            className="border-2 border-primary bg-transparent"
           >
-            Next
-            <ChevronRight className="w-5 h-5 ml-2" />
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
           </Button>
-        ) : (
+
           <Button
-            onClick={handleSubmit}
+            onClick={handleSave}
+            variant="outline"
             size="lg"
-            className="bg-accent text-accent-foreground hover:bg-accent/90"
-            disabled={isSubmitting}
+            className="border-2 border-primary bg-transparent"
           >
-            {isSubmitting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              'Submit Report'
-            )}
+            <Save className="w-5 h-5 mr-2" />
+            Save Progress
           </Button>
-        )}
+
+          {currentStep < PARTS.length - 1 ? (
+            <Button
+              onClick={handleNext}
+              size="lg"
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              Next
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              size="lg"
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                'Submit Report'
+              )}
+            </Button>
+          )}
+        </div>
+
+        {/* Privacy Statement */}
+        <Card className="border border-muted p-4 bg-muted/30">
+          <h3 className="font-bold text-sm mb-2">Privacy Statement</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Information is being collected as required under applicable law.
+            Information reported is made available to certain revenue, law
+            enforcement, national security, regulatory and social justice bodies
+            and may be disclosed to other Commonwealth and international bodies
+            pursuant to relevant legislation.
+          </p>
+        </Card>
       </div>
-
-      {/* Privacy Statement */}
-      <Card className="border border-muted p-4 bg-muted/30">
-        <h3 className="font-bold text-sm mb-2">Privacy Statement</h3>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Information is being collected as required under applicable law.
-          Information reported is made available to certain revenue, law
-          enforcement, national security, regulatory and social justice bodies
-          and may be disclosed to other Commonwealth and international bodies
-          pursuant to relevant legislation.
-        </p>
-      </Card>
-    </div>
+    </UILoader>
   );
 }

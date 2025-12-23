@@ -10,6 +10,15 @@ export const createGFS = async (formData) => {
   return response.json();
 }
 
+export const updateGFS = async (formData) => {
+  const { id, ...data } = formData;
+  console.log('formdata', id)
+  const response = await fetchWithAuth(`gfs-report/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  })
+  return response.json();
+}
 export const getGFSById = async (id) => {
   const response = await fetchWithAuth(`gfs-report/${id}`);
   return response.json();

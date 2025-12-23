@@ -1,28 +1,41 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
-import { TransactionForm } from "../transaction-form";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Plus, Trash2 } from 'lucide-react';
+import { TransactionForm } from '../transaction-form';
+import { useEffect } from 'react';
 
 export function PartF({ data, updateData }) {
   const [transactions, setTransactions] = useState(
     data.transactions || [createEmptyTransaction()]
   );
+  useEffect(() => {
+    console.log('data', data.transactions);
+    //date should suppport input type date 2025-11-28
+    const transactions = data.transactions.map((transaction) => {
+      return {
+        ...transaction,
+        date: new Date(transaction.date).toISOString().split('T')[0],
+      };
+    });
+    console.log('transactions', transactions);
+    setTransactions(transactions);
+  }, [data]);
 
   function createEmptyTransaction() {
     return {
-      date: "",
-      type: "",
+      date: '',
+      type: '',
       completed: true,
-      referenceNumber: "",
-      totalAmount: { currencyCode: "AUD", amount: 0 },
-      cashAmount: { currencyCode: "AUD", amount: 0 },
+      referenceNumber: '',
+      totalAmount: { currencyCode: 'AUD', amount: 0 },
+      cashAmount: { currencyCode: 'AUD', amount: 0 },
       foreignCurrencies: [],
       digitalCurrencies: [],
-      sender: { name: "", institutions: [] },
-      payee: { name: "", institutions: [] },
-      beneficiary: { name: "", institutions: [] },
+      sender: { name: '', institutions: [] },
+      payee: { name: '', institutions: [] },
+      beneficiary: { name: '', institutions: [] },
     };
   }
 

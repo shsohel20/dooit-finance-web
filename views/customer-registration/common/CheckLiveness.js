@@ -12,7 +12,6 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 import FaceCapture from "./FaceCapture";
 import { useRouter } from "next/navigation";
 
-
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -28,8 +27,6 @@ export default function CheckLiveness() {
   const [error, setError] = useState(null);
   const router = useRouter();
 
-
-
   const handleFrontChange = async (src) => {
     console.log("Front change", src);
     setFrontProfile(src);
@@ -43,19 +40,19 @@ export default function CheckLiveness() {
   const handleSubmit = async () => {
     setLoading(true);
     const data = {
-      img1_base64: frontProfile.replace('data:image/jpeg;base64,', ''),
-      img2_base64: rightProfile.replace('data:image/jpeg;base64,', ''),
-    }
-    console.log('checkImageLiveness data', JSON.stringify(data, null, 2))
+      img1_base64: frontProfile.replace("data:image/jpeg;base64,", ""),
+      img2_base64: rightProfile.replace("data:image/jpeg;base64,", ""),
+    };
+    // console.log('checkImageLiveness data', JSON.stringify(data, null, 2))
     try {
       const res = await checkImageLiveness(data);
-      console.log('checkImageLiveness response', JSON.stringify(res, null, 2))
+      console.log("checkImageLiveness response", JSON.stringify(res, null, 2));
 
       if (res.verdict) {
-        localStorage.setItem('liveness_verdict', true);
-        localStorage.setItem('live_photo', frontProfile);
+        localStorage.setItem("liveness_verdict", true);
+        localStorage.setItem("live_photo", frontProfile);
         toast.success(res.verdict);
-        router.push('/customer/registration/individual');
+        router.push("/customer/registration/individual");
       } else if (res.error) {
         toast.error(res.error);
         setError(res.error);
@@ -78,7 +75,6 @@ export default function CheckLiveness() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 mt-4 pb-10">
       <div className="space-y-8">
-
         {/* Header */}
         <div className="space-y-2">
           <FormTitle>Profile Image Upload</FormTitle>
@@ -101,19 +97,22 @@ export default function CheckLiveness() {
           <CardContent>
             <ul className="space-y-2 list-disc pl-5">
               {requirements.map((req, i) => (
-                <li key={i} className="text-sm">{req}</li>
+                <li key={i} className="text-sm">
+                  {req}
+                </li>
               ))}
             </ul>
           </CardContent>
         </Card>
         <div>
-          {error && <Alert variant="destructive">
-            <AlertTitle>{error}</AlertTitle>
-          </Alert>}
+          {error && (
+            <Alert variant="destructive">
+              <AlertTitle>{error}</AlertTitle>
+            </Alert>
+          )}
         </div>
         {/* Upload Section */}
         <div className="grid lg:grid-cols-2 gap-6">
-
           {/* Front */}
           <Card className="border-2 hover:border-primary/50 transition-colors">
             <CardHeader>
@@ -127,10 +126,7 @@ export default function CheckLiveness() {
               >
                 <p className="font-medium">Drag & drop or click to upload</p>
               </CustomDropZone> */}
-              <FaceCapture
-                image={frontProfile}
-                onCapture={handleFrontChange}
-              />
+              <FaceCapture image={frontProfile} onCapture={handleFrontChange} />
             </CardContent>
           </Card>
 
@@ -147,10 +143,7 @@ export default function CheckLiveness() {
                 >
                   <p className="font-medium">Drag & drop or click to upload</p>
                 </CustomDropZone> */}
-              <FaceCapture
-                image={rightProfile}
-                onCapture={handleRightChange}
-              />
+              <FaceCapture image={rightProfile} onCapture={handleRightChange} />
             </CardContent>
           </Card>
         </div>
@@ -165,7 +158,6 @@ export default function CheckLiveness() {
             {loading ? "Processing..." : "Submit for Verification"}
           </Button>
         </div>
-
       </div>
     </div>
   );

@@ -1,23 +1,49 @@
 'use client'
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { FileText, User, Users, Receipt, AlertTriangle, Building } from "lucide-react"
+import {
+  FileText,
+  User,
+  ArrowRightLeft,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  Mail,
+  Phone,
+  Calendar,
+  Hash,
+  Banknote,
+  Shield,
+  Users,
+  UserX,
+  FileWarning,
+  Building,
+} from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { getSMRById } from "../../actions"
 import { useEffect, useState } from "react"
+import UILoader from "@/components/UILoader"
 
 
 export default function ReportDetailView() {
   const [data, setData] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
   const id = useSearchParams().get('id');
 
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await getSMRById(id);
-      console.log('response', response);
-      setData(response?.data);
+      setIsFetching(true);
+      try {
+        const response = await getSMRById(id);
+        console.log('response', JSON.stringify(response.data, null, 2));
+        setData(response?.data);
+      } catch (error) {
+        console.error('error', error);
+      } finally {
+        setIsFetching(false);
+      }
     }
     fetchData();
   }, [id]);
@@ -42,211 +68,426 @@ export default function ReportDetailView() {
   }
 
   return (
-    <div className=" p-6 md:p-8 lg:p-12">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl md:text-4xl font-semibold text-balance">Suspicious Matter Report</h1>
-          <Badge variant={data?.status === "draft" ? "secondary" : "default"} className="text-sm px-3 py-1">
-            {data?.status?.toUpperCase()}
-          </Badge>
-        </div>
-        <p className="text-muted-foreground text-lg">Detailed view of report submission</p>
+    <UILoader loading={isFetching} type='page'>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <header className="sticky top-0 z-10 border-b bg-card/80 backdrop-blur-sm">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                <Shield className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-foreground">SMR Details</h1>
+                <p className="text-sm text-muted-foreground">{data?.uid}</p>
+              </div>
+            </div>
+            <Badge
+              variant="outline"
+              className="border-warning bg-warning/10 text-warning-foreground px-3 py-1 text-sm font-medium"
+            >
+              {data?.status.charAt(0).toUpperCase() + data?.status.slice(1) || 'Draft'}
+            </Badge>
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-6xl px-6 py-8">
+          {/* Overview Cards */}
+          <div className="mb-8 grid gap-4 md:grid-cols-3">
+            <Card className="border-0 shadow-sm">
+              <CardContent className="flex items-center gap-4 p-5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <FileText className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Report ID</p>
+                  <p className="font-mono text-sm font-semibold text-foreground">{data?.uid}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm">
+              <CardContent className="flex items-center gap-4 p-5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <Calendar className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Created</p>
+                  <p className="text-sm font-semibold text-foreground">{formatDate(data?.createdAt)}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm">
+              <CardContent className="flex items-center gap-4 p-5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <Hash className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Sequence</p>
+                  <p className="text-sm font-semibold text-foreground">#{data?.sequence}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content */}
+          <div className="space-y-6">
+            {/* Part A - Service Status */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold text-sm">
+                    A
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Designated Services</CardTitle>
+                    <p className="text-sm text-muted-foreground">Service status and reasons for suspicion</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Service Status</p>
+                    <Badge
+                      variant="outline"
+                      className="border-success bg-success/10 text-success-foreground capitalize px-3 py-1"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                      {data?.partA.serviceStatus}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Designated Services</p>
+                    <p className="text-sm text-foreground">
+                      {data?.partA.designatedServices.length > 0
+                        ? data?.partA.designatedServices.join(", ")
+                        : "None specified"}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Part B - Grounds for Suspicion */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-destructive text-destructive-foreground font-semibold text-sm">
+                    B
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Grounds for Suspicion</CardTitle>
+                    <p className="text-sm text-muted-foreground">Detailed reasoning and red flags identified</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-xl bg-destructive/5 border border-destructive/10 p-5">
+                  <div className="flex items-start gap-3 mb-4">
+                    <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                    <p className="text-sm font-medium text-destructive">Suspicious Activity Identified</p>
+                  </div>
+                  <div className="prose prose-sm max-w-none">
+                    {data?.partB.groundsForSuspicion.split("\n\n").map((paragraph, index) => (
+                      <p key={index} className="mb-4 text-sm leading-relaxed text-muted-foreground last:mb-0">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Part C - Person/Organisation */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold text-sm">
+                    C
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Person or Organisation</CardTitle>
+                    <p className="text-sm text-muted-foreground">Subject of the suspicious matter report</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-xl bg-muted/50 p-5">
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl font-semibold text-primary-foreground">
+                      {data?.partC.personOrganisation.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-lg font-semibold capitalize text-foreground">
+                        {data?.partC.personOrganisation.name}
+                      </p>
+                      <Badge variant="secondary" className="mt-1">
+                        <User className="h-3 w-3 mr-1" />
+                        Individual
+                      </Badge>
+                    </div>
+                  </div>
+                  <Separator className="my-4" />
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Contact Information</p>
+                      <div className="space-y-2">
+                        {data?.partC.personOrganisation.emails.map((email, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-foreground">{email}</span>
+                          </div>
+                        ))}
+                        {data?.partC.personOrganisation.phoneNumbers.map((phone, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-foreground">{phone}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Other Details</p>
+                      <div className="space-y-2 text-sm text-muted-foreground">
+                        <p>Accounts: {data?.partC.personOrganisation.accounts.length || "None"}</p>
+                        <p>Digital Wallets: {data?.partC.personOrganisation.digitalWallets.length || "None"}</p>
+                        <p>Beneficial Owners: {data?.partC.personOrganisation.beneficialOwners.length || "None"}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Part D - Other Parties */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-secondary-foreground font-semibold text-sm">
+                    D
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Other Parties</CardTitle>
+                    <p className="text-sm text-muted-foreground">Additional parties involved in the matter</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    {data?.partD.hasOtherParties
+                      ? `${data?.partD.otherParties.length} other parties identified`
+                      : "No other parties identified"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Part E - Unidentified Persons */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-secondary-foreground font-semibold text-sm">
+                    E
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Unidentified Persons</CardTitle>
+                    <p className="text-sm text-muted-foreground">Unknown individuals related to the matter</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
+                  <UserX className="h-5 w-5 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    {data?.partE.hasUnidentifiedPersons
+                      ? `${data?.partE.unidentifiedPersons.length} unidentified persons`
+                      : "No unidentified persons"}
+                  </p>
+                </div>
+                <div>
+                  {data?.partE.unidentifiedPersons.map((person, index) => (
+                    <div key={index} className="flex items-center gap-3 rounded-xl  p-4">
+                      <User className="h-5 w-5 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">{person.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Part F - Transactions */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold text-sm">
+                    F
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Transaction Details</CardTitle>
+                    <p className="text-sm text-muted-foreground">Financial transactions under investigation</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {data?.partF.transactions.map((transaction, index) => (
+                  <div key={index} className="rounded-xl bg-muted/50 p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <ArrowRightLeft className="h-5 w-5 text-primary" />
+                        <Badge variant="secondary" className="font-medium capitalize">
+                          {transaction.type}
+                        </Badge>
+                      </div>
+                      <span className="text-2xl font-bold text-foreground">
+                        {formatCurrency(transaction.totalAmount.amount, transaction.totalAmount.currencyCode)}
+                      </span>
+                    </div>
+                    <Separator className="my-4" />
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Date</p>
+                          <p className="text-sm font-medium text-foreground">{formatDate(transaction.date)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Currency</p>
+                          <p className="text-sm font-medium text-foreground">{transaction.totalAmount.currencyCode}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Hash className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Reference</p>
+                          <p className="font-mono text-sm font-medium text-foreground">{transaction.referenceNumber}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Part G - Additional Information */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-secondary-foreground font-semibold text-sm">
+                    G
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Additional Information</CardTitle>
+                    <p className="text-sm text-muted-foreground">Likely offences, previous reports, and attachments</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
+                    <FileWarning className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Likely Offences</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {data?.partG.likelyOffence.length || "None specified"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Previous Reports</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {data?.partG.previousReports.length || "None"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
+                    <Building className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Other Government Bodies</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {data?.partG.otherGovernmentBodies.length || "None"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Attachments</p>
+                      <p className="text-sm font-medium text-foreground">{data?.partG.attachments.length || "None"}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Part H - Reporting Entity */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-secondary-foreground font-semibold text-sm">
+                    H
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Reporting Entity</CardTitle>
+                    <p className="text-sm text-muted-foreground">Organisation submitting this report</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
+                  <Building className="h-5 w-5 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">{data?.partH.reportingEntity?.name || "Not specified"}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Workflow History */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                    <Clock className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Activity Timeline</CardTitle>
+                    <p className="text-sm text-muted-foreground">Workflow history and status changes</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {data?.metadata.workflowHistory.map((event, index) => (
+                    <div key={index} className="relative flex gap-4">
+                      {index !== data?.metadata.workflowHistory.length - 1 && (
+                        <div className="absolute left-[7px] top-6 h-full w-px bg-border" />
+                      )}
+                      <div className="relative z-10 mt-1 h-4 w-4 rounded-full border-2 border-primary bg-card" />
+                      <div className="flex-1 pb-4">
+                        <p className="text-sm font-medium capitalize text-foreground">{event.action}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(event.timestamp)}</p>
+                        {event.notes && <p className="mt-1 text-xs text-muted-foreground">{event.notes}</p>}
+                        {event.toStatus && (
+                          <Badge variant="secondary" className="mt-2 text-xs capitalize">
+                            → {event.toStatus}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
       </div>
-
-      <div className="space-y-6">
-        {/* Part A: Service and Suspicion Details */}
-        <Card className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold">Part A: Service Details</h2>
-          </div>
-          <Separator className="mb-4" />
-          <div className="grid grid-cols-3">
-            <InfoRow label="Service Status" value={data?.partA?.serviceStatus} />
-            <InfoRow label="Designated Services" value={data?.partA?.designatedServices?.join(", ")} />
-            <InfoRow label="Suspicion Reasons" value={data?.partA?.suspicionReasons?.join(", ")} highlight />
-          </div>
-        </Card>
-
-        {/* Part B: Grounds for Suspicion */}
-        <Card className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <AlertTriangle className="h-5 w-5 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold">Part B: Grounds for Suspicion</h2>
-          </div>
-          <Separator className="mb-4" />
-          <div className="bg-muted/50 rounded-lg p-4">
-            <p className="text-foreground leading-relaxed">{data?.partB?.groundsForSuspicion}</p>
-          </div>
-        </Card>
-
-        {/* Part C: Person/Organisation Details */}
-        <Card className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <User className="h-5 w-5 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold">Part C: Person/Organisation Details</h2>
-          </div>
-          <Separator className="mb-4" />
-          <div className="grid grid-cols-3 gap-4">
-            <InfoRow label="Name" value={data?.partC?.personOrganisation?.name} />
-            <InfoRow label="Business Address" value={formatAddress(data?.partC?.personOrganisation?.businessAddress)} />
-            <InfoRow label="Phone Numbers" value={data?.partC?.personOrganisation?.phoneNumbers?.join(", ")} />
-            <InfoRow label="Email Addresses" value={data?.partC?.personOrganisation?.emails?.join(", ")} />
-            <InfoRow label="Customer Status" value={data?.partC?.personOrganisation?.isCustomer ? "Yes" : "No"} />
-            <InfoRow label="Date of Birth" value={formatDate(data?.partC?.personOrganisation?.dateOfBirth)} />
-            <InfoRow label="Citizenship" value={data?.partC?.personOrganisation?.citizenship} />
-          </div>
-        </Card>
-
-        {/* Part D: Other Parties */}
-        <Card className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Users className="h-5 w-5 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold">Part D: Other Parties</h2>
-          </div>
-          <Separator className="mb-4" />
-          {data?.partD?.hasOtherParties ? (
-            <div className="space-y-4">
-              {data?.partD?.otherParties?.map((party, index) => (
-                <div key={index} className="bg-muted/50 rounded-lg p-4">
-                  <p className="text-foreground">Party {index + 1}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">No other parties involved</p>
-          )}
-        </Card>
-
-        {/* Part E: Unidentified Persons */}
-        <Card className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Users className="h-5 w-5 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold">Part E: Unidentified Persons</h2>
-          </div>
-          <Separator className="mb-4" />
-          {data?.partE?.hasUnidentifiedPersons ? (
-            <div className="space-y-4">
-              {data?.partE?.unidentifiedPersons?.map((person, index) => (
-                <div key={index} className="bg-muted/50 rounded-lg p-4">
-                  <p className="text-foreground">Person {index + 1}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">No unidentified persons</p>
-          )}
-        </Card>
-
-        {/* Part F: Transactions */}
-        <Card className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Receipt className="h-5 w-5 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold">Part F: Transactions</h2>
-          </div>
-          <Separator className="mb-4" />
-          <div className="space-y-4">
-            {data?.partF?.transactions?.map((transaction, index) => (
-              <div key={index} className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-foreground">Transaction {index + 1}</h3>
-                  <Badge variant={transaction.completed ? "default" : "secondary"}>
-                    {transaction.completed ? "Completed" : "Pending"}
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                  <InfoRow label="Date" value={formatDate(transaction.date)} compact />
-                  <InfoRow label="Type" value={transaction.type} compact />
-                  <InfoRow label="Reference Number" value={transaction.referenceNumber} compact />
-                  <InfoRow
-                    label="Total Amount"
-                    value={formatCurrency(transaction.totalAmount.amount, transaction.totalAmount.currencyCode)}
-                    compact
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Part G: Offence and Related Information */}
-        <Card className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <AlertTriangle className="h-5 w-5 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold">Part G: Offence Information</h2>
-          </div>
-          <Separator className="mb-4" />
-          <div className="grid grid-cols-4 gap-4">
-            <InfoRow label="Likely Offence" value={data?.partG?.likelyOffence?.join(", ")} highlight />
-            <InfoRow label="Previous Reports" value={data?.partG?.previousReports?.length > 0 ? "Yes" : "None"} />
-            <InfoRow
-              label="Other Government Bodies Notified"
-              value={data?.partG?.otherGovernmentBodies?.length > 0 ? "Yes" : "None"}
-            />
-            <InfoRow
-              label="Attachments"
-              value={data?.partG?.attachments?.length > 0 ? `${data?.partG?.attachments?.length} file(s)` : "None"}
-            />
-          </div>
-        </Card>
-
-        {/* Part H: Reporting Entity */}
-        <Card className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Building className="h-5 w-5 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold">Part H: Reporting Entity</h2>
-          </div>
-          <Separator className="mb-4" />
-          <div className="space-y-5">
-            <div>
-              <h3 className="font-medium text-foreground mb-3">Entity Details</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <InfoRow label="Name" value={data?.partH?.reportingEntity?.name} />
-                <InfoRow label="Address" value={formatAddress(data?.partH?.reportingEntity?.address)} />
-              </div>
-            </div>
-            <Separator />
-            <div>
-              <h3 className="font-medium text-foreground mb-3">Completed By</h3>
-              <div className="grid grid-cols-4 gap-4">
-                <InfoRow label="Name" value={data?.partH?.reportingEntity?.completedBy?.name} />
-                <InfoRow label="Job Title" value={data?.partH?.reportingEntity?.completedBy?.jobTitle} />
-                <InfoRow label="Phone" value={data?.partH?.reportingEntity?.completedBy?.phone} />
-                <InfoRow label="Email" value={data?.partH?.reportingEntity?.completedBy?.email} />
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-    </div>
-  )
-}
-
-
-function InfoRow({ label, value, highlight = false, compact = false }) {
-  return (
-    <div className={compact ? "space-y-1" : "space-y-2"}>
-      <dt className="font-medium text-muted-foreground">{label}</dt>
-      <dd className={` text-foreground font-semibold`}>
-        {value}
-      </dd>
-    </div>
+    </UILoader>
   )
 }
