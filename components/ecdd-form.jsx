@@ -22,7 +22,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import UILoader from './UILoader';
-import CustomSelect from './ui/CustomSelect';
 import { getCaseList } from '@/app/dashboard/client/monitoring-and-cases/case-list/actions';
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
@@ -173,7 +172,6 @@ export function ECDDForm({ caseNumber, id }) {
     setFetching(true);
     try {
       const response = await autoPopulatedEcddData(caseNumber);
-      console.log('response from ai analysis', response);
       const formattedData = getFormattedData(response);
       reset(formattedData);
     } catch (error) {
@@ -188,7 +186,6 @@ export function ECDDForm({ caseNumber, id }) {
     setFetching(true);
     try {
       const response = await getEcddById(id);
-      console.log('response by id', response);
       const {
         caseNumber,
         transaction,
@@ -412,7 +409,6 @@ ${
 
     const action = id ? updateEcdd : createEcdd;
     const response = await action(submittedData);
-    console.log('submit response', response);
     if (response.success) {
       localStorage.setItem('newId', response.data._id);
       toast.success(
@@ -493,7 +489,6 @@ ${formData.recommendation || '_________________________'}
     setFetchingCaseNumbers(true);
     try {
       const response = await getCaseList();
-      console.log('response', response);
       const options = response.data.map((item) => ({
         ...item,
         label: item.uid,

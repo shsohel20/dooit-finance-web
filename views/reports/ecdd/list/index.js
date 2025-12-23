@@ -131,7 +131,6 @@ const DeleteModal = ({ open, setOpen, id, getData }) => {
         setDeleting(true);
         try {
             const res = await deleteEcdd(id);
-            console.log("res", res);
             if (res.success) {
                 setOpen(false);
                 getData();

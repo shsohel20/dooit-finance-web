@@ -32,7 +32,6 @@ export default function SelectCustomerList({ onChange, value, label }) {
         limit: 10,
       };
       const response = await getCustomers(queryParams);
-      console.log("customers response => ", response);
       setTotalItems(response.totalRecords);
       const options = response.data.map((item) => {
         const personalDetails = item.personalKyc.personal_form?.customer_details;
