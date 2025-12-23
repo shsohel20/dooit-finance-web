@@ -4,16 +4,15 @@ import React from "react";
 
 export default async function CaseListDetails({ params, searchParams }) {
   const { id } = await params;
-  const { caseNumber } = await searchParams;
-  console.log("alerts id", id);
-  console.log("alerts caseNumber", caseNumber);
+  const { caseNumber, tab } = await searchParams;
+
   return (
     <div>
       <div className="min-h-screen bg-background">
         {/* <CaseHeader /> */}
         <div className="border-b border-border">
           <div className="container mx-auto ">
-            <CaseTabs caseNumber={caseNumber} id={id}/>
+            <CaseTabs caseNumber={caseNumber} id={id} tab={tab} />
           </div>
         </div>
         {/* <main className="container mx-auto px-6 py-8">

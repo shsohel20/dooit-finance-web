@@ -1,7 +1,7 @@
-"use client";
-import React, { useCallback, useEffect, useRef } from "react";
-import { useState } from "react";
-import { getCaseList } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
+'use client';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { useState } from 'react';
+import { getCaseList } from '@/app/dashboard/client/monitoring-and-cases/case-list/actions';
 import {
   Select,
   SelectContent,
@@ -10,15 +10,15 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { IconLoader2 } from "@tabler/icons-react";
-import { Label } from "./label";
-import { Button } from "./button";
-import { Plus } from "lucide-react";
-import { Input } from "./input";
+} from '@/components/ui/select';
+import { IconLoader2 } from '@tabler/icons-react';
+import { Label } from './label';
+import { Button } from './button';
+import { Plus } from 'lucide-react';
+import { Input } from './input';
 
 export default function SelectCaseList({ onChange, value, label }) {
-  const [newValue, setNewValue] = useState("");
+  const [newValue, setNewValue] = useState('');
   const [caseNumbers, setCaseNumbers] = useState([]);
   const [fetchingCaseNumbers, setFetchingCaseNumbers] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
@@ -43,9 +43,9 @@ export default function SelectCaseList({ onChange, value, label }) {
 
       setCaseNumbers([...caseNumbers, ...options]);
 
-      setNewValue("");
+      setNewValue('');
     } catch (error) {
-      console.error("Failed to get case numbers", error);
+      console.error('Failed to get case numbers', error);
     } finally {
       setFetchingCaseNumbers(false);
     }
@@ -83,7 +83,7 @@ export default function SelectCaseList({ onChange, value, label }) {
     onChange(newOption);
     // setNewValue("");
   };
-
+  console.log('caseNumbers', value);
   return (
     <div className="space-y-1">
       {label && <Label>{label}</Label>}
@@ -92,6 +92,7 @@ export default function SelectCaseList({ onChange, value, label }) {
           onChange(caseNumbers.find((option) => option.value === value))
         }
         value={value?.label || value}
+        defaultValue={value?.label || value}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select a case number" />
@@ -105,7 +106,7 @@ export default function SelectCaseList({ onChange, value, label }) {
                 className="flex-grow min-w-full text-xs"
                 placeholder="Create new option"
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === 'Enter') {
                     e.preventDefault();
                     handleCreate();
                   }
@@ -131,9 +132,9 @@ export default function SelectCaseList({ onChange, value, label }) {
               </div>
             ) : (
               <SelectGroup className="relative">
-                <SelectLabel>Case Numbers</SelectLabel>{" "}
+                <SelectLabel>Case Numbers</SelectLabel>{' '}
                 {caseNumbers.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option?.value} value={option?.value}>
                     {option.label}
                   </SelectItem>
                 ))}

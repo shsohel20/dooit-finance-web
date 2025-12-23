@@ -45,8 +45,8 @@ const EcddList = () => {
 
     }, [])
 
-    const handleView = (id) => {
-        router.push(`/dashboard/client/report-compliance/ecdd/form/${id}`);
+    const handleView = (caseId) => {
+        router.push(`/dashboard/client/monitoring-and-cases/case-list/details/${caseId}?tab=ecdd-review`);
     }
     const handleEdit = (id) => {
         // router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`);
@@ -70,7 +70,7 @@ const EcddList = () => {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuItem > <Eye />View</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleView(row?.original?.caseId)}> <Eye />View</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleEdit(row?.original?._id)}> <Edit />Edit</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleGenerateEcdd(row?.original?.caseId)}> <FileText />Generate ECDD</DropdownMenuItem>
                     <DropdownMenuItem variant='destructive' onClick={() => handleDelete(row?.original?._id)}> <Trash />Delete</DropdownMenuItem>
