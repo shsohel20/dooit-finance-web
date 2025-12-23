@@ -1,10 +1,11 @@
-"use client";
 import { LoginForm } from "@/components/login-form";
 import AuthLayout from "@/components/AuthLayout";
 
-export default function LoginPage({ searchParams }) {
-  const token = searchParams?.token;
-  const cid = searchParams?.cid;
+export default async function LoginPage({ searchParams }) {
+  const params = await searchParams;
+
+  const token = params?.token;
+  const cid = params?.cid;
 
   return (
     <AuthLayout>
