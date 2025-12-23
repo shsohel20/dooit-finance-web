@@ -12,11 +12,11 @@
 }
 @font-face {
   font-family: font-2;
-  src: url("/fonts/font-2.woff2");
+  src: url("/assets/fonts/font-2.woff2");
 }
 @font-face {
   font-family: font-3;
-  src: url("/fonts/font-3.woff2");
+  src: url("/assets/fonts/font-3.woff2");
 }
 @font-face {
   font-family: "font-4";
@@ -142,7 +142,7 @@
 body {
   /* background: var(--background);
   color: var(--foreground); */
-  font-family: var(--font-font-2), sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 0.8rem;
 }
 .container {

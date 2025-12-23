@@ -22,7 +22,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import UILoader from './UILoader';
-import CustomSelect from './ui/CustomSelect';
 import { getCaseList } from '@/app/dashboard/client/monitoring-and-cases/case-list/actions';
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
@@ -173,7 +172,6 @@ export function ECDDForm({ caseNumber, id }) {
     setFetching(true);
     try {
       const response = await autoPopulatedEcddData(caseNumber);
-      console.log('response from ai analysis', response);
       const formattedData = getFormattedData(response);
       reset(formattedData);
     } catch (error) {
@@ -188,7 +186,6 @@ export function ECDDForm({ caseNumber, id }) {
     setFetching(true);
     try {
       const response = await getEcddById(id);
-      console.log('response by id', response);
       const {
         caseNumber,
         transaction,
@@ -224,44 +221,42 @@ export function ECDDForm({ caseNumber, id }) {
 
   const getFormattedData = (data) => {
     const formattedData = {
-      withdrawalDetails: data.withdrawal_details,
-      depositDetails: data.deposit_details,
-      profileSummary: data.recommendation,
-      additionalInfo: data.additional_information,
-      behavioralAnalysis: data.behavioral_analysis,
-      analystName: data.analyst_name,
+      withdrawalDetails: data.withdrawal_details || '',
+      depositDetails: data.deposit_details || '',
+      profileSummary: data.recommendation || '',
+      additionalInfo: data.additional_information || '',
+      behavioralAnalysis: data.behavioral_analysis || '',
+      analystName: data.analyst_name || '',
       position: 'Compliance Officer',
       date: data.analysis_date || new Date().toISOString().split('T')[0],
       caseNumber: caseNumber,
       fullName: data.name,
-      onboardingDate: data.onboarding_date,
-      expectedVolume: data.Expected_Trading_Volume,
+      onboardingDate: data.onboarding_date || '',
+      expectedVolume: data.Expected_Trading_Volume || '',
       accountCreationDate: data.account_creation_date,
       totalDepositsAUD: data.total_deposits_AUD,
       totalWithdrawalsBTC: data.total_withdrawals_BTC,
       totalWithdrawalsETH: data.total_withdrawals_ETH,
       totalWithdrawalsUSDT: data.total_withdrawals_USDT,
-      ipLocations: data.ip_locations,
-      registeredAddress: data.registered_address,
-      recommendation: data.recommendation,
-      transactionAnalysis: data.transaction_analysis,
-      directors: data.director_name,
+      ipLocations: data.ip_locations || '',
+      registeredAddress: data.registered_address || '',
+      recommendation: data.recommendation || '',
+      transactionAnalysis: data.transaction_analysis || '',
+      directors: data.director_name || '',
       isPEP: data.pep_flag ? 'Yes' : 'No',
       isSanctioned: data.sanction_flag ? 'Yes' : 'No',
       userId: data.user_id,
       accountPurpose: data.account_purpose,
       annualIncome: data.annual_income,
-      beneficialOwner: data.beneficial_owner,
+      beneficialOwner: data.beneficial_owner || '',
       analysisEndDate: data.analysis_end_date,
-
+      abn: data.abn || '',
+      relatedParty: data.related_party || 'N/A',
       caseNumber: {
         label: caseNumber,
         value: caseNumber,
       },
       customer: data?.user_id,
-      analyst: '6906ef042b25d3502f3a6915',
-      generatedBy: '6906ef042b25d3502f3a6915',
-      transaction: '690fd9dbfc65168c8a447a8a',
     };
     return formattedData;
   };
@@ -414,7 +409,6 @@ ${
 
     const action = id ? updateEcdd : createEcdd;
     const response = await action(submittedData);
-    console.log('submit response', response);
     if (response.success) {
       localStorage.setItem('newId', response.data._id);
       toast.success(
@@ -495,7 +489,6 @@ ${formData.recommendation || '_________________________'}
     setFetchingCaseNumbers(true);
     try {
       const response = await getCaseList();
-      console.log('response', response);
       const options = response.data.map((item) => ({
         ...item,
         label: item.uid,
@@ -575,7 +568,7 @@ ${formData.recommendation || '_________________________'}
   };
 
   return (
-    <UILoader loading={fetching} type="form">
+    <UILoader loading={fetching} type="page">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8 text-center">

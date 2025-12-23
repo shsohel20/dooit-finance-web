@@ -2,8 +2,10 @@ import { LoginForm } from "@/components/login-form";
 import AuthLayout from "@/components/AuthLayout";
 
 export default async function LoginPage({ searchParams }) {
-  const token = await searchParams?.token;
-  const cid = await searchParams?.cid;
+  const params = await searchParams;
+
+  const token = params?.token;
+  const cid = params?.cid;
 
   return (
     <AuthLayout>
