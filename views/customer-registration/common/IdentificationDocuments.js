@@ -207,32 +207,41 @@ const IdentificationDocuments = ({
       setIsSaving(true);
       // setVerifyingStatus("verifying");
       const verify_response = await verifyDocument(verify_data);
-      verifiedMsg = `Found ${verify_response.data?.result?.similarity}% similarity with the document`;
-
-      if (verify_response?.error?.length > 0) {
-        toast.error("Documents are not verified");
+      console.log("verify_response", verify_response);
+      const verification_status = verify_response.data?.result?.verification_status;
+      if (verification_status === 0) {
+        toast.error("Documents are not verified. You can't proceed further.");
         setVerifyingStatus("idle");
+        setIsSaving(false);
         return;
       } else {
-        const response = await getDataFromDocuments(formData);
-        console.log("response", response);
-        if (response.success) {
-          const [given_name, middle_name, surname] = response.data.full_name?.split(" ");
-          //23-dec-1990 to yyyy-mm-dd
-          const date_of_birth = formatDate(response.data.date_of_birth);
-          console.log("date_of_birth", date_of_birth);
-          setValue("customer_details.given_name", given_name || "");
-          setValue("customer_details.middle_name", middle_name || "");
-          setValue("customer_details.surname", surname || "");
-          setValue("residential_address.address", response.data.address || "");
-          setValue("customer_details.date_of_birth", date_of_birth || "");
+        verifiedMsg = `Found ${verify_response.data?.result?.similarity}% similarity with the document`;
+
+        if (verify_response?.error?.length > 0) {
+          toast.error("Documents are not verified");
+          setVerifyingStatus("idle");
+          return;
+        } else {
+          const response = await getDataFromDocuments(formData);
+          console.log("response", response);
+          if (response.success) {
+            const [given_name, middle_name, surname] = response.data.full_name?.split(" ");
+            //23-dec-1990 to yyyy-mm-dd
+            const date_of_birth = formatDate(response.data.date_of_birth);
+            console.log("date_of_birth", date_of_birth);
+            setValue("customer_details.given_name", given_name || "");
+            setValue("customer_details.middle_name", middle_name || "");
+            setValue("customer_details.surname", surname || "");
+            setValue("residential_address.address", response.data.address || "");
+            setValue("customer_details.date_of_birth", date_of_birth || "");
+            setVerifyingStatus("verified");
+          }
         }
       }
     } catch (error) {
       toast.error("Failed to save identification documents");
     } finally {
       setIsSaving(false);
-      setVerifyingStatus("verified");
       setVerifiedMsg(verifiedMsg);
     }
   };
