@@ -12,6 +12,7 @@ import { getCaseDetails } from "@/app/dashboard/client/monitoring-and-cases/case
 import { useEffect } from "react";
 import useAlertStore from "@/app/store/alerts";
 import { useSearchParams } from "next/navigation";
+import UILoader from "@/components/UILoader";
 
 const tabs = [
   {
@@ -47,7 +48,7 @@ const tabs = [
 ];
 
 export default function CaseTabs({ caseNumber, id, tab = "summary-and-timeline" }) {
-  const { details, setDetails, setFetching } = useAlertStore();
+  const { details, setDetails, setFetching, fetching } = useAlertStore();
 
   const [activeTab, setActiveTab] = useState(tabs[0]);
 
@@ -101,7 +102,9 @@ export default function CaseTabs({ caseNumber, id, tab = "summary-and-timeline" 
           </button>
         ))}
       </nav>
-      <main className="  py-8">{activeTab.component}</main>
+      <UILoader loading={fetching} type="page">
+        <main className="  py-8">{activeTab.component}</main>
+      </UILoader>
     </>
   );
 }
