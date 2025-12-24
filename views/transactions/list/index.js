@@ -353,8 +353,9 @@ const TransactionListView = () => {
         open={openDetailView}
         setOpen={setOpenDetailView}
         currentItem={currentItem}
+        setCurrentItem={setCurrentItem}
       />
-      <TransactionReportingModal open={viewReport} setOpen={setViewReport} />
+      <TransactionReportingModal open={viewReport} setOpen={setViewReport} currentItem={currentItemReport} setCurrentItem={setCurrentItemReport} />
     </div>
   );
 };

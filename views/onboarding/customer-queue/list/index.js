@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { StatusPill } from '@/components/ui/StatusPill'
 
 import { Textarea } from '@/components/ui/textarea'
-import { dateShowFormatWithTime, objWithValidValues } from '@/lib/utils'
+import { dateShowFormatWithTime, objWithValidValues, riskLevelVariants } from '@/lib/utils'
 import { IconChevronRight, IconDownload, IconEye, IconGridDots, IconList, IconPennant, IconSearch, IconUpload, } from '@tabler/icons-react'
 import {
   Plus
@@ -27,6 +27,7 @@ import React, { useEffect, useState } from 'react'
 import { DetailViewModal } from '../details'
 import { useRouter } from 'next/navigation'
 import CustomDropZone from '@/components/ui/DropZone'
+import { toast } from 'sonner'
 const statusVariants = {
   pending: 'warning',
   rejected: 'danger',
@@ -34,12 +35,7 @@ const statusVariants = {
   'in_review': 'info',
   closed: 'muted',
 }
-export const riskLevelVariants = {
-  Low: 'success',
-  Medium: 'warning',
-  High: 'danger',
-  Unacceptable: 'danger',
-}
+
 
 const GridView = () => {
   const { customers } = useCustomerStore();
@@ -287,7 +283,11 @@ const ListView = () => {
         onChangeLimit={handleLimitChange}
       />
       {/* <CustomDatatable data={data} columns={columns} onDoubleClick={handleDoubleClick} /> */}
-      <ReportingModal open={openReporting} setOpen={setOpenReporting} currentItem={currentItem} />
+      {openReporting && <ReportingModal
+        open={openReporting}
+        setOpen={setOpenReporting}
+        currentItem={currentItem}
+        setCurrentItem={setCurrentItem} />}
       {/* <DetailViewModal open={openDetailView} setOpen={setOpenDetailView} currentId={currentItem} /> */}
     </>
   )
@@ -401,29 +401,52 @@ export default function CustomerQueueList({ variant, data, kycStatus }) {
 }
 
 
-export const ReportingModal = ({ open, setOpen }) => {
+export const ReportingModal = ({ open, setOpen, currentItem, setCurrentItem }) => {
   const [file, setFile] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  console.log('currentItem', currentItem);
   const handleFileChange = (file) => {
     console.log(file);
     setFile(file);
   }
+  const onSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      // const response = await submitReporting(file);
+      //sleep for 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setOpen(false);
+      toast.success('Reporting submitted successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to submit reporting');
+    } finally {
+      setIsSubmitting(false);
+      setCurrentItem(null);
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
 
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Reporting</DialogTitle>
-          <DialogDescription>Risk Level: Medium</DialogDescription>
+          <DialogDescription>Risk Level: <Badge variant={riskLevelVariants[currentItem?.riskLabel ?? '']}>{currentItem?.riskLabel}</Badge></DialogDescription>
         </DialogHeader>
         <div className='flex flex-col '>
           <Label className={'font-bold'}>Share your insights</Label>
           <Textarea placeholder='Share your insights' />
         </div>
         <div>
-          <CustomDropZone className='' handleChange={handleFileChange} file={file} setFile={setFile} />
+          <CustomDropZone
+            className=''
+            handleChange={handleFileChange}
+            file={file}
+            setFile={setFile} />
         </div>
         <DialogFooter>
-          <Button className={'w-full'}>Submit</Button>
+          <Button className={'w-full'} onClick={onSubmit} disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'Submit'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
