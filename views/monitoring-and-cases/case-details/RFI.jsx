@@ -44,7 +44,6 @@ export default function RFI() {
     try {
       setLoading(true);
       const response = await getRFIList();
-      console.log("rfi list response", response);
       if (response.success) {
         setData(response.data);
         setLoading(false);
