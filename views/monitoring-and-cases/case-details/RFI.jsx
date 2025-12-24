@@ -180,7 +180,7 @@ export default function RFI() {
           {/* <ResponseTracker /> */}
         </div>
       </div>
-      <CaseRequestForm open={open} setOpen={setOpen} getRFI={getRFI} />
+      {open && <CaseRequestForm open={open} setOpen={setOpen} getRFI={getRFI} />}
       {openDetails && (
         <RFIDetails open={openDetails} onOpenChange={setOpenDetails} id={rfiId} setId={setRfiId} />
       )}
