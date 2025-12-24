@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-const TransactionDetailView = ({ open, setOpen, currentItem }) => {
+const TransactionDetailView = ({ open, setOpen, currentItem, setCurrentItem }) => {
   const [viewReport, setViewReport] = useState(false);
   const [customer, setCustomer] = useState(null);
 
@@ -547,7 +547,7 @@ const TransactionDetailView = ({ open, setOpen, currentItem }) => {
           </div>
         </div>
       </SheetContent>
-      <TransactionReportingModal open={viewReport} setOpen={setViewReport} />
+      <TransactionReportingModal open={viewReport} setOpen={setViewReport} currentItem={currentItem} setCurrentItem={setCurrentItem} />
     </Sheet>
   )
 }

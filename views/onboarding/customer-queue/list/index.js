@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { StatusPill } from '@/components/ui/StatusPill'
 
 import { Textarea } from '@/components/ui/textarea'
-import { dateShowFormatWithTime, objWithValidValues } from '@/lib/utils'
+import { dateShowFormatWithTime, objWithValidValues, riskLevelVariants } from '@/lib/utils'
 import { IconChevronRight, IconDownload, IconEye, IconGridDots, IconList, IconPennant, IconSearch, IconUpload, } from '@tabler/icons-react'
 import {
   Plus
@@ -35,12 +35,7 @@ const statusVariants = {
   'in_review': 'info',
   closed: 'muted',
 }
-export const riskLevelVariants = {
-  Low: 'success',
-  Medium: 'warning',
-  High: 'danger',
-  Unacceptable: 'danger',
-}
+
 
 const GridView = () => {
   const { customers } = useCustomerStore();
