@@ -278,69 +278,6 @@ export function SMRDashboard() {
 
 
 
-      {/* Summary Cards Row */}
-      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertTriangle className="size-4" />
-              Most Frequent Service
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">AFSL holder arranging service</p>
-              <p className="text-2xl font-bold">487 reports</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Globe className="size-4" />
-              Top Country
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Australia</p>
-              <p className="text-2xl font-bold">487 reports</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Paperclip className="size-4" />
-              With Attachments
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Documents included</p>
-              <p className="text-2xl font-bold">342 reports</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Users className="size-4" />
-              Unidentified Persons
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Reports with unknown subjects</p>
-              <p className="text-2xl font-bold">156 reports</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div> */}
-
 
 
 

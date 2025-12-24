@@ -1,8 +1,10 @@
 "use server";
+import { getQueryString } from "@/lib/utils";
 import { fetchWithAuth } from "@/services/serverApi";
 
-export const getSMRList = async () => {
-  const response = await fetchWithAuth("smr-report");
+export const getSMRList = async (queryParams) => {
+  const queryString = getQueryString(queryParams);
+  const response = await fetchWithAuth(`smr-report?${queryString}`);
   return response.json();
 };
 

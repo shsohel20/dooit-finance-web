@@ -11,15 +11,17 @@ export function PartF({ data, updateData }) {
     data.transactions || [createEmptyTransaction()]
   );
   useEffect(() => {
-    console.log('data', data.transactions);
     //date should suppport input type date 2025-11-28
     const transactions = data.transactions.map((transaction) => {
+      const date = transaction.date
+        ? new Date(transaction.date).toISOString().split('T')[0]
+        : '';
       return {
         ...transaction,
-        date: new Date(transaction.date).toISOString().split('T')[0],
+        date,
       };
     });
-    console.log('transactions', transactions);
+    // console.log('transactions', transactions);
     setTransactions(transactions);
   }, [data]);
 
@@ -58,6 +60,7 @@ export function PartF({ data, updateData }) {
     updateData({ transactions: updated });
   };
 
+  console.log('transactions in part f', transactions);
   return (
     <div className="space-y-6">
       {transactions.map((transaction, index) => (

@@ -1,18 +1,12 @@
 "use client";
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { z } from "zod";
 import {
   Sheet,
@@ -36,13 +30,9 @@ export const requestedItemSchema = z.object({
 });
 
 export const caseRequestSchema = z.object({
-  primaryContactName: z
-    .string()
-    .min(2, "Primary contact name must be at least 2 characters"),
+  primaryContactName: z.string().min(2, "Primary contact name must be at least 2 characters"),
   replyToEmail: z.string().email("Invalid email address"),
-  requestedItems: z
-    .array(requestedItemSchema)
-    .min(1, "At least one requested item is required"),
+  requestedItems: z.array(requestedItemSchema).min(1, "At least one requested item is required"),
 });
 
 const defaultValues = {
@@ -53,12 +43,14 @@ const defaultValues = {
 
 export function CaseRequestForm({ open, setOpen, getRFI }) {
   const { details } = useAlertStore();
+  console.log("details uid", details?.uid);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  console.log("in rfi form details", details);
+  // console.log("in rfi form details", details);
   const {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
     setValue,
   } = useForm({
@@ -72,15 +64,22 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
   });
 
   const getData = async () => {
+    console.log("call", "uid", details?.uid);
     try {
       const response = await autoPopulateRFI(details?.uid);
       setValue("primaryContactName", response.primary_contact_name);
       setValue("replyToEmail", response.reply_to_email);
-      response.requested_items?.forEach((item) => {
-        if (!fields.some((row) => row.text === item)) {
-          append({ text: item });
-        }
-      });
+      const existingTexts = fields.map((f) => f.text);
+
+      // response.requested_items?.forEach((item) => {
+      //   if (!existingTexts.includes(item)) {
+      //     append({ text: item });
+      //   }
+      // });
+      setValue(
+        "requestedItems",
+        response.requested_items.map((text) => ({ text })),
+      );
       // response.requested_items.forEach((item) => {
       //   append({ text: item });
       // });
@@ -151,9 +150,7 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
                   disabled
                 />
                 {errors.metadata?.caseNumber && (
-                  <p className="text-sm text-destructive">
-                    {errors.metadata.caseNumber.message}
-                  </p>
+                  <p className="text-sm text-destructive">{errors.metadata.caseNumber.message}</p>
                 )}
               </div>
             </CardContent>
@@ -166,34 +163,51 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="primaryContactName">
-                    Primary Contact Name
-                  </Label>
-                  <Input
+                  <Label htmlFor="primaryContactName">Primary Contact Name</Label>
+                  {/* <Input
+                    onChange={(e) => setValue("primaryContactName", e.target.value)}
                     id="primaryContactName"
-                    {...register("primaryContactName")}
+                    name="primaryContactName"
                     placeholder="Enter contact name"
+                    value={watch("primaryContactName")}
                   />
                   {errors.primaryContactName && (
-                    <p className="text-sm text-destructive">
-                      {errors.primaryContactName.message}
-                    </p>
-                  )}
+                    <p className="text-sm text-destructive">{errors.primaryContactName.message}</p>
+                  )} */}
+                  <Controller
+                    name="primaryContactName"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field} // contains value and onChange
+                        placeholder="Enter contact name"
+                      />
+                    )}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="replyToEmail">Reply To Email</Label>
-                  <Input
+                  <Controller
+                    name="replyToEmail"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field} // contains value and onChange
+                        placeholder="Enter contact name"
+                      />
+                    )}
+                  />
+                  {/* <Input
                     id="replyToEmail"
                     type="email"
-                    {...register("replyToEmail")}
+                    onChange={(e) => setValue("replyToEmail", e.target.value)}
+                    value={watch("replyToEmail")}
                     placeholder="contact@example.com"
                   />
                   {errors.replyToEmail && (
-                    <p className="text-sm text-destructive">
-                      {errors.replyToEmail.message}
-                    </p>
-                  )}
+                    <p className="text-sm text-destructive">{errors.replyToEmail.message}</p>
+                  )} */}
                 </div>
               </div>
             </CardContent>
@@ -202,22 +216,28 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
           <Card>
             <CardHeader>
               <CardTitle>Requested Items</CardTitle>
-              <CardDescription>
-                Documents and information requested for this case
-              </CardDescription>
+              <CardDescription>Documents and information requested for this case</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex gap-2 items-end">
                   <div className="flex-1 space-y-2">
-                    <Label htmlFor={`requestedItems.${index}.text`}>
-                      Item {index + 1}
-                    </Label>
-                    <Input
+                    <Label htmlFor={`requestedItems.${index}.text`}>Item {index + 1}</Label>
+                    <Controller
+                      name={`requestedItems.${index}.text`}
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          {...field} // contains value and onChange
+                          placeholder="Enter item description"
+                        />
+                      )}
+                    />
+                    {/* <Input
                       id={`requestedItems.${index}.text`}
                       {...register(`requestedItems.${index}.text`)}
                       placeholder="Enter item description"
-                    />
+                    /> */}
                     {errors.requestedItems?.[index]?.text && (
                       <p className="text-sm text-destructive">
                         {errors.requestedItems[index]?.text?.message}
@@ -239,9 +259,7 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
               ))}
 
               {errors.requestedItems && (
-                <p className="text-sm text-destructive">
-                  {errors.requestedItems.message}
-                </p>
+                <p className="text-sm text-destructive">{errors.requestedItems.message}</p>
               )}
 
               <Button
@@ -256,7 +274,7 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
             </CardContent>
           </Card>
 
-          <div className="flex justify-end">
+          <div className="flex ">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Submitting..." : "Submit Case Request"}
             </Button>
