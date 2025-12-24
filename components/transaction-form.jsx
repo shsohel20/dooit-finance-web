@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -13,22 +13,28 @@ import {
 } from '@/components/ui/select';
 
 const TRANSACTION_TYPES = [
-  'Cash deposit',
-  'Cash withdrawal',
-  'Electronic funds transfer',
-  'Wire transfer',
-  'Currency exchange',
-  'Digital currency exchange',
-  'Account opening',
-  'Loan application',
-  'Insurance policy',
-  'Securities transaction',
-  'Other',
+  { name: 'Deposit', value: 'deposit' },
+  { name: 'Withdrawal', value: 'withdrawal' },
+  { name: 'Transfer', value: 'transfer' },
+  { name: 'Exchange', value: 'exchange' },
+  { name: 'Cash deposit', value: 'cash-deposit' },
+  { name: 'Cash withdrawal', value: 'cash-withdrawal' },
+  { name: 'Electronic funds transfer', value: 'electronic-funds-transfer' },
+  { name: 'Wire transfer', value: 'wire-transfer' },
+  { name: 'Currency exchange', value: 'currency-exchange' },
+  { name: 'Digital currency exchange', value: 'digital-currency-exchange' },
+  { name: 'Account opening', value: 'account-opening' },
+  { name: 'Loan application', value: 'loan-application' },
+  { name: 'Insurance policy', value: 'insurance-policy' },
+  { name: 'Securities transaction', value: 'securities-transaction' },
+  { name: 'Other', value: 'other' },
 ];
 
 export function TransactionForm({ data, onUpdate }) {
   const [transaction, setTransaction] = useState(data);
-
+  useEffect(() => {
+    setTransaction(data);
+  }, [data]);
   const handleChange = (field, value) => {
     const updated = { ...transaction };
     const keys = field.split('.');
@@ -40,7 +46,6 @@ export function TransactionForm({ data, onUpdate }) {
     setTransaction(updated);
     onUpdate(updated);
   };
-
   return (
     <div className="space-y-6">
       {/* Basic transaction info */}
@@ -69,8 +74,8 @@ export function TransactionForm({ data, onUpdate }) {
             </SelectTrigger>
             <SelectContent>
               {TRANSACTION_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
+                <SelectItem key={type?.value} value={type?.value}>
+                  {type?.name}
                 </SelectItem>
               ))}
             </SelectContent>

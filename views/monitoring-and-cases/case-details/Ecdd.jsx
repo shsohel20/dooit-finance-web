@@ -84,7 +84,7 @@ const Ecdd = () => {
                     <div className="flex items-center gap-3 mb-2">
                       <FileText className="h-7 w-7 text-accent" />
                       <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-                        Case Analysis
+                        ECDD Review
                       </h1>
                     </div>
                     <p className="text-muted-foreground">

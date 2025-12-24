@@ -19,6 +19,7 @@ import {
   UserX,
   FileWarning,
   Building,
+  MapPin,
 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { getSMRById } from "../../actions"
@@ -445,6 +446,35 @@ export default function ReportDetailView() {
                 <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
                   <Building className="h-5 w-5 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">{data?.partH.reportingEntity?.name || "Not specified"}</p>
+                </div>
+                {/* address */}
+                <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">{formatAddress(data?.partH.reportingEntity.address)}</p>
+                </div>
+                {/* completed by */}
+                <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
+                  <User className="h-5 w-5 text-muted-foreground" />
+                  {/* name, job title, phone, emai */}
+                  <div className="flex flex-col gap-1">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Name</p>
+                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH.reportingEntity.completedBy.name || "Not specified"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Job Title</p>
+                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH.reportingEntity.completedBy.jobTitle || "Not specified"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Phone</p>
+                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH.reportingEntity.completedBy.phone || "Not specified"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Email</p>
+                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH.reportingEntity.completedBy.email || "Not specified"}</p>
+                    </div>
+                  </div>
+
                 </div>
               </CardContent>
             </Card>

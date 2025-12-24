@@ -1,8 +1,9 @@
+'use client';
 import React from 'react'
-import { Loader2 } from 'lucide-react'
+
 import FormSkeleton from './Formskeleton'
-import { IconReload } from '@tabler/icons-react'
-import CommonLoader, { DataProcessingLoader, MinimalFinanceLoader } from './ui/CommonLoader'
+
+import { DataProcessingLoader } from './ui/CommonLoader'
 
 
 

@@ -9,11 +9,15 @@ import { formatDateTime } from '@/lib/utils'
 import { EyeIcon, PencilIcon } from 'lucide-react'
 import { SMRDashboard } from './Dashboard'
 import SMRHeatmap from './HeatMap'
+import CustomPagination from '@/components/CustomPagination'
 
 export default function SMRPage() {
   const router = useRouter()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   const handleView = (id) => {
     router.push(`/dashboard/client/report-compliance/smr-filing/smr/form/detail?id=${id}`)
@@ -100,12 +104,18 @@ export default function SMRPage() {
       size: 100,
     },
   ]
+
   const getSmr = async () => {
     setLoading(true)
     try {
-      const response = await getSMRList();
+      const response = await getSMRList({
+        page: currentPage,
+        limit: limit,
+      });
+      console.log('response', response)
       if (response.success) {
         setData(response.data)
+        setTotalItems(response.totalRecords)
       }
     } catch (error) {
       console.log('error', error)
@@ -116,11 +126,18 @@ export default function SMRPage() {
 
   useEffect(() => {
     getSmr()
-  }, [])
+  }, [currentPage, limit])
 
   const handleNewSMR = () => {
     router.push('/dashboard/client/report-compliance/smr-filing/smr/form')
   }
+  const handlePageChange = (page) => {
+    setCurrentPage(page.selected + 1);
+  };
+  const handleLimitChange = (limit) => {
+    setLimit(limit);
+    setCurrentPage(1);
+  };
 
   return (
     <div className='  rounded-lg space-y-4'>
@@ -141,6 +158,13 @@ export default function SMRPage() {
         columns={columns}
         data={data}
         actions={<Button size='sm' onClick={handleNewSMR}>Add New</Button>}
+      />
+      <CustomPagination
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        totalItems={totalItems}
+        limit={limit}
+        onChangeLimit={handleLimitChange}
       />
     </div>
   )
