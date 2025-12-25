@@ -1,45 +1,45 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Upload, Download, Calculator, FileText } from "lucide-react";
-import ResizableTable from "../ui/Resizabletable";
-import { riskLevelVariants } from "@/views/onboarding/customer-queue/list";
-import { IconPennant } from "@tabler/icons-react";
-import { Badge } from "../ui/badge";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Upload, Download, Calculator, FileText } from 'lucide-react';
+import ResizableTable from '../ui/Resizabletable';
+import { riskLevelVariants } from '@/lib/utils';
+import { IconPennant } from '@tabler/icons-react';
+import { Badge } from '../ui/badge';
 
 export function CustomerRiskAssessment() {
   const [customerData, setCustomerData] = useState({
-    customerName: "",
-    customerId: "",
-    assessmentDate: new Date().toISOString().split("T")[0],
-    customerType: { value: "", score: 0 },
-    jurisdiction: { value: "", score: 0 },
-    customerRetention: { value: "", score: 0 },
-    product: { value: "", score: 0 },
-    channel: { value: "", score: 0 },
-    occupation: { value: "", score: 0 },
-    industry: { value: "", score: 0 },
+    customerName: '',
+    customerId: '',
+    assessmentDate: new Date().toISOString().split('T')[0],
+    customerType: { value: '', score: 0 },
+    jurisdiction: { value: '', score: 0 },
+    customerRetention: { value: '', score: 0 },
+    product: { value: '', score: 0 },
+    channel: { value: '', score: 0 },
+    occupation: { value: '', score: 0 },
+    industry: { value: '', score: 0 },
     totalScore: 0,
-    riskLevel: "Low",
+    riskLevel: 'Low',
   });
 
   const [data, setData] = useState([]);
@@ -54,224 +54,224 @@ export function CustomerRiskAssessment() {
     setRiskFactors({
       customerType: [
         {
-          value: "Government",
+          value: 'Government',
           score: 1,
-          description: "LR - Stable and transparent income streams",
+          description: 'LR - Stable and transparent income streams',
         },
         {
-          value: "Individual/Sole proprietorship",
+          value: 'Individual/Sole proprietorship',
           score: 2,
-          description: "MR - Simple ownership structure",
+          description: 'MR - Simple ownership structure',
         },
         {
-          value: "Association/cooperative",
+          value: 'Association/cooperative',
           score: 3,
-          description: "MR - Moderately complex structure",
+          description: 'MR - Moderately complex structure',
         },
         {
-          value: "Company/Partnership",
+          value: 'Company/Partnership',
           score: 4,
-          description: "HR - Complex ownership structure",
+          description: 'HR - Complex ownership structure',
         },
         {
-          value: "Trust",
+          value: 'Trust',
           score: 5,
-          description: "HR - Difficult to identify source/destination of funds",
+          description: 'HR - Difficult to identify source/destination of funds',
         },
       ],
       jurisdiction: [
         {
-          value: "LRC - Low Risk Country",
+          value: 'LRC - Low Risk Country',
           score: 1,
-          description: "Basel AML Index < 4.71",
+          description: 'Basel AML Index < 4.71',
         },
         {
-          value: "MRC - Medium Risk Country",
+          value: 'MRC - Medium Risk Country',
           score: 3,
-          description: "Remaining countries",
+          description: 'Remaining countries',
         },
         {
-          value: "HRC - High Risk Country",
+          value: 'HRC - High Risk Country',
           score: 5,
-          description: "Tax havens, Basel > 6, FATF grey list",
+          description: 'Tax havens, Basel > 6, FATF grey list',
         },
         {
-          value: "UHRC - Ultra High Risk Country",
+          value: 'UHRC - Ultra High Risk Country',
           score: 100,
-          description: "Sanctioned countries (Unacceptable)",
+          description: 'Sanctioned countries (Unacceptable)',
         },
       ],
       customerRetention: [
         {
-          value: "3+ Years",
+          value: '3+ Years',
           score: 1,
-          description: "LR - Established relationship, high understanding",
+          description: 'LR - Established relationship, high understanding',
         },
         {
-          value: "1-3 Years",
+          value: '1-3 Years',
           score: 2,
-          description: "MR - Moderate understanding",
+          description: 'MR - Moderate understanding',
         },
-        { value: "New", score: 3, description: "HR - Minimal understanding" },
+        { value: 'New', score: 3, description: 'HR - Minimal understanding' },
       ],
       product: [
-        { value: "Custody", score: 2, description: "MR - Moderate ML/TF risk" },
+        { value: 'Custody', score: 2, description: 'MR - Moderate ML/TF risk' },
         {
-          value: "Stable coin",
+          value: 'Stable coin',
           score: 3,
-          description: "MR - Moderate exposure",
+          description: 'MR - Moderate exposure',
         },
-        { value: "Affiliate", score: 3, description: "MR - Moderate risk" },
+        { value: 'Affiliate', score: 3, description: 'MR - Moderate risk' },
         {
-          value: "Bullion",
+          value: 'Bullion',
           score: 4,
-          description: "HR - High cash/value exposure",
+          description: 'HR - High cash/value exposure',
         },
         {
-          value: "Remittance/FX",
+          value: 'Remittance/FX',
           score: 4,
-          description: "HR - High ML/TF risk",
+          description: 'HR - High ML/TF risk',
         },
-        { value: "DCE", score: 5, description: "HR - Highest ML/TF exposure" },
+        { value: 'DCE', score: 5, description: 'HR - Highest ML/TF exposure' },
       ],
       channel: [
         {
-          value: "Face to Face",
+          value: 'Face to Face',
           score: 1,
-          description: "LR - Direct verification possible",
+          description: 'LR - Direct verification possible',
         },
         {
-          value: "Direct mobile App",
+          value: 'Direct mobile App',
           score: 3,
-          description: "MR - Instant communication",
+          description: 'MR - Instant communication',
         },
         {
-          value: "Customer with agent/authorised representative",
+          value: 'Customer with agent/authorised representative',
           score: 3,
-          description: "MR - Indirect but verified",
+          description: 'MR - Indirect but verified',
         },
         {
-          value: "Direct messaging App/Email (OTC)",
+          value: 'Direct messaging App/Email (OTC)',
           score: 4,
-          description: "HR - Limited verification",
+          description: 'HR - Limited verification',
         },
         {
-          value: "Customer with broker",
+          value: 'Customer with broker',
           score: 5,
-          description: "HR - Difficult to verify identity",
+          description: 'HR - Difficult to verify identity',
         },
       ],
       occupation: [
         {
-          value: "Managers",
+          value: 'Managers',
           score: 1,
-          description: "LR - Low exposure to cash/crypto/ML/TF",
+          description: 'LR - Low exposure to cash/crypto/ML/TF',
         },
-        { value: "Professionals", score: 1, description: "LR - Low exposure" },
+        { value: 'Professionals', score: 1, description: 'LR - Low exposure' },
         {
-          value: "Clerical and Administrative Workers",
+          value: 'Clerical and Administrative Workers',
           score: 2,
-          description: "MR - Medium exposure",
+          description: 'MR - Medium exposure',
         },
         {
-          value: "Technicians and Trades Workers",
+          value: 'Technicians and Trades Workers',
           score: 3,
-          description: "MR - Medium exposure",
+          description: 'MR - Medium exposure',
         },
         {
-          value: "Sales Workers",
+          value: 'Sales Workers',
           score: 3,
-          description: "MR - Medium exposure",
+          description: 'MR - Medium exposure',
         },
         {
-          value: "Machinery Operators and Drivers",
+          value: 'Machinery Operators and Drivers',
           score: 3,
-          description: "MR - Medium exposure",
+          description: 'MR - Medium exposure',
         },
         {
-          value: "Community and Personal Service Workers",
+          value: 'Community and Personal Service Workers',
           score: 4,
-          description: "HR - High exposure",
+          description: 'HR - High exposure',
         },
-        { value: "Labourers", score: 4, description: "HR - High exposure" },
+        { value: 'Labourers', score: 4, description: 'HR - High exposure' },
         {
-          value: "Business Owner",
+          value: 'Business Owner',
           score: 4,
-          description: "HR - High exposure",
+          description: 'HR - High exposure',
         },
         {
-          value: "Unemployed/Retiree",
+          value: 'Unemployed/Retiree',
           score: 5,
-          description: "UHR - Highest exposure",
+          description: 'UHR - Highest exposure',
         },
-        { value: "Student", score: 5, description: "UHR - Highest exposure" },
+        { value: 'Student', score: 5, description: 'UHR - Highest exposure' },
       ],
       industry: [
         {
-          value: "Electricity, Gas, Water and Waste Services",
+          value: 'Electricity, Gas, Water and Waste Services',
           score: 1,
-          description: "LR",
+          description: 'LR',
         },
         {
-          value: "Information Media and Telecommunications",
+          value: 'Information Media and Telecommunications',
           score: 1,
-          description: "LR",
+          description: 'LR',
         },
         {
-          value: "Public Administration and Safety",
+          value: 'Public Administration and Safety',
           score: 1,
-          description: "LR",
+          description: 'LR',
         },
-        { value: "Education and Training", score: 2, description: "MR" },
+        { value: 'Education and Training', score: 2, description: 'MR' },
         {
-          value: "Health Care and Social Assistance",
+          value: 'Health Care and Social Assistance',
           score: 2,
-          description: "MR",
+          description: 'MR',
         },
         {
-          value: "Agriculture, Forestry and Fishing",
+          value: 'Agriculture, Forestry and Fishing',
           score: 3,
-          description: "MR",
+          description: 'MR',
         },
-        { value: "Mining", score: 3, description: "MR" },
-        { value: "Manufacturing", score: 3, description: "MR" },
-        { value: "Wholesale Trade", score: 3, description: "MR" },
+        { value: 'Mining', score: 3, description: 'MR' },
+        { value: 'Manufacturing', score: 3, description: 'MR' },
+        { value: 'Wholesale Trade', score: 3, description: 'MR' },
         {
-          value: "Accommodation and Food Services",
+          value: 'Accommodation and Food Services',
           score: 3,
-          description: "MR",
+          description: 'MR',
         },
         {
-          value: "Transport, Postal and Warehousing",
+          value: 'Transport, Postal and Warehousing',
           score: 3,
-          description: "MR",
+          description: 'MR',
         },
         {
-          value: "Professional, Scientific and Technical Services",
+          value: 'Professional, Scientific and Technical Services',
           score: 3,
-          description: "MR",
+          description: 'MR',
         },
         {
-          value: "Administrative and Support Services",
+          value: 'Administrative and Support Services',
           score: 3,
-          description: "MR",
+          description: 'MR',
         },
-        { value: "Retail Trade", score: 4, description: "HR" },
-        { value: "Arts and Recreation Services", score: 4, description: "HR" },
+        { value: 'Retail Trade', score: 4, description: 'HR' },
+        { value: 'Arts and Recreation Services', score: 4, description: 'HR' },
         {
-          value: "Construction",
+          value: 'Construction',
           score: 5,
-          description: "UHR - Highest ML/TF risk",
+          description: 'UHR - Highest ML/TF risk',
         },
         {
-          value: "Financial and Insurance Services",
+          value: 'Financial and Insurance Services',
           score: 5,
-          description: "UHR - Highest ML/TF risk",
+          description: 'UHR - Highest ML/TF risk',
         },
         {
-          value: "Rental, Hiring and Real Estate Services",
+          value: 'Rental, Hiring and Real Estate Services',
           score: 5,
-          description: "UHR - Highest ML/TF risk",
+          description: 'UHR - Highest ML/TF risk',
         },
       ],
     });
@@ -287,18 +287,18 @@ export function CustomerRiskAssessment() {
       customerData.occupation.score +
       customerData.industry.score;
 
-    let riskLevel = "Low";
-    if (total >= 1000) riskLevel = "Unacceptable";
-    else if (total >= 21) riskLevel = "High";
-    else if (total >= 18) riskLevel = "Medium";
-    else riskLevel = "Low";
+    let riskLevel = 'Low';
+    if (total >= 1000) riskLevel = 'Unacceptable';
+    else if (total >= 21) riskLevel = 'High';
+    else if (total >= 18) riskLevel = 'Medium';
+    else riskLevel = 'Low';
 
     const newData = { ...customerData, totalScore: total, riskLevel };
 
     setData([...data, newData]);
   };
 
-  console.log("customerData", customerData);
+  console.log('customerData', customerData);
 
   const handleFactorChange = (factor, value, score) => {
     setCustomerData({
@@ -309,27 +309,27 @@ export function CustomerRiskAssessment() {
 
   const getRiskLevelColor = (level) => {
     switch (level.toLowerCase()) {
-      case "low":
-        return "text-green-600";
-      case "medium":
-        return "text-yellow-600";
-      case "high":
-        return "text-orange-600";
-      case "unacceptable":
-        return "text-red-600";
+      case 'low':
+        return 'text-green-600';
+      case 'medium':
+        return 'text-yellow-600';
+      case 'high':
+        return 'text-orange-600';
+      case 'unacceptable':
+        return 'text-red-600';
       default:
-        return "text-gray-600";
+        return 'text-gray-600';
     }
   };
 
   const handleExport = () => {
     const dataStr = JSON.stringify(customerData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `CRA_${customerData.customerId || "assessment"}_${
-      new Date().toISOString().split("T")[0]
+    link.download = `CRA_${customerData.customerId || 'assessment'}_${
+      new Date().toISOString().split('T')[0]
     }.json`;
     link.click();
   };
@@ -343,7 +343,7 @@ export function CustomerRiskAssessment() {
           const data = JSON.parse(e.target?.result);
           setCustomerData(data);
         } catch (error) {
-          console.error("[v0] Error parsing JSON:", error);
+          console.error('[v0] Error parsing JSON:', error);
         }
       };
       reader.readAsText(file);
@@ -393,27 +393,27 @@ Risk Classification:
 Generated: ${new Date().toISOString()}
     `.trim();
 
-    const blob = new Blob([report], { type: "text/plain" });
+    const blob = new Blob([report], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `CRA_Report_${customerData.customerId || "assessment"}_${
-      new Date().toISOString().split("T")[0]
+    link.download = `CRA_Report_${customerData.customerId || 'assessment'}_${
+      new Date().toISOString().split('T')[0]
     }.txt`;
     link.click();
   };
   const columns = [
     {
-      header: "Customer Name",
-      accessorKey: "customerName",
+      header: 'Customer Name',
+      accessorKey: 'customerName',
     },
     {
-      header: "Total Risk Score",
-      accessorKey: "totalScore",
+      header: 'Total Risk Score',
+      accessorKey: 'totalScore',
     },
     {
-      header: "Risk Level",
-      accessorKey: "riskLevel",
+      header: 'Risk Level',
+      accessorKey: 'riskLevel',
       cell: ({ row }) => {
         return (
           <Badge variant={riskLevelVariants[row.original.riskLevel]}>
@@ -424,16 +424,16 @@ Generated: ${new Date().toISOString()}
       },
     },
     {
-      header: "Assessment Date",
-      accessorKey: "assessmentDate",
+      header: 'Assessment Date',
+      accessorKey: 'assessmentDate',
     },
     {
-      header: "Customer Type",
-      accessorKey: "customerType.value",
+      header: 'Customer Type',
+      accessorKey: 'customerType.value',
     },
     {
-      header: "Jurisdiction",
-      accessorKey: "jurisdiction.value",
+      header: 'Jurisdiction',
+      accessorKey: 'jurisdiction.value',
     },
   ];
 
@@ -453,7 +453,7 @@ Generated: ${new Date().toISOString()}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => document.getElementById("import-file")?.click()}
+                onClick={() => document.getElementById('import-file')?.click()}
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Import
@@ -532,7 +532,7 @@ Generated: ${new Date().toISOString()}
                   const factor = riskFactors.customerType?.find(
                     (f) => f.value === value
                   );
-                  handleFactorChange("customerType", value, factor?.score || 0);
+                  handleFactorChange('customerType', value, factor?.score || 0);
                 }}
               >
                 <SelectTrigger>
@@ -565,7 +565,7 @@ Generated: ${new Date().toISOString()}
                   const factor = riskFactors.jurisdiction?.find(
                     (f) => f.value === value
                   );
-                  handleFactorChange("jurisdiction", value, factor?.score || 0);
+                  handleFactorChange('jurisdiction', value, factor?.score || 0);
                 }}
               >
                 <SelectTrigger>
@@ -599,7 +599,7 @@ Generated: ${new Date().toISOString()}
                     (f) => f.value === value
                   );
                   handleFactorChange(
-                    "customerRetention",
+                    'customerRetention',
                     value,
                     factor?.score || 0
                   );
@@ -635,7 +635,7 @@ Generated: ${new Date().toISOString()}
                   const factor = riskFactors.product?.find(
                     (f) => f.value === value
                   );
-                  handleFactorChange("product", value, factor?.score || 0);
+                  handleFactorChange('product', value, factor?.score || 0);
                 }}
               >
                 <SelectTrigger>
@@ -668,7 +668,7 @@ Generated: ${new Date().toISOString()}
                   const factor = riskFactors.channel?.find(
                     (f) => f.value === value
                   );
-                  handleFactorChange("channel", value, factor?.score || 0);
+                  handleFactorChange('channel', value, factor?.score || 0);
                 }}
               >
                 <SelectTrigger>
@@ -701,7 +701,7 @@ Generated: ${new Date().toISOString()}
                   const factor = riskFactors.occupation?.find(
                     (f) => f.value === value
                   );
-                  handleFactorChange("occupation", value, factor?.score || 0);
+                  handleFactorChange('occupation', value, factor?.score || 0);
                 }}
               >
                 <SelectTrigger>
@@ -734,7 +734,7 @@ Generated: ${new Date().toISOString()}
                   const factor = riskFactors.industry?.find(
                     (f) => f.value === value
                   );
-                  handleFactorChange("industry", value, factor?.score || 0);
+                  handleFactorChange('industry', value, factor?.score || 0);
                 }}
               >
                 <SelectTrigger>
