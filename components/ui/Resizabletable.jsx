@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
   ColumnDef,
-} from "@tanstack/react-table";
+} from '@tanstack/react-table';
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -22,13 +22,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./dropdown-menu";
-import { Button } from "./button";
-import { Eye } from "lucide-react";
-import { useTableColumnResize } from "../hooks/use-table-column.resize";
-import { DataTableResizer } from "./tableResizer";
-import { Skeleton } from "./skeleton";
-import { cn } from "@/lib/utils";
+} from './dropdown-menu';
+import { Button } from './button';
+import { Eye } from 'lucide-react';
+import { useTableColumnResize } from '../hooks/use-table-column.resize';
+import { DataTableResizer } from './tableResizer';
+import { Skeleton } from './skeleton';
+import { cn } from '@/lib/utils';
 
 export default function ResizableTable({
   loading = false,
@@ -37,7 +37,7 @@ export default function ResizableTable({
   onDoubleClick,
   onRowClick,
   actions,
-  tableId = "1111",
+  tableId = '1111',
   tableConfig = {
     enableRowSelection: true,
     enableClickRowSelect: false,
@@ -46,11 +46,11 @@ export default function ResizableTable({
     enableDateFilter: true,
     enableColumnVisibility: true,
     enableUrlState: true,
-    size: "default",
-    columnResizingTableId: "user-table",
-    searchPlaceholder: "Search users",
-    defaultSortBy: "created_at", // Snake_case sorting (matches API response)
-    defaultSortOrder: "desc",
+    size: 'default',
+    columnResizingTableId: 'user-table',
+    searchPlaceholder: 'Search users',
+    defaultSortBy: 'created_at', // Snake_case sorting (matches API response)
+    defaultSortOrder: 'desc',
   },
   ...props
 }) {
@@ -62,7 +62,7 @@ export default function ResizableTable({
 
   const handleColumnSizingChange = React.useCallback(
     (updaterOrValue) => {
-      if (typeof updaterOrValue === "function") {
+      if (typeof updaterOrValue === 'function') {
         setColumnSizing((current) => updaterOrValue(current));
       } else {
         setColumnSizing(updaterOrValue);
@@ -72,10 +72,10 @@ export default function ResizableTable({
   );
 
   React.useEffect(() => {
-    const newId = localStorage.getItem("newId");
+    const newId = localStorage.getItem('newId');
     if (newId) {
       setHighlightedId(newId);
-      localStorage.removeItem("newId"); // cleanup
+      localStorage.removeItem('newId'); // cleanup
 
       // remove highlight after few seconds
       setTimeout(() => setHighlightedId(null), 10000);
@@ -85,7 +85,7 @@ export default function ResizableTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    columnResizeMode: "onChange", // "onChange" updates live, "onEnd" waits until drag ends
+    columnResizeMode: 'onChange', // "onChange" updates live, "onEnd" waits until drag ends
     state: {
       sorting,
       columnVisibility,
@@ -168,11 +168,11 @@ export default function ResizableTable({
                     <TableHead
                       key={header.id}
                       className={
-                        "text-xs     bg-zinc-100  text-zinc-700 uppercase sticky top-0 "
+                        'text-xs      text-zinc-700 uppercase sticky top-0 '
                       }
                       style={{
-                        position: "relative",
-                        width: header.getSize() ?? "auto",
+                        position: 'relative',
+                        width: header.getSize() ?? 'auto',
                       }}
                     >
                       {header.isPlaceholder
@@ -209,7 +209,7 @@ export default function ResizableTable({
                       return (
                         <TableCell
                           key={header.id}
-                          className={" border-r   first:border-l  font-bold  "}
+                          className={' border-r   first:border-l  font-bold  '}
                         >
                           <Skeleton className="w-full h-10 animate-pulse" />
                         </TableCell>
@@ -227,8 +227,8 @@ export default function ResizableTable({
                     <TableRow
                       key={row.id}
                       data-highlighted={highlightedId === row?.original?.id}
-                      className={cn(" hover:bg-neutral-100  font-medium ", {
-                        "bg-blue-50 ": highlightedId === row?.original?.id,
+                      className={cn(' hover:bg-neutral-100  font-medium ', {
+                        'bg-blue-50 ': highlightedId === row?.original?.id,
                       })}
                       onDoubleClick={() => handleDoubleClick(row.original)}
                       onClick={() => handleRowClick(row.original)}
@@ -238,10 +238,10 @@ export default function ResizableTable({
                           key={cell.id}
                           // data-highlighted={highlightedId === row?.id}
                           className={
-                            "text-xs text-zinc-700 border-r w-full   border-b "
+                            'text-xs text-zinc-900 border-r w-full   border-b '
                           }
                           style={{
-                            width: cell.column.getSize() ?? "auto",
+                            width: cell.column.getSize() ?? 'auto',
                           }}
                         >
                           {flexRender(

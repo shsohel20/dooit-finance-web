@@ -1,29 +1,45 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { IconHelpCircle } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
+'use client';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import {
+  IconCash,
+  IconHelpCircle,
+  IconAlertTriangle,
+  IconUsers,
+} from '@tabler/icons-react';
+import { useRouter } from 'next/navigation';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from './ui/select';
+
 export function SiteHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const routes = [
     {
-      name: "Customers",
-      href: "/dashboard/client/onboarding/customer-queue",
+      name: 'Customers',
+      href: '/dashboard/client/onboarding/customer-queue',
+      icon: <IconUsers size={14} />,
     },
 
     {
-      name: "Transactions",
-      href: "/dashboard/client/transactions",
+      name: 'Transactions',
+      href: '/dashboard/client/transactions',
+      icon: <IconCash size={14} />,
     },
     {
-      name: "Alerts",
-      href: "/dashboard/client/monitoring-and-cases/case-list",
+      name: 'Alerts',
+      href: '/dashboard/client/monitoring-and-cases/case-list',
+      icon: <IconAlertTriangle size={14} />,
     },
   ];
   return (
@@ -35,20 +51,25 @@ export function SiteHeader() {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
 
-        <div className=" w-full flex ">
-          <ul className="flex items-center gap-2">
+        <div className=" w-full flex justify-center">
+          <ul className="flex items-center gap-2 ">
             {routes.map((route) => (
               <li key={route.name}>
                 <Link
                   href={route.href}
                   className={cn(
-                    " px-4 py-2 rounded-md text-zinc-400  font-extrabold ",
+                    ' px-4 py-2  text-zinc-600  font-semibold flex items-center gap-2 [&>svg]:size-4 [&>svg]:shrink-0 relative rounded-md text-[0.78rem]',
                     {
-                      "text-zinc-800  font-bold ": pathname === route.href,
+                      'text-zinc-800  font-bold  bg-secondary':
+                        pathname === route.href,
                     }
                   )}
                 >
-                  {route.name}
+                  {pathname === route.href && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-full rounded-full w-1 bg-gradient-to-b from-primary to-primary/50" />
+                  )}
+                  <span className="">{route.icon}</span>
+                  <span>{route.name}</span>
                 </Link>
               </li>
             ))}
@@ -58,8 +79,17 @@ export function SiteHeader() {
           <Button variant="secondary" size="sm">
             Help <IconHelpCircle />
           </Button>
+          <Select defaultValue="production">
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Select environment" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="production">Production</SelectItem>
+              <SelectItem value="sandbox">Sandbox</SelectItem>
+            </SelectContent>
+          </Select>
           <Button
-            onClick={() => router.push("/dashboard/client/profile")}
+            onClick={() => router.push('/dashboard/client/profile')}
             variant="ghost"
             asChild
             size="sm"
