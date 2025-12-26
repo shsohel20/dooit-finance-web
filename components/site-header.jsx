@@ -66,7 +66,7 @@ export function SiteHeader() {
                   )}
                 >
                   {pathname === route.href && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-full rounded-full w-1 bg-gradient-to-b from-primary to-primary/50" />
+                    <div className="absolute left-0 bottom-0  w-full rounded-full h-1 bg-accent" />
                   )}
                   <span className="">{route.icon}</span>
                   <span>{route.name}</span>

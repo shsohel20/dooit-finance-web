@@ -115,7 +115,7 @@ export default function ResizableTable({
   };
 
   return (
-    <div className="overflow-x-auto   text-xs relative bg-white  mt-4 px-4 rounded-md pb-6 shadow">
+    <div className="overflow-x-auto   relative   mt-4  rounded-md pb-6 ">
       {/* Toolbar */}
       <div className="flex items-center justify-end py-4 gap-2">
         <DropdownMenu>
@@ -167,9 +167,7 @@ export default function ResizableTable({
                   return (
                     <TableHead
                       key={header.id}
-                      className={
-                        'text-xs      text-zinc-700 uppercase sticky top-0 '
-                      }
+                      className={'text-xs text-heading uppercase sticky top-0 '}
                       style={{
                         position: 'relative',
                         width: header.getSize() ?? 'auto',
@@ -238,7 +236,7 @@ export default function ResizableTable({
                           key={cell.id}
                           // data-highlighted={highlightedId === row?.id}
                           className={
-                            'text-xs text-zinc-900 border-r w-full   border-b '
+                            'text-xs text-heading border-r w-full   border-b '
                           }
                           style={{
                             width: cell.column.getSize() ?? 'auto',
