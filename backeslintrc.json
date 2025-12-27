@@ -2,6 +2,6 @@
   "extends": "next/core-web-vitals",
 
   "rules": {
-    "no-undef": "off"
+    "no-undef": "error"
   }
 }
