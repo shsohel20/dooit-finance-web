@@ -1,29 +1,37 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { TrendingUp, TrendingDown } from "lucide-react"
-
-
+import { Card, CardContent } from "@/components/ui/card";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 export function MetricCard({ title, value, icon, trend }) {
   return (
-    <Card className="border bg-white">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-3">
-          <div className="p-2.5 rounded-lg bg-muted text-foreground">{icon}</div>
+    <Card className="border bg-white ">
+      <CardContent className="">
+        <div className="flex items-start justify-between ">
           {trend && (
             <div
-              className={`flex items-center gap-1 text-xs font-medium ${trend.positive ? "text-emerald-600" : "text-red-600"
-                }`}
+              className={`flex items-center gap-1 text-xs font-medium mb-3 ${
+                trend.positive ? "text-emerald-600" : "text-red-600"
+              }`}
             >
-              {trend.positive ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+              {trend.positive ? (
+                <TrendingUp className="h-3.5 w-3.5" />
+              ) : (
+                <TrendingDown className="h-3.5 w-3.5" />
+              )}
               <span>{trend.value}</span>
             </div>
           )}
         </div>
         <div>
-          <p className="text-sm text-muted-foreground mb-1.5">{title}</p>
-          <p className="text-3xl font-semibold tracking-tight text-foreground">{value}</p>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="text-primary">{icon}</div>
+              <p className="text-sm text-heading  tracking-tighter font-medium">{title}</p>
+            </div>
+            <p className="text-primary-gray font-medium">Last 30 days</p>
+          </div>
+          <p className="text-4xl font-semibold tracking-tighter font-mono text-heading">{value}</p>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

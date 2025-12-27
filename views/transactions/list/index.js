@@ -60,7 +60,6 @@ const TransactionListView = () => {
   const totalItems = transactions?.totalRecords || 0;
   const router = useRouter();
 
-
   useEffect(() => {
     const fetchTransactions = async () => {
       setFetching(true);
@@ -97,7 +96,7 @@ const TransactionListView = () => {
   };
   const handleEditClick = (item) => {
     router.push(`/dashboard/client/transactions/edit?id=${item?._id}`);
-  }
+  };
   const columns = [
     {
       header: "Actions",
@@ -262,10 +261,10 @@ const TransactionListView = () => {
 
   return (
     <div>
-      <PageHeader>
+      {/* <PageHeader>
         <PageTitle>Transaction History</PageTitle>
         <PageDescription>View and manage transaction history for your clients.</PageDescription>
-      </PageHeader>
+      </PageHeader> */}
       <TransactionDashboard transactions={transactions?.data || []} />
 
       <div className="flex items-center justify-between bg-white shadow-sm rounded-md p-4">
@@ -319,15 +318,15 @@ const TransactionListView = () => {
           <ButtonGroup>
             <Button
               variant="outline"
-            // onClick={() => setView('grid')}
-            // variant={view === 'grid' ? 'default' : 'outline'}
+              // onClick={() => setView('grid')}
+              // variant={view === 'grid' ? 'default' : 'outline'}
             >
               <IconGridDots />
             </Button>
             <Button
               variant="outline"
-            // variant={view === 'list' ? 'default' : 'outline'}
-            // onClick={() => setView('list')}
+              // variant={view === 'list' ? 'default' : 'outline'}
+              // onClick={() => setView('list')}
             >
               <IconList />
             </Button>
@@ -355,7 +354,12 @@ const TransactionListView = () => {
         currentItem={currentItem}
         setCurrentItem={setCurrentItem}
       />
-      <TransactionReportingModal open={viewReport} setOpen={setViewReport} currentItem={currentItemReport} setCurrentItem={setCurrentItemReport} />
+      <TransactionReportingModal
+        open={viewReport}
+        setOpen={setViewReport}
+        currentItem={currentItemReport}
+        setCurrentItem={setCurrentItemReport}
+      />
     </div>
   );
 };

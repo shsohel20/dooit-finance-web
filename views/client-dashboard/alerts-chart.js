@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
 
 const data = [
-  { name: "Sanctions\nMatches", value: 25, fill: "#3b82f6" },
-  { name: "Watchlist\nMatches", value: 45, fill: "#8b5cf6" },
-  { name: "KYC\nArtifacts", value: 30, fill: "#06b6d4" },
-  { name: "Sanctions\nOngoing", value: 15, fill: "#10b981" },
-]
+  { name: "Sanctions\nMatches", value: 25, fill: "var(--primary)" },
+  { name: "Watchlist\nMatches", value: 45, fill: "var(--primary-light)" },
+  { name: "KYC\nArtifacts", value: 30, fill: "var(--accent)" },
+  { name: "Sanctions\nOngoing", value: 15, fill: "var(--success)" },
+];
 
 export function AlertsChart() {
   return (
@@ -26,8 +26,13 @@ export function AlertsChart() {
               tick={{ fontSize: 12, fill: "#6b7280" }}
               tickLine={false}
               axisLine={{ stroke: "#d1d5db" }}
+              // className="text-primary-gray"
             />
-            <YAxis tick={{ fontSize: 12, fill: "#6b7280" }} tickLine={false} axisLine={{ stroke: "#d1d5db" }} />
+            <YAxis
+              tick={{ fontSize: 12, fill: "#6b7280" }}
+              tickLine={false}
+              axisLine={{ stroke: "#d1d5db" }}
+            />
             <Tooltip
               cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
               contentStyle={{
@@ -41,5 +46,5 @@ export function AlertsChart() {
         </ResponsiveContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

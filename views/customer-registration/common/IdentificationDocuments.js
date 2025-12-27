@@ -207,7 +207,7 @@ const IdentificationDocuments = ({
       setIsSaving(true);
       // setVerifyingStatus("verifying");
       const verify_response = await verifyDocument(verify_data);
-      console.log("verify_response", verify_response);
+
       const verification_status = verify_response.data?.result?.verification_status;
       if (verification_status === 0) {
         toast.error("Documents are not verified. You can't proceed further.");
@@ -225,15 +225,50 @@ const IdentificationDocuments = ({
           const response = await getDataFromDocuments(formData);
           console.log("response", response);
           if (response.success) {
-            const [given_name, middle_name, surname] = response.data.full_name?.split(" ");
-            //23-dec-1990 to yyyy-mm-dd
-            const date_of_birth = formatDate(response.data.date_of_birth);
-            console.log("date_of_birth", date_of_birth);
-            setValue("customer_details.given_name", given_name || "");
-            setValue("customer_details.middle_name", middle_name || "");
-            setValue("customer_details.surname", surname || "");
-            setValue("residential_address.address", response.data.address || "");
-            setValue("customer_details.date_of_birth", date_of_birth || "");
+            // const formData = response.data;
+            // const full_name = formData.full_name;
+            // const given_name = full_name ? formData.full_name?.split(" ")[0] : formData?.given_name;
+            // const middle_name = full_name ? formData.full_name?.split(" ")[1] : formData?.middle_name;
+            // const surname = full_name ? formData.full_name?.split(" ")[2] : formData?.surname;
+
+            // //23-dec-1990 to yyyy-mm-dd
+            // const date_of_birth = formatDate(formData.date_of_birth);
+            // setValue("customer_details.given_name", given_name || "");
+            // setValue("customer_details.middle_name", middle_name || "");
+            // setValue("customer_details.surname", surname || "");
+            // setValue("residential_address.address", formData.address || formData?.permanent_address);
+            // setValue("customer_details.date_of_birth", date_of_birth);
+            const formData = response.data ?? {};
+
+            const fullNameParts = formData.full_name?.trim().split(/\s+/) ?? [];
+
+            const given_name =
+              fullNameParts[0] || formData.given_name || "";
+
+            const middle_name =
+              fullNameParts.length > 2
+                ? fullNameParts.slice(1, -1).join(" ")
+                : formData.middle_name || "";
+
+            const surname =
+              fullNameParts.length > 1
+                ? fullNameParts[fullNameParts.length - 1]
+                : formData.surname || "";
+
+            const date_of_birth = formData.date_of_birth
+              ? formatDate(formData.date_of_birth)
+              : "";
+
+            setValue("customer_details.given_name", given_name);
+            setValue("customer_details.middle_name", middle_name);
+            setValue("customer_details.surname", surname);
+            setValue(
+              "residential_address.address",
+              formData.address || formData.permanent_address || ""
+            );
+            setValue("customer_details.date_of_birth", date_of_birth);
+            setVerifyingStatus("verified");
+          } else {
             setVerifyingStatus("verified");
           }
         }
