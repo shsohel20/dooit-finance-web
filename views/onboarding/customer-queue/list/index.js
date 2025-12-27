@@ -426,6 +426,7 @@ export const ReportingModal = ({ open, setOpen, currentItem, setCurrentItem }) =
     }
   }
 
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
 
