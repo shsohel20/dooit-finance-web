@@ -33,7 +33,7 @@ const PARTS = [
   { id: 'H', title: 'Details of reporting entity', component: PartH },
 ];
 
-export function SuspiciousMatterReportForm({ id }) {
+export function SuspiciousMatterReportForm({ id, caseNumber, caseId }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
   const [formData, setFormData] = useState({
@@ -85,6 +85,7 @@ export function SuspiciousMatterReportForm({ id }) {
         otherGovernmentBodies: response?.data?.partG?.otherGovernmentBodies,
         attachments: response?.data?.partG?.attachments,
         reportingEntity: response?.data?.partH?.reportingEntity,
+        caseNumber: response?.data?.caseNumber,
       };
       setFormData(modifiedData);
     } catch (error) {
@@ -98,6 +99,18 @@ export function SuspiciousMatterReportForm({ id }) {
       getFormDataById();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (caseNumber) {
+      setFormData({
+        ...formData,
+        caseNumber: {
+          label: caseNumber,
+          value: caseId,
+        },
+      });
+    }
+  }, [caseNumber]);
 
   const handleNext = () => {
     if (currentStep < PARTS.length - 1) {

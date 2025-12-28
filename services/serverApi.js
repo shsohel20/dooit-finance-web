@@ -21,9 +21,16 @@ export async function fetchWithAuth(endpoint, options = {}, isAi = false) {
     ...options,
   }
 
-  const res = await fetch(`${isAi ? AI_URL : BASE_URL}${endpoint}`, {
-    ...allOptions,
-  });
 
-  return res;
+
+  try {
+    const res = await fetch(`${isAi ? AI_URL : BASE_URL}${endpoint}`, {
+      ...allOptions,
+    });
+
+    return res;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return { success: false, error: error.message };
+  }
 }

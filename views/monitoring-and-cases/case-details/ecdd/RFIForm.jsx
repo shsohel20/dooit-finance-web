@@ -22,6 +22,7 @@ import useAlertStore from "@/app/store/alerts";
 import {
   autoPopulateRFI,
   createRFI,
+  getRFIById,
 } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -41,16 +42,14 @@ const defaultValues = {
   requestedItems: [],
 };
 
-export function CaseRequestForm({ open, setOpen, getRFI }) {
+export function CaseRequestForm({ open, setOpen, getRFI, caseNumber, setCaseNumber }) {
   const { details } = useAlertStore();
-  console.log("details uid", details?.uid);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   // console.log("in rfi form details", details);
   const {
-    register,
     handleSubmit,
     control,
-    watch,
     formState: { errors },
     setValue,
   } = useForm({
@@ -64,7 +63,6 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
   });
 
   const getData = async () => {
-    console.log("call", "uid", details?.uid);
     try {
       const response = await autoPopulateRFI(details?.uid);
       setValue("primaryContactName", response.primary_contact_name);
@@ -92,13 +90,15 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
   };
 
   useEffect(() => {
-    getData();
+    if (details?.uid) {
+      getData();
+    }
   }, [details?.uid]);
 
   const onSubmit = async (data) => {
     const submiitedData = {
       ...data,
-      caseNumber: details?.uid,
+      caseNumber: details?.uid || caseNumber,
       caseId: details?._id,
       clientId: details?.transaction?.client,
       customerId: details?.customer?._id,
@@ -115,7 +115,9 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
         toast.success("RFI created successfully");
         setIsSubmitting(false);
         setOpen(false);
-        getRFI();
+        if (getRFI) {
+          getRFI();
+        }
       } else {
         toast.error("Failed to create RFI");
       }
@@ -127,8 +129,15 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
     // Handle form submission here
   };
 
+  const handleOpenChange = (open) => {
+    setOpen(open);
+    if (!open) {
+      setCaseNumber(null);
+    }
+  };
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="sm:max-w-2xl w-full p-4 overflow-y-auto ">
         <SheetHeader>
           <SheetTitle>New RFI</SheetTitle>
@@ -146,7 +155,7 @@ export function CaseRequestForm({ open, setOpen, getRFI }) {
                 <Input
                   id="metadata.caseNumber"
                   placeholder="CASE-2025-0001"
-                  value={details?.uid}
+                  value={details?.uid || caseNumber}
                   disabled
                 />
                 {errors.metadata?.caseNumber && (

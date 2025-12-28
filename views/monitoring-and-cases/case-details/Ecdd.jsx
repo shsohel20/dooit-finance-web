@@ -23,18 +23,16 @@ import { toast } from "sonner";
 
 const Ecdd = () => {
   const [caseData, setCaseData] = useState(null);
-  const params = useParams();
   const query = useSearchParams();
   const caseNumber = query.get("caseNumber");
   const { details } = useAlertStore();
   const router = useRouter();
   const [fetching, setFetching] = useState(true);
-  console.log("details", details);
+  console.log("casedata", caseData);
   const fetchEcddData = async () => {
     setFetching(true);
     try {
       const response = await getEcddByCaseNumber(details?.uid);
-      console.log("ecdd response", response);
       if (response?.data) {
         setCaseData(response.data);
       } else {
@@ -204,6 +202,49 @@ const Ecdd = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Transaction Information */}
+                <div hidden={!caseData?.transaction}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <DollarSign className="h-5 w-5 text-accent" />
+                        Transaction Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Transaction ID</p>
+                        <p className="font-medium">{caseData?.transaction?.uid}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Transaction Amount</p>
+                        <p className="font-semibold text-xl ">
+                          {caseData?.transaction?.currency} {caseData?.transaction?.amount}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Transaction Date</p>
+                        <p className="font-medium">
+                          {formatDate(caseData?.transaction?.timestamp)}
+                        </p>
+                      </div>
+                      {/* sender and receiver */}
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Sender</p>
+                        <p className="font-medium capitalize">
+                          {caseData?.transaction?.sender?.name}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Receiver</p>
+                        <p className="font-medium capitalize">
+                          {caseData?.transaction?.receiver?.name}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
 
                 {/* Business Information */}
                 <Card>

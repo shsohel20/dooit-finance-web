@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ResizableTable from '@/components/ui/Resizabletable';
 import { IconDotsVertical } from '@tabler/icons-react';
-import { Edit, Eye, FileText, Loader2, Trash } from 'lucide-react';
+import { ArrowRight, Edit, Eye, FileText, Loader2, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import {
@@ -20,19 +20,29 @@ import {
 } from "@/components/ui/alert-dialog"
 import { deleteEcdd } from '@/app/dashboard/client/report-compliance/ecdd/actions';
 import { toast } from 'sonner';
+import { formatDateTime } from '@/lib/utils';
+import CustomPagination from '@/components/CustomPagination';
 
 const EcddList = () => {
     const router = useRouter();
     const [data, setData] = useState([]);
+    console.log('data', data)
     const [loading, setLoading] = useState(false)
     const [deleteId, setDeleteId] = useState(null);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit, setLimit] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
     const getData = async () => {
         setLoading(true)
         try {
-            const res = await getEcdds();
+            const queryParams = {
+                page: currentPage,
+                limit: limit,
+            };
+            const res = await getEcdds(queryParams);
             setData(res?.data)
+            setTotalItems(res?.totalRecords)
         } catch (error) {
             console.log('error', error)
         } finally {
@@ -43,7 +53,7 @@ const EcddList = () => {
     useEffect(() => {
         getData()
 
-    }, [])
+    }, [currentPage, limit])
 
     const handleView = (caseId) => {
         router.push(`/dashboard/client/monitoring-and-cases/case-list/details/${caseId}?tab=ecdd-review`);
@@ -61,6 +71,7 @@ const EcddList = () => {
     }
     const columns = [
         {
+            size: 40,
             header: 'Action',
             accessorKey: 'id',
             cell: ({ row }) => <DropdownMenu>
@@ -78,16 +89,28 @@ const EcddList = () => {
             </DropdownMenu>,
         },
         {
-            header: 'Case ID',
-            accessorKey: 'caseNumber',
+            header: 'UID',
+            cell: ({ row }) => <div>
+                <p className="font-mono">#{row?.original?.uid}</p>
+            </div>
         },
         {
-            header: 'Customer Name',
-            accessorKey: 'customerName',
+            header: 'Case ID',
+            accessorKey: 'caseNumber',
+            cell: ({ row }) => <div>
+                <h5 className="text-heading font-semibold capitalize" >{row?.original?.fullName}</h5>
+                <p className="font-mono text-neutral-500">#{row?.original?.caseNumber}</p>
+            </div>
         },
+
         {
             header: 'Suspicion Date',
             accessorKey: 'createdAt',
+            cell: ({ row }) => <div>
+                <p className=" text-heading">
+                    {formatDateTime(row?.original?.createdAt)?.date}</p>
+                <p className="font-mono text-neutral-500">  {formatDateTime(row?.original?.createdAt)?.time}</p>
+            </div>
         },
         {
             header: 'Analyst',
@@ -96,6 +119,28 @@ const EcddList = () => {
         {
             header: 'Transaction',
             accessorKey: 'transaction.amount',
+            cell: ({ row }) => <div hidden={!row?.original?.transaction}>
+
+                <div className="flex items-center gap-2">
+
+                    <div>
+                        <p className="text-heading font-semibold capitalize" >{row?.original?.transaction?.sender?.name}</p>
+                        <p className="font-mono text-neutral-500">#{row?.original?.transaction?.sender?.account}</p>
+                    </div>
+                    <div>
+                        <ArrowRight className="size-4 text-green-500" />
+                    </div>
+                    <div>
+                        <p className="text-heading font-semibold capitalize" >{row?.original?.transaction?.receiver?.name}</p>
+                        <p className="font-mono text-neutral-500">#{row?.original?.transaction?.receiver?.account}</p>
+                    </div>
+                </div>
+                <div className='bg-accent/10'>
+                    <p className="text-heading font-semibold capitalize text-center" >
+                        (${row?.original?.transaction?.amount})
+                    </p>
+                </div>
+            </div>
         },
         {
             header: 'Status',
@@ -108,6 +153,14 @@ const EcddList = () => {
             <Button size='sm' onClick={() => router.push('/dashboard/client/report-compliance/ecdd/form')}>Add new</Button>
         )
     }
+    const handlePageChange = (page) => {
+        setCurrentPage(page.selected + 1);
+    };
+    const handleLimitChange = (limit) => {
+        setLimit(limit);
+        setCurrentPage(1);
+    };
+
 
     return (
         <div>
@@ -116,6 +169,13 @@ const EcddList = () => {
                 data={data}
                 loading={loading}
                 actions={<Actions />}
+            />
+            <CustomPagination
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                totalItems={totalItems}
+                limit={limit}
+                onChangeLimit={handleLimitChange}
             />
             <DeleteModal open={openDeleteModal} setOpen={setOpenDeleteModal} id={deleteId} getData={getData} />
         </div>

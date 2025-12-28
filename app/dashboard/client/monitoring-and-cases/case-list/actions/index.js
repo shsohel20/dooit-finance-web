@@ -13,6 +13,7 @@ export const getCaseDetails = async (id) => {
 export const getCaseList = async (queryParams) => {
   const queryString = getQueryString(queryParams);
   const response = await fetchWithAuth(`${endpoint}?${queryString}`);
+  console.log("alert response", response);
   return response.json();
 }
 

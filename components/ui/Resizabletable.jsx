@@ -26,7 +26,7 @@ import {
 import { Button } from './button';
 import { Eye } from 'lucide-react';
 import { useTableColumnResize } from '../hooks/use-table-column.resize';
-import { DataTableResizer } from './tableResizer';
+
 import { Skeleton } from './skeleton';
 import { cn } from '@/lib/utils';
 
@@ -167,7 +167,9 @@ export default function ResizableTable({
                   return (
                     <TableHead
                       key={header.id}
-                      className={'text-xs text-heading uppercase sticky top-0 '}
+                      className={
+                        'text-xs text-heading uppercase sticky top-0 bg-sidebar-bg'
+                      }
                       style={{
                         position: 'relative',
                         width: header.getSize() ?? 'auto',
@@ -236,7 +238,7 @@ export default function ResizableTable({
                           key={cell.id}
                           // data-highlighted={highlightedId === row?.id}
                           className={
-                            'text-xs text-heading border-r w-full   border-b '
+                            ' text-heading border-r w-full   border-b py-4'
                           }
                           style={{
                             width: cell.column.getSize() ?? 'auto',

@@ -19,14 +19,6 @@ import { CaseRequestForm } from "./ecdd/RFIForm";
 import { getRFIList } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
 import { useEffect } from "react";
 import RFIDetails from "./ecdd/RFIDetails";
-const data = [
-  {
-    date: "2025-01-01",
-    subject: "Clarification on recent transactions",
-    status: "Pending",
-    deadline: "14 days",
-  },
-];
 
 export default function RFI() {
   const [open, setOpen] = useState(false);
@@ -36,7 +28,6 @@ export default function RFI() {
   const [openDetails, setOpenDetails] = useState(false);
 
   const handleOpenDetails = (id) => {
-    console.log("id", id);
     setRfiId(id);
     setOpenDetails(true);
   };

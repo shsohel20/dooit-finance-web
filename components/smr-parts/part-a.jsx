@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, HelpCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import SelectCaseList from '../ui/SelectCaseList';
+import { autoPopulatedSMRData } from '@/app/dashboard/client/report-compliance/smr-filing/smr/actions';
 
 const DESIGNATED_SERVICES = [
   'AFSL holder arranging a designated service',
@@ -74,6 +76,7 @@ export function PartA({ data, updateData }) {
   const [selectedServices, setSelectedServices] = useState(
     data.designatedServices || []
   );
+  const [isLoading, setIsLoading] = useState(false);
   console.log('selectedServices', selectedServices);
   const [serviceStatus, setServiceStatus] = useState(
     data.serviceStatus || 'provided'
@@ -116,11 +119,73 @@ export function PartA({ data, updateData }) {
     setOtherReasons(updated);
     updateData({ otherReasons: updated.filter((r) => r.trim() !== '') });
   };
+  const handleCaseNumberChange = async (value) => {
+    setIsLoading(true);
+    console.log('value', value);
+    updateData({ caseNumber: value });
+    try {
+      const response = await autoPopulatedSMRData(value.value);
+
+      updateData({
+        groundsForSuspicion: response.narrative,
+        personOrganisation: {
+          ...data.personOrganisation,
+          name: response.name,
+          emails: [response.email_address],
+          phoneNumbers: [...response.phone_numbers],
+          dateOfBirth: response.dob,
+          citizenship: response.country_of_citizenship,
+        },
+        transactions: [
+          {
+            date: response.transaction_details?.date_of_transaction ?? '',
+            type: response.transaction_details?.transaction_type ?? '',
+            referenceNumber:
+              response.transaction_details?.transaction_reference_number ?? '',
+            totalAmount: {
+              currencyCode: response.transaction_details?.currency ?? '',
+              amount: response.transaction_details?.total_amount ?? 0,
+            },
+            cashAmount: {
+              currencyCode: response.transaction_details?.currency ?? '',
+              amount: response.transaction_details?.total_cash_involved ?? 0,
+            },
+            completed: false,
+            foreignCurrencies: [],
+            digitalCurrencies: [],
+            sender: {
+              name: response.parties?.sender?.name ?? '',
+              institutions: [response.parties?.sender?.institution ?? ''],
+            },
+            payee: {
+              name: response.parties?.payee ?? '',
+              institutions: [],
+            },
+            beneficiary: {
+              name: response.parties?.beneficiary?.name ?? '',
+              institutions: [response.parties?.beneficiary?.institution ?? ''],
+            },
+          },
+        ],
+      });
+    } catch (error) {
+      console.log('Failed to get data', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
       {/* Question 1 */}
       <div className="space-y-4">
+        <div className="max-w-sm">
+          <SelectCaseList
+            label="Case Number"
+            onChange={handleCaseNumberChange}
+            value={data?.caseNumber}
+          />
+        </div>
         <div className="flex items-start gap-2">
           <Label className="text-base font-bold ">
             1. Please specify the designated service(s) to which the suspicious

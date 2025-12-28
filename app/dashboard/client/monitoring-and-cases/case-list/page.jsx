@@ -42,10 +42,13 @@ import CustomPagination from "@/components/CustomPagination";
 import { useAlertStore } from "@/app/store/useAlertStore";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Shield, AlertTriangle } from "lucide-react";
+import { CaseRequestForm } from "@/views/monitoring-and-cases/case-details/ecdd/RFIForm";
 
 const ListView = ({}) => {
   const { alerts, fetching, totalItems, currentPage, limit, setCurrentPage, setLimit } =
     useAlertStore();
+  const [caseNumber, setCaseNumber] = useState(null);
+  const [openRfi, setOpenRfi] = useState(false);
   const router = useRouter();
   const riskVariants = {
     Low: "info",
@@ -62,6 +65,16 @@ const ListView = ({}) => {
     // console.log("caseNumber", caseNumber);
     router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`);
   };
+  const handleGenerateSmr = (data) => {
+    router.push(
+      `/dashboard/client/report-compliance/smr-filing/smr/form?caseNumber=${data?.uid}&caseId=${data?._id}`,
+    );
+  };
+  const handleRfi = (data) => {
+    setCaseNumber(data?.uid);
+
+    setOpenRfi(true);
+  };
   const columns = [
     {
       header: "Actions",
@@ -69,68 +82,35 @@ const ListView = ({}) => {
       cell: ({ row }) => (
         <>
           <div className="flex justify-center gap-2">
-            {/* <Button
-              variant="ghost"
-              size="icon-sm"
-              title="Generate ECDD"
-              className={"rounded-full border"}
-              onClick={() => handleGenerateEcdd(row?.original?.uid)}
-            >
-              <IconLetterESmall className="size-4" />
-            </Button>
-            <Button variant="ghost" size="icon-sm" className="rounded-full border">
-              <IconLetterSSmall className="" />
-            </Button>
-            <Button variant="ghost" size="icon-sm" className="rounded-full border">
-              <IconLetterRSmall />
-            </Button> */}
             <Button
               size="sm"
               variant="outline"
-              className="h-9 px-3 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 text-amber-900 font-semibold transition-all duration-200 dark:from-amber-950 dark:to-orange-950 dark:border-amber-800 dark:text-amber-100 dark:hover:border-amber-700"
+              className=" bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 text-amber-900 font-semibold transition-all duration-200 dark:from-amber-950 dark:to-orange-950 dark:border-amber-800 dark:text-amber-100 dark:hover:border-amber-700"
               onClick={() => handleGenerateEcdd(row?.original?.uid)}
             >
-              <FileText className="h-3.5 w-3.5 mr-1.5" />E
-              <Badge
-                variant="secondary"
-                className="ml-1.5 h-5 px-1 text-[10px] bg-amber-200/40 text-amber-900 dark:bg-amber-900/50 dark:text-amber-100"
-              >
-                CDD
-              </Badge>
+              E
             </Button>
 
             {/* SMR Button - Blue/Cyan theme */}
             <Button
               size="sm"
               variant="outline"
-              className="h-9 px-3 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 hover:from-blue-100 hover:to-cyan-100 hover:border-blue-300 text-blue-900 font-semibold  transition-all duration-200 dark:from-blue-950 dark:to-cyan-950 dark:border-blue-800 dark:text-blue-100 dark:hover:border-blue-700"
-              // onClick={() => handleReportAction("smr", alert.caseId)}
+              className=" bg-gradient-to-br from-red-50 to-rose-50 border-red-200 hover:from-red-100 hover:to-rose-100 hover:border-red-300 text-red-900 font-semibold  transition-all duration-200 dark:from-red-950 dark:to-rose-950 dark:border-red-800 dark:text-red-100 dark:hover:border-red-700 "
+              onClick={() => handleGenerateSmr(row?.original)}
               // disabled={loadingButton === `smr-${alert.caseId}`}
             >
-              <Shield className="h-3.5 w-3.5 mr-1.5" />S
-              <Badge
-                variant="secondary"
-                className="ml-1.5 h-5 px-1 text-[10px] bg-blue-200/50 text-blue-900 dark:bg-blue-900/50 dark:text-blue-100"
-              >
-                MR
-              </Badge>
+              S
             </Button>
 
             {/* RFI Button - Red/Rose theme */}
             <Button
               size="sm"
               variant="outline"
-              className="h-9 px-3 bg-gradient-to-br from-red-50 to-rose-50 border-red-200 hover:from-red-100 hover:to-rose-100 hover:border-red-300 text-red-900 font-semibold  transition-all duration-200 dark:from-red-950 dark:to-rose-950 dark:border-red-800 dark:text-red-100 dark:hover:border-red-700"
-              // onClick={() => handleReportAction("rfi", alert.caseId)}
+              className=" bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 hover:from-blue-100 hover:to-cyan-100 hover:border-blue-300 text-blue-900 font-semibold  transition-all duration-200 dark:from-blue-950 dark:to-cyan-950 dark:border-blue-800 dark:text-blue-100 dark:hover:border-blue-700"
+              onClick={() => handleRfi(row?.original)}
               // disabled={loadingButton === `rfi-${alert.caseId}`}
             >
-              <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />R
-              <Badge
-                variant="secondary"
-                className="ml-1.5 h-5 px-1 text-[10px] bg-red-200/50 text-red-900 dark:bg-red-900/50 dark:text-red-100"
-              >
-                FI
-              </Badge>
+              R
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -178,14 +158,18 @@ const ListView = ({}) => {
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <div>
-            <p className="capitalize">{row?.original?.transaction?.sender?.name}</p>
+            <p className="capitalize text-heading font-semibold">
+              {row?.original?.transaction?.sender?.name}
+            </p>
             <p className="text-zinc-400 text-xs">{row?.original?.transaction?.sender?.account}</p>
           </div>
           <span>
             <ArrowRight className="size-4 text-green-500" />
           </span>
           <div>
-            <p className="">{row?.original?.transaction?.receiver?.name}</p>
+            <p className="text-heading font-semibold">
+              {row?.original?.transaction?.receiver?.name}
+            </p>
             <p className="text-zinc-400 text-xs">{row?.original?.transaction?.receiver?.account}</p>
           </div>
         </div>
@@ -254,6 +238,14 @@ const ListView = ({}) => {
         limit={limit}
         onChangeLimit={handleLimitChange}
       />
+      {openRfi && (
+        <CaseRequestForm
+          open={openRfi}
+          setOpen={setOpenRfi}
+          caseNumber={caseNumber}
+          setCaseNumber={setCaseNumber}
+        />
+      )}
     </div>
   );
 };
@@ -269,6 +261,7 @@ export default function CaseList() {
           limit: limit,
         };
         const response = await getCaseList(queryParams);
+        console.log("response", response);
 
         setAlerts(response?.data);
         setTotalItems(response?.totalRecords);
