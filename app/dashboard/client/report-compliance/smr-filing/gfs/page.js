@@ -118,7 +118,6 @@ export default function GFSPage() {
   const router = useRouter()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
-  console.log('data', data)
 
 
   const getData = async () => {
@@ -133,7 +132,6 @@ export default function GFSPage() {
     }
     // setData(response.data)
   }
-  console.log('data', data)
 
   useEffect(() => {
     getData()
