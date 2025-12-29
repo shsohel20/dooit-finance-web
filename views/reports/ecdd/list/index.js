@@ -20,13 +20,14 @@ import {
 } from "@/components/ui/alert-dialog"
 import { deleteEcdd } from '@/app/dashboard/client/report-compliance/ecdd/actions';
 import { toast } from 'sonner';
-import { formatDateTime } from '@/lib/utils';
+import { formatDateTime, riskLevelVariants } from '@/lib/utils';
 import CustomPagination from '@/components/CustomPagination';
+import { StatusPill, statusPillVariants } from '@/components/ui/StatusPill';
+import { Badge } from '@/components/ui/badge';
 
 const EcddList = () => {
     const router = useRouter();
     const [data, setData] = useState([]);
-    console.log('data', data)
     const [loading, setLoading] = useState(false)
     const [deleteId, setDeleteId] = useState(null);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -74,19 +75,21 @@ const EcddList = () => {
             size: 40,
             header: 'Action',
             accessorKey: 'id',
-            cell: ({ row }) => <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button size='sm' variant='ghost'>
-                        <IconDotsVertical className="size-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => handleView(row?.original?.caseId)}> <Eye />View</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEdit(row?.original?._id)}> <Edit />Edit</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleGenerateEcdd(row?.original?.caseId)}> <FileText />Generate ECDD</DropdownMenuItem>
-                    <DropdownMenuItem variant='destructive' onClick={() => handleDelete(row?.original?._id)}> <Trash />Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>,
+            cell: ({ row }) => <div className='flex justify-center'>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button size='sm' variant='ghost'>
+                            <IconDotsVertical className="size-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => handleView(row?.original?.caseId)}> <Eye />View</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEdit(row?.original?._id)}> <Edit />Edit</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleGenerateEcdd(row?.original?.caseId)}> <FileText />Generate ECDD</DropdownMenuItem>
+                        <DropdownMenuItem variant='destructive' onClick={() => handleDelete(row?.original?._id)}> <Trash />Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>,
         },
         {
             header: 'UID',
@@ -98,7 +101,16 @@ const EcddList = () => {
             header: 'Case ID',
             accessorKey: 'caseNumber',
             cell: ({ row }) => <div>
-                <h5 className="text-heading font-semibold capitalize" >{row?.original?.fullName}</h5>
+                <h5 className="text-heading font-semibold capitalize flex justify-between" >
+                    <span className='text-md'>
+                        {row?.original?.fullName}
+                    </span>
+                    <StatusPill
+                        className={'text-xs ml-2'}
+                        variant={riskLevelVariants[row?.original?.customer?.kycStatus]}>
+                        {row?.original?.customer?.kycStatus}
+                    </StatusPill>
+                </h5>
                 <p className="font-mono text-neutral-500">#{row?.original?.caseNumber}</p>
             </div>
         },

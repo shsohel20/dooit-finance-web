@@ -106,7 +106,7 @@ export function SuspiciousMatterReportForm({ id, caseNumber, caseId }) {
         ...formData,
         caseNumber: {
           label: caseNumber,
-          value: caseId,
+          value: caseNumber,
         },
       });
     }

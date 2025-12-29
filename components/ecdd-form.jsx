@@ -993,8 +993,14 @@ export function ECDDForm({ caseNumber, id }) {
                 variant="outline"
                 size="lg"
                 className={'border bg-transparent'}
+                onClick={() =>
+                  router.push(
+                    `/dashboard/client/report-compliance/smr-filing/smr/form?caseNumber=${caseNumber}`
+                  )
+                }
               >
-                <FileText className="w-5 h-5 mr-2 text-destructive" /> SMR
+                <FileText className="w-5 h-5 mr-2 text-destructive" />
+                SMR
               </Button>
               <Button
                 variant="outline"
