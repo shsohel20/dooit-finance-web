@@ -137,7 +137,7 @@ export default function DashboardPage() {
               <Bar dataKey="value" radius={[6, 6, 0, 0]} />
               <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#6b7280" }} />
               <YAxis tick={{ fontSize: 12, fill: "#6b7280" }} />
-              <Tooltip />
+              {/* <Tooltip  /> */}
             </BarChart>
           </ResponsiveContainer>
         </div>
