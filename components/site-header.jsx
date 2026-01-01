@@ -11,6 +11,7 @@ import {
   IconHelpCircle,
   IconAlertTriangle,
   IconUsers,
+  IconCards,
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import {
@@ -20,6 +21,7 @@ import {
   SelectContent,
   SelectItem,
 } from './ui/select';
+import { CreditCard } from 'lucide-react';
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -34,7 +36,7 @@ export function SiteHeader() {
     {
       name: 'Transactions',
       href: '/dashboard/client/transactions',
-      icon: <IconCash size={14} />,
+      icon: <CreditCard size={14} />,
     },
     {
       name: 'Alerts',
