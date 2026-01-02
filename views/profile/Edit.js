@@ -50,9 +50,18 @@ export function ClientEditForm() {
     return newObj;
   };
   const updateField = (path, value) => {
-    bindLoggedInUser({ 'client.name': 'hello' })
-  };
-
+    bindLoggedInUser((prev) => {
+      const keys = path.split(".")
+      const newData = { ...prev }
+      let current = newData
+      for (let i = 0; i < keys.length - 1; i++) {
+        current[keys[i]] = { ...(current[keys[i]]) }
+        current = current[keys[i]]
+      }
+      current[keys[keys.length - 1]] = value
+      return newData
+    })
+  }
 
   const navItems = [
     { id: "company", label: "Company Info", icon: Building2 },
