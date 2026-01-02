@@ -40,7 +40,7 @@ export default function CustomerProfile() {
                 alt={userData?.name}
                 className="h-full w-full object-cover"
               />
-              {userData.isActive && (
+              {userData?.isActive && (
                 <div className="absolute bottom-2 right-2 h-4 w-4 rounded-full border-2 border-background bg-green-500" />
               )}
             </div>
@@ -61,7 +61,7 @@ export default function CustomerProfile() {
                 <Badge variant="outline" className="capitalize">
                   {userData?.userType}
                 </Badge>
-                <Badge variant="default" className={userData.isActive ? "bg-green-600" : "bg-gray-600"}>
+                <Badge variant="default" className={userData?.isActive ? "bg-green-600" : "bg-gray-600"}>
                   {userData?.isActive ? "Active" : "Inactive"}
                 </Badge>
               </div>

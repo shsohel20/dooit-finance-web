@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,13 +27,81 @@ import {
   Camera,
 } from "lucide-react"
 import { useLoggedInUserStore } from "@/app/store/useLoggedInUser"
+import { useFieldArray, useForm } from "react-hook-form"
+import { FormField } from "@/components/ui/FormField"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { countriesData } from "@/constants"
+import { updateProfile } from "@/app/dashboard/client/profile/actions"
+import { toast } from "sonner"
 
 
 export function ClientEditForm() {
   const { loggedInUser: formData, bindLoggedInUser } = useLoggedInUserStore();
-  console.log('formData', JSON.stringify(formData, null, 2));
-  console.log('bindLoggedInUser', bindLoggedInUser);
-  const [activeTab, setActiveTab] = useState("company")
+  console.log('formData', formData);
+  const [activeTab, setActiveTab] = useState("company");
+
+  const form = useForm({
+    defaultValues: formData,
+    mode: "onChange",
+    resolver: zodResolver(z.object({
+      client: z.object({
+        name: z.string().optional(),
+        clientType: z.string().optional(),
+        registrationNumber: z.string().optional(),
+        taxId: z.string().optional(),
+        email: z.string().email("Invalid email address").optional(),
+        phone: z.string().min(1, "Phone is required").optional(),
+        website: z.string().url("Invalid website URL").optional(),
+        contacts: z.array(z.object({
+          name: z.string().optional(),
+          title: z.string().optional(),
+          email: z.string().email("Invalid email address").optional(),
+          phone: z.string().min(1, "Phone is required").optional(),
+          primary: z.boolean().optional(),
+        })).optional(),
+        address: z.object({
+          street: z.string().optional(),
+          city: z.string().optional(),
+          state: z.string().optional(),
+          country: z.string().optional(),
+          zipcode: z.string().optional(),
+        }).optional(),
+        legalRepresentative: z.object({
+          name: z.string().optional(),
+          designation: z.string().optional(),
+          email: z.string().email("Invalid email address").optional(),
+          phone: z.string().min(1, "Phone is required").optional(),
+        }).optional(),
+        documents: z.array(z.object({
+          name: z.string().optional(),
+          url: z.string().url("Invalid URL").optional(),
+          mimeType: z.string().optional(),
+          type: z.string().optional(),
+        })).optional(),
+        settings: z.object({
+          billingCycle: z.string().optional(),
+          currency: z.string().optional(),
+        }).optional(),
+      }),
+
+    }))
+  })
+  useEffect(() => {
+    form.reset(formData);
+  }, [formData]);
+
+  const { fields: contactFields, append: appendContact, remove: removeContact } = useFieldArray({
+    control: form.control,
+    name: "client.contacts",
+  })
+
+  const addContact = () => {
+    appendContact({ name: "", title: "", email: "", phone: "", primary: false })
+  }
+  const removeContactItem = (index) => {
+    removeContact(index)
+  }
   const updateNestedField = (obj, path, value) => {
     const keys = path.split(".");
     const lastKey = keys.pop();
@@ -71,6 +139,17 @@ export function ClientEditForm() {
     { id: "documents", label: "Documents", icon: FileText },
     { id: "settings", label: "Settings", icon: Settings },
   ]
+
+  const onSubmit = async (data) => {
+    console.log('data', data);
+    // const response = await updateProfile(data.client, formData?.id);
+    // console.log('response', response);
+    // if (response.success) {
+    //   toast.success(response.message);
+    // } else {
+    //   toast.error(response.message);
+    // }
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -125,7 +204,7 @@ export function ClientEditForm() {
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline">Cancel</Button>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={form.handleSubmit(onSubmit)}>
                 <Save className="h-4 w-4" />
                 Save Changes
               </Button>
@@ -165,93 +244,65 @@ export function ClientEditForm() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="companyName">Company Name</Label>
-                      <Input
-                        id="companyName"
-                        value={formData?.client?.name}
-                        onChange={(e) => updateField("client.name", e.target.value)}
+                    <div className="">
+                      <FormField
+                        name="client.name"
+                        label="Company Name"
+                        form={form}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="clientType">Client Type</Label>
-                      <Select
-                        value={formData?.client?.clientType}
-                        onValueChange={(value) => updateField("client.clientType", value)}
-                      >
-                        <SelectTrigger id="clientType">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Financial">Financial</SelectItem>
-                          <SelectItem value="Technology">Technology</SelectItem>
-                          <SelectItem value="Healthcare">Healthcare</SelectItem>
-                          <SelectItem value="Retail">Retail</SelectItem>
-                          <SelectItem value="Manufacturing">Manufacturing</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <FormField
+                      name="client.clientType"
+                      label="Client Type"
+                      form={form}
+                      type="select"
+                      options={[
+                        { label: "Financial", value: "Financial" },
+                        { label: "Technology", value: "Technology" },
+                        { label: "Healthcare", value: "Healthcare" },
+                        { label: "Retail", value: "Retail" },
+                        { label: "Manufacturing", value: "Manufacturing" },
+                      ]}
+                    />
                   </div>
 
                   <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="registrationNumber">Registration Number</Label>
-                      <Input
-                        id="registrationNumber"
-                        value={formData?.client?.registrationNumber}
-                        onChange={(e) => updateField("client.registrationNumber", e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="taxId">Tax ID</Label>
-                      <Input
-                        id="taxId"
-                        value={formData?.client?.taxId}
-                        onChange={(e) => updateField("client.taxId", e.target.value)}
-                      />
-                    </div>
+                    <FormField
+                      name="client.registrationNumber"
+                      label="Registration Number"
+                      form={form}
+                    />
+                    <FormField
+                      name="client.taxId"
+                      label="Tax ID"
+                      form={form}
+                    />
+
                   </div>
 
                   <Separator />
 
                   <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="flex items-center gap-2">
-                        <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                        Email
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData?.client?.email}
-                        onChange={(e) => updateField("client.email", e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="flex items-center gap-2">
-                        <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                        Phone
-                      </Label>
-                      <Input
-                        id="phone"
-                        value={formData?.client?.phone}
-                        onChange={(e) => updateField("client.phone", e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="website" className="flex items-center gap-2">
-                      <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-                      Website
-                    </Label>
-                    <Input
-                      id="website"
-                      type="url"
-                      value={formData?.client?.website}
-                      onChange={(e) => updateField("client.website", e.target.value)}
+                    <FormField
+                      name="client.email"
+                      label="Email"
+                      form={form}
+                      type="email"
+                    />
+                    <FormField
+                      name="client.phone"
+                      label="Phone"
+                      form={form}
+                      type="phone"
                     />
                   </div>
+
+                  <FormField
+                    name="client.website"
+                    label="Website"
+                    form={form}
+                    type="url"
+                  />
                 </CardContent>
               </Card>
             )}
@@ -268,14 +319,14 @@ export function ClientEditForm() {
                       </CardTitle>
                       <CardDescription>Manage company contact persons</CardDescription>
                     </div>
-                    <Button size="sm" variant="outline" className="gap-2 bg-transparent">
+                    <Button size="sm" variant="outline" className="gap-2 bg-transparent" onClick={addContact}>
                       <Plus className="h-4 w-4" />
                       Add Contact
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  {formData?.client?.contacts?.map((contact, index) => (
+                <CardContent className="space-y-4">
+                  {contactFields.map((contact, index) => (
                     <div key={index} className="p-4 rounded-lg border border-border bg-muted/30">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -302,28 +353,42 @@ export function ClientEditForm() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => removeContactItem(index)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label>Name</Label>
-                          <Input value={contact.name} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Title</Label>
-                          <Input value={contact.title} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Email</Label>
-                          <Input type="email" value={contact.email} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Phone</Label>
-                          <Input value={contact.phone} />
-                        </div>
+                        <FormField
+                          name={`client.contacts[${index}].name`}
+                          label="Name"
+                          form={form}
+                        />
+                        <FormField
+                          name={`client.contacts[${index}].title`}
+                          label="Title"
+                          form={form}
+                        />
+
+                        <FormField
+                          name={`client.contacts[${index}].email`}
+                          label="Email"
+                          form={form}
+                          type="email"
+                        />
+                        <FormField
+                          name={`client.contacts[${index}].phone`}
+                          label="Phone"
+                          form={form}
+                          type="phone"
+                        />
+                        {/* <FormField
+                        name={`client.contacts[${index}].primary`}
+                        label="Primary"
+                        form={form}
+                        type="checkbox"
+                      /> */}
                       </div>
                     </div>
                   ))}
@@ -341,51 +406,35 @@ export function ClientEditForm() {
                   </CardTitle>
                   <CardDescription>Company location and mailing address</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="street">Street Address</Label>
-                    <Input
-                      id="street"
-                      value={formData?.client?.address?.street}
-                      onChange={(e) => updateField("client.address.street", e.target.value)}
-                    />
-                  </div>
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        value={formData?.client?.address?.city}
-                        onChange={(e) => updateField("client.address.city", e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="state">State / Province</Label>
-                      <Input
-                        id="state"
-                        value={formData?.client?.address?.state}
-                        onChange={(e) => updateField("client.address.state", e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="country">Country</Label>
-                      <Input
-                        id="country"
-                        value={formData?.client?.address?.country}
-                        onChange={(e) => updateField("client.address.country", e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="zipcode">Zip / Postal Code</Label>
-                      <Input
-                        id="zipcode"
-                        value={formData?.client?.address?.zipcode}
-                        onChange={(e) => updateField("client.address.zipcode", e.target.value)}
-                      />
-                    </div>
-                  </div>
+                <CardContent className=" grid gap-6 sm:grid-cols-2">
+                  <FormField
+                    name="client.address.street"
+                    label="Street Address"
+                    form={form}
+                  />
+                  <FormField
+                    name="client.address.city"
+                    label="City"
+                    form={form}
+                  />
+                  <FormField
+                    name="client.address.state"
+                    label="State / Province"
+                    form={form}
+                  />
+                  <FormField
+                    name="client.address.zipcode"
+                    label="Zip / Postal Code"
+                    form={form}
+                  />
+                  <FormField
+                    name="client.address.country"
+                    label="Country"
+                    form={form}
+                    type="select"
+                    options={countriesData}
+                  />
+
                 </CardContent>
               </Card>
             )}
@@ -402,41 +451,31 @@ export function ClientEditForm() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="legalName">Full Name</Label>
-                      <Input
-                        id="legalName"
-                        value={formData?.client?.legalRepresentative?.name}
-                        onChange={(e) => updateField("client.legalRepresentative.name", e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="legalDesignation">Designation</Label>
-                      <Input
-                        id="legalDesignation"
-                        value={formData?.client?.legalRepresentative?.designation}
-                        onChange={(e) => updateField("client.legalRepresentative.designation", e.target.value)}
-                      />
-                    </div>
+                    <FormField
+                      name="client.legalRepresentative.name"
+                      label="Full Name"
+                      form={form}
+                    />
+                    <FormField
+                      name="client.legalRepresentative.designation"
+                      label="Designation"
+                      form={form}
+                    />
+
                   </div>
                   <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="legalEmail">Email</Label>
-                      <Input
-                        id="legalEmail"
-                        type="email"
-                        value={formData?.client?.legalRepresentative?.email}
-                        onChange={(e) => updateField("client.legalRepresentative.email", e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="legalPhone">Phone</Label>
-                      <Input
-                        id="legalPhone"
-                        value={formData?.client?.legalRepresentative?.phone}
-                        onChange={(e) => updateField("client.legalRepresentative.phone", e.target.value)}
-                      />
-                    </div>
+                    <FormField
+                      name="client.legalRepresentative.email"
+                      label="Email"
+                      form={form}
+                      type="email"
+                    />
+                    <FormField
+                      name="client.legalRepresentative.phone"
+                      label="Phone"
+                      form={form}
+                      type="phone"
+                    />
                   </div>
                 </CardContent>
               </Card>
