@@ -1,12 +1,12 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { cn } from "@/lib/utils";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { Button } from "./button";
+import { cn } from '@/lib/utils';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { Button } from './button';
 
 function Input({
   className,
-  type,
+  type = 'text',
   error,
   rows,
   value,
@@ -19,46 +19,46 @@ function Input({
   };
   return (
     <div className="relative">
-      {type === "textarea" ? (
+      {type === 'textarea' ? (
         <textarea
           rows={rows}
           data-slot="textarea"
           className={cn(
-            "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground text-xs  dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1  shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 ",
-            "focus-visible:border-ring focus-visible:ring-primary/50 focus-visible:ring-[1px] min-h-20",
-            "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+            'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground text-xs  dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1  shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 ',
+            'focus-visible:border-ring focus-visible:ring-primary/50 focus-visible:ring-[1px] min-h-20',
+            'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
             className,
             {
-              "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive":
+              'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive':
                 error,
             }
           )}
           onChange={onChange}
-          value={value ?? ""}
+          value={value ?? ''}
           aria-invalid={error ? true : false}
           {...props}
         />
       ) : (
         <>
           <input
-            type={showPassword ? "text" : type}
+            type={showPassword ? 'text' : type}
             data-slot="input"
             className={cn(
-              "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground text-xs  dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1  transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50  shadow-xs",
-              "focus-visible:border-ring focus-visible:ring-primary/50 focus-visible:ring-[1px]",
-              "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive placeholder:text-gray-300",
+              'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground text-xs  dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1  transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50  shadow-xs',
+              'focus-visible:border-ring focus-visible:ring-primary/50 focus-visible:ring-[1px]',
+              'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive placeholder:text-gray-300',
               className,
               {
-                "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive":
+                'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive':
                   error,
               }
             )}
-            value={value ?? ""}
+            value={value ?? ''}
             onChange={onChange}
             aria-invalid={error ? true : false}
             {...props}
           />
-          {type === "password" && (
+          {type === 'password' && (
             <Button
               variant="ghost"
               size="sm"
