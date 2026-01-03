@@ -10,5 +10,5 @@ export default function NumberAnimation({ value }) {
     setCurrentValue(value);
   }, [value]);
 
-  return <NumberFlow value={currentValue} plugins={[continuous]} />;
+  return <NumberFlow value={currentValue} plugins={[continuous]} isolate />;
 }

@@ -57,23 +57,25 @@ export default function CustomerDashboard() {
                   <p className="text-sm text-muted-foreground">Total Customers</p>
                   <p className="text-3xl font-bold text-foreground"><NumberAnimation value={totalCustomers} /></p>
                 </div>
-                <ResponsiveContainer width={100} height={100}>
-                  <PieChart>
-                    <Pie
-                      data={riskData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={30}
-                      outerRadius={45}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {riskData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="size-[100px]">
+                  <ResponsiveContainer width={'100%'} height={"100%"}>
+                    <PieChart>
+                      <Pie
+                        data={riskData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={30}
+                        outerRadius={45}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {riskData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between rounded-lg bg-destructive/10 p-3">
@@ -115,23 +117,25 @@ export default function CustomerDashboard() {
                   <p className="text-sm text-muted-foreground">Pending Review</p>
                   <p className="text-3xl font-bold text-foreground"><NumberAnimation value={pendingKyc} /></p>
                 </div>
-                <ResponsiveContainer width={100} height={100}>
-                  <PieChart>
-                    <Pie
-                      data={kycStatusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={30}
-                      outerRadius={45}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {kycStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="size-[100px]">
+                  <ResponsiveContainer width={'100%'} height={"100%"}>
+                    <PieChart>
+                      <Pie
+                        data={kycStatusData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={30}
+                        outerRadius={45}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {kycStatusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between rounded-lg bg-amber-500/10 p-3">
@@ -169,23 +173,25 @@ export default function CustomerDashboard() {
                   <p className="text-sm text-muted-foreground">Not Authorized</p>
                   <p className="text-3xl font-bold text-foreground"><NumberAnimation value={notAuthorized} /></p>
                 </div>
-                <ResponsiveContainer width={100} height={100}>
-                  <PieChart>
-                    <Pie
-                      data={authorizationData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={30}
-                      outerRadius={45}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {authorizationData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="size-[100px]">
+                  <ResponsiveContainer width={'100%'} height={"100%"}>
+                    <PieChart>
+                      <Pie
+                        data={authorizationData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={30}
+                        outerRadius={45}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {authorizationData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between rounded-lg bg-slate-500/10 p-3">
