@@ -1,10 +1,10 @@
 'use client'
 
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useLoggedInUserStore } from "@/app/store/useLoggedInUser"
-import { Mail, Phone, Globe, MapPin, FileText, Building2, Calendar, Router } from "lucide-react"
+import { useLoggedInUser } from "@/app/store/useLoggedInUser"
+import { Mail, Phone, Globe, MapPin, FileText, Building2, Calendar } from "lucide-react"
 import LabelDetails from "@/components/LabelDetails"
 import { IconEdit } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation"
 
 
 export default function CustomerProfile() {
-  const { loggedInUser: userData } = useLoggedInUserStore();
+  const { loggedInUser: userData } = useLoggedInUser();
   const router = useRouter()
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {

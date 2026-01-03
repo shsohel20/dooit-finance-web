@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
@@ -19,28 +18,27 @@ import {
   Upload,
   Trash2,
   Plus,
-  ArrowLeft,
   Save,
-  Globe,
-  Mail,
-  Phone,
   Camera,
 } from "lucide-react"
-import { useLoggedInUserStore } from "@/app/store/useLoggedInUser"
+import { useLoggedInUser, useLoggedInUserStore } from "@/app/store/useLoggedInUser"
 import { useFieldArray, useForm } from "react-hook-form"
 import { FormField } from "@/components/ui/FormField"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { countriesData } from "@/constants"
-import { updateProfile } from "@/app/dashboard/client/profile/actions"
+import { updateClientProfile, updateProfile } from "@/app/dashboard/client/profile/actions"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import { getLoggedInUser } from "@/app/actions"
 
 
 export function ClientEditForm() {
-  const { loggedInUser: formData, bindLoggedInUser } = useLoggedInUserStore();
-  console.log('formData', formData);
+  const { loggedInUser: formData, setLoggedInUser } = useLoggedInUser();
   const [activeTab, setActiveTab] = useState("company");
 
+  const isClient = formData?.userType === "client";
+  const router = useRouter();
   const form = useForm({
     defaultValues: formData,
     mode: "onChange",
@@ -102,34 +100,7 @@ export function ClientEditForm() {
   const removeContactItem = (index) => {
     removeContact(index)
   }
-  const updateNestedField = (obj, path, value) => {
-    const keys = path.split(".");
-    const lastKey = keys.pop();
 
-    const newObj = structuredClone(obj || {});
-    let current = newObj;
-
-    keys.forEach((key) => {
-      if (!current[key]) current[key] = {};
-      current = current[key];
-    });
-
-    current[lastKey] = value;
-    return newObj;
-  };
-  const updateField = (path, value) => {
-    bindLoggedInUser((prev) => {
-      const keys = path.split(".")
-      const newData = { ...prev }
-      let current = newData
-      for (let i = 0; i < keys.length - 1; i++) {
-        current[keys[i]] = { ...(current[keys[i]]) }
-        current = current[keys[i]]
-      }
-      current[keys[keys.length - 1]] = value
-      return newData
-    })
-  }
 
   const navItems = [
     { id: "company", label: "Company Info", icon: Building2 },
@@ -141,14 +112,22 @@ export function ClientEditForm() {
   ]
 
   const onSubmit = async (data) => {
-    console.log('data', data);
-    // const response = await updateProfile(data.client, formData?.id);
-    // console.log('response', response);
-    // if (response.success) {
-    //   toast.success(response.message);
-    // } else {
-    //   toast.error(response.message);
-    // }
+    const action = isClient ? updateClientProfile : updateProfile;
+    const id = isClient ? formData?.client?._id : formData?.id;
+    const dataToSend = isClient ? data.client : data;
+    const response = await action(dataToSend, id);
+    console.log('response', response);
+    if (response.success) {
+      toast.success('Profile updated successfully');
+      const response = await getLoggedInUser()
+      console.log('getLoggedInUser response', response);
+      if (response.success) {
+        setLoggedInUser(response.data);
+      }
+      router.push('/dashboard/client/profile');
+    } else {
+      toast.error('Failed to update profile');
+    }
   }
 
   return (
@@ -561,7 +540,7 @@ export function ClientEditForm() {
                 <CardContent className="space-y-6">
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="billingCycle">Billing Cycle</Label>
+                      {/* <Label htmlFor="billingCycle">Billing Cycle</Label>
                       <Select
                         value={formData?.client?.settings?.billingCycle}
                         onValueChange={(value) => updateField("client.settings.billingCycle", value)}
@@ -574,24 +553,32 @@ export function ClientEditForm() {
                           <SelectItem value="quarterly">Quarterly</SelectItem>
                           <SelectItem value="annually">Annually</SelectItem>
                         </SelectContent>
-                      </Select>
+                      </Select> */}
+                      <FormField
+                        name="client.settings.billingCycle"
+                        label="Billing Cycle"
+                        form={form}
+                        type="select"
+                        options={[
+                          { label: "Monthly", value: "monthly" },
+                          { label: "Quarterly", value: "quarterly" },
+                          { label: "Annually", value: "annually" },
+                        ]}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="currency">Currency</Label>
-                      <Select
-                        value={formData?.client?.settings?.currency}
-                        onValueChange={(value) => updateField("client.settings.currency", value)}
-                      >
-                        <SelectTrigger id="currency">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="USD">USD - US Dollar</SelectItem>
-                          <SelectItem value="EUR">EUR - Euro</SelectItem>
-                          <SelectItem value="GBP">GBP - British Pound</SelectItem>
-                          <SelectItem value="BDT">BDT - Bangladeshi Taka</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormField
+                        name="client.settings.currency"
+                        label="Currency"
+                        form={form}
+                        type="select"
+                        options={[
+                          { label: "USD", value: "USD" },
+                          { label: "EUR", value: "EUR" },
+                          { label: "GBP", value: "GBP" },
+                          { label: "BDT", value: "BDT" },
+                        ]}
+                      />
                     </div>
                   </div>
                 </CardContent>
