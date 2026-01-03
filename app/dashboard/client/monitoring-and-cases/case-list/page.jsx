@@ -12,16 +12,10 @@ import {
 } from "@/components/ui/select";
 import { StatusPill } from "@/components/ui/StatusPill";
 import {
-  IconCircleDottedLetterE,
   IconDotsVertical,
   IconEye,
-  IconFile,
   IconFilePlus,
   IconGridDots,
-  IconLetterE,
-  IconLetterESmall,
-  IconLetterRSmall,
-  IconLetterSSmall,
   IconList,
   IconPennant,
   IconSearch,
@@ -40,8 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import CustomPagination from "@/components/CustomPagination";
 import { useAlertStore } from "@/app/store/useAlertStore";
-import { Badge } from "@/components/ui/badge";
-import { FileText, Shield, AlertTriangle } from "lucide-react";
+
 import { CaseRequestForm } from "@/views/monitoring-and-cases/case-details/ecdd/RFIForm";
 
 const ListView = ({}) => {
@@ -85,10 +78,11 @@ const ListView = ({}) => {
             <Button
               size="sm"
               variant="outline"
-              className=" bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 text-amber-900 font-semibold transition-all duration-200 dark:from-amber-950 dark:to-orange-950 dark:border-amber-800 dark:text-amber-100 dark:hover:border-amber-700"
+              className=" bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 text-amber-900 font-semibold transition-all duration-200 dark:from-amber-950 dark:to-orange-950 dark:border-amber-800 dark:text-amber-100 dark:hover:border-amber-700 "
               onClick={() => handleGenerateEcdd(row?.original?.uid)}
             >
-              E
+              <span>E</span>
+              <span className="text-[0.7rem] bg-secondary">cdd</span>
             </Button>
 
             {/* SMR Button - Blue/Cyan theme */}
@@ -99,7 +93,7 @@ const ListView = ({}) => {
               onClick={() => handleGenerateSmr(row?.original)}
               // disabled={loadingButton === `smr-${alert.caseId}`}
             >
-              S
+              S <span className="text-[0.7rem] bg-secondary">mr</span>
             </Button>
 
             {/* RFI Button - Red/Rose theme */}
@@ -110,7 +104,7 @@ const ListView = ({}) => {
               onClick={() => handleRfi(row?.original)}
               // disabled={loadingButton === `rfi-${alert.caseId}`}
             >
-              R
+              R <span className="text-[0.7rem] bg-secondary">fi</span>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
