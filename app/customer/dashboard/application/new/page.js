@@ -8,16 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Camera, ChevronLeft, ChevronRight, Pencil, Upload } from 'lucide-react';
 import React, { useState } from 'react';
 import Stepper from './(components)/Stepper';
+import LabelDetails from '@/components/LabelDetails';
 
 
-const LabelDetails = ({ label, value }) => {
-    return (
-        <div className='space-y-1'>
-            <h4 className='text-purple'>{label}</h4>
-            <p className='text-gray-900 font-medium'>{value}</p>
-        </div>
-    )
-}
+
+
 
 
 const Success = () => {

@@ -1,22 +1,10 @@
 import AuthProvider from "@/providers/SessionProvider";
-import { Inter, Manrope, Poppins } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Manrope, Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
+import { EncryptDecryptFAB } from "@/components/EncryptBtn";
+const _geist = Geist({ subsets: ["latin"] });
+const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Dooit Wallet",
@@ -26,9 +14,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`font-font-4 antialiased bg-body`} suppressHydrationWarning>
+      <body className={` antialiased bg-body`} suppressHydrationWarning>
         {/* <AuthProvider> */}
-
+        <EncryptDecryptFAB />
         <AuthProvider>{children}</AuthProvider>
         <Toaster />
         {/* </AuthProvider> */}

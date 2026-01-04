@@ -1,5 +1,5 @@
-'use client'
-import React from 'react'
+"use client";
+import React from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -8,7 +8,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import {
   IconAlertTriangle,
   IconBook,
@@ -27,19 +27,19 @@ import {
   IconUserOff,
   IconUsers,
   IconWorld,
-} from "@tabler/icons-react"
-import { NavMain } from '@/components/nav-main'
-import { NavUser } from '@/components/nav-user'
-import { useSession } from 'next-auth/react'
-import { FileInput, GraduationCap, Newspaper, ShieldHalf, ShieldUser, Wallet } from 'lucide-react'
+} from "@tabler/icons-react";
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
+import { useSession } from "next-auth/react";
+import { FileInput, GraduationCap, Newspaper, ShieldHalf, ShieldUser, Wallet } from "lucide-react";
 
 export default function ClientSidebar({ ...props }) {
   const session = useSession();
   const onBoardingMenuItems = [
     {
-      title: 'Dashboard',
+      title: "Dashboard",
       icon: IconLayoutDashboard,
-      url: '/dashboard/client',
+      url: "/dashboard/client",
     },
 
     {
@@ -49,19 +49,19 @@ export default function ClientSidebar({ ...props }) {
       // current: true,
       children: [
         {
-          title: 'Overview',
+          title: "Overview",
           icon: IconListDetails,
-          url: '/dashboard/client/onboarding/customer-queue',
+          url: "/dashboard/client/onboarding/customer-queue",
         },
         {
-          title: 'Pending',
-          url: '/dashboard/client/onboarding/customer-queue/pending',
+          title: "Pending",
+          url: "/dashboard/client/onboarding/customer-queue/pending",
           icon: IconDatabase,
           current: true,
         },
         {
-          title: 'Rejected',
-          url: '/dashboard/client/onboarding/customer-queue/rejected',
+          title: "Rejected",
+          url: "/dashboard/client/onboarding/customer-queue/rejected",
           icon: IconPentagonX,
           current: true,
         },
@@ -72,106 +72,97 @@ export default function ClientSidebar({ ...props }) {
         //   current: true,
         // },
         {
-          title: 'In Review',
-          url: '/dashboard/client/onboarding/customer-queue/in-review',
+          title: "In Review",
+          url: "/dashboard/client/onboarding/customer-queue/in-review",
           icon: IconProgress,
           current: true,
         },
-      ]
+      ],
     },
     {
-      title: 'Branches',
+      title: "Branches",
       icon: IconBuildingBank,
-      url: '/dashboard/client/branch',
-
+      url: "/dashboard/client/branch",
     },
     {
-      title: 'Risk Assessment',
+      title: "Risk Assessment",
       icon: IconAlertTriangle,
-      url: '/dashboard/client/risk-assessment',
-
-    }
-  ]
+      url: "/dashboard/client/risk-assessment",
+    },
+  ];
   const reportingMenuItems = [
     {
-      title: 'Overview',
-      icon: IconListDetails,
-      url: '/dashboard/client/report-compliance',
-    },
-    {
-      title: 'STR Filing',
+      title: "STR Filing",
       icon: IconChartBar,
       children: [
         {
-          title: 'STR Review',
-          url: '/dashboard/client/str-filling-report/review',
+          title: "STR Review",
+          url: "/dashboard/client/str-filling-report/review",
           icon: IconDatabase,
           current: true,
         },
         {
-          title: 'STR Approval',
-          url: '/dashboard/client/str-filling-report/approval',
+          title: "STR Approval",
+          url: "/dashboard/client/str-filling-report/approval",
           icon: IconDatabase,
           current: true,
         },
         {
-          title: 'Draft STR',
-          url: '/dashboard/client/str-filling-report/draft',
+          title: "Draft STR",
+          url: "/dashboard/client/str-filling-report/draft",
           icon: IconDatabase,
           current: true,
         },
-      ]
+      ],
     },
     {
-      title: 'SMR Filing ',
+      title: "SMR Filing ",
       icon: FileInput,
       children: [
         {
-          title: 'SMR',
-          url: '/dashboard/client/report-compliance/smr-filing/smr',
+          title: "SMR",
+          url: "/dashboard/client/report-compliance/smr-filing/smr",
           icon: IconDatabase,
           current: true,
         },
         {
-          title: 'GFS',
-          url: '/dashboard/client/report-compliance/smr-filing/gfs',
+          title: "GFS",
+          url: "/dashboard/client/report-compliance/smr-filing/gfs",
           icon: IconDatabase,
           current: true,
         },
-      ]
+      ],
     },
     {
-      title: 'Compliance ',
+      title: "Compliance ",
       icon: ShieldHalf,
       children: [
-
         {
-          title: 'TTR Reports',
-          url: '/dashboard/client/report-compliance/ttr',
+          title: "TTR Reports",
+          url: "/dashboard/client/report-compliance/ttr",
           icon: IconDatabase,
           current: true,
         },
         {
-          title: 'IFTI Reports',
-          url: '/dashboard/client/report-compliance/ifti',
+          title: "IFTI Reports",
+          url: "/dashboard/client/report-compliance/ifti",
           icon: IconDatabase,
           current: true,
         },
         {
-          title: 'Compliance Health',
-          url: '/#',
+          title: "Compliance Health",
+          url: "/#",
           icon: IconDatabase,
           current: true,
         },
-      ]
+      ],
     },
     {
-      title: 'Registers',
+      title: "Registers",
       icon: IconListDetails,
-      url: '/dashboard/client/report-compliance/registers',
-    }
-
-  ]
+      url: "/dashboard/client/report-compliance/registers",
+    },
+  ];
   const monitoringMenuItems = [
     // {
     //   title: 'Alerts',
@@ -179,135 +170,131 @@ export default function ClientSidebar({ ...props }) {
     //   url: '/dashboard/client/alerts',
     // },
     {
-      title: 'Case Management',
+      title: "Case Management",
       icon: Newspaper,
       children: [
         {
-          title: 'Alerts',
-          url: '/dashboard/client/monitoring-and-cases/case-list',
+          title: "Alerts",
+          url: "/dashboard/client/monitoring-and-cases/case-list",
           icon: IconAlertTriangle,
         },
-
-      ]
+      ],
     },
     {
-      title: 'ECDD',
+      title: "ECDD",
       icon: ShieldUser,
-      url: '/dashboard/client/report-compliance/ecdd',
-    }
-  ]
+      url: "/dashboard/client/report-compliance/ecdd",
+    },
+  ];
 
   const watchlistAndScreeningMenuItems = [
     {
-      title: 'Internal Blacklist',
+      title: "Internal Blacklist",
       icon: IconUserOff,
-      url: '/dashboard/client/watchlist-and-screening/internal-blacklist',
+      url: "/dashboard/client/watchlist-and-screening/internal-blacklist",
     },
-  ]
+  ];
 
   const knowledgeHubMenuItems = [
     {
-      title: 'Policy Hub',
+      title: "Policy Hub",
       icon: IconBook,
-      url: '/dashboard/client/knowledge-hub/policy-hub',
+      url: "/dashboard/client/knowledge-hub/policy-hub",
     },
     {
-      title: 'Training Hub',
+      title: "Training Hub",
       icon: GraduationCap,
-      url: '/dashboard/client/knowledge-hub/training-hub',
+      url: "/dashboard/client/knowledge-hub/training-hub",
     },
     {
-      title: 'EWRA',
+      title: "EWRA",
       icon: IconWorld,
-      url: '/dashboard/client/faq',
+      url: "/dashboard/client/faq",
       children: [
         {
-          title: 'Dashboard',
-          url: '/dashboard/client/knowledge-hub/ewra/dashboard',
+          title: "Dashboard",
+          url: "/dashboard/client/knowledge-hub/ewra/dashboard",
           icon: IconListDetails,
         },
         {
-          title: 'ML Risk Assessment',
-          url: '/dashboard/client/knowledge-hub/ewra/ml-risk-assesment',
+          title: "ML Risk Assessment",
+          url: "/dashboard/client/knowledge-hub/ewra/ml-risk-assesment",
           icon: IconListDetails,
         },
         {
-          title: 'TF Risk Assessment',
-          url: '/dashboard/client/knowledge-hub/ewra/tf-risk-assesment',
+          title: "TF Risk Assessment",
+          url: "/dashboard/client/knowledge-hub/ewra/tf-risk-assesment",
           icon: IconListDetails,
         },
         {
-          title: 'ABC Risk Assessment',
-          url: '/dashboard/client/knowledge-hub/ewra/abc-risk-assesment',
+          title: "ABC Risk Assessment",
+          url: "/dashboard/client/knowledge-hub/ewra/abc-risk-assesment",
           icon: IconListDetails,
         },
-      ]
+      ],
     },
     {
-      title: 'Regulatory Links',
+      title: "Regulatory Links",
       icon: IconCirclesRelation,
-      url: '/dashboard/client/knowledge-hub/regulatory-links',
-
+      url: "/dashboard/client/knowledge-hub/regulatory-links",
     },
-  ]
+  ];
   const configurationMenuItems = [
     {
-      title: 'User & Role Management',
+      title: "User & Role Management",
       icon: IconListDetails,
-      url: '/dashboard/client/user-and-role-management',
+      url: "/dashboard/client/user-and-role-management",
     },
     {
-      title: 'Risk Rule Engine',
+      title: "Risk Rule Engine",
       icon: IconListDetails,
       children: [
         {
-          title: 'CRA Scoring Configuration',
-          url: '/dashboard/client/risk-rule-engine/cra-scoring-config',
+          title: "CRA Scoring Configuration",
+          url: "/dashboard/client/risk-rule-engine/cra-scoring-config",
           icon: IconDatabase,
         },
         {
-          title: 'Transaction Rule Editor',
-          url: '/dashboard/client/risk-rule-engine/transaction-rule-editor',
+          title: "Transaction Rule Editor",
+          url: "/dashboard/client/risk-rule-engine/transaction-rule-editor",
           icon: IconDatabase,
         },
-
-      ]
+      ],
     },
     {
-      title: 'Training Module',
-      url: '/dashboard/client/risk-rule-engine/training-module',
+      title: "Training Module",
+      url: "/dashboard/client/risk-rule-engine/training-module",
       icon: IconDatabase,
       children: [
         {
-          title: 'Anti-Money Laundering Training',
-          url: '/dashboard/client/risk-rule-engine/training-module/anti-money-laundering',
+          title: "Anti-Money Laundering Training",
+          url: "/dashboard/client/risk-rule-engine/training-module/anti-money-laundering",
           icon: IconDatabase,
         },
         {
-          title: 'AML Red Flags',
-          url: '/dashboard/client/risk-rule-engine/training-module/aml-red-flags',
-          icon: IconAlertTriangle
+          title: "AML Red Flags",
+          url: "/dashboard/client/risk-rule-engine/training-module/aml-red-flags",
+          icon: IconAlertTriangle,
         },
         {
-          title: 'Our Ecosystem',
-          url: '/dashboard/client/risk-rule-engine/training-module/our-ecosystem',
+          title: "Our Ecosystem",
+          url: "/dashboard/client/risk-rule-engine/training-module/our-ecosystem",
           icon: IconDatabase,
-        }
-      ]
+        },
+      ],
     },
     {
-      title: 'System Settings',
+      title: "System Settings",
       icon: IconListDetails,
       children: [
         {
-          title: 'Privacy',
-          url: '/dashboard/client/system-settings/privacy',
+          title: "Privacy",
+          url: "/dashboard/client/system-settings/privacy",
           icon: IconDatabase,
         },
-      ]
-    }
-  ]
-
+      ],
+    },
+  ];
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -316,7 +303,7 @@ export default function ClientSidebar({ ...props }) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <a href="#">
-                <div className='bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md'>
+                <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
                   <Wallet className="!size-4" />
                 </div>
                 <span className="text-base font-semibold">Dooit Wallet.</span>
@@ -340,5 +327,5 @@ export default function ClientSidebar({ ...props }) {
         <NavUser user={session.data?.user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

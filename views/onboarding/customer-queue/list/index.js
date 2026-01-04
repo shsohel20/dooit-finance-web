@@ -17,17 +17,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { StatusPill } from '@/components/ui/StatusPill'
 
 import { Textarea } from '@/components/ui/textarea'
-import { dateShowFormatWithTime, objWithValidValues, riskLevelVariants } from '@/lib/utils'
+import { dateShowFormatWithTime, formatDateTime, objWithValidValues, riskLevelVariants } from '@/lib/utils'
 import { IconChevronRight, IconDownload, IconEye, IconGridDots, IconList, IconPennant, IconSearch, IconUpload, } from '@tabler/icons-react'
 import {
-  Plus
+  Filter,
+  Plus,
+  XCircle
 } from 'lucide-react'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DetailViewModal } from '../details'
 import { useRouter } from 'next/navigation'
 import CustomDropZone from '@/components/ui/DropZone'
 import { toast } from 'sonner'
+import { Input } from '@/components/ui/input'
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import _, { isObject } from 'lodash';
+import CustomSelect from '@/components/ui/CustomSelect'
+import { countriesData } from '@/constants'
 const statusVariants = {
   pending: 'warning',
   rejected: 'danger',
@@ -40,7 +47,7 @@ const statusVariants = {
 const GridView = () => {
   const { customers } = useCustomerStore();
   const [openReporting, setOpenReporting] = useState(false);
-  const [openDetailView, setOpenDetailView] = useState(false);
+  const router = useRouter();
   const [currentItem, setCurrentItem] = useState(null);
   const handleDoubleClick = (item) => {
     setCurrentItem(item);
@@ -48,7 +55,7 @@ const GridView = () => {
   }
   const handleViewClick = (item) => {
     setCurrentItem(item);
-    setOpenDetailView(true);
+    router.push(`/dashboard/client/onboarding/customer-queue/details?id=${item?.id}`);
   }
   return (
     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xxl:grid-cols-4  mt-4'>
@@ -94,7 +101,7 @@ const GridView = () => {
         ))
       }
       <ReportingModal open={openReporting} setOpen={setOpenReporting} currentItem={currentItem} />
-      <DetailViewModal open={openDetailView} setOpen={setOpenDetailView} currentId={currentItem?.id} />
+      {/* <DetailViewModal open={openDetailView} setOpen={setOpenDetailView} currentId={currentItem?.id} /> */}
     </div>
   )
 }
@@ -127,6 +134,20 @@ const ListView = () => {
           </Button>
         </div>
       ),
+    },
+    {
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Customer ID"
+        />
+      ),
+      cell: ({ row }) => (
+        <div>
+          <p className='font-semibold text-muted-foreground font-mono'>#{row.original?.uid}</p>
+        </div>
+      ),
+      accessorKey: 'uid',
     },
     {
       header: ({ column }) => (
@@ -215,22 +236,25 @@ const ListView = () => {
       accessorKey: 'createdAt',
       size: 100,
       cell: ({ row }) => (
-        <span>{dateShowFormatWithTime(row.original.createdAt)}</span>
+        <div>
+          <p className='font-semibold'>{formatDateTime(row.original.createdAt)?.date}</p>
+          <span className='text-xs text-muted-foreground'>{formatDateTime(row.original.createdAt)?.time}</span>
+        </div>
       ),
     },
-    {
-      header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title="Last Updated"
-        />
-      ),
-      accessorKey: 'updatedAt',
-      size: 100,
-      cell: ({ row }) => (
-        <span>{dateShowFormatWithTime(row.original.updatedAt)}</span>
-      ),
-    },
+    // {
+    //   header: ({ column }) => (
+    //     <DataTableColumnHeader
+    //       column={column}
+    //       title="Last Updated"
+    //     />
+    //   ),
+    //   accessorKey: 'updatedAt',
+    //   size: 100,
+    //   cell: ({ row }) => (
+    //     <span>{dateShowFormatWithTime(row.original.updatedAt)}</span>
+    //   ),
+    // },
 
 
   ]
@@ -293,86 +317,168 @@ const ListView = () => {
   )
 }
 
-export default function CustomerQueueList({ variant, data, kycStatus }) {
+
+const getFilterLabel = (key) => {
+  switch (key) {
+    case 'uid':
+      return 'Customer ID';
+    case 'email':
+      return 'Email';
+    case 'type':
+      return 'Type';
+    case 'riskLabel':
+      return 'Risk Level';
+    default:
+      return key;
+  }
+}
+
+export default function CustomerQueueList({ data, kycStatus }) {
   const [view, setView] = useState('list')
-  const { currentPage, limit, setCustomers, setFetching, setCurrentPage, setLimit, setTotalItems } = useCustomerStore();
+  const { currentPage, limit, customers, setCustomers, setFetching, setTotalItems } = useCustomerStore();
+  const initialState = {
+    uid: '',
+    type: '',
+    email: '',
+    riskLabel: '',
+    country: null
+    // riskLevel: '',
+    // dateRange: '',
+    // country: '',
+  }
+  const [filters, setFilters] = useState(initialState);
+  const debouncedFetchRef = useRef(null);
 
 
-  const fetchData = async () => {
+  console.log('customers', customers);
+  const fetchData = useCallback(async (params = null) => {
     setFetching(true);
 
     const queryParams = objWithValidValues({
       page: currentPage,
       limit: limit,
-      kycStatus: kycStatus
+      kycStatus: kycStatus,
+      ...filters,
+      ...params
     });
+
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value && isObject(value)) {
+        queryParams[key] = value?.value;
+      }
+    }
+    console.log('queryParams', queryParams);
     const response = await getCustomers(queryParams);
     setFetching(false);
     setCustomers(response.data);
     setTotalItems(response.totalRecords);
 
+  }, []);
 
-  }
+  useEffect(() => {
+    debouncedFetchRef.current = _.debounce(fetchData, 500);
+
+    return () => {
+      debouncedFetchRef.current.cancel(); // cleanup
+    };
+  }, [fetchData]);
 
   useEffect(() => {
     fetchData();
   }, [currentPage, limit, kycStatus]);
 
 
-
-
+  const handleFilterChange = (name, value) => {
+    const updatedFilters = { ...filters, [name]: value };
+    setFilters(updatedFilters);
+    debouncedFetchRef.current(updatedFilters);
+  }
+  // const handleSearch = () => {
+  //   fetchData();
+  // }
+  const handleReset = () => {
+    setFilters(initialState);
+    debouncedFetchRef.current(initialState);
+  }
+  const handleRemoveFilter = (key) => {
+    const initialState = { ...filters, [key]: '' };
+    setFilters(initialState);
+    fetchData(initialState);
+  }
   return (
     <div className='my-2'>
       {/* <CustomerDashboard /> */}
       <div className='flex items-center justify-between  py-4 bg-white rounded-md px-4 shadow'>
         {/* Search and Filter */}
-        <div className='flex items-center gap-2  '>
-          <InputGroup className={'max-w-64'}>
+        <div className='flex items-center gap-2 flex-shrink-0 flex-grow  flex-wrap'>
+          <InputGroup className={'w-64 flex-shrink-0'}>
             <InputGroupInput placeholder="Search..." />
             <InputGroupAddon >
               <IconSearch />
             </InputGroupAddon>
           </InputGroup>
 
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Case ID" />
-            </SelectTrigger>
-          </Select>
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Email" />
-            </SelectTrigger>
-          </Select>
-          <Select>
+          <Input
+            name='uid'
+            placeholder='Customer ID'
+            className='w-40 flex-shrink-0'
+            value={filters.uid}
+            onChange={(e) => handleFilterChange('uid', e.target.value?.replace(/^#/, ''))}
+          />
+          <Input
+            name='email'
+            placeholder='Email'
+            className='w-40 flex-shrink-0'
+            value={filters.email}
+            onChange={(e) => handleFilterChange('email', e.target.value)}
+          />
+          {/* <Select>
             <SelectTrigger>
               <SelectValue placeholder="KYC Status" />
             </SelectTrigger>
-          </Select>
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Risk Level" />
-            </SelectTrigger>
-          </Select>
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Date Range" />
-            </SelectTrigger>
-          </Select>
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a country" />
+          </Select> */}
+          <Select value={filters.type} onValueChange={(value) => handleFilterChange('type', value)} >
+            <SelectTrigger className='max-w-40 flex-shrink-0'>
+              <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Bangladesh">Bangladesh</SelectItem>
-              <SelectItem value="India">India</SelectItem>
-              <SelectItem value="Australia">Australia</SelectItem>
+              <SelectItem value="individual">Individual</SelectItem>
+              <SelectItem value="business">Business</SelectItem>
+              <SelectItem value="corporate">Corporate</SelectItem>
+              <SelectItem value="government">Government</SelectItem>
+              <SelectItem value="non-profit">Non-Profit</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={filters.riskLabel} onValueChange={(value) => handleFilterChange('riskLabel', value)}>
+            <SelectTrigger className='max-w-40 flex-shrink-0'>
+              <SelectValue placeholder="Risk Level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Unacceptable">Unacceptable</SelectItem>
+              <SelectItem value="Low">Low</SelectItem>
+              <SelectItem value="Medium">Medium</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+            </SelectContent>
+          </Select>
+
+
+          <div className='w-40 flex-shrink-0'>
+            <CustomSelect
+              placeholder='Select a country'
+              options={countriesData}
+              value={filters.country}
+              onChange={(value) => handleFilterChange('country', value)}
+            />
+          </div>
           <Button size='icon' variant='outline'><Plus className='size-4' /></Button>
+          {/* <Button onClick={handleSearch} lit={!!filters.uid || !!filters.email || !!filters.type || !!filters.riskLabel}>
+            <MagnifyingGlassIcon className='size-4' />Search
+          </Button>
+          <Button onClick={handleReset} variant='outline' > <XMarkIcon className='size-4' /> Reset</Button> */}
 
         </div>
-        <div className='flex items-center gap-2 '>
+        <div className='flex items-center gap-2 flex-shrink-0 '>
           {/* <Button size={'sm'} className={'text-xs'}><IconBrandTelegram />  Send Invite </Button> */}
 
           <ButtonGroup>
@@ -389,12 +495,34 @@ export default function CustomerQueueList({ variant, data, kycStatus }) {
           </ButtonGroup>
         </div>
       </div>
+      <div className=' flex flex-wrap gap-2 py-2'>
+        {Object.entries(filters).map(([key, value]) => {
+          if (value) {
+            return (
+              <Badge key={key} variant='outline' className='py-1 flex-shrink-0'>
+                <div className='flex items-center gap-2'>
+                  <span className='text-primary'>{getFilterLabel(key)}</span>: <span className='py-1 px-3 text-[0.65rem] rounded-full bg-primary text-white capitalize '>{value?.label || value}</span>
+                </div>
+                <Button className={'size-6'} size='icon' variant='outline' onClick={() => handleRemoveFilter(key)}>
+                  <XMarkIcon className='size-3' />
+                </Button>
+              </Badge>
+            )
+          }
+          return null;
+        })}
+        {Object.entries(filters).some(([key, value]) => value) && <Button variant='outline' onClick={handleReset}
+          className='text-xs py-1 h-8'>
+          <XCircle className='size-4' /> Clear
+        </Button>}
+      </div>
       <div className=''>
         {view === 'grid' ?
           <GridView data={data} /> :
           <ListView data={data} />
         }
       </div>
+
 
     </div>
   )

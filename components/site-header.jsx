@@ -11,6 +11,7 @@ import {
   IconHelpCircle,
   IconAlertTriangle,
   IconUsers,
+  IconCards,
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import {
@@ -20,6 +21,7 @@ import {
   SelectContent,
   SelectItem,
 } from './ui/select';
+import { CreditCard } from 'lucide-react';
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -34,7 +36,7 @@ export function SiteHeader() {
     {
       name: 'Transactions',
       href: '/dashboard/client/transactions',
-      icon: <IconCash size={14} />,
+      icon: <CreditCard size={14} />,
     },
     {
       name: 'Alerts',
@@ -58,15 +60,14 @@ export function SiteHeader() {
                 <Link
                   href={route.href}
                   className={cn(
-                    ' px-4 py-2  text-zinc-600  font-semibold flex items-center gap-2 [&>svg]:size-4 [&>svg]:shrink-0 relative rounded-md text-[0.78rem]',
+                    ' px-4 py-2  text-heading  font-semibold flex items-center gap-2 [&>svg]:size-4 [&>svg]:shrink-0 relative rounded-md ',
                     {
-                      'text-zinc-800  font-bold  bg-secondary':
-                        pathname === route.href,
+                      '  font-bold bg-transparent': pathname === route.href,
                     }
                   )}
                 >
                   {pathname === route.href && (
-                    <div className="absolute left-0 bottom-0  w-full rounded-full h-1 bg-accent" />
+                    <div className="absolute left-1/2 -translate-x-1/2 top-2  w-1/2  h-2/5 -z-1 bg-accent opacity-[0.2]" />
                   )}
                   <span className="">{route.icon}</span>
                   <span>{route.name}</span>

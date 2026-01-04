@@ -79,11 +79,7 @@ const TransactionListView = () => {
     setViewReport(true);
   };
 
-  const riskVariants = {
-    Low: "info",
-    Medium: "warning",
-    High: "danger",
-  };
+
   const statusVariants = {
     pending: "info",
     completed: "success",
@@ -138,17 +134,17 @@ const TransactionListView = () => {
       size: 200,
       cell: ({ row }) => {
         return (
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center ">
             <div>
-              <h4 className="text-zinc-800 font-semibold">{row.original?.sender?.name}</h4>
-              <p className="text-zinc-500 text-xs">{row.original?.sender?.account}</p>
+              <h4 className="text-heading font-semibold capitalize">{row.original?.sender?.name}</h4>
+              <p className="text-neutral-500 text-md">{row.original?.sender?.account}</p>
             </div>
             <div>
               <ArrowRight className="size-4 text-green-500" />
             </div>
             <div>
-              <h4 className="text-zinc-800 font-semibold">{row.original?.receiver?.name}</h4>
-              <p className="text-zinc-500 text-xs">{row.original?.receiver?.account}</p>
+              <h4 className="text-heading font-semibold capitalize">{row.original?.receiver?.name}</h4>
+              <p className="text-neutral-500 ">{row.original?.receiver?.account}</p>
             </div>
           </div>
         );
@@ -166,8 +162,8 @@ const TransactionListView = () => {
       cell: ({ row }) => {
         return (
           <div>
-            <h4 className="text-zinc-800 font-semibold">{row.original?.beneficiary?.name}</h4>
-            <p className="text-zinc-500 text-xs">{row.original?.beneficiary?.account}</p>
+            <h4 className="text-heading font-semibold">{row.original?.beneficiary?.name}</h4>
+            <p className="text-neutral-500 ">{row.original?.beneficiary?.account}</p>
           </div>
         );
       },
@@ -178,7 +174,7 @@ const TransactionListView = () => {
       cell: ({ row }) => {
         return (
           <div>
-            <p className="text-zinc-600 text-end">
+            <p className="text-heading text-end">
               {formatAUD(row.original?.amount, row.original?.currency)}
             </p>
           </div>
@@ -194,7 +190,7 @@ const TransactionListView = () => {
       cell: ({ row }) => {
         return (
           <div>
-            <p className="text-zinc-600 text-end">{row.original?.channel || "N/A"}</p>
+            <p className="text-heading text-end ">{row.original?.channel || "N/A"}</p>
           </div>
         );
       },
@@ -222,10 +218,10 @@ const TransactionListView = () => {
       cell: ({ row }) => {
         return (
           <div>
-            <p className="text-zinc-800 font-semibold">
+            <p className="text-heading font-semibold">
               {formatDateTime(row.original?.timeStamp)?.date}
             </p>
-            <p className="text-zinc-400 ">{formatDateTime(row.original?.timeStamp)?.time}</p>
+            <p className="text-secondary-heading ">{formatDateTime(row.original?.timeStamp)?.time}</p>
           </div>
         );
       },
@@ -267,16 +263,16 @@ const TransactionListView = () => {
       </PageHeader> */}
       <TransactionDashboard transactions={transactions?.data || []} />
 
-      <div className="flex items-center justify-between bg-white shadow-sm rounded-md p-4">
+      <div className="flex items-center justify-between bg-sidebar-bg border border-border/50 rounded-md p-4">
         <div className="flex items-center gap-2   ">
-          <InputGroup className={"max-w-64"}>
+          <InputGroup className={"max-w-64 bg-white"}>
             <InputGroupInput placeholder="Search by name, id..." />
             <InputGroupAddon>
               <IconSearch />
             </InputGroupAddon>
           </InputGroup>
           <Select>
-            <SelectTrigger>
+            <SelectTrigger className="bg-white">
               <SelectValue placeholder="ID" />
             </SelectTrigger>
           </Select>
@@ -318,15 +314,15 @@ const TransactionListView = () => {
           <ButtonGroup>
             <Button
               variant="outline"
-              // onClick={() => setView('grid')}
-              // variant={view === 'grid' ? 'default' : 'outline'}
+            // onClick={() => setView('grid')}
+            // variant={view === 'grid' ? 'default' : 'outline'}
             >
               <IconGridDots />
             </Button>
             <Button
               variant="outline"
-              // variant={view === 'list' ? 'default' : 'outline'}
-              // onClick={() => setView('list')}
+            // variant={view === 'list' ? 'default' : 'outline'}
+            // onClick={() => setView('list')}
             >
               <IconList />
             </Button>

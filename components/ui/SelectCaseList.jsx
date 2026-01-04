@@ -45,7 +45,8 @@ export default function SelectCaseList({ onChange, value, label }) {
 
       setNewValue('');
     } catch (error) {
-      console.error('Failed to get case numbers', error);
+      setFetchingCaseNumbers(false);
+      console.log('Failed to get case numbers', error);
     } finally {
       setFetchingCaseNumbers(false);
     }
@@ -127,15 +128,20 @@ export default function SelectCaseList({ onChange, value, label }) {
           <div className="relative mt-[56px]">
             {caseNumbers?.length === 0 ? (
               <div className="flex items-center gap-2 justify-center">
-                <IconLoader2 className="size-4 animate-spin" />
-                <span>Loading...</span>
+                {/* <IconLoader2 className="size-4 animate-spin" /> */}
+                <span className="text-secondary-heading text-xs">
+                  No case numbers found
+                </span>
               </div>
             ) : (
               <SelectGroup className="relative">
                 <SelectLabel>Case Numbers</SelectLabel>{' '}
                 {caseNumbers.map((option) => (
-                  <SelectItem key={option?.value} value={option?.value}>
-                    {option.label}
+                  <SelectItem
+                    key={option?.value || option._id}
+                    value={option?.value || option}
+                  >
+                    {option.label || option}
                   </SelectItem>
                 ))}
                 {hasMore && (
