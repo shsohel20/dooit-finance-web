@@ -21,16 +21,20 @@ import { dateShowFormatWithTime, formatDateTime, objWithValidValues, riskLevelVa
 import { IconChevronRight, IconDownload, IconEye, IconGridDots, IconList, IconPennant, IconSearch, IconUpload, } from '@tabler/icons-react'
 import {
   Filter,
-  Plus
+  Plus,
+  XCircle
 } from 'lucide-react'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DetailViewModal } from '../details'
 import { useRouter } from 'next/navigation'
 import CustomDropZone from '@/components/ui/DropZone'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import _, { isObject } from 'lodash';
+import CustomSelect from '@/components/ui/CustomSelect'
+import { countriesData } from '@/constants'
 const statusVariants = {
   pending: 'warning',
   rejected: 'danger',
@@ -337,14 +341,17 @@ export default function CustomerQueueList({ data, kycStatus }) {
     type: '',
     email: '',
     riskLabel: '',
+    country: null
     // riskLevel: '',
     // dateRange: '',
     // country: '',
   }
   const [filters, setFilters] = useState(initialState);
+  const debouncedFetchRef = useRef(null);
+
 
   console.log('customers', customers);
-  const fetchData = async (params = null) => {
+  const fetchData = useCallback(async (params = null) => {
     setFetching(true);
 
     const queryParams = objWithValidValues({
@@ -354,13 +361,27 @@ export default function CustomerQueueList({ data, kycStatus }) {
       ...filters,
       ...params
     });
+
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value && isObject(value)) {
+        queryParams[key] = value?.value;
+      }
+    }
+    console.log('queryParams', queryParams);
     const response = await getCustomers(queryParams);
     setFetching(false);
     setCustomers(response.data);
     setTotalItems(response.totalRecords);
 
+  }, []);
 
-  }
+  useEffect(() => {
+    debouncedFetchRef.current = _.debounce(fetchData, 500);
+
+    return () => {
+      debouncedFetchRef.current.cancel(); // cleanup
+    };
+  }, [fetchData]);
 
   useEffect(() => {
     fetchData();
@@ -368,14 +389,16 @@ export default function CustomerQueueList({ data, kycStatus }) {
 
 
   const handleFilterChange = (name, value) => {
-    setFilters({ ...filters, [name]: value });
+    const updatedFilters = { ...filters, [name]: value };
+    setFilters(updatedFilters);
+    debouncedFetchRef.current(updatedFilters);
   }
-  const handleSearch = () => {
-    fetchData();
-  }
+  // const handleSearch = () => {
+  //   fetchData();
+  // }
   const handleReset = () => {
     setFilters(initialState);
-    fetchData(initialState);
+    debouncedFetchRef.current(initialState);
   }
   const handleRemoveFilter = (key) => {
     const initialState = { ...filters, [key]: '' };
@@ -387,7 +410,7 @@ export default function CustomerQueueList({ data, kycStatus }) {
       {/* <CustomerDashboard /> */}
       <div className='flex items-center justify-between  py-4 bg-white rounded-md px-4 shadow'>
         {/* Search and Filter */}
-        <div className='flex items-center gap-2  flex-wrap'>
+        <div className='flex items-center gap-2 flex-shrink-0 flex-grow  flex-wrap'>
           <InputGroup className={'w-64 flex-shrink-0'}>
             <InputGroupInput placeholder="Search..." />
             <InputGroupAddon >
@@ -439,24 +462,23 @@ export default function CustomerQueueList({ data, kycStatus }) {
             </SelectContent>
           </Select>
 
-          <Select>
-            <SelectTrigger className='max-w-40 flex-shrink-0'>
-              <SelectValue placeholder="Select a country" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Bangladesh">Bangladesh</SelectItem>
-              <SelectItem value="India">India</SelectItem>
-              <SelectItem value="Australia">Australia</SelectItem>
-            </SelectContent>
-          </Select>
+
+          <div className='w-40 flex-shrink-0'>
+            <CustomSelect
+              placeholder='Select a country'
+              options={countriesData}
+              value={filters.country}
+              onChange={(value) => handleFilterChange('country', value)}
+            />
+          </div>
           <Button size='icon' variant='outline'><Plus className='size-4' /></Button>
-          <Button onClick={handleSearch} lit={!!filters.uid || !!filters.email || !!filters.type || !!filters.riskLabel}>
+          {/* <Button onClick={handleSearch} lit={!!filters.uid || !!filters.email || !!filters.type || !!filters.riskLabel}>
             <MagnifyingGlassIcon className='size-4' />Search
           </Button>
-          <Button onClick={handleReset} variant='outline' > <XMarkIcon className='size-4' /> Reset</Button>
+          <Button onClick={handleReset} variant='outline' > <XMarkIcon className='size-4' /> Reset</Button> */}
 
         </div>
-        <div className='flex items-center gap-2 '>
+        <div className='flex items-center gap-2 flex-shrink-0 '>
           {/* <Button size={'sm'} className={'text-xs'}><IconBrandTelegram />  Send Invite </Button> */}
 
           <ButtonGroup>
@@ -479,7 +501,7 @@ export default function CustomerQueueList({ data, kycStatus }) {
             return (
               <Badge key={key} variant='outline' className='py-1 flex-shrink-0'>
                 <div className='flex items-center gap-2'>
-                  <span className='text-primary'>{getFilterLabel(key)}</span>: <span className='py-1 px-3 text-[0.65rem] rounded-full bg-primary text-white capitalize '>{value}</span>
+                  <span className='text-primary'>{getFilterLabel(key)}</span>: <span className='py-1 px-3 text-[0.65rem] rounded-full bg-primary text-white capitalize '>{value?.label || value}</span>
                 </div>
                 <Button className={'size-6'} size='icon' variant='outline' onClick={() => handleRemoveFilter(key)}>
                   <XMarkIcon className='size-3' />
@@ -489,6 +511,10 @@ export default function CustomerQueueList({ data, kycStatus }) {
           }
           return null;
         })}
+        {Object.entries(filters).some(([key, value]) => value) && <Button variant='outline' onClick={handleReset}
+          className='text-xs py-1 h-8'>
+          <XCircle className='size-4' /> Clear
+        </Button>}
       </div>
       <div className=''>
         {view === 'grid' ?
