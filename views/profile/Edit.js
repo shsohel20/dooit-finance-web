@@ -131,33 +131,13 @@ export function ClientEditForm() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar Navigation */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-border bg-card">
+    <div className="flex min-h-screen relative">
 
-        <nav className="flex-1 p-4">
-          <div className="space-y-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === item.id
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </nav>
-      </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="border-b border-border bg-card px-6 py-4">
+        <header className="border-b border-border bg-card px-6 py-4 sticky top-10 z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="relative group">
@@ -192,7 +172,7 @@ export function ClientEditForm() {
         </header>
 
         {/* Mobile Tab Navigation */}
-        <div className="lg:hidden border-b border-border bg-card px-4 py-2 overflow-x-auto">
+        {/* <div className="lg:hidden border-b border-border bg-card px-4 py-2 overflow-x-auto">
           <div className="flex gap-1 min-w-max">
             {navItems.map((item) => (
               <button
@@ -206,341 +186,339 @@ export function ClientEditForm() {
               </button>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Form Content */}
         <div className="flex-1 p-6 overflow-auto">
-          <div className="max-w-3xl mx-auto space-y-6">
+          <div className="max-w-4xl mx-auto space-y-6">
             {/* Company Info Section */}
-            {activeTab === "company" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5 text-primary" />
-                    Company Information
-                  </CardTitle>
-                  <CardDescription>Basic details about the company</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="">
-                      <FormField
-                        name="client.name"
-                        label="Company Name"
-                        form={form}
-                      />
-                    </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-primary" />
+                  Company Information
+                </CardTitle>
+                <CardDescription>Basic details about the company</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="">
                     <FormField
-                      name="client.clientType"
-                      label="Client Type"
+                      name="client.name"
+                      label="Company Name"
                       form={form}
-                      type="select"
-                      options={[
-                        { label: "Financial", value: "Financial" },
-                        { label: "Technology", value: "Technology" },
-                        { label: "Healthcare", value: "Healthcare" },
-                        { label: "Retail", value: "Retail" },
-                        { label: "Manufacturing", value: "Manufacturing" },
-                      ]}
                     />
                   </div>
-
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <FormField
-                      name="client.registrationNumber"
-                      label="Registration Number"
-                      form={form}
-                    />
-                    <FormField
-                      name="client.taxId"
-                      label="Tax ID"
-                      form={form}
-                    />
-
-                  </div>
-
-                  <Separator />
-
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <FormField
-                      name="client.email"
-                      label="Email"
-                      form={form}
-                      type="email"
-                    />
-                    <FormField
-                      name="client.phone"
-                      label="Phone"
-                      form={form}
-                      type="phone"
-                    />
-                  </div>
-
                   <FormField
-                    name="client.website"
-                    label="Website"
+                    name="client.clientType"
+                    label="Client Type"
                     form={form}
-                    type="url"
+                    type="select"
+                    options={[
+                      { label: "Financial", value: "Financial" },
+                      { label: "Technology", value: "Technology" },
+                      { label: "Healthcare", value: "Healthcare" },
+                      { label: "Retail", value: "Retail" },
+                      { label: "Manufacturing", value: "Manufacturing" },
+                    ]}
                   />
-                </CardContent>
-              </Card>
-            )}
+                </div>
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <FormField
+                    name="client.registrationNumber"
+                    label="Registration Number"
+                    form={form}
+                  />
+                  <FormField
+                    name="client.taxId"
+                    label="Tax ID"
+                    form={form}
+                  />
+
+                </div>
+
+                <Separator />
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <FormField
+                    name="client.email"
+                    label="Email"
+                    form={form}
+                    type="email"
+                  />
+                  <FormField
+                    name="client.phone"
+                    label="Phone"
+                    form={form}
+                    type="phone"
+                  />
+                </div>
+
+                <FormField
+                  name="client.website"
+                  label="Website"
+                  form={form}
+                  type="url"
+                />
+              </CardContent>
+            </Card>
+
 
             {/* Contacts Section */}
-            {activeTab === "contacts" && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <User className="h-5 w-5 text-primary" />
-                        Contacts
-                      </CardTitle>
-                      <CardDescription>Manage company contact persons</CardDescription>
-                    </div>
-                    <Button size="sm" variant="outline" className="gap-2 bg-transparent" onClick={addContact}>
-                      <Plus className="h-4 w-4" />
-                      Add Contact
-                    </Button>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="h-5 w-5 text-primary" />
+                      Contacts
+                    </CardTitle>
+                    <CardDescription>Manage company contact persons</CardDescription>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {contactFields.map((contact, index) => (
-                    <div key={index} className="p-4 rounded-lg border border-border bg-muted/30">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                              {contact?.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-foreground">{contact?.name}</p>
-                            <p className="text-sm text-muted-foreground">{contact?.title}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {contact?.primary && (
-                            <Badge variant="default" className="text-xs">
-                              Primary
-                            </Badge>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => removeContactItem(index)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                  <Button size="sm" variant="outline" className="gap-2 bg-transparent" onClick={addContact}>
+                    <Plus className="h-4 w-4" />
+                    Add Contact
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {contactFields.map((contact, index) => (
+                  <div key={index} className="p-4 rounded-lg border border-border bg-muted/30">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                            {contact?.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-foreground">{contact?.name}</p>
+                          <p className="text-sm text-muted-foreground">{contact?.title}</p>
                         </div>
                       </div>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <FormField
-                          name={`client.contacts[${index}].name`}
-                          label="Name"
-                          form={form}
-                        />
-                        <FormField
-                          name={`client.contacts[${index}].title`}
-                          label="Title"
-                          form={form}
-                        />
+                      <div className="flex items-center gap-2">
+                        {contact?.primary && (
+                          <Badge variant="default" className="text-xs">
+                            Primary
+                          </Badge>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => removeContactItem(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <FormField
+                        name={`client.contacts[${index}].name`}
+                        label="Name"
+                        form={form}
+                      />
+                      <FormField
+                        name={`client.contacts[${index}].title`}
+                        label="Title"
+                        form={form}
+                      />
 
-                        <FormField
-                          name={`client.contacts[${index}].email`}
-                          label="Email"
-                          form={form}
-                          type="email"
-                        />
-                        <FormField
-                          name={`client.contacts[${index}].phone`}
-                          label="Phone"
-                          form={form}
-                          type="phone"
-                        />
-                        {/* <FormField
+                      <FormField
+                        name={`client.contacts[${index}].email`}
+                        label="Email"
+                        form={form}
+                        type="email"
+                      />
+                      <FormField
+                        name={`client.contacts[${index}].phone`}
+                        label="Phone"
+                        form={form}
+                        type="phone"
+                      />
+                      {/* <FormField
                         name={`client.contacts[${index}].primary`}
                         label="Primary"
                         form={form}
                         type="checkbox"
                       /> */}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+
+            {/* Address Section */}
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Address
+                </CardTitle>
+                <CardDescription>Company location and mailing address</CardDescription>
+              </CardHeader>
+              <CardContent className=" grid gap-6 sm:grid-cols-2">
+                <FormField
+                  name="client.address.street"
+                  label="Street Address"
+                  form={form}
+                />
+                <FormField
+                  name="client.address.city"
+                  label="City"
+                  form={form}
+                />
+                <FormField
+                  name="client.address.state"
+                  label="State / Province"
+                  form={form}
+                />
+                <FormField
+                  name="client.address.zipcode"
+                  label="Zip / Postal Code"
+                  form={form}
+                />
+                <FormField
+                  name="client.address.country"
+                  label="Country"
+                  form={form}
+                  type="select"
+                  options={countriesData}
+                />
+
+              </CardContent>
+            </Card>
+
+
+            {/* Legal Representative Section */}
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Scale className="h-5 w-5 text-primary" />
+                  Legal Representative
+                </CardTitle>
+                <CardDescription>Company legal contact information</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <FormField
+                    name="client.legalRepresentative.name"
+                    label="Full Name"
+                    form={form}
+                  />
+                  <FormField
+                    name="client.legalRepresentative.designation"
+                    label="Designation"
+                    form={form}
+                  />
+
+                </div>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <FormField
+                    name="client.legalRepresentative.email"
+                    label="Email"
+                    form={form}
+                    type="email"
+                  />
+                  <FormField
+                    name="client.legalRepresentative.phone"
+                    label="Phone"
+                    form={form}
+                    type="phone"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+
+            {/* Documents Section */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-primary" />
+                      Documents
+                    </CardTitle>
+                    <CardDescription>Manage company documents and files</CardDescription>
+                  </div>
+                  <Button size="sm" variant="outline" className="gap-2 bg-transparent">
+                    <Upload className="h-4 w-4" />
+                    Upload Document
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {formData?.client?.documents?.map((doc, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{doc.name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Badge variant="outline" className="text-xs">
+                              {doc.type}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm">
+                          View
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
-            )}
+                </div>
 
-            {/* Address Section */}
-            {activeTab === "address" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-primary" />
-                    Address
-                  </CardTitle>
-                  <CardDescription>Company location and mailing address</CardDescription>
-                </CardHeader>
-                <CardContent className=" grid gap-6 sm:grid-cols-2">
-                  <FormField
-                    name="client.address.street"
-                    label="Street Address"
-                    form={form}
-                  />
-                  <FormField
-                    name="client.address.city"
-                    label="City"
-                    form={form}
-                  />
-                  <FormField
-                    name="client.address.state"
-                    label="State / Province"
-                    form={form}
-                  />
-                  <FormField
-                    name="client.address.zipcode"
-                    label="Zip / Postal Code"
-                    form={form}
-                  />
-                  <FormField
-                    name="client.address.country"
-                    label="Country"
-                    form={form}
-                    type="select"
-                    options={countriesData}
-                  />
+                {/* Upload Zone */}
+                <div className="mt-4 border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 hover:bg-muted/30 transition-colors cursor-pointer">
+                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm font-medium text-foreground">Drop files here or click to upload</p>
+                  <p className="text-xs text-muted-foreground mt-1">PDF, DOC, or images up to 10MB</p>
+                </div>
+              </CardContent>
+            </Card>
 
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Legal Representative Section */}
-            {activeTab === "legal" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Scale className="h-5 w-5 text-primary" />
-                    Legal Representative
-                  </CardTitle>
-                  <CardDescription>Company legal contact information</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <FormField
-                      name="client.legalRepresentative.name"
-                      label="Full Name"
-                      form={form}
-                    />
-                    <FormField
-                      name="client.legalRepresentative.designation"
-                      label="Designation"
-                      form={form}
-                    />
-
-                  </div>
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <FormField
-                      name="client.legalRepresentative.email"
-                      label="Email"
-                      form={form}
-                      type="email"
-                    />
-                    <FormField
-                      name="client.legalRepresentative.phone"
-                      label="Phone"
-                      form={form}
-                      type="phone"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Documents Section */}
-            {activeTab === "documents" && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-primary" />
-                        Documents
-                      </CardTitle>
-                      <CardDescription>Manage company documents and files</CardDescription>
-                    </div>
-                    <Button size="sm" variant="outline" className="gap-2 bg-transparent">
-                      <Upload className="h-4 w-4" />
-                      Upload Document
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {formData?.client?.documents?.map((doc, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <FileText className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-foreground">{doc.name}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <Badge variant="outline" className="text-xs">
-                                {doc.type}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
-                            View
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Upload Zone */}
-                  <div className="mt-4 border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 hover:bg-muted/30 transition-colors cursor-pointer">
-                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-sm font-medium text-foreground">Drop files here or click to upload</p>
-                    <p className="text-xs text-muted-foreground mt-1">PDF, DOC, or images up to 10MB</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Settings Section */}
-            {activeTab === "settings" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-primary" />
-                    Settings
-                  </CardTitle>
-                  <CardDescription>Billing and preferences configuration</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      {/* <Label htmlFor="billingCycle">Billing Cycle</Label>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-primary" />
+                  Settings
+                </CardTitle>
+                <CardDescription>Billing and preferences configuration</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    {/* <Label htmlFor="billingCycle">Billing Cycle</Label>
                       <Select
                         value={formData?.client?.settings?.billingCycle}
                         onValueChange={(value) => updateField("client.settings.billingCycle", value)}
@@ -554,36 +532,36 @@ export function ClientEditForm() {
                           <SelectItem value="annually">Annually</SelectItem>
                         </SelectContent>
                       </Select> */}
-                      <FormField
-                        name="client.settings.billingCycle"
-                        label="Billing Cycle"
-                        form={form}
-                        type="select"
-                        options={[
-                          { label: "Monthly", value: "monthly" },
-                          { label: "Quarterly", value: "quarterly" },
-                          { label: "Annually", value: "annually" },
-                        ]}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <FormField
-                        name="client.settings.currency"
-                        label="Currency"
-                        form={form}
-                        type="select"
-                        options={[
-                          { label: "USD", value: "USD" },
-                          { label: "EUR", value: "EUR" },
-                          { label: "GBP", value: "GBP" },
-                          { label: "BDT", value: "BDT" },
-                        ]}
-                      />
-                    </div>
+                    <FormField
+                      name="client.settings.billingCycle"
+                      label="Billing Cycle"
+                      form={form}
+                      type="select"
+                      options={[
+                        { label: "Monthly", value: "monthly" },
+                        { label: "Quarterly", value: "quarterly" },
+                        { label: "Annually", value: "annually" },
+                      ]}
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                  <div className="space-y-2">
+                    <FormField
+                      name="client.settings.currency"
+                      label="Currency"
+                      form={form}
+                      type="select"
+                      options={[
+                        { label: "USD", value: "USD" },
+                        { label: "EUR", value: "EUR" },
+                        { label: "GBP", value: "GBP" },
+                        { label: "BDT", value: "BDT" },
+                      ]}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
           </div>
         </div>
       </div>
