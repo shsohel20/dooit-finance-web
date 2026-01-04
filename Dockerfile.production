@@ -29,7 +29,7 @@ COPY --from=builder /app/public ./public
 COPY --from=deps /app/node_modules ./node_modules
 
 # Next.js default port
-EXPOSE 4000
+EXPOSE 4800
 
 # Create a non-root user
 RUN addgroup -S app && adduser -S app -G app
@@ -37,4 +37,3 @@ USER app
 
 # Start Next.js f
 CMD ["npm", "start"]
- 
