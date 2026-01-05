@@ -241,6 +241,17 @@ export default function ClientSidebar({ ...props }) {
   ];
   const configurationMenuItems = [
     {
+      title: "PEP Screening",
+      icon: IconListDetails,
+      url: "/dashboard/client/pep-screening",
+    },
+    // {
+    //   title: "PEP Screening",
+    //   icon: IconListDetails,
+    //   url: "/dashboard/client/pep-screening",
+    // },
+
+    {
       title: "User & Role Management",
       icon: IconListDetails,
       url: "/dashboard/client/user-and-role-management",
