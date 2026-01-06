@@ -461,7 +461,7 @@ export default function PEPScreeningDashboard() {
               ) : (
                 <ChevronRight className="h-4 w-4" />
               )}
-              LINK TO PRIMARY CASE
+              LINK TO CASE
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-4">
               <div>
