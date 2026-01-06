@@ -214,14 +214,6 @@ export default function PEPScreeningDashboard() {
   const renderScreeningContent = () => (
     <div className="flex flex-1 overflow-hidden">
       {/* Left Mini Sidebar */}
-      <aside className="w-14 bg-slate-100 border-r border-slate-200 flex flex-col items-center py-4 gap-4 shrink-0">
-        <button className="p-2 rounded hover:bg-slate-200 text-slate-600">
-          <Search className="h-5 w-5" />
-        </button>
-        <div className="text-[10px] text-slate-500 -rotate-90 whitespace-nowrap mt-8">
-          Group (R)
-        </div>
-      </aside>
 
       {/* Screening Settings Sidebar */}
       <aside className="w-72 bg-slate-50 border-r border-slate-200 flex flex-col shrink-0 overflow-y-auto">
@@ -543,8 +535,8 @@ export default function PEPScreeningDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <nav className="bg-slate-800 text-white px-4 py-0 flex items-center shrink-0">
+    <div className="min-h-screen  flex flex-col">
+      <nav className=" px-4 py-0 flex items-center shrink-0 shadow-sm mb-4">
         {navTabs.map((tab) => (
           <button
             key={tab.id}
@@ -552,8 +544,8 @@ export default function PEPScreeningDashboard() {
             className={cn(
               "px-4 py-3 text-sm font-medium transition-colors flex items-center gap-1",
               activeTab === tab.id
-                ? "text-white border-b-2 border-white"
-                : "text-slate-300 hover:text-white hover:bg-slate-700",
+                ? "text-primary border-b-2 border-primary"
+                : "text-slate-700 hover:text-primary hover:bg-white",
             )}
           >
             {tab.label}

@@ -216,18 +216,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
   const [activeTab, setActiveTab] = useState("world-check");
   const [selectedMatches, setSelectedMatches] = useState([]);
   const [selectedMatchIndex, setSelectedMatchIndex] = useState(null);
-
-  // Filter states
-  const [matchStrengthOpen, setMatchStrengthOpen] = useState(false);
-  const [typeOpen, setTypeOpen] = useState(false);
-  const [genderOpen, setGenderOpen] = useState(false);
-  const [dobOpen, setDobOpen] = useState(false);
-  const [identificationOpen, setIdentificationOpen] = useState(false);
-  const [placeOfBirthOpen, setPlaceOfBirthOpen] = useState(false);
-  const [citizenshipOpen, setCitizenshipOpen] = useState(false);
-  const [countryLocationOpen, setCountryLocationOpen] = useState(false);
-  const [categoryOpen, setCategoryOpen] = useState(false);
-  const [pepStatusOpen, setPepStatusOpen] = useState(false);
+  const [openMatchDetail, setOpenMatchDetail] = useState(false);
 
   const handleSelectMatch = (id) => {
     if (selectedMatches.includes(id)) {
@@ -239,6 +228,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
 
   const handleMatchClick = (index) => {
     setSelectedMatchIndex(index);
+    setOpenMatchDetail(true);
   };
 
   const getRatingBadge = (rating) => {
@@ -594,6 +584,10 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
     }
   };
 
+  const toggleMatchDetail = () => {
+    setOpenMatchDetail(!openMatchDetail);
+  };
+
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Case Header */}
@@ -634,7 +628,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
 
       {/* Tabs */}
       <div className="bg-white border-b border-slate-200 px-4 flex items-center gap-1">
-        <button
+        {/* <button
           onClick={() => setActiveTab("summary")}
           className={cn(
             "px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors",
@@ -645,7 +639,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         >
           <FileText className="h-4 w-4" />
           SUMMARY
-        </button>
+        </button> */}
         <button
           onClick={() => setActiveTab("world-check")}
           className={cn(
@@ -670,18 +664,6 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         >
           <Link2 className="h-4 w-4" />
           LINKED CASES
-        </button>
-        <button
-          onClick={() => setActiveTab("audit")}
-          className={cn(
-            "px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors",
-            activeTab === "audit"
-              ? "border-blue-600 text-blue-600 bg-blue-50"
-              : "border-transparent text-slate-600 hover:text-slate-800 hover:bg-slate-50",
-          )}
-        >
-          <FileSearch className="h-4 w-4" />
-          AUDIT
         </button>
       </div>
 
@@ -716,6 +698,8 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
               setSelectedMatchIndex(selectedMatchIndex + 1);
             }
           }}
+          open={openMatchDetail}
+          onOpenChange={toggleMatchDetail}
         />
       )}
     </div>
