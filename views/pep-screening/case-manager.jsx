@@ -694,6 +694,7 @@ export function CaseManager() {
         <ResizableTable
           columns={columns}
           data={cases}
+          tableId="pep-screening-case-manager"
           // onDoubleClick={handleDoubleClick}
           loading={fetching}
           // actions={<Actions />}

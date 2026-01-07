@@ -30,6 +30,9 @@ import {
 } from "lucide-react";
 import { ScreeningResults } from "./screening-results";
 import { CaseManager } from "./case-manager";
+import CustomSelect from "@/components/ui/CustomSelect";
+import { countries } from "@/lib/country";
+import { getCardTypesByCountryId } from "@/lib/card-type";
 
 const initialFormData = {
   name: "",
@@ -106,7 +109,7 @@ export default function PEPScreeningDashboard() {
           <>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                <Label>
                   Date of Birth
                   <HelpCircle className="h-3 w-3 text-slate-400" />
                 </Label>
@@ -117,7 +120,7 @@ export default function PEPScreeningDashboard() {
                 />
               </div>
               <div>
-                <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                <Label>
                   Nationality
                   <HelpCircle className="h-3 w-3 text-slate-400" />
                 </Label>
@@ -143,7 +146,7 @@ export default function PEPScreeningDashboard() {
               </div>
             </div>
             <div className="mb-4">
-              <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+              <Label>
                 Gender
                 <HelpCircle className="h-3 w-3 text-slate-400" />
               </Label>
@@ -173,7 +176,7 @@ export default function PEPScreeningDashboard() {
               <CollapsibleContent className="pt-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                    <Label>
                       Identification Number
                       <HelpCircle className="h-3 w-3 text-slate-400" />
                     </Label>
@@ -184,26 +187,19 @@ export default function PEPScreeningDashboard() {
                     />
                   </div>
                   <div>
-                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                    {/* <Label >
                       Country/Jurisdiction
                       <HelpCircle className="h-3 w-3 text-slate-400" />
-                    </Label>
-                    <Select
+                    </Label> */}
+                    <CustomSelect
+                      label="Country/Jurisdiction"
+                      options={countries}
                       value={formData.issuerCountry}
-                      onValueChange={(value) => handleFieldChange("issuerCountry", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="us">United States</SelectItem>
-                        <SelectItem value="uk">United Kingdom</SelectItem>
-                        <SelectItem value="ch">Switzerland</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      onChange={(value) => handleFieldChange("issuerCountry", value)}
+                    />
                   </div>
                   <div>
-                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                    {/* <Label>
                       ID Type
                       <HelpCircle className="h-3 w-3 text-slate-400" />
                     </Label>
@@ -220,7 +216,14 @@ export default function PEPScreeningDashboard() {
                         <SelectItem value="drivers-license">{"Driver's License"}</SelectItem>
                         <SelectItem value="registration">Registration Number</SelectItem>
                       </SelectContent>
-                    </Select>
+                    </Select> */}
+                    <CustomSelect
+                      label="ID Type"
+                      isDisabled={!formData.issuerCountry}
+                      options={getCardTypesByCountryId(formData.issuerCountry?.id)}
+                      value={formData.idType}
+                      onChange={(value) => handleFieldChange("idType", value)}
+                    />
                   </div>
                 </div>
               </CollapsibleContent>
@@ -232,27 +235,33 @@ export default function PEPScreeningDashboard() {
         return (
           <>
             <div className="mb-4">
-              <Label className="text-sm text-slate-600 mb-1.5 block">Registered Country</Label>
-              <Select
+              {/* <Label className="text-sm text-slate-600 mb-1.5 block">Registered Country</Label>
+                <Select
+                  value={formData.registeredCountry}
+                  onValueChange={(value) => handleFieldChange("registeredCountry", value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="us">United States</SelectItem>
+                    <SelectItem value="uk">United Kingdom</SelectItem>
+                    <SelectItem value="ch">Switzerland</SelectItem>
+                    <SelectItem value="sg">Singapore</SelectItem>
+                    <SelectItem value="hk">Hong Kong</SelectItem>
+                    <SelectItem value="de">Germany</SelectItem>
+                    <SelectItem value="fr">France</SelectItem>
+                    <SelectItem value="ru">Russia</SelectItem>
+                    <SelectItem value="ir">Iran</SelectItem>
+                    <SelectItem value="kp">North Korea</SelectItem>
+                  </SelectContent>
+                </Select> */}
+              <CustomSelect
+                label="Registered Country/Jurisdiction"
+                options={countries}
                 value={formData.registeredCountry}
-                onValueChange={(value) => handleFieldChange("registeredCountry", value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="us">United States</SelectItem>
-                  <SelectItem value="uk">United Kingdom</SelectItem>
-                  <SelectItem value="ch">Switzerland</SelectItem>
-                  <SelectItem value="sg">Singapore</SelectItem>
-                  <SelectItem value="hk">Hong Kong</SelectItem>
-                  <SelectItem value="de">Germany</SelectItem>
-                  <SelectItem value="fr">France</SelectItem>
-                  <SelectItem value="ru">Russia</SelectItem>
-                  <SelectItem value="ir">Iran</SelectItem>
-                  <SelectItem value="kp">North Korea</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={(value) => handleFieldChange("registeredCountry", value)}
+              />
             </div>
             <Collapsible open={idSectionOpen} onOpenChange={setIdSectionOpen} className="mb-4">
               <CollapsibleTrigger className="flex items-center gap-2 w-full bg-primary/10 px-3 py-2 rounded text-sm font-medium text-primary hover:bg-primary/20 transition-colors">
@@ -266,7 +275,7 @@ export default function PEPScreeningDashboard() {
               <CollapsibleContent className="pt-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                    <Label>
                       Identification Number
                       <HelpCircle className="h-3 w-3 text-slate-400" />
                     </Label>
@@ -277,7 +286,7 @@ export default function PEPScreeningDashboard() {
                     />
                   </div>
                   <div>
-                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                    {/* <Label >
                       Country/Jurisdiction
                       <HelpCircle className="h-3 w-3 text-slate-400" />
                     </Label>
@@ -293,10 +302,16 @@ export default function PEPScreeningDashboard() {
                         <SelectItem value="uk">United Kingdom</SelectItem>
                         <SelectItem value="ch">Switzerland</SelectItem>
                       </SelectContent>
-                    </Select>
+                    </Select> */}
+                    <CustomSelect
+                      label="Issuer Country/Jurisdiction"
+                      options={countries}
+                      value={formData.issuerCountry}
+                      onChange={(value) => handleFieldChange("issuerCountry", value)}
+                    />
                   </div>
                   <div>
-                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                    {/* <Label>
                       ID Type
                       <HelpCircle className="h-3 w-3 text-slate-400" />
                     </Label>
@@ -313,7 +328,14 @@ export default function PEPScreeningDashboard() {
                         <SelectItem value="drivers-license">{"Driver's License"}</SelectItem>
                         <SelectItem value="registration">Registration Number</SelectItem>
                       </SelectContent>
-                    </Select>
+                    </Select> */}
+                    <CustomSelect
+                      label="ID Type"
+                      isDisabled={!formData.issuerCountry}
+                      options={getCardTypesByCountryId(formData.issuerCountry?.id)}
+                      value={formData.idType}
+                      onChange={(value) => handleFieldChange("idType", value)}
+                    />
                   </div>
                 </div>
               </CollapsibleContent>
@@ -324,7 +346,7 @@ export default function PEPScreeningDashboard() {
       case "vessel":
         return (
           <div className="mb-4">
-            <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+            <Label>
               IMO Number
               <HelpCircle className="h-3 w-3 text-slate-400" />
             </Label>
@@ -391,7 +413,13 @@ export default function PEPScreeningDashboard() {
           </div>
           <div className="mb-4">
             <div className="text-xs font-medium text-slate-500 mb-2">ENTITY TYPE</div>
-            <Select value={entityType} onValueChange={(value) => setEntityType(value)}>
+            <Select
+              value={entityType}
+              onValueChange={(value) => {
+                setFormData(initialFormData);
+                setEntityType(value);
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select entity type" />
               </SelectTrigger>
@@ -462,7 +490,7 @@ export default function PEPScreeningDashboard() {
 
           {/* Name Field */}
           <div className="mb-4">
-            <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+            <Label>
               Name <span className="text-red-500">*</span>
               <HelpCircle className="h-3 w-3 text-slate-400" />
             </Label>
@@ -492,7 +520,7 @@ export default function PEPScreeningDashboard() {
           {/* Case ID and Group Row */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+              <Label>
                 Case ID
                 <HelpCircle className="h-3 w-3 text-slate-400" />
               </Label>
@@ -503,7 +531,7 @@ export default function PEPScreeningDashboard() {
               />
             </div>
             <div>
-              <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+              <Label>
                 Group
                 <HelpCircle className="h-3 w-3 text-slate-400" />
               </Label>
@@ -534,7 +562,7 @@ export default function PEPScreeningDashboard() {
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-4">
               <div>
-                <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                <Label>
                   Choose Case
                   <HelpCircle className="h-3 w-3 text-slate-400" />
                 </Label>
