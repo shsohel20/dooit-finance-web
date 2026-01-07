@@ -288,159 +288,6 @@ const mockCases = [
   },
 ];
 
-const columns = [
-  {
-    header: "Case ID",
-    accessorKey: "uid",
-    cell: ({ row }) => (
-      <div>
-        <p className="font-mono">{row?.original?.uid}</p>
-      </div>
-    ),
-    size: 100,
-  },
-
-  {
-    header: "Linked Cases",
-    accessorKey: "linkedCases",
-    cell: ({ row }) => (
-      <div>
-        <p className="font-mono text-end">{row?.original?.linkedCases || 10}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Case Type",
-    accessorKey: "type",
-    cell: ({ row }) => (
-      <div>
-        <p className="">{row?.original?.caseType}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Case Rating",
-    accessorKey: "caseRating",
-    cell: ({ row }) => (
-      <StatusPill icon={<IconPennant />} variant={riskLevelVariants[row?.original?.riskLabel]}>
-        {row?.original?.riskLabel}
-      </StatusPill>
-    ),
-    size: 100,
-  },
-  {
-    header: "ID",
-    accessorKey: "caseId",
-    cell: ({ row }) => (
-      <div>
-        <p className="font-mono">{row?.original?.customer?._id}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Mandatory Actions",
-    accessorKey: "mandatoryActions",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-end">{row?.original?.mandatoryActions || 0}</p>
-      </div>
-    ),
-  },
-  {
-    header: "Unresolved",
-    accessorKey: "unresolved",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-end">{row?.original?.unresolved || 0}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Review Required",
-    accessorKey: "reviewRequired",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-end">{row?.original?.reviewRequired || 0}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Ongoing Screening",
-    accessorKey: "ongoingScreening",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-end">{row?.original?.ongoingScreening ? "Yes" : "No"}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Archived",
-    accessorKey: "archived",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-end">{row?.original?.archived ? "Yes" : "No"}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Assignee",
-    accessorKey: "assignee",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-end">{row?.original?.assignee || "N/A"}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Last Modified By",
-    accessorKey: "lastModifiedBy",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Last Modified Date - User",
-    accessorKey: "lastModifiedDateUser",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Last Modified Date - OGS",
-    accessorKey: "lastModifiedDateOGS",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
-      </div>
-    ),
-    size: 100,
-  },
-  {
-    header: "Created By",
-    accessorKey: "createdBy",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
-      </div>
-    ),
-    size: 100,
-  },
-];
-
 export function CaseManager() {
   const [selectedCases, setSelectedCases] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -504,6 +351,161 @@ export function CaseManager() {
   if (selectedCase) {
     return <CaseDetails caseData={selectedCase} onBack={() => setSelectedCase(null)} />;
   }
+  const columns = [
+    {
+      header: "Case ID",
+      accessorKey: "uid",
+      cell: ({ row }) => (
+        <div
+          className="cursor-pointer hover:underline"
+          onClick={() => handleCaseClick(row.original?.uid)}
+        >
+          <p className="font-mono">{row?.original?.uid}</p>
+        </div>
+      ),
+      size: 100,
+    },
+
+    {
+      header: "Linked Cases",
+      accessorKey: "linkedCases",
+      cell: ({ row }) => (
+        <div>
+          <p className="font-mono text-end">{row?.original?.linkedCases || 10}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Case Type",
+      accessorKey: "type",
+      cell: ({ row }) => (
+        <div>
+          <p className="">{row?.original?.caseType}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Case Rating",
+      accessorKey: "caseRating",
+      cell: ({ row }) => (
+        <StatusPill icon={<IconPennant />} variant={riskLevelVariants[row?.original?.riskLabel]}>
+          {row?.original?.riskLabel}
+        </StatusPill>
+      ),
+      size: 100,
+    },
+    {
+      header: "ID",
+      accessorKey: "caseId",
+      cell: ({ row }) => (
+        <div>
+          <p className="font-mono">{row?.original?.customer?._id}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Mandatory Actions",
+      accessorKey: "mandatoryActions",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.mandatoryActions || 0}</p>
+        </div>
+      ),
+    },
+    {
+      header: "Unresolved",
+      accessorKey: "unresolved",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.unresolved || 0}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Review Required",
+      accessorKey: "reviewRequired",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.reviewRequired || 0}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Ongoing Screening",
+      accessorKey: "ongoingScreening",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.ongoingScreening ? "Yes" : "No"}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Archived",
+      accessorKey: "archived",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.archived ? "Yes" : "No"}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Assignee",
+      accessorKey: "assignee",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.assignee || "N/A"}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Last Modified By",
+      accessorKey: "lastModifiedBy",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Last Modified Date - User",
+      accessorKey: "lastModifiedDateUser",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Last Modified Date - OGS",
+      accessorKey: "lastModifiedDateOGS",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      header: "Created By",
+      accessorKey: "createdBy",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+        </div>
+      ),
+      size: 100,
+    },
+  ];
 
   return (
     <div className="flex-1 flex flex-col  overflow-hidden">
