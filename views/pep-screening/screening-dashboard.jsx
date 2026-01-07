@@ -26,6 +26,7 @@ import {
   Settings,
   RefreshCw,
   Loader2,
+  MonitorCheck,
 } from "lucide-react";
 import { ScreeningResults } from "./screening-results";
 import { CaseManager } from "./case-manager";
@@ -33,7 +34,7 @@ import { CaseManager } from "./case-manager";
 const initialFormData = {
   name: "",
   caseId: "",
-  group: "Line2",
+  group: "",
   registeredCountry: "",
   identificationNumber: "",
   issuerCountry: "",
@@ -52,7 +53,6 @@ export default function PEPScreeningDashboard() {
   const [mode, setMode] = useState("single");
   const [entityType, setEntityType] = useState("organisation");
   const [worldCheckEnabled, setWorldCheckEnabled] = useState(true);
-  const [uboCheckEnabled, setUboCheckEnabled] = useState(false);
   const [ongoingScreeningEnabled, setOngoingScreeningEnabled] = useState(false);
   const [idSectionOpen, setIdSectionOpen] = useState(true);
   const [linkCaseSectionOpen, setLinkCaseSectionOpen] = useState(true);
@@ -63,14 +63,14 @@ export default function PEPScreeningDashboard() {
   const [savedMessage, setSavedMessage] = useState("");
 
   const entityTypes = [
-    { id: "individual", label: "INDIVIDUAL", icon: User },
-    { id: "organisation", label: "ORGANISATION", icon: Building2 },
-    { id: "vessel", label: "VESSEL", icon: Ship },
+    { id: "individual", value: "individual", label: "Individual", icon: User },
+    { id: "organisation", value: "organisation", label: "Organisation", icon: Building2 },
+    { id: "vessel", value: "vessel", label: "Vessel", icon: Ship },
   ];
 
   const navTabs = [
-    { id: "screening", label: "SCREENING" },
-    { id: "case-manager", label: "CASE MANAGER" },
+    { id: "screening", label: "Screening", icon: Search },
+    { id: "case-manager", label: "Case Manager", icon: MonitorCheck },
   ];
 
   const handleFieldChange = (field, value) => {
@@ -161,34 +161,164 @@ export default function PEPScreeningDashboard() {
                 </SelectContent>
               </Select>
             </div>
+            <Collapsible open={idSectionOpen} onOpenChange={setIdSectionOpen} className="mb-4">
+              <CollapsibleTrigger className="flex items-center gap-2 w-full bg-primary/10 px-3 py-2 rounded text-sm font-medium text-primary hover:bg-primary/20 transition-colors">
+                {idSectionOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+                IDENTIFICATION NUMBER
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                      Identification Number
+                      <HelpCircle className="h-3 w-3 text-slate-400" />
+                    </Label>
+                    <Input
+                      placeholder="Enter ID number"
+                      value={formData.identificationNumber}
+                      onChange={(e) => handleFieldChange("identificationNumber", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                      Country/Jurisdiction
+                      <HelpCircle className="h-3 w-3 text-slate-400" />
+                    </Label>
+                    <Select
+                      value={formData.issuerCountry}
+                      onValueChange={(value) => handleFieldChange("issuerCountry", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="us">United States</SelectItem>
+                        <SelectItem value="uk">United Kingdom</SelectItem>
+                        <SelectItem value="ch">Switzerland</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                      ID Type
+                      <HelpCircle className="h-3 w-3 text-slate-400" />
+                    </Label>
+                    <Select
+                      value={formData.idType}
+                      onValueChange={(value) => handleFieldChange("idType", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="passport">Passport</SelectItem>
+                        <SelectItem value="national-id">National ID</SelectItem>
+                        <SelectItem value="drivers-license">{"Driver's License"}</SelectItem>
+                        <SelectItem value="registration">Registration Number</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </>
         );
 
       case "organisation":
         return (
-          <div className="mb-4">
-            <Label className="text-sm text-slate-600 mb-1.5 block">Registered Country</Label>
-            <Select
-              value={formData.registeredCountry}
-              onValueChange={(value) => handleFieldChange("registeredCountry", value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select country" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="us">United States</SelectItem>
-                <SelectItem value="uk">United Kingdom</SelectItem>
-                <SelectItem value="ch">Switzerland</SelectItem>
-                <SelectItem value="sg">Singapore</SelectItem>
-                <SelectItem value="hk">Hong Kong</SelectItem>
-                <SelectItem value="de">Germany</SelectItem>
-                <SelectItem value="fr">France</SelectItem>
-                <SelectItem value="ru">Russia</SelectItem>
-                <SelectItem value="ir">Iran</SelectItem>
-                <SelectItem value="kp">North Korea</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <>
+            <div className="mb-4">
+              <Label className="text-sm text-slate-600 mb-1.5 block">Registered Country</Label>
+              <Select
+                value={formData.registeredCountry}
+                onValueChange={(value) => handleFieldChange("registeredCountry", value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="us">United States</SelectItem>
+                  <SelectItem value="uk">United Kingdom</SelectItem>
+                  <SelectItem value="ch">Switzerland</SelectItem>
+                  <SelectItem value="sg">Singapore</SelectItem>
+                  <SelectItem value="hk">Hong Kong</SelectItem>
+                  <SelectItem value="de">Germany</SelectItem>
+                  <SelectItem value="fr">France</SelectItem>
+                  <SelectItem value="ru">Russia</SelectItem>
+                  <SelectItem value="ir">Iran</SelectItem>
+                  <SelectItem value="kp">North Korea</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Collapsible open={idSectionOpen} onOpenChange={setIdSectionOpen} className="mb-4">
+              <CollapsibleTrigger className="flex items-center gap-2 w-full bg-primary/10 px-3 py-2 rounded text-sm font-medium text-primary hover:bg-primary/20 transition-colors">
+                {idSectionOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+                IDENTIFICATION NUMBER
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                      Identification Number
+                      <HelpCircle className="h-3 w-3 text-slate-400" />
+                    </Label>
+                    <Input
+                      placeholder="Enter ID number"
+                      value={formData.identificationNumber}
+                      onChange={(e) => handleFieldChange("identificationNumber", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                      Country/Jurisdiction
+                      <HelpCircle className="h-3 w-3 text-slate-400" />
+                    </Label>
+                    <Select
+                      value={formData.issuerCountry}
+                      onValueChange={(value) => handleFieldChange("issuerCountry", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="us">United States</SelectItem>
+                        <SelectItem value="uk">United Kingdom</SelectItem>
+                        <SelectItem value="ch">Switzerland</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
+                      ID Type
+                      <HelpCircle className="h-3 w-3 text-slate-400" />
+                    </Label>
+                    <Select
+                      value={formData.idType}
+                      onValueChange={(value) => handleFieldChange("idType", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="passport">Passport</SelectItem>
+                        <SelectItem value="national-id">National ID</SelectItem>
+                        <SelectItem value="drivers-license">{"Driver's License"}</SelectItem>
+                        <SelectItem value="registration">Registration Number</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </>
         );
 
       case "vessel":
@@ -225,7 +355,16 @@ export default function PEPScreeningDashboard() {
             <div className="text-xs font-medium text-slate-500 mb-2 flex items-center gap-1">
               MODE
             </div>
-            <div className="space-y-1">
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single">Single</SelectItem>
+                <SelectItem value="batch">Batch</SelectItem>
+              </SelectContent>
+            </Select>
+            {/* <div className="space-y-1">
               <button
                 onClick={() => setMode("single")}
                 className={cn(
@@ -248,29 +387,23 @@ export default function PEPScreeningDashboard() {
               >
                 Batch
               </button>
-            </div>
+            </div> */}
           </div>
-
-          {/* Entity Type Section */}
           <div className="mb-4">
             <div className="text-xs font-medium text-slate-500 mb-2">ENTITY TYPE</div>
-            <div className="space-y-1">
-              {entityTypes.map((type) => (
-                <button
-                  key={type.id}
-                  onClick={() => setEntityType(type.id)}
-                  className={cn(
-                    "w-full text-left px-3 py-2 rounded text-sm transition-colors flex items-center gap-2",
-                    entityType === type.id
-                      ? "bg-primary text-white"
-                      : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200",
-                  )}
-                >
-                  <type.icon className="h-4 w-4" />
-                  {type.label}
-                </button>
-              ))}
-            </div>
+            <Select value={entityType} onValueChange={(value) => setEntityType(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select entity type" />
+              </SelectTrigger>
+              <SelectContent>
+                {entityTypes.map((type) => (
+                  <SelectItem key={type.id} value={type.id} className={"capitalize"}>
+                    <type.icon className="h-4 w-4" />
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Check Types Section */}
@@ -283,7 +416,7 @@ export default function PEPScreeningDashboard() {
               <div className="flex items-center justify-between bg-white border border-slate-200 rounded px-3 py-2">
                 <div className="flex items-center gap-2 text-sm">
                   <Globe className="h-4 w-4 text-primary" />
-                  WORLD-CHECK
+                  Dooit Screening
                 </div>
                 <div className="flex items-center gap-2">
                   <button className="text-slate-400 hover:text-slate-600">
@@ -311,7 +444,7 @@ export default function PEPScreeningDashboard() {
             <div className="flex items-center justify-between bg-white border border-slate-200 rounded px-3 py-2">
               <div className="flex items-center gap-2 text-sm">
                 <RefreshCw className="h-4 w-4 text-slate-500" />
-                WORLD-CHECK
+                Dooit Screening
               </div>
               <Switch
                 checked={ongoingScreeningEnabled}
@@ -325,7 +458,7 @@ export default function PEPScreeningDashboard() {
       {/* Main Form Area */}
       <main className="flex-1 bg-white p-6 overflow-y-auto">
         <div className="max-w-3xl">
-          <h2 className="text-sm font-semibold text-slate-500 mb-4">SINGLE SCREENING</h2>
+          <h2 className="text-sm font-semibold text-slate-500 mb-4">SCREENING</h2>
 
           {/* Name Field */}
           <div className="mb-4">
@@ -349,7 +482,7 @@ export default function PEPScreeningDashboard() {
                       ? "Enter Vessel Name"
                       : "Enter Organisation Name"
                 }
-                className="pl-10 bg-primary/10 border-primary focus:ring-primary"
+                className="pl-10 "
                 value={formData.name}
                 onChange={(e) => handleFieldChange("name", e.target.value)}
               />
@@ -384,70 +517,6 @@ export default function PEPScreeningDashboard() {
           {renderEntitySpecificFields()}
 
           {/* Identification Number Section */}
-          <Collapsible open={idSectionOpen} onOpenChange={setIdSectionOpen} className="mb-4">
-            <CollapsibleTrigger className="flex items-center gap-2 w-full bg-primary/10 px-3 py-2 rounded text-sm font-medium text-primary hover:bg-primary/20 transition-colors">
-              {idSectionOpen ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-              IDENTIFICATION NUMBER
-            </CollapsibleTrigger>
-            <CollapsibleContent className="pt-4">
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
-                    Identification Number
-                    <HelpCircle className="h-3 w-3 text-slate-400" />
-                  </Label>
-                  <Input
-                    placeholder="Enter ID number"
-                    value={formData.identificationNumber}
-                    onChange={(e) => handleFieldChange("identificationNumber", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
-                    Issuer/Country
-                    <HelpCircle className="h-3 w-3 text-slate-400" />
-                  </Label>
-                  <Select
-                    value={formData.issuerCountry}
-                    onValueChange={(value) => handleFieldChange("issuerCountry", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="us">United States</SelectItem>
-                      <SelectItem value="uk">United Kingdom</SelectItem>
-                      <SelectItem value="ch">Switzerland</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-sm text-slate-600 flex items-center gap-1 mb-1.5">
-                    ID Type
-                    <HelpCircle className="h-3 w-3 text-slate-400" />
-                  </Label>
-                  <Select
-                    value={formData.idType}
-                    onValueChange={(value) => handleFieldChange("idType", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="passport">Passport</SelectItem>
-                      <SelectItem value="national-id">National ID</SelectItem>
-                      <SelectItem value="drivers-license">{"Driver's License"}</SelectItem>
-                      <SelectItem value="registration">Registration Number</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
 
           {/* Link to Primary Case Section */}
           <Collapsible
@@ -536,19 +605,20 @@ export default function PEPScreeningDashboard() {
 
   return (
     <div className="min-h-screen  flex flex-col">
-      <nav className=" px-4 py-0 flex items-center shrink-0 shadow-sm mb-4">
+      <nav className=" px-2 py-1 flex items-center shrink-0   bg-gray-100 rounded-md">
         {navTabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "px-4 py-3 text-sm font-medium transition-colors flex items-center gap-1",
+              "px-4 py-1.5 text-sm font-medium transition-colors flex items-center gap-1 rounded-md ",
               activeTab === tab.id
-                ? "text-primary border-b-2 border-primary"
+                ? "text-primary border shadow-sm bg-white"
                 : "text-slate-700 hover:text-primary hover:bg-white",
             )}
           >
-            {tab.label}
+            <tab.icon className="h-4 w-4" />
+            <span className="text-sm capitalize">{tab.label}</span>
             {tab.hasDropdown && <ChevronDown className="h-3 w-3" />}
           </button>
         ))}

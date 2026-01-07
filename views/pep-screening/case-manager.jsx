@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { cn, riskLevelVariants } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,8 +20,15 @@ import {
   User,
   MoreVertical,
   FolderOpen,
+  AlertTriangle,
 } from "lucide-react";
 import { CaseDetails } from "./case-details";
+import { DataTable } from "@/components/data-table";
+import ResizableTable from "@/components/ui/Resizabletable";
+import { getCustomers } from "@/app/dashboard/client/onboarding/customer-queue/actions";
+import { getCaseList } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { IconPennant } from "@tabler/icons-react";
 
 const mockCases = [
   {
@@ -281,11 +288,165 @@ const mockCases = [
   },
 ];
 
+const columns = [
+  {
+    header: "Case ID",
+    accessorKey: "uid",
+    cell: ({ row }) => (
+      <div>
+        <p className="font-mono">{row?.original?.uid}</p>
+      </div>
+    ),
+    size: 100,
+  },
+
+  {
+    header: "Linked Cases",
+    accessorKey: "linkedCases",
+    cell: ({ row }) => (
+      <div>
+        <p className="font-mono text-end">{row?.original?.linkedCases || 10}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Case Type",
+    accessorKey: "type",
+    cell: ({ row }) => (
+      <div>
+        <p className="">{row?.original?.caseType}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Case Rating",
+    accessorKey: "caseRating",
+    cell: ({ row }) => (
+      <StatusPill icon={<IconPennant />} variant={riskLevelVariants[row?.original?.riskLabel]}>
+        {row?.original?.riskLabel}
+      </StatusPill>
+    ),
+    size: 100,
+  },
+  {
+    header: "ID",
+    accessorKey: "caseId",
+    cell: ({ row }) => (
+      <div>
+        <p className="font-mono">{row?.original?.customer?._id}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Mandatory Actions",
+    accessorKey: "mandatoryActions",
+    cell: ({ row }) => (
+      <div>
+        <p className="text-end">{row?.original?.mandatoryActions || 0}</p>
+      </div>
+    ),
+  },
+  {
+    header: "Unresolved",
+    accessorKey: "unresolved",
+    cell: ({ row }) => (
+      <div>
+        <p className="text-end">{row?.original?.unresolved || 0}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Review Required",
+    accessorKey: "reviewRequired",
+    cell: ({ row }) => (
+      <div>
+        <p className="text-end">{row?.original?.reviewRequired || 0}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Ongoing Screening",
+    accessorKey: "ongoingScreening",
+    cell: ({ row }) => (
+      <div>
+        <p className="text-end">{row?.original?.ongoingScreening ? "Yes" : "No"}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Archived",
+    accessorKey: "archived",
+    cell: ({ row }) => (
+      <div>
+        <p className="text-end">{row?.original?.archived ? "Yes" : "No"}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Assignee",
+    accessorKey: "assignee",
+    cell: ({ row }) => (
+      <div>
+        <p className="text-end">{row?.original?.assignee || "N/A"}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Last Modified By",
+    accessorKey: "lastModifiedBy",
+    cell: ({ row }) => (
+      <div>
+        <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Last Modified Date - User",
+    accessorKey: "lastModifiedDateUser",
+    cell: ({ row }) => (
+      <div>
+        <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Last Modified Date - OGS",
+    accessorKey: "lastModifiedDateOGS",
+    cell: ({ row }) => (
+      <div>
+        <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+      </div>
+    ),
+    size: 100,
+  },
+  {
+    header: "Created By",
+    accessorKey: "createdBy",
+    cell: ({ row }) => (
+      <div>
+        <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+      </div>
+    ),
+    size: 100,
+  },
+];
+
 export function CaseManager() {
   const [selectedCases, setSelectedCases] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedCase, setSelectedCase] = useState(null);
-
+  const [cases, setCases] = useState([]);
+  const [fetching, setFetching] = useState(false);
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedCases([]);
@@ -307,6 +468,26 @@ export function CaseManager() {
     setSelectedCase(caseItem);
   };
 
+  const fetchCustomers = async () => {
+    setFetching(true);
+    const queryParams = {
+      page: 1,
+      limit: 10,
+    };
+    try {
+      const response = await getCaseList(queryParams);
+      console.log("customers", response.data);
+      setCases(response.data);
+    } catch (error) {
+      console.error("Failed to get customers", error);
+    } finally {
+      setFetching(false);
+    }
+  };
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
   const getRatingBadge = (rating) => {
     const colors = {
       High: "bg-red-600 text-white",
@@ -325,9 +506,9 @@ export function CaseManager() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 overflow-hidden">
+    <div className="flex-1 flex flex-col  overflow-hidden">
       {/* Case Manager Header */}
-      <div className="bg-white border-b border-slate-200 px-4 py-3">
+      {/* <div className="bg-white border-b border-slate-200 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FolderOpen className="h-5 w-5 text-slate-600" />
@@ -362,10 +543,10 @@ export function CaseManager() {
             </Button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Toolbar */}
-      <div className="bg-white border-b border-slate-200 px-4 py-2 flex items-center gap-3">
+      {/* <div className="bg-white border-b border-slate-200 px-4 py-2 flex items-center gap-3">
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <Filter className="h-4 w-4" />
         </Button>
@@ -382,11 +563,11 @@ export function CaseManager() {
             <DropdownMenuItem>Export as PDF</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </div> */}
 
       {/* Table */}
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-sm">
+        {/* <table className="w-full text-sm">
           <thead className="bg-slate-100 sticky top-0 z-10">
             <tr className="border-b border-slate-200">
               <th className="px-3 py-2 text-left w-10">
@@ -509,7 +690,14 @@ export function CaseManager() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table> */}
+        <ResizableTable
+          columns={columns}
+          data={cases}
+          // onDoubleClick={handleDoubleClick}
+          loading={fetching}
+          // actions={<Actions />}
+        />
       </div>
     </div>
   );

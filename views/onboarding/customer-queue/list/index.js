@@ -350,7 +350,6 @@ export default function CustomerQueueList({ data, kycStatus }) {
   const debouncedFetchRef = useRef(null);
 
 
-  console.log('customers', customers);
   const fetchData = useCallback(async (params = null) => {
     setFetching(true);
 
@@ -367,7 +366,6 @@ export default function CustomerQueueList({ data, kycStatus }) {
         queryParams[key] = value?.value;
       }
     }
-    console.log('queryParams', queryParams);
     const response = await getCustomers(queryParams);
     setFetching(false);
     setCustomers(response.data);
