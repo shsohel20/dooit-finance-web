@@ -239,12 +239,24 @@ export default function ClientSidebar({ ...props }) {
       url: "/dashboard/client/knowledge-hub/regulatory-links",
     },
   ];
-  const configurationMenuItems = [
+  const pepScreenigItems = [
     {
-      title: "PEP Screening",
+      title: "AML Screening",
       icon: IconListDetails,
-      url: "/dashboard/client/pep-screening",
+      url: "/dashboard/client/pep-and-adverse-media/aml-screening",
     },
+    {
+      title: "TEst",
+      icon: IconListDetails,
+      url: "/dashboard/client/pep-and-adverse-media/aml-screening/test",
+    },
+  ];
+  const configurationMenuItems = [
+    // {
+    //   title: "PEP Screening",
+    //   icon: IconListDetails,
+    //   url: "/dashboard/client/pep-screening",
+    // },
     // {
     //   title: "PEP Screening",
     //   icon: IconListDetails,
@@ -329,6 +341,7 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
+        <NavMain items={pepScreenigItems} label="PEP Screening" />
         <NavMain items={configurationMenuItems} label="Configuration" />
 
         {/* <NavDocuments items={data.documents} />

@@ -322,7 +322,7 @@ export function CaseManager() {
       limit: 10,
     };
     try {
-      const response = await getCaseList(queryParams);
+      const response = await getCustomers(queryParams);
       console.log("customers", response.data);
       setCases(response.data);
     } catch (error) {
@@ -351,6 +351,7 @@ export function CaseManager() {
   if (selectedCase) {
     return <CaseDetails caseData={selectedCase} onBack={() => setSelectedCase(null)} />;
   }
+  console.log("cases", cases);
   const columns = [
     {
       header: "Case ID",
@@ -360,7 +361,11 @@ export function CaseManager() {
           className="cursor-pointer hover:underline"
           onClick={() => handleCaseClick(row.original?.uid)}
         >
-          <p className="font-mono">{row?.original?.uid}</p>
+          <p className="">
+            {row?.original?.personalKyc?.personal_form?.customer_details?.given_name}{" "}
+            {row?.original?.personalKyc?.personal_form?.customer_details?.middle_name}{" "}
+            {row?.original?.personalKyc?.personal_form?.customer_details?.surname}
+          </p>
         </div>
       ),
       size: 100,
@@ -401,7 +406,7 @@ export function CaseManager() {
       accessorKey: "caseId",
       cell: ({ row }) => (
         <div>
-          <p className="font-mono">{row?.original?.customer?._id}</p>
+          <p className="font-mono">{row?.original?._id}</p>
         </div>
       ),
       size: 100,
@@ -508,7 +513,7 @@ export function CaseManager() {
   ];
 
   return (
-    <div className="flex-1 flex flex-col  overflow-hidden">
+    <div className="  overflow-hidden w-full">
       {/* Case Manager Header */}
       {/* <div className="bg-white border-b border-slate-200 px-4 py-3">
         <div className="flex items-center justify-between">
