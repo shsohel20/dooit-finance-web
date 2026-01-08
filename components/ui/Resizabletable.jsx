@@ -38,6 +38,7 @@ export default function ResizableTable({
   onRowClick,
   actions,
   tableId = '1111',
+
   tableConfig = {
     enableRowSelection: true,
     enableClickRowSelect: false,

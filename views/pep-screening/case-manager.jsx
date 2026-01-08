@@ -361,7 +361,7 @@ export function CaseManager() {
           className="cursor-pointer hover:underline"
           onClick={() => handleCaseClick(row.original?.uid)}
         >
-          <p className="">
+          <p className="capitalize font-bold">
             {row?.original?.personalKyc?.personal_form?.customer_details?.given_name}{" "}
             {row?.original?.personalKyc?.personal_form?.customer_details?.middle_name}{" "}
             {row?.original?.personalKyc?.personal_form?.customer_details?.surname}
@@ -406,7 +406,7 @@ export function CaseManager() {
       accessorKey: "caseId",
       cell: ({ row }) => (
         <div>
-          <p className="font-mono">{row?.original?._id}</p>
+          <p className="font-mono text-muted-foreground">{row?.original?._id}</p>
         </div>
       ),
       size: 100,
@@ -448,7 +448,6 @@ export function CaseManager() {
           <p className="text-end">{row?.original?.ongoingScreening ? "Yes" : "No"}</p>
         </div>
       ),
-      size: 100,
     },
     {
       header: "Archived",
@@ -458,7 +457,6 @@ export function CaseManager() {
           <p className="text-end">{row?.original?.archived ? "Yes" : "No"}</p>
         </div>
       ),
-      size: 100,
     },
     {
       header: "Assignee",
@@ -468,7 +466,6 @@ export function CaseManager() {
           <p className="text-end">{row?.original?.assignee || "N/A"}</p>
         </div>
       ),
-      size: 100,
     },
     {
       header: "Last Modified By",
@@ -478,7 +475,6 @@ export function CaseManager() {
           <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
         </div>
       ),
-      size: 100,
     },
     {
       header: "Last Modified Date - User",
@@ -488,7 +484,6 @@ export function CaseManager() {
           <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
         </div>
       ),
-      size: 100,
     },
     {
       header: "Last Modified Date - OGS",
@@ -498,7 +493,6 @@ export function CaseManager() {
           <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
         </div>
       ),
-      size: 100,
     },
     {
       header: "Created By",
@@ -508,12 +502,11 @@ export function CaseManager() {
           <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
         </div>
       ),
-      size: 100,
     },
   ];
 
   return (
-    <div className="  overflow-hidden w-full">
+    <div className="  ">
       {/* Case Manager Header */}
       {/* <div className="bg-white border-b border-slate-200 px-4 py-3">
         <div className="flex items-center justify-between">
@@ -701,7 +694,7 @@ export function CaseManager() {
         <ResizableTable
           columns={columns}
           data={cases}
-          tableId="pep-screening-case-manager"
+          // tableId="pep-screening-case-manager"
           // onDoubleClick={handleDoubleClick}
           loading={fetching}
           // actions={<Actions />}
