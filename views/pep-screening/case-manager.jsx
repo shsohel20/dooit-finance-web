@@ -288,7 +288,7 @@ const mockCases = [
   },
 ];
 
-export function CaseManager() {
+export function CaseManager({ formData = null }) {
   const [selectedCases, setSelectedCases] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedCase, setSelectedCase] = useState(null);
@@ -351,7 +351,6 @@ export function CaseManager() {
   if (selectedCase) {
     return <CaseDetails caseData={selectedCase} onBack={() => setSelectedCase(null)} />;
   }
-  console.log("cases", cases);
   const columns = [
     {
       header: "Case ID",
@@ -359,7 +358,7 @@ export function CaseManager() {
       cell: ({ row }) => (
         <div
           className="cursor-pointer hover:underline"
-          onClick={() => handleCaseClick(row.original?.uid)}
+          onClick={() => handleCaseClick(row.original)}
         >
           <p className="capitalize font-bold">
             {row?.original?.personalKyc?.personal_form?.customer_details?.given_name}{" "}
@@ -508,189 +507,9 @@ export function CaseManager() {
   return (
     <div className="  ">
       {/* Case Manager Header */}
-      {/* <div className="bg-white border-b border-slate-200 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FolderOpen className="h-5 w-5 text-slate-600" />
-            <span className="text-sm text-slate-500">CASE MANAGER</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1 text-slate-700">
-                  Default view <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>Default view</DropdownMenuItem>
-                <DropdownMenuItem>High Risk Cases</DropdownMenuItem>
-                <DropdownMenuItem>Unresolved Only</DropdownMenuItem>
-                <DropdownMenuItem>My Cases</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Search className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1 bg-transparent">
-              <Columns3 className="h-4 w-4" />
-              COLUMNS
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Toolbar */}
-      {/* <div className="bg-white border-b border-slate-200 px-4 py-2 flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Filter className="h-4 w-4" />
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-1">
-              <Download className="h-4 w-4" />
-              EXPORT <ChevronDown className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>Export as CSV</DropdownMenuItem>
-            <DropdownMenuItem>Export as Excel</DropdownMenuItem>
-            <DropdownMenuItem>Export as PDF</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div> */}
 
       {/* Table */}
       <div className="flex-1 overflow-auto">
-        {/* <table className="w-full text-sm">
-          <thead className="bg-slate-100 sticky top-0 z-10">
-            <tr className="border-b border-slate-200">
-              <th className="px-3 py-2 text-left w-10">
-                <Checkbox checked={selectAll} onCheckedChange={handleSelectAll} />
-              </th>
-              <th className="px-2 py-2 text-left w-10 text-slate-500 font-medium"></th>
-              <th className="px-2 py-2 text-left w-8"></th>
-              <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[140px]">
-                Case Name
-              </th>
-              <th className="px-3 py-2 text-center text-slate-600 font-medium w-20">
-                Linked
-                <br />
-                Cases
-              </th>
-              <th className="px-3 py-2 text-center text-slate-600 font-medium w-24">Case Rating</th>
-              <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[140px]">ID</th>
-              <th className="px-3 py-2 text-center text-slate-600 font-medium w-24">
-                Mandatory
-                <br />
-                Actions
-              </th>
-              <th className="px-1 py-2 text-center text-slate-500 font-medium text-xs" colSpan={2}>
-                World-Check - Summary
-              </th>
-              <th className="px-3 py-2 text-center text-slate-600 font-medium w-24">
-                Ongoing
-                <br />
-                Screening
-              </th>
-              <th className="px-3 py-2 text-center text-slate-600 font-medium w-20">Archived</th>
-              <th className="px-3 py-2 text-center text-slate-600 font-medium w-24">Assignee</th>
-              <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[130px]">
-                Last Modified By
-              </th>
-              <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[140px]">
-                Last Modified Date -<br />
-                User
-              </th>
-              <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[140px]">
-                Last Modified Date -<br />
-                OGS
-              </th>
-              <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[140px]">
-                Created By
-              </th>
-            </tr>
-            <tr className="border-b border-slate-200 bg-slate-50">
-              <th colSpan={8}></th>
-              <th className="px-2 py-1 text-center text-slate-500 font-medium text-xs bg-red-50">
-                Unresolved
-              </th>
-              <th className="px-2 py-1 text-center text-slate-500 font-medium text-xs">
-                Review
-                <br />
-                Required
-              </th>
-              <th colSpan={7}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {mockCases.map((caseItem, index) => (
-              <tr
-                key={caseItem.id}
-                className={cn(
-                  "border-b border-slate-100 hover:bg-slate-50 transition-colors",
-                  selectedCases.includes(caseItem.id) && "bg-blue-50",
-                )}
-              >
-                <td className="px-3 py-2">
-                  <Checkbox
-                    checked={selectedCases.includes(caseItem.id)}
-                    onCheckedChange={() => handleSelectCase(caseItem.id)}
-                  />
-                </td>
-                <td className="px-2 py-2 text-slate-500 text-xs">{index + 1}</td>
-                <td className="px-2 py-2">
-                  <User className="h-4 w-4 text-slate-400" />
-                </td>
-                <td
-                  className="px-3 py-2 font-medium text-blue-600 hover:underline cursor-pointer"
-                  onClick={() => handleCaseClick(caseItem)}
-                >
-                  {caseItem.caseName}
-                </td>
-                <td className="px-3 py-2 text-center text-slate-600">{caseItem.linkedCases}</td>
-                <td className="px-3 py-2 text-center">{getRatingBadge(caseItem.caseRating)}</td>
-                <td className="px-3 py-2 text-slate-600 font-mono text-xs">{caseItem.caseId}</td>
-                <td className="px-3 py-2 text-center text-slate-600">
-                  {caseItem.mandatoryActions}
-                </td>
-                <td className="px-2 py-2 text-center">
-                  <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs font-medium">
-                    {caseItem.unresolved}
-                  </span>
-                </td>
-                <td className="px-2 py-2 text-center text-slate-600">{caseItem.reviewRequired}</td>
-                <td className="px-3 py-2 text-center">
-                  <Checkbox checked={caseItem.ongoingScreening} disabled />
-                </td>
-                <td className="px-3 py-2 text-center">
-                  <Checkbox checked={caseItem.archived} disabled />
-                </td>
-                <td className="px-3 py-2 text-center">
-                  {caseItem.assignee ? (
-                    <span className="flex items-center justify-center gap-1">
-                      <User className="h-3 w-3" />
-                      {caseItem.assignee}
-                    </span>
-                  ) : (
-                    <span className="text-slate-300">-</span>
-                  )}
-                </td>
-                <td className="px-3 py-2 text-slate-600">{caseItem.lastModifiedBy}</td>
-                <td className="px-3 py-2 text-slate-500 text-xs">
-                  {caseItem.lastModifiedDateUser}
-                </td>
-                <td className="px-3 py-2 text-slate-500 text-xs">{caseItem.lastModifiedDateOGS}</td>
-                <td className="px-3 py-2 text-slate-600">{caseItem.createdBy}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table> */}
         <ResizableTable
           columns={columns}
           data={cases}

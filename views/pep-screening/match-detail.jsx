@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { AlertTriangle } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import LabelDetails from "@/components/LabelDetails";
 
 export function MatchDetail({
   matchData,
@@ -60,10 +61,10 @@ export function MatchDetail({
     gender: matchData.gender || "UNKNOWN",
     citizenship: matchData.citizenship,
   };
-
+  console.log("caseData", caseData);
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className={"sm:max-w-7xl w-full"}>
+      <SheetContent className={"sm:max-w-7xl w-full bg-white"}>
         <SheetHeader>
           <SheetTitle>Match Detail</SheetTitle>
         </SheetHeader>
@@ -71,7 +72,7 @@ export function MatchDetail({
           {/* Top Bar */}
 
           {/* Case Header */}
-          <div className="bg-white border-b border-slate-200 px-4 py-3">
+          {/* <div className="bg-white border-b border-slate-200 px-4 py-3">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <User className="h-5 w-5 text-slate-500" />
@@ -106,12 +107,12 @@ export function MatchDetail({
                 </span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Left Sidebar + Main Content Row */}
           <div className="flex-1 flex overflow-hidden">
             {/* Left Sidebar - Case Details */}
-            <div className="w-44  border-r border-slate-200 p-4 shrink-0">
+            {/* <div className="w-44  border-r border-slate-200 p-4 shrink-0">
               <h3 className="text-xs font-semibold text-slate-500 mb-3">CASE DETAILS</h3>
               <div className="space-y-3 text-sm">
                 <div>
@@ -137,12 +138,12 @@ export function MatchDetail({
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
               {/* Navigation Bar */}
-              <div className="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center gap-4">
+              {/* <div className=" border-b border-slate-200 px-4 py-2 flex items-center gap-4">
                 <Button
                   variant="outline"
                   size="sm"
@@ -173,7 +174,7 @@ export function MatchDetail({
                   </button>
                   <span className="text-sm text-slate-500">of {totalMatches}</span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Archived Warning Banner */}
               {caseData.archived && (
@@ -189,37 +190,20 @@ export function MatchDetail({
 
               {/* Match Detail Content */}
               <div className="flex-1 overflow-auto p-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className=" gap-4">
                   {/* Current Status */}
                   <div className="bg-white rounded-lg border border-slate-200 p-4">
                     <h3 className="text-xs font-semibold text-slate-500 mb-3 uppercase">
                       Current Status
                     </h3>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex">
-                        <span className="text-slate-500 w-32">Resolution Status</span>
-                        <span className="text-slate-800">Unresolved</span>
-                      </div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-32">Risk Level</span>
-                        <span className="text-slate-800">-</span>
-                      </div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-32">Reason</span>
-                        <span className="text-slate-800">-</span>
-                      </div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-32">Resolution Remark</span>
-                        <span className="text-slate-800">-</span>
-                      </div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-32">Review Comment</span>
-                        <span className="text-slate-800">-</span>
-                      </div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-32">Last Updated</span>
-                        <span className="text-slate-800">-</span>
-                      </div>
+                    <div className="flex text-sm justify-between">
+                      <LabelDetails label="Resolution Status" value="Unresolved" />
+                      {/* <div className="flex flex-col"> */}
+                      <LabelDetails label="Risk Level" value={caseData.riskLevel} />
+                      <LabelDetails label="Reason" value={caseData.reason} />
+                      <LabelDetails label="Resolution Remark" value={caseData.resolutionRemark} />
+                      <LabelDetails label="Review Comment" value={caseData.reviewComment} />
+                      <LabelDetails label="Last Updated" value={caseData.lastUpdated} />
                     </div>
                   </div>
 
@@ -240,7 +224,7 @@ export function MatchDetail({
 
                 {/* Comparison Data */}
                 <div className="mt-4 bg-white rounded-lg border border-slate-200 overflow-hidden">
-                  <div className="bg-slate-100 px-4 py-2 border-b border-slate-200">
+                  <div className=" px-4 py-2 border-b border-slate-200">
                     <h3 className="text-xs font-semibold text-slate-500 uppercase">
                       Comparison Data
                     </h3>
@@ -290,7 +274,7 @@ export function MatchDetail({
                         className={cn(
                           "px-3 py-1.5 text-xs font-medium rounded transition-colors",
                           activeDetailTab === tab.id
-                            ? "bg-blue-600 text-white"
+                            ? "bg-primary text-white"
                             : "text-slate-600 hover:bg-slate-200",
                         )}
                       >
@@ -299,79 +283,151 @@ export function MatchDetail({
                     ))}
                   </div>
 
-                  <div className="p-4">
-                    {/* Key Data Header */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-500 uppercase">
-                          KEY DATA
-                        </span>
-                        <span className="bg-orange-500 text-white text-xs px-2 py-0.5 rounded font-medium">
-                          PEP
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-slate-600">Show all Updated Dates</span>
-                        <Switch
-                          checked={showAllUpdatedDates}
-                          onCheckedChange={setShowAllUpdatedDates}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Key Data Table */}
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
-                      <div className="flex">
-                        <span className="text-slate-500 w-40">Name</span>
-                        <span className="text-slate-800">{keyData.name}</span>
-                      </div>
-                      <div></div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-40">Record Update</span>
-                        <div className="flex gap-8">
-                          <div>
-                            <span className="text-slate-500 text-xs">Update Categorization</span>
-                            <p className="text-blue-600 hover:underline cursor-pointer">
-                              {keyData.updateCategorization}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-slate-500 text-xs">Entered Date</span>
-                            <p className="text-slate-800">{keyData.enteredDate}</p>
-                          </div>
-                          <div>
-                            <span className="text-slate-500 text-xs">Updated Date</span>
-                            <p className="text-slate-800">{keyData.updatedDate}</p>
-                          </div>
+                  {activeDetailTab === "key-data" && (
+                    <div className="p-4">
+                      {/* Key Data Header */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-slate-500 uppercase">
+                            KEY DATA
+                          </span>
+                          <span className="bg-orange-500 text-white text-xs px-2 py-0.5 rounded font-medium">
+                            PEP
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-slate-600">Show all Updated Dates</span>
+                          <Switch
+                            checked={showAllUpdatedDates}
+                            onCheckedChange={setShowAllUpdatedDates}
+                          />
                         </div>
                       </div>
-                      <div></div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-40">Category</span>
-                        <span className="text-slate-800">{keyData.category}</span>
-                      </div>
-                      <div></div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-40">Sub-Category</span>
-                        <span className="text-slate-800">{keyData.subCategory}</span>
-                      </div>
-                      <div></div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-40">PEP Status</span>
-                        <span className="text-slate-800">{keyData.pepStatus}</span>
-                      </div>
-                      <div></div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-40">Gender</span>
-                        <span className="text-slate-800">{keyData.gender}</span>
-                      </div>
-                      <div></div>
-                      <div className="flex">
-                        <span className="text-slate-500 w-40">Citizenship</span>
-                        <span className="text-slate-800">{keyData.citizenship}</span>
+
+                      {/* Key Data Table */}
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                        <div className="flex">
+                          <LabelDetails label="Name" value={keyData.name} />
+                        </div>
+                        <div></div>
+                        <div className="flex">
+                          <span className="text-slate-500 w-40">Record Update</span>
+                          <div className="flex gap-8">
+                            <div>
+                              <LabelDetails
+                                label="Update Categorization"
+                                value={keyData.updateCategorization}
+                              />
+                            </div>
+                            <div>
+                              <LabelDetails label="Entered Date" value={keyData.enteredDate} />
+                            </div>
+                            <div>
+                              <LabelDetails label="Updated Date" value={keyData.updatedDate} />
+                            </div>
+                          </div>
+                        </div>
+                        <div></div>
+                        <div className="flex">
+                          <LabelDetails label="Category" value={keyData.category} />
+                        </div>
+                        <div></div>
+                        <div className="flex">
+                          <LabelDetails label="Sub-Category" value={keyData.subCategory} />
+                        </div>
+                        <div></div>
+                        <div className="flex">
+                          <LabelDetails label="PEP Status" value={keyData.pepStatus} />
+                        </div>
+                        <div></div>
+                        <div className="flex">
+                          <LabelDetails label="Gender" value={keyData.gender} />
+                        </div>
+                        <div></div>
+                        <div className="flex">
+                          <LabelDetails label="Citizenship" value={keyData.citizenship} />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+
+                  {activeDetailTab === "further-info" && (
+                    <div className="p-4">
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase">
+                        FURTHER INFORMATION
+                      </h3>
+
+                      <div className="py-4 flex flex-col gap-2">
+                        <LabelDetails label="Professional Title" value={"-"} />
+                        <LabelDetails label="Date of Birth" value={"19th NOV 1990"} />
+                        <LabelDetails label="Place of Birth" value={"Kabul, Afghanistan"} />
+                      </div>
+                    </div>
+                  )}
+                  {activeDetailTab === "aliases" && (
+                    <div className="p-4">
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase">ALIASES</h3>
+                      <div className="py-4 flex flex-col gap-2">
+                        <LabelDetails label="Alias" value={"AHMADI, Sitara"} />
+                        {/* <LabelDetails label="Alias" value={"AHMADI, Sitara"} /> */}
+                      </div>
+                    </div>
+                  )}
+                  {activeDetailTab === "keywords" && (
+                    <div className="p-4">
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase">KEYWORDS</h3>
+                      <div className="py-4 flex flex-col gap-2">
+                        <LabelDetails label="Keyword" value={"AHMADI, Sitara"} />
+                      </div>
+                    </div>
+                  )}
+                  {activeDetailTab === "pep-role" && (
+                    <div className="p-4">
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase">
+                        PEP ROLE DETAILS
+                      </h3>
+                      <div className="py-4 flex flex-col gap-2">
+                        <LabelDetails label="Is PEP" value={"Yes"} />
+                        <LabelDetails label="PEP Role" value={"President"} />
+                        <LabelDetails
+                          label="PEP Role Description"
+                          value={"President of the United States"}
+                        />
+                        <LabelDetails label="PEP Role Start Date" value={"01-Jan-2020"} />
+                        <LabelDetails label="PEP Role End Date" value={"01-Jan-2020"} />
+                        <LabelDetails label="PEP Role Status" value={"Active"} />
+                        <LabelDetails label="PEP Role Status Description" value={"Active"} />
+                        <LabelDetails label="PEP Role Status Start Date" value={"01-Jan-2020"} />
+                      </div>
+                    </div>
+                  )}
+                  {activeDetailTab === "connections" && (
+                    <div className="p-4">
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase">
+                        CONNECTIONS / RELATIONSHIPS
+                      </h3>
+                      <div className="py-4 flex flex-col gap-2">
+                        NO CONNECTIONS / RELATIONSHIPS FOUND
+                      </div>
+                    </div>
+                  )}
+                  {activeDetailTab === "sources" && (
+                    <div className="p-4">
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase">SOURCES</h3>
+                      <div className="py-4 flex flex-col gap-2">
+                        <a
+                          href="https://www.prothomalo.com/bangladesh/district/2ulbxsr9q2"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <LabelDetails
+                            label="Source"
+                            value={"https://www.prothomalo.com/bangladesh/district/2ulbxsr9q2"}
+                          />
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -245,11 +245,11 @@ export default function ClientSidebar({ ...props }) {
       icon: IconListDetails,
       url: "/dashboard/client/pep-and-adverse-media/aml-screening",
     },
-    {
-      title: "TEst",
-      icon: IconListDetails,
-      url: "/dashboard/client/pep-and-adverse-media/aml-screening/test",
-    },
+    // {
+    //   title: "TEst",
+    //   icon: IconListDetails,
+    //   url: "/dashboard/client/pep-and-adverse-media/aml-screening/test",
+    // },
   ];
   const configurationMenuItems = [
     // {

@@ -32,172 +32,265 @@ import { MatchDetail } from "./match-detail";
 const mockMatches = [
   {
     id: 1,
-    name: "- XIELAOSHILA",
-    matchedAlias: "WANG,Jun\nAlias",
-    matchStrength: 75,
-    matchStrengthColor: "orange",
+    name: "- SITARA AHMADI",
+    matchedAlias: "AHMADI, Sitara\nAlias",
+    matchStrength: 82,
+    matchStrengthColor: "red",
     types: [
-      { label: "LE", color: "bg-blue-500" },
-      { label: "SIC", color: "bg-orange-500" },
+      { label: "PEP", color: "bg-red-500" },
+      { label: "SAN", color: "bg-purple-500" },
     ],
-    gender: "Male",
-    dateOfBirth: "06-May-1991",
-    placeOfBirth: "China",
-    citizenship: "China",
-    countryLocation: "China",
-    category: "CRIME - ORGANIZED",
-    count: 4,
+    gender: "Female",
+    dateOfBirth: "14-Mar-1988",
+    placeOfBirth: "Kabul",
+    citizenship: "Afghanistan",
+    countryLocation: "Afghanistan",
+    category: "POLITICAL EXPOSURE",
+    count: 10,
   },
   {
     id: 2,
-    name: "Brigadier General Jun WANG",
-    matchedAlias: "",
-    matchStrength: 85,
+    name: "- AHMED KHAN",
+    matchedAlias: "KHAN, Ahmed\nAlias",
+    matchStrength: 45,
     matchStrengthColor: "green",
-    types: [{ label: "PEP", color: "bg-orange-500" }],
+    types: [{ label: "LE", color: "bg-blue-500" }],
     gender: "Male",
-    dateOfBirth: "",
-    placeOfBirth: "",
-    citizenship: "China",
-    countryLocation: "United States\nChina",
-    category: "DIPLOMAT",
-    count: 1,
+    dateOfBirth: "22-Aug-1990",
+    placeOfBirth: "Lahore",
+    citizenship: "Pakistan",
+    countryLocation: "Pakistan",
+    category: "LOW RISK",
+    count: 10,
   },
   {
     id: 3,
-    name: "Changli WANG",
-    matchedAlias: "WANG,Jun\nAlias",
-    matchStrength: 70,
-    matchStrengthColor: "green",
+    name: "- AHMADULLAH SAFI",
+    matchedAlias: "SAFI, Ahmadullah\nAlias",
+    matchStrength: 78,
+    matchStrengthColor: "orange",
     types: [
-      { label: "OB", color: "bg-blue-500" },
       { label: "SIC", color: "bg-orange-500" },
+      { label: "SAN", color: "bg-purple-500" },
     ],
     gender: "Male",
-    dateOfBirth: "03-Jul-1956",
-    placeOfBirth: "China",
-    citizenship: "China",
-    countryLocation: "China",
-    category: "CRIME - FINANCIAL",
-    count: 1,
+    dateOfBirth: "03-Jan-1985",
+    placeOfBirth: "Nangarhar",
+    citizenship: "Afghanistan",
+    countryLocation: "Afghanistan",
+    category: "SECURITY WATCHLIST",
+    count: 10,
   },
   {
     id: 4,
-    name: "Chuangguo WANG",
-    matchedAlias: "WANG,Jun\nAlias",
-    matchStrength: 68,
+    name: "- FAHIM RAHMAN",
+    matchedAlias: "RAHMAN, Fahim\nAlias",
+    matchStrength: 52,
     matchStrengthColor: "green",
-    types: [
-      { label: "OB", color: "bg-blue-500" },
-      { label: "SIC", color: "bg-orange-500" },
-    ],
+    types: [{ label: "LE", color: "bg-blue-500" }],
     gender: "Male",
-    dateOfBirth: "14-Feb-1971",
-    placeOfBirth: "China",
-    citizenship: "China",
-    countryLocation: "China",
-    category: "CRIME - FINANCIAL",
-    count: 5,
+    dateOfBirth: "11-Nov-1993",
+    placeOfBirth: "Dhaka",
+    citizenship: "Bangladesh",
+    countryLocation: "Bangladesh",
+    category: "LOW RISK",
+    count: 10,
   },
   {
     id: 5,
-    name: "Dr Jun WANG",
-    matchedAlias: "",
-    matchStrength: 80,
-    matchStrengthColor: "green",
-    types: [{ label: "PEP", color: "bg-orange-500" }],
-    gender: "Male",
-    dateOfBirth: "Nov-1971",
-    placeOfBirth: "",
-    citizenship: "China",
-    countryLocation: "China",
-    category: "INDIVIDUAL",
-    count: 3,
+    name: "- OLIVIA HARRIS",
+    matchedAlias: "HARRIS, Olivia\nAlias",
+    matchStrength: 63,
+    matchStrengthColor: "orange",
+    types: [{ label: "SIC", color: "bg-orange-500" }],
+    gender: "Female",
+    dateOfBirth: "29-Jun-1987",
+    placeOfBirth: "Manchester",
+    citizenship: "United Kingdom",
+    countryLocation: "United Kingdom",
+    category: "FINANCIAL MONITORING",
+    count: 10,
   },
   {
     id: 6,
-    name: "Dr Jun WANG",
-    matchedAlias: "",
-    matchStrength: 82,
-    matchStrengthColor: "green",
-    types: [{ label: "PEP", color: "bg-orange-500" }],
+    name: "- JAVID NOORI",
+    matchedAlias: "NOORI, Javid\nAlias",
+    matchStrength: 88,
+    matchStrengthColor: "red",
+    types: [
+      { label: "PEP", color: "bg-red-500" },
+      { label: "SAN", color: "bg-purple-500" },
+    ],
     gender: "Male",
-    dateOfBirth: "Mar-1971",
-    placeOfBirth: "",
-    citizenship: "China",
-    countryLocation: "China",
-    category: "POLITICAL INDIVIDUAL",
-    count: 2,
+    dateOfBirth: "17-Feb-1982",
+    placeOfBirth: "Herat",
+    citizenship: "Afghanistan",
+    countryLocation: "Afghanistan",
+    category: "HIGH RISK - SANCTIONS",
+    count: 10,
   },
   {
     id: 7,
-    name: "Dr Jun WANG",
-    matchedAlias: "",
-    matchStrength: 78,
+    name: "- HASAN MAHMUD",
+    matchedAlias: "MAHMUD, Hasan\nAlias",
+    matchStrength: 48,
     matchStrengthColor: "green",
-    types: [
-      { label: "PEP", color: "bg-orange-500" },
-      { label: "SIC", color: "bg-orange-500" },
-    ],
+    types: [{ label: "LE", color: "bg-blue-500" }],
     gender: "Male",
-    dateOfBirth: "Apr-1970",
-    placeOfBirth: "",
-    citizenship: "China",
-    countryLocation: "China",
-    category: "CRIME - FINANCIAL",
-    count: 1,
+    dateOfBirth: "09-Sep-1991",
+    placeOfBirth: "Chittagong",
+    citizenship: "Bangladesh",
+    countryLocation: "Bangladesh",
+    category: "LOW RISK",
+    count: 10,
   },
   {
     id: 8,
-    name: "Dr Jun WANG",
-    matchedAlias: "",
-    matchStrength: 83,
+    name: "- MIA HOFFMANN",
+    matchedAlias: "HOFFMANN, Mia\nAlias",
+    matchStrength: 57,
     matchStrengthColor: "green",
-    types: [{ label: "PEP", color: "bg-orange-500" }],
-    gender: "Male",
-    dateOfBirth: "15-Feb-1971",
-    placeOfBirth: "",
-    citizenship: "China",
-    countryLocation: "Hong Kong\nUnited Kingdom\nChina",
-    category: "INDIVIDUAL",
-    count: 3,
+    types: [{ label: "SIC", color: "bg-orange-500" }],
+    gender: "Female",
+    dateOfBirth: "18-Apr-1989",
+    placeOfBirth: "Hamburg",
+    citizenship: "Germany",
+    countryLocation: "Germany",
+    category: "INDIRECT WATCHLIST",
+    count: 10,
   },
   {
     id: 9,
-    name: "Dr Jun WANG",
-    matchedAlias: "",
-    matchStrength: 79,
-    matchStrengthColor: "green",
-    types: [{ label: "PEP", color: "bg-orange-500" }],
+    name: "- JOHN CARTER",
+    matchedAlias: "CARTER, John\nAlias",
+    matchStrength: 62,
+    matchStrengthColor: "orange",
+    types: [{ label: "SIC", color: "bg-orange-500" }],
     gender: "Male",
-    dateOfBirth: "Nov-1958",
-    placeOfBirth: "",
-    citizenship: "China",
-    countryLocation: "China",
-    category: "INDIVIDUAL",
-    count: 7,
+    dateOfBirth: "25-Dec-1984",
+    placeOfBirth: "Texas",
+    citizenship: "United States",
+    countryLocation: "United States",
+    category: "FINANCIAL MONITORING",
+    count: 10,
   },
   {
     id: 10,
-    name: "Dr Jun WANG",
-    matchedAlias: "",
-    matchStrength: 81,
+    name: "- GRACE WALKER",
+    matchedAlias: "WALKER, Grace\nAlias",
+    matchStrength: 41,
     matchStrengthColor: "green",
-    types: [{ label: "PEP", color: "bg-orange-500" }],
+    types: [{ label: "LE", color: "bg-blue-500" }],
+    gender: "Female",
+    dateOfBirth: "03-Mar-1995",
+    placeOfBirth: "Sydney",
+    citizenship: "Australia",
+    countryLocation: "Australia",
+    category: "LOW RISK",
+    count: 10,
+  },
+  {
+    id: 11,
+    name: "- FAHIM RAHMAN",
+    matchedAlias: "RAHMAN, Fahim\nAlias",
+    matchStrength: 69,
+    matchStrengthColor: "orange",
+    types: [
+      { label: "SIC", color: "bg-orange-500" },
+      { label: "LE", color: "bg-blue-500" },
+    ],
     gender: "Male",
-    dateOfBirth: "May-1976",
-    placeOfBirth: "",
-    citizenship: "China",
-    countryLocation: "China",
-    category: "POLITICAL INDIVIDUAL",
-    count: 6,
+    dateOfBirth: "30-Jan-1986",
+    placeOfBirth: "Sylhet",
+    citizenship: "Bangladesh",
+    countryLocation: "Bangladesh",
+    category: "ENHANCED DUE DILIGENCE",
+    count: 10,
+  },
+  {
+    id: 12,
+    name: "- AHMAD KHAN",
+    matchedAlias: "KHAN, Ahmad\nAlias",
+    matchStrength: 76,
+    matchStrengthColor: "orange",
+    types: [{ label: "SAN", color: "bg-purple-500" }],
+    gender: "Male",
+    dateOfBirth: "12-Jul-1980",
+    placeOfBirth: "Peshawar",
+    citizenship: "Pakistan",
+    countryLocation: "Pakistan",
+    category: "SANCTIONS WATCH",
+    count: 10,
+  },
+  {
+    id: 13,
+    name: "- SITARA AHMADI",
+    matchedAlias: "AHMADI, Sitara Z.\nAlias",
+    matchStrength: 90,
+    matchStrengthColor: "red",
+    types: [{ label: "PEP", color: "bg-red-500" }],
+    gender: "Female",
+    dateOfBirth: "05-May-1979",
+    placeOfBirth: "Bamyan",
+    citizenship: "Afghanistan",
+    countryLocation: "Afghanistan",
+    category: "HIGH RISK - PEP",
+    count: 10,
+  },
+  {
+    id: 14,
+    name: "- OLIVIA HARRIS",
+    matchedAlias: "HARRIS, Olivia Ann\nAlias",
+    matchStrength: 54,
+    matchStrengthColor: "green",
+    types: [{ label: "LE", color: "bg-blue-500" }],
+    gender: "Female",
+    dateOfBirth: "14-Feb-1992",
+    placeOfBirth: "Leeds",
+    citizenship: "United Kingdom",
+    countryLocation: "United Kingdom",
+    category: "LOW RISK",
+    count: 10,
+  },
+  {
+    id: 15,
+    name: "- JAVID NOORI",
+    matchedAlias: "NOORI, Javid A.\nAlias",
+    matchStrength: 81,
+    matchStrengthColor: "red",
+    types: [
+      { label: "SAN", color: "bg-purple-500" },
+      { label: "SIC", color: "bg-orange-500" },
+    ],
+    gender: "Male",
+    dateOfBirth: "01-Oct-1983",
+    placeOfBirth: "Kandahar",
+    citizenship: "Afghanistan",
+    countryLocation: "Afghanistan",
+    category: "SANCTIONS ENFORCEMENT",
+    count: 10,
+  },
+  {
+    id: 16,
+    name: "- AHMADULLAH SAFI",
+    matchedAlias: "SAFI, A.\nAlias",
+    matchStrength: 67,
+    matchStrengthColor: "orange",
+    types: [{ label: "SIC", color: "bg-orange-500" }],
+    gender: "Male",
+    dateOfBirth: "19-Jun-1987",
+    placeOfBirth: "Kunar",
+    citizenship: "Afghanistan",
+    countryLocation: "Afghanistan",
+    category: "WATCHLIST - REGIONAL",
+    count: 10,
   },
 ];
 
 const mockLinkedCases = [
   {
     id: 1,
-    caseName: "JUN WANG",
+    caseName: "Sitara Ahmadi",
     relationship: "",
     caseId: "CXP2300243",
     mandatoryActions: 348,
@@ -263,7 +356,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
   const renderLinkedCasesTab = () => (
     <div className="flex-1 flex overflow-hidden">
       {/* Left Sidebar - Case Details */}
-      <div className="w-48 bg-slate-100 border-r border-slate-200 p-4 shrink-0">
+      <div className="w-48  border-r border-slate-200 p-4 shrink-0">
         <h3 className="text-xs font-semibold text-slate-500 mb-3">CASE DETAILS</h3>
         <div className="space-y-3 text-sm">
           <div>
@@ -292,7 +385,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Toolbar */}
-        <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 flex items-center justify-between">
+        <div className=" border-b border-slate-200 px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" className="h-8 text-slate-600">
               <Filter className="h-4 w-4" />
@@ -340,7 +433,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         {/* Linked Cases Table */}
         <div className="flex-1 overflow-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-100 sticky top-0 z-10">
+            <thead className=" sticky top-0 z-10">
               <tr className="border-b border-slate-200">
                 <th className="px-3 py-2 text-left w-10">
                   <Checkbox />
@@ -376,7 +469,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
                   Last Modified Date - OGS
                 </th>
               </tr>
-              <tr className="border-b border-slate-200 bg-slate-50">
+              <tr className="border-b border-slate-200 ">
                 <th className="px-3 py-1"></th>
                 <th className="px-3 py-1"></th>
                 <th className="px-3 py-1"></th>
@@ -401,7 +494,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
               {mockLinkedCases.map((linkedCase) => (
                 <tr
                   key={linkedCase.id}
-                  className="border-b border-slate-100 hover:bg-slate-50 transition-colors bg-blue-50"
+                  className="border-b border-slate-100 hover: transition-colors "
                 >
                   <td className="px-3 py-2">
                     <span className="text-slate-500">{linkedCase.id}</span>
@@ -447,7 +540,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
   const renderWorldCheckTab = () => (
     <div className="flex-1 flex overflow-hidden">
       {/* Left Sidebar - Case Details */}
-      <div className="w-48 bg-slate-100 border-r border-slate-200 p-4 shrink-0">
+      {/* <div className="w-48  border-r border-slate-200 p-4 shrink-0">
         <h3 className="text-xs font-semibold text-slate-500 mb-3">CASE DETAILS</h3>
         <div className="space-y-3 text-sm">
           <div>
@@ -471,18 +564,18 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Results Table */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 text-sm text-slate-600">
+        {/* <div className="px-4 py-2  border-b border-slate-200 text-sm text-slate-600">
           Showing <strong>348</strong> of <strong>1140</strong> matches for{" "}
           <strong className="text-blue-600">{caseData.caseName}</strong>
-        </div>
+        </div> */}
 
         <div className="flex-1 overflow-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-100 sticky top-0 z-10">
+            <thead className=" sticky top-0 z-10">
               <tr className="border-b border-slate-200">
                 <th className="px-3 py-2 text-left w-10">
                   <Checkbox />
@@ -519,7 +612,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
                 <tr
                   key={match.id}
                   className={cn(
-                    "border-b border-slate-100 hover:bg-slate-50 transition-colors",
+                    "border-b border-slate-100 hover: transition-colors",
                     selectedMatches.includes(match.id) && "bg-blue-50",
                   )}
                 >
@@ -530,7 +623,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
                     />
                   </td>
                   <td
-                    className="px-3 py-2 text-blue-600 hover:underline cursor-pointer font-medium"
+                    className="px-3 py-2  hover:underline cursor-pointer font-medium"
                     onClick={() => handleMatchClick(index)}
                   >
                     {match.name}
@@ -596,7 +689,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <User className="h-5 w-5 text-slate-500" />
           <span className="font-semibold text-slate-800">{caseData.caseName}</span>
         </div>
@@ -623,18 +716,18 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-500">Ongoing Screening</span>
           <span className="text-sm text-slate-700">{caseData.ongoingScreening ? "Yes" : "No"}</span>
-        </div>
+        </div> */}
       </div>
 
       {/* Tabs */}
-      <div className="bg-white border-b border-slate-200 px-4 flex items-center gap-1">
+      <div className="bg-white py-2  flex items-center gap-1">
         {/* <button
           onClick={() => setActiveTab("summary")}
           className={cn(
             "px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors",
             activeTab === "summary"
               ? "border-blue-600 text-blue-600 bg-blue-50"
-              : "border-transparent text-slate-600 hover:text-slate-800 hover:bg-slate-50",
+              : "border-transparent text-slate-600 hover:text-slate-800 hover:",
           )}
         >
           <FileText className="h-4 w-4" />
@@ -643,23 +736,23 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         <button
           onClick={() => setActiveTab("world-check")}
           className={cn(
-            "px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors",
+            "px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors rounded-md",
             activeTab === "world-check"
-              ? "border-blue-600 text-blue-600 bg-blue-50"
-              : "border-transparent text-slate-600 hover:text-slate-800 hover:bg-slate-50",
+              ? "bg-primary text-white"
+              : "border-transparent text-slate-600 hover:text-slate-800 hover:",
           )}
         >
           <Globe className="h-4 w-4" />
-          WORLD-CHECK
-          <span className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">348</span>
+          Dooit CHECK
+          <span className="bg-accent text-white text-xs px-1.5 py-0.5 rounded">348</span>
         </button>
         <button
           onClick={() => setActiveTab("linked-cases")}
           className={cn(
-            "px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors",
+            "px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors rounded-md",
             activeTab === "linked-cases"
-              ? "border-blue-600 text-blue-600 bg-blue-50"
-              : "border-transparent text-slate-600 hover:text-slate-800 hover:bg-slate-50",
+              ? "bg-primary text-white"
+              : "border-transparent text-slate-600 hover:text-slate-800 hover:",
           )}
         >
           <Link2 className="h-4 w-4" />

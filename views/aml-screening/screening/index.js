@@ -62,16 +62,16 @@ export default function AMLSearchScreeningForm() {
   ];
   return (
     <div className="min-h-screen   px-4  bg-white">
-      <div className="flex  gap-4 ">
+      <div className="  gap-4 ">
         {/* sidebar */}
-        <div className="col-span-1 p-2 rounded-md shadow h-40 border w-[250px] flex-shrink-0">
+        <div className=" p-2 rounded-md shadow  border   flex mb-4">
           {/* <h2 className="text-sm text-muted-foreground mb-3  tracking-wider">Settings</h2> */}
           {tabs.map((tab) => (
             <button
               key={tab.name}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all w-full",
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ",
                 {
                   "bg-primary/10 text-primary": activeTab === tab.id,
                 },
@@ -82,9 +82,9 @@ export default function AMLSearchScreeningForm() {
             </button>
           ))}
         </div>
-        <div className="flex-1 w-full   space-y-6 ">
+        <div className=" w-full   space-y-6 ">
           {activeTab === "screening" && (
-            <div className="max-w-3xl space-y-4">
+            <div className="max-w-3xl mx-auto space-y-4">
               <div className="flex ">
                 <div className="inline-flex p-1 rounded-md bg-muted/80 border border-border w-full">
                   <button
@@ -132,7 +132,7 @@ export default function AMLSearchScreeningForm() {
               </div>
 
               <div className="flex items-center gap-3 max-w-2xl">
-                <Button className="flex-1  ">
+                <Button className="flex-1  " onClick={() => setActiveTab("case-manager")}>
                   <Search className="w-4 h-4 mr-2" />
                   Run Screening
                 </Button>
@@ -147,7 +147,7 @@ export default function AMLSearchScreeningForm() {
           )}
           {activeTab === "case-manager" && (
             <div className="w-full border rounded-md p-4 shadow overflow-hidden">
-              <CaseManager />
+              <CaseManager formData={formData} />
             </div>
           )}
         </div>
