@@ -25,6 +25,9 @@ import React, { useState, useEffect } from "react";
 import { getCaseList } from "./actions";
 import ResizableTable from "@/components/ui/Resizabletable";
 import { ArrowRight } from "lucide-react";
+const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
+  ssr: false,
+});
 import { formatDateTime } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -36,6 +39,7 @@ import CustomPagination from "@/components/CustomPagination";
 import { useAlertStore } from "@/app/store/useAlertStore";
 
 import { CaseRequestForm } from "@/views/monitoring-and-cases/case-details/ecdd/RFIForm";
+import dynamic from "next/dynamic";
 
 const ListView = ({}) => {
   const { alerts, fetching, totalItems, currentPage, limit, setCurrentPage, setLimit } =
@@ -223,14 +227,15 @@ const ListView = ({}) => {
     setCurrentPage(1);
   };
   return (
-    <div>
-      <ResizableTable data={alerts} columns={columns} loading={fetching} />
+    <div className="mt-4">
+      <CustomResizableTable data={alerts} columns={columns} loading={fetching} />
       <CustomPagination
         currentPage={currentPage}
         onPageChange={handlePageChange}
         totalItems={totalItems}
         limit={limit}
         onChangeLimit={handleLimitChange}
+        mainClass="custom-alert-resizable-table"
       />
       {openRfi && (
         <CaseRequestForm

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -9,6 +9,7 @@ import {
   TableRow,
 } from './table';
 import { cn } from '@/lib/utils';
+import { Skeleton } from './skeleton';
 
 const CustomResizableTable = ({
   className,
@@ -17,8 +18,10 @@ const CustomResizableTable = ({
   columns,
   data,
   loading,
+  onDoubleClick,
   ...props
 }) => {
+  const [highlightedId, setHighlightedId] = useState(null);
   const tables = document.getElementsByClassName(mainClass);
   const resizableGrid = (table) => {
     if (!table) return;
@@ -120,6 +123,16 @@ const CustomResizableTable = ({
   };
 
   useEffect(() => {
+    const newId = localStorage.getItem('newId');
+    if (newId) {
+      setHighlightedId(newId);
+      localStorage.removeItem('newId'); // cleanup
+
+      // remove highlight after few seconds
+      setTimeout(() => setHighlightedId(null), 10000);
+    }
+  }, []);
+  useEffect(() => {
     if (tables.length === 0) return;
     for (let i = 0; i < tables.length; i++) {
       resizableGrid(tables[i]);
@@ -127,7 +140,7 @@ const CustomResizableTable = ({
   }, [tableId]);
 
   return (
-    <div>
+    <div className="mt-4">
       <Table
         id={tableId}
         className={cn(mainClass, className, 'w-full  border ')}
@@ -135,9 +148,9 @@ const CustomResizableTable = ({
       >
         <TableHeader>
           <TableRow>
-            {columns.map((column) => (
+            {columns.map((column, colIndex) => (
               <TableHead
-                key={column.id}
+                key={column.id || column.accessorKey || colIndex}
                 className={'font-bold bg-primary/10 text-primary'}
               >
                 {typeof column.header === 'function'
@@ -147,35 +160,63 @@ const CustomResizableTable = ({
             ))}
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {data?.length > 0 ? (
-            data?.map((row, index) => {
-              return (
-                <TableRow key={row.id || index}>
-                  {columns.map((column) => {
+        {loading ? (
+          <>
+            <TableBody>
+              {Array.from({ length: 10 }).map((_, index) => (
+                <TableRow key={`skeleton-row-${index}`} className="">
+                  {columns.map((header) => {
                     return (
-                      <TableCell key={column.id}>
-                        {column.cell
-                          ? column.cell({
-                              row: {
-                                original: row,
-                              },
-                            })
-                          : row[column.accessorKey]}
+                      <TableCell
+                        key={header.id}
+                        className={' border-r   first:border-l  font-bold  '}
+                      >
+                        <Skeleton className="w-full h-10 animate-pulse" />
                       </TableCell>
                     );
                   })}
                 </TableRow>
-              );
-            })
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
-                No data found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
+              ))}
+            </TableBody>
+          </>
+        ) : (
+          <TableBody>
+            {data?.length > 0 ? (
+              data?.map((row, index) => {
+                return (
+                  <TableRow
+                    onDoubleClick={() => onDoubleClick(row)}
+                    key={row.id || index}
+                    data-highlighted={highlightedId === row?.original?.id}
+                    className={cn(' hover:bg-neutral-100  font-medium ', {
+                      'bg-blue-50 ': highlightedId === row?.original?.id,
+                    })}
+                  >
+                    {columns.map((column) => {
+                      return (
+                        <TableCell key={column.id}>
+                          {column.cell
+                            ? column.cell({
+                                row: {
+                                  original: row,
+                                },
+                              })
+                            : row[column.accessorKey]}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  No data found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        )}
       </Table>
     </div>
   );

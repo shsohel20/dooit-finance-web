@@ -15,7 +15,7 @@ export default function ClientLayout({ children }) {
         <SiteHeader />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2 bg-sidebar-bg ">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-8 px-8 bg-white rounded-xl  mx-4 shadow-xl">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-8 px-8 bg-white rounded-xl  mr-4 shadow-xl">
               {children}
             </div>
           </div>

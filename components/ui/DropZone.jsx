@@ -18,7 +18,6 @@ const CustomDropZone = ({
   handleChange = () => {},
   ...props
 }) => {
-  console.log('dropzone file', file?.name);
   const renderIcon = () => {
     if (loading === true) {
       return <Loader2 className="w-4 h-4 animate-spin" />;

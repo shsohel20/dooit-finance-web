@@ -2,33 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { cn, riskLevelVariants } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Filter,
-  Download,
-  Search,
-  RefreshCw,
-  Columns3,
-  ChevronDown,
-  User,
-  MoreVertical,
-  FolderOpen,
-  AlertTriangle,
-} from "lucide-react";
 import { CaseDetails } from "./case-details";
-import { DataTable } from "@/components/data-table";
 import ResizableTable from "@/components/ui/Resizabletable";
 import { getCustomers } from "@/app/dashboard/client/onboarding/customer-queue/actions";
-import { getCaseList } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
+
 import { StatusPill } from "@/components/ui/StatusPill";
 import { IconPennant } from "@tabler/icons-react";
+import dynamic from "next/dynamic";
+const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
+  ssr: false,
+});
 
 const mockCases = [
   {
@@ -353,6 +336,7 @@ export function CaseManager({ formData = null }) {
   }
   const columns = [
     {
+      id: "caseId",
       header: "Case ID",
       accessorKey: "uid",
       cell: ({ row }) => (
@@ -371,6 +355,7 @@ export function CaseManager({ formData = null }) {
     },
 
     {
+      id: "linkedCases",
       header: "Linked Cases",
       accessorKey: "linkedCases",
       cell: ({ row }) => (
@@ -381,6 +366,7 @@ export function CaseManager({ formData = null }) {
       size: 100,
     },
     {
+      id: "type",
       header: "Case Type",
       accessorKey: "type",
       cell: ({ row }) => (
@@ -391,6 +377,7 @@ export function CaseManager({ formData = null }) {
       size: 100,
     },
     {
+      id: "caseRating",
       header: "Case Rating",
       accessorKey: "caseRating",
       cell: ({ row }) => (
@@ -401,6 +388,7 @@ export function CaseManager({ formData = null }) {
       size: 100,
     },
     {
+      id: "id",
       header: "ID",
       accessorKey: "caseId",
       cell: ({ row }) => (
@@ -411,6 +399,7 @@ export function CaseManager({ formData = null }) {
       size: 100,
     },
     {
+      id: "mandatoryActions",
       header: "Mandatory Actions",
       accessorKey: "mandatoryActions",
       cell: ({ row }) => (
@@ -420,6 +409,7 @@ export function CaseManager({ formData = null }) {
       ),
     },
     {
+      id: "unresolved",
       header: "Unresolved",
       accessorKey: "unresolved",
       cell: ({ row }) => (
@@ -430,6 +420,7 @@ export function CaseManager({ formData = null }) {
       size: 100,
     },
     {
+      id: "reviewRequired",
       header: "Review Required",
       accessorKey: "reviewRequired",
       cell: ({ row }) => (
@@ -440,6 +431,7 @@ export function CaseManager({ formData = null }) {
       size: 100,
     },
     {
+      id: "ongoingScreening",
       header: "Ongoing Screening",
       accessorKey: "ongoingScreening",
       cell: ({ row }) => (
@@ -449,6 +441,7 @@ export function CaseManager({ formData = null }) {
       ),
     },
     {
+      id: "archived",
       header: "Archived",
       accessorKey: "archived",
       cell: ({ row }) => (
@@ -458,6 +451,7 @@ export function CaseManager({ formData = null }) {
       ),
     },
     {
+      id: "assignee",
       header: "Assignee",
       accessorKey: "assignee",
       cell: ({ row }) => (
@@ -467,6 +461,7 @@ export function CaseManager({ formData = null }) {
       ),
     },
     {
+      id: "lastModifiedBy",
       header: "Last Modified By",
       accessorKey: "lastModifiedBy",
       cell: ({ row }) => (
@@ -476,6 +471,7 @@ export function CaseManager({ formData = null }) {
       ),
     },
     {
+      id: "lastModifiedDateUser",
       header: "Last Modified Date - User",
       accessorKey: "lastModifiedDateUser",
       cell: ({ row }) => (
@@ -485,6 +481,7 @@ export function CaseManager({ formData = null }) {
       ),
     },
     {
+      id: "lastModifiedDateOGS",
       header: "Last Modified Date - OGS",
       accessorKey: "lastModifiedDateOGS",
       cell: ({ row }) => (
@@ -494,6 +491,7 @@ export function CaseManager({ formData = null }) {
       ),
     },
     {
+      id: "createdBy",
       header: "Created By",
       accessorKey: "createdBy",
       cell: ({ row }) => (
@@ -510,13 +508,12 @@ export function CaseManager({ formData = null }) {
 
       {/* Table */}
       <div className="flex-1 overflow-auto">
-        <ResizableTable
+        <CustomResizableTable
           columns={columns}
           data={cases}
-          // tableId="pep-screening-case-manager"
-          // onDoubleClick={handleDoubleClick}
+          tableId="pep-screening-case-manager"
           loading={fetching}
-          // actions={<Actions />}
+          mainClass="pep-screening-case-manager"
         />
       </div>
     </div>
