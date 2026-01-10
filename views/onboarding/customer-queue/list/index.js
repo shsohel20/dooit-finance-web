@@ -31,10 +31,12 @@ import { useRouter } from 'next/navigation'
 import CustomDropZone from '@/components/ui/DropZone'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import _, { isObject } from 'lodash';
 import CustomSelect from '@/components/ui/CustomSelect'
 import { countriesData } from '@/constants'
+import dynamic from 'next/dynamic'
+const CustomResizableTable = dynamic(() => import('@/components/ui/CustomResizable'), { ssr: false });
 const statusVariants = {
   pending: 'warning',
   rejected: 'danger',
@@ -115,6 +117,7 @@ const ListView = () => {
 
   const columns = [
     {
+      id: 'actions',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -136,6 +139,7 @@ const ListView = () => {
       ),
     },
     {
+      id: 'uid',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -150,6 +154,7 @@ const ListView = () => {
       accessorKey: 'uid',
     },
     {
+      id: 'user.name',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -173,6 +178,7 @@ const ListView = () => {
     },
 
     {
+      id: 'country',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -183,6 +189,7 @@ const ListView = () => {
       size: 100,
     },
     {
+      id: 'kycStatus',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -198,6 +205,7 @@ const ListView = () => {
       ),
     },
     {
+      id: 'riskAssessment?.customerType?.value',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -212,6 +220,7 @@ const ListView = () => {
       ),
     },
     {
+      id: 'riskLabel',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -227,6 +236,7 @@ const ListView = () => {
       ),
     },
     {
+      id: 'createdAt',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -292,12 +302,14 @@ const ListView = () => {
       {/* <div className='flex justify-end'>
         <Button>Send Invite</Button>
       </div> */}
-      <ResizableTable
+      <CustomResizableTable
         columns={columns}
         data={customers}
         onDoubleClick={handleDoubleClick}
         loading={fetching}
         actions={<Actions />}
+        mainClass="customer-queue-table"
+        tableId="customer-queue-table"
       />
       <CustomPagination
         currentPage={currentPage}
