@@ -340,15 +340,13 @@ export function CaseManager({ formData = null }) {
       header: "Case ID",
       accessorKey: "uid",
       cell: ({ row }) => (
-        <div
-          className="cursor-pointer hover:underline"
-          onClick={() => handleCaseClick(row.original)}
-        >
-          <p className="capitalize font-bold">
+        <div className="" onClick={() => handleCaseClick(row.original)}>
+          <p className="capitalize font-bold cursor-pointer hover:underline">
             {row?.original?.personalKyc?.personal_form?.customer_details?.given_name}{" "}
             {row?.original?.personalKyc?.personal_form?.customer_details?.middle_name}{" "}
             {row?.original?.personalKyc?.personal_form?.customer_details?.surname}
           </p>
+          <p className="text-sm text-muted-foreground">{row?.original?._id}</p>
         </div>
       ),
       size: 100,
@@ -365,39 +363,29 @@ export function CaseManager({ formData = null }) {
       ),
       size: 100,
     },
-    {
-      id: "type",
-      header: "Case Type",
-      accessorKey: "type",
-      cell: ({ row }) => (
-        <div>
-          <p className="">{row?.original?.caseType}</p>
-        </div>
-      ),
-      size: 100,
-    },
-    {
-      id: "caseRating",
-      header: "Case Rating",
-      accessorKey: "caseRating",
-      cell: ({ row }) => (
-        <StatusPill icon={<IconPennant />} variant={riskLevelVariants[row?.original?.riskLabel]}>
-          {row?.original?.riskLabel}
-        </StatusPill>
-      ),
-      size: 100,
-    },
-    {
-      id: "id",
-      header: "ID",
-      accessorKey: "caseId",
-      cell: ({ row }) => (
-        <div>
-          <p className="font-mono text-muted-foreground">{row?.original?._id}</p>
-        </div>
-      ),
-      size: 100,
-    },
+    // {
+    //   id: "type",
+    //   header: "Case Type",
+    //   accessorKey: "type",
+    //   cell: ({ row }) => (
+    //     <div>
+    //       <p className="">{row?.original?.caseType}</p>
+    //     </div>
+    //   ),
+    //   size: 100,
+    // },
+    // {
+    //   id: "caseRating",
+    //   header: "Case Rating",
+    //   accessorKey: "caseRating",
+    //   cell: ({ row }) => (
+    //     <StatusPill icon={<IconPennant />} variant={riskLevelVariants[row?.original?.riskLabel]}>
+    //       {row?.original?.riskLabel}
+    //     </StatusPill>
+    //   ),
+    //   size: 100,
+    // },
+
     {
       id: "mandatoryActions",
       header: "Mandatory Actions",

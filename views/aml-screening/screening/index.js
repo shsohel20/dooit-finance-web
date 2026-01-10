@@ -140,7 +140,7 @@ export default function AMLSearchScreeningForm() {
               </div>
             )}
             {activeTab === "case-manager" && (
-              <div className="w-full border rounded-md p-4 shadow overflow-hidden">
+              <div className="w-full   overflow-hidden">
                 <CaseManager formData={formData} />
               </div>
             )}

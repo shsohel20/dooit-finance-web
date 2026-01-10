@@ -12,7 +12,7 @@ import { ChevronDown, Globe, Hash, Link2, Search, Settings2, Sparkles } from 'lu
 import React, { useState } from 'react'
 
 export default function SearchForm({ formData, setFormData, type }) {
-  const [identificationOpen, setIdentificationOpen] = useState(false)
+  const [identificationOpen, setIdentificationOpen] = useState(true)
   const [linkToCaseOpen, setLinkToCaseOpen] = useState(false);
   const isIndividual = type === "individual";
   const isOrganization = type === "organisation";
@@ -24,7 +24,7 @@ export default function SearchForm({ formData, setFormData, type }) {
   }
   return (
     <div className="">
-      <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="rounded-2xl  bg-white border-2 border-smoke-200 overflow-hidden">
         {/* Name section */}
         <div className="p-6 space-y-4">
           <div className="space-y-1.5">
@@ -110,7 +110,7 @@ export default function SearchForm({ formData, setFormData, type }) {
           </div>
         </div>
 
-        <div className="border-t border-border">
+        <div className="">
           <Collapsible open={identificationOpen} onOpenChange={setIdentificationOpen}>
             <CollapsibleTrigger className="flex w-full items-center justify-between p-4 px-6 hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
@@ -166,7 +166,7 @@ export default function SearchForm({ formData, setFormData, type }) {
           </Collapsible>
         </div>
 
-        <div className="border-t border-border">
+        <div className="">
           <Collapsible open={linkToCaseOpen} onOpenChange={setLinkToCaseOpen}>
             <CollapsibleTrigger className="flex w-full items-center justify-between p-4 px-6 hover:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
@@ -180,8 +180,8 @@ export default function SearchForm({ formData, setFormData, type }) {
             <CollapsibleContent>
               <div className="px-6 pb-4 pt-0">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input placeholder="Search by Case ID or Name" className="h-10 pl-10 bg-background" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+                  <Input placeholder="Search by Case ID or Name" className="h-10 pl-10 " />
                 </div>
               </div>
             </CollapsibleContent>

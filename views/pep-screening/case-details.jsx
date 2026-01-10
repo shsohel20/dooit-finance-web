@@ -28,6 +28,7 @@ import {
   Search,
 } from "lucide-react";
 import { MatchDetail } from "./match-detail";
+import CustomResizableTable from "@/components/ui/CustomResizable";
 
 const mockMatches = [
   {
@@ -431,7 +432,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         </div>
 
         {/* Linked Cases Table */}
-        <div className="flex-1 overflow-auto">
+        {/* <div className="flex-1 overflow-auto">
           <table className="w-full text-sm">
             <thead className=" sticky top-0 z-10">
               <tr className="border-b border-slate-200">
@@ -532,16 +533,197 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
               ))}
             </tbody>
           </table>
-        </div>
+        </div> */}
+        <CustomResizableTable
+          columns={linkedCasesColumns}
+          data={mockLinkedCases}
+          tableId="pep-screening-linked-cases"
+          mainClass="pep-screening-linked-cases"
+        />
       </div>
     </div>
   );
+
+  const matchedCasesColumns = [
+    {
+      id: "name",
+      header: "Name",
+      accessorKey: "name",
+      cell: ({ row, index }) => (
+        <div onClick={() => handleMatchClick(index)} className="group">
+          <p className="text-slate-800 font-semibold group-hover:underline cursor-pointer">
+            {row.original.name}
+          </p>
+          <div className="text-muted-foreground text-xs whitespace-pre-line">
+            {row?.original.matchedAlias}
+          </div>
+        </div>
+      ),
+    },
+    // {
+    //   id: "matchedAlias",
+    //   header: "Matched Alias",
+    //   accessorKey: "matchedAlias",
+    // },
+    {
+      id: "matchStrength",
+      header: "Match",
+      accessorKey: "matchStrength",
+      cell: ({ row }) => (
+        <div className="text-end flex items-center gap-1 border rounded-full w-max px-2 py-1">
+          {getMatchStrengthBar(row.original.matchStrength, row.original.matchStrengthColor)}
+          <span className="text-xs text-muted-foreground">{row.original.matchStrength}</span>
+        </div>
+      ),
+    },
+    {
+      id: "types",
+      header: "Type",
+      accessorKey: "types.label",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          {row.original.types.map((type) => (
+            <span
+              key={type.label}
+              className={cn("px-1.5 py-0.5 rounded text-xs font-medium text-white", type.color)}
+            >
+              {type.label}
+            </span>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "gender",
+      header: "Gender",
+      accessorKey: "gender",
+      cell: ({ row }) => (
+        <div className="text-center">
+          <span className=" text-muted-foreground">{row.original.gender}</span>
+        </div>
+      ),
+    },
+    {
+      id: "dateOfBirth",
+      header: "Place & Date of Birth",
+      accessorKey: "dateOfBirth",
+      cell: ({ row }) => (
+        <div className="text-center flex flex-col items-center gap-1">
+          <span className="text-xs text-muted-foreground font-mono">
+            {row.original.dateOfBirth}
+          </span>
+          <span className=" text-smoke-600 font-semibold">{row.original.placeOfBirth}</span>
+        </div>
+      ),
+    },
+    // {
+    //   id: "placeOfBirth",
+    //   header: "Place of Birth",
+    //   accessorKey: "placeOfBirth",
+    //   cell: ({ row }) => (
+    //     <div className="text-center">
+    //       <span className="text-xs text-muted-foreground">{row.original.placeOfBirth}</span>
+    //     </div>
+    //   ),
+    // },
+    {
+      id: "citizenship",
+      header: "Citizenship",
+      accessorKey: "citizenship",
+      cell: ({ row }) => (
+        <div className="text-center">
+          <span className=" text-muted-foreground">{row.original.citizenship}</span>
+        </div>
+      ),
+    },
+    // {
+    //   id: "countryLocation",
+    //   header: "Country Location",
+    //   accessorKey: "countryLocation",
+    //   cell: ({ row }) => (
+    //     <div className="text-center">
+    //       <span className="text-xs text-muted-foreground">{row.original.countryLocation}</span>
+    //     </div>
+    //   ),
+    // },
+    {
+      id: "category",
+      header: "Category",
+      accessorKey: "category",
+      cell: ({ row }) => (
+        <div className="text-center">
+          <span className="text-xs text-muted-foreground">{row.original.category}</span>
+        </div>
+      ),
+    },
+    // {
+    //   id: "count",
+    //   header: "Count",
+    //   accessorKey: "count",
+    // },
+  ];
+
+  const linkedCasesColumns = [
+    {
+      id: "caseName",
+      header: "Case Name",
+      accessorKey: "caseName",
+      cell: ({ row }) => (
+        <div className="text-slate-800 font-semibold">{row.original.caseName}</div>
+      ),
+    },
+    {
+      id: "relationship",
+      header: "Relationship",
+      accessorKey: "relationship",
+    },
+    {
+      id: "caseId",
+      header: "Case ID",
+      accessorKey: "caseId",
+      cell: ({ row }) => <div className="text-slate-600">{row.original.caseId}</div>,
+    },
+    {
+      id: "mandatoryActions",
+      header: "Mandatory Actions",
+      accessorKey: "mandatoryActions",
+      cell: ({ row }) => <div className="text-slate-600">{row.original.mandatoryActions}</div>,
+    },
+    {
+      id: "unresolved",
+      header: "Unresolved",
+      accessorKey: "unresolved",
+      cell: ({ row }) => <div className="text-slate-600">{row.original.unresolved}</div>,
+    },
+    {
+      id: "reviewRequired",
+      header: "Review Required",
+      accessorKey: "reviewRequired",
+      cell: ({ row }) => <div className="text-slate-600">{row.original.reviewRequired}</div>,
+    },
+    {
+      id: "ongoingScreening",
+      header: "Ongoing Screening",
+      accessorKey: "ongoingScreening",
+      cell: ({ row }) => (
+        <div className="text-slate-600">{row.original.ongoingScreening ? "Yes" : "No"}</div>
+      ),
+    },
+    {
+      id: "archived",
+      header: "Archived",
+      accessorKey: "archived",
+      cell: ({ row }) => (
+        <div className="text-slate-600">{row.original.archived ? "Yes" : "No"}</div>
+      ),
+    },
+  ];
 
   const renderWorldCheckTab = () => (
     <div className="flex-1 flex overflow-hidden">
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-auto">
-          <table className="w-full text-sm">
+          {/* <table className="w-full text-sm">
             <thead className=" sticky top-0 z-10">
               <tr className="border-b border-slate-200">
                 <th className="px-3 py-2 text-left w-10">
@@ -628,7 +810,13 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table> */}
+          <CustomResizableTable
+            columns={matchedCasesColumns}
+            data={mockMatches}
+            tableId="pep-screening-matched-cases"
+            mainClass="pep-screening-matched-cases"
+          />
         </div>
       </div>
     </div>
@@ -649,10 +837,15 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col ">
       {/* Case Header */}
-      <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-6">
-        <Button variant="ghost" size="sm" onClick={onBack} className="gap-1 text-slate-600">
+      <div className="   py-3 flex items-center gap-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onBack}
+          className="gap-1 text-primary bg-smoke-200"
+        >
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>

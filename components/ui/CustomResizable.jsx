@@ -200,6 +200,7 @@ const CustomResizableTable = ({
                                 row: {
                                   original: row,
                                 },
+                                index,
                               })
                             : row[column.accessorKey]}
                         </TableCell>
