@@ -308,7 +308,7 @@ const TransactionListView = () => {
               <SelectValue placeholder="Date Range" />
             </SelectTrigger>
           </Select>
-          <Select>
+          <Select >
             <SelectTrigger>
               <SelectValue placeholder="Select a country" />
             </SelectTrigger>

@@ -473,7 +473,7 @@ export default function CustomerQueueList({ data, kycStatus }) {
           </Select>
 
 
-          <div className='w-40 flex-shrink-0'>
+          <div className='w-44 flex-shrink-0'>
             <CustomSelect
               placeholder='Select a country'
               options={countriesData}
