@@ -34,24 +34,24 @@ export default function SearchForm({ formData, setFormData, type }) {
             </Label>
             <Input
               placeholder="Enter full name"
-              className=" bg-background"
+              className=" "
             />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
               <Label >Case ID</Label>
-              <Input placeholder="Optional" className=" bg-background" />
+              <Input placeholder="Optional" className="" />
             </div>
             <div className="space-y-1.5">
               <Label >Group</Label>
-              <Input placeholder="Optional" className=" bg-background" />
+              <Input placeholder="Optional" className="" />
             </div>
           </div>
           {isIndividual && <div className="space-y-4">
             <div className="space-y-1.5">
               <Label className="">Date of Birth</Label>
-              <Input type="date" placeholder="Optional" className=" bg-background" />
+              <Input type="date" placeholder="Optional" className="" />
             </div>
             <div className="space-y-1.5">
               {/* <Label className="text-sm font-medium">Nationality</Label> */}

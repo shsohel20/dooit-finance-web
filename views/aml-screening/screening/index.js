@@ -5,27 +5,15 @@ import {
   Building2,
   User,
   Globe,
-  Shield,
-  Hash,
-  Link2,
   Search,
-  ChevronDown,
   Settings2,
   Sparkles,
   Ship,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 import { cn } from "@/lib/utils";
 import CustomSelect from "@/components/ui/CustomSelect";
 import SearchForm from "./SearchForm";
@@ -61,10 +49,10 @@ export default function AMLSearchScreeningForm() {
     },
   ];
   return (
-    <div className="min-h-screen   px-4  bg-white">
+    <div className="min-h-screen   ">
       <div className="  gap-4 ">
-        {/* sidebar */}
-        <div className=" p-2 rounded-md shadow  border   flex mb-4">
+        {/* tab */}
+        <div className=" p-2 rounded-md bg-smoke-200     flex mb-4">
           {/* <h2 className="text-sm text-muted-foreground mb-3  tracking-wider">Settings</h2> */}
           {tabs.map((tab) => (
             <button
@@ -73,7 +61,7 @@ export default function AMLSearchScreeningForm() {
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ",
                 {
-                  "bg-primary/10 text-primary": activeTab === tab.id,
+                  "bg-white text-primary font-bold ": activeTab === tab.id,
                 },
               )}
             >
@@ -82,80 +70,83 @@ export default function AMLSearchScreeningForm() {
             </button>
           ))}
         </div>
-        <div className=" w-full   space-y-6 ">
-          {activeTab === "screening" && (
-            <div className="max-w-3xl mx-auto space-y-4">
-              <div className="flex ">
-                <div className="inline-flex p-1 rounded-md bg-muted/80 border border-border w-full">
-                  <button
-                    onClick={() => setEntityType("organisation")}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
-                      entityType === "organisation"
-                        ? "bg-white text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <Building2 className="w-4 h-4" />
-                    Organisation
-                  </button>
-                  <button
-                    onClick={() => setEntityType("individual")}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
-                      entityType === "individual"
-                        ? "bg-white text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <User className="w-4 h-4" />
-                    Individual
-                  </button>
-                  <button
-                    onClick={() => setEntityType("vessel")}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
-                      entityType === "vessel"
-                        ? "bg-white text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <Ship className="w-4 h-4" />
-                    Vessel
-                  </button>
+        {/* searchable inputs */}
+        <div className="">
+          <div className=" w-full   space-y-6 ">
+            {activeTab === "screening" && (
+              <div className="flex gap-4">
+                <div className="max-w-3xl w-full  space-y-4">
+                  <div className="flex ">
+                    <div className="inline-flex p-1 rounded-md bg-muted/80 border border-border w-full">
+                      <button
+                        onClick={() => setEntityType("organisation")}
+                        className={cn(
+                          "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
+                          entityType === "organisation"
+                            ? "bg-white text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        <Building2 className="w-4 h-4" />
+                        Organisation
+                      </button>
+                      <button
+                        onClick={() => setEntityType("individual")}
+                        className={cn(
+                          "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
+                          entityType === "individual"
+                            ? "bg-white text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        <User className="w-4 h-4" />
+                        Individual
+                      </button>
+                      <button
+                        onClick={() => setEntityType("vessel")}
+                        className={cn(
+                          "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
+                          entityType === "vessel"
+                            ? "bg-white text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        <Ship className="w-4 h-4" />
+                        Vessel
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 col-span-2">
+                    <SearchForm formData={formData} setFormData={setFormData} type={entityType} />
+                  </div>
+
+                  <div className="flex items-center gap-3 max-w-2xl">
+                    <Button className="flex-1  " onClick={() => setActiveTab("case-manager")}>
+                      <Search className="w-4 h-4 mr-2" />
+                      Run Screening
+                    </Button>
+                    <Button variant="outline" className=" bg-transparent">
+                      Save
+                    </Button>
+                    <Button variant="ghost" className=" text-muted-foreground">
+                      Clear
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <ScreeningSettings formData={formData} setFormData={setFormData} />
                 </div>
               </div>
-
-              <div className="space-y-4 col-span-2">
-                <ScreeningSettings formData={formData} setFormData={setFormData} />
-                <SearchForm formData={formData} setFormData={setFormData} type={entityType} />
+            )}
+            {activeTab === "case-manager" && (
+              <div className="w-full border rounded-md p-4 shadow overflow-hidden">
+                <CaseManager formData={formData} />
               </div>
+            )}
+          </div>
 
-              <div className="flex items-center gap-3 max-w-2xl">
-                <Button className="flex-1  " onClick={() => setActiveTab("case-manager")}>
-                  <Search className="w-4 h-4 mr-2" />
-                  Run Screening
-                </Button>
-                <Button variant="outline" className=" bg-transparent">
-                  Save
-                </Button>
-                <Button variant="ghost" className=" text-muted-foreground">
-                  Clear
-                </Button>
-              </div>
-            </div>
-          )}
-          {activeTab === "case-manager" && (
-            <div className="w-full border rounded-md p-4 shadow overflow-hidden">
-              <CaseManager formData={formData} />
-            </div>
-          )}
         </div>
-
-        {/* search results */}
-        {/* <div className="col-span-2">
-          <CaseManager />
-        </div> */}
       </div>
     </div>
   );
@@ -163,7 +154,7 @@ export default function AMLSearchScreeningForm() {
 
 const ScreeningSettings = ({ formData, setFormData }) => {
   return (
-    <div className="rounded-2xl border border-border bg-card shadow-sm p-6 space-y-5">
+    <div className="rounded-2xl border border-border bg-smoke-200  p-6 space-y-5">
       <div className="flex items-center gap-2">
         <Settings2 className="w-4 h-4 text-muted-foreground" />
         <h2 className="text-sm font-semibold">Screening Settings</h2>

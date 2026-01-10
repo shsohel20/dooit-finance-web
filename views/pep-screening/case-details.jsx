@@ -539,40 +539,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
 
   const renderWorldCheckTab = () => (
     <div className="flex-1 flex overflow-hidden">
-      {/* Left Sidebar - Case Details */}
-      {/* <div className="w-48  border-r border-slate-200 p-4 shrink-0">
-        <h3 className="text-xs font-semibold text-slate-500 mb-3">CASE DETAILS</h3>
-        <div className="space-y-3 text-sm">
-          <div>
-            <span className="text-slate-500 text-xs">Name Transposition</span>
-            <p className="text-slate-800">Yes</p>
-          </div>
-          <div>
-            <span className="text-slate-500 text-xs">Primary Name</span>
-            <p className="text-slate-800 font-medium">{caseData.caseName}</p>
-          </div>
-          <div>
-            <span className="text-slate-500 text-xs">Status</span>
-            <div className="mt-1">
-              {caseData.archived ? (
-                <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded">Archived</span>
-              ) : (
-                <span className="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded">
-                  Active
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Results Table */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* <div className="px-4 py-2  border-b border-slate-200 text-sm text-slate-600">
-          Showing <strong>348</strong> of <strong>1140</strong> matches for{" "}
-          <strong className="text-blue-600">{caseData.caseName}</strong>
-        </div> */}
-
         <div className="flex-1 overflow-auto">
           <table className="w-full text-sm">
             <thead className=" sticky top-0 z-10">
