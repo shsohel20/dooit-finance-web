@@ -320,8 +320,8 @@ export default function ClientSidebar({ ...props }) {
   ];
 
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="offcanvas" {...props} className={'relative max-h-screen overflow-y-auto'}>
+      {/* <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
@@ -334,7 +334,7 @@ export default function ClientSidebar({ ...props }) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-      </SidebarHeader>
+      </SidebarHeader> */}
       <SidebarContent>
         <NavMain items={onBoardingMenuItems} label="Onboarding" />
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
@@ -347,7 +347,7 @@ export default function ClientSidebar({ ...props }) {
         {/* <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className={''}>
         <NavUser user={session.data?.user} />
       </SidebarFooter>
     </Sidebar>

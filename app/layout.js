@@ -1,10 +1,11 @@
 import AuthProvider from "@/providers/SessionProvider";
-import { Geist, Geist_Mono, Inter, Manrope, Poppins } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Manrope, Montserrat, Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { EncryptDecryptFAB } from "@/components/EncryptBtn";
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const montserrat = Montserrat({ subsets: ["latin"], weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"] });
 
 export const metadata = {
   title: "Dooit Wallet",
@@ -14,7 +15,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={` antialiased bg-body`} suppressHydrationWarning>
+      <body className={`${montserrat.className} antialiased bg-smoke-200`} suppressHydrationWarning>
         {/* <AuthProvider> */}
         <EncryptDecryptFAB />
         <AuthProvider>{children}</AuthProvider>

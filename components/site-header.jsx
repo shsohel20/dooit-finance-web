@@ -45,7 +45,7 @@ export function SiteHeader() {
     },
   ];
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) bg-white sticky top-0 z-10">
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2  transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)  sticky top-0 z-10 bg-smoke-200 py-8">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator
@@ -60,15 +60,16 @@ export function SiteHeader() {
                 <Link
                   href={route.href}
                   className={cn(
-                    ' px-4 py-2  text-heading  font-semibold flex items-center gap-2 [&>svg]:size-4 [&>svg]:shrink-0 relative rounded-md ',
+                    ' px-4 py-2   font-bold flex items-center gap-2 [&>svg]:size-4 [&>svg]:shrink-0 relative rounded-md text-smoke-600 ',
                     {
-                      '  font-bold bg-transparent': pathname === route.href,
+                      '  font-extrabold rounded-md shadow bg-white':
+                        pathname === route.href,
                     }
                   )}
                 >
-                  {pathname === route.href && (
+                  {/* {pathname === route.href && (
                     <div className="absolute left-1/2 -translate-x-1/2 top-2  w-1/2  h-2/5 -z-1 bg-accent opacity-[0.2]" />
-                  )}
+                  )} */}
                   <span className="">{route.icon}</span>
                   <span>{route.name}</span>
                 </Link>

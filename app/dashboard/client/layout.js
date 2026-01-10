@@ -9,11 +9,14 @@ export default function ClientLayout({ children }) {
         "--sidebar-width": "calc(var(--spacing) * 72)",
         "--header-height": "calc(var(--spacing) * 12)",
       }}
+      className="flex flex-col  h-full w-full"
     >
-      <ClientSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
+      <SiteHeader />
+      <SidebarInset className=" grid grid-cols-12">
+        <div className="col-span-2 max-h-screen overflow-y-auto bg-smoke-300">
+          <ClientSidebar variant="inset" />
+        </div>
+        <div className="h-screen overflow-y-auto col-span-10">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-4 px-4">
               {children}

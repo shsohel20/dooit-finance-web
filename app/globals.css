@@ -50,6 +50,13 @@
   --mute-200: #696969;
   --gray: #696969;
   --radius: 0.625rem;
+  --smoke-100: #ffffff;
+  --smoke-200: #f5f5f5;
+  --smoke-300: #f0eeef;
+  --smoke-400: #d6d6d6;
+  --smoke-500: #bdbdbd;
+  --smoke-600: #5b5b5b;
+  --smoke-700: #08070c;
   --background: oklch(0.98 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -119,6 +126,13 @@
   --color-body: var(--body);
   --color-primary-light: var(--primary-light);
   --color-accent: var(--accent);
+  --color-smoke-100: var(--smoke-100);
+  --color-smoke-200: var(--smoke-200);
+  --color-smoke-300: var(--smoke-300);
+  --color-smoke-400: var(--smoke-400);
+  --color-smoke-500: var(--smoke-500);
+  --color-smoke-600: var(--smoke-600);
+  --color-smoke-700: var(--smoke-700);
   /* --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono); */
   /* --font-mono:
@@ -157,13 +171,15 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
-
+* {
+  box-sizing: border-box;
+}
 body {
   /* background: var(--background);
   color: var(--foreground); */
-  font-family: font-2, sans-serif;
+  /* font-family: font-2, sans-serif; */
   font-size: 0.8rem;
-  background: var(--body);
+  background: var(--smoke-200);
 }
 .container {
   width: min(90%, 1280px);
@@ -215,6 +231,13 @@ button {
   body {
     @apply bg-background text-foreground;
   }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE & Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }
 /* react-select */
 
@@ -252,6 +275,9 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+.border-red {
+  border: 5px solid var(--danger);
 }
 .scanner-effect {
   background: linear-gradient(to right, rgba(0, 255, 0, 0.29), rgba(0, 255, 0, 0.1));
