@@ -134,7 +134,7 @@ const TransactionListView = () => {
       accessorKey: "uid",
     },
     {
-      id: "sender.name",
+      id: "Flow Direction",
       header: ({ column }) => <span>Flow Direction</span>,
       accessorKey: "sender.name",
       size: 200,
@@ -163,7 +163,7 @@ const TransactionListView = () => {
       size: 100,
     },
     {
-      id: "beneficiary.name",
+      id: "beneficiaryName",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Beneficial Owner" />,
       accessorKey: "beneficiary.name",
       size: 100,
