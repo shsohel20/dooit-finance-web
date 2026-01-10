@@ -320,7 +320,7 @@ export default function ClientSidebar({ ...props }) {
   ];
 
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="offcanvas" {...props} className={'border-0'}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
