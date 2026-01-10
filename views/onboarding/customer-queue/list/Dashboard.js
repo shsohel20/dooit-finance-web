@@ -3,6 +3,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import { AlertTriangle, Clock, Shield } from "lucide-react"
+import NumberFlow from "@number-flow/react"
+import NumberAnimation from "@/components/NumberAnimation"
 
 // Sample data based on the customer data provided
 const riskData = [
@@ -24,10 +26,10 @@ const authorizationData = [
 ]
 
 export default function CustomerDashboard() {
-  const totalCustomers = 10
-  const unacceptableRisk = 6
-  const pendingKyc = 7
-  const notAuthorized = 8
+  const totalCustomers = 10054
+  const unacceptableRisk = 586
+  const pendingKyc = 317
+  const notAuthorized = 108
 
   return (
     <div className="mb-4">
@@ -53,25 +55,27 @@ export default function CustomerDashboard() {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Total Customers</p>
-                  <p className="text-3xl font-bold text-foreground">{totalCustomers}</p>
+                  <p className="text-3xl font-bold text-foreground"><NumberAnimation value={totalCustomers} /></p>
                 </div>
-                <ResponsiveContainer width={100} height={100}>
-                  <PieChart>
-                    <Pie
-                      data={riskData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={30}
-                      outerRadius={45}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {riskData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="size-[100px]">
+                  <ResponsiveContainer width={'100%'} height={"100%"}>
+                    <PieChart>
+                      <Pie
+                        data={riskData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={30}
+                        outerRadius={45}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {riskData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between rounded-lg bg-destructive/10 p-3">
@@ -81,15 +85,15 @@ export default function CustomerDashboard() {
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div className="text-center">
                     <p className="text-muted-foreground">High</p>
-                    <p className="font-semibold text-foreground">2</p>
+                    <p className="font-semibold text-foreground"><NumberAnimation value={2} /></p>
                   </div>
                   <div className="text-center">
                     <p className="text-muted-foreground">Medium</p>
-                    <p className="font-semibold text-foreground">1</p>
+                    <p className="font-semibold text-foreground"><NumberAnimation value={1} /></p>
                   </div>
                   <div className="text-center">
                     <p className="text-muted-foreground">Low</p>
-                    <p className="font-semibold text-foreground">1</p>
+                    <p className="font-semibold text-foreground"><NumberAnimation value={1} /></p>
                   </div>
                 </div>
               </div>
@@ -111,39 +115,41 @@ export default function CustomerDashboard() {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Pending Review</p>
-                  <p className="text-3xl font-bold text-foreground">{pendingKyc}</p>
+                  <p className="text-3xl font-bold text-foreground"><NumberAnimation value={pendingKyc} /></p>
                 </div>
-                <ResponsiveContainer width={100} height={100}>
-                  <PieChart>
-                    <Pie
-                      data={kycStatusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={30}
-                      outerRadius={45}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {kycStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="size-[100px]">
+                  <ResponsiveContainer width={'100%'} height={"100%"}>
+                    <PieChart>
+                      <Pie
+                        data={kycStatusData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={30}
+                        outerRadius={45}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {kycStatusData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between rounded-lg bg-amber-500/10 p-3">
                   <span className="text-sm font-medium text-foreground">Pending</span>
-                  <span className="text-lg font-bold text-amber-600">{pendingKyc}</span>
+                  <span className="text-lg font-bold text-amber-600"><NumberAnimation value={pendingKyc} /></span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-md bg-emerald-500/10 p-2 text-center">
                     <p className="text-muted-foreground">Approved</p>
-                    <p className="font-semibold text-emerald-600">2</p>
+                    <p className="font-semibold text-emerald-600"><NumberAnimation value={2} /></p>
                   </div>
                   <div className="rounded-md bg-red-500/10 p-2 text-center">
                     <p className="text-muted-foreground">Rejected</p>
-                    <p className="font-semibold text-red-600">1</p>
+                    <p className="font-semibold text-red-600"><NumberAnimation value={1} /></p>
                   </div>
                 </div>
               </div>
@@ -165,39 +171,41 @@ export default function CustomerDashboard() {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Not Authorized</p>
-                  <p className="text-3xl font-bold text-foreground">{notAuthorized}</p>
+                  <p className="text-3xl font-bold text-foreground"><NumberAnimation value={notAuthorized} /></p>
                 </div>
-                <ResponsiveContainer width={100} height={100}>
-                  <PieChart>
-                    <Pie
-                      data={authorizationData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={30}
-                      outerRadius={45}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {authorizationData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="size-[100px]">
+                  <ResponsiveContainer width={'100%'} height={"100%"}>
+                    <PieChart>
+                      <Pie
+                        data={authorizationData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={30}
+                        outerRadius={45}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {authorizationData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between rounded-lg bg-slate-500/10 p-3">
                   <span className="text-sm font-medium text-foreground">Incomplete</span>
-                  <span className="text-lg font-bold text-slate-600">{notAuthorized}</span>
+                  <span className="text-lg font-bold text-slate-600"><NumberAnimation value={notAuthorized} /></span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-md bg-cyan-500/10 p-2 text-center">
                     <p className="text-muted-foreground">Authorized</p>
-                    <p className="font-semibold text-cyan-600">2</p>
+                    <p className="font-semibold text-cyan-600"><NumberAnimation value={2} /></p>
                   </div>
                   <div className="rounded-md bg-slate-500/10 p-2 text-center">
                     <p className="text-muted-foreground">Pending</p>
-                    <p className="font-semibold text-slate-600">8</p>
+                    <p className="font-semibold text-slate-600"><NumberAnimation value={8} /></p>
                   </div>
                 </div>
               </div>
@@ -205,7 +213,7 @@ export default function CustomerDashboard() {
           </Card>
         </div>
 
-     
+
       </div>
     </div>
   )

@@ -17,7 +17,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Download, FileSpreadsheet, Loader2, Save, Upload } from 'lucide-react';
+import {
+  Download,
+  FileSpreadsheet,
+  FileText,
+  Loader2,
+  Save,
+  Upload,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -175,7 +182,8 @@ export function ECDDForm({ caseNumber, id }) {
       const formattedData = getFormattedData(response);
       reset(formattedData);
     } catch (error) {
-      console.error('Failed to get data', error);
+      setValue('caseNumber', caseNumber);
+      console.log('Failed to get data', error);
       // toast.error("Failed to get data");
     } finally {
       setFetching(false);
@@ -260,142 +268,6 @@ export function ECDDForm({ caseNumber, id }) {
     };
     return formattedData;
   };
-  const handleFileUpload = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const content = e.target?.result;
-        // Parse JSON or CSV data
-        const data = JSON.parse(content);
-        populateFormFromData(data);
-      } catch (error) {
-        console.error('[v0] Error parsing file:', error);
-        alert("Error parsing file. Please ensure it's valid JSON format.");
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const populateFormFromData = (data) => {
-    // Auto-populate form fields from uploaded data
-    const populated = {
-      analystName: data.analystName || '',
-      position: data.position || 'Compliance Officer',
-      date: data.date || new Date().toISOString().split('T')[0],
-      caseNumber: data.caseNumber || generateCaseNumber(),
-      userId: data.userId || generateUserId(),
-      fullName: data.fullName || '',
-      customerName: data.customerName || data.fullName || '',
-      abn: data.abn || '',
-      onboardingDate: data.onboardingDate || '',
-      accountPurpose: data.accountPurpose || 'Digital Currency Exchange',
-      expectedVolume: data.expectedVolume || '',
-      annualIncome: data.annualIncome || '',
-      beneficialOwner: data.beneficialOwner || '',
-      directors: data.directors || '',
-      isPEP: data.isPEP || 'No',
-      isSanctioned: data.isSanctioned || 'No',
-      relatedParty: data.relatedParty || 'N/A',
-      // Transaction data
-      accountCreationDate:
-        data.accountCreationDate || data.onboardingDate || '',
-      analysisEndDate: data.analysisEndDate || '',
-      totalDepositsAUD: data.totalDepositsAUD || '',
-      totalWithdrawalsUSDT: data.totalWithdrawalsUSDT || '',
-      totalWithdrawalsETH: data.totalWithdrawalsETH || '',
-      totalWithdrawalsBTC: data.totalWithdrawalsBTC || '',
-      depositDetails: data.depositDetails || '',
-      withdrawalDetails: data.withdrawalDetails || '',
-      additionalInfo: data.additionalInfo || '',
-      // Behavioral
-      ipLocations: data.ipLocations || '',
-      registeredAddress: data.registeredAddress || '',
-      // Auto-generate summaries
-      profileSummary: generateProfileSummary(data),
-      transactionAnalysis: generateTransactionAnalysis(data),
-      behavioralAnalysis: generateBehavioralAnalysis(data),
-      recommendation: generateRecommendation(data),
-    };
-
-    setFormData(populated);
-  };
-
-  const generateCaseNumber = () => {
-    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
-    return `EC_${date}_01`;
-  };
-
-  const generateUserId = () => {
-    const randomNum = Math.floor(Math.random() * 1000) + 1;
-    return `X${randomNum}`;
-  };
-
-  const generateProfileSummary = (data) => {
-    if (!data.customerName) return '';
-    return `The customer ${data.customerName} (UID: ${
-      data.userId || 'UID'
-    }), ABN ${data.abn || 'N/A'}, was onboarded on ${data.onboardingDate || 'dd/mm/yyyy'}.
-
-     Account opening purpose was stated as ${
-       data.accountPurpose || 'Digital Currency Exchange'
-     } and expected trading volume is listed as $${
-       data.expectedVolume || 'X'
-     } and over AUD (per month), where the company annual income is over $${
-       data.annualIncome || 'X'
-     } million as per onboarding document. An open media search reveals no adverse  media for the customer. ${
-       data.beneficialOwner || 'N/A'
-     } appears to be the BO of ${data.customerName}, where ${
-       data.directors || 'N/A'
-     } are the directors of the company. No adverse media was identified for the related parties while conducting open media searches.`;
-  };
-
-  const generateTransactionAnalysis = (data) => {
-    if (!data.customerName) return '';
-
-    return `Since then account creation date on ${
-      data.accountCreationDate || 'dd/mm/yyyy'
-    }, until ${data.analysisEndDate || 'dd/mm/yyyy'}, ${data.customerName} conducted a total of $${
-      data.totalDepositsAUD || 'X'
-    } million AUD in deposits and withdrawals amounting to ${
-      data.totalWithdrawalsUSDT || 'X'
-    } million USDT, ${data.totalWithdrawalsETH || 'X'} ETH and ${
-      data.totalWithdrawalsBTC || 'X'
-    } BTC. The transactions follow a pattern of high-value AUD deposits immediately converted to cryptocurrency, with consistent use of a single beneficiary wallet for USDT withdrawals.
-
-  Deposit:
-    ${
-      data.depositDetails ||
-      'The deposits, totaling $X AUD, ranged between $X AUD and $X AUD. All deposits were from the customer and converted into USDT and BTC. Elliptic screening and World-Check results indicate no adverse findings, with funds originating from legitimate sources.'
-    }
-
-  Withdrawals:
-${
-  data.withdrawalDetails ||
-  'Withdrawals included X million USDT sent to various wallets. Elliptic screening did not identify risks for these wallets.'
-}`;
-  };
-
-  const generateBehavioralAnalysis = (data) => {
-    if (data.ipLocations) {
-      return `The customer account has recorded a total of ${
-        data.ipLocations
-      } different IP locations, where all the IP logins are from Australia. The customer's registered address is in ${
-        data.registeredAddress || 'N/A'
-      }.`;
-    }
-    return 'The customer is an OTC customer thus no IP information is available.';
-  };
-
-  const generateRecommendation = (data) => {
-    if (!data.customerName) return '';
-
-    return `Based on our analysis on ${data.customerName} (UID: ${
-      data.userId || 'UID'
-    }) conducted multiple AUD deposits followed by USDT and BTC withdrawals where the majority of them were sourced from an external whitelisted bank account. However, the SOF and SOW needs to be collected. Thus recommending to continue the relationship as a high risk customer (HRC) and request RFI at this stage.`;
-  };
 
   const handleSave = async (data) => {
     setLastSaved(new Date());
@@ -421,68 +293,6 @@ ${
     }
     console.log('[v0] ECDD response', response);
     setLoading(false);
-  };
-
-  const handleExport = () => {
-    const dataStr = JSON.stringify(formData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `ECDD_${formData.caseNumber || 'report'}.json`;
-    link.click();
-  };
-
-  const handleGenerateReport = () => {
-    // Generate formatted report text
-    const report = `
-ENHANCED CUSTOMER DUE DILIGENCE REPORT
-
-1. Analysis and Review
-
-1.(i) Analysed By:
-(a) Name:     ${formData.analystName || '_________________________'}
-(b) Position: ${formData.position || '_________________________'}
-(c) Date:     ${formData.date || '_________________________'}
-(d) Case Number: ${formData.caseNumber || '_________________________'}
-
-2. Customer Profile
-Inherent Customer risk rating:
-2.1. User_id: ${formData.userId || '_________________________'}
-2.2. Full Name: ${formData.fullName || '_________________________'}
-2.3 Profile Summary
-${formData.profileSummary || '_________________________'}
-
-3. Customer is PEP (Y/N)
-${formData.isPEP || 'No'}
-
-4. Sanctioned Customer (Y/N)
-${formData.isSanctioned || 'No'}
-
-5. Related Party:
-${formData.relatedParty || 'N/A'}
-
-6. Transaction Analysis
-Transaction Analysis:
-${formData.transactionAnalysis || '_________________________'}
-
-Additional Information:
-${formData.additionalInfo || '_________________________'}
-
-7. Behavioral Analysis
-${formData.behavioralAnalysis || '_________________________'}
-
-8. Recommendation
-${formData.recommendation || '_________________________'}
-`;
-
-    // Download as text file
-    const blob = new Blob([report], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `ECDD_Report_${formData.caseNumber || 'report'}.txt`;
-    link.click();
   };
 
   const fetchCaseNumbers = async () => {
@@ -584,43 +394,6 @@ ${formData.recommendation || '_________________________'}
             </p>
           )}
         </div>
-
-        {/* File Upload Section */}
-        {/* <Card className="border   p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-bold  text-zinc-700 mb-1">Data Import</h3>
-            <p className="text-sm text-muted-foreground">
-              Upload JSON or Excel file to auto-populate fields
-            </p>
-          </div>
-          <FileSpreadsheet className="w-8 h-8  text-zinc-700" />
-        </div>
-        <div className="flex gap-4">
-          <Label
-            htmlFor="file-upload"
-            className="flex-1 cursor-pointer border border-dashed   rounded-lg p-6 hover:bg-primary/5 transition-colors"
-          >
-            <div className="flex flex-col items-center gap-2">
-              <Upload className="w-8 h-8  text-zinc-700" />
-              <span className="text-sm font-medium  text-zinc-700">
-                Click to upload JSON file
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Supported: .json, .csv
-              </span>
-            </div>
-            <Input
-              id="file-upload"
-              type="file"
-              accept=".json,.csv"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
-          </Label>
-        </div>
-      </Card> */}
-
         {/* Section 1: Analysis and Review */}
         <Card className="border   p-6 mb-6">
           <h2 className="text-2xl font-bold  text-zinc-700 mb-6">
@@ -1206,14 +979,46 @@ ${formData.recommendation || '_________________________'}
           <Download className="w-5 h-5 mr-2" />
           Export JSON
         </Button> */}
-          <Button
+          {/* <Button
             onClick={handleGenerateReport}
             size="lg"
             className="bg-accent text-accent-foreground hover:bg-accent/90"
           >
             <FileSpreadsheet className="w-5 h-5 mr-2" />
             Generate Report
-          </Button>
+          </Button> */}
+          {caseNumber ? (
+            <>
+              <Button
+                variant="outline"
+                size="lg"
+                className={'border bg-transparent'}
+                onClick={() =>
+                  router.push(
+                    `/dashboard/client/report-compliance/smr-filing/smr/form?caseNumber=${caseNumber}`
+                  )
+                }
+              >
+                <FileText className="w-5 h-5 mr-2 text-destructive" />
+                SMR
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className={'border bg-transparent'}
+              >
+                <FileText className="w-5 h-5 mr-2 text-destructive" /> RFI
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className={'border bg-transparent'}
+              >
+                <FileSpreadsheet className="w-5 h-5 mr-2 text-destructive" />{' '}
+                GFS
+              </Button>
+            </>
+          ) : null}
         </div>
       </div>
     </UILoader>

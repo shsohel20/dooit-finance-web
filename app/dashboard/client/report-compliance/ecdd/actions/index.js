@@ -1,5 +1,6 @@
 'use server'
 
+import { getQueryString } from "@/lib/utils";
 import { fetchWithAuth } from "@/services/serverApi";
 import { revalidateTag } from "next/cache";
 
@@ -14,9 +15,10 @@ export async function createEcdd(formData) {
 
 
 
-export async function getEcdds() {
+export async function getEcdds(queryParams) {
     try {
-        const response = await fetchWithAuth('ecdd-report', {
+        const queryString = getQueryString(queryParams);
+        const response = await fetchWithAuth(`ecdd-report?${queryString}`, {
             next: { tags: ['ecdds'] }
         });
         return response.json();

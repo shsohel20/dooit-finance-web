@@ -2,11 +2,14 @@
 import { PageDescription, PageHeader, PageTitle } from '@/components/common'
 import { Button } from '@/components/ui/button'
 import ResizableTable from '@/components/ui/Resizabletable'
-import { EyeIcon, PencilIcon } from 'lucide-react'
+import { ChevronDownIcon, EyeIcon, PencilIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { getGFSList } from './actions'
 import { SuspicionDashboard } from './dashboard'
+import { StatusPill } from '@/components/ui/StatusPill'
+import { riskLevelVariants } from '@/lib/utils'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 
 const handleColumns = (handleView, handleEdit) => {
@@ -41,11 +44,24 @@ const handleColumns = (handleView, handleEdit) => {
     {
       header: 'Customer Name',
       accessorKey: 'customerName',
+      cell: ({ row }) => {
+        return (
+          <div>
+            <h5 className="text-heading font-semibold capitalize flex justify-between" >
+              <span className='text-md'>
+                {row.original.customerName}
+              </span>
+
+            </h5>
+            <p className="font-mono text-neutral-500">#{row.original.customerUID}</p>
+          </div>
+        )
+      }
     },
-    {
-      header: 'Customer ID',
-      accessorKey: 'customerUID',
-    },
+    // {
+    //   header: 'Customer ID',
+    //   accessorKey: 'customerUID',
+    // },
     {
       header: 'Suspicion Date',
       accessorKey: 'suspicionDates',
@@ -53,10 +69,42 @@ const handleColumns = (handleView, handleEdit) => {
     {
       header: 'Suspicion Type',
       accessorKey: 'suspicionType',
+      cell: ({ row }) => {
+        return (
+          <div>
+            <p className='max-w-[200px] text-wrap break-words line-clamp-2 text-ellipsis overflow-hidden'>{row.original.suspicionType}</p>
+          </div>
+        )
+      }
     },
     {
       header: 'Suspicion Reason',
       accessorKey: 'suspicionReason',
+      size: 300,
+      cell: ({ row }) => {
+        return (
+          <>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <p className='max-w-[200px] text-wrap break-words   overflow-hidden line-clamp-2 text-ellipsis'>{row.original.suspicionReason}</p>
+
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div>
+                  <p className='max-w-[300px] text-wrap break-words   overflow-hidden '>{row.original.suspicionReason}</p>
+
+                </div>
+              </TooltipContent>
+            </Tooltip>
+
+
+
+          </>
+
+        )
+      }
     },
     {
       header: 'Status',
@@ -84,7 +132,6 @@ export default function GFSPage() {
     }
     // setData(response.data)
   }
-  console.log('data', data)
 
   useEffect(() => {
     getData()

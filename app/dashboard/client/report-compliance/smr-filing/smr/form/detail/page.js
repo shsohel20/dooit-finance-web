@@ -450,7 +450,7 @@ export default function ReportDetailView() {
                 {/* address */}
                 <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
                   <MapPin className="h-5 w-5 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">{formatAddress(data?.partH.reportingEntity.address)}</p>
+                  <p className="text-sm text-muted-foreground">{formatAddress(data?.partH?.reportingEntity?.address)}</p>
                 </div>
                 {/* completed by */}
                 <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-4">
@@ -459,19 +459,19 @@ export default function ReportDetailView() {
                   <div className="flex flex-col gap-1">
                     <div>
                       <p className="text-xs text-muted-foreground">Name</p>
-                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH.reportingEntity.completedBy.name || "Not specified"}</p>
+                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH?.reportingEntity?.completedBy?.name || "Not specified"}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Job Title</p>
-                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH.reportingEntity.completedBy.jobTitle || "Not specified"}</p>
+                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH?.reportingEntity?.completedBy?.jobTitle || "Not specified"}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Phone</p>
-                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH.reportingEntity.completedBy.phone || "Not specified"}</p>
+                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH?.reportingEntity?.completedBy?.phone || "Not specified"}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Email</p>
-                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH.reportingEntity.completedBy.email || "Not specified"}</p>
+                      <p className="text-sm text-muted-foreground font-semibold">{data?.partH?.reportingEntity?.completedBy?.email || "Not specified"}</p>
                     </div>
                   </div>
 
@@ -494,7 +494,7 @@ export default function ReportDetailView() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {data?.metadata.workflowHistory.map((event, index) => (
+                  {data?.metadata?.workflowHistory?.map((event, index) => (
                     <div key={index} className="relative flex gap-4">
                       {index !== data?.metadata.workflowHistory.length - 1 && (
                         <div className="absolute left-[7px] top-6 h-full w-px bg-border" />

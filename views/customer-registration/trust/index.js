@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 
 export default function TrustRegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState(null);
+
   const { country } = useCustomerRegisterStore();
 
   const form = useForm({

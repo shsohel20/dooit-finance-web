@@ -1,62 +1,24 @@
-import { defineConfig, globalIgnores } from 'eslint/config'
-import nextVitals from 'eslint-config-next/core-web-vitals'
+import { defineConfig } from "eslint/config";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import js from "@eslint/js";
+import { FlatCompat } from "@eslint/eslintrc";
 
-const eslintConfig = defineConfig([
-  ...nextVitals,
-  // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    '.next/**',
-    'out/**',
-    'build/**',
-    'next-env.d.ts',
-  ]),
-  //error on unused imports
-  {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const compat = new FlatCompat({
+    baseDirectory: __dirname,
+    recommendedConfig: js.configs.recommended,
+    allConfig: js.configs.all
+});
+
+export default defineConfig([{
+    extends: compat.extends("next/core-web-vitals"),
+    files: ["**/*.js", "**/*.jsx"],
     rules: {
-      // ❗ NOW this will work for JS
-      "no-undef": "error",
-
-      // Unused variables
-      "no-unused-vars": [
-        "error",
-        {
-          vars: "all",
-          args: "after-used",
-          ignoreRestSiblings: true,
-        },
-      ],
-
-      // Unused imports
-      "no-unused-imports/no-unused-imports": "error",
-
-      // Import order
-      "import/order": [
-        "error",
-        {
-          groups: [
-            "builtin",
-            "external",
-            "internal",
-            "parent",
-            "sibling",
-            "index",
-          ],
-          alphabetize: { order: "asc", caseInsensitive: true },
-          "newlines-between": "always",
-        },
-      ],
-
-      // Prettier formatting
-      "prettier/prettier": "error",
-
-      // Clean code
-      "no-console": "warn",
-      "no-var": "error",
-      "prefer-const": "error",
+        //for all js, jsx files
+        "no-console": "warn",
+        "no-unused-vars": "warn",
+        "no-undef": "error",
     },
-
-  },
-])
-
-export default eslintConfig
+}]);
