@@ -5,15 +5,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import CustomDropZone from "@/components/ui/DropZone";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { riskLevelVariants } from "@/lib/utils";
+
 import { toast } from "sonner";
 import { createInstantReport } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 import { ArrowRight } from "lucide-react";

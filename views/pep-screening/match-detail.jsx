@@ -69,113 +69,10 @@ export function MatchDetail({
           <SheetTitle>Match Detail</SheetTitle>
         </SheetHeader>
         <div className="flex-1 flex flex-col  overflow-hidden">
-          {/* Top Bar */}
-
-          {/* Case Header */}
-          {/* <div className="bg-white border-b border-slate-200 px-4 py-3">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-slate-500" />
-                <span className="font-semibold text-slate-800">{caseData.caseName}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Case Rating</span>
-                {getRatingBadge(caseData.caseRating)}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Case ID</span>
-                <span className="text-sm font-mono text-slate-700">{caseData.caseId}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Group</span>
-                <span className="text-sm text-slate-700">Line1</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Assignee</span>
-                <span className="text-sm text-slate-700">
-                  {caseData.assignee || "Case Unassigned"}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Case Last Updated</span>
-                <span className="text-sm text-slate-700">{caseData.lastModifiedDateUser}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Ongoing Screening</span>
-                <span className="text-sm text-slate-700">
-                  {caseData.ongoingScreening ? "Yes" : "No"}
-                </span>
-              </div>
-            </div>
-          </div> */}
-
           {/* Left Sidebar + Main Content Row */}
           <div className="flex-1 flex overflow-hidden">
-            {/* Left Sidebar - Case Details */}
-            {/* <div className="w-44  border-r border-slate-200 p-4 shrink-0">
-              <h3 className="text-xs font-semibold text-slate-500 mb-3">CASE DETAILS</h3>
-              <div className="space-y-3 text-sm">
-                <div>
-                  <span className="text-slate-500 text-xs">Name Transposition</span>
-                  <p className="text-slate-800">Yes</p>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-xs">Primary Name</span>
-                  <p className="text-slate-800 font-medium">{caseData.caseName}</p>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-xs">Status</span>
-                  <div className="mt-1">
-                    {caseData.archived ? (
-                      <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded">
-                        Archived
-                      </span>
-                    ) : (
-                      <span className="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded">
-                        Active
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div> */}
-
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Navigation Bar */}
-              {/* <div className=" border-b border-slate-200 px-4 py-2 flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onBack}
-                  className="gap-1 bg-transparent"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Back to Matches
-                </Button>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-600">Matching World-Check Record</span>
-                  <button
-                    onClick={() => onNavigate("prev")}
-                    className="text-slate-400 hover:text-slate-700 disabled:opacity-50"
-                    disabled={matchIndex <= 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <span className="bg-white border border-slate-300 px-2 py-0.5 rounded text-sm min-w-[40px] text-center">
-                    {matchIndex}
-                  </span>
-                  <button
-                    onClick={() => onNavigate("next")}
-                    className="text-slate-400 hover:text-slate-700 disabled:opacity-50"
-                    disabled={matchIndex >= totalMatches}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                  <span className="text-sm text-slate-500">of {totalMatches}</span>
-                </div>
-              </div> */}
-
               {/* Archived Warning Banner */}
               {caseData.archived && (
                 <div className="bg-amber-100 border-b border-amber-300 px-4 py-2 flex items-center gap-2">
@@ -191,22 +88,56 @@ export function MatchDetail({
               {/* Match Detail Content */}
               <div className="flex-1 overflow-auto p-4">
                 <div className=" gap-4">
-                  {/* Current Status */}
-                  <div className="bg-white rounded-lg border border-slate-200 p-4">
-                    <h3 className="text-xs font-semibold text-slate-500 mb-3 uppercase">
-                      Current Status
-                    </h3>
-                    <div className="flex text-sm justify-between">
-                      <LabelDetails label="Resolution Status" value="Unresolved" />
-                      {/* <div className="flex flex-col"> */}
-                      <LabelDetails label="Risk Level" value={caseData.riskLevel} />
-                      <LabelDetails label="Reason" value={caseData.reason} />
-                      <LabelDetails label="Resolution Remark" value={caseData.resolutionRemark} />
-                      <LabelDetails label="Review Comment" value={caseData.reviewComment} />
-                      <LabelDetails label="Last Updated" value={caseData.lastUpdated} />
+                  <div className="border rounded-lg   p-4">
+                    {/* Current Status */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-500 mb-3 uppercase">
+                        Current Status
+                      </h3>
+                      <div className="flex text-sm justify-between">
+                        <LabelDetails label="Resolution" value="Unresolved" />
+                        {/* <div className="flex flex-col"> */}
+                        <LabelDetails label="Risk Level" value={caseData.riskLevel} />
+                        <LabelDetails label="Reason" value={caseData.reason} />
+                        <LabelDetails label="Resolution Remark" value={caseData.resolutionRemark} />
+                        <LabelDetails label="Review Comment" value={caseData.reviewComment} />
+                        <LabelDetails label="Last Updated" value={caseData.lastUpdated} />
+                      </div>
+                    </div>
+                    {/* Comparison Data */}
+                    <div className="mt-4 bg-white rounded-lg border border-slate-200 overflow-hidden">
+                      <div className=" px-4 py-2 border-b border-slate-200">
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase">
+                          Comparison Data
+                        </h3>
+                      </div>
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-slate-200 bg-slate-50">
+                            <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3"></th>
+                            <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3">
+                              Submitted Data
+                            </th>
+                            <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3">
+                              Matched Data
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="border-b border-slate-100">
+                            <td className="px-4 py-2 text-slate-800 font-medium">Name</td>
+                            <td className="px-4 py-2">
+                              <div className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-emerald-500" />
+                                <span className="text-slate-800">{caseData.caseName}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-2 text-slate-800">{keyData.name}</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-
                   {/* Archived Notice */}
                   {caseData.archived && (
                     <div className="bg-amber-50 rounded-lg border border-amber-200 p-4 flex items-start gap-2">
@@ -220,40 +151,6 @@ export function MatchDetail({
                       </div>
                     </div>
                   )}
-                </div>
-
-                {/* Comparison Data */}
-                <div className="mt-4 bg-white rounded-lg border border-slate-200 overflow-hidden">
-                  <div className=" px-4 py-2 border-b border-slate-200">
-                    <h3 className="text-xs font-semibold text-slate-500 uppercase">
-                      Comparison Data
-                    </h3>
-                  </div>
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50">
-                        <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3"></th>
-                        <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3">
-                          Submitted Data
-                        </th>
-                        <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3">
-                          Matched Data
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b border-slate-100">
-                        <td className="px-4 py-2 text-slate-800 font-medium">Name</td>
-                        <td className="px-4 py-2">
-                          <div className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-emerald-500" />
-                            <span className="text-slate-800">{caseData.caseName}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-slate-800">{keyData.name}</td>
-                      </tr>
-                    </tbody>
-                  </table>
                 </div>
 
                 {/* Detail Tabs */}

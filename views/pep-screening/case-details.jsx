@@ -849,67 +849,27 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        {/* <div className="flex items-center gap-2">
-          <User className="h-5 w-5 text-slate-500" />
-          <span className="font-semibold text-slate-800">{caseData.caseName}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">Case Rating</span>
-          {getRatingBadge(caseData.caseRating)}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">Case ID</span>
-          <span className="text-sm font-mono text-slate-700">{caseData.caseId}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">Group</span>
-          <span className="text-sm text-slate-700">Line1</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">Assignee</span>
-          <span className="text-sm text-slate-700">{caseData.assignee || "Case Unassigned"}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">Case Last Updated</span>
-          <span className="text-sm text-slate-700">{caseData.lastModifiedDateUser}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">Ongoing Screening</span>
-          <span className="text-sm text-slate-700">{caseData.ongoingScreening ? "Yes" : "No"}</span>
-        </div> */}
       </div>
 
       {/* Tabs */}
       <div className="bg-white py-2  flex items-center gap-1">
-        {/* <button
-          onClick={() => setActiveTab("summary")}
-          className={cn(
-            "px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors",
-            activeTab === "summary"
-              ? "border-blue-600 text-blue-600 bg-blue-50"
-              : "border-transparent text-slate-600 hover:text-slate-800 hover:",
-          )}
-        >
-          <FileText className="h-4 w-4" />
-          SUMMARY
-        </button> */}
         <button
           onClick={() => setActiveTab("world-check")}
           className={cn(
-            "px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors rounded-md",
+            "px-4 py-2 text-sm font-medium flex items-center gap-2  transition-colors rounded-md",
             activeTab === "world-check"
               ? "bg-primary text-white"
               : "border-transparent text-slate-600 hover:text-slate-800 hover:",
           )}
         >
-          <Globe className="h-4 w-4" />
-          Dooit CHECK
+          <Search className="h-4 w-4" />
+          Dooit
           <span className="bg-accent text-white text-xs px-1.5 py-0.5 rounded">348</span>
         </button>
         <button
           onClick={() => setActiveTab("linked-cases")}
           className={cn(
-            "px-4 py-2 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors rounded-md",
+            "px-4 py-2 text-sm font-medium flex items-center gap-2  transition-colors rounded-md",
             activeTab === "linked-cases"
               ? "bg-primary text-white"
               : "border-transparent text-slate-600 hover:text-slate-800 hover:",
