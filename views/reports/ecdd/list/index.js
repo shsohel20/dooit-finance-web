@@ -24,6 +24,7 @@ import { formatDateTime, riskLevelVariants } from '@/lib/utils';
 import CustomPagination from '@/components/CustomPagination';
 import { StatusPill, statusPillVariants } from '@/components/ui/StatusPill';
 import { Badge } from '@/components/ui/badge';
+import CustomResizableTable from '@/components/ui/CustomResizable';
 
 const EcddList = () => {
     const router = useRouter();
@@ -72,6 +73,7 @@ const EcddList = () => {
     }
     const columns = [
         {
+            id: 'actions',
             size: 40,
             header: 'Action',
             accessorKey: 'id',
@@ -92,12 +94,14 @@ const EcddList = () => {
             </div>,
         },
         {
+            id: 'uid',
             header: 'UID',
             cell: ({ row }) => <div>
                 <p className="font-mono">#{row?.original?.uid}</p>
             </div>
         },
         {
+            id: 'caseId',
             header: 'Case ID',
             accessorKey: 'caseNumber',
             cell: ({ row }) => <div>
@@ -116,6 +120,7 @@ const EcddList = () => {
         },
 
         {
+            id: 'suspicionDate',
             header: 'Suspicion Date',
             accessorKey: 'createdAt',
             cell: ({ row }) => <div>
@@ -125,10 +130,12 @@ const EcddList = () => {
             </div>
         },
         {
+            id: 'analyst',
             header: 'Analyst',
             accessorKey: 'analystName',
         },
         {
+            id: 'transaction',
             header: 'Transaction',
             accessorKey: 'transaction.amount',
             cell: ({ row }) => <div hidden={!row?.original?.transaction}>
@@ -155,6 +162,7 @@ const EcddList = () => {
             </div>
         },
         {
+            id: 'status',
             header: 'Status',
             accessorKey: 'status',
         },
@@ -176,11 +184,13 @@ const EcddList = () => {
 
     return (
         <div>
-            <ResizableTable
+            <CustomResizableTable
                 columns={columns}
                 data={data}
                 loading={loading}
                 actions={<Actions />}
+                tableId="ecdd-list"
+                mainClass="ecdd-list"
             />
             <CustomPagination
                 currentPage={currentPage}

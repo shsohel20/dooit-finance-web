@@ -19,6 +19,7 @@ const CustomResizableTable = ({
   data,
   loading,
   onDoubleClick,
+  actions,
   ...props
 }) => {
   const [highlightedId, setHighlightedId] = useState(null);
@@ -141,6 +142,11 @@ const CustomResizableTable = ({
 
   return (
     <div className="mt-4">
+      {actions ? (
+        <div className="flex items-center justify-end gap-2 mb-2">
+          {actions}
+        </div>
+      ) : null}
       <Table
         id={tableId}
         className={cn(mainClass, className, 'w-full  border ')}

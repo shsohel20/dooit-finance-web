@@ -2,12 +2,11 @@ import React from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from '@/components/ui/badge'
 import CustomerQueueList from '@/views/onboarding/customer-queue/list'
-import { PageDescription, PageHeader, PageTitle } from '@/components/common';
+
 import CustomerQueueHeader from '@/views/onboarding/customer-queue/header';
 import PendingCollection from '@/views/onboarding/customer-queue/list/PendingCollection';
 import Rejected from '@/views/onboarding/customer-queue/list/Rejected';
 import Verified from '@/views/onboarding/customer-queue/list/Verified';
-import { Card } from '@/components/ui/card';
 import CustomerDashboard from '@/views/onboarding/customer-queue/list/Dashboard';
 
 export default function Page() {

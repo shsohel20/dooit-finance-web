@@ -50,6 +50,7 @@ export const TransactionReportingModal = ({ open, setOpen, currentItem, setCurre
           // }
         ]
       }
+      console.log('payload', JSON.stringify(payload, null, 2))
       const response = await createInstantReport(payload);
       if (response.succeed) {
         setOpen(false);

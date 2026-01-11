@@ -553,6 +553,7 @@ export const ReportingModal = ({ open, setOpen, currentItem, setCurrentItem }) =
   const handleFileChange = (file) => {
     setFile(file);
   }
+  console.log('currentItem', currentItem);
   const onSubmit = async () => {
     setIsSubmitting(true);
     try {
@@ -576,6 +577,7 @@ export const ReportingModal = ({ open, setOpen, currentItem, setCurrentItem }) =
           // }
         ]
       }
+      console.log('payload', JSON.stringify(payload, null, 2))
       const response = await createInstantReport(payload);
       if (response.succeed) {
         setOpen(false);

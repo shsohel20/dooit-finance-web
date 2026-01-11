@@ -178,6 +178,7 @@ body {
   font-family: font-2, sans-serif;
   font-size: 0.8rem;
   background: var(--body);
+  color: var(--smoke-700);
 }
 .container {
   width: min(90%, 1280px);
