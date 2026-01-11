@@ -100,7 +100,7 @@ export default function DashboardPage() {
 
   return (
     <div className="mb-4  to-muted/20">
-      <div className="bg-primary rounded-md p-8 text-white mb-4 space-y-2 flex items-center justify-between ">
+      <div className="bg-smoke-200  rounded-md p-8  mb-4 space-y-2 flex items-center justify-between ">
         <div className="space-y-2">
           <h1 className=" font-bold tracking-tight ">Total Transactions (last 30 days)</h1>
           {/* <p className="text-sm ">Total transactions processed in the last 30 days</p> */}
@@ -122,27 +122,26 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
-      <main className=" grid grid-cols-4 gap-6 py-4">
+      <main className=" grid grid-cols-8 gap-6 py-4">
         <div className="col-span-3 border rounded-md p-4">
-          <div className="flex items-center gap-2 mb-10">
+          <div className="flex items-center gap-2 ">
             <Calendar className="h-4 w-4 text-success" />
             <h5 className="text-base font-semibold text-heading tracking-tight">
               Transaction flow
             </h5>
           </div>
 
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={100}>
             <BarChart data={cashFlowData}>
-              {/* need to add multiple colors for the bars */}
               <Bar dataKey="value" radius={[6, 6, 0, 0]} />
-              <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#6b7280" }} />
-              <YAxis tick={{ fontSize: 12, fill: "#6b7280" }} />
+              {/* <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#6b7280" }} /> */}
+              {/* <YAxis tick={{ fontSize: 12, fill: "#6b7280" }} /> */}
               <Tooltip />
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="  col-span-1">
-          <Card className="">
+        <div className="  col-span-5 flex gap-4">
+          <Card className="w-full">
             {/* <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full -mr-16 -mt-16"></div> */}
             <CardContent className="pt-6 relative">
               <div className="flex items-start justify-between gap-4">
@@ -169,7 +168,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="">
+          <Card className="w-full">
             <CardContent className="pt-6 relative">
               <div className="flex items-start justify-between gap-4">
                 <div className="rounded-xl bg-accent p-2">
@@ -195,7 +194,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="">
+          <Card className="w-full">
             <CardContent className="pt-6 relative">
               <div className="flex items-start justify-between gap-4">
                 <div className="rounded-xl bg-primary-light p-2">

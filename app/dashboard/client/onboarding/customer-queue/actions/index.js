@@ -27,3 +27,11 @@ export const getCustomerById = async (id) => {
   })
   return response.json();
 }
+
+export const createInstantReport = async (reportData) => {
+  const response = await fetchWithAuth('report-notify/new', {
+    method: 'POST',
+    body: JSON.stringify(reportData)
+  })
+  return response.json();
+}

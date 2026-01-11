@@ -47,6 +47,9 @@ import TransactionReportingModal from "../form/ReportingModal";
 import TransactionDashboard from "./Dashboard";
 import CustomPagination from "@/components/CustomPagination";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), { ssr: false });
+
 
 const TransactionListView = () => {
   const [openDetailView, setOpenDetailView] = useState(false);
@@ -95,6 +98,7 @@ const TransactionListView = () => {
   };
   const columns = [
     {
+      id: "actions",
       header: "Actions",
       accessorKey: "actions",
       size: 60,
@@ -125,10 +129,12 @@ const TransactionListView = () => {
       ),
     },
     {
+      id: "id",
       header: ({ column }) => <DataTableColumnHeader column={column} title="ID" />,
       accessorKey: "uid",
     },
     {
+      id: "Flow Direction",
       header: ({ column }) => <span>Flow Direction</span>,
       accessorKey: "sender.name",
       size: 200,
@@ -151,11 +157,13 @@ const TransactionListView = () => {
       },
     },
     {
+      id: "type",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
       accessorKey: "type",
       size: 100,
     },
     {
+      id: "beneficiaryName",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Beneficial Owner" />,
       accessorKey: "beneficiary.name",
       size: 100,
@@ -169,6 +177,7 @@ const TransactionListView = () => {
       },
     },
     {
+      id: "amount",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Amount" />,
       accessorKey: "amount",
       cell: ({ row }) => {
@@ -184,6 +193,7 @@ const TransactionListView = () => {
     },
 
     {
+      id: "channel",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Method" />,
       accessorKey: "channel",
       size: 100,
@@ -196,10 +206,12 @@ const TransactionListView = () => {
       },
     },
     {
+      id: "reference",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Ref" />,
       accessorKey: "reference",
     },
     {
+      id: "status",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
       accessorKey: "Status",
       cell: ({ row }) => {
@@ -213,6 +225,7 @@ const TransactionListView = () => {
       },
     },
     {
+      id: "date",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Date & Time" />,
       accessorKey: "date",
       cell: ({ row }) => {
@@ -254,7 +267,6 @@ const TransactionListView = () => {
     setLimit(limit);
     setCurrentPage(1);
   };
-
   return (
     <div>
       {/* <PageHeader>
@@ -296,7 +308,7 @@ const TransactionListView = () => {
               <SelectValue placeholder="Date Range" />
             </SelectTrigger>
           </Select>
-          <Select>
+          <Select >
             <SelectTrigger>
               <SelectValue placeholder="Select a country" />
             </SelectTrigger>
@@ -330,11 +342,12 @@ const TransactionListView = () => {
         </div>
       </div>
       {/* <CustomDatatable data={transactions} columns={columns} onDoubleClick={handleViewReportClick} /> */}
-      <ResizableTable
+      <CustomResizableTable
         columns={columns}
         data={transactions?.data || []}
         onDoubleClick={handleViewReportClick}
         loading={fetching}
+        mainClass="transactions-table"
         actions={<Actions />}
       />
       <CustomPagination

@@ -1,6 +1,6 @@
 'use client'
 
-import { getCustomerById, getCustomers } from '@/app/dashboard/client/onboarding/customer-queue/actions'
+import { createInstantReport, getCustomerById, getCustomers } from '@/app/dashboard/client/onboarding/customer-queue/actions'
 import { useCustomerStore } from '@/app/store/useCustomer'
 import CustomPagination from '@/components/CustomPagination'
 import { DataTableColumnHeader } from '@/components/DatatableColumnHeader'
@@ -31,10 +31,13 @@ import { useRouter } from 'next/navigation'
 import CustomDropZone from '@/components/ui/DropZone'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import _, { isObject } from 'lodash';
 import CustomSelect from '@/components/ui/CustomSelect'
 import { countriesData } from '@/constants'
+import dynamic from 'next/dynamic'
+import { fileUploadOnCloudinary } from '@/app/actions'
+const CustomResizableTable = dynamic(() => import('@/components/ui/CustomResizable'), { ssr: false });
 const statusVariants = {
   pending: 'warning',
   rejected: 'danger',
@@ -115,6 +118,7 @@ const ListView = () => {
 
   const columns = [
     {
+      id: 'actions',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -136,6 +140,7 @@ const ListView = () => {
       ),
     },
     {
+      id: 'uid',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -150,6 +155,7 @@ const ListView = () => {
       accessorKey: 'uid',
     },
     {
+      id: 'user.name',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -173,6 +179,7 @@ const ListView = () => {
     },
 
     {
+      id: 'country',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -183,6 +190,7 @@ const ListView = () => {
       size: 100,
     },
     {
+      id: 'kycStatus',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -198,6 +206,7 @@ const ListView = () => {
       ),
     },
     {
+      id: 'riskAssessment?.customerType?.value',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -212,6 +221,7 @@ const ListView = () => {
       ),
     },
     {
+      id: 'riskLabel',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -227,6 +237,7 @@ const ListView = () => {
       ),
     },
     {
+      id: 'createdAt',
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -292,12 +303,14 @@ const ListView = () => {
       {/* <div className='flex justify-end'>
         <Button>Send Invite</Button>
       </div> */}
-      <ResizableTable
+      <CustomResizableTable
         columns={columns}
         data={customers}
         onDoubleClick={handleDoubleClick}
         loading={fetching}
         actions={<Actions />}
+        mainClass="customer-queue-table"
+        tableId="customer-queue-table"
       />
       <CustomPagination
         currentPage={currentPage}
@@ -350,7 +363,6 @@ export default function CustomerQueueList({ data, kycStatus }) {
   const debouncedFetchRef = useRef(null);
 
 
-  console.log('customers', customers);
   const fetchData = useCallback(async (params = null) => {
     setFetching(true);
 
@@ -367,7 +379,6 @@ export default function CustomerQueueList({ data, kycStatus }) {
         queryParams[key] = value?.value;
       }
     }
-    console.log('queryParams', queryParams);
     const response = await getCustomers(queryParams);
     setFetching(false);
     setCustomers(response.data);
@@ -408,7 +419,7 @@ export default function CustomerQueueList({ data, kycStatus }) {
   return (
     <div className='my-2'>
       {/* <CustomerDashboard /> */}
-      <div className='flex items-center justify-between  py-4 bg-white rounded-md px-4 shadow'>
+      <div className='flex items-center justify-between  py-4 bg-sidebar-bg rounded-md px-4 '>
         {/* Search and Filter */}
         <div className='flex items-center gap-2 flex-shrink-0 flex-grow  flex-wrap'>
           <InputGroup className={'w-64 flex-shrink-0'}>
@@ -463,7 +474,7 @@ export default function CustomerQueueList({ data, kycStatus }) {
           </Select>
 
 
-          <div className='w-40 flex-shrink-0'>
+          <div className='w-44 flex-shrink-0'>
             <CustomSelect
               placeholder='Select a country'
               options={countriesData}
@@ -530,48 +541,105 @@ export default function CustomerQueueList({ data, kycStatus }) {
 
 
 export const ReportingModal = ({ open, setOpen, currentItem, setCurrentItem }) => {
+  const [formData, setFormData] = useState({
+    riskLevel: currentItem?.riskLabel ?? '',
+    insights: '',
+    file: null,
+  });
   const [file, setFile] = useState(null);
+  const [fileUrl, setFileUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  console.log('currentItem', currentItem);
   const handleFileChange = (file) => {
-    console.log(file);
     setFile(file);
   }
   const onSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // const response = await submitReporting(file);
-      //sleep for 1 second
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setOpen(false);
-      toast.success('Reporting submitted successfully');
+      const payload = {
+        notifyFor: "Customer",
+        notes: formData?.insights,
+        resourceType: "Customer",
+        resourceId: currentItem?.id,
+        isActive: true,
+        metadata: {
+          priority: "high",
+          origin: "automated-rule"
+        },
+        documents: [
+          // {
+          //   name: file?.name,
+          //   url: fileUrl,
+          //   mimeType: file?.type,
+          //   type: "invoice",
+          //   docType: "billing"
+          // }
+        ]
+      }
+      const response = await createInstantReport(payload);
+      if (response.succeed) {
+        setOpen(false);
+        toast.success('Reporting submitted successfully');
+      } else {
+        toast.error('Failed to submit report');
+      }
     } catch (error) {
       console.error(error);
-      toast.error('Failed to submit reporting');
+      toast.error('Failed to submit report');
     } finally {
       setIsSubmitting(false);
       setCurrentItem(null);
     }
   }
 
+  // const handleFileUpload = async (file) => {
+  //   setUploading(true);
+  //   try {
+  //     const response = await fileUploadOnCloudinary(file);
+  //     console.log('response', response);
+  //     if (response.success) {
+  //       setFileUrl(response.data.fileUrl);
+  //     } else {
+  //       toast.error('Failed to upload file');
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error('Failed to upload file');
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // }
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
 
-      <DialogContent>
+      <DialogContent className='md:max-w-2xl'>
         <DialogHeader>
           <DialogTitle>Reporting</DialogTitle>
-          <DialogDescription>Risk Level: <Badge variant={riskLevelVariants[currentItem?.riskLabel ?? '']}>{currentItem?.riskLabel}</Badge></DialogDescription>
+          {/* <DialogDescription>
+            <div className='bg-smoke-200 border w-max p-2 rounded-md'>
+              Risk Level: <Badge variant={riskLevelVariants[currentItem?.riskLabel ?? '']}>{currentItem?.riskLabel}</Badge>
+            </div>
+          </DialogDescription> */}
         </DialogHeader>
+        <div className='flex items-center gap-2'>
+          <Label className='font-bold'>Risk Level</Label>
+          <Badge variant={riskLevelVariants[currentItem?.riskLabel ?? '']}>{currentItem?.riskLabel}</Badge>
+        </div>
         <div className='flex flex-col '>
           <Label className={'font-bold'}>Share your insights</Label>
-          <Textarea placeholder='Share your insights' />
+          <Textarea placeholder='Share your insights' className='min-h-40' onChange={(e) => setFormData({ ...formData, insights: e.target.value })} />
         </div>
         <div>
           <CustomDropZone
+            fileTypes={['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']}
             className=''
             handleChange={handleFileChange}
             file={file}
+            loading={uploading}
+            disabled={uploading}
+            url={fileUrl}
             setFile={setFile} />
         </div>
         <DialogFooter>
