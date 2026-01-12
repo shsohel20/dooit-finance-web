@@ -74,6 +74,7 @@ const ListView = ({}) => {
   };
   const columns = [
     {
+      id: "actions",
       header: "Actions",
       size: 40,
       cell: ({ row }) => (
@@ -142,6 +143,7 @@ const ListView = ({}) => {
       ),
     },
     {
+      id: "uid",
       header: "Case ID",
       accessorKey: "uid",
       cell: ({ row }) => (
@@ -152,6 +154,7 @@ const ListView = ({}) => {
     },
 
     {
+      id: "transaction",
       header: "Transaction",
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
@@ -174,6 +177,7 @@ const ListView = ({}) => {
       ),
     },
     {
+      id: "transactionAmount",
       header: "Transaction Amount",
       accessorKey: "transaction.amount",
       cell: ({ row }) => (
@@ -183,6 +187,7 @@ const ListView = ({}) => {
       ),
     },
     {
+      id: "transactionDate",
       header: "Transaction Date",
       accessorKey: "transaction.timestamp",
       cell: ({ row }) => (
@@ -195,10 +200,12 @@ const ListView = ({}) => {
       ),
     },
     {
+      id: "analyst",
       header: "Analyst",
       accessorKey: "analyst.name",
     },
     {
+      id: "risk",
       header: "Risk",
       accessorKey: "risk",
       cell: ({ row }) => (
@@ -208,10 +215,12 @@ const ListView = ({}) => {
       ),
     },
     {
+      id: "alertType",
       header: "Alert Type",
       accessorKey: "caseType",
     },
     {
+      id: "status",
       header: "Status",
       accessorKey: "status",
       cell: ({ row }) => (
@@ -228,7 +237,13 @@ const ListView = ({}) => {
   };
   return (
     <div className="mt-4">
-      <CustomResizableTable data={alerts} columns={columns} loading={fetching} />
+      <CustomResizableTable
+        data={alerts}
+        columns={columns}
+        loading={fetching}
+        tableId="case-list-table"
+        mainClass="case-list-table"
+      />
       <CustomPagination
         currentPage={currentPage}
         onPageChange={handlePageChange}

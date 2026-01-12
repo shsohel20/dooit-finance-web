@@ -44,6 +44,7 @@ export default function RuleConfigurationList() {
       }
     },
     {
+      id: "condition",
       header: "Condition",
       accessorKey: "condition",
       cell: ({ row }) => {
@@ -55,6 +56,7 @@ export default function RuleConfigurationList() {
       }
     },
     {
+      id: "ruleDomain",
       header: "Rule Domain",
       accessorKey: "ruleDomain",
       cell: ({ row }) => {
@@ -66,6 +68,7 @@ export default function RuleConfigurationList() {
       }
     },
     {
+      id: "mainDomain",
       header: "Main Domain",
       accessorKey: "mainDomain",
       cell: ({ row }) => {
@@ -102,7 +105,7 @@ export default function RuleConfigurationList() {
         data={data}
         // onDoubleClick={handleDoubleClick}
         tableId="rule-configuration-table"
-        mainClass="rule-configuration-table"
+        mainClass="rule-configuration-table-id"
       />
       {openEditModal && <RuleConfigurationForm
         open={openEditModal}
