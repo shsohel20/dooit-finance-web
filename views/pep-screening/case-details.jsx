@@ -38,7 +38,7 @@ const mockMatches = [
     matchStrength: 82,
     matchStrengthColor: "red",
     types: [
-      { label: "PEP", color: "bg-red-500" },
+      { label: "PEP", color: "bg-green-500" },
       { label: "SAN", color: "bg-purple-500" },
     ],
     gender: "Female",
@@ -119,7 +119,7 @@ const mockMatches = [
     matchStrength: 88,
     matchStrengthColor: "red",
     types: [
-      { label: "PEP", color: "bg-red-500" },
+      { label: "PEP", color: "bg-green-500" },
       { label: "SAN", color: "bg-purple-500" },
     ],
     gender: "Male",
@@ -229,7 +229,7 @@ const mockMatches = [
     matchedAlias: "AHMADI, Sitara Z.\nAlias",
     matchStrength: 90,
     matchStrengthColor: "red",
-    types: [{ label: "PEP", color: "bg-red-500" }],
+    types: [{ label: "PEP", color: "bg-green-500" }],
     gender: "Female",
     dateOfBirth: "05-May-1979",
     placeOfBirth: "Bamyan",
@@ -312,30 +312,9 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
   const [selectedMatchIndex, setSelectedMatchIndex] = useState(null);
   const [openMatchDetail, setOpenMatchDetail] = useState(false);
 
-  const handleSelectMatch = (id) => {
-    if (selectedMatches.includes(id)) {
-      setSelectedMatches(selectedMatches.filter((mId) => mId !== id));
-    } else {
-      setSelectedMatches([...selectedMatches, id]);
-    }
-  };
-
   const handleMatchClick = (index) => {
     setSelectedMatchIndex(index);
     setOpenMatchDetail(true);
-  };
-
-  const getRatingBadge = (rating) => {
-    const colors = {
-      High: "bg-red-600 text-white",
-      Medium: "bg-amber-500 text-white",
-      Low: "bg-emerald-500 text-white",
-    };
-    return (
-      <span className={cn("px-2 py-0.5 rounded text-xs font-medium", colors[rating])}>
-        {rating}
-      </span>
-    );
   };
 
   const getMatchStrengthBar = (strength, color) => {

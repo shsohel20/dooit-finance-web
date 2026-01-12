@@ -93,7 +93,7 @@ export function MatchDetail({
                       <h3 className="text-xs font-semibold text-slate-500 mb-3 uppercase">
                         Current Status
                       </h3>
-                      <div className="flex text-sm justify-between">
+                      <div className="grid grid-cols-3 gap-4">
                         <LabelDetails label="Resolution" value="Unresolved" />
                         {/* <div className="flex flex-col"> */}
                         <LabelDetails label="Risk Level" value={caseData.riskLevel} />
@@ -104,38 +104,38 @@ export function MatchDetail({
                       </div>
                     </div>
                     {/* Comparison Data */}
-                    <div className="mt-4 bg-white rounded-lg border border-slate-200 overflow-hidden">
-                      <div className=" px-4 py-2 border-b border-slate-200">
-                        <h3 className="text-xs font-semibold text-slate-500 uppercase">
-                          Comparison Data
-                        </h3>
-                      </div>
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-slate-200 bg-slate-50">
-                            <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3"></th>
-                            <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3">
-                              Submitted Data
-                            </th>
-                            <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3">
-                              Matched Data
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border-b border-slate-100">
-                            <td className="px-4 py-2 text-slate-800 font-medium">Name</td>
-                            <td className="px-4 py-2">
-                              <div className="flex items-center gap-2">
-                                <Check className="h-4 w-4 text-emerald-500" />
-                                <span className="text-slate-800">{caseData.caseName}</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-2 text-slate-800">{keyData.name}</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                  </div>
+                  <div className="mt-4 bg-white rounded-lg border border-slate-200 overflow-hidden">
+                    <div className=" px-4 py-2 border-b border-slate-200">
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase">
+                        Comparison Data
+                      </h3>
                     </div>
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-slate-200 bg-slate-50">
+                          <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3"></th>
+                          <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3">
+                            Submitted Data
+                          </th>
+                          <th className="px-4 py-2 text-left text-slate-600 font-medium w-1/3">
+                            Matched Data
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b border-slate-100">
+                          <td className="px-4 py-2 text-slate-800 font-medium">Name</td>
+                          <td className="px-4 py-2">
+                            <div className="flex items-center gap-2">
+                              <Check className="h-4 w-4 text-emerald-500" />
+                              <span className="text-slate-800">{caseData.caseName}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2 text-slate-800">{keyData.name}</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                   {/* Archived Notice */}
                   {caseData.archived && (
@@ -156,10 +156,7 @@ export function MatchDetail({
                 <div className="mt-4 bg-white rounded-lg border border-slate-200 overflow-hidden">
                   <div className="bg-slate-50 px-2 py-1 border-b border-slate-200 flex items-center gap-1 flex-wrap">
                     {[
-                      { id: "key-data", label: "KEY DATA" },
-                      { id: "further-info", label: "FURTHER INFORMATION" },
-                      { id: "aliases", label: "ALIASES" },
-                      { id: "keywords", label: "KEYWORDS" },
+                      { id: "key-data", label: "General Information" },
                       { id: "pep-role", label: "PEP ROLE DETAILS" },
                       { id: "connections", label: "CONNECTIONS / RELATIONSHIPS" },
                       { id: "sources", label: "SOURCES" },
@@ -201,88 +198,33 @@ export function MatchDetail({
                       </div>
 
                       {/* Key Data Table */}
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
-                        <div className="flex">
-                          <LabelDetails label="Name" value={keyData.name} />
-                        </div>
-                        <div></div>
-                        <div className="flex">
-                          <span className="text-slate-500 w-40">Record Update</span>
-                          <div className="flex gap-8">
-                            <div>
-                              <LabelDetails
-                                label="Update Categorization"
-                                value={keyData.updateCategorization}
-                              />
-                            </div>
-                            <div>
-                              <LabelDetails label="Entered Date" value={keyData.enteredDate} />
-                            </div>
-                            <div>
-                              <LabelDetails label="Updated Date" value={keyData.updatedDate} />
-                            </div>
-                          </div>
-                        </div>
-                        <div></div>
-                        <div className="flex">
-                          <LabelDetails label="Category" value={keyData.category} />
-                        </div>
-                        <div></div>
-                        <div className="flex">
-                          <LabelDetails label="Sub-Category" value={keyData.subCategory} />
-                        </div>
-                        <div></div>
-                        <div className="flex">
-                          <LabelDetails label="PEP Status" value={keyData.pepStatus} />
-                        </div>
-                        <div></div>
-                        <div className="flex">
-                          <LabelDetails label="Gender" value={keyData.gender} />
-                        </div>
-                        <div></div>
-                        <div className="flex">
-                          <LabelDetails label="Citizenship" value={keyData.citizenship} />
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                      <div className="grid grid-cols-4 gap-x-8 gap-y-3 text-sm">
+                        <LabelDetails label="Name" value={keyData.name} />
 
-                  {activeDetailTab === "further-info" && (
-                    <div className="p-4">
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase">
-                        FURTHER INFORMATION
-                      </h3>
+                        <LabelDetails
+                          label="Update Categorization"
+                          value={keyData.updateCategorization}
+                        />
+                        <LabelDetails label="Entered Date" value={keyData.enteredDate} />
+                        <LabelDetails label="Updated Date" value={keyData.updatedDate} />
 
-                      <div className="py-4 flex flex-col gap-2">
+                        <LabelDetails label="Category" value={keyData.category} />
+                        <LabelDetails label="Sub-Category" value={keyData.subCategory} />
+                        <LabelDetails label="PEP Status" value={keyData.pepStatus} />
+                        <LabelDetails label="Gender" value={keyData.gender} />
+                        <LabelDetails label="Citizenship" value={keyData.citizenship} />
                         <LabelDetails label="Professional Title" value={"-"} />
                         <LabelDetails label="Date of Birth" value={"19th NOV 1990"} />
                         <LabelDetails label="Place of Birth" value={"Kabul, Afghanistan"} />
-                      </div>
-                    </div>
-                  )}
-                  {activeDetailTab === "aliases" && (
-                    <div className="p-4">
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase">ALIASES</h3>
-                      <div className="py-4 flex flex-col gap-2">
                         <LabelDetails label="Alias" value={"AHMADI, Sitara"} />
-                        {/* <LabelDetails label="Alias" value={"AHMADI, Sitara"} /> */}
-                      </div>
-                    </div>
-                  )}
-                  {activeDetailTab === "keywords" && (
-                    <div className="p-4">
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase">KEYWORDS</h3>
-                      <div className="py-4 flex flex-col gap-2">
                         <LabelDetails label="Keyword" value={"AHMADI, Sitara"} />
                       </div>
                     </div>
                   )}
+
                   {activeDetailTab === "pep-role" && (
                     <div className="p-4">
-                      <h3 className="text-xs font-semibold text-slate-500 uppercase">
-                        PEP ROLE DETAILS
-                      </h3>
-                      <div className="py-4 flex flex-col gap-2">
+                      <div className="grid grid-cols-4 gap-x-8 gap-y-3 text-sm">
                         <LabelDetails label="Is PEP" value={"Yes"} />
                         <LabelDetails label="PEP Role" value={"President"} />
                         <LabelDetails

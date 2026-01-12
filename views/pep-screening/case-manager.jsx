@@ -9,6 +9,7 @@ import { getCustomers } from "@/app/dashboard/client/onboarding/customer-queue/a
 import { StatusPill } from "@/components/ui/StatusPill";
 import { IconPennant } from "@tabler/icons-react";
 import dynamic from "next/dynamic";
+import { Input } from "@/components/ui/input";
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
 });
@@ -358,7 +359,9 @@ export function CaseManager({ formData = null }) {
       accessorKey: "linkedCases",
       cell: ({ row }) => (
         <div>
-          <p className="font-mono text-end">{row?.original?.linkedCases || 10}</p>
+          <p className="font-mono text-end text-muted-foreground">
+            {row?.original?.linkedCases || 10}
+          </p>
         </div>
       ),
       size: 100,
@@ -388,11 +391,11 @@ export function CaseManager({ formData = null }) {
 
     {
       id: "mandatoryActions",
-      header: "Mandatory Actions",
+      header: "Actions Required",
       accessorKey: "mandatoryActions",
       cell: ({ row }) => (
         <div>
-          <p className="text-end">{row?.original?.mandatoryActions || 0}</p>
+          <p className="text-end text-muted-foreground">{row?.original?.mandatoryActions || 0}</p>
         </div>
       ),
     },
@@ -402,18 +405,18 @@ export function CaseManager({ formData = null }) {
       accessorKey: "unresolved",
       cell: ({ row }) => (
         <div>
-          <p className="text-end">{row?.original?.unresolved || 0}</p>
+          <p className="text-end text-muted-foreground">{row?.original?.unresolved || 0}</p>
         </div>
       ),
       size: 100,
     },
     {
       id: "reviewRequired",
-      header: "Review Required",
+      header: "Review",
       accessorKey: "reviewRequired",
       cell: ({ row }) => (
         <div>
-          <p className="text-end">{row?.original?.reviewRequired || 0}</p>
+          <p className="text-end text-muted-foreground">{row?.original?.reviewRequired || 0}</p>
         </div>
       ),
       size: 100,
@@ -424,7 +427,9 @@ export function CaseManager({ formData = null }) {
       accessorKey: "ongoingScreening",
       cell: ({ row }) => (
         <div>
-          <p className="text-end">{row?.original?.ongoingScreening ? "Yes" : "No"}</p>
+          <p className="text-end text-muted-foreground">
+            {row?.original?.ongoingScreening ? "Yes" : "No"}
+          </p>
         </div>
       ),
     },
@@ -434,7 +439,7 @@ export function CaseManager({ formData = null }) {
       accessorKey: "archived",
       cell: ({ row }) => (
         <div>
-          <p className="text-end">{row?.original?.archived ? "Yes" : "No"}</p>
+          <p className="text-end text-muted-foreground">{row?.original?.archived ? "Yes" : "No"}</p>
         </div>
       ),
     },
@@ -444,17 +449,17 @@ export function CaseManager({ formData = null }) {
       accessorKey: "assignee",
       cell: ({ row }) => (
         <div>
-          <p className="text-end">{row?.original?.assignee || "N/A"}</p>
+          <p className="text-end text-muted-foreground">{row?.original?.assignee || "N/A"}</p>
         </div>
       ),
     },
     {
       id: "lastModifiedBy",
-      header: "Last Modified By",
+      header: "Last Updated By",
       accessorKey: "lastModifiedBy",
       cell: ({ row }) => (
         <div>
-          <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+          <p className="text-end text-muted-foreground">{row?.original?.analyst?.name || "N/A"}</p>
         </div>
       ),
     },
@@ -464,7 +469,7 @@ export function CaseManager({ formData = null }) {
       accessorKey: "lastModifiedDateUser",
       cell: ({ row }) => (
         <div>
-          <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+          <p className="text-end text-muted-foreground">{row?.original?.analyst?.name || "N/A"}</p>
         </div>
       ),
     },
@@ -474,7 +479,7 @@ export function CaseManager({ formData = null }) {
       accessorKey: "lastModifiedDateOGS",
       cell: ({ row }) => (
         <div>
-          <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+          <p className="text-end text-muted-foreground">{row?.original?.analyst?.name || "N/A"}</p>
         </div>
       ),
     },
@@ -484,7 +489,7 @@ export function CaseManager({ formData = null }) {
       accessorKey: "createdBy",
       cell: ({ row }) => (
         <div>
-          <p className="text-end">{row?.original?.analyst?.name || "N/A"}</p>
+          <p className="text-end text-muted-foreground">{row?.original?.analyst?.name || "N/A"}</p>
         </div>
       ),
     },
@@ -493,7 +498,11 @@ export function CaseManager({ formData = null }) {
   return (
     <div className="  ">
       {/* Case Manager Header */}
-
+      {/* filter and search */}
+      <div className="flex gap-2">
+        <Input type="text" placeholder="Search" />
+        <Input type="text" placeholder="Case ID" />
+      </div>
       {/* Table */}
       <div className="flex-1 overflow-auto">
         <CustomResizableTable
