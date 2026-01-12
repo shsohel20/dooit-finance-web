@@ -42,7 +42,7 @@ function SheetContent({ className, children, side = 'right', ...props }) {
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          ' data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 m-3 rounded-lg',
+          'bg-white data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 m-3 rounded-lg',
           side === 'right' &&
             'data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-[calc(100vh-2rem)] w-3/4  sm:max-w-sm',
           side === 'left' &&

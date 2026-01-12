@@ -61,7 +61,6 @@ export function MatchDetail({
     gender: matchData.gender || "UNKNOWN",
     citizenship: matchData.citizenship,
   };
-  console.log("caseData", caseData);
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className={"sm:max-w-7xl w-full bg-white"}>

@@ -273,6 +273,11 @@ export default function ClientSidebar({ ...props }) {
       icon: IconListDetails,
       children: [
         {
+          title: "Rule Configuration",
+          url: "/dashboard/client/risk-rule-engine/rule-configuration",
+          icon: IconDatabase,
+        },
+        {
           title: "CRA Scoring Configuration",
           url: "/dashboard/client/risk-rule-engine/cra-scoring-config",
           icon: IconDatabase,

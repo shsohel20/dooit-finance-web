@@ -1,0 +1,983 @@
+[
+  {
+    "id": 1,
+    "name": "large_tx_new_account",
+    "condition": "Account open days < 30 AND amount > 50,000",
+    "description": "Triggers when a large transaction occurs shortly after account opening, indicating potential mule or misuse behavior.",
+    "ruleDomain": "Account & Customer Activity Rules",
+    "mainDomain": "Account & Customer Activity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 2,
+    "name": "sudden_freq_increase",
+    "condition": "Transaction frequency change > 300%",
+    "description": "Detects a sudden and abnormal spike in transaction activity compared to historical behavior.",
+    "ruleDomain": "Account & Customer Activity Rules",
+    "mainDomain": "Account & Customer Activity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 3,
+    "name": "large_debit_low_balance_hist",
+    "condition": "Avg daily balance < 1,000 AND amount > 50,000",
+    "description": "Identifies large debits inconsistent with historically low balances, suggesting unusual funding sources.",
+    "ruleDomain": "Account & Customer Activity Rules",
+    "mainDomain": "Account & Customer Activity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 4,
+    "name": "minor_large_tx",
+    "condition": "Sender age < 18 AND amount > 5,000",
+    "description": "Flags high-value transactions involving minors, which may indicate misuse or proxy account usage.",
+    "ruleDomain": "Account & Customer Activity Rules",
+    "mainDomain": "Account & Customer Activity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 5,
+    "name": "elderly_large_tx",
+    "condition": "Sender age > 80 AND amount > 50,000",
+    "description": "Identifies large transactions by elderly customers, potentially indicating coercion or fraud.",
+    "ruleDomain": "Account & Customer Activity Rules",
+    "mainDomain": "Account & Customer Activity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 6,
+    "name": "extreme_charity_tx",
+    "condition": "Purpose = CHARITY AND amount > 500,000",
+    "description": "Flags exceptionally large charity-related transfers, which can be used for laundering or diversion.",
+    "ruleDomain": "Account & Customer Activity Rules",
+    "mainDomain": "Account & Customer Activity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 7,
+    "name": "extreme_inheritance_tx",
+    "condition": "Purpose = INHERITANCE AND amount > 1,000,000",
+    "description": "Detects very large inheritance claims, often used as a justification for suspicious funds.",
+    "ruleDomain": "Account & Customer Activity Rules",
+    "mainDomain": "Account & Customer Activity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 8,
+    "name": "self_employed_large_tx",
+    "condition": "Employment = SELF_EMPLOYED AND amount > 500,000",
+    "description": "Detects unusually large transactions by self-employed customers, requiring source-of-funds validation.",
+    "ruleDomain": "Account & Customer Activity Rules",
+    "mainDomain": "Account & Customer Activity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 9,
+    "name": "reg_country_mismatch",
+    "condition": "Registration country \u2260 transaction country",
+    "description": "Flags country mismatch between registration and activity, a common cross-border risk signal.",
+    "ruleDomain": "Account & Customer Activity Rules",
+    "mainDomain": "Account & Customer Activity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 10,
+    "name": "rapid_tx",
+    "condition": "Time difference between consecutive transactions < 60 seconds",
+    "description": "Flags rapid successive transactions that may indicate automation or abnormal usage.",
+    "ruleDomain": "Velocity & Pattern Shift",
+    "mainDomain": "Behavioral & Digital Interaction Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 11,
+    "name": "sudden_amt_increase",
+    "condition": "Transaction amount increase > 50% vs previous",
+    "description": "Detects sudden spikes in transaction value inconsistent with normal behavior.",
+    "ruleDomain": "Velocity & Pattern Shift",
+    "mainDomain": "Behavioral & Digital Interaction Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 12,
+    "name": "sudden_amt_drop",
+    "condition": "Transaction amount decrease > 50% vs previous",
+    "description": "Identifies abrupt reductions in transaction amounts, often seen in probing activity.",
+    "ruleDomain": "Velocity & Pattern Shift",
+    "mainDomain": "Behavioral & Digital Interaction Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 13,
+    "name": "burst_large",
+    "condition": "Sum of last 5 transactions > 1,000,000",
+    "description": "Flags high-value transaction bursts over a short period.",
+    "ruleDomain": "Velocity & Pattern Shift",
+    "mainDomain": "Behavioral & Digital Interaction Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 14,
+    "name": "device_shared",
+    "condition": "Number of users per device > 3",
+    "description": "Detects devices shared across multiple users, common in fraud rings.",
+    "ruleDomain": "Device, Session & Identity Reuse",
+    "mainDomain": "Behavioral & Digital Interaction Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 15,
+    "name": "bullion_large",
+    "condition": "Metal purity present AND amount > 200,000",
+    "description": "Detects large bullion-related transactions, requiring source and legitimacy checks.",
+    "ruleDomain": "Business KYC",
+    "mainDomain": "Business KYC & Entity Due Diligence Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 16,
+    "name": "large_tx_charity",
+    "condition": "Sender type = CHARITY_NON_PROFIT AND amount > 500,000",
+    "description": "Flags large transactions involving charities, which may be misused for fund diversion.",
+    "ruleDomain": "Counterparty Type Risk",
+    "mainDomain": "Transaction Counterparties Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 17,
+    "name": "high_freq_to_ben_7d",
+    "condition": "Transactions to same beneficiary > 5 in last 7 days",
+    "description": "Detects high-frequency transfers to a single beneficiary, a structuring indicator.",
+    "ruleDomain": "Counterparty Activity Pattern",
+    "mainDomain": "Transaction Counterparties Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 18,
+    "name": "high_freq_from_sender_7d",
+    "condition": "Transactions from same sender > 5 in last 7 days",
+    "description": "Flags repeated transfers from a single sender, indicating potential layering.",
+    "ruleDomain": "Counterparty Activity Pattern",
+    "mainDomain": "Transaction Counterparties Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 19,
+    "name": "ben_ofac_fuzzy_match",
+    "condition": "Beneficiary OFAC score between 70\u201390",
+    "description": "Detects partial or fuzzy sanctions matches for beneficiaries.",
+    "ruleDomain": "Sanctions & Watchlist Risk",
+    "mainDomain": "Transaction Counterparties Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 20,
+    "name": "sender_ofac_fuzzy_match",
+    "condition": "Sender OFAC score between 70\u201390",
+    "description": "Flags potential fuzzy sanctions matches for senders.",
+    "ruleDomain": "Sanctions & Watchlist Risk",
+    "mainDomain": "Transaction Counterparties Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 21,
+    "name": "newly_established_ben_entity",
+    "condition": "Beneficiary entity age < 180 days",
+    "description": "Flags newly formed beneficiary entities, a common mule typology.",
+    "ruleDomain": "Entity Maturity Risk",
+    "mainDomain": "Transaction Counterparties Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 22,
+    "name": "newly_established_sender_entity",
+    "condition": "Sender entity age < 180 days",
+    "description": "Detects newly established sender entities, often used in rapid fund movement.",
+    "ruleDomain": "Entity Maturity Risk",
+    "mainDomain": "Transaction Counterparties Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 23,
+    "name": "high_tx_type_variance",
+    "condition": "Transaction type variance > 0.8",
+    "description": "Detects high variability in transaction types, indicating inconsistent or suspicious behavior.",
+    "ruleDomain": "Behavioral Counterparty Risk",
+    "mainDomain": "Transaction Counterparties Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 24,
+    "name": "crypto_wallet_large",
+    "condition": "Crypto wallet present AND amount > 100,000",
+    "description": "Flags large-value transactions involving crypto wallets, requiring source-of-funds review.",
+    "ruleDomain": "Crypto Transaction Risk",
+    "mainDomain": "Crypto Behavior & Blockchain Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 25,
+    "name": "crypto_hash_large",
+    "condition": "Crypto transaction hash present AND amount > 50,000",
+    "description": "Detects high-value blockchain-referenced transactions, indicating direct crypto exposure.",
+    "ruleDomain": "Crypto Transaction Risk",
+    "mainDomain": "Crypto Behavior & Blockchain Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 26,
+    "name": "defi_large",
+    "condition": "Network = DEFI AND amount > 200,000",
+    "description": "Detects large DeFi transactions, which may bypass traditional controls.",
+    "ruleDomain": "Crypto Platform Risk",
+    "mainDomain": "Crypto Behavior & Blockchain Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 27,
+    "name": "dex_large",
+    "condition": "Network = DEX AND amount > 200,000",
+    "description": "Flags large decentralized exchange transactions, increasing counterparty opacity.",
+    "ruleDomain": "Crypto Platform Risk",
+    "mainDomain": "Crypto Behavior & Blockchain Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 28,
+    "name": "bridge_used",
+    "condition": "Crypto network = BRIDGE",
+    "description": "Identifies use of cross-chain bridges, often linked to laundering via chain hopping.",
+    "ruleDomain": "Crypto Platform Risk",
+    "mainDomain": "Crypto Behavior & Blockchain Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 29,
+    "name": "l2_used",
+    "condition": "Crypto network = LAYER2",
+    "description": "Flags activity on Layer-2 networks, which can reduce traceability.",
+    "ruleDomain": "Crypto Platform Risk",
+    "mainDomain": "Crypto Behavior & Blockchain Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 30,
+    "name": "crypto_for_id_large",
+    "condition": "Crypto foreign ID present AND amount > 200,000",
+    "description": "Detects large crypto transactions tied to foreign identifiers, increasing jurisdictional risk.",
+    "ruleDomain": "Cross-Border Crypto Risk",
+    "mainDomain": "Crypto Behavior & Blockchain Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 31,
+    "name": "massive_data_exposure",
+    "condition": "PIID records exposed > 10,000",
+    "description": "Identifies large-scale personal data exposure incidents.",
+    "ruleDomain": "Data Breach & Incident Risk",
+    "mainDomain": "Data Protection & Privacy Compliance Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 32,
+    "name": "large_data_breach_notifs",
+    "condition": "Individuals notified > 5,000",
+    "description": "Flags large-scale breach notifications, indicating severe incidents.",
+    "ruleDomain": "Data Breach & Incident Risk",
+    "mainDomain": "Data Protection & Privacy Compliance Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 33,
+    "name": "document_upload_night_time",
+    "condition": "Document uploaded between 00:00\u201303:00",
+    "description": "Flags off-hours document uploads, possibly suspicious or automated.",
+    "ruleDomain": "Document & Data Integrity",
+    "mainDomain": "Document & Data Integrity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 34,
+    "name": "ben_name_consecutive_digits",
+    "condition": "Beneficiary name contains \u22653 consecutive digits",
+    "description": "Detects beneficiary names with numeric sequences, often anomalous or system-generated.",
+    "ruleDomain": "Identity Validation",
+    "mainDomain": "Document & Data Integrity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 35,
+    "name": "low_ocr_quality_document",
+    "condition": "OCR quality score < 50",
+    "description": "Flags poor OCR document quality, which may hinder verification.",
+    "ruleDomain": "Document & Data Integrity",
+    "mainDomain": "Document & Data Integrity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 36,
+    "name": "datacenter_ip_used",
+    "condition": "IP ownership = DATACENTER",
+    "description": "Identifies transactions from datacenter IPs, which may indicate automation.",
+    "ruleDomain": "Network / Device Risk",
+    "mainDomain": "Document & Data Integrity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 37,
+    "name": "ben_in_sanctioned_region",
+    "condition": "Beneficiary country in sanctioned region = YES",
+    "description": "Flags beneficiaries in restricted or sanctioned regions.",
+    "ruleDomain": "Sanctions & Watchlist Risk",
+    "mainDomain": "Document & Data Integrity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 38,
+    "name": "unknown_sof",
+    "condition": "Source of funds = UNKNOWN",
+    "description": "Flags entities with unknown or unverified source of funds.",
+    "ruleDomain": "Entity Risk / KYC",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 39,
+    "name": "unknown_sow",
+    "condition": "Source of wealth = UNKNOWN",
+    "description": "Detects entities with unknown or unverified source of wealth.",
+    "ruleDomain": "Entity Risk / KYC",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 40,
+    "name": "unclear_purpose",
+    "condition": "Purpose of account = UNCLEAR",
+    "description": "Flags accounts where intended purpose is not clearly stated.",
+    "ruleDomain": "Entity Risk / KYC",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 41,
+    "name": "jobless_large_tx",
+    "condition": "Occupation = UNEMPLOYED AND amount > 50,000",
+    "description": "Detects high-value transactions by unemployed individuals, a potential risk signal.",
+    "ruleDomain": "Entity Risk / Transaction Monitoring",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 42,
+    "name": "crypto_sector_large",
+    "condition": "Industry = CRYPTO AND amount > 200,000",
+    "description": "Flags large transactions in crypto-related sectors, high-risk activity.",
+    "ruleDomain": "Entity Risk / Industry Risk",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 43,
+    "name": "gamble_sector_large",
+    "condition": "Industry = GAMBLING AND amount > 200,000",
+    "description": "Detects large transactions in gambling-related businesses, high-risk for AML.",
+    "ruleDomain": "Entity Risk / Industry Risk",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 44,
+    "name": "ngo_large",
+    "condition": "Industry = NGO AND amount > 200,000",
+    "description": "Flags large NGO transactions, potential fund diversion risk.",
+    "ruleDomain": "Entity Risk / Industry Risk",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 45,
+    "name": "cash_intense_large",
+    "condition": "Industry = CASH_INTENSIVE AND amount > 200,000",
+    "description": "Detects high-value transactions in cash-intensive businesses.",
+    "ruleDomain": "Entity Risk / Industry Risk",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 46,
+    "name": "mining_large",
+    "condition": "Industry = MINING AND amount > 200,000",
+    "description": "Flags large transactions in mining sector, subject to high-risk controls.",
+    "ruleDomain": "Entity Risk / Industry Risk",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 47,
+    "name": "import_export_large",
+    "condition": "Industry = IMPORT_EXPORT AND amount > 200,000",
+    "description": "Detects high-value import/export transactions, often cross-border.",
+    "ruleDomain": "Entity Risk / Industry Risk",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 48,
+    "name": "realestate_large",
+    "condition": "Industry = REAL_ESTATE AND amount > 200,000",
+    "description": "Flags large real estate transactions, potentially layering.",
+    "ruleDomain": "Entity Risk / Industry Risk",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 49,
+    "name": "jewelry_large",
+    "condition": "Industry = JEWELRY AND amount > 200,000",
+    "description": "Detects high-value jewelry sector transactions, often cash-heavy.",
+    "ruleDomain": "Entity Risk / Industry Risk",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 50,
+    "name": "msb_large",
+    "condition": "Industry = MSB AND amount > 200,000",
+    "description": "Flags large transactions in money service businesses, AML-sensitive.",
+    "ruleDomain": "Entity Risk / Industry Risk",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 51,
+    "name": "forex_sector_large",
+    "condition": "Industry = FOREX AND amount > 200,000",
+    "description": "Detects large forex transactions, high-risk for AML/CFT.",
+    "ruleDomain": "Entity Risk / Industry Risk",
+    "mainDomain": "Entity / Customer Risk Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 52,
+    "name": "extreme_fraud_score",
+    "condition": "Fraud score > 900",
+    "description": "Flags transactions with extremely high fraud scores, indicating high likelihood of fraudulent activity.",
+    "ruleDomain": "Fraud & Sanctions Risk",
+    "mainDomain": "Fraud & Sanctions Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 53,
+    "name": "banned_device_used",
+    "condition": "Device fingerprint banned = YES",
+    "description": "Detects use of devices previously flagged for fraud or abuse.",
+    "ruleDomain": "Network / Device Risk",
+    "mainDomain": "Fraud & Sanctions Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 54,
+    "name": "excessive_account_linkage",
+    "condition": "Multiple account linkage > 5",
+    "description": "Flags entities linked to multiple accounts, indicating structuring or layering.",
+    "ruleDomain": "Fraud & Transaction Risk",
+    "mainDomain": "Fraud & Sanctions Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 55,
+    "name": "high_risk_email_score",
+    "condition": "Email risk score > 80",
+    "description": "Detects high-risk email addresses, potentially linked to fraud or phishing.",
+    "ruleDomain": "Identity / KYC Risk",
+    "mainDomain": "Fraud & Sanctions Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 56,
+    "name": "high_risk_phone_score",
+    "condition": "Phone risk score > 80",
+    "description": "Detects high-risk phone numbers, potentially linked to fraud schemes.",
+    "ruleDomain": "Identity / KYC Risk",
+    "mainDomain": "Fraud & Sanctions Rule",
+    "isYellowFlag": true
+  },
+  {
+    "id": 57,
+    "name": "sender_hr_large",
+    "condition": "Sender from high-risk country AND amount > 50,000",
+    "description": "Detects large transactions from high-risk countries, increasing AML risk.",
+    "ruleDomain": "Geographic / Country Risk",
+    "mainDomain": "Geographic Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 58,
+    "name": "ben_hr_large",
+    "condition": "Beneficiary from high-risk country AND amount > 50,000",
+    "description": "Flags large transactions to high-risk countries.",
+    "ruleDomain": "Geographic / Country Risk",
+    "mainDomain": "Geographic Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 59,
+    "name": "large_cross_border_2",
+    "condition": "Channel = CROSS_BORDER AND amount > 200,000",
+    "description": "Detects large cross-border transactions, AML sensitive.",
+    "ruleDomain": "Geographic / Channel Risk",
+    "mainDomain": "Geographic Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 60,
+    "name": "large_intl",
+    "condition": "Channel = INTL AND amount > 200,000",
+    "description": "Flags large international transactions, AML monitoring.",
+    "ruleDomain": "Geographic / Channel Risk",
+    "mainDomain": "Geographic Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 61,
+    "name": "forex_high",
+    "condition": "Channel = FOREX AND amount > 100,000",
+    "description": "Flags high-value foreign exchange transactions.",
+    "ruleDomain": "Geographic / Channel Risk",
+    "mainDomain": "Geographic Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 62,
+    "name": "remit_high",
+    "condition": "Channel = REMIT AND amount > 100,000",
+    "description": "Flags high-value remittance transactions.",
+    "ruleDomain": "Geographic / Channel Risk",
+    "mainDomain": "Geographic Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 63,
+    "name": "wire_high",
+    "condition": "Channel = WIRE AND amount > 300,000",
+    "description": "Detects high-value wire transfers, AML sensitive.",
+    "ruleDomain": "Geographic / Channel Risk",
+    "mainDomain": "Geographic Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 64,
+    "name": "fx_high",
+    "condition": "Type = FOREIGN_EXCHANGE AND amount > 200,000",
+    "description": "Flags large foreign exchange transactions, high-risk for money laundering.",
+    "ruleDomain": "Geographic / Channel Risk",
+    "mainDomain": "Geographic Risk Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 65,
+    "name": "large_cancel",
+    "condition": "Status = CANCELLED AND amount > 50,000",
+    "description": "Detects large transactions that were cancelled, potential risk or audit interest.",
+    "ruleDomain": "Transaction / Integrity",
+    "mainDomain": "Misc + Integrity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 66,
+    "name": "manual_large",
+    "condition": "Subtype = MANUAL AND amount > 100,000",
+    "description": "Flags large manually processed transactions, potential bypass of automated controls.",
+    "ruleDomain": "Transaction / Integrity",
+    "mainDomain": "Misc + Integrity Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 67,
+    "name": "large_usd",
+    "condition": "Amount > 500,000 AND Currency = USD",
+    "description": "Flags large USD transactions, potentially high risk.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 68,
+    "name": "large_cash",
+    "condition": "Amount > 750,000 AND Channel = CASH",
+    "description": "Flags large cash transactions, often higher AML risk.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 69,
+    "name": "large_cross_border",
+    "condition": "Amount > 200,000 AND Sender country \u2260 Beneficiary country",
+    "description": "Flags large cross-border transactions, higher monitoring priority.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 70,
+    "name": "large_crypto",
+    "condition": "Amount > 300,000 AND Type = CRYPTO",
+    "description": "Flags large crypto transactions, potential risk of anonymity/illicit activity.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 71,
+    "name": "large_gamble",
+    "condition": "Amount > 150,000 AND Subtype = GAMBLING",
+    "description": "Flags large gambling-related transactions, regulatory scrutiny.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 72,
+    "name": "large_fx",
+    "condition": "Amount > 250,000 AND TOTAL_AUD > 0",
+    "description": "Flags large foreign exchange transactions, potential compliance risk.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 73,
+    "name": "large_pending",
+    "condition": "Amount > 500,000 AND Status = PENDING",
+    "description": "Flags large pending transactions, could be high-risk if delayed or unreviewed.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 74,
+    "name": "large_without_ref",
+    "condition": "Amount > 100,000 AND Reference missing",
+    "description": "Flags large transactions without reference, poor traceability.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 75,
+    "name": "large_online",
+    "condition": "Amount > 800,000 AND Channel = ONLINE",
+    "description": "Flags large online transactions, potential fraud risk.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 76,
+    "name": "large_to_short_name",
+    "condition": "Amount > 120,000 AND Beneficiary name length < 3",
+    "description": "Flags large transactions to accounts with very short names, unusual pattern.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 77,
+    "name": "large_from_short_name",
+    "condition": "Amount > 200,000 AND Sender name length < 3",
+    "description": "Flags large transactions from accounts with very short names, suspicious.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 78,
+    "name": "large_to_weak_acct",
+    "condition": "Amount > 300,000 AND Beneficiary account length < 5",
+    "description": "Flags large transactions to weakly structured accounts, potential fraud.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 79,
+    "name": "large_from_weak_acct",
+    "condition": "Amount > 350,000 AND Sender account length < 5",
+    "description": "Flags large transactions from weakly structured accounts, high risk.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 80,
+    "name": "large_to_paypal_like",
+    "condition": "Amount > 400,000 AND Beneficiary institution contains PAYPAL",
+    "description": "Flags large payments to PayPal-like platforms, often riskier channels.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 81,
+    "name": "large_from_paypal_like",
+    "condition": "Amount > 450,000 AND Sender institution contains PAYPAL",
+    "description": "Flags large payments from PayPal-like platforms, high-risk monitoring.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 82,
+    "name": "large_agent",
+    "condition": "Amount > 500,000 AND Channel = AGENT",
+    "description": "Flags large agent-mediated transactions, higher AML concern.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 83,
+    "name": "large_gift",
+    "condition": "Amount > 250,000 AND Narrative contains \"gift\"",
+    "description": "Flags large gift transactions, could be structuring or unusual transfers.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 84,
+    "name": "large_loan",
+    "condition": "Amount > 250,000 AND Narrative contains \"loan\"",
+    "description": "Flags large loan-related transactions, potential unusual activity.",
+    "ruleDomain": "Transaction Amount",
+    "mainDomain": "Transaction Amount Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 85,
+    "name": "structuring_like_1",
+    "condition": "Type = TRANSFER AND Amount 9,000\u20139,999",
+    "description": "Detects possible structuring patterns in transfers just below reporting thresholds.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 86,
+    "name": "structuring_like_2",
+    "condition": "Type = TRANSFER AND Amount 9,500\u201310,000",
+    "description": "Another structuring detection for amounts near regulatory limits.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 87,
+    "name": "round_amt_high",
+    "condition": "Amount > 50,000 AND divisible by 1,000",
+    "description": "Flags large round-number transactions, often indicative of structured or artificial amounts.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 88,
+    "name": "round_amt_high2",
+    "condition": "Amount > 50,000 AND divisible by 500",
+    "description": "Flags large semi-round transactions, similar to R23 but more granular.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 89,
+    "name": "night_large",
+    "condition": "Hour < 4 AND Amount > 50,000",
+    "description": "Detects large late-night transactions, unusual activity outside normal business hours.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 90,
+    "name": "weekend_large",
+    "condition": "Weekday \u2265 5 AND Amount > 300,000",
+    "description": "Detects large weekend transactions, potential unusual activity.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 91,
+    "name": "atm_large",
+    "condition": "Amount > 200,000 AND Channel = ATM",
+    "description": "Flags large ATM withdrawals, often high-risk or suspicious.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 92,
+    "name": "crypto_large",
+    "condition": "Type = CRYPTO AND Amount > 150,000",
+    "description": "Flags large crypto transactions, higher anonymity and fraud risk.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 93,
+    "name": "crypto_many_hops",
+    "condition": "Type = CRYPTO AND HOPS_FROM_ILLICIT_CLUSTER > 10",
+    "description": "Flags crypto transactions with many hops from high-risk clusters, indicative of laundering.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 94,
+    "name": "gambling_large",
+    "condition": "Subtype = GAMBLING AND Amount > 100,000",
+    "description": "Detects large gambling-related transactions, regulatory risk.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 95,
+    "name": "gamble_win_large",
+    "condition": "GAMBLING_OUTCOME = WIN AND Amount > 100,000",
+    "description": "Flags large wins, potential payout laundering patterns.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 96,
+    "name": "gamble_loss_large",
+    "condition": "GAMBLING_OUTCOME = LOSS AND Amount > 100,000",
+    "description": "Flags large losses, could indicate high-stakes unusual behavior.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 97,
+    "name": "large_to_hr",
+    "condition": "Amount > 300,000 AND Beneficiary country = HIGH_RISK",
+    "description": "Flags large transfers to high-risk countries.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 98,
+    "name": "large_from_hr",
+    "condition": "Amount > 300,000 AND Sender country = HIGH_RISK",
+    "description": "Flags large transfers from high-risk countries.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 99,
+    "name": "hidden_crypto_ref",
+    "condition": "Amount > 200,000 AND Narrative contains \"crypto\"",
+    "description": "Detects transactions referencing crypto in narrative fields.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 100,
+    "name": "hidden_exchange_ref",
+    "condition": "Amount > 200,000 AND Narrative contains \"exchange\"",
+    "description": "Detects transactions referencing exchanges, possibly crypto or FX.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 101,
+    "name": "hidden_cash_ref",
+    "condition": "Amount > 200,000 AND Narrative contains \"cash\"",
+    "description": "Flags transactions with cash-related references, often higher AML risk.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 102,
+    "name": "suspicious_invoice",
+    "condition": "Amount > 200,000 AND Narrative contains \"invoice\"",
+    "description": "Flags transactions with invoice references, potential fraudulent activity.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 103,
+    "name": "suspicious_services",
+    "condition": "Amount > 200,000 AND Narrative contains \"services\"",
+    "description": "Flags services-related transactions, potential structuring or illicit activity.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 104,
+    "name": "suspicious_consult",
+    "condition": "Amount > 200,000 AND Narrative contains \"consult\"",
+    "description": "Flags consulting-related transactions, often used for hiding illicit transfers.",
+    "ruleDomain": "Transaction Pattern",
+    "mainDomain": "Transaction Pattern Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 105,
+    "name": "tr_large",
+    "condition": "Travel Rule Message exists AND Amount > 100,000",
+    "description": "Flags large transactions under Travel Rule, requiring enhanced scrutiny.",
+    "ruleDomain": "Travel Rule",
+    "mainDomain": "Travel Rule Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 106,
+    "name": "tr_inbound_large",
+    "condition": "Message Direction = INBOUND AND Amount > 150,000",
+    "description": "Detects large inbound Travel Rule transactions, high-risk transfers.",
+    "ruleDomain": "Travel Rule",
+    "mainDomain": "Travel Rule Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 107,
+    "name": "tr_outbound_large",
+    "condition": "Message Direction = OUTBOUND AND Amount > 150,000",
+    "description": "Detects large outbound Travel Rule transactions, high-risk transfers.",
+    "ruleDomain": "Travel Rule",
+    "mainDomain": "Travel Rule Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 108,
+    "name": "tr_failed",
+    "condition": "Message Status = FAILED",
+    "description": "Flags failed Travel Rule messages, potential compliance gaps.",
+    "ruleDomain": "Travel Rule",
+    "mainDomain": "Travel Rule Rules",
+    "isYellowFlag": true
+  },
+  {
+    "id": 109,
+    "name": "tr_pending_large",
+    "condition": "Message Status = PENDING AND Amount > 100,000",
+    "description": "Detects large pending transactions, may need urgent attention.",
+    "ruleDomain": "Travel Rule",
+    "mainDomain": "Travel Rule Rules",
+    "isYellowFlag": true
+  }
+]

@@ -21,7 +21,7 @@ export default function ChatBot() {
     <div
       ref={chatBotRef}
       className={cn(
-        'chat-bot fixed bottom-8 right-8 z-[99999] bg-white border shadow-lg rounded-md transition-[width,height] duration-500 ease-in-out ',
+        'chat-bot fixed bottom-8 right-8 z-40 bg-white border shadow-lg rounded-md transition-[width,height] duration-500 ease-in-out ',
         isOpen ? 'w-[400px] h-[400px] ' : 'w-40 h-10'
       )}
     >

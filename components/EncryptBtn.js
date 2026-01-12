@@ -18,7 +18,7 @@ export function EncryptDecryptFAB() {
   return (
     <button
       onClick={handleToggle}
-      className="group fixed bottom-20 right-8 z-50 flex h-10 w-40 items-center gap-3 rounded-md bg-primary px-6 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95"
+      className="group fixed bottom-20 right-8 z-40 flex h-10 w-40 items-center gap-3 rounded-md bg-primary px-6 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95"
       aria-label={isEncrypted ? 'Decrypt data' : 'Encrypt data'}
     >
       <div
