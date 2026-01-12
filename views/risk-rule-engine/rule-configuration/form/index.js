@@ -17,12 +17,14 @@ export default function RuleConfigurationForm({ open, setOpen, currentItem, setC
       ruleDomain: '',
       mainDomain: '',
       id: currentItem?.id,
+      condition: '',
     },
     resolver: zodResolver(z.object({
       name: z.string().optional(),
       description: z.string().optional(),
       ruleDomain: z.string().optional(),
       mainDomain: z.string().optional(),
+      condition: z.string().optional(),
     })),
   })
   useEffect(() => {
@@ -53,6 +55,7 @@ export default function RuleConfigurationForm({ open, setOpen, currentItem, setC
         {/* form */}
         <div className='px-6 space-y-4'>
           <FormField form={form} name='name' label='Name' type='text' />
+          <FormField form={form} name='condition' label='Condition' type='text' />
           <FormField form={form} name='description' label='Description' type='textarea' />
           <FormField form={form} name='ruleDomain' label='Rule Domain' type='text' options={[]} />
           <FormField form={form} name='mainDomain' label='Main Domain' type='text' options={[]} />
