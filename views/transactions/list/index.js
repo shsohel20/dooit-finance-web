@@ -132,6 +132,13 @@ const TransactionListView = () => {
       id: "id",
       header: ({ column }) => <DataTableColumnHeader column={column} title="ID" />,
       accessorKey: "uid",
+      cell: ({ row }) => {
+        return (
+          <div>
+            <p className=" font-mono text-muted-foreground">#{row.original?.uid}</p>
+          </div>
+        );
+      },
     },
     {
       id: "Flow Direction",
@@ -142,15 +149,15 @@ const TransactionListView = () => {
         return (
           <div className="flex gap-2 items-center ">
             <div>
-              <h4 className="text-heading font-semibold capitalize">{row.original?.sender?.name}</h4>
-              <p className="text-neutral-500 text-md">{row.original?.sender?.account}</p>
+              <h4 className=" font-semibold capitalize">{row.original?.sender?.name}</h4>
+              <p className="text-muted-foreground text-md">{row.original?.sender?.account}</p>
             </div>
             <div>
               <ArrowRight className="size-4 text-green-500" />
             </div>
             <div>
-              <h4 className="text-heading font-semibold capitalize">{row.original?.receiver?.name}</h4>
-              <p className="text-neutral-500 ">{row.original?.receiver?.account}</p>
+              <h4 className=" font-semibold capitalize">{row.original?.receiver?.name}</h4>
+              <p className="text-muted-foreground ">{row.original?.receiver?.account}</p>
             </div>
           </div>
         );
@@ -161,6 +168,13 @@ const TransactionListView = () => {
       header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
       accessorKey: "type",
       size: 100,
+      cell: ({ row }) => {
+        return (
+          <div>
+            <p className="text-muted-foreground">{row.original?.type}</p>
+          </div>
+        );
+      },
     },
     {
       id: "beneficiaryName",
@@ -200,7 +214,7 @@ const TransactionListView = () => {
       cell: ({ row }) => {
         return (
           <div>
-            <p className="text-heading text-end ">{row.original?.channel || "N/A"}</p>
+            <p className="text-center text-muted-foreground">{row.original?.channel || "N/A"}</p>
           </div>
         );
       },
@@ -209,6 +223,13 @@ const TransactionListView = () => {
       id: "reference",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Ref" />,
       accessorKey: "reference",
+      cell: ({ row }) => {
+        return (
+          <div>
+            <p className="text-muted-foreground">{row.original?.reference || "N/A"}</p>
+          </div>
+        );
+      },
     },
     {
       id: "status",
@@ -231,7 +252,7 @@ const TransactionListView = () => {
       cell: ({ row }) => {
         return (
           <div>
-            <p className="text-heading font-semibold">
+            <p className="text-muted-foreground font-semibold">
               {formatDateTime(row.original?.timeStamp)?.date}
             </p>
             <p className="text-secondary-heading ">{formatDateTime(row.original?.timeStamp)?.time}</p>
