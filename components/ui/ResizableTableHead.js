@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 
 
 
-const ResizableTableHead = ({ id, className, children }) => {
+const ResizableTableHead = ({ id, className, children, style: tableHeadStyle }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
   const style = {
@@ -18,7 +18,8 @@ const ResizableTableHead = ({ id, className, children }) => {
     transition: transition,
     whiteSpace: 'nowrap',
     width: 200,
-    zIndex: isDragging ? 1 : 0
+    zIndex: isDragging ? 1 : 0,
+    ...tableHeadStyle
   }
 
   return (

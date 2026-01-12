@@ -31,6 +31,7 @@ export default function RuleConfigurationList() {
           </div>
         )
       },
+      size: 80,
 
     },
     {
@@ -41,7 +42,7 @@ export default function RuleConfigurationList() {
         return (
           <div className='space-y-2'>
             <p className='font-bold'>{row.original.name}</p>
-            <p className='text-sm text-gray-500 text-wrap max-w-[300px]'>{row.original.description}</p>
+            <p className='text-sm text-gray-500 text-wrap max-w-[400px]'>{row.original.description}</p>
           </div>
         )
       }

@@ -211,7 +211,11 @@ const CustomResizableTable = ({
             <TableHeader>
               <TableRow>
                 {orderedColumns.map((column) => (
-                  <ResizableTableHead key={column.id} id={column.id}>
+                  <ResizableTableHead
+                    key={column.id}
+                    id={column.id}
+                    style={{ width: column.size ?? 'auto' }}
+                  >
                     {typeof column.header === 'function'
                       ? column.header({ column })
                       : column.header}
