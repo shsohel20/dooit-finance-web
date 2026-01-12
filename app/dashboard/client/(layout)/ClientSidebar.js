@@ -330,12 +330,17 @@ export default function ClientSidebar({ ...props }) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
+              {/* <a href="#">
                 <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
                   <Wallet className="!size-4" />
                 </div>
                 <span className="text-base font-semibold">Dooit Wallet.</span>
-              </a>
+              </a> */}
+              <div className="py-2  relative">
+                <div className="w-28 ">
+                  <img src="/logo.png" alt="Logo" className=' w-full h-8 object-contain ' />
+                </div>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

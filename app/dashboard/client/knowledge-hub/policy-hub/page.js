@@ -71,18 +71,18 @@ export default function Page() {
   ]
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen ">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-border  backdrop-blur">
+        <div className=" px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">Knowledge Base</h1>
           <div className="text-sm text-muted-foreground">Help & Documentation</div>
         </div>
       </header>
 
       {/* Search Bar */}
-      <div className="border-b border-border bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className=" ">
+        <div className=" px-4 sm:px-6 lg:px-8 py-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
             <input
@@ -97,7 +97,7 @@ export default function Page() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className=" px-4 sm:px-6 lg:px-8 py-12">
         {/* Browse by Category */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-foreground mb-8">Browse by Category</h2>

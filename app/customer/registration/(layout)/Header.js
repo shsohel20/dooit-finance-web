@@ -20,6 +20,7 @@ const Header = () => {
                         <IconInnerShadowTop className="!size-5" />
                         <span className="text-base font-semibold">Dooit Wallet.</span>
                     </a>
+                    {/* <img src="/logo.jpg" alt="Logo" className='h-10 w-auto' /> */}
                 </div>
                 {/* <div className='flex items-center gap-4'>
                     <Link href='#'>Dashboard</Link>
