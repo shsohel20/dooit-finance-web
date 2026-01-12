@@ -1,12 +1,15 @@
 'use client'
 import React, { useState } from 'react'
 import allRuleConfigurations from '../JSON/rules.json'
-import CustomResizableTable from '@/components/ui/CustomResizable'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PageDescription, PageHeader, PageTitle } from '@/components/common'
 import RuleConfigurationForm from '../form'
+import dynamic from 'next/dynamic'
+const CustomResizableTable = dynamic(() => import('@/components/ui/CustomResizable'), {
+  ssr: false,
+})
 
 export default function RuleConfigurationList() {
   const [openEditModal, setOpenEditModal] = useState(false)
@@ -23,18 +26,18 @@ export default function RuleConfigurationList() {
       header: "Actions",
       cell: ({ row }) => {
         return (
-          <div className='flex gap-2'>
+          <div className=' '>
             <Button variant='outline' size='sm' onClick={() => handleEdit(row.original)}>Edit</Button>
           </div>
         )
-      }
+      },
+
     },
     {
       id: "name",
       header: "Name",
       accessorKey: "name",
       cell: ({ row }) => {
-        console.log('row', row)
         return (
           <div className='space-y-2'>
             <p className='font-bold'>{row.original.name}</p>
