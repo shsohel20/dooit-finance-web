@@ -320,6 +320,11 @@ export default function ClientSidebar({ ...props }) {
           url: "/dashboard/client/system-settings/privacy",
           icon: IconDatabase,
         },
+        {
+          title: "Role Management",
+          url: "/dashboard/client/user-and-role-management",
+          icon: IconDatabase,
+        },
       ],
     },
   ];

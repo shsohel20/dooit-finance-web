@@ -5,6 +5,7 @@ import { Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Toolti
 import { AlertTriangle, CalendarIcon, Clock, Shield } from "lucide-react"
 import NumberFlow from "@number-flow/react"
 import NumberAnimation from "@/components/NumberAnimation"
+import { Map, MapControls, MapMarker, MarkerContent, MarkerPopup, MarkerTooltip } from "@/components/ui/map"
 
 // Sample data based on the customer data provided
 const riskData = [
@@ -30,6 +31,21 @@ const mostUsersCountryData = [
   { name: "Afghanistan", value: 20 },
   { name: "Bangladesh", value: 100 },
 ]
+const locations = [
+  {
+    id: 1,
+    name: "Empire State Building",
+    lng: -73.9857,
+    lat: 40.7484,
+  },
+  {
+    id: 2,
+    name: "Central Park",
+    lng: -73.9654,
+    lat: 40.7829,
+  },
+  { id: 3, name: "Times Square", lng: -73.9855, lat: 40.758 },
+];
 
 export default function CustomerDashboard() {
   const totalCustomers = 10054
@@ -141,51 +157,34 @@ export default function CustomerDashboard() {
           {/* Authorization Status Card */}
           <Card className="bg-smoke-200 border-0">
 
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Country of Origin</p>
-                  <p className="text-3xl font-bold text-foreground"><NumberAnimation value={mostUsersCountryData.length} /></p>
-                </div>
-                <div className="w-[200px] h-[80px]">
-                  <ResponsiveContainer width={'100%'} height={"100%"}>
-                    {/* <PieChart>
-                      <Pie
-                        data={authorizationData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={30}
-                        outerRadius={45}
-                        paddingAngle={2}
-                        dataKey="value"
-                      >
-                        {authorizationData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                    </PieChart> */}
-                    <BarChart
-                      style={{ width: '100%', maxWidth: '300px', maxHeight: '100px', aspectRatio: 1.618 }}
-                      responsive
-                      data={mostUsersCountryData}
-                    >
-                      <Bar dataKey="value" fill={["var(--accent)"]} radius={[6, 6, 0, 0]} />
-                      <Bar dataKey="value" fill={["var(--primary)"]} radius={[6, 6, 0, 0]} />
-                      {/* <XAxis dataKey="name" /> */}
-                      {/* <YAxis dataKey="value" /> */}
-                      <Tooltip />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-
-              </div>
+            <CardContent className="">
+              <p className="text-sm text-muted-foreground mb-2">Most Users Locations</p>
               <div className="flex items-center justify-end gap-2">
-                {mostUsersCountryData.map((item) => (
-                  <div key={item.name} className="flex items-center gap-2  rounded-md p-2 bg-smoke-300">
-                    <span className="text-xs ">{item.name}</span>
-                    <span className="text-xs text-primary font-extrabold">{item.value}</span>
-                  </div>
-                ))}
+
+                <div className="h-[120px] w-full rounded-md overflow-hidden">
+                  <Map center={[-73.98, 40.76]} zoom={7}>
+                    {locations.map((location) => (
+                      <MapMarker
+                        key={location.id}
+                        longitude={location.lng}
+                        latitude={location.lat}
+                      >
+                        <MarkerContent>
+                          <div className="size-4 rounded-full bg-primary border-2 border-white shadow-lg" />
+                        </MarkerContent>
+                        <MarkerTooltip>{location.name}</MarkerTooltip>
+                        <MarkerPopup>
+                          <div className="space-y-1">
+                            <p className="font-medium text-foreground">{location.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                            </p>
+                          </div>
+                        </MarkerPopup>
+                      </MapMarker>
+                    ))}
+                  </Map>
+                </div>
               </div>
             </CardContent>
           </Card>

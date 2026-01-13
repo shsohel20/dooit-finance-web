@@ -1,6 +1,6 @@
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
-import React from "react";
-import ReactPaginate from "react-paginate";
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
+import React, { useState } from 'react';
+import ReactPaginate from 'react-paginate';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,18 +9,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
+} from './ui/dropdown-menu';
+import { Button } from './ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Input } from "./ui/input";
-import _ from "lodash";
+} from './ui/select';
+import { Input } from './ui/input';
+import _ from 'lodash';
 export default function CustomPagination(props) {
+  const [jumpToPage, setJumpToPage] = useState(1);
   const {
     currentPage = 1,
     onPageChange,
@@ -39,13 +40,19 @@ export default function CustomPagination(props) {
   }, 1000);
 
   const onChange = (e) => {
-    handlePageSizeWithDebounce(e.target.value);
+    const value = e.target.value;
+    if (value) {
+      setJumpToPage(value);
+      handlePageSizeWithDebounce(value);
+    } else {
+      setJumpToPage('');
+    }
   };
 
   return (
     <div className="flex justify-between items-center  rounded-md my-4 bg-white border p-4 shadow">
       <div className="flex items-center gap-2">
-        {" "}
+        {' '}
         <Select value={limit} onValueChange={onChangeLimit}>
           <SelectTrigger id="clientType">
             <SelectValue />
@@ -57,7 +64,7 @@ export default function CustomPagination(props) {
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>{" "}
+        </Select>{' '}
         <span className="text-xs text-nowrap">
           Showing {currentPage} of {pageCount} pages
         </span>
@@ -68,25 +75,31 @@ export default function CustomPagination(props) {
           activeClassName="bg-primary text-light w-full h-full py-1 border border-primary rounded-md hover:bg-primary"
           forcePage={currentPage !== 0 ? currentPage - 1 : 0}
           onPageChange={(page) => onPageChange(page)}
-          pageClassName={"  "}
-          nextLinkClassName={"page-link"}
+          pageClassName={'  '}
+          nextLinkClassName={'page-link'}
           nextClassName={
-            "px-2 py-1.5 justify-self-center text-center  hover:bg-secondary cursor-pointer rounded-md font-medium border"
+            'px-2 py-1.5 justify-self-center text-center  hover:bg-secondary cursor-pointer rounded-md font-medium border'
           }
           previousClassName={
-            "px-2 py-1.5 justify-self-center text-center  hover:bg-secondary cursor-pointer rounded-md font-medium border"
+            'px-2 py-1.5 justify-self-center text-center  hover:bg-secondary cursor-pointer rounded-md font-medium border'
           }
-          previousLinkClassName={"page-link"}
+          previousLinkClassName={'page-link'}
           pageLinkClassName={
-            "px-3 justify-self-center text-center py-1.5  hover:bg-secondary cursor-pointer rounded-md font-bold hover:text-dark w-full h-full"
+            'px-3 justify-self-center text-center py-1.5  hover:bg-secondary cursor-pointer rounded-md font-bold hover:text-dark w-full h-full'
           }
-          containerClassName={"flex justify-end my-2  gap-1  items-center"}
+          containerClassName={'flex justify-end my-2  gap-1  items-center'}
           previousLabel={<IconChevronLeft className="size-4" />}
           nextLabel={<IconChevronRight className="size-4" />}
         />
         <div className="flex items-center gap-2">
           <span>Jump to:</span>
-          <Input type="number" onChange={onChange} min={1} className="w-16" />
+          <Input
+            type="number"
+            onChange={onChange}
+            min={1}
+            value={jumpToPage}
+            className="w-16"
+          />
         </div>
       </div>
     </div>
