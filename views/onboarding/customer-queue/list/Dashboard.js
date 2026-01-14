@@ -155,39 +155,39 @@ export default function CustomerDashboard() {
           </Card>
 
           {/* Authorization Status Card */}
-          <Card className="bg-smoke-200 border-0">
+          {/* <Card className="bg-smoke-200 border-0"> */}
 
-            <CardContent className="">
-              <p className="text-sm text-muted-foreground mb-2">Most Users Locations</p>
-              <div className="flex items-center justify-end gap-2">
+          <div className="">
+            {/* <p className="text-sm text-muted-foreground mb-2">Most Users Locations</p> */}
+            <div className="flex items-center justify-end gap-2">
 
-                <div className="h-[120px] w-full rounded-md overflow-hidden">
-                  <Map center={[-73.98, 40.76]} zoom={7}>
-                    {locations.map((location) => (
-                      <MapMarker
-                        key={location.id}
-                        longitude={location.lng}
-                        latitude={location.lat}
-                      >
-                        <MarkerContent>
-                          <div className="size-4 rounded-full bg-primary border-2 border-white shadow-lg" />
-                        </MarkerContent>
-                        <MarkerTooltip>{location.name}</MarkerTooltip>
-                        <MarkerPopup>
-                          <div className="space-y-1">
-                            <p className="font-medium text-foreground">{location.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-                            </p>
-                          </div>
-                        </MarkerPopup>
-                      </MapMarker>
-                    ))}
-                  </Map>
-                </div>
+              <div className="h-[200px] w-full rounded-md overflow-hidden">
+                <Map center={[-73.98, 40.76]} zoom={7}>
+                  {locations.map((location) => (
+                    <MapMarker
+                      key={location.id}
+                      longitude={location.lng}
+                      latitude={location.lat}
+                    >
+                      <MarkerContent>
+                        <div className="size-4 rounded-full bg-primary border-2 border-white shadow-lg" />
+                      </MarkerContent>
+                      <MarkerTooltip>{location.name}</MarkerTooltip>
+                      <MarkerPopup>
+                        <div className="space-y-1">
+                          <p className="font-medium text-foreground">{location.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                          </p>
+                        </div>
+                      </MarkerPopup>
+                    </MapMarker>
+                  ))}
+                </Map>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+          {/* </Card> */}
         </div>
 
 

@@ -397,7 +397,7 @@ const PermissionDrawer = ({ role }) => {
             {role.name} permissions
           </SheetDescription>
         </SheetHeader>
-        <div className=' px-4 bg-smoke-200/40 py-4 mx-4 rounded-lg border'>
+        <div className=' px-4  py-4 mx-4 rounded-lg border'>
           <h2 className='text-sm text-gray-600 mb-8'>
             Total Permissions <span className='text-gray-900'>({role.permissions.length})</span>
           </h2>
