@@ -1,20 +1,24 @@
 'use client';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { AudioLines, Forward, Paperclip, X } from 'lucide-react';
+import useOutsideClick from '@/hooks/useOutsideClick';
 const NissaModel = dynamic(() => import("@/components/nisa-ai/Nisa", { ssr: false }));
 
 export default function ChatBotNissa() {
   const [isOpen, setIsOpen] = useState(false);
+  const [chat, setChat] = useState([]);
+  const chatRef = useRef(null);
+  useOutsideClick(chatRef, () => setIsOpen(false));
   return (
     <>
       <div onClick={() => setIsOpen(!isOpen)} className='fixed bottom-4 right-0 z-50 size-13 rounded-lg  overflow-hidden '>
         <NissaModel />
       </div>
-      <div className={cn('fixed w-full max-w-[450px] bottom-2  h-[500px]   transition-transform duration-500 ease-in-out translate-x-full rounded-xl  bg-white shadow-xl', {
+      <div ref={chatRef} className={cn('fixed w-full max-w-[450px] bottom-2  h-[500px]   transition-transform duration-500 ease-in-out translate-x-full rounded-xl  bg-white shadow-xl border-t', {
         ' -right-1 z-50   translate-x-0 ': isOpen,
         ' translate-x-full ': !isOpen,
 
@@ -24,9 +28,12 @@ export default function ChatBotNissa() {
 
         <div className=' p-2  h-full flex flex-col  '>
 
-          <div className='h-full bg-white mb-2 rounded-lg p-2  overflow-y-auto '>
-            Ask me anything
-          </div>
+          {chat.length === 0 && <div className='h-full bg-white mb-2 rounded-lg p-2  overflow-y-auto '>
+            <h1 className='text-center text-2xl font-bold'>Welcome to
+              <span className='bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text ml-2'>
+                Nissa AI</span></h1>
+            <p className='text-center text-sm text-gray-500'>Ask me anything about LAW & REGULATION</p>
+          </div>}
           <div className=' w-full border rounded-lg mt-auto bg-white '>
             <div className='h-full w-full  rounded-lg '>
               <Textarea
