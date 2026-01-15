@@ -15,7 +15,7 @@ export default function ChatBotNissa() {
   useOutsideClick(chatRef, () => setIsOpen(false));
   return (
     <>
-      <div onClick={() => setIsOpen(!isOpen)} className='fixed bottom-4 right-0 z-50 size-13 rounded-lg  overflow-hidden '>
+      <div onClick={() => setIsOpen(!isOpen)} className='fixed bottom-4 right-0 z-50 size-13 rounded-lg  overflow-hidden cursor-pointer '>
         <NissaModel />
       </div>
       <div ref={chatRef} className={cn('fixed w-full max-w-[450px] bottom-2  h-[500px]   transition-transform duration-500 ease-in-out translate-x-full rounded-xl  bg-white shadow-xl border-t', {
