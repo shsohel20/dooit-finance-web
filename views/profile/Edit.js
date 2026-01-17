@@ -214,6 +214,7 @@ export function ClientEditForm() {
                     name="client.clientType"
                     label="Client Type"
                     form={form}
+                    disabled={true}
                     type="select"
                     options={[
                       { label: "Financial", value: "Financial" },

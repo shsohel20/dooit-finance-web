@@ -3,7 +3,6 @@ import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { EncryptDecryptFAB } from "@/components/EncryptBtn";
-import dynamic from "next/dynamic";
 import ChatBotNissa from "@/components/nisa-ai";
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -23,7 +22,9 @@ export default function RootLayout({ children }) {
         {/* <AuthProvider> */}
         <EncryptDecryptFAB />
         <ChatBotNissa />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
         <Toaster />
         {/* </AuthProvider> */}
       </body>
