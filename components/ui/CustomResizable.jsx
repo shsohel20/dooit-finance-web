@@ -25,14 +25,79 @@ import {
 } from '@dnd-kit/sortable';
 import ResizableTableHead from './ResizableTableHead';
 import { Skeleton } from './skeleton';
+/**
+ * CustomResizableTable
+ *
+ * A flexible table component with:
+ * - Resizable columns (mouse drag)
+ * - Draggable column reordering (horizontal only)
+ * - Loading skeleton state
+ * - Optional action toolbar
+ * - Row highlighting via localStorage
+ *
+ * --------------------
+ * PROPS
+ * --------------------
+ *
+ * @param {string} [className]
+ *  Additional CSS/Tailwind classes applied to the Table element.
+ *
+ * @param {string} mainClass
+ *  REQUIRED for column resizing.
+ *  Used to query DOM tables via `document.getElementsByClassName`.
+ *  All resizable tables must share this class.
+ *
+ * @param {string} [tableId="1111"]
+ *  Unique table ID used internally to control table width during column resize.
+ *  Must be unique when multiple tables exist on the page.
+ *
+ * @param {Array} columns
+ *  Column configuration array.
+ *
+ *  Column shape:
+ *  {
+ *    id: string; // required, used for drag & resize
+ *    header: ReactNode | ({ column }) => ReactNode;
+ *    accessorKey?: string; // used when cell renderer is not provided
+ *    cell?: ({ row, index }) => ReactNode;
+ *    size?: number | string; // initial column width
+ *  }
+ *
+ * @param {Array} [data=[]]
+ *  Array of row objects.
+ *  Each row is passed to `cell` as `row.original`.
+ *
+ * @param {boolean} [loading=false]
+ *  When true, renders skeleton rows instead of data.
+ *
+ * @param {(row: any) => void} [onDoubleClick]
+ *  Callback fired when a table row is double-clicked.
+ *  Receives the original row object.
+ *
+ * @param {React.ReactNode} [actions]
+ *  Optional toolbar rendered above the table (filters, buttons, etc.).
+ *
+ * @param {...any} props
+ *  Additional props forwarded to the underlying Table component.
+ *
+ * --------------------
+ * BEHAVIOR NOTES
+ * --------------------
+ *
+ * - Column order is managed internally and resets when `columns` change.
+ * - Column resizing is done via direct DOM manipulation (not React state).
+ * - Drag overlay shows the active column header while dragging.
+ * - Row highlighting reads `newId` from localStorage and auto-clears after 10s.
+ */
+
 
 const CustomResizableTable = ({
   className,
   mainClass,
   tableId = '1111',
-  columns = [], // Added default empty array to prevent undefined errors
-  data = [], // Added default empty array
-  loading = false, // Added default value
+  columns = [],
+  data = [],
+  loading = false,
   onDoubleClick,
   actions,
   ...props

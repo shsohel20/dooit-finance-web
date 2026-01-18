@@ -328,15 +328,15 @@ export default function ClientSidebar({ ...props }) {
         { title: "Track Status", url: "/dashboard/client/track-status", icon: Building2 },
       ],
     },
-    {
-      title: "Conveyancer Portal",
-      items: [
-        { title: "Matter Management", url: "/dashboard/client/conveyancer/matters", icon: Scale },
-        { title: "Title Searches", url: "/dashboard/client/conveyancer/title-search", icon: Search },
-        { title: "Settlements", url: "/dashboard/client/conveyancer/settlements", icon: CreditCard },
-        // { title: "Trust Account", url: "/conveyancer/trust", icon: CreditCard },
-      ],
-    },
+    // {
+    //   title: "Conveyancer Portal",
+    //   items: [
+    //     { title: "Matter Management", url: "/dashboard/client/conveyancer/matters", icon: Scale },
+    //     { title: "Title Searches", url: "/dashboard/client/conveyancer/title-search", icon: Search },
+    //     { title: "Settlements", url: "/dashboard/client/conveyancer/settlements", icon: CreditCard },
+    //     // { title: "Trust Account", url: "/conveyancer/trust", icon: CreditCard },
+    //   ],
+    // },
     {
       title: "Agent Portal",
       items: [
@@ -373,10 +373,8 @@ export default function ClientSidebar({ ...props }) {
       <SidebarContent>
         {isFinancial && <>
           <NavMain items={onBoardingMenuItems} label="Onboarding" />
-          <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
           <NavMain items={reportingMenuItems} label="Reporting & Registers" />
-          <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
-          <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
+
           <NavMain items={pepScreenigItems} label="PEP Screening" />
           <NavMain items={configurationMenuItems} label="Configuration" />
         </>}
@@ -387,6 +385,9 @@ export default function ClientSidebar({ ...props }) {
             ))
           }
         </>}
+        <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
+        <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
+        <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
 
       </SidebarContent>
       <SidebarFooter>

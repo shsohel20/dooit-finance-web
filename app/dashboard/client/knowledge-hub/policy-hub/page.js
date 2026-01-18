@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import { Search, BookOpen, FileText, HelpCircle, Download, Tag } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
-
+  const router = useRouter()
   const categories = [
     {
       icon: BookOpen,
@@ -70,19 +72,25 @@ export default function Page() {
     },
   ]
 
+  const handleGeneratePolicy = () => {
+    router.push('/dashboard/client/knowledge-hub/policy-hub/form')
+  }
   return (
     <div className="min-h-screen ">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border  backdrop-blur">
-        <div className=" px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <header className="">
+        <div className="  py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">Knowledge Base</h1>
           <div className="text-sm text-muted-foreground">Help & Documentation</div>
         </div>
       </header>
+      <div className="flex justify-end">
+        <Button onClick={handleGeneratePolicy}>Generate Policy</Button>
+      </div>
 
       {/* Search Bar */}
       <div className=" ">
-        <div className=" px-4 sm:px-6 lg:px-8 py-4">
+        <div className="  py-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
             <input
@@ -97,7 +105,7 @@ export default function Page() {
       </div>
 
       {/* Main Content */}
-      <div className=" px-4 sm:px-6 lg:px-8 py-12">
+      <div className="  py-12">
         {/* Browse by Category */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-foreground mb-8">Browse by Category</h2>

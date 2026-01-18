@@ -184,7 +184,10 @@ body {
   width: min(90%, 1280px);
   margin: 0 auto;
 }
-
+.border-red {
+  border-color: var(--danger);
+  border-width: 5px;
+}
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
