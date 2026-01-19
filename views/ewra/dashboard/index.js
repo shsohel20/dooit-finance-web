@@ -15,10 +15,10 @@ export function EWRADashboard() {
   const [activeView, setActiveView] = useState("dashboard")
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen ">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-sm">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
+      <header className="sticky top-0 z-50  bg-card/80 backdrop-blur-sm">
+        <div className=" flex items-center justify-between px-6 py-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Enterprise-Wide Risk Assessment</h1>
             <p className="text-sm text-muted-foreground">Version: 2024.1 | Period: Q1 2025</p>
@@ -37,8 +37,8 @@ export function EWRADashboard() {
       </header>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-border bg-card">
-        <div className="container mx-auto px-6">
+      <div className=" bg-card">
+        <div className=" px-6">
           <Tabs value={activeView} onValueChange={(v) => setActiveView(v)} className="w-full">
             <TabsList className="h-12 bg-transparent border-b-0">
               <TabsTrigger
@@ -65,7 +65,7 @@ export function EWRADashboard() {
       </div>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className=" px-6 py-8">
         {activeView === "dashboard" && (
           <div className="space-y-8">
             <RiskSummaryCards />

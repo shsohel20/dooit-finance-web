@@ -4,6 +4,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   experimental: {
+    viewTransition: true,
     serverActions: {
       bodySizeLimit: '2mb'
     }

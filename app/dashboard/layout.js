@@ -1,19 +1,12 @@
 
-import ChatBot from "@/components/ChatBot";
 
 export default function DashboardLayout({
-  children,
-  isComponentLoading = false,
-  title = "Dashbarod",
+  children
 }) {
-
-
-
-
   return (
     <div className="relative">
       {children}
-      <ChatBot />
+      {/* <ChatBot /> */}
     </div>
   );
 }

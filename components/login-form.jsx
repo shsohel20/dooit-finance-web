@@ -1,30 +1,30 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import SocialLogin from "./SocialLogin";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import SocialLogin from './SocialLogin';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
-import { toast } from "sonner";
-import { IconLoaderQuarter } from "@tabler/icons-react";
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
+import { toast } from 'sonner';
+import { IconLoaderQuarter } from '@tabler/icons-react';
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
 
 export function LoginForm({ className, token, cid, ...props }) {
@@ -39,21 +39,21 @@ export function LoginForm({ className, token, cid, ...props }) {
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
-  console.log("login page session", session);
+  console.log('login page session', session);
   useEffect(() => {
     if (session.data) {
-      if (session.data?.user?.userType === "dooit") {
-        router.replace("/dashboard/admin");
-      } else if (session.data?.user?.userType === "client" || "branch") {
-        router.replace("/dashboard/client");
-      } else if (session.data.user.role === "customer" && token) {
-        router.replace("/auth/registration-type");
+      if (session.data?.user?.userType === 'dooit') {
+        router.replace('/dashboard/admin');
+      } else if (session.data?.user?.userType === 'client' || 'branch') {
+        router.replace('/dashboard/client');
+      } else if (session.data.user.role === 'customer' && token) {
+        router.replace('/auth/registration-type');
       } else {
-        router.replace("/");
+        router.replace('/');
       }
     } else {
       // router.push("/auth/login");
@@ -62,22 +62,23 @@ export function LoginForm({ className, token, cid, ...props }) {
   const onSubmit = async (data) => {
     setIsLoading(true);
     const formData = new FormData();
-    formData.append("email", data.email);
-    formData.append("password", data.password);
-    const res = await signIn("credentials", {
+    formData.append('email', data.email);
+    formData.append('password', data.password);
+    const res = await signIn('credentials', {
       ...data,
       redirect: false,
     });
     const user = res.user;
+    console.log('user', res);
 
     if (res.error) {
-      toast.error("Something went wrong");
+      toast.error('Something went wrong');
     }
 
     setIsLoading(false);
   };
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome back</CardTitle>
@@ -136,12 +137,12 @@ export function LoginForm({ className, token, cid, ...props }) {
                       Processing...
                     </span>
                   ) : (
-                    "Login"
+                    'Login'
                   )}
                 </Button>
               </div>
               <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
+                Don&apos;t have an account?{' '}
                 <a
                   href="/auth/register"
                   className="underline underline-offset-4"
@@ -154,7 +155,7 @@ export function LoginForm({ className, token, cid, ...props }) {
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+        By clicking continue, you agree to our <a href="#">Terms of Service</a>{' '}
         and <a href="#">Privacy Policy</a>.
       </div>
     </div>

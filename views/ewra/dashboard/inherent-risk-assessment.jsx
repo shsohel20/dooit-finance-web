@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Upload, FileText, User } from "lucide-react"
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Upload, FileText, User } from "lucide-react";
 
 const riskIndicators = [
   {
@@ -29,19 +29,21 @@ const riskIndicators = [
     category: "product",
     responses: ["Low Risk", "Medium Risk", "High Risk", "Very High Risk"],
   },
-]
+];
 
 export function InherentRiskAssessment() {
-  const [selectedTab, setSelectedTab] = useState("customer")
-  const [responses, setResponses] = useState({})
+  const [selectedTab, setSelectedTab] = useState("customer");
+  const [responses, setResponses] = useState({});
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className=" max-w-6xl">
       <Card className="mb-6 p-6">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-semibold mb-2">Inherent Risk Assessment</h2>
-            <p className="text-sm text-muted-foreground">Complete the risk assessment across all categories</p>
+            <p className="text-sm text-muted-foreground">
+              Complete the risk assessment across all categories
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
@@ -136,7 +138,9 @@ export function InherentRiskAssessment() {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-xl font-semibold mb-2">Customer Risk Factors</h3>
-                <p className="text-sm text-muted-foreground">Assessment of customer demographics and behaviors</p>
+                <p className="text-sm text-muted-foreground">
+                  Assessment of customer demographics and behaviors
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline">Weight: 25%</Badge>
@@ -176,7 +180,9 @@ export function InherentRiskAssessment() {
 
                     <RadioGroup
                       value={responses[indicator.id]}
-                      onValueChange={(value) => setResponses({ ...responses, [indicator.id]: value })}
+                      onValueChange={(value) =>
+                        setResponses({ ...responses, [indicator.id]: value })
+                      }
                     >
                       <div className="grid gap-3 sm:grid-cols-2">
                         {indicator.responses.map((response) => (
@@ -185,7 +191,10 @@ export function InherentRiskAssessment() {
                             className="flex items-center space-x-2 rounded-lg border border-border p-3 hover:bg-accent/50 transition-colors"
                           >
                             <RadioGroupItem value={response} id={`${indicator.id}-${response}`} />
-                            <Label htmlFor={`${indicator.id}-${response}`} className="flex-1 cursor-pointer">
+                            <Label
+                              htmlFor={`${indicator.id}-${response}`}
+                              className="flex-1 cursor-pointer"
+                            >
                               {response}
                             </Label>
                           </div>
@@ -195,7 +204,10 @@ export function InherentRiskAssessment() {
 
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">Evidence / Comments</Label>
-                      <Textarea placeholder="Add supporting evidence or comments..." className="min-h-[80px]" />
+                      <Textarea
+                        placeholder="Add supporting evidence or comments..."
+                        className="min-h-[80px]"
+                      />
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -223,5 +235,5 @@ export function InherentRiskAssessment() {
         </div>
       </div>
     </div>
-  )
+  );
 }

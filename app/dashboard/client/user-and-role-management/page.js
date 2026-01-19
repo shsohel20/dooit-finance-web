@@ -1,16 +1,56 @@
 'use client'
 
-import { useState } from 'react'
-import { Edit2, Trash2, Copy, SearchIcon } from 'lucide-react'
-import { Card } from '@/components/ui/card'
+import { useCallback, useEffect, useState } from 'react'
+import { SearchIcon, EyeIcon, PencilIcon, TrashIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PageDescription, PageHeader, PageTitle } from '@/components/common'
+
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Checkbox } from '@/components/ui/checkbox'
+import { getAllRoles, getAllUsers } from './actions'
+import dynamic from 'next/dynamic'
+import CustomPagination from '@/components/CustomPagination'
+const CustomResizableTable = dynamic(() => import('@/components/ui/CustomResizable'), { ssr: false })
 
 export default function UserManagementDashboard() {
   const [activeTab, setActiveTab] = useState('all-users')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState('');
+  const [allRoles, setAllRoles] = useState([]);
+  const [allUsers, setAllUsers] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const fetchRoles = async () => {
+    try {
+      const roles = await getAllRoles();
+      console.log('roles', roles);
+      setAllRoles(roles);
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+    }
+  }
+  const fetchUsers = async () => {
+    const queryParams = {
+      page: currentPage,
+      limit: limit,
+
+    };
+    console.log('call')
+
+    try {
+      const users = await getAllUsers(queryParams);
+      setAllUsers(users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  }
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, [currentPage, limit]);
 
   const statCards = [
     { label: 'Total Users', value: '42' },
@@ -19,76 +59,242 @@ export default function UserManagementDashboard() {
     { label: 'Suspended', value: '2' },
   ]
 
-  const users = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john.doe@infsecure.com',
-      role: 'System Admin',
-      department: 'IT & Security',
-      lastLogin: 'Today, 09:24 AM',
-      status: 'Active',
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane.smith@infsecure.com',
-      role: 'Compliance Officer',
-      department: 'Compliance',
-      lastLogin: 'Yesterday, 03:45 PM',
-      status: 'Active',
-    },
-    {
-      id: 3,
-      name: 'Mike Johnson',
-      email: 'mike.johnson@infsecure.com',
-      role: 'KYC Analyst',
-      department: 'Operations',
-      lastLogin: '2 days ago',
-      status: 'Active',
-    },
-  ]
+
 
   const roles = [
     {
-      name: 'System Administrator',
+      name: "System Administrator",
       users: 4,
+      permissions: [
+        {
+          title: 'Manage users',
+          name: "manage_users",
+          description: "Create, update, deactivate users and assign roles."
+        },
+        {
+          name: "manage_roles_permissions",
+          description: "Create and modify roles and control permission mappings.",
+          title: 'Manage roles permissions'
+        },
+        {
+          name: "system_configuration",
+          title: 'System configuration',
+          description: "Update system-wide settings, thresholds, and integrations."
+        },
+        {
+          name: "view_all_data",
+          title: 'View all data',
+          description: "Access all customer, transaction, and audit data."
+        },
+        {
+          name: "audit_logs_access",
+          title: 'Audit logs access',
+          description: "View and export system audit and activity logs."
+        }
+      ]
     },
     {
-      name: 'Compliance Officer',
+      name: "Compliance Officer",
       users: 8,
+      permissions: [
+        {
+          name: "review_suspicious_activity",
+          title: 'Review suspicious activity',
+          description: "Review flagged transactions and potential compliance breaches."
+        },
+        {
+          name: "approve_or_reject_cases",
+          title: 'Approve or reject cases',
+          description: "Approve, reject, or escalate compliance and risk cases."
+        },
+        {
+          name: "generate_compliance_reports",
+          title: 'Generate compliance reports',
+          description: "Generate and export regulatory and compliance reports."
+        },
+        {
+          name: "manage_sanctions_pep_rules",
+          title: 'Manage sanctions, PEP, and risk rules',
+          description: "Configure and maintain sanctions, PEP, and risk rules."
+        },
+        {
+          name: "view_audit_logs",
+          title: 'View audit logs',
+          description: "View audit logs related to compliance actions."
+        }
+      ]
     },
     {
-      name: 'KYC Analyst',
+      name: "KYC Analyst",
       users: 22,
+      permissions: [
+        {
+          name: "view_customer_profiles",
+          title: 'View customer profiles',
+          description: "View customer personal, identity, and risk information."
+        },
+        {
+          name: "verify_kyc_documents",
+          title: 'Verify KYC documents',
+          description: "Review and verify customer KYC documents."
+        },
+        {
+          name: "update_kyc_status",
+          title: 'Update KYC status',
+          description: "Update KYC status such as approved, rejected, or pending."
+        },
+        {
+          name: "add_kyc_notes",
+          title: 'Add KYC notes',
+          description: "Add internal notes and observations to KYC cases."
+        },
+        {
+          name: "raise_compliance_case",
+          title: 'Raise compliance case',
+          description: "Flag customers or transactions for compliance review."
+        }
+      ]
+    }
+  ];
+
+  const usersColumns = [
+    {
+      id: 'user',
+      header: 'User',
+      accessorKey: 'name',
+      cell: ({ row }) => (
+        <div>
+          <p className='text-sm text-gray-700 font-bold capitalize'>{row.original.name}</p>
+          <p className='text-sm text-gray-500'>{row.original.email}</p>
+        </div>
+      ),
+    },
+    {
+      id: 'role',
+      header: 'Role',
+      accessorKey: 'role',
+      cell: ({ row }) => (
+        <div className=' text-gray-500 border rounded-full flex items-center gap-2 px-3 py-1 w-max'>
+          <div className='size-2 rounded-full bg-gray-500' />
+          <p className='text-xs font-semibold'>{row.original.role}</p>
+        </div>
+      ),
+    },
+    // {
+    //   id: 'department',
+    //   header: 'Department',
+    //   accessorKey: 'department',
+    //   cell: ({ row }) => (
+    //     <div className='text-sm text-gray-500'>
+    //       <p>{row.original.department}</p>
+    //     </div>
+    //   ),
+    // },
+    // {
+    //   id: 'lastLogin',
+    //   header: 'Last Login',
+    //   accessorKey: 'lastLogin',
+    //   cell: ({ row }) => (
+    //     <div className='text-sm text-gray-500'>
+    //       <p>{row.original.lastLogin}</p>
+    //     </div>
+    //   ),
+    // },
+    // {
+    //   id: 'status',
+    //   header: 'Status',
+    //   accessorKey: 'status',
+    //   cell: ({ row }) => (
+    //     <div className='text-sm text-gray-500'>
+    //       <p>{row.original.status}</p>
+    //     </div>
+    //   ),
+    // },
+    {
+      id: 'actions',
+      header: 'Actions',
+      accessorKey: 'actions',
+      cell: ({ row }) => (
+        <div className='text-sm text-gray-500 flex items-center gap-2'>
+          {/* <Button size="sm" variant="outline" className="">
+            <EyeIcon />
+          </Button> */}
+          <Button size="sm" variant="outline" className="">
+            <PencilIcon />
+          </Button>
+          <Button size="sm" variant="outline" className="">
+            <TrashIcon />
+          </Button>
+        </div>
+      ),
     },
   ]
-
+  const rolesColumns = [
+    {
+      id: 'name',
+      header: 'Name',
+      accessorKey: 'name',
+    },
+    {
+      id: 'users',
+      header: 'Users',
+      accessorKey: 'users',
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      accessorKey: 'actions',
+    },
+  ]
+  const handlePageChange = (page) => {
+    setCurrentPage(page.selected + 1);
+  }
+  const handleLimitChange = (limit) => {
+    setLimit(limit);
+    setCurrentPage(1);
+  }
+  const totalUsers = allUsers?.totalRecords;
   return (
     <div className="min-h-screen ">
+      <PageHeader>
+        <PageTitle>
+          User and Role Management
+        </PageTitle>
+        <PageDescription>
+          Manage users and roles in the system
+        </PageDescription>
+      </PageHeader>
 
-
-      <main className="py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <main className="">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {statCards.map((stat) => (
-            <div key={stat.label} className="bg-white border border-gray-200 rounded-lg p-4">
+            <div key={stat.label} className="bg-smoke-200 rounded-lg p-4">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p>
               <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
             </div>
           ))}
+        </div> */}
+        {/* Role Management Section */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Roles</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {roles.map((role) => (
+              <div key={role.name} className="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900">{role.name}</h3>
+                <p className="text-sm text-gray-600 mt-3">{role.users} users</p>
+                <PermissionDrawer role={role} />
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* User Management Section */}
         <div className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Users</h2>
-            <Button size="sm" className="bg-gray-900 text-white hover:bg-gray-800">
-              Add User
-            </Button>
-          </div>
+
 
           <Tabs defaultValue="all-users" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="border-b border-gray-200 bg-white p-0 mb-4">
+            {/* <TabsList className="border-b border-gray-200 bg-white p-0 mb-4">
               <TabsTrigger
                 value="all-users"
 
@@ -113,62 +319,42 @@ export default function UserManagementDashboard() {
               >
                 Analysts
               </TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
-            <TabsContent value="all-users" className="mt-0">
-              <div className="mb-4 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
-                <SearchIcon className="w-4 h-4 text-gray-400" />
-                <Input
-                  placeholder="Search users..."
-                  className="border-0 bg-transparent text-sm placeholder:text-gray-400 focus-visible:ring-0"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            <TabsContent value="all-users" className="mt-4">
+              <div className='flex items-center justify-between'>
+                {/* filter */}
+                <div>
+                  <div className=" flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 max-w-md w-full">
+                    <SearchIcon className="w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder="Search users..."
+                      className="border-0 bg-transparent shadow-none text-sm placeholder:text-gray-400 focus-visible:ring-0"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button size="sm" className="">
+                  Add User
+                </Button>
               </div>
 
               {/* Users Table */}
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50">
-                      <th className="px-4 py-3 text-left font-medium text-gray-700">User</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-700">Role</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-700">Department</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-700">Last Login</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-700">Status</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-700">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map((user) => (
-                      <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          <div className="flex flex-col">
-                            <p className="font-medium text-gray-900">{user.name}</p>
-                            <p className="text-xs text-gray-500">{user.email}</p>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-gray-700">{user.role}</td>
-                        <td className="px-4 py-3 text-gray-700">{user.department}</td>
-                        <td className="px-4 py-3 text-gray-600 text-xs">{user.lastLogin}</td>
-                        <td className="px-4 py-3">
-                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100">{user.status}</Badge>
-                        </td>
-                        <td className="px-4 py-3 flex gap-2">
-                          <button className="p-1 hover:bg-gray-200 rounded transition-colors">
-                            <Edit2 className="w-4 h-4 text-gray-600" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-200 rounded transition-colors">
-                            <Copy className="w-4 h-4 text-gray-600" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-200 rounded transition-colors">
-                            <Trash2 className="w-4 h-4 text-gray-600" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className=" ">
+                <CustomResizableTable
+                  columns={usersColumns}
+                  data={allUsers?.data}
+                  tableId="users-table"
+                  mainClass="users-table"
+                />
+                <CustomPagination
+                  currentPage={currentPage}
+                  onPageChange={handlePageChange}
+                  totalItems={totalUsers}
+                  limit={limit}
+                  onChangeLimit={handleLimitChange}
+                />
               </div>
             </TabsContent>
 
@@ -190,23 +376,50 @@ export default function UserManagementDashboard() {
           </Tabs>
         </div>
 
-        {/* Role Management Section */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Roles</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {roles.map((role) => (
-              <div key={role.name} className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="font-medium text-gray-900">{role.name}</h3>
-                <p className="text-sm text-gray-600 mt-3">{role.users} users</p>
-                <Button size="sm" variant="outline" className="w-full mt-4">
-                  View
-                </Button>
+      </main>
+    </div>
+  )
+}
+
+const PermissionDrawer = ({ role }) => {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button size="sm" variant="outline" className="w-full mt-4">
+          <EyeIcon /> View Permissions
+        </Button>
+      </SheetTrigger>
+      <SheetContent className='sm:max-w-xl'>
+        <SheetHeader>
+          <SheetTitle>Permissions</SheetTitle>
+          <SheetDescription>
+            {role.name} permissions
+          </SheetDescription>
+        </SheetHeader>
+        <div className=' px-4  py-4 mx-4 rounded-lg border'>
+          <h2 className='text-sm text-gray-600 mb-8'>
+            Total Permissions <span className='text-gray-900'>({role.permissions.length})</span>
+          </h2>
+          <div className='space-y-6'>
+
+            {role.permissions.map((permission) => (
+              <div key={permission.name} className='flex items-start gap-2'>
+                <Checkbox id={permission.name} />
+                <div className='relative -mt-1' >
+                  <p className='text-gray-800 font-semibold'>{permission.title}</p>
+                  <p className='text-sm text-gray-500'>{permission.description}</p>
+                </div>
               </div>
             ))}
           </div>
+          <div className='mt-8 flex justify-end'>
+            <Button size="sm" className="">
+              Save Changes
+            </Button>
+          </div>
         </div>
-      </main>
-    </div>
+      </SheetContent>
+    </Sheet>
   )
 }

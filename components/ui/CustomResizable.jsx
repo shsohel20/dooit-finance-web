@@ -9,20 +9,111 @@ import {
   TableRow,
 } from './table';
 import { cn } from '@/lib/utils';
+import {
+  closestCorners,
+  DndContext,
+  DragOverlay,
+  MouseSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
+import {
+  arrayMove,
+  horizontalListSortingStrategy,
+  SortableContext,
+} from '@dnd-kit/sortable';
+import ResizableTableHead from './ResizableTableHead';
 import { Skeleton } from './skeleton';
+/**
+ * CustomResizableTable
+ *
+ * A flexible table component with:
+ * - Resizable columns (mouse drag)
+ * - Draggable column reordering (horizontal only)
+ * - Loading skeleton state
+ * - Optional action toolbar
+ * - Row highlighting via localStorage
+ *
+ * --------------------
+ * PROPS
+ * --------------------
+ *
+ * @param {string} [className]
+ *  Additional CSS/Tailwind classes applied to the Table element.
+ *
+ * @param {string} mainClass
+ *  REQUIRED for column resizing.
+ *  Used to query DOM tables via `document.getElementsByClassName`.
+ *  All resizable tables must share this class.
+ *
+ * @param {string} [tableId="1111"]
+ *  Unique table ID used internally to control table width during column resize.
+ *  Must be unique when multiple tables exist on the page.
+ *
+ * @param {Array} columns
+ *  Column configuration array.
+ *
+ *  Column shape:
+ *  {
+ *    id: string; // required, used for drag & resize
+ *    header: ReactNode | ({ column }) => ReactNode;
+ *    accessorKey?: string; // used when cell renderer is not provided
+ *    cell?: ({ row, index }) => ReactNode;
+ *    size?: number | string; // initial column width
+ *  }
+ *
+ * @param {Array} [data=[]]
+ *  Array of row objects.
+ *  Each row is passed to `cell` as `row.original`.
+ *
+ * @param {boolean} [loading=false]
+ *  When true, renders skeleton rows instead of data.
+ *
+ * @param {(row: any) => void} [onDoubleClick]
+ *  Callback fired when a table row is double-clicked.
+ *  Receives the original row object.
+ *
+ * @param {React.ReactNode} [actions]
+ *  Optional toolbar rendered above the table (filters, buttons, etc.).
+ *
+ * @param {...any} props
+ *  Additional props forwarded to the underlying Table component.
+ *
+ * --------------------
+ * BEHAVIOR NOTES
+ * --------------------
+ *
+ * - Column order is managed internally and resets when `columns` change.
+ * - Column resizing is done via direct DOM manipulation (not React state).
+ * - Drag overlay shows the active column header while dragging.
+ * - Row highlighting reads `newId` from localStorage and auto-clears after 10s.
+ */
+
 
 const CustomResizableTable = ({
   className,
   mainClass,
   tableId = '1111',
-  columns,
-  data,
-  loading,
+  columns = [],
+  data = [],
+  loading = false,
   onDoubleClick,
+  actions,
   ...props
 }) => {
   const [highlightedId, setHighlightedId] = useState(null);
   const tables = document.getElementsByClassName(mainClass);
+  const sensors = useSensors(useSensor(MouseSensor, {}));
+  const [activeDragId, setActiveDragId] = useState(null);
+  const [columnOrder, setColumnOrder] = useState(
+    columns.map((column) => column.id)
+  );
+
+  useEffect(() => {
+    setColumnOrder(columns.map((column) => column.id));
+  }, [columns]);
+
   const resizableGrid = (table) => {
     if (!table) return;
     const tableHeight = table.offsetHeight;
@@ -39,7 +130,7 @@ const CustomResizableTable = ({
 
       const padLeft = getStyleVal(col, 'padding-left');
       const padRight = getStyleVal(col, 'padding-right');
-      return parseInt(padLeft) + parseInt(padRight);
+      return Number.parseInt(padLeft) + Number.parseInt(padRight);
     };
 
     const setListeners = (div) => {
@@ -57,6 +148,7 @@ const CustomResizableTable = ({
       };
 
       const handleMouseMove = (e) => {
+        setActiveDragId(null);
         const tableElement = document.getElementById(tableId);
         if (curCol && tableElement) {
           const diffX = e.pageX - pageX;
@@ -84,7 +176,6 @@ const CustomResizableTable = ({
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
 
-      // Cleanup event listeners on unmount
       return () => {
         div.removeEventListener('mousedown', handleMouseDown);
         div.removeEventListener(
@@ -126,12 +217,11 @@ const CustomResizableTable = ({
     const newId = localStorage.getItem('newId');
     if (newId) {
       setHighlightedId(newId);
-      localStorage.removeItem('newId'); // cleanup
-
-      // remove highlight after few seconds
+      localStorage.removeItem('newId');
       setTimeout(() => setHighlightedId(null), 10000);
     }
   }, []);
+
   useEffect(() => {
     if (tables.length === 0) return;
     for (let i = 0; i < tables.length; i++) {
@@ -139,86 +229,148 @@ const CustomResizableTable = ({
     }
   }, [tableId]);
 
+  const handleDragStart = (event) => {
+    setActiveDragId(String(event.active.id));
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+      setColumnOrder((prev) => {
+        const oldIndex = prev.indexOf(String(active.id));
+        const newIndex = prev.indexOf(String(over.id));
+        return arrayMove(prev, oldIndex, newIndex);
+      });
+    }
+
+    setActiveDragId(null);
+  };
+
+  const orderedColumns = columnOrder
+    .map((id) => columns.find((col) => col.id === id))
+    .filter(Boolean);
+
   return (
     <div className="mt-4">
-      <Table
-        id={tableId}
-        className={cn(mainClass, className, 'w-full  border ')}
-        {...props}
+      {actions ? (
+        <div className="flex items-center justify-end gap-2 mb-2">
+          {actions}
+        </div>
+      ) : null}
+      <DndContext
+        collisionDetection={closestCorners}
+        modifiers={[restrictToHorizontalAxis]}
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
       >
-        <TableHeader>
-          <TableRow>
-            {columns.map((column, colIndex) => (
-              <TableHead
-                key={column.id || column.accessorKey || colIndex}
-                className={'font-bold bg-primary/10 text-primary'}
-              >
-                {typeof column.header === 'function'
-                  ? column.header({ column })
-                  : column.header}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        {loading ? (
-          <>
-            <TableBody>
-              {Array.from({ length: 10 }).map((_, index) => (
-                <TableRow key={`skeleton-row-${index}`} className="">
-                  {columns.map((header) => {
-                    return (
-                      <TableCell
-                        key={header.id}
-                        className={' border-r   first:border-l  font-bold  '}
-                      >
-                        <Skeleton className="w-full h-10 animate-pulse" />
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableBody>
-          </>
-        ) : (
-          <TableBody>
-            {data?.length > 0 ? (
-              data?.map((row, index) => {
-                return (
-                  <TableRow
-                    onDoubleClick={() => onDoubleClick(row)}
-                    key={row.id || index}
-                    data-highlighted={highlightedId === row?.original?.id}
-                    className={cn(' hover:bg-neutral-100  font-medium ', {
-                      'bg-blue-50 ': highlightedId === row?.original?.id,
-                    })}
-                  >
-                    {columns.map((column) => {
-                      return (
-                        <TableCell key={column.id}>
-                          {column.cell
-                            ? column.cell({
-                                row: {
-                                  original: row,
-                                },
-                                index,
-                              })
-                            : row[column.accessorKey]}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })
-            ) : (
+        <SortableContext
+          items={columnOrder}
+          strategy={horizontalListSortingStrategy}
+        >
+          <Table
+            id={tableId}
+            className={cn(mainClass, className, 'w-full  border ')}
+            {...props}
+          >
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center">
-                  No data found
-                </TableCell>
+                {orderedColumns.map((column) => (
+                  <ResizableTableHead
+                    key={column.id}
+                    id={column.id}
+                    style={{ width: column.size ?? 'auto' }}
+                  >
+                    {typeof column.header === 'function'
+                      ? column.header({ column })
+                      : column.header}
+                  </ResizableTableHead>
+                ))}
               </TableRow>
+            </TableHeader>
+            {loading ? (
+              <>
+                <TableBody>
+                  {Array.from({ length: 10 }).map((_, index) => (
+                    <TableRow key={`skeleton-row-${index}`} className="">
+                      {orderedColumns.map((header) => {
+                        return (
+                          <TableCell
+                            key={header.id}
+                            className={
+                              ' border-r   first:border-l  font-bold  '
+                            }
+                          >
+                            <Skeleton className="w-full h-10 animate-pulse" />
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </>
+            ) : (
+              <TableBody>
+                {data?.length > 0 ? (
+                  data?.map((row, index) => {
+                    return (
+                      <TableRow
+                        onDoubleClick={() => onDoubleClick?.(row)}
+                        key={row.id || index}
+                        data-highlighted={highlightedId === row?.original?.id}
+                        className={cn(' hover:bg-neutral-100  font-medium ', {
+                          'bg-blue-50 ': highlightedId === row?.original?.id,
+                        })}
+                      >
+                        {orderedColumns.map((column) => {
+                          return (
+                            <TableCell key={column.id}>
+                              {column.cell
+                                ? column.cell({
+                                    row: {
+                                      original: row,
+                                    },
+                                    index,
+                                  })
+                                : row[column.accessorKey]}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="text-center">
+                      No data found
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
             )}
-          </TableBody>
-        )}
-      </Table>
+            {activeDragId && (
+              <DragOverlay wrapperElement="thead">
+                <TableRow className="flex w-full h-full">
+                  <TableHead className="cursor-grabbing bg-primary shadow-lg font-bold text-primary-foreground">
+                    <div className="flex flex-row items-center w-full h-full">
+                      {(() => {
+                        const activeColumn = columns.find(
+                          (col) => col.id === activeDragId
+                        );
+                        return activeColumn
+                          ? typeof activeColumn.header === 'function'
+                            ? activeColumn.header({ column: activeColumn })
+                            : activeColumn.header
+                          : '';
+                      })()}
+                    </div>
+                  </TableHead>
+                </TableRow>
+              </DragOverlay>
+            )}
+          </Table>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };

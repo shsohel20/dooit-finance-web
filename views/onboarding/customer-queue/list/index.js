@@ -576,6 +576,7 @@ export const ReportingModal = ({ open, setOpen, currentItem, setCurrentItem }) =
           // }
         ]
       }
+      console.log('payload', JSON.stringify(payload, null, 2))
       const response = await createInstantReport(payload);
       if (response.succeed) {
         setOpen(false);

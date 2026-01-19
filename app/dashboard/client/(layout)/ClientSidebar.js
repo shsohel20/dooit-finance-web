@@ -14,12 +14,8 @@ import {
   IconBook,
   IconBuildingBank,
   IconChartBar,
-  IconCircleCheck,
-  IconCircleDashedCheck,
   IconCirclesRelation,
-  IconDashboard,
   IconDatabase,
-  IconInnerShadowTop,
   IconLayoutDashboard,
   IconListDetails,
   IconPentagonX,
@@ -31,10 +27,17 @@ import {
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { useSession } from "next-auth/react";
-import { FileInput, GraduationCap, Newspaper, ShieldHalf, ShieldUser, Wallet } from "lucide-react";
+import { BarChart3, Building2, CreditCard, FileInput, FileText, GraduationCap, Home, Newspaper, Scale, Search, ShieldHalf, ShieldUser, Users, Wallet } from "lucide-react";
+import useGetUser from "@/hooks/useGetUser";
+
 
 export default function ClientSidebar({ ...props }) {
   const session = useSession();
+  const { loggedInUser } = useGetUser();
+  const clientType = loggedInUser?.client?.clientType;
+  const isRealState = clientType === "Real Estate";
+  const isFinancial = clientType === "Financial";
+
   const onBoardingMenuItems = [
     {
       title: "Dashboard",
@@ -164,11 +167,6 @@ export default function ClientSidebar({ ...props }) {
     },
   ];
   const monitoringMenuItems = [
-    // {
-    //   title: 'Alerts',
-    //   icon: IconListDetails,
-    //   url: '/dashboard/client/alerts',
-    // },
     {
       title: "Case Management",
       icon: Newspaper,
@@ -244,25 +242,9 @@ export default function ClientSidebar({ ...props }) {
       title: "AML Screening",
       icon: IconListDetails,
       url: "/dashboard/client/pep-and-adverse-media/aml-screening",
-    },
-    // {
-    //   title: "TEst",
-    //   icon: IconListDetails,
-    //   url: "/dashboard/client/pep-and-adverse-media/aml-screening/test",
-    // },
+    }
   ];
   const configurationMenuItems = [
-    // {
-    //   title: "PEP Screening",
-    //   icon: IconListDetails,
-    //   url: "/dashboard/client/pep-screening",
-    // },
-    // {
-    //   title: "PEP Screening",
-    //   icon: IconListDetails,
-    //   url: "/dashboard/client/pep-screening",
-    // },
-
     {
       title: "User & Role Management",
       icon: IconListDetails,
@@ -272,6 +254,11 @@ export default function ClientSidebar({ ...props }) {
       title: "Risk Rule Engine",
       icon: IconListDetails,
       children: [
+        {
+          title: "Rule Configuration",
+          url: "/dashboard/client/risk-rule-engine/rule-configuration",
+          icon: IconDatabase,
+        },
         {
           title: "CRA Scoring Configuration",
           url: "/dashboard/client/risk-rule-engine/cra-scoring-config",
@@ -315,9 +302,58 @@ export default function ClientSidebar({ ...props }) {
           url: "/dashboard/client/system-settings/privacy",
           icon: IconDatabase,
         },
+        {
+          title: "Role Management",
+          url: "/dashboard/client/user-and-role-management",
+          icon: IconDatabase,
+        },
       ],
     },
   ];
+
+
+  const navigation = [
+    {
+      title: "Overview",
+      items: [
+        { title: "Dashboard", url: "/dashboard/client", icon: Home },
+        // { title: "Analytics", url: "/analytics", icon: BarChart3 },
+      ],
+    },
+    {
+      title: "Client Portal",
+      items: [
+        { title: "Property Search", url: "/dashboard/client/properties", icon: Search },
+        { title: "My Documents", url: "/dashboard/client/documents", icon: FileText },
+        { title: "Track Status", url: "/dashboard/client/track-status", icon: Building2 },
+      ],
+    },
+    // {
+    //   title: "Conveyancer Portal",
+    //   items: [
+    //     { title: "Matter Management", url: "/dashboard/client/conveyancer/matters", icon: Scale },
+    //     { title: "Title Searches", url: "/dashboard/client/conveyancer/title-search", icon: Search },
+    //     { title: "Settlements", url: "/dashboard/client/conveyancer/settlements", icon: CreditCard },
+    //     // { title: "Trust Account", url: "/conveyancer/trust", icon: CreditCard },
+    //   ],
+    // },
+    {
+      title: "Agent Portal",
+      items: [
+        { title: "Listings", url: "/dashboard/client/agent/listing", icon: Building2 },
+        { title: "Clients", url: "/dashboard/client/agent/client", icon: Users },
+        { title: "Contracts", url: "/dashboard/client/agent/contracts", icon: FileText },
+      ],
+    },
+    // {
+    //   title: "Compliance",
+    //   items: [
+    //     { name: "AML Dashboard", href: "/compliance/aml", icon: ShieldCheck },
+    //     { name: "Case Management", href: "/compliance/cases", icon: FileText },
+    //     { name: "Reports", href: "/compliance/reports", icon: BarChart3 },
+    //   ],
+    // },
+  ]
 
   return (
     <Sidebar collapsible="offcanvas" {...props} className={'border-0'}>
@@ -325,27 +361,34 @@ export default function ClientSidebar({ ...props }) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
-                <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-                  <Wallet className="!size-4" />
+              <div className="py-2  relative">
+                <div className="w-28 ">
+                  <img src="/logo.png" alt="Logo" className=' w-full h-8 object-contain ' />
                 </div>
-                <span className="text-base font-semibold">Dooit Wallet.</span>
-              </a>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={onBoardingMenuItems} label="Onboarding" />
+        {isFinancial && <>
+          <NavMain items={onBoardingMenuItems} label="Onboarding" />
+          <NavMain items={reportingMenuItems} label="Reporting & Registers" />
+
+          <NavMain items={pepScreenigItems} label="PEP Screening" />
+          <NavMain items={configurationMenuItems} label="Configuration" />
+        </>}
+        {isRealState && <>
+          {
+            navigation.map((item) => (
+              <NavMain key={item.title} items={item.items} label={item.title} />
+            ))
+          }
+        </>}
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
-        <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
-        <NavMain items={pepScreenigItems} label="PEP Screening" />
-        <NavMain items={configurationMenuItems} label="Configuration" />
 
-        {/* <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={session.data?.user} />
