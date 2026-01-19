@@ -9,6 +9,7 @@ import { Save } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function RuleConfigurationForm({ open, setOpen, currentItem, setCurrentItem, setData, data: ruleConfigurations }) {
+  console.log('currentItem', currentItem)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const form = useForm({
     defaultValues: {

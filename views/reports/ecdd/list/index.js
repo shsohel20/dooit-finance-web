@@ -24,7 +24,8 @@ import { formatDateTime, riskLevelVariants } from '@/lib/utils';
 import CustomPagination from '@/components/CustomPagination';
 import { StatusPill, statusPillVariants } from '@/components/ui/StatusPill';
 import { Badge } from '@/components/ui/badge';
-import CustomResizableTable from '@/components/ui/CustomResizable';
+import dynamic from 'next/dynamic';
+const CustomResizableTable = dynamic(() => import('@/components/ui/CustomResizable'), { ssr: false });
 
 const EcddList = () => {
     const router = useRouter();

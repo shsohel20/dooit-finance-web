@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import allRuleConfigurations from '../JSON/rules.json'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PageDescription, PageHeader, PageTitle } from '@/components/common'
 import RuleConfigurationForm from '../form'
 import dynamic from 'next/dynamic'
+import { getAllRules } from '@/app/dashboard/client/risk-rule-engine/rule-configuration/actions'
 const CustomResizableTable = dynamic(() => import('@/components/ui/CustomResizable'), {
   ssr: false,
 })
@@ -14,19 +15,32 @@ const CustomResizableTable = dynamic(() => import('@/components/ui/CustomResizab
 export default function RuleConfigurationList() {
   const [openEditModal, setOpenEditModal] = useState(false)
   const [currentItem, setCurrentItem] = useState(null)
-  const [data, setData] = useState(allRuleConfigurations.slice(0, 20))
+  const [data, setData] = useState([])
 
   const handleEdit = (item) => {
     setCurrentItem(item)
     setOpenEditModal(true)
   }
+
+  const getRules = async () => {
+    try {
+      const res = await getAllRules();
+      console.log('res', res)
+      setData(res.data)
+    } catch (error) {
+
+    }
+  }
+  useEffect(() => {
+    getRules()
+  }, [])
   const columns = [
     {
       id: 'actions',
       header: "Actions",
       cell: ({ row }) => {
         return (
-          <div className=' '>
+          <div className=' ' hidden={!row?.original.isEditable}>
             <Button variant='outline' size='sm' onClick={() => handleEdit(row.original)}>Edit</Button>
           </div>
         )
@@ -37,12 +51,12 @@ export default function RuleConfigurationList() {
     {
       id: "name",
       header: "Name",
-      accessorKey: "name",
+      accessorKey: "ruleName",
       cell: ({ row }) => {
         return (
           <div className='space-y-2'>
-            <p className='font-bold'>{row.original.name}</p>
-            <p className='text-sm text-gray-500 text-wrap max-w-[400px]'>{row.original.description}</p>
+            <p className='font-bold'>{row.original.ruleName}</p>
+            <p className='text-sm text-gray-500 text-wrap max-w-[400px]'>{row.original.descriptiveExplanation}</p>
           </div>
         )
       }
@@ -50,27 +64,21 @@ export default function RuleConfigurationList() {
     {
       id: "condition",
       header: "Condition",
-      accessorKey: "condition",
+      accessorKey: "ruleCondition",
       cell: ({ row }) => {
         return (
           <div className='text-gray-500'>
-            <p>{row.original.condition}</p>
+            <p>{row.original.ruleCondition}</p>
           </div>
         )
       }
     },
     {
-      id: "ruleDomain",
-      header: "Rule Domain",
-      accessorKey: "ruleDomain",
-      cell: ({ row }) => {
-        return (
-          <div className='text-gray-500'>
-            <p>{row.original.ruleDomain}</p>
-          </div>
-        )
-      }
+      id: 'riskscore',
+      header: 'Risk Score',
+      accessorKey: 'riskScore'
     },
+
     {
       id: "mainDomain",
       header: "Main Domain",
@@ -82,7 +90,19 @@ export default function RuleConfigurationList() {
           </div>
         )
       }
-    }
+    },
+    {
+      id: "ruleDomain",
+      header: "Sub Domain",
+      accessorKey: "ruleDomainSubdomain",
+      cell: ({ row }) => {
+        return (
+          <div className='text-gray-500'>
+            <p>{row.original.ruleDomainSubdomain}</p>
+          </div>
+        )
+      }
+    },
   ]
   return (
     <div>
