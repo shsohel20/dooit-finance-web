@@ -2,6 +2,7 @@
 
 import useGetUser from '@/hooks/useGetUser';
 import ClientDashboard from '@/views/client-dashboard'
+import CryptoCurrencyDashboard from '@/views/crypto-currency/dashboard';
 import PreciousMetalDashboard from '@/views/precious-metal/dashboard';
 import RealEstateDashboard from '@/views/real-estate/dashboard';
 import React from 'react'
@@ -13,12 +14,14 @@ export default function DashboardClientPage() {
   const isRealState = clientType === "Real Estate";
   const isFinancial = clientType === "Financial";
   const isPreciousMetal=clientType==='Precious Metal'
+  const isCrypto=clientType==='Crypto'
 
   return (
     <div>
       {isRealState && <RealEstateDashboard />}
       {isFinancial && <ClientDashboard />}
       {isPreciousMetal && <PreciousMetalDashboard/>}
+      {isCrypto && <CryptoCurrencyDashboard/>}
     </div>
   )
 }

@@ -38,6 +38,7 @@ export default function ClientSidebar({ ...props }) {
   const isRealState = clientType === "Real Estate";
   const isFinancial = clientType === "Financial";
   const isPreciousMetal=clientType==='Precious Metal'
+  const isCrypto=clientType==='Crypto'
 
   const onBoardingMenuItems = [
     {
@@ -368,6 +369,17 @@ export default function ClientSidebar({ ...props }) {
       ],
     },
   ]
+  const cryptoMenu=[
+    {
+      title: "Overview",
+      items: [
+        { title: "Dashboard", url: "/dashboard/client", icon: Home },
+        { title: "Wallet", url: "/dashboard/client/wallet", icon: Wallet },
+        
+      ],
+    },
+  ]
+
 
   return (
     <Sidebar collapsible="offcanvas" {...props} className={'border-0'}>
@@ -403,6 +415,15 @@ export default function ClientSidebar({ ...props }) {
           isPreciousMetal && <>
           {
             preciousMetalMenu.map((item) => (
+              <NavMain key={item.title} items={item.items} label={item.title} />
+            ))
+          }
+          </>
+        }
+        {
+          isCrypto && <>
+          {
+            cryptoMenu.map((item) => (
               <NavMain key={item.title} items={item.items} label={item.title} />
             ))
           }
