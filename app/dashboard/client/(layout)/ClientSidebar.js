@@ -27,7 +27,7 @@ import {
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { useSession } from "next-auth/react";
-import { BarChart3, Building2, CreditCard, FileInput, FileText, GraduationCap, Home, Newspaper, Scale, Search, ShieldHalf, ShieldUser, Users, Wallet } from "lucide-react";
+import { TrendingUp, Building2, PieChart, FileInput, FileText, GraduationCap, Home, Newspaper, Scale, Search, ShieldHalf, ShieldUser, Users, Wallet } from "lucide-react";
 import useGetUser from "@/hooks/useGetUser";
 
 
@@ -37,6 +37,7 @@ export default function ClientSidebar({ ...props }) {
   const clientType = loggedInUser?.client?.clientType;
   const isRealState = clientType === "Real Estate";
   const isFinancial = clientType === "Financial";
+  const isPreciousMetal=clientType==='Precious Metal'
 
   const onBoardingMenuItems = [
     {
@@ -355,6 +356,19 @@ export default function ClientSidebar({ ...props }) {
     // },
   ]
 
+  const preciousMetalMenu=[
+    {
+      title: "Overview",
+      items: [
+        { title: "Dashboard", url: "/dashboard/client", icon: Home },
+        { title: "Trade", url: "/dashboard/client/trade", icon: TrendingUp },
+        { title: "Portfolio", url: "/dashboard/client/portfolio", icon: PieChart },
+
+        // { title: "Analytics", url: "/analytics", icon: BarChart3 },
+      ],
+    },
+  ]
+
   return (
     <Sidebar collapsible="offcanvas" {...props} className={'border-0'}>
       <SidebarHeader>
@@ -385,6 +399,16 @@ export default function ClientSidebar({ ...props }) {
             ))
           }
         </>}
+        {
+          isPreciousMetal && <>
+          {
+            preciousMetalMenu.map((item) => (
+              <NavMain key={item.title} items={item.items} label={item.title} />
+            ))
+          }
+          </>
+        }
+
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
