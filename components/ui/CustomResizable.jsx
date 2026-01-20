@@ -103,7 +103,6 @@ const CustomResizableTable = ({
   ...props
 }) => {
   const [highlightedId, setHighlightedId] = useState(null);
-  const tables = document.getElementsByClassName(mainClass);
   const sensors = useSensors(useSensor(MouseSensor, {}));
   const [activeDragId, setActiveDragId] = useState(null);
   const [columnOrder, setColumnOrder] = useState(
@@ -223,6 +222,8 @@ const CustomResizableTable = ({
   }, []);
 
   useEffect(() => {
+  const tables = document.getElementsByClassName(mainClass);
+
     if (tables.length === 0) return;
     for (let i = 0; i < tables.length; i++) {
       resizableGrid(tables[i]);

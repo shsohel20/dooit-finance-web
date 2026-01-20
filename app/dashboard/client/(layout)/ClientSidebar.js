@@ -27,9 +27,25 @@ import {
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { useSession } from "next-auth/react";
-import { BarChart3, Building2, CreditCard, FileInput, FileText, GraduationCap, Home, Newspaper, Scale, Search, ShieldHalf, ShieldUser, Users, Wallet } from "lucide-react";
+import {
+  TrendingUp,
+  Building2,
+  PieChart,
+  FileInput,
+  FileText,
+  GraduationCap,
+  Home,
+  Newspaper,
+  Scale,
+  Search,
+  ShieldHalf,
+  ShieldUser,
+  Users,
+  Wallet,
+  Send,
+  Download,
+} from "lucide-react";
 import useGetUser from "@/hooks/useGetUser";
-
 
 export default function ClientSidebar({ ...props }) {
   const session = useSession();
@@ -37,6 +53,8 @@ export default function ClientSidebar({ ...props }) {
   const clientType = loggedInUser?.client?.clientType;
   const isRealState = clientType === "Real Estate";
   const isFinancial = clientType === "Financial";
+  const isPreciousMetal = clientType === "Precious Metal";
+  const isCrypto = clientType === "Crypto";
 
   const onBoardingMenuItems = [
     {
@@ -93,31 +111,33 @@ export default function ClientSidebar({ ...props }) {
       url: "/dashboard/client/risk-assessment",
     },
   ];
+
+  const STRMenu = {
+    title: "STR Filing",
+    icon: IconChartBar,
+    children: [
+      {
+        title: "STR Review",
+        url: "/dashboard/client/str-filling-report/review",
+        icon: IconDatabase,
+        current: true,
+      },
+      {
+        title: "STR Approval",
+        url: "/dashboard/client/str-filling-report/approval",
+        icon: IconDatabase,
+        current: true,
+      },
+      {
+        title: "Draft STR",
+        url: "/dashboard/client/str-filling-report/draft",
+        icon: IconDatabase,
+        current: true,
+      },
+    ],
+  };
   const reportingMenuItems = [
-    {
-      title: "STR Filing",
-      icon: IconChartBar,
-      children: [
-        {
-          title: "STR Review",
-          url: "/dashboard/client/str-filling-report/review",
-          icon: IconDatabase,
-          current: true,
-        },
-        {
-          title: "STR Approval",
-          url: "/dashboard/client/str-filling-report/approval",
-          icon: IconDatabase,
-          current: true,
-        },
-        {
-          title: "Draft STR",
-          url: "/dashboard/client/str-filling-report/draft",
-          icon: IconDatabase,
-          current: true,
-        },
-      ],
-    },
+    ...(isFinancial ? [STRMenu] : []),
     {
       title: "SMR Filing ",
       icon: FileInput,
@@ -242,8 +262,9 @@ export default function ClientSidebar({ ...props }) {
       title: "AML Screening",
       icon: IconListDetails,
       url: "/dashboard/client/pep-and-adverse-media/aml-screening",
-    }
+    },
   ];
+
   const configurationMenuItems = [
     {
       title: "User & Role Management",
@@ -311,15 +332,7 @@ export default function ClientSidebar({ ...props }) {
     },
   ];
 
-
-  const navigation = [
-    {
-      title: "Overview",
-      items: [
-        { title: "Dashboard", url: "/dashboard/client", icon: Home },
-        // { title: "Analytics", url: "/analytics", icon: BarChart3 },
-      ],
-    },
+  const realStateMenu = [
     {
       title: "Client Portal",
       items: [
@@ -341,7 +354,7 @@ export default function ClientSidebar({ ...props }) {
       title: "Agent Portal",
       items: [
         { title: "Listings", url: "/dashboard/client/agent/listing", icon: Building2 },
-        { title: "Clients", url: "/dashboard/client/agent/client", icon: Users },
+        // { title: "Clients", url: "/dashboard/client/agent/client", icon: Users },
         { title: "Contracts", url: "/dashboard/client/agent/contracts", icon: FileText },
       ],
     },
@@ -353,17 +366,39 @@ export default function ClientSidebar({ ...props }) {
     //     { name: "Reports", href: "/compliance/reports", icon: BarChart3 },
     //   ],
     // },
-  ]
+  ];
+
+  const preciousMetalMenu = [
+    {
+      title: "Overview",
+      items: [
+        { title: "Trade", url: "/dashboard/client/trade", icon: TrendingUp },
+        { title: "Portfolio", url: "/dashboard/client/portfolio", icon: PieChart },
+
+        // { title: "Analytics", url: "/analytics", icon: BarChart3 },
+      ],
+    },
+  ];
+  const cryptoMenu = [
+    {
+      title: "Overview",
+      items: [
+        { title: "Wallet", url: "/dashboard/client/wallet", icon: Wallet },
+        { title: "Send Crypto", url: "/dashboard/client/send-crypto", icon: Send },
+        { title: "Receive Crypto", url: "/dashboard/client/receive-crypto", icon: Download },
+      ],
+    },
+  ];
 
   return (
-    <Sidebar collapsible="offcanvas" {...props} className={'border-0'}>
+    <Sidebar collapsible="offcanvas" {...props} className={"border-0"}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <div className="py-2  relative">
                 <div className="w-28 ">
-                  <img src="/logo.png" alt="Logo" className=' w-full h-8 object-contain ' />
+                  <img src="/logo.png" alt="Logo" className=" w-full h-8 object-contain " />
                 </div>
               </div>
             </SidebarMenuButton>
@@ -371,24 +406,34 @@ export default function ClientSidebar({ ...props }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {isFinancial && <>
-          <NavMain items={onBoardingMenuItems} label="Onboarding" />
-          <NavMain items={reportingMenuItems} label="Reporting & Registers" />
-
-          <NavMain items={pepScreenigItems} label="PEP Screening" />
-          <NavMain items={configurationMenuItems} label="Configuration" />
-        </>}
-        {isRealState && <>
-          {
-            navigation.map((item) => (
+        <NavMain items={onBoardingMenuItems} label="Onboarding" />
+        <NavMain items={reportingMenuItems} label="Reporting & Registers" />
+        {isRealState && (
+          <>
+            {realStateMenu.map((item) => (
               <NavMain key={item.title} items={item.items} label={item.title} />
-            ))
-          }
-        </>}
+            ))}
+          </>
+        )}
+        {isPreciousMetal && (
+          <>
+            {preciousMetalMenu.map((item) => (
+              <NavMain key={item.title} items={item.items} label={item.title} />
+            ))}
+          </>
+        )}
+        {isCrypto && (
+          <>
+            {cryptoMenu.map((item) => (
+              <NavMain key={item.title} items={item.items} label={item.title} />
+            ))}
+          </>
+        )}
+        <NavMain items={pepScreenigItems} label="PEP Screening" />
+        <NavMain items={configurationMenuItems} label="Configuration" />
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
-
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={session.data?.user} />

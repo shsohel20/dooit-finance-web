@@ -42,7 +42,7 @@ export default function ClientDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           <MetricCard
             title="Onboarded Customers"
-            value="$1,055,000"
+            value="1,055,000"
             icon={<Users className="size-4" />}
             trend={{ value: "+12.5%", positive: true }}
           />
