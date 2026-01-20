@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import React, { useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
-import { AudioLines, Forward, Paperclip, X } from 'lucide-react';
+import { AudioLines, Forward, Mic, Paperclip, X } from 'lucide-react';
 import useOutsideClick from '@/hooks/useOutsideClick';
 const NissaModel = dynamic(
   () => import('@/components/nisa-ai/Nisa', { ssr: false })
@@ -49,11 +49,11 @@ export default function ChatBotNissa() {
               <h1 className="text-center text-2xl font-bold">
                 Welcome to
                 <span className="bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text ml-2">
-                  Nissa AI
+                  Nisa AI
                 </span>
               </h1>
               <p className="text-center text-sm text-gray-500">
-                Ask me anything about LAW & REGULATION
+                Ask me anything about Risk & Compliance
               </p>
             </div>
           )}
@@ -69,7 +69,7 @@ export default function ChatBotNissa() {
                     <Paperclip />
                   </Button>
                   <Button size="icon" variant="outline">
-                    <AudioLines />
+                    <Mic />
                   </Button>
                 </div>
                 <div>
