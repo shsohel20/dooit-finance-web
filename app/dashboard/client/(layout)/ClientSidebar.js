@@ -137,7 +137,7 @@ export default function ClientSidebar({ ...props }) {
     ],
   };
   const reportingMenuItems = [
-    ...(isFinancial ? [STRMenu] : []),
+    ...(isFinancial || isCrypto ? [STRMenu] : []),
     {
       title: "SMR Filing ",
       icon: FileInput,
