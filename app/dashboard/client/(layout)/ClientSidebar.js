@@ -430,9 +430,9 @@ export default function ClientSidebar({ ...props }) {
             ))}
           </>
         )}
+        <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
         <NavMain items={configurationMenuItems} label="Configuration" />
-        <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
       </SidebarContent>
