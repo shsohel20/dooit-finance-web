@@ -137,7 +137,7 @@ export default function ClientSidebar({ ...props }) {
     ],
   };
   const reportingMenuItems = [
-    ...(isFinancial ? [STRMenu] : []),
+    ...(isFinancial || isCrypto ? [STRMenu] : []),
     {
       title: "SMR Filing ",
       icon: FileInput,
@@ -386,6 +386,7 @@ export default function ClientSidebar({ ...props }) {
         { title: "Wallet", url: "/dashboard/client/wallet", icon: Wallet },
         { title: "Send Crypto", url: "/dashboard/client/send-crypto", icon: Send },
         { title: "Receive Crypto", url: "/dashboard/client/receive-crypto", icon: Download },
+        { title: "Market", url: "/dashboard/client/market", icon: TrendingUp },
       ],
     },
   ];
@@ -407,7 +408,6 @@ export default function ClientSidebar({ ...props }) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={onBoardingMenuItems} label="Onboarding" />
-        <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         {isRealState && (
           <>
             {realStateMenu.map((item) => (
@@ -429,9 +429,10 @@ export default function ClientSidebar({ ...props }) {
             ))}
           </>
         )}
+        <NavMain items={reportingMenuItems} label="Reporting & Registers" />
+        <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
         <NavMain items={configurationMenuItems} label="Configuration" />
-        <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
       </SidebarContent>

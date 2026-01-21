@@ -24,6 +24,10 @@
 } */
 
 @custom-variant dark (&:is(.dark *));
+.border-red {
+  border-color: var(--danger);
+  border-width: 5px;
+}
 
 :root {
   /* oklch(0.52 0.11 200)

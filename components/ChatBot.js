@@ -62,10 +62,10 @@ export default function ChatBot() {
             <Button size="icon" variant="outline" disabled>
               <IconPaperclip />
             </Button>
-            <div className="flex-1 w-full">
+            <div className="flex-1 w-full max-h-40 border-red">
               <Input
                 type="textarea"
-                className={'min-h-2'}
+                className={'min-h-2 '}
                 placeholder="Ask me anything"
                 rows={1}
               />

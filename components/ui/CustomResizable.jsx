@@ -90,7 +90,6 @@ import { Skeleton } from './skeleton';
  * - Row highlighting reads `newId` from localStorage and auto-clears after 10s.
  */
 
-
 const CustomResizableTable = ({
   className,
   mainClass,
@@ -222,7 +221,7 @@ const CustomResizableTable = ({
   }, []);
 
   useEffect(() => {
-  const tables = document.getElementsByClassName(mainClass);
+    const tables = document.getElementsByClassName(mainClass);
 
     if (tables.length === 0) return;
     for (let i = 0; i < tables.length; i++) {
