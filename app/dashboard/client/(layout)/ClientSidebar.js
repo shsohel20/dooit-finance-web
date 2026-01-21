@@ -408,7 +408,6 @@ export default function ClientSidebar({ ...props }) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={onBoardingMenuItems} label="Onboarding" />
-        <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         {isRealState && (
           <>
             {realStateMenu.map((item) => (
@@ -430,6 +429,7 @@ export default function ClientSidebar({ ...props }) {
             ))}
           </>
         )}
+        <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
         <NavMain items={configurationMenuItems} label="Configuration" />
