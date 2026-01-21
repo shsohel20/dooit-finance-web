@@ -386,6 +386,7 @@ export default function ClientSidebar({ ...props }) {
         { title: "Wallet", url: "/dashboard/client/wallet", icon: Wallet },
         { title: "Send Crypto", url: "/dashboard/client/send-crypto", icon: Send },
         { title: "Receive Crypto", url: "/dashboard/client/receive-crypto", icon: Download },
+        { title: "Market", url: "/dashboard/client/market", icon: TrendingUp },
       ],
     },
   ];
