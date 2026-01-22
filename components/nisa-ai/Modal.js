@@ -24,7 +24,7 @@ const NissaModel = dynamic(
 
 const NisaIntro = () => {
   return (
-    <div>
+    <div className="pt-10">
       <h1 className="text-center text-2xl font-bold">
         Hi, I&apos;m
         <span className="bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text ml-2">
@@ -136,9 +136,10 @@ export default function Modal({ isOpen, setIsOpen }) {
     <div
       ref={chatRef}
       className={cn(
-        'fixed  bottom-2   right-0  transition-[transform, height, width] duration-500 ease-in-out translate-x-full rounded-xl  bg-white shadow-xl border-t ',
+        'fixed  bottom-2 transition-[transform, height, width] duration-500 ease-in-out  rounded-xl  bg-white shadow-xl border-t ',
         {
           ' -right-1 z-50   translate-x-0 ': isOpen,
+          'translate-x-full right-0': !isOpen,
           'h-[80vh] w-[60vw] max-w-[850px]': maximize,
           'h-[500px] w-full max-w-[450px] ': !maximize,
         }
