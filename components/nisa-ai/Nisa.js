@@ -1,12 +1,13 @@
 'use client';
 // import CustomImage from "@/lib/reusable/CustomImage";
 // import { useStrikeoTheme } from "@/lib/utils/useStrikeoTheme";
-import { Environment } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
-import dynamic from "next/dynamic";
-const Nissa = dynamic(() => import("./model"), { ssr: false });
+import { Environment } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import dynamic from 'next/dynamic';
+import React from 'react';
+const Nissa = dynamic(() => import('./model'), { ssr: false });
 
-export default function NissaModel() {
+const NissaModel = () => {
   // const { isLight } = useStrikeoTheme();
 
   // if (isLight) {
@@ -25,8 +26,8 @@ export default function NissaModel() {
     <Canvas
       id="storeCanvas"
       style={{
-        width: "100%",
-        height: "100%",
+        width: '100%',
+        height: '100%',
       }}
       camera={{
         fov: 35,
@@ -36,7 +37,7 @@ export default function NissaModel() {
       gl={{ preserveDrawingBuffer: true }}
     >
       <Environment
-        files={"models/metro_noord_2k.hdr"}
+        files={'models/metro_noord_2k.hdr'}
         path="/"
         background={true}
         blur={0.2}
@@ -49,4 +50,6 @@ export default function NissaModel() {
       </group>
     </Canvas>
   );
-}
+};
+
+export default React.memo(NissaModel);
