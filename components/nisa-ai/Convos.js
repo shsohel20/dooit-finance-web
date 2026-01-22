@@ -40,7 +40,7 @@ export default function Convos({ chat, loading }) {
         );
       })}
       {loading ? (
-        <div>
+        <div className="animate-pulse duration-300">
           <div>Thinking...</div>
         </div>
       ) : null}

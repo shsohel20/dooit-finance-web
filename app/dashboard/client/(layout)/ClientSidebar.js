@@ -50,11 +50,13 @@ import useGetUser from "@/hooks/useGetUser";
 export default function ClientSidebar({ ...props }) {
   const session = useSession();
   const { loggedInUser } = useGetUser();
+  console.log("loggedInUser", loggedInUser);
   const clientType = loggedInUser?.client?.clientType;
   const isRealState = clientType === "Real Estate";
   const isFinancial = clientType === "Financial";
   const isPreciousMetal = clientType === "Precious Metal";
   const isCrypto = clientType === "Crypto";
+  const isBranch = loggedInUser?.role === "branch";
 
   const onBoardingMenuItems = [
     {
@@ -100,11 +102,15 @@ export default function ClientSidebar({ ...props }) {
         },
       ],
     },
-    {
-      title: "Branches",
-      icon: IconBuildingBank,
-      url: "/dashboard/client/branch",
-    },
+    ...(isBranch
+      ? []
+      : [
+          {
+            title: "Branches",
+            icon: IconBuildingBank,
+            url: "/dashboard/client/branch",
+          },
+        ]),
     {
       title: "Risk Assessment",
       icon: IconAlertTriangle,

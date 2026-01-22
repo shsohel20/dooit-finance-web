@@ -1,13 +1,19 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Building2,
   User,
@@ -20,87 +26,110 @@ import {
   Plus,
   Save,
   Camera,
-} from "lucide-react"
-import { useLoggedInUser, useLoggedInUserStore } from "@/app/store/useLoggedInUser"
-import { useFieldArray, useForm } from "react-hook-form"
-import { FormField } from "@/components/ui/FormField"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { countriesData } from "@/constants"
-import { updateClientProfile, updateProfile } from "@/app/dashboard/client/profile/actions"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
-import { getLoggedInUser } from "@/app/actions"
-
+} from "lucide-react";
+import { useLoggedInUser, useLoggedInUserStore } from "@/app/store/useLoggedInUser";
+import { useFieldArray, useForm } from "react-hook-form";
+import { FormField } from "@/components/ui/FormField";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { countriesData } from "@/constants";
+import {
+  updateBranchProfile,
+  updateClientProfile,
+  updateProfile,
+} from "@/app/dashboard/client/profile/actions";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { getLoggedInUser } from "@/app/actions";
 
 export function ClientEditForm() {
   const { loggedInUser: formData, setLoggedInUser } = useLoggedInUser();
   const [activeTab, setActiveTab] = useState("company");
-
+  console.log("formData", formData);
   const isClient = formData?.userType === "client";
+  const isBranch = formData?.userType === "branch";
+
   const router = useRouter();
   const form = useForm({
     defaultValues: formData,
     mode: "onChange",
-    resolver: zodResolver(z.object({
-      client: z.object({
-        name: z.string().optional(),
-        clientType: z.string().optional(),
-        registrationNumber: z.string().optional(),
-        taxId: z.string().optional(),
-        email: z.string().email("Invalid email address").optional(),
-        phone: z.string().min(1, "Phone is required").optional(),
-        website: z.string().url("Invalid website URL").optional(),
-        contacts: z.array(z.object({
+    resolver: zodResolver(
+      z.object({
+        client: z.object({
           name: z.string().optional(),
-          title: z.string().optional(),
+          clientType: z.string().optional(),
+          registrationNumber: z.string().optional(),
+          taxId: z.string().optional(),
           email: z.string().email("Invalid email address").optional(),
           phone: z.string().min(1, "Phone is required").optional(),
-          primary: z.boolean().optional(),
-        })).optional(),
-        address: z.object({
-          street: z.string().optional(),
-          city: z.string().optional(),
-          state: z.string().optional(),
-          country: z.string().optional(),
-          zipcode: z.string().optional(),
-        }).optional(),
-        legalRepresentative: z.object({
-          name: z.string().optional(),
-          designation: z.string().optional(),
-          email: z.string().email("Invalid email address").optional(),
-          phone: z.string().min(1, "Phone is required").optional(),
-        }).optional(),
-        documents: z.array(z.object({
-          name: z.string().optional(),
-          url: z.string().url("Invalid URL").optional(),
-          mimeType: z.string().optional(),
-          type: z.string().optional(),
-        })).optional(),
-        settings: z.object({
-          billingCycle: z.string().optional(),
-          currency: z.string().optional(),
-        }).optional(),
+          website: z.string().url("Invalid website URL").optional(),
+          contacts: z
+            .array(
+              z.object({
+                name: z.string().optional(),
+                title: z.string().optional(),
+                email: z.string().email("Invalid email address").optional(),
+                phone: z.string().min(1, "Phone is required").optional(),
+                primary: z.boolean().optional(),
+              }),
+            )
+            .optional(),
+          address: z
+            .object({
+              street: z.string().optional(),
+              city: z.string().optional(),
+              state: z.string().optional(),
+              country: z.string().optional(),
+              zipcode: z.string().optional(),
+            })
+            .optional(),
+          legalRepresentative: z
+            .object({
+              name: z.string().optional(),
+              designation: z.string().optional(),
+              email: z.string().email("Invalid email address").optional(),
+              phone: z.string().min(1, "Phone is required").optional(),
+            })
+            .optional(),
+          documents: z
+            .array(
+              z.object({
+                name: z.string().optional(),
+                url: z.string().url("Invalid URL").optional(),
+                mimeType: z.string().optional(),
+                type: z.string().optional(),
+              }),
+            )
+            .optional(),
+          settings: z
+            .object({
+              billingCycle: z.string().optional(),
+              currency: z.string().optional(),
+            })
+            .optional(),
+        }),
       }),
-
-    }))
-  })
+    ),
+  });
   useEffect(() => {
     form.reset(formData);
   }, [formData]);
 
-  const { fields: contactFields, append: appendContact, remove: removeContact } = useFieldArray({
+  const {
+    fields: contactFields,
+    append: appendContact,
+    remove: removeContact,
+  } = useFieldArray({
     control: form.control,
     name: "client.contacts",
-  })
+  });
 
   const addContact = () => {
-    appendContact({ name: "", title: "", email: "", phone: "", primary: false })
-  }
+    appendContact({ name: "", title: "", email: "", phone: "", primary: false });
+  };
   const removeContactItem = (index) => {
-    removeContact(index)
-  }
-
+    removeContact(index);
+  };
 
   const navItems = [
     { id: "company", label: "Company Info", icon: Building2 },
@@ -109,31 +138,30 @@ export function ClientEditForm() {
     { id: "legal", label: "Legal Representative", icon: Scale },
     { id: "documents", label: "Documents", icon: FileText },
     { id: "settings", label: "Settings", icon: Settings },
-  ]
+  ];
 
   const onSubmit = async (data) => {
-    const action = isClient ? updateClientProfile : updateProfile;
+    const action = isClient ? updateClientProfile : isBranch ? updateBranchProfile : updateProfile;
     const id = isClient ? formData?.client?._id : formData?.id;
-    const dataToSend = isClient ? data.client : data;
+    const dataToSend = isClient || isBranch ? data.client : data;
+    console.log("data to send", JSON.stringify(dataToSend, null, 2));
     const response = await action(dataToSend, id);
-    console.log('response', response);
+    console.log("edit response", response);
     if (response.success) {
-      toast.success('Profile updated successfully');
-      const response = await getLoggedInUser()
-      console.log('getLoggedInUser response', response);
+      toast.success("Profile updated successfully");
+      const response = await getLoggedInUser();
+      console.log("getLoggedInUser response", response);
       if (response.success) {
         setLoggedInUser(response.data);
       }
-      router.push('/dashboard/client/profile');
+      router.push("/dashboard/client/profile");
     } else {
-      toast.error('Failed to update profile');
+      toast.error("Failed to update profile");
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen relative">
-
-
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
@@ -142,7 +170,10 @@ export function ClientEditForm() {
             <div className="flex items-center gap-4">
               <div className="relative group">
                 <Avatar className="h-14 w-14 border-2 border-border">
-                  <AvatarImage src={formData?.photoUrl || "/placeholder.svg"} alt={formData?.client?.name} />
+                  <AvatarImage
+                    src={formData?.photoUrl || "/placeholder.svg"}
+                    alt={formData?.client?.name}
+                  />
                   <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
                     {formData?.client?.name?.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
@@ -157,7 +188,9 @@ export function ClientEditForm() {
                   <Badge variant="secondary" className="text-xs">
                     {formData?.client?.clientType}
                   </Badge>
-                  <span className="text-sm text-muted-foreground">{formData?.client?.registrationNumber}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {formData?.client?.registrationNumber}
+                  </span>
                 </div>
               </div>
             </div>
@@ -204,11 +237,7 @@ export function ClientEditForm() {
               <CardContent className="space-y-6">
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="">
-                    <FormField
-                      name="client.name"
-                      label="Company Name"
-                      form={form}
-                    />
+                    <FormField name="client.name" label="Company Name" form={form} />
                   </div>
                   <FormField
                     name="client.clientType"
@@ -232,40 +261,19 @@ export function ClientEditForm() {
                     label="Registration Number"
                     form={form}
                   />
-                  <FormField
-                    name="client.taxId"
-                    label="Tax ID"
-                    form={form}
-                  />
-
+                  <FormField name="client.taxId" label="Tax ID" form={form} />
                 </div>
 
                 <Separator />
 
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <FormField
-                    name="client.email"
-                    label="Email"
-                    form={form}
-                    type="email"
-                  />
-                  <FormField
-                    name="client.phone"
-                    label="Phone"
-                    form={form}
-                    type="phone"
-                  />
+                  <FormField name="client.email" label="Email" form={form} type="email" />
+                  <FormField name="client.phone" label="Phone" form={form} type="phone" />
                 </div>
 
-                <FormField
-                  name="client.website"
-                  label="Website"
-                  form={form}
-                  type="url"
-                />
+                <FormField name="client.website" label="Website" form={form} type="url" />
               </CardContent>
             </Card>
-
 
             {/* Contacts Section */}
 
@@ -279,7 +287,12 @@ export function ClientEditForm() {
                     </CardTitle>
                     <CardDescription>Manage company contact persons</CardDescription>
                   </div>
-                  <Button size="sm" variant="outline" className="gap-2 bg-transparent" onClick={addContact}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 bg-transparent"
+                    onClick={addContact}
+                  >
                     <Plus className="h-4 w-4" />
                     Add Contact
                   </Button>
@@ -320,11 +333,7 @@ export function ClientEditForm() {
                       </div>
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <FormField
-                        name={`client.contacts[${index}].name`}
-                        label="Name"
-                        form={form}
-                      />
+                      <FormField name={`client.contacts[${index}].name`} label="Name" form={form} />
                       <FormField
                         name={`client.contacts[${index}].title`}
                         label="Title"
@@ -355,7 +364,6 @@ export function ClientEditForm() {
               </CardContent>
             </Card>
 
-
             {/* Address Section */}
 
             <Card>
@@ -367,26 +375,10 @@ export function ClientEditForm() {
                 <CardDescription>Company location and mailing address</CardDescription>
               </CardHeader>
               <CardContent className=" grid gap-6 sm:grid-cols-2">
-                <FormField
-                  name="client.address.street"
-                  label="Street Address"
-                  form={form}
-                />
-                <FormField
-                  name="client.address.city"
-                  label="City"
-                  form={form}
-                />
-                <FormField
-                  name="client.address.state"
-                  label="State / Province"
-                  form={form}
-                />
-                <FormField
-                  name="client.address.zipcode"
-                  label="Zip / Postal Code"
-                  form={form}
-                />
+                <FormField name="client.address.street" label="Street Address" form={form} />
+                <FormField name="client.address.city" label="City" form={form} />
+                <FormField name="client.address.state" label="State / Province" form={form} />
+                <FormField name="client.address.zipcode" label="Zip / Postal Code" form={form} />
                 <FormField
                   name="client.address.country"
                   label="Country"
@@ -394,10 +386,8 @@ export function ClientEditForm() {
                   type="select"
                   options={countriesData}
                 />
-
               </CardContent>
             </Card>
-
 
             {/* Legal Representative Section */}
 
@@ -411,17 +401,12 @@ export function ClientEditForm() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <FormField
-                    name="client.legalRepresentative.name"
-                    label="Full Name"
-                    form={form}
-                  />
+                  <FormField name="client.legalRepresentative.name" label="Full Name" form={form} />
                   <FormField
                     name="client.legalRepresentative.designation"
                     label="Designation"
                     form={form}
                   />
-
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2">
                   <FormField
@@ -439,7 +424,6 @@ export function ClientEditForm() {
                 </div>
               </CardContent>
             </Card>
-
 
             {/* Documents Section */}
             <Card>
@@ -500,12 +484,15 @@ export function ClientEditForm() {
                 {/* Upload Zone */}
                 <div className="mt-4 border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 hover:bg-muted/30 transition-colors cursor-pointer">
                   <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm font-medium text-foreground">Drop files here or click to upload</p>
-                  <p className="text-xs text-muted-foreground mt-1">PDF, DOC, or images up to 10MB</p>
+                  <p className="text-sm font-medium text-foreground">
+                    Drop files here or click to upload
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    PDF, DOC, or images up to 10MB
+                  </p>
                 </div>
               </CardContent>
             </Card>
-
 
             {/* Settings Section */}
             <Card>
@@ -562,10 +549,9 @@ export function ClientEditForm() {
                 </div>
               </CardContent>
             </Card>
-
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
