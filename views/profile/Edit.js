@@ -44,14 +44,13 @@ import { getLoggedInUser } from "@/app/actions";
 
 export function ClientEditForm() {
   const { loggedInUser: formData, setLoggedInUser } = useLoggedInUser();
-  const [activeTab, setActiveTab] = useState("company");
-  console.log("formData", formData);
   const isClient = formData?.userType === "client";
   const isBranch = formData?.userType === "branch";
 
   const router = useRouter();
+  const formDataByUserType=isClient ? formData: {...formData, client: formData?.branch}
   const form = useForm({
-    defaultValues: formData,
+    defaultValues: formDataByUserType,
     mode: "onChange",
     resolver: zodResolver(
       z.object({
@@ -112,7 +111,7 @@ export function ClientEditForm() {
     ),
   });
   useEffect(() => {
-    form.reset(formData);
+    form.reset(formDataByUserType);
   }, [formData]);
 
   const {
