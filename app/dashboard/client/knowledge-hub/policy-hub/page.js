@@ -1,14 +1,19 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Search, BookOpen, FileText, HelpCircle, Download, Tag } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react";
+import { Search, BookOpen, FileText, HelpCircle, Download, Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import useGetUser from "@/hooks/useGetUser";
+import { getAllPolicyDocuments } from "./actions";
 
 export default function Page() {
-  const [activeTab, setActiveTab] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const router = useRouter()
+  const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const { loggedInUser } = useGetUser();
+  const [data, setData] = useState(null);
+  console.log("loggedInUser", loggedInUser);
+  const router = useRouter();
   const categories = [
     {
       icon: BookOpen,
@@ -34,47 +39,63 @@ export default function Page() {
       description: "Answers to common questions and support",
       count: 32,
     },
-  ]
+  ];
 
   const articles = [
     {
       title: "Understanding AML/KYC Compliance in 2023",
-      description: "An overview of the latest regulatory changes affecting KYC processes in the financial industry.",
+      description:
+        "An overview of the latest regulatory changes affecting KYC processes in the financial industry.",
       updated: "2 days ago",
       category: "Regulatory Guidelines",
     },
     {
       title: "Understanding AML/KYC Compliance in 2023",
-      description: "An overview of the latest regulatory changes affecting KYC processes in the financial industry.",
+      description:
+        "An overview of the latest regulatory changes affecting KYC processes in the financial industry.",
       updated: "2 days ago",
       category: "Implementation Guides",
     },
     {
       title: "Understanding AML/KYC Compliance in 2023",
-      description: "An overview of the latest regulatory changes affecting KYC processes in the financial industry.",
+      description:
+        "An overview of the latest regulatory changes affecting KYC processes in the financial industry.",
       updated: "2 days ago",
       category: "Best Practices",
     },
-  ]
+  ];
 
   const policies = [
     {
       title: "Customer Identification Program Policy",
-      description: "Comprehensive guidelines for customer identification and verification processes.",
+      description:
+        "Comprehensive guidelines for customer identification and verification processes.",
       updated: "15 Jan 2023",
       size: "2.1 MB",
     },
     {
       title: "Customer Identification Program Policy",
-      description: "Comprehensive guidelines for customer identification and verification processes.",
+      description:
+        "Comprehensive guidelines for customer identification and verification processes.",
       updated: "15 Jan 2023",
       size: "2.1 MB",
     },
-  ]
+  ];
 
   const handleGeneratePolicy = () => {
-    router.push('/dashboard/client/knowledge-hub/policy-hub/form')
-  }
+    router.push("/dashboard/client/knowledge-hub/policy-hub/form");
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // const company = loggedInUser?.name;
+      // const type
+      const data = await getAllPolicyDocuments();
+      setData(data);
+    };
+    // fetchData();
+  }, []);
+
   return (
     <div className="min-h-screen ">
       {/* Header */}
@@ -111,7 +132,7 @@ export default function Page() {
           <h2 className="text-2xl font-bold text-foreground mb-8">Browse by Category</h2>
           <div className="grid md:grid-cols-4 gap-6">
             {categories.map((cat, i) => {
-              const IconComponent = cat.icon
+              const IconComponent = cat.icon;
               return (
                 <div
                   key={i}
@@ -131,7 +152,7 @@ export default function Page() {
                     Explore
                   </button>
                 </div>
-              )
+              );
             })}
           </div>
         </section>
@@ -175,10 +196,11 @@ export default function Page() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-3 px-2 text-sm font-medium whitespace-nowrap transition-colors ${activeTab === tab
-                  ? "text-primary border-b-2 border-primary"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
+                className={`pb-3 px-2 text-sm font-medium whitespace-nowrap transition-colors ${
+                  activeTab === tab
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
               >
                 {tab}
               </button>
@@ -196,7 +218,9 @@ export default function Page() {
                 <p className="text-sm text-muted-foreground mb-4">{policy.description}</p>
                 <div className="flex items-center justify-between pt-4 border-t border-border">
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-muted-foreground">Last updated: {policy.updated}</span>
+                    <span className="text-xs text-muted-foreground">
+                      Last updated: {policy.updated}
+                    </span>
                     <span className="text-xs text-muted-foreground">PDF, {policy.size}</span>
                   </div>
                   <button className="px-4 py-2 rounded-lg border border-border text-foreground text-sm font-medium hover:bg-muted transition-colors flex items-center gap-2">
@@ -210,5 +234,5 @@ export default function Page() {
         </section>
       </div>
     </div>
-  )
+  );
 }

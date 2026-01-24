@@ -4,17 +4,7 @@ import dynamic from 'next/dynamic';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
-import {
-  AudioLines,
-  Cross,
-  Forward,
-  Maximize,
-  Maximize2,
-  Mic,
-  Minimize,
-  Paperclip,
-  X,
-} from 'lucide-react';
+import { Forward, Maximize2, Mic, Minimize, Paperclip, X } from 'lucide-react';
 import useOutsideClick from '@/hooks/useOutsideClick';
 import { chatWithNissa } from '@/app/actions';
 import Convos from './Convos';
