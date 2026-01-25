@@ -6,10 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FormField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash } from "lucide-react";
+import { Loader2, Plus, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageDescription, PageHeader, PageTitle } from "@/components/common";
+import { generatePolicy } from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 const EditorForm = dynamic(() => import("./Editor"), { ssr: false });
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -23,6 +26,8 @@ const schema = z.object({
   llm_model: z.string().min(1, "LLM Model is required"),
 });
 export default function PolicyForm() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const initialData = {
     name: "",
     address: "",
@@ -86,9 +91,23 @@ export default function PolicyForm() {
     name: "services",
   });
 
-  const onSubmit = (data) => {
-    console.log("run");
-    console.log(data);
+  const onSubmit = async (data) => {
+    console.log('data', JSON.stringify(data, null, 2))
+    try {
+      setLoading(true);
+      const response = await generatePolicy(data);
+      if(response.success) {
+        toast.success('Policy generated successfully!');
+        router.push('/dashboard/client/knowledge-hub/policy-hub');
+      } else {
+        toast.error('Failed to generate policy!');
+      }
+      console.log("response", response);
+    } catch (error) {
+      console.error("error", error);
+    } finally {
+      setLoading(false);
+    }
   };
   console.log("errors", form.formState.errors);
   return (
@@ -144,8 +163,8 @@ export default function PolicyForm() {
             label="LLM Model"
           />
         </div>
-        <Button type="submit" className={"w-full"} onClick={form.handleSubmit(onSubmit)}>
-          Save
+        <Button disabled={loading} type="submit" className={"w-full"} onClick={form.handleSubmit(onSubmit)}>
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
         </Button>
       </div>
     </div>
