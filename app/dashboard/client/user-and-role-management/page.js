@@ -169,14 +169,14 @@ export default function UserManagementDashboard() {
     setOpenUserForm(true)
   }
   const handleDeleteUser = async (id) => {
-    try {
-      const response = await deleteUser(id)
-      if(response.success) {
-        fetchUsers()
-      }
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
+    // try {
+    //   const response = await deleteUser(id)
+    //   if(response.success) {
+    //     fetchUsers()
+    //   }
+    // } catch (error) {
+    //   console.error("Error deleting user:", error);
+    // }
   }
 
   const usersColumns = [
