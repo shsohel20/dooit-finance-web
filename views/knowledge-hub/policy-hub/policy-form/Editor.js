@@ -6,10 +6,12 @@ import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 // import Code from "@editorjs/code";
 
 
-export default function Editor({ data, onChange }) {
+export default function Editor({ data, onSubmit , isSaving = false}) {
   const editorRef = useRef(null);
   const [isReady, setIsReady] = useState(false);
   useEffect(() => {
@@ -53,7 +55,9 @@ export default function Editor({ data, onChange }) {
   }, []);
   const handleSave = async () => {
     const saved = await editorRef.current.save();
-    // setEditorData(saved);
+    if(onSubmit) {
+      onSubmit(saved);
+    }
   };
 //  useEffect(() => {
 //   if (!editorRef.current) return;
@@ -64,5 +68,10 @@ export default function Editor({ data, onChange }) {
 
 // }, [data, isReady]);
 
-  return <div id="editorjs" className=" min-h-screen w-full overflow-x-auto overflow-y-auto" />;
+  return <div className=" min-h-screen w-full overflow-x-auto overflow-y-auto">
+    <div className="flex justify-end">
+      <Button onClick={handleSave} variant={'outline'} size='sm' disabled={isSaving}><Save/>{isSaving ? 'Saving...' : 'Save'}</Button>
+    </div>
+    <div id="editorjs"  />
+  </div>;
 }

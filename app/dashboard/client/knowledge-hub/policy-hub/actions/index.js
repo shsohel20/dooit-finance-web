@@ -41,3 +41,16 @@ export const getPolicyById = async (id) => {
     return [];
   }
 };
+export const updatePolicy = async (id, data) => {
+  try {
+    const response = await fetchWithAuth(`policy-hub/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    const res = await response.json();
+    return res;
+  } catch (error) {
+    console.error("Error updating policy:", error);
+    return [];
+  }
+};

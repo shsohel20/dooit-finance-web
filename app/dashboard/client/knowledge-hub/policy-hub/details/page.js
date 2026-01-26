@@ -1,11 +1,11 @@
 "use client"
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { getPolicyById } from "../actions";
+import { getPolicyById, updatePolicy } from "../actions";
 import dynamic from "next/dynamic";
 const EditorForm = dynamic(() => import("@/views/knowledge-hub/policy-hub/policy-form/Editor"), { ssr: false });
 import { toast } from "sonner";
-import { parseToEditorJS } from "@/lib/utils";
+import { editorToText, parseToEditorJS } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const DocSkeleton = () => {
@@ -32,19 +32,19 @@ export default function PolicyDetails() {
   const [data, setData] = useState(null);
   const [content, setContent] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isSaving, setIsSaving]=useState(false)
+console.log('getbyid',data)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
        setIsLoading(true);
        const response = await getPolicyById(id);
-      console.log('response', response);
       if(response.success) {
         setData(response.data);
         const jsonContent = parseToEditorJS(response.data.docs)
         setContent(jsonContent);
-        window.scrollTo(0, 0);
+        // window.scrollTo(0, 0);
       } else {
         toast.error(response.error);
       }
@@ -58,8 +58,34 @@ export default function PolicyDetails() {
     fetchData();
   //  }
   }, [id]);
-  const onSubmit = () => {
-
+  const onSubmit = async(editorData) => {
+    try {
+      setIsSaving(true);
+      const docs = editorToText(editorData);
+      const payload = {
+                docs: docs,
+                generatedBy: data?.generatedBy?._id,
+                metadata: {
+       createdBy: data?.client?.id,
+       assignedTo: data?.assignee?._id?? null,
+       tags: [],
+     },
+     isActive: true,
+   }
+   console.log('payload', JSON.stringify(payload, null, 2))
+   const res = await updatePolicy(id, payload)
+   console.log('res',res)
+    if(res.success) {
+  toast.success(res.message)
+    } else {
+  toast.error(res.message)
+}
+ } catch (error) {
+  console.log('error',error)
+  toast.error('Failed to update policy')
+ }finally{
+  setIsSaving(false)
+ }
   }
   return (
     <div>
@@ -67,7 +93,11 @@ export default function PolicyDetails() {
       {
         isLoading ? <div className="flex items-center justify-center h-full">
           <DocSkeleton />
-        </div> :  <EditorForm data={content}  />
+        </div> : <EditorForm
+            data={content}
+            onSubmit={onSubmit}
+            isSaving={isSaving}
+          />
       }
 
     </div>
