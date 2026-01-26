@@ -14,8 +14,7 @@ export default function PolicyList() {
   const [searchQuery, setSearchQuery] = useState("");
   const { loggedInUser } = useGetUser();
   const [data, setData] = useState(null);
-  console.log("loggedInUser", loggedInUser);
-  const router = useRouter();
+ const router = useRouter();``
   const categories = [
     {
       icon: BookOpen,
@@ -226,10 +225,10 @@ export default function PolicyList() {
                     </span>
                     <span className="text-xs text-muted-foreground">PDF, {policy.fileSize}</span>
                   </div>
-                  <button className="px-4 py-2 rounded-lg border border-border text-foreground text-xs font-medium hover:bg-muted transition-colors flex items-center gap-2">
+                  <Button onClick={() => router.push(`/dashboard/client/knowledge-hub/policy-hub/details?id=${policy.id}`)} variant="outline" size="sm" className="flex items-center gap-2">
                     <Eye className="h-4 w-4" />
                     View
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}

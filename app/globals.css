@@ -243,6 +243,27 @@ button {
   .maplibregl-popup-tip {
     @apply hidden!;
   }
+  h1{
+    @apply text-2xl font-bold;
+  }
+  h2{
+    @apply text-xl font-bold;
+  }
+  h3{
+    @apply text-lg font-bold;
+  }
+  h4{
+    @apply text-base font-bold;
+  }
+  h6{
+    @apply text-sm font-bold;
+  }
+}
+#editorjs {
+  height: auto;
+}
+.codex-editor__redactor{
+  padding-bottom: 0 !important;
 }
 /* react-select */
 
@@ -302,11 +323,13 @@ div[data-slot="sidebar-content"] {
   -ms-overflow-style: none;
 }
 /* change scrollbar color for body */
-body::-webkit-scrollbar {
+/* body::-webkit-scrollbar {
   width: 8px;
-  background: var(--smoke-400);
+  height: 8px;
+  background: var(--smoke-600);
   border-radius: 10px;
-}
+} */
+
 
 @keyframes shimmer {
   0% {

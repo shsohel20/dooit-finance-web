@@ -28,3 +28,16 @@ export const generatePolicy = async (data) => {
     return [];
   }
 };
+
+export const getPolicyById = async (id) => {
+  try {
+    const response = await fetchWithAuth(`policy-hub/${id}`, {
+      method: "GET",
+    });
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching policy by id:", error);
+    return [];
+  }
+};
