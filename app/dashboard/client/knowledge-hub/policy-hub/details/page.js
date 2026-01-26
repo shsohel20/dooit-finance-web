@@ -1,5 +1,5 @@
 "use client"
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { getPolicyById, updatePolicy } from "../actions";
 import dynamic from "next/dynamic";
@@ -10,12 +10,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const DocSkeleton = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-full">
-      <Skeleton className="w-full h-10" />
+    <div className="flex flex-col items-start justify-center h-full gap-2">
+      <Skeleton className="w-full h-10 " />
       <Skeleton className="w-4/5 h-10" />
       <Skeleton className="w-3/5 h-10" />
       <Skeleton className="w-2/5 h-10" />
-      <Skeleton className="w-1/5 h-10" />
       <Skeleton className="w-4/5 h-10" />
       <Skeleton className="w-3/5 h-10" />
       <Skeleton className="w-2/5 h-10" />
@@ -32,8 +31,10 @@ export default function PolicyDetails() {
   const [data, setData] = useState(null);
   const [content, setContent] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving]=useState(false)
-console.log('getbyid',data)
+  const [isSaving, setIsSaving] = useState(false)
+  const router = useRouter();
+
+  console.log('data', data)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,13 +73,13 @@ console.log('getbyid',data)
      },
      isActive: true,
    }
-   console.log('payload', JSON.stringify(payload, null, 2))
+  //  console.log('payload', JSON.stringify(payload, null, 2))
    const res = await updatePolicy(id, payload)
-   console.log('res',res)
     if(res.success) {
-  toast.success(res.message)
+  toast.success('Policy updated successfully')
+  router.push(`/dashboard/client/knowledge-hub/policy-hub`)
     } else {
-  toast.error(res.message)
+  toast.error('Failed to update policy')
 }
  } catch (error) {
   console.log('error',error)
@@ -91,7 +92,7 @@ console.log('getbyid',data)
     <div>
       {/* <h1>Policy Details</h1> */}
       {
-        isLoading ? <div className="flex items-center justify-center h-full">
+        isLoading ? <div className="">
           <DocSkeleton />
         </div> : <EditorForm
             data={content}

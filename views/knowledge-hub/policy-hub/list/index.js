@@ -10,7 +10,7 @@ import { getPolicyHubColumns } from "./column";
 import { getAllPolicyDocuments } from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
 
 export default function PolicyList() {
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("All Policies");
   const [searchQuery, setSearchQuery] = useState("");
   const { loggedInUser } = useGetUser();
   const [data, setData] = useState(null);
@@ -97,7 +97,6 @@ export default function PolicyList() {
     };
     fetchData();
   }, []);
-
   return (
     <div className="min-h-screen ">
       {/* Header */}
@@ -130,7 +129,7 @@ export default function PolicyList() {
       {/* Main Content */}
       <div className="  py-12">
         {/* Browse by Category */}
-        <section className="mb-16">
+        {/* <section className="mb-16">
           <h2 className="text-2xl font-bold text-foreground mb-8">Browse by Category</h2>
           <div className="grid md:grid-cols-4 gap-6">
             {categories.map((cat, i) => {
@@ -157,10 +156,10 @@ export default function PolicyList() {
               );
             })}
           </div>
-        </section>
+        </section> */}
 
         {/* Featured Articles */}
-        <section className="mb-16">
+        {/* <section className="mb-16">
           <h2 className="text-2xl font-bold text-foreground mb-8">Featured Articles</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {articles.map((article, i) => (
@@ -186,7 +185,7 @@ export default function PolicyList() {
               </article>
             ))}
           </div>
-        </section>
+        </section> */}
 
         {/* Policy Library */}
         <section>
@@ -210,7 +209,7 @@ export default function PolicyList() {
           </div>
 
           {/* Policy Cards */}
-          <div className="grid md:grid-cols-2 gap-6">
+         {activeTab === "All Policies" && <div className="grid md:grid-cols-2 gap-6">
             {data?.data?.map((policy, i) => (
               <div
                 key={i}
@@ -232,7 +231,7 @@ export default function PolicyList() {
                 </div>
               </div>
             ))}
-          </div>
+          </div>}
         </section>
       </div>
     </div>

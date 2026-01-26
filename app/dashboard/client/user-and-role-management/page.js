@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { SearchIcon, EyeIcon, PencilIcon, TrashIcon } from "lucide-react";
+import { SearchIcon, EyeIcon, PencilIcon, TrashIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,58 +16,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
-import { getAllRoles, getAllUsers } from "./actions";
+import { deleteUser, getAllRoles, getAllUsers } from "./actions";
 import dynamic from "next/dynamic";
 import CustomPagination from "@/components/CustomPagination";
+import UserForm from "@/views/user-and-role/form";
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
 });
-
-export default function UserManagementDashboard() {
-  const [activeTab, setActiveTab] = useState("all-users");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [allRoles, setAllRoles] = useState([]);
-  const [allUsers, setAllUsers] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const fetchRoles = async () => {
-    try {
-      const roles = await getAllRoles();
-      console.log("roles", roles);
-      setAllRoles(roles);
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
-  const fetchUsers = async () => {
-    const queryParams = {
-      page: currentPage,
-      limit: limit,
-    };
-    console.log("call");
-
-    try {
-      const users = await getAllUsers(queryParams);
-      setAllUsers(users);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
-  useEffect(() => {
-    fetchRoles();
-  }, []);
-  useEffect(() => {
-    fetchUsers();
-  }, [currentPage, limit]);
-
-  const statCards = [
-    { label: "Total Users", value: "42" },
-    { label: "Active Users", value: "38" },
-    { label: "Pending", value: "3" },
-    { label: "Suspended", value: "2" },
-  ];
-
-  const roles = [
+ const roles = [
     {
       name: "System Administrator",
       users: 4,
@@ -162,6 +118,66 @@ export default function UserManagementDashboard() {
       ],
     },
   ];
+export default function UserManagementDashboard() {
+  const [activeTab, setActiveTab] = useState("all-users");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [allRoles, setAllRoles] = useState([]);
+  const [allUsers, setAllUsers] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [openUserForm, setOpenUserForm] = useState(false);
+  const [id, setId] = useState(null);
+  const fetchRoles = async () => {
+    try {
+      const roles = await getAllRoles();
+      console.log("roles", roles);
+      setAllRoles(roles);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+  const fetchUsers = async () => {
+    const queryParams = {
+      page: currentPage,
+      limit: limit,
+    };
+    console.log("call");
+
+    try {
+      const users = await getAllUsers(queryParams);
+      setAllUsers(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, [currentPage, limit]);
+
+  const statCards = [
+    { label: "Total Users", value: "42" },
+    { label: "Active Users", value: "38" },
+    { label: "Pending", value: "3" },
+    { label: "Suspended", value: "2" },
+  ];
+
+  const handleEditUser = (id) => {
+    setId(id)
+    setOpenUserForm(true)
+  }
+  const handleDeleteUser = async (id) => {
+    try {
+      const response = await deleteUser(id)
+      if(response.success) {
+        fetchUsers()
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  }
 
   const usersColumns = [
     {
@@ -173,10 +189,10 @@ export default function UserManagementDashboard() {
           {/* <Button size="sm" variant="outline" className="">
             <EyeIcon />
           </Button> */}
-          <Button size="sm" variant="outline" className="">
+          <Button size="sm" variant="outline" className="" onClick={() => handleEditUser(row.original._id)}>
             <PencilIcon />
           </Button>
-          <Button size="sm" variant="outline" className="">
+          <Button size="sm" variant="outline" className="" onClick={() => handleDeleteUser(row.original._id)}>
             <TrashIcon />
           </Button>
         </div>
@@ -235,23 +251,7 @@ export default function UserManagementDashboard() {
     //   ),
     // },
   ];
-  const rolesColumns = [
-    {
-      id: "name",
-      header: "Name",
-      accessorKey: "name",
-    },
-    {
-      id: "users",
-      header: "Users",
-      accessorKey: "users",
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      accessorKey: "actions",
-    },
-  ];
+
   const handlePageChange = (page) => {
     setCurrentPage(page.selected + 1);
   };
@@ -340,8 +340,8 @@ export default function UserManagementDashboard() {
                     />
                   </div>
                 </div>
-                <Button size="sm" className="">
-                  Add User
+                <Button size="sm" className="" onClick={() => setOpenUserForm(true)}>
+                  <PlusIcon /> Add User
                 </Button>
               </div>
 
@@ -381,6 +381,14 @@ export default function UserManagementDashboard() {
           </Tabs>
         </div>
       </main>
+    {openUserForm && <UserForm
+        open={openUserForm}
+        setOpen={setOpenUserForm}
+        allRoles={allRoles?.data || []}
+      fetchUsers={fetchUsers}
+      id={id}
+      setId={setId}
+      />}
     </div>
   );
 }
