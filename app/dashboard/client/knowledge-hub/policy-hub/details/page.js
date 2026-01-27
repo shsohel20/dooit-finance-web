@@ -98,6 +98,7 @@ export default function PolicyDetails() {
             data={content}
             onSubmit={onSubmit}
             isSaving={isSaving}
+            setData={setContent}
           />
       }
 

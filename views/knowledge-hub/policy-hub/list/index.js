@@ -1,17 +1,51 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, BookOpen, FileText, HelpCircle, Download, Tag, Eye } from "lucide-react";
+import { Search, BookOpen, FileText, HelpCircle,  Tag, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import useGetUser from "@/hooks/useGetUser";
-import CustomResizableTable from "@/components/ui/CustomResizable";
-import { getPolicyHubColumns } from "./column";
+
 import { getAllPolicyDocuments } from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
+import { Skeleton } from "@/components/ui/skeleton";
+// make a skeleton loader for the table
+
+const PolicyListSkeleton = () => {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+   {Array.from({ length: 10 }).map((_, index) => (
+     <div
+       key={index}
+      className="p-2 rounded-lg border border-border bg-card "
+     >
+       <h3 className="font-semibold text-foreground mb-2">
+         <Skeleton className="w-full h-4" />
+       </h3>
+         <Skeleton className="w-full h-10" />
+        <div className="flex items-center justify-between ">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground">
+              <Skeleton className="w-full h-10" />
+            </span>
+           <span className="text-xs text-muted-foreground">
+             <Skeleton className="w-full h-10" />
+           </span>
+        </div>
+        <div className="flex items-center gap-2 w-20 ">
+                    {/* <Eye className="h-4 w-4" /> */}
+              <Skeleton className="w-full h-10" />
+          </div>
+        </div>
+      </div>
+   ))}
+   </div>
+  );
+};
 
 export default function PolicyList() {
   const [activeTab, setActiveTab] = useState("All Policies");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const { loggedInUser } = useGetUser();
   const [data, setData] = useState(null);
  const router = useRouter();``
@@ -89,11 +123,17 @@ export default function PolicyList() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // const company = loggedInUser?.name;
-      // const type
+
+     try {
+       setIsLoading(true);
       const data = await getAllPolicyDocuments();
-      console.log('data', data);
       setData(data);
+     } catch (error) {
+      // console.log('error', error);
+     } finally {
+      setIsLoading(false);
+     }
+
     };
     fetchData();
   }, []);
@@ -209,7 +249,7 @@ export default function PolicyList() {
           </div>
 
           {/* Policy Cards */}
-         {activeTab === "All Policies" && <div className="grid md:grid-cols-2 gap-6">
+         {activeTab === "All Policies" && isLoading ? <PolicyListSkeleton /> : <div className="grid md:grid-cols-2 gap-6">
             {data?.data?.map((policy, i) => (
               <div
                 key={i}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import List from "@editorjs/list";
@@ -8,70 +8,72 @@ import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
-// import Code from "@editorjs/code";
 
+export default function Editor({ data, onSubmit, isSaving = false, setData }) {
+  const holderRef = useRef(null);   // DOM node
+  const editorRef = useRef(null);   // EditorJS instance
+  const initialDataRef = useRef(data); // freeze initial data
 
-export default function Editor({ data, onSubmit , isSaving = false}) {
-  const editorRef = useRef(null);
-  const [isReady, setIsReady] = useState(false);
   useEffect(() => {
-    if(typeof window === 'undefined') return;
-    if (!editorRef.current) {
-      const editor = new EditorJS({
-        holder: "editorjs",
-        autofocus: true,
-        data,
-        onReady: () => setIsReady(true),
-        tools: {
-          header: {
-            class: Header,
-            inlineToolbar: true,
-            config: {
-              levels: [1, 2, 3],
-              defaultLevel: 2,
-            },
+    if (editorRef.current) return; // ✅ prevent re-init
+    if(!holderRef.current) return;
+    const editor = new EditorJS({
+      holder: holderRef.current,
+      autofocus: true,
+      data: data, // ✅ load once
+      tools: {
+        header: {
+          class: Header,
+          inlineToolbar: true,
+          config: {
+            levels: [1, 2, 3],
+            defaultLevel: 2,
           },
-          paragraph: {
-            class: Paragraph,
-            inlineToolbar: true,
-          },
-          list: {
-            class: List,
-            inlineToolbar: true,
-          },
-          table: Table,
-          // code: Code,
         },
+        paragraph: {
+          class: Paragraph,
+          inlineToolbar: true,
+        },
+        list: {
+          class: List,
+          inlineToolbar: true,
+        },
+        table: Table,
+      },
+      onChange: async () => {
+        const saved = await editor.save();
+        setData(saved)
+      },
+    });
 
-      });
-
-      editorRef.current = editor;
-    }
+    editorRef.current = editor;
 
     return () => {
-      // editorRef.current?.destroy();
+      // editor.destroy();
       editorRef.current = null;
     };
   }, []);
+
   const handleSave = async () => {
-    const saved = await editorRef.current.save();
-    if(onSubmit) {
-      onSubmit(saved);
-    }
+    console.log('data', data)
+    onSubmit?.(data)
   };
-//  useEffect(() => {
-//   if (!editorRef.current) return;
-// console.log('isready')
-//  if(data && editorRef?.current) {
-//   editorRef?.current?.render(data);
-//    }
 
-// }, [data, isReady]);
+  return (
+    <div className="min-h-screen w-full overflow-auto">
+      <div className="flex justify-end mb-2">
+        <Button
+          onClick={handleSave}
+          variant="outline"
+          size="sm"
+          disabled={isSaving}
+        >
+          <Save />
+          {isSaving ? "Saving..." : "Save"}
+        </Button>
+      </div>
 
-  return <div className=" min-h-screen w-full overflow-x-auto overflow-y-auto">
-    <div className="flex justify-end">
-      <Button onClick={handleSave} variant={'outline'} size='sm' disabled={isSaving}><Save/>{isSaving ? 'Saving...' : 'Save'}</Button>
+      <div ref={holderRef} />
     </div>
-    <div id="editorjs"  />
-  </div>;
+  );
 }
