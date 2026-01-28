@@ -593,14 +593,13 @@ function SidebarMenuSub({ className, ...props }) {
 
 function SidebarMenuSubItem({ className, ...props }) {
   return (
-
        <li
       data-slot="sidebar-menu-sub-item"
-      data-sidebar="menu-sub-item"
+      data-sidebar="menu-sub-item "
       className={cn('group/menu-sub-item relative pl-4 hover:pl-6 transition-all duration-300',
       // Tree line styles - vertical line and horizontal branch connector
         'before:absolute before:left-0 before:top-0 before:h-full before:w-px before:bg-primary/20 before:rounded-full',
-        'after:absolute after:left-0 after:top-1/2 after:h-px after:w-3 after:-translate-y-1/2 after:bg-primary/20 after:rounded-bl-full ',
+        'after:absolute after:left-0 after:top-1/2 after:h-px after:w-3 after:-translate-y-1/2 after:bg-transparent after:rounded-bl-full after:border-b after:border-primary/20 after:border-l',
         // Last item: vertical line only goes to the middle
         'last:before:h-1/2',
         className)}
