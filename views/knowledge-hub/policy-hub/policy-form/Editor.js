@@ -7,7 +7,7 @@ import List from "@editorjs/list";
 import Paragraph from "@editorjs/paragraph";
 import Table from "@editorjs/table";
 import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
+import { Bold, Code, Italic, Save, Strikethrough, Underline } from "lucide-react";
 
 export default function Editor({ data, onSubmit, isSaving = false, setData }) {
   const holderRef = useRef(null);   // DOM node
@@ -55,9 +55,9 @@ export default function Editor({ data, onSubmit, isSaving = false, setData }) {
   }, []);
 
   const handleSave = async () => {
-    console.log('data', data)
     onSubmit?.(data)
   };
+
 
   return (
     <div className="min-h-screen w-full overflow-auto">
@@ -73,7 +73,7 @@ export default function Editor({ data, onSubmit, isSaving = false, setData }) {
         </Button>
       </div>
 
-      <div ref={holderRef} />
+      <div ref={holderRef} className=""/>
     </div>
   );
 }

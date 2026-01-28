@@ -23,6 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import Image from 'next/image';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -510,7 +511,7 @@ function SidebarMenuAction({
       data-slot="sidebar-menu-action"
       data-sidebar="menu-action"
       className={cn(
-        'text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
+        'text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0 ',
         // Increases the hit area of the button on mobile.
         'after:absolute after:-inset-2 md:after:hidden',
         'peer-data-[size=sm]/menu-button:top-1',
@@ -581,7 +582,7 @@ function SidebarMenuSub({ className, ...props }) {
       data-slot="sidebar-menu-sub"
       data-sidebar="menu-sub"
       className={cn(
-        'border-sidebar-border ml-3 mr-0 flex min-w-0 translate-x-px flex-col  border-l px-2.5 py-0.5 font-semibold',
+        'border-sidebar-border ml-3 mr-0 flex min-w-0 translate-x-px flex-col   px-2.5 py-0.5 font-semibold',
         'group-data-[collapsible=icon]:hidden',
         className
       )}
@@ -592,12 +593,22 @@ function SidebarMenuSub({ className, ...props }) {
 
 function SidebarMenuSubItem({ className, ...props }) {
   return (
-    <li
+
+       <li
       data-slot="sidebar-menu-sub-item"
       data-sidebar="menu-sub-item"
-      className={cn('group/menu-sub-item relative', className)}
+      className={cn('group/menu-sub-item relative pl-4 ',
+      // Tree line styles - vertical line and horizontal branch connector
+        'before:absolute before:left-0 before:top-0 before:h-full before:w-px before:bg-primary/20 before:rounded-full',
+        'after:absolute after:left-0 after:top-1/2 after:h-px after:w-3 after:-translate-y-1/2 after:bg-primary/20 before:rounded-full',
+        // Last item: vertical line only goes to the middle
+        'last:before:h-1/2',
+        className)}
       {...props}
-    />
+      >
+      {/* <Image src="/menuCurve.svg" alt="menuCurve" width={54} height={48} className='absolute left-0 top-0 h-1/2 w-4' /> */}
+    {props.children}
+    </li>
   );
 }
 
