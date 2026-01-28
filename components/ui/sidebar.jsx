@@ -582,7 +582,7 @@ function SidebarMenuSub({ className, ...props }) {
       data-slot="sidebar-menu-sub"
       data-sidebar="menu-sub"
       className={cn(
-        'border-sidebar-border ml-3 mr-0 flex min-w-0 translate-x-px flex-col   px-2.5 py-0.5 font-semibold',
+        'border-sidebar-border ml-3 mr-0 flex min-w-0 translate-x-px flex-col   px-2.5 py-0.5 font-semibold ',
         'group-data-[collapsible=icon]:hidden',
         className
       )}
@@ -597,10 +597,10 @@ function SidebarMenuSubItem({ className, ...props }) {
        <li
       data-slot="sidebar-menu-sub-item"
       data-sidebar="menu-sub-item"
-      className={cn('group/menu-sub-item relative pl-4 ',
+      className={cn('group/menu-sub-item relative pl-4 hover:pl-6 transition-all duration-300',
       // Tree line styles - vertical line and horizontal branch connector
         'before:absolute before:left-0 before:top-0 before:h-full before:w-px before:bg-primary/20 before:rounded-full',
-        'after:absolute after:left-0 after:top-1/2 after:h-px after:w-3 after:-translate-y-1/2 after:bg-primary/20 before:rounded-full',
+        'after:absolute after:left-0 after:top-1/2 after:h-px after:w-3 after:-translate-y-1/2 after:bg-primary/20 after:rounded-bl-full ',
         // Last item: vertical line only goes to the middle
         'last:before:h-1/2',
         className)}

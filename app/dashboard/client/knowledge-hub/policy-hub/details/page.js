@@ -34,7 +34,6 @@ export default function PolicyDetails() {
   const [isSaving, setIsSaving] = useState(false)
   const router = useRouter();
 
-  console.log('data', data)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +42,7 @@ export default function PolicyDetails() {
        const response = await getPolicyById(id);
       if(response.success) {
         setData(response.data);
+        console.log('response.data.docs', JSON.stringify(response.data.docs, null, 2))
         const jsonContent = parseToEditorJS(response.data.docs)
         setContent(jsonContent);
         // window.scrollTo(0, 0);
@@ -73,7 +73,7 @@ export default function PolicyDetails() {
      },
      isActive: true,
    }
-  //  console.log('payload', JSON.stringify(payload, null, 2))
+   console.log('payload', JSON.stringify(payload, null, 2))
    const res = await updatePolicy(id, payload)
     if(res.success) {
   toast.success('Policy updated successfully')
