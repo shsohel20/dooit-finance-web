@@ -390,6 +390,7 @@ export default function ClientSidebar({ ...props }) {
       items: [
         { title: "Wallet", url: "/dashboard/client/wallet", icon: Wallet },
         { title: "Send Crypto", url: "/dashboard/client/send-crypto", icon: Send },
+        { title: "Travel Rule", url: "/dashboard/client/travel-rule", icon: IconListDetails },
         { title: "Receive Crypto", url: "/dashboard/client/receive-crypto", icon: Download },
         { title: "Market", url: "/dashboard/client/market", icon: TrendingUp },
       ],
