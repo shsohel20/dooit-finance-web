@@ -386,7 +386,7 @@ export default function ClientSidebar({ ...props }) {
   ];
   const dueDiligenceMenu = [
     {
-      title: "Compliance Officer and Governing Body",
+      title: "Compliance Officer & GB",
       icon: IconListDetails,
       url: "/dashboard/client/due-diligence/compliance-officer-and-governing-body",
     },

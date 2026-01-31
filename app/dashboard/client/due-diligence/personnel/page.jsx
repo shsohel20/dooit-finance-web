@@ -141,7 +141,7 @@ export default function PersonnelDueDiligenceForm() {
 
   return (
     <main className="min-h-screen bg-muted/30 py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-foreground">Personnel Due Diligence Form</h1>
@@ -164,7 +164,7 @@ export default function PersonnelDueDiligenceForm() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <div className="space-y-2">
                 <Label htmlFor="personBeingAssessed">Person being assessed</Label>
                 <Input
@@ -183,16 +183,17 @@ export default function PersonnelDueDiligenceForm() {
                   placeholder="Enter position title"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="dateOfPDD">Date of PDD</Label>
+                <Input
+                  id="dateOfPDD"
+                  type="date"
+                  value={dateOfPDD}
+                  onChange={(e) => setDateOfPDD(e.target.value)}
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="dateOfPDD">Date of PDD</Label>
-              <Input
-                id="dateOfPDD"
-                type="date"
-                value={dateOfPDD}
-                onChange={(e) => setDateOfPDD(e.target.value)}
-              />
-            </div>
+
             <div className="space-y-3">
               <Label>Purpose of PDD</Label>
               <div className="space-y-2">
@@ -247,7 +248,7 @@ export default function PersonnelDueDiligenceForm() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">
-              Step 2: Check Accounting Professional Association Membership
+              Step 2: Accounting Professional Association Membership
             </CardTitle>
             <CardDescription>
               Check if the candidate is currently a member of one of the accounting professional
