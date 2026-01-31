@@ -384,6 +384,23 @@ export default function ClientSidebar({ ...props }) {
       ],
     },
   ];
+  const dueDiligenceMenu = [
+    {
+      title: "Compliance Officer and Governing Body",
+      icon: IconListDetails,
+      url: "/dashboard/client/due-diligence/compliance-officer-and-governing-body",
+    },
+    {
+      title: "Personnel",
+      icon: IconListDetails,
+      url: "/dashboard/client/due-diligence/personnel",
+    },
+    {
+      title: "Compliance ",
+      icon: IconListDetails,
+      url: "/dashboard/client/due-diligence/compliance-officer",
+    },
+  ];
   const cryptoMenu = [
     {
       title: "Overview",
@@ -435,6 +452,7 @@ export default function ClientSidebar({ ...props }) {
             ))}
           </>
         )}
+        <NavMain items={dueDiligenceMenu} label="Due Diligence" />
         <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
