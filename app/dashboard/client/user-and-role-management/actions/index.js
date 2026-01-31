@@ -15,4 +15,29 @@ const getAllUsers = async (queryParams) => {
   return response.json();
 }
 
+export const createUser = async (data) => {
+  const response = await fetchWithAuth('user', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export const updateUser = async (id, data) => {
+  const response = await fetchWithAuth(`user/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+export const getUserById = async (id) => {
+  const response = await fetchWithAuth(`user/${id}`);
+  return response.json();
+}
+export const deleteUser = async (id) => {
+  const response = await fetchWithAuth(`user/${id}`, {
+    method: 'DELETE',
+  });
+  return response.json();
+}
 export { getAllRoles, getAllUsers };

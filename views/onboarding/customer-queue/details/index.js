@@ -1,49 +1,63 @@
-'use client'
+"use client";
 import { useEffect, useState } from "react";
 
-import { Card } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Shield, User, Calendar, Clock, Globe, MapPin, Phone, FileText, ChevronRight, TrendingUp, AlertCircle, CheckCircle2, BarChart3, AlertTriangle, ShieldAlert, ImageIcon, Download } from 'lucide-react'
-import { getCustomerById } from '@/app/dashboard/client/onboarding/customer-queue/actions'
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  Shield,
+  User,
+  Calendar,
+  Clock,
+  Globe,
+  MapPin,
+  Phone,
+  FileText,
+  ChevronRight,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle2,
+  BarChart3,
+  AlertTriangle,
+  ShieldAlert,
+  ImageIcon,
+  Download,
+} from "lucide-react";
+import { getCustomerById } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 import { cn, dateShowFormat } from "@/lib/utils";
 import { RelationsTree } from "./RelationsTree";
 
 export const DetailViewModal = ({ details, fetching }) => {
-
   const [reviewDocuments, setReviewDocuments] = useState(false);
 
-
-  console.log('details => ', details);
-
-
+  console.log("details => ", details);
 
   const riskAssessment = details?.riskAssessment || {};
 
   const totalRiskScore = Object.values(riskAssessment)
     .filter((item) => typeof item === "object" && "score" in item)
-    .reduce((sum, item) => sum + (item).score, 0)
+    .reduce((sum, item) => sum + item.score, 0);
 
   const getLabelColor = (label) => {
-    if (label === "Unacceptable") return "bg-destructive/15 text-destructive border-destructive/30"
-    if (label === "High") return "bg-danger/15 text-danger border-danger/30"
-    if (label === "Medium") return "bg-warning/15 text-warning-foreground border-warning/30"
-    return "bg-success/15 text-success border-success/30"
-  }
+    if (label === "Unacceptable") return "bg-destructive/15 text-destructive border-destructive/30";
+    if (label === "High") return "bg-danger/15 text-danger border-danger/30";
+    if (label === "Medium") return "bg-warning/15 text-warning-foreground border-warning/30";
+    return "bg-success/15 text-success border-success/30";
+  };
   const getRiskColor = (score) => {
-    if (score === 0) return "text-success"
-    if (score <= 20) return "text-success"
-    if (score <= 30) return "text-warning-foreground"
-    return "text-danger"
-  }
+    if (score === 0) return "text-success";
+    if (score <= 20) return "text-success";
+    if (score <= 30) return "text-warning-foreground";
+    return "text-danger";
+  };
   const getRiskBadgeColor = (score) => {
-    if (score === 0) return "bg-muted text-muted-foreground border-border"
-    if (score <= 20) return "bg-success/15 text-success border-success/30"
-    if (score <= 30) return "bg-warning/15 text-warning-foreground border-warning/30"
-    return "bg-danger/15 text-danger border-danger/30"
-  }
+    if (score === 0) return "bg-muted text-muted-foreground border-border";
+    if (score <= 20) return "bg-success/15 text-success border-success/30";
+    if (score <= 30) return "bg-warning/15 text-warning-foreground border-warning/30";
+    return "bg-danger/15 text-danger border-danger/30";
+  };
 
   const isPep = details?.isPEP;
   const isSanctioned = details?.sanction;
@@ -51,15 +65,12 @@ export const DetailViewModal = ({ details, fetching }) => {
     return type
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
-  }
+      .join(" ");
+  };
 
   return (
-
-    <div className='grid grid-cols-12 gap-4 '>
+    <div className="grid grid-cols-12 gap-4 ">
       <div className="col-span-8">
-
-
         <div className=" mx-auto ">
           {/* User Profile Section */}
           <Card className="mb-6 overflow-hidden border-border/50">
@@ -74,15 +85,24 @@ export const DetailViewModal = ({ details, fetching }) => {
                   </Avatar>
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">
-                      <h2 className="text-2xl font-semibold capitalize">{
-                        details?.personalKyc?.personal_form?.customer_details?.given_name + " " + details?.personalKyc?.personal_form?.customer_details?.middle_name + " " + details?.personalKyc?.personal_form?.customer_details?.surname
-                      }</h2>
-                      <Badge variant="outline" className="bg-warning/10 text-warning-foreground border-warning/30">
+                      <h2 className="text-2xl font-semibold capitalize">
+                        {details?.personalKyc?.personal_form?.customer_details?.given_name +
+                          " " +
+                          details?.personalKyc?.personal_form?.customer_details?.middle_name +
+                          " " +
+                          details?.personalKyc?.personal_form?.customer_details?.surname}
+                      </h2>
+                      <Badge
+                        variant="outline"
+                        className="bg-warning/10 text-warning-foreground border-warning/30"
+                      >
                         <Clock className="size-3 mr-1" />
                         Pending Review
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">{details?.personalKyc?.personal_form?.contact_details?.email}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {details?.personalKyc?.personal_form?.contact_details?.email}
+                    </p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="size-3" />
@@ -104,7 +124,7 @@ export const DetailViewModal = ({ details, fetching }) => {
           </Card>
 
           {/* Status Cards Grid */}
-          <div className="grid gap-4 md:grid-cols-4 mb-6">
+          <div className="grid gap-4 md:grid-cols-2 mb-6">
             {/* Current Status Card */}
             <Card className="border-border/50 hover:border-primary/30 transition-colors">
               <div className="p-5">
@@ -115,9 +135,16 @@ export const DetailViewModal = ({ details, fetching }) => {
                     </div>
                     <h3 className="font-semibold">Current Status</h3>
                   </div>
-                  <Badge className={cn("bg-success/15 text-success hover:bg-success/20 border-success/30", details?.isActive ? 'bg-success/15 text-success hover:bg-success/20 border-success/30' : 'bg-danger/15 text-danger hover:bg-danger/20 border-danger/30')}>
+                  <Badge
+                    className={cn(
+                      "bg-success/15 text-success hover:bg-success/20 border-success/30",
+                      details?.isActive
+                        ? "bg-success/15 text-success hover:bg-success/20 border-success/30"
+                        : "bg-danger/15 text-danger hover:bg-danger/20 border-danger/30",
+                    )}
+                  >
                     <CheckCircle2 className="size-3 mr-1" />
-                    {details?.isActive ? 'Active' : 'Inactive'}
+                    {details?.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -185,8 +212,12 @@ export const DetailViewModal = ({ details, fetching }) => {
               <div className="p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <div className={`p-2 rounded-lg ${isSanctioned ? "bg-destructive/15" : "bg-muted"}`}>
-                      <ShieldAlert className={`size-5 ${isSanctioned ? "text-destructive" : "text-muted-foreground"}`} />
+                    <div
+                      className={`p-2 rounded-lg ${isSanctioned ? "bg-destructive/15" : "bg-muted"}`}
+                    >
+                      <ShieldAlert
+                        className={`size-5 ${isSanctioned ? "text-destructive" : "text-muted-foreground"}`}
+                      />
                     </div>
                     <h3 className="font-semibold">Sanctions</h3>
                   </div>
@@ -226,7 +257,9 @@ export const DetailViewModal = ({ details, fetching }) => {
                     <div className="flex items-center justify-between py-3 border-b border-border/50">
                       <div className="flex items-center gap-3">
                         <Phone className="size-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground">Phone Number</span>
+                        <span className="text-sm font-medium text-muted-foreground">
+                          Phone Number
+                        </span>
                       </div>
                       <span className="text-sm font-mono">2347689316687</span>
                     </div>
@@ -234,7 +267,9 @@ export const DetailViewModal = ({ details, fetching }) => {
                     <div className="flex items-center justify-between py-3 border-b border-border/50">
                       <div className="flex items-center gap-3">
                         <Calendar className="size-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-muted-foreground">Date of Birth</span>
+                        <span className="text-sm font-medium text-muted-foreground">
+                          Date of Birth
+                        </span>
                       </div>
                       <span className="text-sm">12 Aug 2025</span>
                     </div>
@@ -259,8 +294,6 @@ export const DetailViewModal = ({ details, fetching }) => {
                   </div>
                 </div>
               </Card>
-
-
             </div>
 
             {/* Right Column - Timeline & Activity */}
@@ -294,8 +327,6 @@ export const DetailViewModal = ({ details, fetching }) => {
                   </div>
                 </div>
               </Card>
-
-
             </div>
             <div>
               {/* Activity Log */}
@@ -350,8 +381,6 @@ export const DetailViewModal = ({ details, fetching }) => {
               </Card> */}
             </div>
           </div>
-
-         
         </div>
       </div>
       <div className="col-span-4">
@@ -368,7 +397,9 @@ export const DetailViewModal = ({ details, fetching }) => {
                 </Badge>
                 <div className="text-right">
                   <div className="text-xs text-muted-foreground">Total Score</div>
-                  <div className={`text-2xl font-bold ${getRiskColor(totalRiskScore)}`}>{totalRiskScore}</div>
+                  <div className={`text-2xl font-bold ${getRiskColor(totalRiskScore)}`}>
+                    {totalRiskScore}
+                  </div>
                 </div>
               </div>
             </div>
@@ -378,11 +409,18 @@ export const DetailViewModal = ({ details, fetching }) => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Channel</span>
-                    {riskAssessment?.channel?.score > 0 && <AlertCircle className="size-3 text-warning-foreground" />}
+                    {riskAssessment?.channel?.score > 0 && (
+                      <AlertCircle className="size-3 text-warning-foreground" />
+                    )}
                   </div>
-                  <div className="text-xs text-muted-foreground capitalize">{riskAssessment?.channel?.value}</div>
+                  <div className="text-xs text-muted-foreground capitalize">
+                    {riskAssessment?.channel?.value}
+                  </div>
                 </div>
-                <Badge className={getRiskBadgeColor(riskAssessment?.channel?.score)} variant="outline">
+                <Badge
+                  className={getRiskBadgeColor(riskAssessment?.channel?.score)}
+                  variant="outline"
+                >
                   Score: {riskAssessment?.channel?.score}
                 </Badge>
               </div>
@@ -399,7 +437,10 @@ export const DetailViewModal = ({ details, fetching }) => {
                     {riskAssessment?.customerRetention?.value}
                   </div>
                 </div>
-                <Badge className={getRiskBadgeColor(riskAssessment?.customerRetention?.score)} variant="outline">
+                <Badge
+                  className={getRiskBadgeColor(riskAssessment?.customerRetention?.score)}
+                  variant="outline"
+                >
                   Score: {riskAssessment?.customerRetention?.score}
                 </Badge>
               </div>
@@ -416,7 +457,10 @@ export const DetailViewModal = ({ details, fetching }) => {
                     {riskAssessment?.customerType?.value}
                   </div>
                 </div>
-                <Badge className={getRiskBadgeColor(riskAssessment?.customerType?.score)} variant="outline">
+                <Badge
+                  className={getRiskBadgeColor(riskAssessment?.customerType?.score)}
+                  variant="outline"
+                >
                   Score: {riskAssessment?.customerType?.score}
                 </Badge>
               </div>
@@ -429,9 +473,14 @@ export const DetailViewModal = ({ details, fetching }) => {
                       <AlertCircle className="size-3 text-warning-foreground" />
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground capitalize">{riskAssessment?.industry?.value}</div>
+                  <div className="text-xs text-muted-foreground capitalize">
+                    {riskAssessment?.industry?.value}
+                  </div>
                 </div>
-                <Badge className={getRiskBadgeColor(riskAssessment?.industry?.score)} variant="outline">
+                <Badge
+                  className={getRiskBadgeColor(riskAssessment?.industry?.score)}
+                  variant="outline"
+                >
                   Score: {riskAssessment?.industry?.score}
                 </Badge>
               </div>
@@ -444,12 +493,18 @@ export const DetailViewModal = ({ details, fetching }) => {
                   </div>
                   <div className="text-xs text-muted-foreground capitalize flex items-center gap-2">
                     {riskAssessment?.jurisdiction?.value}
-                    <Badge className="bg-destructive/20 text-destructive text-[10px] px-1.5 py-0" variant="outline">
+                    <Badge
+                      className="bg-destructive/20 text-destructive text-[10px] px-1.5 py-0"
+                      variant="outline"
+                    >
                       {riskAssessment?.jurisdiction?.band}
                     </Badge>
                   </div>
                 </div>
-                <Badge className="bg-destructive/15 text-destructive border-destructive/30" variant="outline">
+                <Badge
+                  className="bg-destructive/15 text-destructive border-destructive/30"
+                  variant="outline"
+                >
                   Score: {riskAssessment?.jurisdiction?.score}
                 </Badge>
               </div>
@@ -462,9 +517,14 @@ export const DetailViewModal = ({ details, fetching }) => {
                       <AlertCircle className="size-3 text-warning-foreground" />
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground capitalize">{riskAssessment?.occupation?.value}</div>
+                  <div className="text-xs text-muted-foreground capitalize">
+                    {riskAssessment?.occupation?.value}
+                  </div>
                 </div>
-                <Badge className={getRiskBadgeColor(riskAssessment?.occupation?.score)} variant="outline">
+                <Badge
+                  className={getRiskBadgeColor(riskAssessment?.occupation?.score)}
+                  variant="outline"
+                >
                   Score: {riskAssessment?.occupation?.score}
                 </Badge>
               </div>
@@ -473,13 +533,18 @@ export const DetailViewModal = ({ details, fetching }) => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Product</span>
-                    {riskAssessment?.product?.score > 0 && <AlertCircle className="size-3 text-warning-foreground" />}
+                    {riskAssessment?.product?.score > 0 && (
+                      <AlertCircle className="size-3 text-warning-foreground" />
+                    )}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {riskAssessment?.product?.value || "Not specified"}
                   </div>
                 </div>
-                <Badge className={getRiskBadgeColor(riskAssessment?.product?.score)} variant="outline">
+                <Badge
+                  className={getRiskBadgeColor(riskAssessment?.product?.score)}
+                  variant="outline"
+                >
                   Score: {riskAssessment?.product?.score}
                 </Badge>
               </div>
@@ -491,8 +556,9 @@ export const DetailViewModal = ({ details, fetching }) => {
                 <div>
                   <h4 className="font-semibold text-sm mb-1">High-Risk Jurisdiction Detected</h4>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    The customer is from Afghanistan, classified as UHRC (Ultra High Risk Country). Enhanced due
-                    diligence and additional verification measures are required before account activation.
+                    The customer is from Afghanistan, classified as UHRC (Ultra High Risk Country).
+                    Enhanced due diligence and additional verification measures are required before
+                    account activation.
                   </p>
                 </div>
               </div>
@@ -500,9 +566,6 @@ export const DetailViewModal = ({ details, fetching }) => {
           </div>
         </Card>
       </div>
-
     </div>
-
-
-  )
-}
+  );
+};

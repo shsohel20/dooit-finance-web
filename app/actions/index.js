@@ -26,7 +26,7 @@ export const getLoggedInUser = async () => {
 
 export const chatWithNissa = async (message) => {
   const response = await fetchWithAuth(
-    "nisa/chat",
+    "query-json",
     {
       method: "POST",
       body: JSON.stringify(message),

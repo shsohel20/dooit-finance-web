@@ -23,6 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import Image from 'next/image';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -122,7 +123,7 @@ function SidebarProvider({
             ...style,
           }}
           className={cn(
-            'group/sidebar-wrapper has-data-[variant=inset]:bg-white flex min-h-svh w-full',
+            'group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar-bg flex min-h-svh w-full',
             className
           )}
           {...props}
@@ -430,7 +431,7 @@ function SidebarMenuItem({ className, ...props }) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-lg px-2 py-2  text-left  outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-white active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-white  data-[active=true]:text-sidebar-accent-foreground data-[active=true]:text-zinc-700 data-[active=true]:font-semibold data-[active=true]:[&>svg]:text-primary data-[active=true]:border-l-[4px] data-[active=true]:border-primary   data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 font-medium text-zinc-700 text-[0.7rem] text-neutral-700',
+  'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-lg px-2 hover:pl-4 transition-all duration-300 py-4  text-left  outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-white active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-white  data-[active=true]:text-sidebar-accent-foreground data-[active=true]:text-zinc-700 data-[active=true]:font-semibold data-[active=true]:[&>svg]:text-primary  data-[active=true]:border-primary   data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 font-medium text-zinc-700 text-[0.7rem] text-neutral-700',
   {
     variants: {
       variant: {
@@ -510,7 +511,7 @@ function SidebarMenuAction({
       data-slot="sidebar-menu-action"
       data-sidebar="menu-action"
       className={cn(
-        'text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
+        'text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0 ',
         // Increases the hit area of the button on mobile.
         'after:absolute after:-inset-2 md:after:hidden',
         'peer-data-[size=sm]/menu-button:top-1',
@@ -581,7 +582,7 @@ function SidebarMenuSub({ className, ...props }) {
       data-slot="sidebar-menu-sub"
       data-sidebar="menu-sub"
       className={cn(
-        'border-sidebar-border ml-3 mr-0 flex min-w-0 translate-x-px flex-col  border-l px-2.5 py-0.5 font-semibold',
+        'border-sidebar-border ml-3 mr-0 flex min-w-0 translate-x-px flex-col   px-2.5 py-0.5 font-semibold ',
         'group-data-[collapsible=icon]:hidden',
         className
       )}
@@ -594,10 +595,21 @@ function SidebarMenuSubItem({ className, ...props }) {
   return (
     <li
       data-slot="sidebar-menu-sub-item"
-      data-sidebar="menu-sub-item"
-      className={cn('group/menu-sub-item relative', className)}
+      data-sidebar="menu-sub-item "
+      className={cn(
+        'group/menu-sub-item relative pl-4 hover:pl-6 transition-all duration-300',
+        // Tree line styles - vertical line and horizontal branch connector
+        'before:absolute before:left-0 before:top-0 before:h-full before:w-px before:bg-primary/20 before:rounded-full',
+        'after:absolute after:left-0 after:top-1/2 after:h-px after:w-3 after:-translate-y-1/2 after:bg-transparent after:rounded-bl-full after:border-b after:border-primary/20 after:border-l',
+        // Last item: vertical line only goes to the middle
+        'last:before:h-1/2',
+        className
+      )}
       {...props}
-    />
+    >
+      {/* <Image src="/menuCurve.svg" alt="menuCurve" width={54} height={48} className='absolute left-0 top-0 h-1/2 w-4' /> */}
+      {props.children}
+    </li>
   );
 }
 
@@ -617,10 +629,10 @@ function SidebarMenuSubButton({
       data-size={size}
       data-active={isActive}
       className={cn(
-        'text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent  py-4 rounded-md  hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden  px-3 outline-hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4  [&>svg]:shrink-0 ',
+        'text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent  py-4.5 rounded-md  hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden  px-3 outline-hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4  [&>svg]:shrink-0 ',
         'data-[active=true]:bg-primary data-[active=true]:text-white data-[active=true]:[&>svg]:text-white    text-zinc-700 font-medium',
-        size === 'sm' && 'text-xs',
-        size === 'md' && 'text-[0.8rem]',
+        // size === 'sm' && 'text-xs',
+        // size === 'md' && 'text-[0.8rem]',
         'group-data-[collapsible=icon]:hidden',
         className
       )}

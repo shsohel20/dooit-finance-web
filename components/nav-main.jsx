@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -9,16 +9,16 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar";
-import { ChevronRightIcon } from "lucide-react";
+} from '@/components/ui/sidebar';
+import { ChevronRightIcon } from 'lucide-react';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "./ui/collapsible";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { Fragment } from "react";
+} from './ui/collapsible';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { Fragment } from 'react';
 
 export function NavMain({ items, label }) {
   const pathname = usePathname();
@@ -42,7 +42,7 @@ export function NavMain({ items, label }) {
                         <SidebarMenuButton
                           tooltip={item.title}
                           isActive={item.current}
-                          className={"justify-between"}
+                          className={'justify-between  '}
                         >
                           <div className="flex items-center gap-2 [&>svg]:size-4 [&>svg]:shrink-0">
                             {item.icon && <item.icon />}
@@ -63,7 +63,7 @@ export function NavMain({ items, label }) {
                                   isActive={child.url === pathname}
                                 >
                                   <span className="flex items-center gap-2 [&>svg]:size-4 [&>svg]:shrink-0">
-                                    {" "}
+                                    {' '}
                                     {child.icon && <child.icon />}
                                     <span>{child.title}</span>
                                   </span>

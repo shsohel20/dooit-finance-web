@@ -55,6 +55,7 @@ export default function ClientSidebar({ ...props }) {
   const isFinancial = clientType === "Financial";
   const isPreciousMetal = clientType === "Precious Metal";
   const isCrypto = clientType === "Crypto";
+  const isBranch = loggedInUser?.role === "branch";
 
   const onBoardingMenuItems = [
     {
@@ -100,11 +101,15 @@ export default function ClientSidebar({ ...props }) {
         },
       ],
     },
-    {
-      title: "Branches",
-      icon: IconBuildingBank,
-      url: "/dashboard/client/branch",
-    },
+    ...(isBranch
+      ? []
+      : [
+          {
+            title: "Branches",
+            icon: IconBuildingBank,
+            url: "/dashboard/client/branch",
+          },
+        ]),
     {
       title: "Risk Assessment",
       icon: IconAlertTriangle,
@@ -379,12 +384,30 @@ export default function ClientSidebar({ ...props }) {
       ],
     },
   ];
+  const dueDiligenceMenu = [
+    {
+      title: "Compliance Officer & GB",
+      icon: IconListDetails,
+      url: "/dashboard/client/due-diligence/compliance-officer-and-governing-body",
+    },
+    {
+      title: "Personnel",
+      icon: IconListDetails,
+      url: "/dashboard/client/due-diligence/personnel",
+    },
+    {
+      title: "Compliance ",
+      icon: IconListDetails,
+      url: "/dashboard/client/due-diligence/compliance-officer",
+    },
+  ];
   const cryptoMenu = [
     {
       title: "Overview",
       items: [
         { title: "Wallet", url: "/dashboard/client/wallet", icon: Wallet },
         { title: "Send Crypto", url: "/dashboard/client/send-crypto", icon: Send },
+        { title: "Travel Rule", url: "/dashboard/client/travel-rule", icon: IconListDetails },
         { title: "Receive Crypto", url: "/dashboard/client/receive-crypto", icon: Download },
         { title: "Market", url: "/dashboard/client/market", icon: TrendingUp },
       ],
@@ -429,6 +452,7 @@ export default function ClientSidebar({ ...props }) {
             ))}
           </>
         )}
+        <NavMain items={dueDiligenceMenu} label="Due Diligence" />
         <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
