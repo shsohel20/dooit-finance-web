@@ -102,7 +102,6 @@ const IdentificationDocuments = ({
     setFrontLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
-      console.log("response", response);
       if (response.success) {
         setFrontError(false);
         const existingFrontIndex = fields.findIndex((item) => item.type === "front");
@@ -175,24 +174,6 @@ const IdentificationDocuments = ({
     });
   };
 
-  // const verifyingLivePhotoWithDocument = async () => {
-  //   const live_photo = localStorage.getItem("live_photo").replace("data:image/jpeg;base64,", "");
-  //   setIsVerifying(true);
-  //   const verify_data = {
-  //     app_id: 1,
-  //     image_1: frontBase64,
-  //     image_2: live_photo,
-  //   };
-  //   try {
-  //     const verify_response = await verifyDocument(verify_data);
-  //     return verify_response;
-  //   } catch (error) {
-  //     console.error("Verifying live photo with document error", error);
-  //     return false;
-  //   } finally {
-  //     setIsVerifying(false);
-  //   }
-  // };
   const handleSave = async () => {
     const formData = new FormData();
     formData.append("image", frontFile);
