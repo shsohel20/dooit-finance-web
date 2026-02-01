@@ -25,7 +25,7 @@ export function MetricCard({ title, value, icon, trend }) {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <div className="text-primary">{icon}</div>
-              <p className="text-sm text-heading  tracking-tighter font-medium">{title}</p>
+              <p className="text-sm text-heading  font-medium">{title}</p>
             </div>
             <p className="text-primary-gray font-medium">Last 30 days</p>
           </div>

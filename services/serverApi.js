@@ -1,6 +1,7 @@
 export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:6830/api/v1/";
 export const AI_URL = process.env.NEXT_PUBLIC_AI_BASE_URL || "http://4.227.188.44:8000/";
 export const NISA_URL = process.env.NEXT_PUBLIC_NISA_BASE_URL || "http://localhost:8000/";
+export const IMAGE_SERVER_URL = process.env.NEXT_PUBLIC_IMAGE_SERVER_URL;
 
 import { auth } from "@/auth";
 
