@@ -413,6 +413,18 @@ export default function ClientSidebar({ ...props }) {
       ],
     },
   ];
+  const testingAndGovernanceMenu = [
+    {
+      title: "Testing & Governance",
+      items: [
+        {
+          title: "Governing Body",
+          url: "/dashboard/client/testing-and-governance/governing-body",
+          icon: IconListDetails,
+        },
+      ],
+    },
+  ];
 
   return (
     <Sidebar collapsible="offcanvas" {...props} className={"border-0"}>
@@ -457,6 +469,7 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
         <NavMain items={configurationMenuItems} label="Configuration" />
+        <NavMain items={testingAndGovernanceMenu.items} label="Testing & Governance" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
       </SidebarContent>

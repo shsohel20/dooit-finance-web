@@ -73,7 +73,7 @@ export default function CheckLiveness() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 mt-4 pb-10">
+    <div className="min-h-screen  mt-4 pb-10">
       <div className="space-y-8">
         {/* Header */}
         <div className="space-y-2">

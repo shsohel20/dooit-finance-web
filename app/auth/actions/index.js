@@ -1,70 +1,64 @@
-'use server'
+"use server";
 
-
-import { BASE_URL, fetchWithAuth } from "@/services/serverApi"
-import { cookies } from "next/headers"
+import { BASE_URL, fetchWithAuth } from "@/services/serverApi";
+import { cookies } from "next/headers";
 // import { cookies } from "next/headers"
 
 // const { default: api } = require("@/services")
 
-
 export const login = async (credentials) => {
-
-    const res = await serverApi('auth/login', {
-        method: 'POST',
-        body: JSON.stringify(credentials)
-    })
-    if (res.status === 200) {
-        cookies().set("token", res.data.token)
-        return res.data
-    } else {
-        return { success: false, message: "Login failed" }
-    }
-
-}
+  const res = await fetch(`${BASE_URL}auth/login`, {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
+  if (res.status === 200) {
+    cookies().set("token", res.data.token);
+    return res.data;
+  } else {
+    return { success: false, message: "Login failed" };
+  }
+};
 export const getLoggedInUser = async () => {
-
-    const res = await fetchWithAuth(`auth/me`)
-    const data = await res.json()
-    return data
-
-}
+  const res = await fetchWithAuth(`auth/me`);
+  const data = await res.json();
+  return data;
+};
 
 export const getLoggedInCustomer = async () => {
-    const res = await fetchWithAuth(`auth/me/customer`)
-    const data = await res.json()
-    return data
-}
+  const res = await fetchWithAuth(`auth/me/customer`);
+  const data = await res.json();
+  return data;
+};
 
 export const registerAction = async (data) => {
-    const res = await fetch(`${BASE_URL}auth/register`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    return res.json()
-}
+  const res = await fetch(`${BASE_URL}auth/register`, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return res.json();
+};
 
 export const verifyOtp = async (data) => {
-    const res = await fetch(`${BASE_URL}auth/confirm-user-by-otp`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    return res.json()
-}
+  const res = await fetch(`${BASE_URL}auth/confirm-user-by-otp`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return res.json();
+};
 
 export const resendOtp = async (data) => {
-    const res = await fetch(`${BASE_URL}auth/re-send-opt`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    return res.json()
-}
+  const res = await fetch(`${BASE_URL}auth/re-send-opt`, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return res.json();
+};

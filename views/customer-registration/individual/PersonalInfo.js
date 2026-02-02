@@ -220,6 +220,7 @@ const PersonalInfo = ({ control, errors }) => {
           render={({ field }) => (
             <CustomSelect
               label="Country"
+              isClearable={true}
               {...field}
               options={countriesData}
               error={errors.mailing_address?.country?.message}

@@ -102,6 +102,7 @@ const IdentificationDocuments = ({
     setFrontLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
+      console.log("front img response", response);
       if (response.success) {
         setFrontError(false);
         const existingFrontIndex = fields.findIndex((item) => item.type === "front");
@@ -136,8 +137,9 @@ const IdentificationDocuments = ({
     setBackLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
+      console.log("response", response);
       if (response.success) {
-        setFrontError(false);
+        setBackError(false);
         const existingBackIndex = fields.findIndex((item) => item.type === "back");
         if (existingBackIndex !== -1) {
           update(existingBackIndex, {
