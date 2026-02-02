@@ -44,6 +44,8 @@ import {
   Wallet,
   Send,
   Download,
+  Landmark,
+  ReceiptText,
 } from "lucide-react";
 import useGetUser from "@/hooks/useGetUser";
 
@@ -417,12 +419,12 @@ export default function ClientSidebar({ ...props }) {
     {
       title: "Governing Body",
       url: "/dashboard/client/testing-and-governance/governing-body",
-      icon: IconListDetails,
+      icon: Landmark,
     },
     {
       title: "Effectiveness Testing",
       url: "/dashboard/client/testing-and-governance/effectiveness-testing",
-      icon: IconListDetails,
+      icon: ReceiptText,
     },
   ];
 

@@ -175,7 +175,7 @@ export default function EffectivenessTestingPage() {
               </div>
             ))}
           </div>
-          <div className="mt-2 flex justify-between text-sm">
+          {/* <div className="mt-2 flex justify-between text-sm">
             <span
               className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}
             >
@@ -186,7 +186,7 @@ export default function EffectivenessTestingPage() {
             >
               Failed Assessments Review
             </span>
-          </div>
+          </div> */}
         </div>
 
         {/* Step 1: Periodic Effectiveness Testing Summary */}
