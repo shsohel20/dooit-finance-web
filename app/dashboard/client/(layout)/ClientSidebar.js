@@ -44,6 +44,8 @@ import {
   Wallet,
   Send,
   Download,
+  Landmark,
+  ReceiptText,
 } from "lucide-react";
 import useGetUser from "@/hooks/useGetUser";
 
@@ -413,6 +415,18 @@ export default function ClientSidebar({ ...props }) {
       ],
     },
   ];
+  const testingAndGovernanceMenu = [
+    {
+      title: "Governing Body",
+      url: "/dashboard/client/testing-and-governance/governing-body",
+      icon: Landmark,
+    },
+    {
+      title: "Effectiveness Testing",
+      url: "/dashboard/client/testing-and-governance/effectiveness-testing",
+      icon: ReceiptText,
+    },
+  ];
 
   return (
     <Sidebar collapsible="offcanvas" {...props} className={"border-0"}>
@@ -457,6 +471,7 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
         <NavMain items={configurationMenuItems} label="Configuration" />
+        <NavMain items={testingAndGovernanceMenu} label="Testing & Governance" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
       </SidebarContent>

@@ -7,6 +7,7 @@ import RealEstateDashboardHeader from "@/views/real-estate/DashboardHeader";
 
 export default function ClientLayout({ children }) {
   const { loggedInUser } = useGetUser();
+  console.log('loggedInUser', loggedInUser);
   const clientType = loggedInUser?.client?.clientType;
   const isRealState = clientType === "Real Estate";
   const isFinancial = clientType === "Financial";

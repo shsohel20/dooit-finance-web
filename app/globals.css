@@ -177,10 +177,7 @@
 }
 
 body {
-  /* background: var(--background);
-  color: var(--foreground); */
-  font-family: montserrat, sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   background: var(--body);
   color: var(--smoke-700);
 }
@@ -243,26 +240,26 @@ button {
   .maplibregl-popup-tip {
     @apply hidden!;
   }
-  h1{
+  h1 {
     @apply text-2xl font-bold;
   }
-  h2{
+  h2 {
     @apply text-xl font-bold;
   }
-  h3{
+  h3 {
     @apply text-lg font-bold;
   }
-  h4{
+  h4 {
     @apply text-base font-bold;
   }
-  h6{
+  h6 {
     @apply text-sm font-bold;
   }
 }
 #editorjs {
   height: auto;
 }
-.codex-editor__redactor{
+.codex-editor__redactor {
   padding-bottom: 0 !important;
 }
 /* react-select */
@@ -329,7 +326,6 @@ div[data-slot="sidebar-content"] {
   background: var(--smoke-600);
   border-radius: 10px;
 } */
-
 
 @keyframes shimmer {
   0% {

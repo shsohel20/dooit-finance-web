@@ -1,5 +1,5 @@
 import AuthProvider from "@/providers/SessionProvider";
-import { Geist, Geist_Mono, Herr_Von_Muellerhoff, Montserrat } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { EncryptDecryptFAB } from "@/components/EncryptBtn";
@@ -21,7 +21,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${montserrat.className} antialiased `} suppressHydrationWarning>
+      <body className={`font-sans antialiased ${montserrat.className}`} suppressHydrationWarning>
         {/* <AuthProvider> */}
         <EncryptDecryptFAB />
         <ChatBotNissa />

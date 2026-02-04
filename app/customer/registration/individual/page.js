@@ -17,8 +17,8 @@ import { IconRefresh } from "@tabler/icons-react";
 const personalInfoSchema = z.object({
   customer_details: z.object({
     given_name: z.string().min(1, "First name is required"),
-    middle_name: z.string().min(1, "Middle name is required"),
-    surname: z.string().min(1, "Last name is required"),
+    middle_name: z.string().optional(),
+    surname: z.string().optional(),
   }),
   document_type: z.object({
     value: z.string().min(1, "Document type is required"),
@@ -42,6 +42,7 @@ const personalInfoSchema = z.object({
         value: z.string(),
         label: z.string(),
       })
+      .optional()
       .nullable(),
   }),
   documents: z
@@ -84,8 +85,8 @@ const personalInfoSchema = z.object({
     postcode: z.string().optional(),
     country: z
       .object({
-        value: z.string(),
-        label: z.string(),
+        value: z.string().optional(),
+        label: z.string().optional(),
       })
       .nullable()
       .optional(),
@@ -98,8 +99,8 @@ const personalInfoSchema = z.object({
       .string()
       .min(1, "Signatory name is required")
       .min(2, "Signatory name must be at least 2 characters"),
-    signature: z.string().min(1, "Signature is required"),
-    date: z.string(),
+    signature: z.string().optional(),
+    date: z.string().optional(),
   }),
 });
 const TOTAL_STEPS = 2;
@@ -120,6 +121,7 @@ const CustomerRegistration = () => {
     resolver: zodResolver(personalInfoSchema),
     mode: "onChange",
   });
+  console.log("errors", errors);
   const onSubmit = (data) => {
     setCustomerRegisterData(data);
     router.push("/customer/registration/individual/preview");
@@ -178,6 +180,33 @@ const CustomerRegistration = () => {
       )}
       {verifyingStatus === "verified" && (
         <>
+          {errors && Object.keys(errors).length > 0 && (
+            <div className="flex flex-col gap-2">
+              {Object.keys(errors).map((key) => {
+                if (errors[key].message) {
+                  return <div key={key}>{errors[key].message}</div>;
+                } else {
+                  return (
+                    <>
+                      {Object.keys(errors[key]).map((subKey) => {
+                        return (
+                          <div key={subKey + key}>
+                            <Alert variant="destructive">
+                              {" "}
+                              <AlertTitle className={"capitalize"}>
+                                {key}/{subKey}
+                              </AlertTitle>
+                              <AlertDescription>Is required</AlertDescription>
+                            </Alert>
+                          </div>
+                        );
+                      })}
+                    </>
+                  );
+                }
+              })}
+            </div>
+          )}
           <div>
             <Stepper currentStep={currentStep} totalSteps={TOTAL_STEPS} handleStep={handleStep} />
           </div>

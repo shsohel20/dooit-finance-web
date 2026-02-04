@@ -40,30 +40,35 @@ export default function PersonnelDueDiligenceForm() {
     attached: false,
     verifiedBy: "",
     dateVerified: "",
+    designation: "",
   });
   const [identification, setIdentification] = useState({
     id: "identification",
     attached: false,
     verifiedBy: "",
     dateVerified: "",
+    designation: "",
   });
   const [adverseMedia, setAdverseMedia] = useState({
     id: "adverseMedia",
     attached: false,
     verifiedBy: "",
     dateVerified: "",
+    designation: "",
   });
   const [referenceCheck, setReferenceCheck] = useState({
     id: "reference",
     attached: false,
     verifiedBy: "",
     dateVerified: "",
+    designation: "",
   });
   const [otherCheck, setOtherCheck] = useState({
     id: "other",
     attached: false,
     verifiedBy: "",
     dateVerified: "",
+    designation: "",
   });
   const [otherCheckDescription, setOtherCheckDescription] = useState("");
 
@@ -248,7 +253,7 @@ export default function PersonnelDueDiligenceForm() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">
-              Step 2: Accounting Professional Association Membership
+              Step 2: Professional Association Membership/Licenses
             </CardTitle>
             <CardDescription>
               Check if the candidate is currently a member of one of the accounting professional
@@ -351,6 +356,7 @@ export default function PersonnelDueDiligenceForm() {
                     <TableHead>Description/process notes</TableHead>
                     <TableHead className="w-[80px] text-center">Attached</TableHead>
                     <TableHead className="w-[100px]">Verified by</TableHead>
+                    <TableHead className="w-[100px]">Designation</TableHead>
                     <TableHead className="w-[130px]">Date verified</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -380,7 +386,20 @@ export default function PersonnelDueDiligenceForm() {
                             verifiedBy: e.target.value,
                           })
                         }
-                        placeholder="Initials"
+                        placeholder="Actual Officer"
+                        className="h-8"
+                      />
+                    </TableCell>
+                    <TableCell className="align-top">
+                      <Input
+                        value={statutoryDeclaration.designation}
+                        onChange={(e) =>
+                          setStatutoryDeclaration({
+                            ...statutoryDeclaration,
+                            designation: e.target.value,
+                          })
+                        }
+                        placeholder="Designation"
                         className="h-8"
                       />
                     </TableCell>
@@ -424,7 +443,20 @@ export default function PersonnelDueDiligenceForm() {
                             verifiedBy: e.target.value,
                           })
                         }
-                        placeholder="Initials"
+                        placeholder="Actual Officer"
+                        className="h-8"
+                      />
+                    </TableCell>
+                    <TableCell className="align-top">
+                      <Input
+                        value={statutoryDeclaration.designation}
+                        onChange={(e) =>
+                          setStatutoryDeclaration({
+                            ...statutoryDeclaration,
+                            designation: e.target.value,
+                          })
+                        }
+                        placeholder="Designation"
                         className="h-8"
                       />
                     </TableCell>
@@ -469,7 +501,20 @@ export default function PersonnelDueDiligenceForm() {
                             verifiedBy: e.target.value,
                           })
                         }
-                        placeholder="Initials"
+                        placeholder="Actual Officer"
+                        className="h-8"
+                      />
+                    </TableCell>
+                    <TableCell className="align-top">
+                      <Input
+                        value={adverseMedia.designation}
+                        onChange={(e) =>
+                          setAdverseMedia({
+                            ...adverseMedia,
+                            designation: e.target.value,
+                          })
+                        }
+                        placeholder="Designation"
                         className="h-8"
                       />
                     </TableCell>
@@ -514,7 +559,20 @@ export default function PersonnelDueDiligenceForm() {
                             verifiedBy: e.target.value,
                           })
                         }
-                        placeholder="Initials"
+                        placeholder="Actual Officer"
+                        className="h-8"
+                      />
+                    </TableCell>
+                    <TableCell className="align-top">
+                      <Input
+                        value={referenceCheck.designation}
+                        onChange={(e) =>
+                          setReferenceCheck({
+                            ...referenceCheck,
+                            designation: e.target.value,
+                          })
+                        }
+                        placeholder="Designation"
                         className="h-8"
                       />
                     </TableCell>
@@ -567,7 +625,20 @@ export default function PersonnelDueDiligenceForm() {
                             verifiedBy: e.target.value,
                           })
                         }
-                        placeholder="Initials"
+                        placeholder="Actual Officer"
+                        className="h-8"
+                      />
+                    </TableCell>
+                    <TableCell className="align-top">
+                      <Input
+                        value={otherCheck.designation}
+                        onChange={(e) =>
+                          setOtherCheck({
+                            ...otherCheck,
+                            designation: e.target.value,
+                          })
+                        }
+                        placeholder="Designation"
                         className="h-8"
                       />
                     </TableCell>

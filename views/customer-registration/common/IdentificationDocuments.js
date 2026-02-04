@@ -102,20 +102,21 @@ const IdentificationDocuments = ({
     setFrontLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
-      console.log("response", response);
+      console.log("front img response", response);
       if (response.success) {
+        setFrontError(false);
         const existingFrontIndex = fields.findIndex((item) => item.type === "front");
         if (existingFrontIndex !== -1) {
           update(existingFrontIndex, {
             ...fields[existingFrontIndex],
             name: file.name,
-            url: response.data.fileUrl,
+            url: response.file.publicUrl,
             mimeType: file.type,
           });
         } else {
           append({
             name: file.name,
-            url: response.data.fileUrl,
+            url: response.file.publicUrl,
             mimeType: file.type,
             type: "front",
             docType: documentTypeValue?.value,
@@ -136,19 +137,21 @@ const IdentificationDocuments = ({
     setBackLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
+      console.log("response", response);
       if (response.success) {
+        setBackError(false);
         const existingBackIndex = fields.findIndex((item) => item.type === "back");
         if (existingBackIndex !== -1) {
           update(existingBackIndex, {
             ...fields[existingBackIndex],
             name: file.name,
-            url: response.data.fileUrl,
+            url: response.file.publicUrl,
             mimeType: file.type,
           });
         } else {
           append({
             name: file.name,
-            url: response.data.fileUrl,
+            url: response.file.publicUrl,
             mimeType: file.type,
             type: "back",
             docType: documentTypeValue?.value,
@@ -173,29 +176,11 @@ const IdentificationDocuments = ({
     });
   };
 
-  // const verifyingLivePhotoWithDocument = async () => {
-  //   const live_photo = localStorage.getItem("live_photo").replace("data:image/jpeg;base64,", "");
-  //   setIsVerifying(true);
-  //   const verify_data = {
-  //     app_id: 1,
-  //     image_1: frontBase64,
-  //     image_2: live_photo,
-  //   };
-  //   try {
-  //     const verify_response = await verifyDocument(verify_data);
-  //     return verify_response;
-  //   } catch (error) {
-  //     console.error("Verifying live photo with document error", error);
-  //     return false;
-  //   } finally {
-  //     setIsVerifying(false);
-  //   }
-  // };
   const handleSave = async () => {
     const formData = new FormData();
     formData.append("image", frontFile);
     formData.append("card_type", documentTypeValue?.value);
-    const live_photo = localStorage.getItem("live_photo").replace("data:image/jpeg;base64,", "");
+    const live_photo = localStorage.getItem("live_photo")?.replace("data:image/jpeg;base64,", "");
     const verify_data = {
       app_id: 1,
       image_1: frontBase64,
@@ -207,12 +192,15 @@ const IdentificationDocuments = ({
       setIsSaving(true);
       // setVerifyingStatus("verifying");
       const verify_response = await verifyDocument(verify_data);
+      console.log("verify-res", verify_response);
 
       const verification_status = verify_response.data?.result?.verification_status;
+      console.log("verification status", verification_status);
       if (verification_status === 0) {
         toast.error("Documents are not verified. You can't proceed further.");
         setVerifyingStatus("idle");
         setIsSaving(false);
+
         return;
       } else {
         verifiedMsg = `Found ${verify_response.data?.result?.similarity}% similarity with the document`;
@@ -242,8 +230,7 @@ const IdentificationDocuments = ({
 
             const fullNameParts = formData.full_name?.trim().split(/\s+/) ?? [];
 
-            const given_name =
-              fullNameParts[0] || formData.given_name || "";
+            const given_name = fullNameParts[0] || formData.given_name || "";
 
             const middle_name =
               fullNameParts.length > 2
@@ -255,16 +242,14 @@ const IdentificationDocuments = ({
                 ? fullNameParts[fullNameParts.length - 1]
                 : formData.surname || "";
 
-            const date_of_birth = formData.date_of_birth
-              ? formatDate(formData.date_of_birth)
-              : "";
+            const date_of_birth = formData.date_of_birth ? formatDate(formData.date_of_birth) : "";
 
             setValue("customer_details.given_name", given_name);
             setValue("customer_details.middle_name", middle_name);
             setValue("customer_details.surname", surname);
             setValue(
               "residential_address.address",
-              formData.address || formData.permanent_address || ""
+              formData.address || formData.permanent_address || "",
             );
             setValue("customer_details.date_of_birth", date_of_birth);
             setVerifyingStatus("verified");
@@ -274,6 +259,7 @@ const IdentificationDocuments = ({
         }
       }
     } catch (error) {
+      setVerifyingStatus("verified");
       toast.error("Failed to save identification documents");
     } finally {
       setIsSaving(false);

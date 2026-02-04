@@ -60,7 +60,7 @@ export function SiteHeader() {
                 <Link
                   href={route.href}
                   className={cn(
-                    ' px-4 py-2  text-heading  font-semibold flex items-center gap-2 [&>svg]:size-4 [&>svg]:shrink-0 relative rounded-md ',
+                    ' px-4 py-2  text-heading  font-semibold flex items-center gap-2 [&>svg]:size-4 [&>svg]:shrink-0 relative rounded-md text-[0.8rem]',
                     {
                       'bg-white shadow-sm  font-bold rounded-md':
                         pathname === route.href,

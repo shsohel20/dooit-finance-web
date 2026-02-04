@@ -1,12 +1,12 @@
-import React from 'react';
-import Preview from '../../../../../views/customer-registration/individual/Preview';
+import React from "react";
+import Preview from "../../../../../views/customer-registration/individual/Preview";
 
 const PreviewPage = () => {
-    return (
-        <div>
-            <Preview />
-        </div>
-    );
+  return (
+    <div>
+      <Preview />
+    </div>
+  );
 };
 
-export default Preview;
+export default PreviewPage;

@@ -43,20 +43,24 @@ export function LoginForm({ className, token, cid, ...props }) {
       password: '',
     },
   });
-  console.log('login page session', session);
+
+  const getRoute = (session) => {
+    if (session.data?.user?.userType === 'dooit') {
+      return '/dashboard/admin';
+    } else if (session.data.user.userType === 'user' && token) {
+      return '/auth/registration-type';
+    } else if (session.data.user.userType === 'user') {
+      return '/customer/dashboard';
+    } else if (session.data?.user?.userType === 'client' || 'branch') {
+      return '/dashboard/client';
+    } else {
+      return '/';
+    }
+  };
+
   useEffect(() => {
     if (session.data) {
-      if (session.data?.user?.userType === 'dooit') {
-        router.replace('/dashboard/admin');
-      } else if (session.data?.user?.userType === 'client' || 'branch') {
-        router.replace('/dashboard/client');
-      } else if (session.data.user.role === 'customer' && token) {
-        router.replace('/auth/registration-type');
-      } else {
-        router.replace('/');
-      }
-    } else {
-      // router.push("/auth/login");
+      router.replace(getRoute(session));
     }
   }, [session.data?.user?.userType]);
   const onSubmit = async (data) => {
