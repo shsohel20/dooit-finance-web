@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // const { default: api } = require("@/services")
 
 export const login = async (credentials) => {
-  const res = await fetch(`${BASE_URL}auth/login`, {
+  const res = await serverApi("auth/login", {
     method: "POST",
     body: JSON.stringify(credentials),
   });

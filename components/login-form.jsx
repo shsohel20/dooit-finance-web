@@ -68,6 +68,7 @@ export function LoginForm({ className, token, cid, ...props }) {
     const formData = new FormData();
     formData.append('email', data.email);
     formData.append('password', data.password);
+    console.log('data', data);
     const res = await signIn('credentials', {
       ...data,
       redirect: false,

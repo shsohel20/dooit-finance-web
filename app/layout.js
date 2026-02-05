@@ -21,7 +21,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased ${montserrat.className}`} suppressHydrationWarning>
+      <body
+        className={`font-sans antialiased ${montserrat.className} text-sm`}
+        suppressHydrationWarning
+      >
         {/* <AuthProvider> */}
         <EncryptDecryptFAB />
         <ChatBotNissa />
