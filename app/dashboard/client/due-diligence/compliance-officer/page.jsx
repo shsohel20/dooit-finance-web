@@ -196,7 +196,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 py-8">
+    <div className="min-h-screen  py-8">
       <div className="container  px-4">
         <Card className="border-none shadow-lg">
           <CardHeader className="bg-primary text-primary-foreground rounded-t-lg py-4">

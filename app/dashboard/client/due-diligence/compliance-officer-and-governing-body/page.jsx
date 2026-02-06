@@ -127,7 +127,7 @@ export default function PersonnelDueDiligenceForm() {
   };
 
   return (
-    <main className="min-h-screen bg-muted/30 py-8 px-4">
+    <main className="min-h-screen  py-8 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">

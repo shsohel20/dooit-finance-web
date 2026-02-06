@@ -145,18 +145,18 @@ export default function PersonnelDueDiligenceForm() {
   };
 
   return (
-    <main className="min-h-screen bg-muted/30 py-8 px-4">
+    <main className="min-h-screen  py-8 px-4">
       <div className="space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-foreground">Personnel Due Diligence Form</h1>
-          <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
+          {/* <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
             This form records all checks, assessment and approval for personnel due diligence (PDD).
             Follow the instructions in each section carefully and complete all required fields.
           </p>
           <p className="text-xs text-muted-foreground">
             AUSTRAC version 29/01/2026 - Internal version 1.0
-          </p>
+          </p> */}
         </div>
 
         {/* Step 1: Personnel Information */}
