@@ -169,7 +169,7 @@ export default function PolicyList() {
       {/* Main Content */}
       <div className="  py-12">
         {/* Browse by Category */}
-        {/* <section className="mb-16">
+        <section className="mb-16">
           <h2 className="text-2xl font-bold text-foreground mb-8">Browse by Category</h2>
           <div className="grid md:grid-cols-4 gap-6">
             {categories.map((cat, i) => {
@@ -196,10 +196,10 @@ export default function PolicyList() {
               );
             })}
           </div>
-        </section> */}
+        </section>
 
         {/* Featured Articles */}
-        {/* <section className="mb-16">
+        <section className="mb-16">
           <h2 className="text-2xl font-bold text-foreground mb-8">Featured Articles</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {articles.map((article, i) => (
@@ -225,7 +225,7 @@ export default function PolicyList() {
               </article>
             ))}
           </div>
-        </section> */}
+        </section>
 
         {/* Policy Library */}
         <section>

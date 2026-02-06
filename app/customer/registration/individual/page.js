@@ -10,9 +10,7 @@ import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import IdentificationDocuments from "@/views/customer-registration/common/IdentificationDocuments";
 import PersonalInfo from "@/views/customer-registration/individual/PersonalInfo";
 import OtherInfo from "@/views/customer-registration/individual/OtherInfo";
-import CheckLiveness from "@/views/customer-registration/common/CheckLiveness";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { IconRefresh } from "@tabler/icons-react";
 
 const personalInfoSchema = z.object({
   customer_details: z.object({
@@ -56,12 +54,12 @@ const personalInfoSchema = z.object({
       }),
     )
     .max(2, "You can only upload 2 documents"),
-  declaration: z.object({
-    declarations_accepted: z.boolean().optional(),
-    signatory_name: z.string().optional(),
-    signature: z.string().optional(),
-    date: z.string().optional(),
-  }),
+  // declaration: z.object({
+  //   declarations_accepted: z.boolean().optional(),
+  //   signatory_name: z.string().optional(),
+  //   signature: z.string().optional(),
+  //   date: z.string().optional(),
+  // }),
   funds_wealth: z.object({
     source_of_funds: z.string().optional(),
     source_of_wealth: z.string().optional(),
