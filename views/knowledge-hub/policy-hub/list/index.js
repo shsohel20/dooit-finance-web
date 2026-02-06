@@ -165,7 +165,7 @@ export default function PolicyList() {
           </div>
         </div>
       </div>
-
+{/* test */}
       {/* Main Content */}
       <div className="  py-12">
         {/* Browse by Category */}
@@ -174,6 +174,7 @@ export default function PolicyList() {
           <div className="grid md:grid-cols-4 gap-6">
             {categories.map((cat, i) => {
               const IconComponent = cat.icon;
+              
               return (
                 <div
                   key={i}
