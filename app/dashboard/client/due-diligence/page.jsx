@@ -4,8 +4,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useState } from 'react'
 import PersonnelDueDiligenceForm from './personnel/page'
-import ComplianceDueDiligenceForm from './compliance-officer/page'
-import ComplianceOfficerAndGoverningBodyDueDiligenceForm from './compliance-officer-and-governing-body/page'
+import ComplianceDueDiligenceForm from './compliance-officer'
+import ComplianceOfficerAndGoverningBodyDueDiligenceForm from './compliance-officer-and-governing-body'
 function DueDiligencePage() {
     const [dueDiligenceType, setDueDiligenceType] = useState('personnel')
   return (

@@ -387,21 +387,21 @@ export default function ClientSidebar({ ...props }) {
     },
   ];
   const dueDiligenceMenu = [
-    {
-      title: "Compliance Officer & GB",
-      icon: IconListDetails,
-      url: "/dashboard/client/due-diligence/compliance-officer-and-governing-body",
-    },
+    // {
+    //   title: "Compliance Officer & GB",
+    //   icon: IconListDetails,
+    //   url: "/dashboard/client/due-diligence/compliance-officer-and-governing-body",
+    // },
     {
       title: "Personnel",
       icon: IconListDetails,
       url: "/dashboard/client/due-diligence/personnel",
     },
-    {
-      title: "Compliance ",
-      icon: IconListDetails,
-      url: "/dashboard/client/due-diligence/compliance-officer",
-    },
+    // {
+    //   title: "Compliance ",
+    //   icon: IconListDetails,
+    //   url: "/dashboard/client/due-diligence/compliance-officer",
+    // },
   ];
   const cryptoMenu = [
     {
