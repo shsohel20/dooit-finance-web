@@ -207,7 +207,7 @@ function Sidebar({
       <div
         data-slot="sidebar-container"
         className={cn(
-          'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex bg-sidebar-bg',
+          'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex ',
           side === 'left'
             ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
             : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
@@ -440,7 +440,7 @@ const sidebarMenuButtonVariants = cva(
           'bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
       },
       size: {
-        default: 'h-8 text-[0.85rem]',
+        default: 'h-8 text-[0.8rem]',
         sm: 'h-7 text-[0.85rem]',
         lg: 'h-12 text-[0.8rem] group-data-[collapsible=icon]:p-0!',
       },
@@ -629,7 +629,7 @@ function SidebarMenuSubButton({
       data-size={size}
       data-active={isActive}
       className={cn(
-        'text-sidebar-foreground ring-sidebar-ring hover:bg-primary/5  py-1.5 rounded-md  hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground flex  min-w-0 -translate-x-px items-center gap-2 overflow-hidden  px-3 outline-hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4  [&>svg]:shrink-0  text-[0.85rem]',
+        'text-sidebar-foreground ring-sidebar-ring hover:bg-primary/5  py-1.5 rounded-md  hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground flex  min-w-0 -translate-x-px items-center gap-2 overflow-hidden  px-3 outline-hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4  [&>svg]:shrink-0  text-[0.8rem]',
         'data-[active=true]:bg-primary data-[active=true]:text-white data-[active=true]:[&>svg]:text-white    text-zinc-700 font-medium',
         // size === 'sm' && 'text-xs',
         // size === 'md' && 'text-[0.8rem]',

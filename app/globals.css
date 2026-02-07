@@ -174,7 +174,7 @@
 
 body {
   font-size: 0.8rem;
-  background: var(--body);
+  background: #fefefe;
   color: var(--smoke-700);
   /* font-family: "font-sf-pro-regular", sans-serif; */
 }
