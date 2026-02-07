@@ -73,7 +73,6 @@ const IdentificationDocuments = ({
   const [backLoading, setBackLoading] = useState(false);
   const [backError, setBackError] = useState(false);
   const [userFrontImage, setUserFrontImage] = useState(null);
-  const [isVerifying, setIsVerifying] = useState(false);
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "documents",

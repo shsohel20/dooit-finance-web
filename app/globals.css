@@ -312,17 +312,24 @@ button[data-lit="true"]:before {
   z-index: -1;
   animation: shimmer 2s ease-in-out infinite alternate;
 }
+
+/* div[data-slot="sidebar-content"] {
+  display: none;
+} */
 div[data-slot="sidebar-content"] {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-color: var(--color-gray-300) transparent;
+  /* -ms-overflow-style: none; */
 }
 /* change scrollbar color for body */
-/* body::-webkit-scrollbar {
+body::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
-  background: var(--smoke-600);
+  /* height: 8px; */
+  background: var(--color-gray-300);
   border-radius: 10px;
-} */
+}
+.css-1nmdiq5-menu {
+  z-index: 9999999 !important;
+}
 
 @keyframes shimmer {
   0% {

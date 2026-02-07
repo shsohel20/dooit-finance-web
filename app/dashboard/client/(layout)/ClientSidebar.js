@@ -393,7 +393,7 @@ export default function ClientSidebar({ ...props }) {
     //   url: "/dashboard/client/due-diligence/compliance-officer-and-governing-body",
     // },
     {
-      title: "Personnel",
+      title: "Personnel (PDD)",
       icon: IconListDetails,
       url: "/dashboard/client/due-diligence/personnel",
     },
