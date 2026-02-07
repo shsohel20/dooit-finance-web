@@ -435,7 +435,7 @@ export default function ClientSidebar({ ...props }) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <div className="py-2  relative">
-                <div className="w-28 ">
+                <div className="w-20 ">
                   <img src="/logo.png" alt="Logo" className=" w-full h-8 object-contain " />
                 </div>
               </div>
