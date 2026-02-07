@@ -15,7 +15,7 @@ export default function IdentificationDocuments({ control }) {
   const [frontLoading, setFrontLoading] = useState(false);
   const [frontError, setFrontError] = useState(false);
   const [frontFile, setFrontFile] = useState(null);
-  const [frontBase64, setFrontBase64] = useState(null);
+  // const [frontBase64, setFrontBase64] = useState(null);
   //back
   const [backLoading, setBackLoading] = useState(false);
   const [backError, setBackError] = useState(false);
@@ -29,6 +29,7 @@ export default function IdentificationDocuments({ control }) {
     control,
     name: "company_details.document_type",
   });
+
   const handleFrontChange = (file) => {
     setFrontFile(file);
     setFrontLoading(true);
@@ -37,7 +38,6 @@ export default function IdentificationDocuments({ control }) {
     setBackFile(file);
     setBackLoading(true);
   };
-  console.log("documentTypeValue", documentType);
   return (
     <div className="border p-4 mt-8 rounded-lg">
       <div className="max-w-[200px] z-3">
