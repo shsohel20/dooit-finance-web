@@ -173,9 +173,8 @@
 }
 
 body {
-  font-size: 0.8rem;
-  background: #fefefe;
-  color: var(--smoke-700);
+  background: #ffffff;
+  /* background: #7c1919; */
   /* font-family: "font-sf-pro-regular", sans-serif; */
 }
 .container {
