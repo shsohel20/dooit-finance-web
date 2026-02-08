@@ -1,103 +1,11 @@
 "use client";
-import { z } from "zod";
 import React, { useState } from "react";
 import IdentificationDocuments from "@/views/company-registration/IdentificationDocuments";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import GeneralForm from "@/views/company-registration/GeneralForm";
 import { Button } from "@/components/ui/button";
-
-const schema = z.object({
-  general_information: z.object({
-    legal_name: z.string().min(1, "Legal name is required"),
-    trading_names: z.string().min(1, "Trading names is required"),
-    phone_number: z.string().min(1, "Phone number is required"),
-    registration_number: z.string().min(1, "Registration number is required"),
-    country_of_incorporation: z.string().min(1, "Country of incorporation is required"),
-    contact_email: z.string().email("Invalid email address"),
-    industry: z.string().min(1, "Industry is required"),
-    nature_of_business: z.string().min(1, "Nature of business is required"),
-    annual_income: z.string().min(1, "Annual income is required"),
-    local_agent: z.object({
-      name: z.string().min(1, "Local agent name is required"),
-      address: z.object({
-        street: z.string().min(1, "Street is required"),
-        suburb: z.string().min(1, "Suburb is required"),
-        state: z.string().min(1, "State is required"),
-        postcode: z.string().min(1, "Postcode is required"),
-        country: z.string().min(1, "Country is required"),
-      }),
-    }),
-    registered_address: z.object({
-      street: z.string().min(1, "Street is required"),
-      suburb: z.string().min(1, "Suburb is required"),
-      state: z.string().min(1, "State is required"),
-      postcode: z.string().min(1, "Postcode is required"),
-      country: z.string().min(1, "Country is required"),
-    }),
-    business_address: z.object({
-      different_from_registered: z.boolean(),
-      street: z.string().min(1, "Street is required"),
-      suburb: z.string().min(1, "Suburb is required"),
-      state: z.string().min(1, "State is required"),
-      postcode: z.string().min(1, "Postcode is required"),
-      country: z.string().min(1, "Country is required"),
-    }),
-    company_type: z.object({
-      type: z.string().min(1, "Company type is required"),
-      is_listed: z.boolean(),
-    }),
-    account_purpose: z.object({
-      digital_currency_exchange: z.boolean(),
-      peer_to_peer: z.boolean(),
-      fx: z.boolean(),
-      other: z.boolean(),
-      other_details: z.string().optional(),
-    }),
-    estimated_trading_volume: z.string().min(1, "Estimated trading volume is required"),
-  }),
-  directors: z.array(
-    z.object({
-      given_name: z.string().min(1, "Given name is required"),
-      surname: z.string().min(1, "Surname is required"),
-    }),
-  ),
-  beneficial_owners: z.array(
-    z.object({
-      full_name: z.string().min(1, "Full name is required"),
-      date_of_birth: z.string().min(1, "Date of birth is required"),
-      residential_address: z.object({
-        street: z.string().min(1, "Street is required"),
-        suburb: z.string().min(1, "Suburb is required"),
-        state: z.string().min(1, "State is required"),
-        postcode: z.string().min(1, "Postcode is required"),
-        country: z.string().min(1, "Country is required"),
-      }),
-    }),
-  ),
-  documents: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        url: z.string().optional(),
-        mimeType: z.string().optional(),
-        type: z.enum(["front", "back"]),
-        docType: z.string().optional(),
-      }),
-    )
-    .max(2, "You can only upload 2 documents"),
-  declaration: z.object({
-    declarations_accepted: z
-      .boolean()
-      .refine((val) => val === true, "You must accept the declarations"),
-    signatory_name: z
-      .string()
-      .min(1, "Signatory name is required")
-      .min(2, "Signatory name must be at least 2 characters"),
-    signature: z.string().optional(),
-    date: z.string().optional(),
-  }),
-});
+import { companyRegistrationFormSchema } from "@/views/company-registration/formSchema";
 
 const initialValues = {
   general_information: {
@@ -134,6 +42,10 @@ const initialValues = {
     },
     registered_address: {
       street: "",
+      suburb: "",
+      state: "",
+      postcode: "",
+      country: "",
     },
     business_address: {
       different_from_registered: false,
@@ -163,6 +75,12 @@ const initialValues = {
       },
     },
   ],
+  declaration: {
+    declarations_accepted: false,
+    signatory_name: "",
+    signature: "",
+    date: new Date().toISOString(),
+  },
 };
 const CompanyRegistration = () => {
   const TOTAL_STEPS = 2;
@@ -170,11 +88,27 @@ const CompanyRegistration = () => {
   const [verifyingStatus, setVerifyingStatus] = useState("idle");
   const form = useForm({
     defaultValues: initialValues,
-    resolver: zodResolver(schema),
+    resolver: zodResolver(companyRegistrationFormSchema),
     mode: "onChange",
   });
+
+  console.log("errors", form.formState.errors);
   const onSubmit = (data) => {
-    console.log(data);
+    const payload = {
+      token: "",
+      cid: "",
+      requestedType: "company",
+      kyc: {
+        general_information: data.general_information,
+        directors_beneficial_owner: {
+          directors: data.directors,
+          beneficial_owners: data.beneficial_owners,
+        },
+      },
+      declaration: data.declaration,
+      documents: data.documents,
+    };
+    console.log("payload", payload);
   };
   return (
     <div className="container">

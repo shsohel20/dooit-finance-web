@@ -1,17 +1,31 @@
-'use client'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import React, { useState } from 'react'
-import { AlertCircle, Clock, Plus, Search, ChevronLeft, ChevronRight, Eye, Upload, Users, Zap, FileText, Download, ArrowLeft } from "lucide-react"
-import ResizableTable from '@/components/ui/Resizabletable'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
-import { IconFilePlus, IconHistory } from '@tabler/icons-react'
-import CustomInput from '@/components/ui/CustomInput'
-import CustomSelect from '@/components/ui/CustomSelect'
+"use client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
+import {
+  AlertCircle,
+  Clock,
+  Plus,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Upload,
+  Users,
+  Zap,
+  FileText,
+  Download,
+  ArrowLeft,
+} from "lucide-react";
+import ResizableTable from "@/components/ui/Resizabletable";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { IconFilePlus, IconHistory } from "@tabler/icons-react";
+import CustomInput from "@/components/ui/CustomInput";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 export default function Draft() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [detailViewOpen, setDetailViewOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [detailViewOpen, setDetailViewOpen] = useState(false);
   const alerts = [
     {
       id: 1,
@@ -25,14 +39,14 @@ export default function Draft() {
       message: "5 drafts ready for submission",
       type: "warning",
     },
-  ]
+  ];
 
   const metrics = [
     { label: "Total Drafts", value: "128", color: "text-blue-600" },
     { label: "My Drafts", value: "15", color: "text-amber-600" },
     { label: "Updated Today", value: "102", color: "text-teal-600" },
     { label: "Incomplete", value: "11", color: "text-red-600" },
-  ]
+  ];
 
   const queueData = [
     {
@@ -68,7 +82,7 @@ export default function Draft() {
       status: "Awaiting Approval",
       statusColor: "bg-amber-100 text-amber-700",
     },
-  ]
+  ];
 
   const recentActions = [
     {
@@ -85,7 +99,7 @@ export default function Draft() {
       recommendation: "Recommended for Escalation",
       color: "bg-red-100 text-red-700",
     },
-  ]
+  ];
 
   const columns = [
     {
@@ -137,8 +151,8 @@ export default function Draft() {
           <Eye className="h-4 w-4" />
         </Button>
       ),
-    }
-  ]
+    },
+  ];
   const quickActions = [
     {
       id: 1,
@@ -168,7 +182,7 @@ export default function Draft() {
       icon: Zap,
       color: "bg-orange-500/10 text-orange-600",
     },
-  ]
+  ];
 
   const templates = [
     {
@@ -206,12 +220,12 @@ export default function Draft() {
       usage: "Emerging",
       icon: "₿",
     },
-  ]
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen ">
       {/* Header */}
-      <div className="border-b border-border bg-card sticky top-0 z-50">
+      <div className="border-b border-border ">
         <div className="mx-auto max-w-[1440px] px-8 py-6">
           <h1 className="text-2xl font-semibold tracking-tight">Request for Information</h1>
         </div>
@@ -222,7 +236,7 @@ export default function Draft() {
         {/* Alert Notifications */}
         <div className="space-y-3">
           {alerts.map((alert) => {
-            const Icon = alert.icon
+            const Icon = alert.icon;
             return (
               <div
                 key={alert.id}
@@ -232,9 +246,11 @@ export default function Draft() {
                   <Icon className="h-5 w-5 text-amber-600" />
                   <span className="text-sm font-medium text-amber-900">{alert.message}</span>
                 </div>
-                <button className="text-xs font-medium text-amber-700 hover:text-amber-900">View All</button>
+                <button className="text-xs font-medium text-amber-700 hover:text-amber-900">
+                  View All
+                </button>
               </div>
-            )
+            );
           })}
         </div>
 
@@ -264,14 +280,16 @@ export default function Draft() {
               />
             </div>
           </div>
-          {["Case ID", "Status", "KYC Status", "Risk Level", "Date Range", "Officer"].map((filter) => (
-            <select
-              key={filter}
-              className="px-3 py-2 rounded-md border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            >
-              <option>{filter}</option>
-            </select>
-          ))}
+          {["Case ID", "Status", "KYC Status", "Risk Level", "Date Range", "Officer"].map(
+            (filter) => (
+              <select
+                key={filter}
+                className="px-3 py-2 rounded-md border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                <option>{filter}</option>
+              </select>
+            ),
+          )}
           <Button size="sm" variant="outline" className="h-10 w-10 p-0 bg-transparent">
             <Plus className="h-4 w-4" />
           </Button>
@@ -284,7 +302,6 @@ export default function Draft() {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-
               <ResizableTable columns={columns} data={queueData} />
             </div>
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
@@ -321,14 +338,11 @@ export default function Draft() {
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-
             </div>
-
           </CardContent>
         </Card>
         <div>
-          <div className=" bg-background">
-
+          <div className=" ">
             {/* Main Content */}
             <div className="pt-4">
               <div className="grid gap-12 lg:grid-cols-3">
@@ -341,7 +355,7 @@ export default function Draft() {
 
                   <div className="space-y-3">
                     {quickActions.map((action) => {
-                      const IconComponent = action.icon
+                      const IconComponent = action.icon;
                       return (
                         <button
                           key={action.id}
@@ -355,11 +369,13 @@ export default function Draft() {
                               <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                                 {action.title}
                               </p>
-                              <p className="text-xs text-muted-foreground mt-1">{action.description}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {action.description}
+                              </p>
                             </div>
                           </div>
                         </button>
-                      )
+                      );
                     })}
                   </div>
                 </div>
@@ -369,7 +385,9 @@ export default function Draft() {
                   <div className="mb-6 flex items-center justify-between">
                     <div>
                       <h2 className="text-lg font-semibold text-foreground">STR Templates</h2>
-                      <p className="text-sm text-muted-foreground mt-1">Pre-built templates for common scenarios</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Pre-built templates for common scenarios
+                      </p>
                     </div>
                     {/* <Button className="gap-2">
                       <Plus className="h-4 w-4" />
@@ -391,13 +409,17 @@ export default function Draft() {
                                 <CardTitle className="text-base group-hover:text-primary transition-colors">
                                   {template.name}
                                 </CardTitle>
-                                <p className="text-xs text-muted-foreground mt-1">{template.usage}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {template.usage}
+                                </p>
                               </div>
                             </div>
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-muted-foreground leading-relaxed">{template.description}</p>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {template.description}
+                          </p>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -415,11 +437,10 @@ export default function Draft() {
             </div>
           </div>
         </div>
-
       </div>
       <DetailView open={detailViewOpen} setOpen={setDetailViewOpen} />
     </div>
-  )
+  );
 }
 
 const CaseDetails = () => {
@@ -427,63 +448,68 @@ const CaseDetails = () => {
     { date: "2025-10-04", type: "Cash Deposit", branch: "Branch 045", amount: "$15,000" },
     { date: "2025-10-03", type: "Cash Deposit", branch: "ATM 112", amount: "$9,800" },
     { date: "2025-10-01", type: "Cash Deposit", branch: "Branch 045", amount: "$12,000" },
-  ]
+  ];
 
   const supportingDocs = [
     { name: "transaction_evidence.pdf", size: "2.4 MB" },
     { name: "kyc_documents.zip", size: "5.1 MB" },
-  ]
+  ];
   return (
     <div className="space-y-6">
-      <div className='grid grid-cols-3 gap-4'>
-        <CustomInput label='Draft ID' placeholder='Enter Draft ID' />
-        <CustomSelect label='Risk Level' placeholder='Select Risk Level' />
-        <CustomInput label='Customer Name'
-          placeholder='Enter Customer Name' />
-        <CustomSelect label='Suspicion Category' placeholder='Select Suspicion Category' />
-        <CustomInput label='ID Number' placeholder='Enter ID Number' />
-        <CustomInput label='Account Number' placeholder='Account Number ' />
-        <CustomInput label='Initial Detection Date *' type='date' placeholder='Select Date First Detected' />
-        <CustomSelect label='Assigned Officer' placeholder='Select Assigned Officer' />
-        <div className='col-span-3'>
-          <CustomInput label='Suspicion Reason *' type='textarea' placeholder='Multiple cash deposits just below reporting threshold. Unusual transaction pattern inconsistent with customer profile.' />
+      <div className="grid grid-cols-3 gap-4">
+        <CustomInput label="Draft ID" placeholder="Enter Draft ID" />
+        <CustomSelect label="Risk Level" placeholder="Select Risk Level" />
+        <CustomInput label="Customer Name" placeholder="Enter Customer Name" />
+        <CustomSelect label="Suspicion Category" placeholder="Select Suspicion Category" />
+        <CustomInput label="ID Number" placeholder="Enter ID Number" />
+        <CustomInput label="Account Number" placeholder="Account Number " />
+        <CustomInput
+          label="Initial Detection Date *"
+          type="date"
+          placeholder="Select Date First Detected"
+        />
+        <CustomSelect label="Assigned Officer" placeholder="Select Assigned Officer" />
+        <div className="col-span-3">
+          <CustomInput
+            label="Suspicion Reason *"
+            type="textarea"
+            placeholder="Multiple cash deposits just below reporting threshold. Unusual transaction pattern inconsistent with customer profile."
+          />
         </div>
       </div>
 
-      <div className='flex items-center justify-end gap-2'>
-        <Button variant='outline'>Save Draft</Button>
+      <div className="flex items-center justify-end gap-2">
+        <Button variant="outline">Save Draft</Button>
         <Button>Next</Button>
       </div>
-
     </div>
-  )
-}
+  );
+};
 
 const STRForm = () => {
   const data = [
     {
       date: "2025-10-04",
-      type: 'Cash Deposit',
+      type: "Cash Deposit",
       amount: 15000,
-      channel: 'Branch',
-      account: 'ACC-987654',
+      channel: "Branch",
+      account: "ACC-987654",
     },
     {
       date: "2025-10-03",
-      type: 'Cash Withdrawal',
+      type: "Cash Withdrawal",
       amount: 10000,
-      channel: 'Branch',
-      account: 'ACC-987654',
+      channel: "Branch",
+      account: "ACC-987654",
     },
     {
       date: "2025-10-02",
-      type: 'Cash Deposit',
+      type: "Cash Deposit",
       amount: 15000,
-      channel: 'Branch',
-      account: 'ACC-987654',
+      channel: "Branch",
+      account: "ACC-987654",
     },
-
-  ]
+  ];
   const columns = [
     {
       header: "Date",
@@ -505,33 +531,34 @@ const STRForm = () => {
       header: "Account",
       accessorKey: "account",
     },
-  ]
+  ];
   return (
     <div>
       <div className="space-y-8">
         <div className="border p-4 rounded-md space-y-8">
-          <h2 className=" font-semibold     flex items-center gap-2">
-
-            Reporting Entry Details</h2>
+          <h2 className=" font-semibold     flex items-center gap-2">Reporting Entry Details</h2>
           <div className="grid grid-cols-3 gap-4 mt-4">
             <CustomInput label="Financial Institution" placeholder="Enter Financial Institution" />
             <CustomInput label="Branch" placeholder="Enter Branch" />
             <CustomInput label="Reporting Officer" placeholder="Enter Reporting Officer" />
           </div>
         </div>
-        <div className="border p-4 rounded-md space-y-8"  >
-          <h2 className=" font-semibold flex items-center gap-2">
-
-            Transaction Details
-          </h2>
+        <div className="border p-4 rounded-md space-y-8">
+          <h2 className=" font-semibold flex items-center gap-2">Transaction Details</h2>
           <div className="grid grid-cols-3 gap-4 mt-4">
-            <CustomInput label='Total Amount Involved' placeholder="Enter Total Amount Involved" />
-            <CustomInput label='Date Range of Transactions' type="date" placeholder="Select Date First Detected" />
+            <CustomInput label="Total Amount Involved" placeholder="Enter Total Amount Involved" />
+            <CustomInput
+              label="Date Range of Transactions"
+              type="date"
+              placeholder="Select Date First Detected"
+            />
           </div>
         </div>
         <div className="border p-4 rounded-md">
           <h2 className=" font-semibold     flex items-center gap-2">
-            <span><IconHistory className="size-5" /></span>
+            <span>
+              <IconHistory className="size-5" />
+            </span>
             Transaction History
           </h2>
           <div>
@@ -540,22 +567,25 @@ const STRForm = () => {
         </div>
         <div className="space-y-2">
           <h2 className="font-semibold text-base">Narrative Description</h2>
-          <p className="leading-relaxed text-neutral-800">Customer Jon Deau, a business owner, has made multiple cash deposits over the past week totaling $37,300. Each transaction is just below the $15,000 reporting threshold, indicating potential structuring activity. This pattern is inconsistent with the customer&apos;s known business operations and declared income sources. The transactions were conducted at different branches and ATM’s, further raising suspicion of intentional avoidance of detection.</p>
+          <p className="leading-relaxed text-neutral-800">
+            Customer Jon Deau, a business owner, has made multiple cash deposits over the past week
+            totaling $37,300. Each transaction is just below the $15,000 reporting threshold,
+            indicating potential structuring activity. This pattern is inconsistent with the
+            customer&apos;s known business operations and declared income sources. The transactions
+            were conducted at different branches and ATM’s, further raising suspicion of intentional
+            avoidance of detection.
+          </p>
         </div>
 
-
-        <div className='flex items-center justify-end gap-2'>
-          <Button variant='outline'>Save Draft</Button>
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="outline">Save Draft</Button>
           <Button>Next</Button>
         </div>
-
       </div>
-      <div>
-
-      </div>
+      <div></div>
     </div>
-  )
-}
+  );
+};
 
 const Preview = () => {
   const caseDetails = {
@@ -563,14 +593,14 @@ const Preview = () => {
     customerName: "Md. Rahim",
     riskLevel: "High",
     suspicionCategory: "Structuring / Smurfing",
-  }
+  };
 
   const reportingDetails = {
     financialInstitution: "Prime Bank Ltd.",
     branch: "Gulshan Branch",
     reportingOfficer: "A. Hasan",
     submissionDate: "2025-10-10",
-  }
+  };
 
   const transactions = [
     {
@@ -597,12 +627,12 @@ const Preview = () => {
       channel: "Branch",
       account: "ACC-987654",
     },
-  ]
+  ];
 
   const attachments = [
     { id: 1, name: "transaction_evidence.pdf", size: "2.4 MB" },
     { id: 2, name: "kyc_documents.zip", size: "1.8 MB" },
-  ]
+  ];
   return (
     <div className="">
       {/* Header */}
@@ -610,10 +640,11 @@ const Preview = () => {
         <div className="">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">STR Preview</h1>
-                <p className="text-sm text-muted-foreground mt-1">Review and verify STR details before submission</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Review and verify STR details before submission
+                </p>
               </div>
             </div>
             {/* <Button className="gap-2">
@@ -636,15 +667,23 @@ const Preview = () => {
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">STR ID</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    STR ID
+                  </p>
                   <p className="text-sm font-semibold text-foreground mt-1">{caseDetails.strId}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Customer Name</p>
-                  <p className="text-sm font-semibold text-foreground mt-1">{caseDetails.customerName}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Customer Name
+                  </p>
+                  <p className="text-sm font-semibold text-foreground mt-1">
+                    {caseDetails.customerName}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Risk Level</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Risk Level
+                  </p>
                   <div className="mt-1">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive">
                       {caseDetails.riskLevel}
@@ -655,7 +694,9 @@ const Preview = () => {
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Suspicion Category
                   </p>
-                  <p className="text-sm font-semibold text-foreground mt-1">{caseDetails.suspicionCategory}</p>
+                  <p className="text-sm font-semibold text-foreground mt-1">
+                    {caseDetails.suspicionCategory}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -672,19 +713,33 @@ const Preview = () => {
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Financial Institution
                   </p>
-                  <p className="text-sm font-semibold text-foreground mt-1">{reportingDetails.financialInstitution}</p>
+                  <p className="text-sm font-semibold text-foreground mt-1">
+                    {reportingDetails.financialInstitution}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Branch</p>
-                  <p className="text-sm font-semibold text-foreground mt-1">{reportingDetails.branch}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Branch
+                  </p>
+                  <p className="text-sm font-semibold text-foreground mt-1">
+                    {reportingDetails.branch}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Reporting Officer</p>
-                  <p className="text-sm font-semibold text-foreground mt-1">{reportingDetails.reportingOfficer}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Reporting Officer
+                  </p>
+                  <p className="text-sm font-semibold text-foreground mt-1">
+                    {reportingDetails.reportingOfficer}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Submission Date</p>
-                  <p className="text-sm font-semibold text-foreground mt-1">{reportingDetails.submissionDate}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Submission Date
+                  </p>
+                  <p className="text-sm font-semibold text-foreground mt-1">
+                    {reportingDetails.submissionDate}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -710,7 +765,10 @@ const Preview = () => {
                 </thead>
                 <tbody>
                   {transactions.map((tx) => (
-                    <tr key={tx.id} className="border-b border-border hover:bg-muted/50 transition-colors">
+                    <tr
+                      key={tx.id}
+                      className="border-b border-border hover:bg-muted/50 transition-colors"
+                    >
                       <td className="py-3 px-4 text-muted-foreground">{tx.date}</td>
                       <td className="py-3 px-4 text-foreground">{tx.type}</td>
                       <td className="py-3 px-4 font-semibold text-foreground">{tx.amount}</td>
@@ -731,10 +789,11 @@ const Preview = () => {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Customer Md. Rahim, a business owner, has made multiple cash deposits over the past week totaling $28,700.
-              Each deposit is just below the $10,000 reporting threshold. Unusual transaction patterns inconsistent with
-              customer profile. The transactions appear to be structured to avoid reporting requirements. Multiple
-              deposits at different branches suggest deliberate structuring activity.
+              Customer Md. Rahim, a business owner, has made multiple cash deposits over the past
+              week totaling $28,700. Each deposit is just below the $10,000 reporting threshold.
+              Unusual transaction patterns inconsistent with customer profile. The transactions
+              appear to be structured to avoid reporting requirements. Multiple deposits at
+              different branches suggest deliberate structuring activity.
             </p>
           </CardContent>
         </Card>
@@ -768,10 +827,8 @@ const Preview = () => {
         </Card>
       </div>
     </div>
-  )
-}
-
-
+  );
+};
 
 const Attachments = () => {
   const documentTypes = [
@@ -779,19 +836,24 @@ const Attachments = () => {
     { label: "KYC Documents", value: "kyc_documents" },
     { label: "Account Statement", value: "account_statement" },
     { label: "Internal Report", value: "internal_report" },
-  ]
+  ];
   return (
     <div>
       <h2 className="font-semibold mb-6">Supporting Documents</h2>
 
-      <div className='flex items-center gap-4'>
-        <div className='space-y-4 w-[400px] shrink-0 border rounded-md p-4'>
-          <CustomSelect label='Document Type' placeholder='Select Document Type' options={documentTypes} />
-          <CustomInput label='Description' placeholder='Enter Description' type='textarea' />
-
+      <div className="flex items-center gap-4">
+        <div className="space-y-4 w-[400px] shrink-0 border rounded-md p-4">
+          <CustomSelect
+            label="Document Type"
+            placeholder="Select Document Type"
+            options={documentTypes}
+          />
+          <CustomInput label="Description" placeholder="Enter Description" type="textarea" />
         </div>
-        <div className='flex items-center justify-center gap-2 border-2
-        h-[180px] border-dashed w-full'>
+        <div
+          className="flex items-center justify-center gap-2 border-2
+        h-[180px] border-dashed w-full"
+        >
           <span>
             <IconFilePlus className="size-5" />
           </span>
@@ -801,32 +863,27 @@ const Attachments = () => {
         </div>
       </div>
 
-      <div className='flex items-center justify-end gap-2 mt-4'>
-        <Button variant='outline'>Save Draft</Button>
+      <div className="flex items-center justify-end gap-2 mt-4">
+        <Button variant="outline">Save Draft</Button>
         <Button>Next</Button>
       </div>
     </div>
-  )
-}
-
+  );
+};
 
 const DetailView = ({ open, setOpen }) => {
-  const [activeTab, setActiveTab] = useState("case-details")
+  const [activeTab, setActiveTab] = useState("case-details");
 
   const tabs = [
     { id: "case-details", label: "Case Details" },
     { id: "str-form", label: "STR Form" },
     { id: "attachments", label: "Attachments" },
     { id: "preview", label: "Preview" },
-  ]
-
-
+  ];
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className='sm:max-w-5xl w-full overflow-y-auto'>
-
-
+      <SheetContent className="sm:max-w-5xl w-full overflow-y-auto">
         <div className="min-h-screen bg-background">
           {/* Header */}
           <div className="border-b border-border bg-card sticky top-0 z-50">
@@ -844,10 +901,11 @@ const DetailView = ({ open, setOpen }) => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-1 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                      ? "border-primary text-foreground"
-                      : "border-transparent text-muted-foreground hover:text-foreground"
-                      }`}
+                    className={`px-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === tab.id
+                        ? "border-primary text-foreground"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    }`}
                   >
                     {tab.label}
                   </button>
@@ -858,21 +916,11 @@ const DetailView = ({ open, setOpen }) => {
 
           {/* Main Content */}
           <div className="mx-auto max-w-[1440px] px-8 py-8">
-            {activeTab === "case-details" && (
-              <CaseDetails />
-            )}
+            {activeTab === "case-details" && <CaseDetails />}
 
-            {activeTab === "str-form" && (
-              <STRForm />
-            )}
-            {
-              activeTab === "attachments" && (
-                <Attachments />
-              )
-            }
-            {activeTab === "preview" && (
-              <Preview />
-            )}
+            {activeTab === "str-form" && <STRForm />}
+            {activeTab === "attachments" && <Attachments />}
+            {activeTab === "preview" && <Preview />}
             {/* {activeTab === "audit-trail" && (
                 <AuditTrail />
               )} */}
@@ -880,5 +928,5 @@ const DetailView = ({ open, setOpen }) => {
         </div>
       </SheetContent>
     </Sheet>
-  )
-}
+  );
+};

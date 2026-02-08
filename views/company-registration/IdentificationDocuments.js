@@ -1,4 +1,5 @@
 "use client";
+import { fileUploadOnCloudinary } from "@/app/actions";
 import CustomSelect from "@/components/ui/CustomSelect";
 import CustomDropZone from "@/components/ui/DropZone";
 import React, { useState } from "react";
@@ -30,13 +31,71 @@ export default function IdentificationDocuments({ control }) {
     name: "company_details.document_type",
   });
 
-  const handleFrontChange = (file) => {
-    setFrontFile(file);
-    setFrontLoading(true);
+  const handleFrontChange = async (file) => {
+    try {
+      const response = await fileUploadOnCloudinary(file);
+      console.log("response", response);
+      if (response.success) {
+        setFrontError(false);
+        const existingFrontIndex = fields.findIndex((item) => item.type === "front");
+        if (existingFrontIndex !== -1) {
+          update(existingFrontIndex, {
+            ...fields[existingFrontIndex],
+            name: file.name,
+            url: response.file.publicUrl,
+            mimeType: file.type,
+          });
+        } else {
+          append({
+            name: file.name,
+            url: response.file.publicUrl,
+            mimeType: file.type,
+            type: "front",
+            docType: documentTypeValue?.value,
+          });
+        }
+      } else {
+        setFrontError(true);
+      }
+    } catch (error) {
+      console.error("Front change error", error);
+      setFrontError(true);
+    } finally {
+      setFrontLoading(false);
+    }
   };
-  const handleBackChange = (file) => {
-    setBackFile(file);
-    setBackLoading(true);
+  const handleBackChange = async (file) => {
+    try {
+      setBackLoading(true);
+      const response = await fileUploadOnCloudinary(file);
+      if (response.success) {
+        setBackError(false);
+        const existingBackIndex = fields.findIndex((item) => item.type === "back");
+        if (existingBackIndex !== -1) {
+          update(existingBackIndex, {
+            ...fields[existingBackIndex],
+            name: file.name,
+            url: response.file.publicUrl,
+            mimeType: file.type,
+          });
+        } else {
+          append({
+            name: file.name,
+            url: response.file.publicUrl,
+            mimeType: file.type,
+            type: "back",
+            docType: documentTypeValue?.value,
+          });
+        }
+      } else {
+        setBackError(true);
+      }
+    } catch (error) {
+      console.error("Back change error", error);
+      setBackError(true);
+    } finally {
+      setBackLoading(false);
+    }
   };
   return (
     <div className="border p-4 mt-8 rounded-lg">
@@ -67,8 +126,8 @@ export default function IdentificationDocuments({ control }) {
         </div>
         <div className="w-full">
           <CustomDropZone
-            handleChange={handleBackChange}
             disabled={!documentType}
+            handleChange={handleBackChange}
             loading={backLoading}
             url={fields.find((field) => field.type === "back")?.url}
             error={backError}

@@ -1,11 +1,17 @@
 import React, { Fragment } from "react";
 import { FormField } from "../customer-registration/common/FormField";
 import { countriesData } from "@/constants";
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
+import CustomDropZone from "@/components/ui/DropZone";
+import { useState } from "react";
+import { fileUploadOnCloudinary } from "@/app/actions";
 
 export default function GeneralForm({ form }) {
+  const [signatureLoading, setSignatureLoading] = useState(false);
+  const [signatureError, setSignatureError] = useState(false);
+  const signatureUrl = useWatch({ control: form.control, name: "declaration.signature" });
   const {
     fields: directorFields,
     append: appendDirector,
@@ -22,6 +28,23 @@ export default function GeneralForm({ form }) {
     control: form.control,
     name: "beneficial_owners",
   });
+  const handleSignatureChange = async (file) => {
+    try {
+      setSignatureError(false);
+      setSignatureLoading(true);
+      const response = await fileUploadOnCloudinary(file);
+      if (response.success) {
+        form.setValue("declaration.signature", response.file.publicUrl);
+      } else {
+        setSignatureError(true);
+      }
+    } catch (error) {
+      console.error("Signature change error", error);
+      setSignatureError(true);
+    } finally {
+      setSignatureLoading(false);
+    }
+  };
   return (
     <div className="  mt-8  space-y-4">
       {/* general information */}
@@ -439,7 +462,7 @@ export default function GeneralForm({ form }) {
         <div className="space-y-4">
           <FormField
             form={form}
-            name="declarations.declarations_accepted"
+            name="declaration.declarations_accepted"
             label="Declarations Accepted"
             type="checkbox"
             placeholder="Enter Declarations Accepted"
@@ -447,26 +470,31 @@ export default function GeneralForm({ form }) {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             <FormField
               form={form}
-              name="declarations.signatory_name"
+              name="declaration.signatory_name"
               label="Signatory Name"
               type="text"
               placeholder="Enter Signatory Name"
             />
             <FormField
               form={form}
-              name="declarations.date"
+              name="declaration.date"
               label="Date"
               type="date"
               placeholder="Enter Date"
             />
           </div>
-          <FormField
-            form={form}
-            name="declarations.signature"
-            label="Signature"
-            type="text"
-            placeholder="Enter Signature"
-          />
+          <CustomDropZone
+            handleChange={handleSignatureChange}
+            disabled={signatureLoading}
+            error={signatureError}
+            loading={signatureLoading}
+            url={signatureUrl}
+          >
+            <p className="font-bold">Signature</p>
+            <p className="text-sm text-muted-foreground">
+              Drag and drop your signature here or click to upload
+            </p>
+          </CustomDropZone>
         </div>
       </div>
     </div>
