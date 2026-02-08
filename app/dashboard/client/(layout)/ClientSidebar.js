@@ -120,23 +120,23 @@ export default function ClientSidebar({ ...props }) {
   ];
 
   const STRMenu = {
-    title: "STR Filing",
+    title: "UAR Filing",
     icon: IconChartBar,
     children: [
       {
-        title: "STR Review",
+        title: "UAR Review",
         url: "/dashboard/client/str-filling-report/review",
         icon: IconDatabase,
         current: true,
       },
       {
-        title: "STR Approval",
+        title: "UAR Approval",
         url: "/dashboard/client/str-filling-report/approval",
         icon: IconDatabase,
         current: true,
       },
       {
-        title: "Draft STR",
+        title: "Draft UAR",
         url: "/dashboard/client/str-filling-report/draft",
         icon: IconDatabase,
         current: true,
@@ -387,21 +387,21 @@ export default function ClientSidebar({ ...props }) {
     },
   ];
   const dueDiligenceMenu = [
+    // {
+    //   title: "Compliance Officer & GB",
+    //   icon: IconListDetails,
+    //   url: "/dashboard/client/due-diligence/compliance-officer-and-governing-body",
+    // },
     {
-      title: "Compliance Officer & GB",
-      icon: IconListDetails,
-      url: "/dashboard/client/due-diligence/compliance-officer-and-governing-body",
-    },
-    {
-      title: "Personnel",
+      title: "Personnel (PDD)",
       icon: IconListDetails,
       url: "/dashboard/client/due-diligence/personnel",
     },
-    {
-      title: "Compliance ",
-      icon: IconListDetails,
-      url: "/dashboard/client/due-diligence/compliance-officer",
-    },
+    // {
+    //   title: "Compliance ",
+    //   icon: IconListDetails,
+    //   url: "/dashboard/client/due-diligence/compliance-officer",
+    // },
   ];
   const cryptoMenu = [
     {
@@ -427,6 +427,25 @@ export default function ClientSidebar({ ...props }) {
       icon: ReceiptText,
     },
   ];
+  const grcModule = [
+    {
+      title: "GRC",
+      icon: IconListDetails,
+      // url: "/dashboard/client/grc-module",
+      children: [
+        {
+          title: "AML/CTF Dashboard",
+          url: "/dashboard/client/grc/aml-ctf-dashboard",
+          icon: IconDatabase,
+        },
+        {
+          title: "Forms Hub",
+          url: "/dashboard/client/grc/forms-hub",
+          icon: IconDatabase,
+        },
+      ],
+    },
+  ];
 
   return (
     <Sidebar collapsible="offcanvas" {...props} className={"border-0"}>
@@ -435,7 +454,7 @@ export default function ClientSidebar({ ...props }) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <div className="py-2  relative">
-                <div className="w-28 ">
+                <div className="w-20 ">
                   <img src="/logo.png" alt="Logo" className=" w-full h-8 object-contain " />
                 </div>
               </div>
@@ -471,7 +490,7 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
         <NavMain items={configurationMenuItems} label="Configuration" />
-        <NavMain items={testingAndGovernanceMenu} label="Testing & Governance" />
+        <NavMain items={grcModule} label="Testing & Governance" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
       </SidebarContent>

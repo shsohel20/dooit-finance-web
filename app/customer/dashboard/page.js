@@ -58,8 +58,7 @@ const VerificationFailed = () => {
   );
 };
 
-export const ProfileCard = () => {
-  const { loggedInUser } = useGetUser();
+export const ProfileCard = ({loggedInUser}) => {
   return (
     <div className="flex items-center gap-4 bg-brown flex-shrink-0 max-w-[400px] py-8 px-8 rounded-md">
       <div className="size-20 rounded-full bg-white text-white"></div>
@@ -72,6 +71,7 @@ export const ProfileCard = () => {
 };
 
 const Dashboard = () => {
+  const { loggedInUser } = useGetUser();
   //dummy verification promise
   const verificationPromise = new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -87,20 +87,20 @@ const Dashboard = () => {
       <div className="flex justify-between items-center">
         <div>
           <h4 className="text-2xl font-bold">Dashboard</h4>
-          <p>Welcome back, Sarah! Here&apos;s an overview of your KYC activities.</p>
+          <p>Welcome back, {loggedInUser?.name}! Here&apos;s an overview of your KYC activities.</p>
         </div>
         <div className="flex gap-4">
           <Button className={"w-[200px] bg-[#4ED7F1] text-black"}>Share KYC</Button>
-          <Link href="/customer/dashboard/application/new">
+          {/* <Link href="/customer/dashboard/application/new">
             <Button className={" bg-[#402E7A]"}>
               <Plus /> Start New Application
             </Button>
-          </Link>
+          </Link> */}
         </div>
       </div>
 
       <div className="mt-8 flex items-start gap-4">
-        <ProfileCard />
+        <ProfileCard loggedInUser={loggedInUser} />
         <div className="min-h-[500px] w-full border flex flex-col justify-center items-center">
           {/* <VerificationReview /> */}
           {/* <VerificationFailed /> */}

@@ -196,12 +196,12 @@ export default function ComplianceOfficerDueDiligenceForm() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 py-8">
+    <div className="min-h-screen  py-8">
       <div className="container  px-4">
         <Card className="border-none shadow-lg">
           <CardHeader className="bg-primary text-primary-foreground rounded-t-lg py-4">
             <CardTitle className="text-2xl">
-              Personnel Due Diligence for AML/CTF Compliance Officer
+              AML/CTF Compliance Officer
             </CardTitle>
             <CardDescription className="text-primary-foreground/80">
               Use this form to conduct personnel due diligence on and appoint an AML/CTF compliance

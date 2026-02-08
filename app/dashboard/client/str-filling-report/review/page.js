@@ -1,35 +1,66 @@
-"use client"
+"use client";
 
-import { Search, Plus, ChevronLeft, ChevronRight, TrendingUp, AlertCircle, Eye, Clock, CheckCircle2, Send, FileCheck } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import ResizableTable from "@/components/ui/Resizabletable"
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
-import { IconCalendarDollar, IconFile, IconFilePlus, IconHistory, IconSearch, IconUserQuestion } from "@tabler/icons-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Badge } from "@/components/ui/badge"
-import { useState } from "react"
-import CustomInput from "@/components/ui/CustomInput"
-import CustomSelect from "@/components/ui/CustomSelect"
+import {
+  Search,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp,
+  AlertCircle,
+  Eye,
+  Clock,
+  CheckCircle2,
+  Send,
+  FileCheck,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import ResizableTable from "@/components/ui/Resizabletable";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import {
+  IconCalendarDollar,
+  IconFile,
+  IconFilePlus,
+  IconHistory,
+  IconSearch,
+  IconUserQuestion,
+} from "@tabler/icons-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import CustomInput from "@/components/ui/CustomInput";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 export default function StrReviewPage() {
-  const [detailViewOpen, setDetailViewOpen] = useState(false)
+  const [detailViewOpen, setDetailViewOpen] = useState(false);
   // Sample data for charts
   const filingProgressData = [
     { name: "Pending Review", value: 8, total: 14 },
     { name: "Submitted", value: 14, total: 24 },
     { name: "Approved", value: 12, total: 24 },
     { name: "Returned", value: 2, total: 24 },
-  ]
+  ];
 
   const transactionTypeData = [
     { name: "Wire Transfer", value: 40 },
     { name: "Cash Transaction", value: 35 },
     { name: "Cryptocurrency", value: 18 },
     { name: "Other", value: 5 },
-  ]
+  ];
   const data = [
     {
       id: "ALT003",
@@ -58,7 +89,7 @@ export default function StrReviewPage() {
       date: "09-08-2025",
       status: "Returned",
     },
-  ]
+  ];
   const columns = [
     {
       header: "ID",
@@ -98,17 +129,19 @@ export default function StrReviewPage() {
         </Button>
       ),
     },
-  ]
+  ];
 
-  const chartColors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"]
+  const chartColors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen ">
       {/* Header */}
-      <div className="border-b border-border bg-card">
+      <div className="border-b border-border ">
         <div className="mx-auto max-w-[1440px] px-8 py-8">
-          <h1 className="text-3xl font-semibold tracking-tight">Suspicious Transaction Reports</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Monitor and manage STR filings and compliance status</p>
+          <h1 className="text-3xl font-semibold tracking-tight">Unusual Activity Reports</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Monitor and manage UAR filings and compliance status
+          </p>
         </div>
       </div>
 
@@ -119,7 +152,7 @@ export default function StrReviewPage() {
           <Card className="border shadow-sm">
             <CardContent className="pt-6">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Total STRs Filed</p>
+                <p className="text-sm font-medium text-muted-foreground">Total UARs Filed</p>
                 <p className="text-3xl font-semibold tracking-tight">128</p>
                 <div className="flex items-center gap-1 text-xs text-success mt-2">
                   <TrendingUp className="h-3 w-3" />
@@ -169,10 +202,10 @@ export default function StrReviewPage() {
 
         {/* Filters and Search */}
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className='flex items-center gap-2 mb-4'>
-            <InputGroup className={'max-w-64'}>
+          <div className="flex items-center gap-2 mb-4">
+            <InputGroup className={"max-w-64"}>
               <InputGroupInput placeholder="Search..." />
-              <InputGroupAddon >
+              <InputGroupAddon>
                 <IconSearch />
               </InputGroupAddon>
             </InputGroup>
@@ -229,13 +262,23 @@ export default function StrReviewPage() {
               </Button>
               <div className="flex gap-1">
                 {[1, 2, 3].map((page) => (
-                  <Button key={page} size="sm" variant={page === 1 ? "default" : "outline"} className="h-8 w-8 p-0">
+                  <Button
+                    key={page}
+                    size="sm"
+                    variant={page === 1 ? "default" : "outline"}
+                    className="h-8 w-8 p-0"
+                  >
                     {page}
                   </Button>
                 ))}
                 <span className="px-2 text-xs text-muted-foreground">...</span>
                 {[67, 68].map((page) => (
-                  <Button key={page} size="sm" variant="outline" className="h-8 w-8 p-0 bg-transparent">
+                  <Button
+                    key={page}
+                    size="sm"
+                    variant="outline"
+                    className="h-8 w-8 p-0 bg-transparent"
+                  >
                     {page}
                   </Button>
                 ))}
@@ -253,13 +296,17 @@ export default function StrReviewPage() {
           {/* STR Filing Progress */}
           <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-lg">STR Filing Progress</CardTitle>
+              <CardTitle className="text-lg">UAR Filing Progress</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={filingProgressData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" stroke="var(--muted-foreground)" style={{ fontSize: "12px" }} />
+                  <XAxis
+                    type="number"
+                    stroke="var(--muted-foreground)"
+                    style={{ fontSize: "12px" }}
+                  />
                   <YAxis
                     dataKey="name"
                     type="category"
@@ -284,13 +331,17 @@ export default function StrReviewPage() {
           {/* STRs by Transaction Type */}
           <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-lg">STRs by Transaction Type</CardTitle>
+              <CardTitle className="text-lg">UARs by Transaction Type</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={transactionTypeData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" stroke="var(--muted-foreground)" style={{ fontSize: "12px" }} />
+                  <XAxis
+                    type="number"
+                    stroke="var(--muted-foreground)"
+                    style={{ fontSize: "12px" }}
+                  />
                   <YAxis
                     dataKey="name"
                     type="category"
@@ -315,10 +366,8 @@ export default function StrReviewPage() {
       </div>
       <DetailViewModal open={detailViewOpen} setOpen={setDetailViewOpen} />
     </div>
-  )
+  );
 }
-
-
 
 const CaseDetails = () => {
   return (
@@ -356,7 +405,9 @@ const CaseDetails = () => {
               </div>
               <div className="flex justify-between items-start pt-2 border-t border-border">
                 <span className="text-sm text-muted-foreground">Risk Level</span>
-                <Badge className="bg-destructive/10 text-destructive border-destructive/20">High</Badge>
+                <Badge className="bg-destructive/10 text-destructive border-destructive/20">
+                  High
+                </Badge>
               </div>
             </div>
           </CardContent>
@@ -398,40 +449,39 @@ const CaseDetails = () => {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-foreground leading-relaxed">
-            Multiple cash deposits just below reporting threshold. Unusual transaction patterns inconsistent with
-            customer profile.
+            Multiple cash deposits just below reporting threshold. Unusual transaction patterns
+            inconsistent with customer profile.
           </p>
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
 
 const STRForm = () => {
   const data = [
     {
       date: "2025-10-04",
-      type: 'Cash Deposit',
+      type: "Cash Deposit",
       amount: 15000,
-      channel: 'Branch',
-      account: 'ACC-987654',
+      channel: "Branch",
+      account: "ACC-987654",
     },
     {
       date: "2025-10-03",
-      type: 'Cash Withdrawal',
+      type: "Cash Withdrawal",
       amount: 10000,
-      channel: 'Branch',
-      account: 'ACC-987654',
+      channel: "Branch",
+      account: "ACC-987654",
     },
     {
       date: "2025-10-02",
-      type: 'Cash Deposit',
+      type: "Cash Deposit",
       amount: 15000,
-      channel: 'Branch',
-      account: 'ACC-987654',
+      channel: "Branch",
+      account: "ACC-987654",
     },
-
-  ]
+  ];
   const columns = [
     {
       header: "Date",
@@ -453,14 +503,17 @@ const STRForm = () => {
       header: "Account",
       accessorKey: "account",
     },
-  ]
+  ];
   return (
     <div>
       <div className="space-y-8">
         <div className="border p-4 rounded-md">
           <h2 className="text-base font-semibold     flex items-center gap-2">
-            <span><IconCalendarDollar className="size-5" /></span>
-            Financial Institution</h2>
+            <span>
+              <IconCalendarDollar className="size-5" />
+            </span>
+            Financial Institution
+          </h2>
           <div className="grid grid-cols-3 gap-4 mt-4">
             <CustomInput label="Financial Institution" placeholder="Enter Financial Institution" />
             <CustomInput label="Branch" placeholder="Enter Branch" />
@@ -469,17 +522,25 @@ const STRForm = () => {
         </div>
         <div className="border p-4 rounded-md">
           <h2 className="text-base font-semibold     flex items-center gap-2">
-            <span><IconUserQuestion className="size-5" /></span>
+            <span>
+              <IconUserQuestion className="size-5" />
+            </span>
             Suspicion Details
           </h2>
           <div className="grid grid-cols-3 gap-4 mt-4">
-            <CustomSelect label='Suspicion Category' placeholder="Select Suspicion Category" />
-            <CustomInput label='Date First Detected' type="date" placeholder="Select Date First Detected" />
+            <CustomSelect label="Suspicion Category" placeholder="Select Suspicion Category" />
+            <CustomInput
+              label="Date First Detected"
+              type="date"
+              placeholder="Select Date First Detected"
+            />
           </div>
         </div>
         <div className=" border p-4 rounded-md">
           <h2 className="text-base font-semibold     flex items-center gap-2">
-            <span><IconHistory className="size-5" /></span>
+            <span>
+              <IconHistory className="size-5" />
+            </span>
             Transaction History
           </h2>
           <div>
@@ -488,35 +549,48 @@ const STRForm = () => {
         </div>
         <div className="space-y-2">
           <h2 className="font-semibold text-base">STR Summary</h2>
-          <p className="leading-relaxed text-neutral-800">During a routine transaction monitoring review, multiple high-value inward remittances totaling USD 120,000 were identified in the account of Mr. Admin Core, a local freelancer, within a span of five days. The account history shows low monthly activity averaging USD 1,000. The remittances originated from three unrelated overseas entities without clear business justification. </p>
+          <p className="leading-relaxed text-neutral-800">
+            During a routine transaction monitoring review, multiple high-value inward remittances
+            totaling USD 120,000 were identified in the account of Mr. Admin Core, a local
+            freelancer, within a span of five days. The account history shows low monthly activity
+            averaging USD 1,000. The remittances originated from three unrelated overseas entities
+            without clear business justification.{" "}
+          </p>
         </div>
         <div className="space-y-2">
           <h2 className="font-semibold text-base">Narrative Description</h2>
-          <p className="leading-relaxed text-neutral-800">Customer Jon Deau, a business owner, has made multiple cash deposits over the past week totaling $37,300. Each transaction is just below the $15,000 reporting threshold, indicating potential structuring activity. This pattern is inconsistent with the customer&apos;s known business operations and declared income sources. The transactions were conducted at different branches and ATM’s, further raising suspicion of intentional avoidance of detection.</p>
+          <p className="leading-relaxed text-neutral-800">
+            Customer Jon Deau, a business owner, has made multiple cash deposits over the past week
+            totaling $37,300. Each transaction is just below the $15,000 reporting threshold,
+            indicating potential structuring activity. This pattern is inconsistent with the
+            customer&apos;s known business operations and declared income sources. The transactions
+            were conducted at different branches and ATM’s, further raising suspicion of intentional
+            avoidance of detection.
+          </p>
         </div>
         <div className="space-y-2">
           <h2 className="font-semibold text-base">Attachments</h2>
           <div className="flex flex-col items-center justify-center gap-2 h-[100px] border-2 border-dashed  rounded-lg p-2">
-            <span><IconFilePlus className="size-5" /></span>
-            <span className="text-sm text-muted-foreground">Upload a file or drag and drop a PNG, JPG, or PDF up to 10MB</span>
+            <span>
+              <IconFilePlus className="size-5" />
+            </span>
+            <span className="text-sm text-muted-foreground">
+              Upload a file or drag and drop a PNG, JPG, or PDF up to 10MB
+            </span>
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-2">
-          <Button variant='outline'>Save draft</Button>
+          <Button variant="outline">Save draft</Button>
           <Button>Submit To FIU</Button>
         </div>
-
       </div>
-      <div>
-
-      </div>
+      <div></div>
     </div>
-  )
-}
+  );
+};
 
 const AuditTrail = () => {
-
   const auditEvents = [
     {
       id: 1,
@@ -550,20 +624,22 @@ const AuditTrail = () => {
       icon: FileCheck,
       status: "completed",
     },
-  ]
+  ];
 
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-2">STR Audit Trail</h2>
-        <p className="text-sm text-muted-foreground">Complete history of all actions and status updates</p>
+        <p className="text-sm text-muted-foreground">
+          Complete history of all actions and status updates
+        </p>
       </div>
 
       {/* Timeline */}
       <div className="space-y-6">
         {auditEvents.map((event, index) => {
-          const IconComponent = event.icon
-          const isLast = index === auditEvents.length - 1
+          const IconComponent = event.icon;
+          const isLast = index === auditEvents.length - 1;
 
           return (
             <div key={event.id} className="flex gap-6">
@@ -572,7 +648,9 @@ const AuditTrail = () => {
                 <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 border border-primary/20 mb-4">
                   <IconComponent className="w-5 h-5 text-primary" />
                 </div>
-                {!isLast && <div className="w-0.5 h-16 bg-gradient-to-b from-primary/30 to-primary/10" />}
+                {!isLast && (
+                  <div className="w-0.5 h-16 bg-gradient-to-b from-primary/30 to-primary/10" />
+                )}
               </div>
 
               {/* Event Content */}
@@ -597,33 +675,30 @@ const AuditTrail = () => {
                       </p>
                     )}
 
-                    {event.description && <p className="text-sm text-muted-foreground mt-2">{event.description}</p>}
+                    {event.description && (
+                      <p className="text-sm text-muted-foreground mt-2">{event.description}</p>
+                    )}
                   </CardContent>
                 </Card>
               </div>
             </div>
-          )
+          );
         })}
       </div>
-
-
     </div>
-  )
-
-
-}
+  );
+};
 const tabs = [
   { id: "details", label: "Case Details", component: <CaseDetails /> },
   { id: "form", label: "STR Form", component: <STRForm /> },
   { id: "audit", label: "Audit Trail", component: <AuditTrail /> },
-]
+];
 export const DetailViewModal = ({ open, setOpen }) => {
-  const [activeTab, setActiveTab] = useState(tabs[0])
-
+  const [activeTab, setActiveTab] = useState(tabs[0]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className='sm:max-w-5xl w-full overflow-y-auto'>
+      <SheetContent className="sm:max-w-5xl w-full overflow-y-auto">
         <SheetHeader>
           <SheetTitle>STR Filing Workflow</SheetTitle>
         </SheetHeader>
@@ -637,9 +712,10 @@ export const DetailViewModal = ({ open, setOpen }) => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab)}
                     className={`pb-3 px-1 text-sm font-medium transition-colors
-                      ${activeTab.id === tab.id
-                        ? "text-foreground border-b-2 border-primary"
-                        : "text-muted-foreground hover:text-foreground"
+                      ${
+                        activeTab.id === tab.id
+                          ? "text-foreground border-b-2 border-primary"
+                          : "text-muted-foreground hover:text-foreground"
                       }
                   `}
                   >
@@ -651,11 +727,9 @@ export const DetailViewModal = ({ open, setOpen }) => {
           </div>
 
           {/* Main Content */}
-          <div className="px-8 py-2">
-            {activeTab.component}
-          </div>
+          <div className="px-8 py-2">{activeTab.component}</div>
         </div>
       </SheetContent>
     </Sheet>
-  )
-}
+  );
+};

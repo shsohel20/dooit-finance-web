@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 const Select = dynamic(
-  () => import("react-select"),
+  () => import('react-select'),
   { ssr: false } // This line is crucial
 );
-import { Label } from "./label";
-import { cn } from "@/lib/utils";
-import dynamic from "next/dynamic";
+import { Label } from './label';
+import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
 export const selectThemeColors = (theme) => ({
   ...theme,
   colors: {
     ...theme.colors,
-    primary25: "var(--accent)", // for option hover bg-color
-    primary: "var(--primary)", // for selected option bg-color
-    neutral10: "var(--primary)", // for tags bg-color
-    neutral20: "var(--border)", // for input border-color
-    neutral30: "var(--border)", // for input hover border-color
+    primary25: 'var(--accent)', // for option hover bg-color
+    primary: 'var(--primary)', // for selected option bg-color
+    neutral10: 'var(--primary)', // for tags bg-color
+    neutral20: 'var(--border)', // for input border-color
+    neutral30: 'var(--border)', // for input hover border-color
   },
 });
 
@@ -28,9 +28,9 @@ const CustomSelect = ({ label, error, ...props }) => {
         aria-invalid={error ? true : false}
         classNamePrefix="react-select"
         className={cn(
-          "dropdown-select border border-transparent !rounded-lg     transition-colors",
+          'dropdown-select border border-transparent !rounded-lg     transition-colors',
           {
-            "border-red-500": error,
+            'border-red-500': error,
           }
         )}
         // menuPortalTarget={document.body}
@@ -38,7 +38,7 @@ const CustomSelect = ({ label, error, ...props }) => {
         styles={{
           menuPortal: (base) => ({
             ...base,
-            zIndex: "9999",
+            zIndex: '9999999',
           }),
         }}
         theme={selectThemeColors}

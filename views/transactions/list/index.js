@@ -48,8 +48,9 @@ import TransactionDashboard from "./Dashboard";
 import CustomPagination from "@/components/CustomPagination";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), { ssr: false });
-
+const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
+  ssr: false,
+});
 
 const TransactionListView = () => {
   const [openDetailView, setOpenDetailView] = useState(false);
@@ -81,7 +82,6 @@ const TransactionListView = () => {
     setCurrentItemReport(item);
     setViewReport(true);
   };
-
 
   const statusVariants = {
     pending: "info",
@@ -135,7 +135,7 @@ const TransactionListView = () => {
       cell: ({ row }) => {
         return (
           <div>
-            <p className=" font-mono text-muted-foreground">#{row.original?.uid}</p>
+            <p className=" font-mono text-muted-foreground text-sm">#{row.original?.uid}</p>
           </div>
         );
       },
@@ -149,14 +149,14 @@ const TransactionListView = () => {
         return (
           <div className="flex gap-2 items-center ">
             <div>
-              <h4 className=" font-semibold capitalize">{row.original?.sender?.name}</h4>
+              <h4 className=" font-semibold capitalize  text-sm">{row.original?.sender?.name}</h4>
               <p className="text-muted-foreground text-md">{row.original?.sender?.account}</p>
             </div>
             <div>
               <ArrowRight className="size-4 text-green-500" />
             </div>
             <div>
-              <h4 className=" font-semibold capitalize">{row.original?.receiver?.name}</h4>
+              <h4 className=" font-semibold capitalize  text-sm">{row.original?.receiver?.name}</h4>
               <p className="text-muted-foreground ">{row.original?.receiver?.account}</p>
             </div>
           </div>
@@ -184,7 +184,7 @@ const TransactionListView = () => {
       cell: ({ row }) => {
         return (
           <div>
-            <h4 className="text-heading font-semibold">{row.original?.beneficiary?.name}</h4>
+            <h4 className=" text-neutral-600 text-sm">{row.original?.beneficiary?.name}</h4>
             <p className="text-neutral-500 ">{row.original?.beneficiary?.account}</p>
           </div>
         );
@@ -255,7 +255,9 @@ const TransactionListView = () => {
             <p className="text-muted-foreground font-semibold">
               {formatDateTime(row.original?.timeStamp)?.date}
             </p>
-            <p className="text-secondary-heading ">{formatDateTime(row.original?.timeStamp)?.time}</p>
+            <p className="text-secondary-heading ">
+              {formatDateTime(row.original?.timeStamp)?.time}
+            </p>
           </div>
         );
       },
@@ -329,7 +331,7 @@ const TransactionListView = () => {
               <SelectValue placeholder="Date Range" />
             </SelectTrigger>
           </Select>
-          <Select >
+          <Select>
             <SelectTrigger>
               <SelectValue placeholder="Select a country" />
             </SelectTrigger>
@@ -347,15 +349,15 @@ const TransactionListView = () => {
           <ButtonGroup>
             <Button
               variant="outline"
-            // onClick={() => setView('grid')}
-            // variant={view === 'grid' ? 'default' : 'outline'}
+              // onClick={() => setView('grid')}
+              // variant={view === 'grid' ? 'default' : 'outline'}
             >
               <IconGridDots />
             </Button>
             <Button
               variant="outline"
-            // variant={view === 'list' ? 'default' : 'outline'}
-            // onClick={() => setView('list')}
+              // variant={view === 'list' ? 'default' : 'outline'}
+              // onClick={() => setView('list')}
             >
               <IconList />
             </Button>

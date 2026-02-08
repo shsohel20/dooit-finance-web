@@ -40,7 +40,7 @@ function formatDate(dateString) {
   if (!month) return ""; // invalid month
 
   const formattedDate = `${year}-${month}-${day.padStart(2, "0")}`;
-  console.log("formattedDate", formattedDate);
+  // console.log("formattedDate", formattedDate);
   return formattedDate;
 }
 
@@ -73,7 +73,6 @@ const IdentificationDocuments = ({
   const [backLoading, setBackLoading] = useState(false);
   const [backError, setBackError] = useState(false);
   const [userFrontImage, setUserFrontImage] = useState(null);
-  const [isVerifying, setIsVerifying] = useState(false);
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "documents",
@@ -102,7 +101,7 @@ const IdentificationDocuments = ({
     setFrontLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
-      console.log("front img response", response);
+      // console.log("front img response", response);
       if (response.success) {
         setFrontError(false);
         const existingFrontIndex = fields.findIndex((item) => item.type === "front");
@@ -137,7 +136,7 @@ const IdentificationDocuments = ({
     setBackLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
-      console.log("response", response);
+      // console.log("response", response);
       if (response.success) {
         setBackError(false);
         const existingBackIndex = fields.findIndex((item) => item.type === "back");

@@ -7,20 +7,16 @@
 @import "tw-animate-css";
 
 /* @font-face {
-  font-family: "font-1";
-  src: url("/assets/fonts/font-2.woff2") format("woff2");
+  font-family: "font-sf-pro-bold";
+  src: url("/assets/fonts/SFPRODISPLAYBOLD.woff2") format("woff2");
 }
 @font-face {
-  font-family: font-2;
-  src: url("/assets/fonts/font-2.woff2");
+  font-family: "font-sf-pro-regular";
+  src: url("/assets/fonts/SFPRODISPLAYREGULAR.woff2") format("woff2");
 }
 @font-face {
-  font-family: font-3;
-  src: url("/assets/fonts/font-3.woff2");
-}
-@font-face {
-  font-family: "font-4";
-  src: url("/assets/fonts/tiktok_only.woff2") format("woff2");
+  font-family: "font-sf-pro-medium";
+  src: url("/assets/fonts/SFPRODISPLAYMEDIUM.woff2") format("woff2");
 } */
 
 @custom-variant dark (&:is(.dark *));
@@ -177,9 +173,10 @@
 }
 
 body {
-  font-size: 0.9rem;
-  background: var(--body);
+  font-size: 0.8rem;
+  background: #fefefe;
   color: var(--smoke-700);
+  /* font-family: "font-sf-pro-regular", sans-serif; */
 }
 .container {
   width: min(90%, 1280px);
@@ -315,17 +312,24 @@ button[data-lit="true"]:before {
   z-index: -1;
   animation: shimmer 2s ease-in-out infinite alternate;
 }
+
+/* div[data-slot="sidebar-content"] {
+  display: none;
+} */
 div[data-slot="sidebar-content"] {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-color: var(--color-gray-300) transparent;
+  /* -ms-overflow-style: none; */
 }
 /* change scrollbar color for body */
-/* body::-webkit-scrollbar {
+body::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
-  background: var(--smoke-600);
+  /* height: 8px; */
+  background: var(--color-gray-300);
   border-radius: 10px;
-} */
+}
+.css-1nmdiq5-menu {
+  z-index: 9999999 !important;
+}
 
 @keyframes shimmer {
   0% {

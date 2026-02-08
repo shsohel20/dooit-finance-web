@@ -3,9 +3,9 @@ import React from 'react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useState } from 'react'
-import PersonnelDueDiligenceForm from './index'
-import ComplianceOfficerDueDiligenceForm from '../compliance-officer'
-import ComplianceOfficerAndGoverningBodyDueDiligenceForm from '../compliance-officer-and-governing-body'
+import PersonnelDueDiligenceForm from './personnel/page'
+import ComplianceDueDiligenceForm from './compliance-officer'
+import ComplianceOfficerAndGoverningBodyDueDiligenceForm from './compliance-officer-and-governing-body'
 function DueDiligencePage() {
     const [dueDiligenceType, setDueDiligenceType] = useState('personnel')
   return (
@@ -31,9 +31,8 @@ function DueDiligencePage() {
         </div>
         <div>
             {dueDiligenceType === 'personnel' && <PersonnelDueDiligenceForm />}
-            {dueDiligenceType === 'compliance' && <ComplianceOfficerDueDiligenceForm />}
-            {dueDiligenceType === 'compliance-officer-and-governing-body' && 
-            <ComplianceOfficerAndGoverningBodyDueDiligenceForm/>}
+            {dueDiligenceType === 'compliance' && <ComplianceDueDiligenceForm />}
+            {dueDiligenceType === 'compliance-officer-and-governing-body' && <ComplianceOfficerAndGoverningBodyDueDiligenceForm />}
         </div>
        </div>
     </div>

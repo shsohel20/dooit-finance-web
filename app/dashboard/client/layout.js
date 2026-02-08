@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import ClientSidebar from "./(layout)/ClientSidebar";
 import { SiteHeader } from "@/components/site-header";
@@ -7,7 +7,7 @@ import RealEstateDashboardHeader from "@/views/real-estate/DashboardHeader";
 
 export default function ClientLayout({ children }) {
   const { loggedInUser } = useGetUser();
-  console.log('loggedInUser', loggedInUser);
+
   const clientType = loggedInUser?.client?.clientType;
   const isRealState = clientType === "Real Estate";
   const isFinancial = clientType === "Financial";
@@ -22,7 +22,7 @@ export default function ClientLayout({ children }) {
       <SidebarInset>
         {/* {isRealState && <RealEstateDashboardHeader />} */}
         <SiteHeader />
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col ">
           <div className="@container/main flex flex-1 flex-col gap-2  ">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-8 px-8 bg-[#fefefe] rounded-xl  mr-4 shadow-sm">
               {children}
@@ -31,5 +31,5 @@ export default function ClientLayout({ children }) {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

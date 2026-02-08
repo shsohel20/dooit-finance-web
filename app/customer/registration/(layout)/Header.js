@@ -13,7 +13,7 @@ import React from "react";
 
 const Header = () => {
   const { loggedInUser } = useGetUser();
-  console.log("loggedInUser", loggedInUser);
+
   const logout = async () => {
     signOut({
       // redirect: true,

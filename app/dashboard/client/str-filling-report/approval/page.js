@@ -1,17 +1,34 @@
-'use client'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import React, { useState } from 'react'
-import { AlertCircle, Clock, Plus, Search, ChevronLeft, ChevronRight, Eye, FileText, Download, MessageSquare, CheckCircle2 } from "lucide-react"
-import ResizableTable from '@/components/ui/Resizabletable'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
-import { IconCalendarDollar, IconFilePlus, IconHistory, IconUserQuestion } from '@tabler/icons-react'
-import CustomInput from '@/components/ui/CustomInput'
-import CustomSelect from '@/components/ui/CustomSelect'
+"use client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
+import {
+  AlertCircle,
+  Clock,
+  Plus,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  FileText,
+  Download,
+  MessageSquare,
+  CheckCircle2,
+} from "lucide-react";
+import ResizableTable from "@/components/ui/Resizabletable";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  IconCalendarDollar,
+  IconFilePlus,
+  IconHistory,
+  IconUserQuestion,
+} from "@tabler/icons-react";
+import CustomInput from "@/components/ui/CustomInput";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 export default function Approve() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [detailViewOpen, setDetailViewOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [detailViewOpen, setDetailViewOpen] = useState(false);
   const alerts = [
     {
       id: 1,
@@ -25,14 +42,14 @@ export default function Approve() {
       message: "1 STR converted for clarification",
       type: "warning",
     },
-  ]
+  ];
 
   const metrics = [
     { label: "Awaiting for Review", value: "128", color: "text-blue-600" },
     { label: "Pending Review", value: "15", color: "text-amber-600" },
     { label: "Approved / Filed", value: "102", color: "text-teal-600" },
     { label: "Returned / Rejected", value: "11", color: "text-red-600" },
-  ]
+  ];
 
   const queueData = [
     {
@@ -68,7 +85,7 @@ export default function Approve() {
       status: "Awaiting Approval",
       statusColor: "bg-amber-100 text-amber-700",
     },
-  ]
+  ];
 
   const recentActions = [
     {
@@ -85,7 +102,7 @@ export default function Approve() {
       recommendation: "Recommended for Escalation",
       color: "bg-red-100 text-red-700",
     },
-  ]
+  ];
 
   const columns = [
     {
@@ -137,12 +154,12 @@ export default function Approve() {
           <Eye className="h-4 w-4" />
         </Button>
       ),
-    }
-  ]
+    },
+  ];
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen ">
       {/* Header */}
-      <div className="border-b border-border bg-card sticky top-0 z-50">
+      <div className="border-b border-border  sticky top-0 z-50">
         <div className="mx-auto max-w-[1440px] px-8 py-6">
           <h1 className="text-2xl font-semibold tracking-tight">Request for Information</h1>
         </div>
@@ -153,7 +170,7 @@ export default function Approve() {
         {/* Alert Notifications */}
         <div className="space-y-3">
           {alerts.map((alert) => {
-            const Icon = alert.icon
+            const Icon = alert.icon;
             return (
               <div
                 key={alert.id}
@@ -163,9 +180,11 @@ export default function Approve() {
                   <Icon className="h-5 w-5 text-amber-600" />
                   <span className="text-sm font-medium text-amber-900">{alert.message}</span>
                 </div>
-                <button className="text-xs font-medium text-amber-700 hover:text-amber-900">View All</button>
+                <button className="text-xs font-medium text-amber-700 hover:text-amber-900">
+                  View All
+                </button>
               </div>
-            )
+            );
           })}
         </div>
 
@@ -195,14 +214,16 @@ export default function Approve() {
               />
             </div>
           </div>
-          {["Case ID", "Status", "KYC Status", "Risk Level", "Date Range", "Officer"].map((filter) => (
-            <select
-              key={filter}
-              className="px-3 py-2 rounded-md border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            >
-              <option>{filter}</option>
-            </select>
-          ))}
+          {["Case ID", "Status", "KYC Status", "Risk Level", "Date Range", "Officer"].map(
+            (filter) => (
+              <select
+                key={filter}
+                className="px-3 py-2 rounded-md border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                <option>{filter}</option>
+              </select>
+            ),
+          )}
           <Button size="sm" variant="outline" className="h-10 w-10 p-0 bg-transparent">
             <Plus className="h-4 w-4" />
           </Button>
@@ -215,7 +236,6 @@ export default function Approve() {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-
               <ResizableTable columns={columns} data={queueData} />
             </div>
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
@@ -268,7 +288,9 @@ export default function Approve() {
                       <p className="font-semibold text-foreground">{action.caseNumber}</p>
                       <p className="text-sm text-muted-foreground mt-1">{action.description}</p>
                     </div>
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${action.color}`}>
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${action.color}`}
+                    >
                       {action.recommendation}
                     </span>
                   </div>
@@ -280,7 +302,7 @@ export default function Approve() {
       </div>
       <DetailView open={detailViewOpen} setOpen={setDetailViewOpen} />
     </div>
-  )
+  );
 }
 
 const CaseDetails = () => {
@@ -288,17 +310,19 @@ const CaseDetails = () => {
     { date: "2025-10-04", type: "Cash Deposit", branch: "Branch 045", amount: "$15,000" },
     { date: "2025-10-03", type: "Cash Deposit", branch: "ATM 112", amount: "$9,800" },
     { date: "2025-10-01", type: "Cash Deposit", branch: "Branch 045", amount: "$12,000" },
-  ]
+  ];
 
   const supportingDocs = [
     { name: "transaction_evidence.pdf", size: "2.4 MB" },
     { name: "kyc_documents.zip", size: "5.1 MB" },
-  ]
+  ];
   return (
     <div className="space-y-6">
       {/* Case ID */}
       <div>
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Case ID</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          Case ID
+        </p>
         <p className="text-lg font-semibold text-foreground">CASE-2025-00124</p>
       </div>
 
@@ -355,8 +379,8 @@ const CaseDetails = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-foreground leading-relaxed">
-                Multiple cash deposits just below reporting threshold. Unusual transaction patterns inconsistent
-                with customer profile.
+                Multiple cash deposits just below reporting threshold. Unusual transaction patterns
+                inconsistent with customer profile.
               </p>
             </CardContent>
           </Card>
@@ -406,7 +430,9 @@ const CaseDetails = () => {
                         <p className="text-sm font-medium text-foreground">{tx.type}</p>
                         <p className="text-xs text-muted-foreground mt-1">{tx.branch}</p>
                       </div>
-                      <p className="text-sm font-semibold text-foreground whitespace-nowrap">{tx.amount}</p>
+                      <p className="text-sm font-semibold text-foreground whitespace-nowrap">
+                        {tx.amount}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -416,34 +442,33 @@ const CaseDetails = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const STRForm = () => {
   const data = [
     {
       date: "2025-10-04",
-      type: 'Cash Deposit',
+      type: "Cash Deposit",
       amount: 15000,
-      channel: 'Branch',
-      account: 'ACC-987654',
+      channel: "Branch",
+      account: "ACC-987654",
     },
     {
       date: "2025-10-03",
-      type: 'Cash Withdrawal',
+      type: "Cash Withdrawal",
       amount: 10000,
-      channel: 'Branch',
-      account: 'ACC-987654',
+      channel: "Branch",
+      account: "ACC-987654",
     },
     {
       date: "2025-10-02",
-      type: 'Cash Deposit',
+      type: "Cash Deposit",
       amount: 15000,
-      channel: 'Branch',
-      account: 'ACC-987654',
+      channel: "Branch",
+      account: "ACC-987654",
     },
-
-  ]
+  ];
   const columns = [
     {
       header: "Date",
@@ -465,14 +490,17 @@ const STRForm = () => {
       header: "Account",
       accessorKey: "account",
     },
-  ]
+  ];
   return (
     <div>
       <div className="space-y-8">
         <div className="border p-4 rounded-md space-y-8">
           <h2 className=" font-semibold  flex items-center gap-2">
-            <span><IconCalendarDollar className="size-3" /></span>
-            Financial Institution</h2>
+            <span>
+              <IconCalendarDollar className="size-3" />
+            </span>
+            Financial Institution
+          </h2>
           <div className="grid grid-cols-3 gap-4 mt-4">
             <CustomInput label="Financial Institution" placeholder="Enter Financial Institution" />
             <CustomInput label="Branch" placeholder="Enter Branch" />
@@ -481,17 +509,25 @@ const STRForm = () => {
         </div>
         <div className="border p-4 rounded-md space-y-8">
           <h2 className=" font-semibold flex items-center gap-2">
-            <span><IconUserQuestion className="size-3" /></span>
+            <span>
+              <IconUserQuestion className="size-3" />
+            </span>
             Suspicion Details
           </h2>
           <div className="grid grid-cols-3 gap-4 mt-4">
-            <CustomSelect label='Suspicion Category' placeholder="Select Suspicion Category" />
-            <CustomInput label='Date First Detected' type="date" placeholder="Select Date First Detected" />
+            <CustomSelect label="Suspicion Category" placeholder="Select Suspicion Category" />
+            <CustomInput
+              label="Date First Detected"
+              type="date"
+              placeholder="Select Date First Detected"
+            />
           </div>
         </div>
         <div className=" border p-4 rounded-md">
           <h2 className=" font-semibold     flex items-center gap-2">
-            <span><IconHistory className="size-3" /></span>
+            <span>
+              <IconHistory className="size-3" />
+            </span>
             Transaction History
           </h2>
           <div>
@@ -500,19 +536,20 @@ const STRForm = () => {
         </div>
         <div className="space-y-2">
           <h2 className="font-semibold text-base">Narrative Description</h2>
-          <p className="leading-relaxed text-neutral-800">Customer Jon Deau, a business owner, has made multiple cash deposits over the past week totaling $37,300. Each transaction is just below the $15,000 reporting threshold, indicating potential structuring activity. This pattern is inconsistent with the customer&apos;s known business operations and declared income sources. The transactions were conducted at different branches and ATM’s, further raising suspicion of intentional avoidance of detection.</p>
+          <p className="leading-relaxed text-neutral-800">
+            Customer Jon Deau, a business owner, has made multiple cash deposits over the past week
+            totaling $37,300. Each transaction is just below the $15,000 reporting threshold,
+            indicating potential structuring activity. This pattern is inconsistent with the
+            customer&apos;s known business operations and declared income sources. The transactions
+            were conducted at different branches and ATM’s, further raising suspicion of intentional
+            avoidance of detection.
+          </p>
         </div>
-
-
-
-
       </div>
-      <div>
-
-      </div>
+      <div></div>
     </div>
-  )
-}
+  );
+};
 
 const AuditTrail = () => {
   const auditEvents = [
@@ -550,7 +587,7 @@ const AuditTrail = () => {
       status: "completed",
       icon: "check",
     },
-  ]
+  ];
   return (
     <Card className="border shadow-none">
       <CardHeader>
@@ -581,7 +618,9 @@ const AuditTrail = () => {
                       <p className="text-sm font-semibold text-foreground">{event.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">by {event.user}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground whitespace-nowrap font-medium">{event.date}</p>
+                    <p className="text-xs text-muted-foreground whitespace-nowrap font-medium">
+                      {event.date}
+                    </p>
                   </div>
                   {event.description && (
                     <p className="text-xs text-muted-foreground mt-2">{event.description}</p>
@@ -593,20 +632,20 @@ const AuditTrail = () => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
 const Approval = () => {
   const decisionOptions = [
     { label: "Approve and File", value: "approve" },
     { label: "Return to collection", value: "return-to-collection" },
     { label: "Reject STR", value: "reject-str" },
-  ]
+  ];
   const priorityOptions = [
     { label: "Low", value: "low" },
     { label: "Medium", value: "medium" },
     { label: "High", value: "high" },
-  ]
+  ];
   const previousReviews = [
     {
       id: 1,
@@ -624,15 +663,23 @@ const Approval = () => {
       date: "2025-09-14 16:30",
       status: "completed",
     },
-  ]
+  ];
   return (
-    <div className='space-y-4'>
+    <div className="space-y-4">
       <h2 className="font-semibold text-base">Approval Decision</h2>
-      <div className='grid grid-cols-2 gap-4 pt-4'>
+      <div className="grid grid-cols-2 gap-4 pt-4">
         <div className="space-y-6   rounded ">
-          <CustomSelect label='Decision' placeholder="Select Approval Decision" options={decisionOptions} />
-          <CustomInput type='textarea' label='Reason' placeholder="Enter Reason" />
-          <CustomSelect label='Priority for Re submission (if returning)' placeholder="Select Priority for Re submission" options={priorityOptions} />
+          <CustomSelect
+            label="Decision"
+            placeholder="Select Approval Decision"
+            options={decisionOptions}
+          />
+          <CustomInput type="textarea" label="Reason" placeholder="Enter Reason" />
+          <CustomSelect
+            label="Priority for Re submission (if returning)"
+            placeholder="Select Priority for Re submission"
+            options={priorityOptions}
+          />
         </div>
         <div className="">
           <div className="space-y-6">
@@ -655,18 +702,25 @@ const Approval = () => {
                       <div className="flex gap-4">
                         {/* Timeline dot */}
 
-
                         {/* Review content */}
                         <div className="flex-1 pb-4">
                           <div className="bg-muted/40 rounded-lg p-4 border border-border hover:border-primary/30 transition-colors">
                             <div className="flex items-start justify-between mb-2">
                               <div>
-                                <p className="text-sm font-semibold text-foreground">{review.title}</p>
-                                <p className="text-xs text-muted-foreground">by {review.reviewer}</p>
+                                <p className="text-sm font-semibold text-foreground">
+                                  {review.title}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  by {review.reviewer}
+                                </p>
                               </div>
-                              <p className="text-xs text-muted-foreground whitespace-nowrap ml-2">{review.date}</p>
+                              <p className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                                {review.date}
+                              </p>
                             </div>
-                            <p className="text-sm text-foreground leading-relaxed">{review.comment}</p>
+                            <p className="text-sm text-foreground leading-relaxed">
+                              {review.comment}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -679,26 +733,22 @@ const Approval = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const DetailView = ({ open, setOpen }) => {
-  const [activeTab, setActiveTab] = useState("case-details")
+  const [activeTab, setActiveTab] = useState("case-details");
 
   const tabs = [
     { id: "case-details", label: "Case Details" },
     { id: "str-form", label: "STR Form" },
     { id: "approval", label: "Approval" },
     { id: "audit-trail", label: "Audit Trail" },
-  ]
-
-
+  ];
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className='sm:max-w-5xl w-full overflow-y-auto'>
-
-
+      <SheetContent className="sm:max-w-5xl w-full overflow-y-auto">
         <div className="min-h-screen bg-background">
           {/* Header */}
           <div className="border-b border-border bg-card sticky top-0 z-50">
@@ -716,10 +766,11 @@ const DetailView = ({ open, setOpen }) => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-1 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                      ? "border-primary text-foreground"
-                      : "border-transparent text-muted-foreground hover:text-foreground"
-                      }`}
+                    className={`px-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+                      activeTab === tab.id
+                        ? "border-primary text-foreground"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    }`}
                   >
                     {tab.label}
                   </button>
@@ -730,24 +781,14 @@ const DetailView = ({ open, setOpen }) => {
 
           {/* Main Content */}
           <div className="mx-auto max-w-[1440px] px-8 py-8">
-            {activeTab === "case-details" && (
-              <CaseDetails />
-            )}
+            {activeTab === "case-details" && <CaseDetails />}
 
-            {activeTab === "str-form" && (
-              <STRForm />
-            )}
-            {
-              activeTab === "approval" && (
-                <Approval />
-              )
-            }
-            {activeTab === "audit-trail" && (
-              <AuditTrail />
-            )}
+            {activeTab === "str-form" && <STRForm />}
+            {activeTab === "approval" && <Approval />}
+            {activeTab === "audit-trail" && <AuditTrail />}
           </div>
         </div>
       </SheetContent>
     </Sheet>
-  )
-}
+  );
+};
