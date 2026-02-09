@@ -439,7 +439,7 @@ export default function ClientSidebar({ ...props }) {
           icon: IconDatabase,
         },
         {
-          title: "Forms Hub",
+          title: "Effectiveness form",
           url: "/dashboard/client/grc/forms-hub",
           icon: IconDatabase,
         },

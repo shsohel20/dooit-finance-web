@@ -25,6 +25,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import SMReffectiveness from "./SMReffectiveness";
 
 const forms = [
   {
@@ -114,7 +115,7 @@ function FormDetail({ form, onBack }) {
         </Button>
         <div className="flex-1">
           <h2 className="text-xl font-semibold text-foreground">{form.title}</h2>
-          <p className="text-sm text-muted-foreground">AUSTRAC Regulatory Form</p>
+          <p className="text-sm text-muted-foreground">Governance Regulatory Form</p>
         </div>
         <Button variant="ghost" size="icon">
           <HelpCircle className="h-4 w-4" />
@@ -203,6 +204,7 @@ function FormDetail({ form, onBack }) {
           )}
         </CardContent>
       </Card>
+      <SMReffectiveness />
 
       <div className="flex justify-end gap-3">
         <Button variant="outline">Save as Draft</Button>
@@ -233,7 +235,7 @@ export default function FormsHubPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            AUSTRAC Forms Hub
+            Governance Forms Hub
           </h1>
           <p className="text-sm text-muted-foreground">
             Complete all regulatory forms in one place
