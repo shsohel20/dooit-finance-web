@@ -137,9 +137,7 @@ export default function PolicyList() {
     fetchData();
   }, []);
   const handleDownload = async (policy) => {
-    console.log("policy", policy);
     const response = await downloadPolicy(policy.id);
-    console.log("response", response);
     if (response.success) {
       const url = response.data.url;
       const a = document.createElement("a");
