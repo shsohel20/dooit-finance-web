@@ -21,7 +21,9 @@ export async function fetchWithAuth(endpoint, options = {}, isAi = false, isNisa
   };
 
   try {
-    const res = await fetch(`${isAi ? AI_URL : isNisa ? NISA_URL : BASE_URL}${endpoint}`, {
+    const endpointUrl = `${isAi ? AI_URL : isNisa ? NISA_URL : BASE_URL}${endpoint}`;
+    console.log("endpointUrl", endpointUrl);
+    const res = await fetch(endpointUrl, {
       ...allOptions,
     });
 

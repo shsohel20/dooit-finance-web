@@ -204,7 +204,7 @@ function FormDetail({ form, onBack }) {
           )}
         </CardContent>
       </Card>
-      <SMReffectiveness />
+      {/* <SMReffectiveness /> */}
 
       <div className="flex justify-end gap-3">
         <Button variant="outline">Save as Draft</Button>
