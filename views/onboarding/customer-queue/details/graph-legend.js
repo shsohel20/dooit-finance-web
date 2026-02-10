@@ -17,6 +17,13 @@ export function GraphLegend() {
           />
           <span className="text-xs">Business</span>
         </div>
+        <div className="flex items-center gap-1.5">
+          <span
+            className="inline-block h-2.5 w-2.5 rounded-full"
+            style={{ backgroundColor: "#14b8a6" }}
+          />
+          <span className="text-xs">Legal Entity</span>
+        </div>
       </div>
       <div className="h-4 w-px bg-border" />
       <div className="flex items-center gap-4">
