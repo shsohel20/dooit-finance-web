@@ -278,10 +278,8 @@ export default function ComplianceOfficerDueDiligenceForm() {
                   association
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Check if the candidate is currently a member of one of the accounting professional
-                  associations, specifically CPA Australia, Chartered Accountants Australia & New
-                  Zealand or the Institute of Public Accountants. If you know the candidate is not a
-                  member, you can skip this step.
+                  Check if the candidate is currently a member of professional
+                  associations.
                 </p>
 
                 <div className="overflow-x-auto">
@@ -295,7 +293,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
                           Description/process notes
                         </th>
                         <th className="border p-3 text-center text-sm font-medium w-20">
-                          Attached
+                          Attach
                         </th>
                         <th className="border p-3 text-center text-sm font-medium w-28">
                           Verified by
@@ -308,7 +306,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
                     <tbody>
                       <tr>
                         <td className="border p-3 text-sm font-medium">
-                          Membership of accounting professional association
+                        Member of a professional body/association
                         </td>
                         <td className="border p-3 text-sm text-muted-foreground">
                           Verify they are a member by searching the register of members on the
@@ -328,7 +326,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
                             onChange={(e) =>
                               updateStep2Verification("membership", "verifiedBy", e.target.value)
                             }
-                            placeholder="Initials"
+                            placeholder=""
                             className="h-8 text-sm"
                           />
                         </td>
@@ -345,7 +343,51 @@ export default function ComplianceOfficerDueDiligenceForm() {
                       </tr>
                       <tr>
                         <td className="border p-3 text-sm font-medium">
-                          National criminal history check
+                        Holding Relevant Licences
+                        </td>
+                        <td className="border p-3 text-sm text-muted-foreground">
+                          Verify they are holding relevant licences by searching the register of members on the
+                        </td>
+                        <td className="border p-3 text-center">
+                          <Checkbox
+                            checked={step2Verification.criminalHistory.attached}
+                            onCheckedChange={(checked) =>
+                              updateStep2Verification("criminalHistory", "attached", checked)
+                            }
+                          />
+                        </td>
+                        <td className="border p-3">
+                          <Input
+                            value={step2Verification.criminalHistory.verifiedBy}
+                            onChange={(e) =>
+                              updateStep2Verification(
+                                "criminalHistory",
+                                "verifiedBy",
+                                e.target.value,
+                              )
+                            }
+                            placeholder=""
+                            className="h-8 text-sm"
+                          />
+                        </td>
+                        <td className="border p-3">
+                          <Input
+                            type="date"
+                            value={step2Verification.criminalHistory.dateVerified}
+                            onChange={(e) =>
+                              updateStep2Verification(
+                                "criminalHistory",
+                                "dateVerified",
+                                e.target.value,
+                              )
+                            }
+                            className="h-8 text-sm"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border p-3 text-sm font-medium">
+                       National criminal history check
                         </td>
                         <td className="border p-3 text-sm text-muted-foreground">
                           Complete a national criminal history check through an approved provider.
@@ -369,7 +411,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
                                 e.target.value,
                               )
                             }
-                            placeholder="Initials"
+                            placeholder=""
                             className="h-8 text-sm"
                           />
                         </td>
@@ -417,7 +459,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
                           Description/process notes
                         </th>
                         <th className="border p-3 text-center text-sm font-medium w-20">
-                          Attached
+                          Attach
                         </th>
                         <th className="border p-3 text-center text-sm font-medium w-28">
                           Verified by
@@ -452,7 +494,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
                                 e.target.value,
                               )
                             }
-                            placeholder="Initials"
+                            placeholder=""
                             className="h-8 text-sm"
                           />
                         </td>

@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -264,65 +265,18 @@ export default function PersonnelDueDiligenceForm() {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[200px]">Required information</TableHead>
-                    <TableHead>Description/process notes</TableHead>
-                    <TableHead className="w-[80px] text-center">Attached</TableHead>
-                    <TableHead className="w-[100px]">Verified by</TableHead>
-                    <TableHead className="w-[130px]">Date verified</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium align-top">
-                      Membership of accounting professional association
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground align-top">
-                      Verify they are a member by searching the register of members on the relevant
-                      professional association&apos;s website.
-                    </TableCell>
-                    <TableCell className="text-center align-top">
-                      <Checkbox
-                        checked={membershipVerification.attached}
-                        onCheckedChange={(checked) =>
-                          setMembershipVerification({
-                            ...membershipVerification,
-                            attached: checked,
-                          })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell className="align-top">
-                      <Input
-                        value={membershipVerification.verifiedBy}
-                        onChange={(e) =>
-                          setMembershipVerification({
-                            ...membershipVerification,
-                            verifiedBy: e.target.value,
-                          })
-                        }
-                        placeholder="Initials"
-                        className="h-8"
-                      />
-                    </TableCell>
-                    <TableCell className="align-top">
-                      <Input
-                        type="date"
-                        value={membershipVerification.dateVerified}
-                        onChange={(e) =>
-                          setMembershipVerification({
-                            ...membershipVerification,
-                            dateVerified: e.target.value,
-                          })
-                        }
-                        className="h-8"
-                      />
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <Label>Professional Body Membership/Licenses</Label>
+              <Select>
+                <SelectTrigger className={'w-52'}>
+                  <SelectValue placeholder="Select Professional Body" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cpa">CPA Australia</SelectItem>
+                  <SelectItem value="chartered">Chartered Accountants Australia & New Zealand</SelectItem>
+                  <SelectItem value="public">Institute of Public Accountants</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
