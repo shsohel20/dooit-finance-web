@@ -692,9 +692,9 @@ export function PartyTreeGraph({ data }) {
                 x={pos.x}
                 y={pos.y + NODE_RADIUS + 16}
                 textAnchor="middle"
-                fill={isExpanded ? "#e2e8f0" : "#94a3b8"}
-                fontSize="10"
-                fontWeight={isExpanded ? "600" : "400"}
+                fill={isExpanded ? "#091326" : "#0E5964"}
+                fontSize="12"
+                fontWeight={isExpanded ? "600" : "500"}
                 className="pointer-events-none"
               >
                 {node.name.length > 18 ? `${node.name.slice(0, 16)}...` : node.name}

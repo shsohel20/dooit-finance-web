@@ -26,6 +26,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import SMReffectiveness from "./SMReffectiveness";
+import GoverningBodyForm from "../../testing-and-governance/governing-body/page";
 
 const forms = [
   {
@@ -35,6 +36,7 @@ const forms = [
     lastUpdated: "15 Aug 2024",
     dueDate: null,
     type: "Program",
+    component: null,
   },
   {
     id: 2,
@@ -43,6 +45,7 @@ const forms = [
     lastUpdated: null,
     dueDate: "30 Sep 2024",
     type: "Evaluation",
+    component: null,
   },
   {
     id: 3,
@@ -51,6 +54,7 @@ const forms = [
     lastUpdated: null,
     dueDate: "15 Sep 2024",
     type: "SMR",
+    component: <SMReffectiveness />,
   },
   {
     id: 4,
@@ -59,6 +63,7 @@ const forms = [
     lastUpdated: "1 Aug 2024",
     dueDate: null,
     type: "Officer",
+    component: null,
   },
   {
     id: 5,
@@ -67,6 +72,7 @@ const forms = [
     lastUpdated: null,
     dueDate: "20 Oct 2024",
     type: "CDD",
+    component: null,
   },
   {
     id: 6,
@@ -75,7 +81,16 @@ const forms = [
     lastUpdated: "10 Aug 2024",
     dueDate: null,
     type: "Monitoring",
-  },
+    component: null,
+  },{
+    id: 7,
+    title: "Governing Body",
+    status: "complete",
+    lastUpdated: "10 Aug 2024",
+    dueDate: null,
+    type: "Governing Body",
+    component: <GoverningBodyForm />,
+  }
 ];
 
 function StatusIcon({ status }) {
@@ -108,8 +123,8 @@ function FormDetail({ form, onBack }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-4">
+    <> 
+    <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -121,6 +136,9 @@ function FormDetail({ form, onBack }) {
           <HelpCircle className="h-4 w-4" />
         </Button>
       </div>
+    {form.component ? form.component : <div>
+      <div className="flex flex-col gap-6">
+      
 
       <Card className="border-border bg-card">
         <CardContent className="p-6">
@@ -211,6 +229,7 @@ function FormDetail({ form, onBack }) {
         <Button>Submit for Approval</Button>
       </div>
     </div>
+      </div>}</>
   );
 }
 
@@ -218,6 +237,7 @@ export default function FormsHubPage() {
   const [selectedForm, setSelectedForm] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
+  console.log({selectedForm});
 
   if (selectedForm) {
     return <FormDetail form={selectedForm} onBack={() => setSelectedForm(null)} />;
@@ -228,6 +248,8 @@ export default function FormsHubPage() {
     const matchesSearch = form.title.toLowerCase().includes(search.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+  console.log({filteredForms});
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -286,7 +308,7 @@ export default function FormsHubPage() {
       </Card>
 
       {/* Forms Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filteredForms.map((form) => (
           <Card
             key={form.id}

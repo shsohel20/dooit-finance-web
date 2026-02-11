@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, FileText } from "lucide-react";
 
-export default function AnnualReportForm() {
+export default function GoverningBodyForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 12;
 
