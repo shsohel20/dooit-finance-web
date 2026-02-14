@@ -1,16 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  CheckCircle2,
-  Clock,
-  AlertTriangle,
-  Search,
-  Settings,
-  HelpCircle,
-  ChevronLeft,
-  X,
-} from "lucide-react";
+import { CheckCircle2, Clock, AlertTriangle, Search, Settings, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,13 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import SMReffectiveness from "./SMReffectiveness";
 import GoverningBodyForm from "../../testing-and-governance/governing-body/page";
-import EcddEffectivenessForm from "./ecdd";
 import { useRouter } from "next/navigation";
+import EcddSelectionForm from "./EcddForm";
 export const forms = [
   {
     id: 1,
@@ -73,7 +61,7 @@ export const forms = [
     lastUpdated: null,
     dueDate: "20 Oct 2024",
     type: "CDD",
-    component: <EcddEffectivenessForm />,
+    component: <EcddSelectionForm />,
   },
   {
     id: 6,
@@ -83,7 +71,8 @@ export const forms = [
     dueDate: null,
     type: "Monitoring",
     component: null,
-  },{
+  },
+  {
     id: 7,
     title: "Governing Body",
     status: "complete",
@@ -91,7 +80,7 @@ export const forms = [
     dueDate: null,
     type: "Governing Body",
     component: <GoverningBodyForm />,
-  }
+  },
 ];
 
 function StatusIcon({ status }) {
@@ -124,7 +113,6 @@ export default function FormsHubPage() {
   const [selectedForm, setSelectedForm] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
-  console.log({selectedForm});
   const router = useRouter();
 
   // if (selectedForm) {
@@ -136,12 +124,11 @@ export default function FormsHubPage() {
     const matchesSearch = form.title.toLowerCase().includes(search.toLowerCase());
     return matchesStatus && matchesSearch;
   });
-  console.log({filteredForms});
 
-const handleFormClick = (form) => {
-  setSelectedForm(form);
-  router.push(`/dashboard/client/grc/forms-hub/form?id=${form.id}`);
-}
+  const handleFormClick = (form) => {
+    setSelectedForm(form);
+    router.push(`/dashboard/client/grc/forms-hub/form?id=${form.id}`);
+  };
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}

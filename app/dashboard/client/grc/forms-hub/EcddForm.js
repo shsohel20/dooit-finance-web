@@ -47,222 +47,269 @@ import {
   TriangleAlert,
 } from "lucide-react";
 
-const SMR_REGISTER = [
+const ECDD_REGISTER = [
   {
-    id: "smr-001",
-    referenceNo: "SMR-2025-0012",
-    filingDate: "2025-01-15",
-    customerName: "Al Farooq Trading LLC",
+    id: "ecdd-001",
+    referenceNo: "ECDD-2025-0015",
+    reviewDate: "2025-01-20",
+    customerName: "Al Rashid Holdings Group",
     customerId: "CUST-4421",
+    riskLevel: "Very High",
+    customerType: "Corporate",
+    nationality: "UAE",
+    occupation: "Conglomerate - Diversified",
+    sourceOfFunds: "Trade finance, real estate, and commodity trading revenues",
+    sourceOfWealth:
+      "Inherited family business empire established in 1978 with subsequent expansion into real estate and commodities trading across GCC region.",
+    accountRelationship: "Since 2012 - Multiple accounts",
+    annualTurnover: 45000000,
+    currency: "AED",
+    lastCddDate: "2022-06-15",
+    ecddTrigger: "High-risk jurisdiction transactions",
+    relationshipManager: "Ahmad Al Mazrouei",
+    branch: "Abu Dhabi Main Branch",
+    status: "Pending Review",
+  },
+  {
+    id: "ecdd-002",
+    referenceNo: "ECDD-2025-0028",
+    reviewDate: "2025-02-05",
+    customerName: "Sheikh Hamad Bin Faisal",
+    customerId: "CUST-7120",
+    riskLevel: "PEP",
+    customerType: "Individual",
+    nationality: "Qatar",
+    occupation: "Government Official - Ministry of Finance",
+    sourceOfFunds: "Government salary, investment income, and family trust distributions",
+    sourceOfWealth:
+      "Royal family member with inherited assets and government compensation. Multiple property holdings across GCC.",
+    accountRelationship: "Since 2018 - Premium Banking",
+    annualTurnover: 12000000,
+    currency: "AED",
+    lastCddDate: "2023-01-10",
+    ecddTrigger: "PEP - Politically Exposed Person",
+    relationshipManager: "Fatima Al Suwaidi",
+    branch: "Dubai DIFC Branch",
+    status: "Reviewed",
+  },
+  {
+    id: "ecdd-003",
+    referenceNo: "ECDD-2025-0041",
+    reviewDate: "2025-02-22",
+    customerName: "Oceanic Freight & Logistics LLC",
+    customerId: "CUST-2390",
     riskLevel: "High",
-    suspicionType: "Structuring",
-    suspicionNarrative:
-      "Multiple cash deposits just below the reporting threshold over a 10-day period, totalling AED 245,000. Transactions appear structured to avoid detection.",
-    transactionValue: 245000,
-    transactionCurrency: "AED",
-    originatingAccount: "AE07 0331 0000 1234 5678 901",
-    beneficiaryAccount: "AE45 0261 0000 9876 5432 100",
-    filedBy: "Omar Hassan",
-    department: "Compliance - Branch Operations",
-    status: "Open",
+    customerType: "Corporate",
+    nationality: "Panama",
+    occupation: "Freight Forwarding & Logistics",
+    sourceOfFunds: "Shipping and logistics service revenues from international trade routes",
+    sourceOfWealth:
+      "Established logistics company with operations in 12 countries. Parent company registered in Panama Free Trade Zone.",
+    accountRelationship: "Since 2020 - Trade Finance",
+    annualTurnover: 28000000,
+    currency: "AED",
+    lastCddDate: "2023-07-20",
+    ecddTrigger: "Complex corporate structure",
+    relationshipManager: "Khalid Bin Rashid",
+    branch: "Jebel Ali Free Zone Branch",
+    status: "Pending Review",
   },
   {
-    id: "smr-002",
-    referenceNo: "SMR-2025-0034",
-    filingDate: "2025-02-03",
-    customerName: "Noor Holdings Ltd",
-    customerId: "CUST-7788",
-    riskLevel: "Medium",
-    suspicionType: "Unusual cash activity",
-    suspicionNarrative:
-      "Significant cash withdrawals inconsistent with the stated business profile of a consulting firm. No clear business rationale provided.",
-    transactionValue: 87500,
-    transactionCurrency: "AED",
-    originatingAccount: "AE12 0440 0000 5566 7788 001",
-    beneficiaryAccount: "N/A - Cash withdrawal",
-    filedBy: "Aisha Khalid",
-    department: "AML Monitoring",
-    status: "Closed",
-  },
-  {
-    id: "smr-003",
-    referenceNo: "SMR-2025-0051",
-    filingDate: "2025-02-18",
-    customerName: "Rashid & Sons Exports",
-    customerId: "CUST-2210",
+    id: "ecdd-004",
+    referenceNo: "ECDD-2025-0056",
+    reviewDate: "2025-03-10",
+    customerName: "Victoria Petrova",
+    customerId: "CUST-8845",
     riskLevel: "High",
-    suspicionType: "Trade-based laundering",
-    suspicionNarrative:
-      "Over-invoicing identified on multiple trade finance transactions. Goods declared at 3x market value with discrepancies in shipping documents.",
-    transactionValue: 520000,
-    transactionCurrency: "AED",
-    originatingAccount: "AE88 0150 0000 3344 5566 001",
-    beneficiaryAccount: "GB29 NWBK 6016 1331 9268 19",
-    filedBy: "Tariq Saleem",
-    department: "Trade Finance Compliance",
-    status: "Under Review",
+    customerType: "Individual",
+    nationality: "Russia",
+    occupation: "Business Owner - Luxury Retail",
+    sourceOfFunds: "Luxury retail chain profits and dividend income from holding companies",
+    sourceOfWealth:
+      "Built luxury retail chain across CIS countries. Proceeds from sale of Moscow-based properties in 2019.",
+    accountRelationship: "Since 2019 - Private Banking",
+    annualTurnover: 8500000,
+    currency: "AED",
+    lastCddDate: "2022-11-30",
+    ecddTrigger: "High-risk nationality + Sanctions proximity",
+    relationshipManager: "Sara Al Hashemi",
+    branch: "Dubai Marina Branch",
+    status: "Escalated",
   },
   {
-    id: "smr-004",
-    referenceNo: "SMR-2025-0067",
-    filingDate: "2025-03-05",
-    customerName: "Yasmin Al Qasim",
-    customerId: "CUST-9102",
-    riskLevel: "Low",
-    suspicionType: "Unusual wire transfer",
-    suspicionNarrative:
-      "First-time international wire transfer to a high-risk jurisdiction with no prior transaction history. Customer could not adequately explain the purpose.",
-    transactionValue: 32000,
-    transactionCurrency: "AED",
-    originatingAccount: "AE55 0230 0000 1122 3344 001",
-    beneficiaryAccount: "MM0201 0001 0000 0060 1231 78",
-    filedBy: "Nadia Youssef",
-    department: "Retail Banking Compliance",
-    status: "Open",
+    id: "ecdd-005",
+    referenceNo: "ECDD-2025-0072",
+    reviewDate: "2025-03-28",
+    customerName: "Golden Gate Exchange House",
+    customerId: "CUST-3150",
+    riskLevel: "Very High",
+    customerType: "DNFBP",
+    nationality: "UAE",
+    occupation: "Money Exchange & Remittance",
+    sourceOfFunds: "Foreign exchange and remittance service commissions and spreads",
+    sourceOfWealth: "Licensed exchange house operating 15 branches across UAE since 2005.",
+    accountRelationship: "Since 2015 - Business Banking",
+    annualTurnover: 120000000,
+    currency: "AED",
+    lastCddDate: "2023-03-01",
+    ecddTrigger: "DNFBP - High volume remittance corridor",
+    relationshipManager: "Omar Al Mansoori",
+    branch: "Sharjah Central Branch",
+    status: "Pending Review",
   },
   {
-    id: "smr-005",
-    referenceNo: "SMR-2025-0089",
-    filingDate: "2025-03-22",
-    customerName: "Golden Crescent Finance",
-    customerId: "CUST-3056",
+    id: "ecdd-006",
+    referenceNo: "ECDD-2025-0088",
+    reviewDate: "2025-04-15",
+    customerName: "Noor Capital Investments",
+    customerId: "CUST-5530",
     riskLevel: "High",
-    suspicionType: "Shell company activity",
-    suspicionNarrative:
-      "Company has no physical office, minimal employees, yet processes high-value transactions. Beneficial ownership is layered through multiple offshore entities.",
-    transactionValue: 1200000,
-    transactionCurrency: "AED",
-    originatingAccount: "AE67 0350 0000 7788 9900 001",
-    beneficiaryAccount: "VG96 VPVG 0000 0123 4567 8901",
-    filedBy: "Khalid Mansour",
-    department: "Corporate Banking Compliance",
-    status: "Open",
+    customerType: "Corporate",
+    nationality: "Cayman Islands",
+    occupation: "Investment Fund Management",
+    sourceOfFunds: "Fund management fees, carried interest, and portfolio investment returns",
+    sourceOfWealth:
+      "Investment fund established in 2016 with seed capital from GCC-based HNW investors.",
+    accountRelationship: "Since 2017 - Corporate Banking",
+    annualTurnover: 35000000,
+    currency: "AED",
+    lastCddDate: "2023-05-15",
+    ecddTrigger: "Offshore entity + complex ownership",
+    relationshipManager: "Ahmad Al Mazrouei",
+    branch: "Abu Dhabi Main Branch",
+    status: "Reviewed",
   },
   {
-    id: "smr-006",
-    referenceNo: "SMR-2025-0102",
-    filingDate: "2025-04-01",
-    customerName: "Zayed Construction Co",
-    customerId: "CUST-5540",
-    riskLevel: "Medium",
-    suspicionType: "Layering",
-    suspicionNarrative:
-      "Funds received from an overseas entity are rapidly moved through multiple domestic accounts before being transferred out. Pattern consistent with layering.",
-    transactionValue: 175000,
-    transactionCurrency: "AED",
-    originatingAccount: "AE23 0260 0000 4455 6677 001",
-    beneficiaryAccount: "AE90 0440 0000 8899 0011 001",
-    filedBy: "Sara Ahmed",
-    department: "Transaction Monitoring",
-    status: "Closed",
+    id: "ecdd-007",
+    referenceNo: "ECDD-2025-0103",
+    reviewDate: "2025-05-02",
+    customerName: "Hon. James Okafor",
+    customerId: "CUST-9210",
+    riskLevel: "PEP",
+    customerType: "Individual",
+    nationality: "Nigeria",
+    occupation: "Senator - National Assembly",
+    sourceOfFunds: "Legislative salary, agricultural business income, and consultancy fees",
+    sourceOfWealth:
+      "Large-scale agricultural operations in Nigeria, inherited from family. Consultancy income from African development projects.",
+    accountRelationship: "Since 2021 - Premium Banking",
+    annualTurnover: 6000000,
+    currency: "AED",
+    lastCddDate: "2023-09-20",
+    ecddTrigger: "PEP + High-risk jurisdiction",
+    relationshipManager: "Fatima Al Suwaidi",
+    branch: "Dubai DIFC Branch",
+    status: "Pending Review",
   },
   {
-    id: "smr-007",
-    referenceNo: "SMR-2025-0118",
-    filingDate: "2025-04-14",
-    customerName: "Khalil Mahmoud Ibrahim",
-    customerId: "CUST-8814",
-    riskLevel: "Low",
-    suspicionType: "Rapid fund movement",
-    suspicionNarrative:
-      "Funds deposited and immediately transferred out within the same business day on multiple occasions. Customer profile does not support such activity.",
-    transactionValue: 48000,
-    transactionCurrency: "AED",
-    originatingAccount: "AE34 0110 0000 2233 4455 001",
-    beneficiaryAccount: "AE78 0330 0000 6677 8899 001",
-    filedBy: "Omar Hassan",
-    department: "Compliance - Branch Operations",
-    status: "Under Review",
+    id: "ecdd-008",
+    referenceNo: "ECDD-2025-0119",
+    reviewDate: "2025-05-18",
+    customerName: "Desert Diamond Mining Corp",
+    customerId: "CUST-1290",
+    riskLevel: "Very High",
+    customerType: "Corporate",
+    nationality: "South Africa",
+    occupation: "Precious Stones Mining & Export",
+    sourceOfFunds: "Diamond and precious stone mining revenues and wholesale distribution",
+    sourceOfWealth:
+      "Mining concessions acquired in 2008. Operations in South Africa, Botswana, and Namibia.",
+    accountRelationship: "Since 2019 - Trade Finance",
+    annualTurnover: 55000000,
+    currency: "AED",
+    lastCddDate: "2022-12-10",
+    ecddTrigger: "High-risk sector (precious stones) + complex structure",
+    relationshipManager: "Khalid Bin Rashid",
+    branch: "Jebel Ali Free Zone Branch",
+    status: "Escalated",
   },
   {
-    id: "smr-008",
-    referenceNo: "SMR-2025-0134",
-    filingDate: "2025-05-02",
-    customerName: "Emirates Star General Trading",
-    customerId: "CUST-1177",
+    id: "ecdd-009",
+    referenceNo: "ECDD-2025-0135",
+    reviewDate: "2025-06-05",
+    customerName: "Bin Laden Charity Foundation",
+    customerId: "CUST-6640",
+    riskLevel: "Very High",
+    customerType: "NPO",
+    nationality: "Saudi Arabia",
+    occupation: "Non-Profit Organization - Humanitarian Aid",
+    sourceOfFunds: "Charitable donations, government grants, and endowment income",
+    sourceOfWealth:
+      "Established charitable trust with endowment from founding family. Government-backed humanitarian programs.",
+    accountRelationship: "Since 2016 - Non-Profit Banking",
+    annualTurnover: 18000000,
+    currency: "AED",
+    lastCddDate: "2023-02-28",
+    ecddTrigger: "NPO + High-risk sector + Name screening alert",
+    relationshipManager: "Omar Al Mansoori",
+    branch: "Sharjah Central Branch",
+    status: "Pending Review",
+  },
+  {
+    id: "ecdd-010",
+    referenceNo: "ECDD-2025-0148",
+    reviewDate: "2025-06-22",
+    customerName: "Zheng Wei International Trading",
+    customerId: "CUST-4480",
     riskLevel: "High",
-    suspicionType: "Structuring",
-    suspicionNarrative:
-      "Series of cash deposits across 4 branches, each just under the reporting threshold. Total aggregated amount of AED 310,000 within a 7-day window.",
-    transactionValue: 310000,
-    transactionCurrency: "AED",
-    originatingAccount: "AE56 0150 0000 9988 7766 001",
-    beneficiaryAccount: "AE12 0260 0000 5544 3322 001",
-    filedBy: "Tariq Saleem",
-    department: "AML Monitoring",
-    status: "Open",
+    customerType: "Corporate",
+    nationality: "China",
+    occupation: "Electronics Export & Import",
+    sourceOfFunds: "Cross-border electronics trade revenue between China and GCC markets",
+    sourceOfWealth:
+      "Established trading company with warehousing in Shenzhen and Dubai. Annual volume exceeds $50M.",
+    accountRelationship: "Since 2020 - Trade Finance",
+    annualTurnover: 52000000,
+    currency: "AED",
+    lastCddDate: "2023-04-15",
+    ecddTrigger: "High volume cross-border + trade-based ML risk",
+    relationshipManager: "Sara Al Hashemi",
+    branch: "Dubai Marina Branch",
+    status: "Reviewed",
   },
   {
-    id: "smr-009",
-    referenceNo: "SMR-2025-0156",
-    filingDate: "2025-05-19",
-    customerName: "Fatima Bint Saleh",
-    customerId: "CUST-6633",
-    riskLevel: "Medium",
-    suspicionType: "Smurfing",
-    suspicionNarrative:
-      "Multiple third parties depositing small cash amounts into the same account. Depositors appear unrelated and unable to explain their connection to the account holder.",
-    transactionValue: 95000,
-    transactionCurrency: "AED",
-    originatingAccount: "Various third-party deposits",
-    beneficiaryAccount: "AE45 0230 0000 7766 5544 001",
-    filedBy: "Aisha Khalid",
-    department: "Retail Banking Compliance",
-    status: "Closed",
+    id: "ecdd-011",
+    referenceNo: "ECDD-2025-0162",
+    reviewDate: "2025-07-08",
+    customerName: "Maria Santos De Souza",
+    customerId: "CUST-3370",
+    riskLevel: "PEP",
+    customerType: "Individual",
+    nationality: "Brazil",
+    occupation: "Former Minister of Trade",
+    sourceOfFunds: "Investment portfolio income, real estate rentals, and pension",
+    sourceOfWealth:
+      "Former government official. Wealth from family-owned agricultural estates and post-government consultancy.",
+    accountRelationship: "Since 2022 - Premium Banking",
+    annualTurnover: 4500000,
+    currency: "AED",
+    lastCddDate: "2023-08-01",
+    ecddTrigger: "Former PEP with ongoing political connections",
+    relationshipManager: "Fatima Al Suwaidi",
+    branch: "Dubai DIFC Branch",
+    status: "Pending Review",
   },
   {
-    id: "smr-010",
-    referenceNo: "SMR-2025-0171",
-    filingDate: "2025-06-08",
-    customerName: "Al Jazeera Metals Corp",
-    customerId: "CUST-4290",
+    id: "ecdd-012",
+    referenceNo: "ECDD-2025-0178",
+    reviewDate: "2025-07-25",
+    customerName: "Al Amal Real Estate Development",
+    customerId: "CUST-7760",
     riskLevel: "High",
-    suspicionType: "Trade-based laundering",
-    suspicionNarrative:
-      "Significant discrepancies between declared goods (precious metals) and actual shipment documents. Invoices appear fraudulent with inflated quantities.",
-    transactionValue: 780000,
-    transactionCurrency: "AED",
-    originatingAccount: "AE89 0350 0000 1234 0000 001",
-    beneficiaryAccount: "CH93 0076 2011 6238 5295 7",
-    filedBy: "Khalid Mansour",
-    department: "Trade Finance Compliance",
-    status: "Open",
-  },
-  {
-    id: "smr-011",
-    referenceNo: "SMR-2025-0189",
-    filingDate: "2025-06-25",
-    customerName: "Hamdan Real Estate Group",
-    customerId: "CUST-3378",
-    riskLevel: "Medium",
-    suspicionType: "Unusual cash activity",
-    suspicionNarrative:
-      "Large cash deposits cited as 'rental income' but amounts are inconsistent with the declared property portfolio. Source of funds documentation is insufficient.",
-    transactionValue: 62000,
-    transactionCurrency: "AED",
-    originatingAccount: "AE67 0440 0000 3322 1100 001",
-    beneficiaryAccount: "N/A - Deposited to own account",
-    filedBy: "Sara Ahmed",
-    department: "Transaction Monitoring",
-    status: "Under Review",
-  },
-  {
-    id: "smr-012",
-    referenceNo: "SMR-2025-0203",
-    filingDate: "2025-07-11",
-    customerName: "Sharjah Pearl Imports",
-    customerId: "CUST-7745",
-    riskLevel: "Low",
-    suspicionType: "Unusual wire transfer",
-    suspicionNarrative:
-      "Wire transfer to a newly opened account in a high-risk jurisdiction. The beneficiary entity was incorporated only 2 weeks prior to the transfer.",
-    transactionValue: 28000,
-    transactionCurrency: "AED",
-    originatingAccount: "AE90 0110 0000 8877 6655 001",
-    beneficiaryAccount: "KY01 0012 0000 0000 0012 3456",
-    filedBy: "Nadia Youssef",
-    department: "Retail Banking Compliance",
-    status: "Closed",
+    customerType: "Corporate",
+    nationality: "UAE",
+    occupation: "Real Estate Development",
+    sourceOfFunds: "Property sales, rental income, and project financing from local banks",
+    sourceOfWealth:
+      "Real estate development company founded in 2010. Portfolio includes 8 residential towers and 3 commercial complexes.",
+    accountRelationship: "Since 2014 - Corporate Banking",
+    annualTurnover: 78000000,
+    currency: "AED",
+    lastCddDate: "2022-09-15",
+    ecddTrigger: "High-risk sector (real estate) + overdue CDD refresh",
+    relationshipManager: "Ahmad Al Mazrouei",
+    branch: "Abu Dhabi Main Branch",
+    status: "Pending Review",
   },
 ];
 
@@ -270,14 +317,21 @@ const SMR_REGISTER = [
 
 const RISK_COLORS = {
   High: "bg-red-100 text-red-800 border-red-200",
-  Medium: "bg-amber-100 text-amber-800 border-amber-200",
-  Low: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  "Very High": "bg-red-200 text-red-900 border-red-300",
+  PEP: "bg-amber-100 text-amber-800 border-amber-200",
 };
 
 const STATUS_COLORS = {
-  Open: "bg-blue-100 text-blue-800 border-blue-200",
-  Closed: "bg-zinc-100 text-zinc-700 border-zinc-200",
-  "Under Review": "bg-violet-100 text-violet-800 border-violet-200",
+  "Pending Review": "bg-blue-100 text-blue-800 border-blue-200",
+  Reviewed: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  Escalated: "bg-red-100 text-red-800 border-red-200",
+};
+
+const CUSTOMER_TYPE_COLORS = {
+  Corporate: "bg-zinc-100 text-zinc-700 border-zinc-200",
+  Individual: "bg-sky-100 text-sky-700 border-sky-200",
+  DNFBP: "bg-orange-100 text-orange-700 border-orange-200",
+  NPO: "bg-teal-100 text-teal-700 border-teal-200",
 };
 
 function formatCurrency(value) {
@@ -293,75 +347,125 @@ function shuffleAndPick(arr, count) {
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
-// --- Review Focus types ---
+// --- ECDD Review Focus areas ---
 
 const REVIEW_AREAS = [
-  { id: "rationale", label: "Rationale for suspicion" },
-  { id: "timeliness", label: "Timeliness of filing" },
-  { id: "accuracy", label: "Accuracy of information" },
-  { id: "regulatory", label: "Regulatory alignment" },
+  { id: "kyc_docs", label: "KYC documentation completeness" },
+  { id: "sof_sow", label: "Source of Funds / Source of Wealth verification" },
+  { id: "beneficial_ownership", label: "Beneficial ownership identification" },
+  { id: "pep_screening", label: "PEP & sanctions screening" },
+  { id: "transaction_profile", label: "Transaction profile vs. expected activity" },
+  { id: "risk_assessment", label: "Customer risk assessment accuracy" },
+  { id: "ongoing_monitoring", label: "Ongoing monitoring adequacy" },
+  { id: "adverse_media", label: "Adverse media checks" },
 ];
 
 function generateTestResult(record) {
-  const seed = record.transactionValue % 100;
-  const completeness = {
-    score: seed > 60 ? 95 : seed > 30 ? 78 : 55,
+  const seed = record.annualTurnover % 100;
+  const kycCompleteness = {
+    score: seed > 50 ? 92 : seed > 20 ? 75 : 58,
     details:
-      seed > 60
-        ? "All mandatory fields populated. Customer identification documents verified."
-        : seed > 30
-          ? "Most fields populated. Customer ID verification partially complete."
-          : "Missing beneficiary details and supporting documentation.",
+      seed > 50
+        ? "All KYC documents on file and within validity. ID, proof of address, and corporate documents verified."
+        : seed > 20
+          ? "Core KYC documents present but some supporting documents are expired or missing. Proof of address over 6 months old."
+          : "Significant KYC gaps identified. Missing updated passport copy, expired trade license, and incomplete corporate resolution.",
   };
-  const timeliness = {
-    score: record.riskLevel === "High" ? (seed > 50 ? 90 : 65) : seed > 40 ? 92 : 80,
+  const sofVerification = {
+    score:
+      record.riskLevel === "Very High"
+        ? seed > 40
+          ? 78
+          : 55
+        : record.riskLevel === "PEP"
+          ? seed > 30
+            ? 82
+            : 65
+          : seed > 50
+            ? 90
+            : 72,
     details:
-      record.riskLevel === "High" && seed <= 50
-        ? "Filing delayed by 3 business days beyond the internal threshold for high-risk cases."
-        : "Filed within acceptable timeframe per internal policy.",
+      record.riskLevel === "Very High" && seed <= 40
+        ? "Source of funds documentation insufficient for declared turnover level. Third-party fund flows not adequately explained."
+        : record.riskLevel === "PEP" && seed <= 30
+          ? "SOF partially verified. Government salary confirmed but investment income sources require further documentation."
+          : "Source of funds adequately documented with bank statements and audited financial records supporting declared income.",
   };
-  const narrative = {
-    score: record.suspicionNarrative.length > 150 ? 88 : 62,
+  const beneficialOwnership = {
+    score:
+      record.customerType === "Corporate"
+        ? seed > 45
+          ? 85
+          : 60
+        : record.customerType === "Individual"
+          ? 95
+          : seed > 35
+            ? 78
+            : 52,
     details:
-      record.suspicionNarrative.length > 150
-        ? "Narrative is detailed and clearly articulates the basis for suspicion."
-        : "Narrative lacks sufficient detail. Recommend expanding on behavioral indicators.",
+      record.customerType === "Corporate" && seed <= 45
+        ? "UBO identification incomplete. Ownership chain traced to offshore entity with opaque structure. Final beneficial owner not confirmed."
+        : record.customerType === "Individual"
+          ? "Individual customer - beneficial ownership directly established."
+          : "Beneficial ownership structure documented but complex layering noted. Recommend periodic re-verification.",
   };
-  const regulatory = {
-    score: record.status === "Closed" ? 92 : seed > 40 ? 85 : 70,
+  const pepScreening = {
+    score: record.riskLevel === "PEP" ? (seed > 50 ? 88 : 70) : seed > 40 ? 93 : 80,
     details:
-      record.status === "Closed"
-        ? "All regulatory requirements met. Proper closure documentation in place."
-        : seed > 40
-          ? "Aligned with regulatory requirements. Minor documentation gaps noted."
-          : "Regulatory alignment concerns identified. Missing mandatory disclosures.",
+      record.riskLevel === "PEP" && seed <= 50
+        ? "PEP screening conducted but close associates list requires updating. Last full screening was over 12 months ago."
+        : "PEP and sanctions screening current. No adverse matches. Last screening within acceptable timeframe.",
+  };
+  const riskAssessment = {
+    score: record.status === "Reviewed" ? 90 : seed > 45 ? 82 : 65,
+    details:
+      record.status === "Reviewed"
+        ? "Risk assessment is current and accurately reflects the customer profile and transaction behavior."
+        : seed > 45
+          ? "Risk assessment generally aligned but some risk factors not fully captured. Recommend updating risk matrix."
+          : "Risk assessment outdated. Customer profile has changed significantly since last review. Immediate re-assessment required.",
   };
   const overallScore = Math.round(
-    (completeness.score + timeliness.score + narrative.score + regulatory.score) / 4,
+    (kycCompleteness.score +
+      sofVerification.score +
+      beneficialOwnership.score +
+      pepScreening.score +
+      riskAssessment.score) /
+      5,
   );
   const flags = [];
-  if (completeness.score < 70) flags.push("Incomplete documentation");
-  if (timeliness.score < 75) flags.push("Filing timeliness concern");
-  if (narrative.score < 70) flags.push("Insufficient narrative detail");
-  if (regulatory.score < 75) flags.push("Regulatory alignment gap");
-  if (record.riskLevel === "High" && overallScore < 80)
-    flags.push("High-risk case below threshold");
-  return { completeness, timeliness, narrative, regulatory, overallScore, flags };
+  if (kycCompleteness.score < 70) flags.push("KYC documentation gaps");
+  if (sofVerification.score < 70) flags.push("Insufficient SOF/SOW verification");
+  if (beneficialOwnership.score < 65) flags.push("UBO identification incomplete");
+  if (pepScreening.score < 75) flags.push("PEP screening overdue");
+  if (riskAssessment.score < 70) flags.push("Risk assessment outdated");
+  if (record.riskLevel === "Very High" && overallScore < 80)
+    flags.push("Very high-risk customer below threshold");
+  if (record.riskLevel === "PEP" && overallScore < 80)
+    flags.push("PEP customer below compliance threshold");
+  return {
+    kycCompleteness,
+    sofVerification,
+    beneficialOwnership,
+    pepScreening,
+    riskAssessment,
+    overallScore,
+    flags,
+  };
 }
 
 const INITIAL_FORM = {
   periodFrom: "",
   periodTo: "",
-  totalSmrs: String(SMR_REGISTER.length),
+  totalRecords: String(ECDD_REGISTER.length),
   registerSource: "",
   selectionMethod: "",
   methodReason: "",
-  suspicionReason: "",
-  timePeriodFrom: "",
-  timePeriodTo: "",
-  customerRiskLevel: "",
-  transactionThreshold: "",
-  numberOfSmrs: "",
+  customerType: "",
+  riskLevel: "",
+  ecddTrigger: "",
+  turnoverThreshold: "",
+  numberOfRecords: "",
   dateOfSelection: "",
   selectedBy: "",
   overallOutcome: "",
@@ -370,95 +474,87 @@ const INITIAL_FORM = {
 
 // --- Component ---
 
-export default function SmrSelectionForm() {
+export default function EcddSelectionForm() {
   const [formData, setFormData] = useState(INITIAL_FORM);
-  const [selectedSmrIds, setSelectedSmrIds] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [submitted, setSubmitted] = useState(false);
 
-  // Per-SMR reviews: { [smrId]: SmrReview }
-  const [smrReviews, setSmrReviews] = useState({});
-  // Which SMR detail is currently open (null = none)
-  const [activeSmrId, setActiveSmrId] = useState(null);
-  // Test results per SMR
+  const [ecddReviews, setEcddReviews] = useState({});
+  const [activeId, setActiveId] = useState(null);
   const [testResults, setTestResults] = useState({});
-  // Currently running test animation
-  const [testingSmrId, setTestingSmrId] = useState(null);
+  const [testingId, setTestingId] = useState(null);
 
   const updateField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // --- Per-SMR review helpers ---
   const getReview = (id) =>
-    smrReviews[id] || { reviewAreas: [], reviewOutcome: "", reviewNotes: "" };
+    ecddReviews[id] || { reviewAreas: [], reviewOutcome: "", reviewNotes: "" };
 
   const updateReview = (id, patch) => {
-    setSmrReviews((prev) => ({
+    setEcddReviews((prev) => ({
       ...prev,
       [id]: { ...getReview(id), ...patch },
     }));
   };
 
-  const toggleReviewArea = (smrId, area) => {
-    const current = getReview(smrId);
+  const toggleReviewArea = (ecddId, area) => {
+    const current = getReview(ecddId);
     const areas = current.reviewAreas.includes(area)
       ? current.reviewAreas.filter((a) => a !== area)
       : [...current.reviewAreas, area];
-    updateReview(smrId, { reviewAreas: areas });
+    updateReview(ecddId, { reviewAreas: areas });
   };
 
-  const isSmrReviewed = (id) => {
-    const review = smrReviews[id];
+  const isRecordReviewed = (id) => {
+    const review = ecddReviews[id];
     return !!(review && review.reviewOutcome && review.reviewAreas.length > 0 && testResults[id]);
   };
 
-  const allSmrsReviewed =
-    selectedSmrIds.length > 0 && selectedSmrIds.every((id) => isSmrReviewed(id));
-  const reviewedCount = selectedSmrIds.filter((id) => isSmrReviewed(id)).length;
+  const allReviewed = selectedIds.length > 0 && selectedIds.every((id) => isRecordReviewed(id));
+  const reviewedCount = selectedIds.filter((id) => isRecordReviewed(id)).length;
 
-  // --- Selection helpers ---
-
-  const runTest = (smrId) => {
-    const record = SMR_REGISTER.find((r) => r.id === smrId);
-    setTestingSmrId(smrId);
+  const runTest = (ecddId) => {
+    const record = ECDD_REGISTER.find((r) => r.id === ecddId);
+    setTestingId(ecddId);
     setTimeout(() => {
       const result = generateTestResult(record);
-      setTestResults((prev) => ({ ...prev, [smrId]: result }));
-      setTestingSmrId(null);
+      setTestResults((prev) => ({ ...prev, [ecddId]: result }));
+      setTestingId(null);
     }, 1500);
   };
 
   const handleMethodChange = (value) => {
     updateField("selectionMethod", value);
-    setSelectedSmrIds([]);
-    setSmrReviews({});
+    setSelectedIds([]);
+    setEcddReviews({});
     setTestResults({});
-    setActiveSmrId(null);
+    setActiveId(null);
   };
 
   const handleRandomSelect = useCallback(() => {
-    const count = Number(formData.numberOfSmrs) || 5;
-    const picked = shuffleAndPick(SMR_REGISTER, count);
-    setSelectedSmrIds(picked.map((r) => r.id));
-    setSmrReviews({});
-    setActiveSmrId(null);
-  }, [formData.numberOfSmrs]);
+    const count = Number(formData.numberOfRecords) || 5;
+    const picked = shuffleAndPick(ECDD_REGISTER, count);
+    setSelectedIds(picked.map((r) => r.id));
+    setEcddReviews({});
+    setActiveId(null);
+  }, [formData.numberOfRecords]);
 
-  const toggleSmr = (id) => {
-    setSelectedSmrIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const toggleRecord = (id) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
-  const removeSmr = (id) => {
-    setSelectedSmrIds((prev) => prev.filter((x) => x !== id));
-    setSmrReviews((prev) => {
+  const removeRecord = (id) => {
+    setSelectedIds((prev) => prev.filter((x) => x !== id));
+    setEcddReviews((prev) => {
       const next = { ...prev };
       delete next[id];
       return next;
     });
-    if (activeSmrId === id) setActiveSmrId(null);
+    if (activeId === id) setActiveId(null);
   };
 
-  const selectedRecords = SMR_REGISTER.filter((r) => selectedSmrIds.includes(r.id));
+  const selectedRecords = ECDD_REGISTER.filter((r) => selectedIds.includes(r.id));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -468,10 +564,10 @@ export default function SmrSelectionForm() {
 
   const handleReset = () => {
     setFormData(INITIAL_FORM);
-    setSelectedSmrIds([]);
-    setSmrReviews({});
+    setSelectedIds([]);
+    setEcddReviews({});
     setTestResults({});
-    setActiveSmrId(null);
+    setActiveId(null);
     setSubmitted(false);
   };
 
@@ -491,29 +587,28 @@ export default function SmrSelectionForm() {
           ? "Mixed"
           : "N/A";
 
-  const totalSelectedValue = selectedRecords.reduce((sum, r) => sum + r.transactionValue, 0);
+  const totalSelectedTurnover = selectedRecords.reduce((sum, r) => sum + r.annualTurnover, 0);
 
   // =============================================
-  // SMR Detail / Review View
+  // ECDD Detail / Review View
   // =============================================
-  if (activeSmrId) {
-    const record = SMR_REGISTER.find((r) => r.id === activeSmrId);
-    const review = getReview(activeSmrId);
+  if (activeId) {
+    const record = ECDD_REGISTER.find((r) => r.id === activeId);
+    const review = getReview(activeId);
 
     return (
       <div className="space-y-6">
-        {/* Back button */}
         <Button
           type="button"
           variant="ghost"
-          onClick={() => setActiveSmrId(null)}
+          onClick={() => setActiveId(null)}
           className="gap-2 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Form
         </Button>
 
-        {/* SMR Detail Card */}
+        {/* ECDD Detail Card */}
         <Card>
           <CardHeader className="pb-4">
             <div className="flex items-start justify-between">
@@ -527,7 +622,12 @@ export default function SmrSelectionForm() {
                 <span
                   className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${RISK_COLORS[record.riskLevel]}`}
                 >
-                  {record.riskLevel} Risk
+                  {record.riskLevel}
+                </span>
+                <span
+                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${CUSTOMER_TYPE_COLORS[record.customerType] || "bg-zinc-100 text-zinc-700 border-zinc-200"}`}
+                >
+                  {record.customerType}
                 </span>
                 <span
                   className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[record.status]}`}
@@ -538,36 +638,43 @@ export default function SmrSelectionForm() {
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
-            {/* Details grid */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <DetailField label="Customer ID" value={record.customerId} />
-              <DetailField label="Filing Date" value={record.filingDate} />
-              <DetailField label="Suspicion Type" value={record.suspicionType} />
+              <DetailField label="Review Date" value={record.reviewDate} />
+              <DetailField label="Nationality" value={record.nationality} />
+              <DetailField label="Occupation" value={record.occupation} />
               <DetailField
-                label="Transaction Value"
-                value={`${formatCurrency(record.transactionValue)} ${record.transactionCurrency}`}
+                label="Annual Turnover"
+                value={`${formatCurrency(record.annualTurnover)}`}
               />
-              <DetailField label="Originating Account" value={record.originatingAccount} />
-              <DetailField label="Beneficiary Account" value={record.beneficiaryAccount} />
-              <DetailField label="Filed By" value={record.filedBy} />
-              <DetailField label="Department" value={record.department} />
+              <DetailField label="Account Relationship" value={record.accountRelationship} />
+              <DetailField label="Last CDD Date" value={record.lastCddDate} />
+              <DetailField label="ECDD Trigger" value={record.ecddTrigger} />
+              <DetailField label="Relationship Manager" value={record.relationshipManager} />
+              <DetailField label="Branch" value={record.branch} />
             </div>
             <Separator />
             <div>
-              <p className="mb-1 text-sm font-medium text-muted-foreground">Suspicion Narrative</p>
+              <p className="mb-1 text-sm font-medium text-muted-foreground">Source of Funds</p>
               <p className="rounded-lg bg-muted/50 p-3 text-sm leading-relaxed text-foreground">
-                {record.suspicionNarrative}
+                {record.sourceOfFunds}
+              </p>
+            </div>
+            <div>
+              <p className="mb-1 text-sm font-medium text-muted-foreground">Source of Wealth</p>
+              <p className="rounded-lg bg-muted/50 p-3 text-sm leading-relaxed text-foreground">
+                {record.sourceOfWealth}
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Step 1: Review Areas Selection */}
+        {/* Review Focus */}
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
               <Search className="h-5 w-5 text-primary" />
-              Review Focus for {record.referenceNo}
+              ECDD Review for {record.referenceNo}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -577,13 +684,13 @@ export default function SmrSelectionForm() {
                 {REVIEW_AREAS.map((area) => (
                   <div key={area.id} className="flex items-center gap-2">
                     <Checkbox
-                      id={`${activeSmrId}-${area.id}`}
+                      id={`${activeId}-${area.id}`}
                       checked={review.reviewAreas.includes(area.id)}
-                      onCheckedChange={() => toggleReviewArea(activeSmrId, area.id)}
-                      disabled={!!testResults[activeSmrId]}
+                      onCheckedChange={() => toggleReviewArea(activeId, area.id)}
+                      disabled={!!testResults[activeId]}
                     />
                     <Label
-                      htmlFor={`${activeSmrId}-${area.id}`}
+                      htmlFor={`${activeId}-${area.id}`}
                       className="cursor-pointer font-normal"
                     >
                       {area.label}
@@ -593,22 +700,23 @@ export default function SmrSelectionForm() {
               </div>
             </div>
 
-            {/* Run Test Button */}
-            {!testResults[activeSmrId] && (
+            {/* Run Test */}
+            {!testResults[activeId] && (
               <>
                 <Separator />
                 <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-6">
                   <FlaskConical className="h-8 w-8 text-primary/60" />
                   <p className="text-center text-sm text-muted-foreground">
-                    Select the review areas above, then run the compliance test to generate results.
+                    Select the review areas above, then run the ECDD compliance test to generate
+                    results.
                   </p>
                   <Button
                     type="button"
-                    onClick={() => runTest(activeSmrId)}
-                    disabled={review.reviewAreas.length === 0 || testingSmrId === activeSmrId}
+                    onClick={() => runTest(activeId)}
+                    disabled={review.reviewAreas.length === 0 || testingId === activeId}
                     className="gap-2"
                   >
-                    {testingSmrId === activeSmrId ? (
+                    {testingId === activeId ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
                         Running Test...
@@ -616,7 +724,7 @@ export default function SmrSelectionForm() {
                     ) : (
                       <>
                         <FlaskConical className="h-4 w-4" />
-                        Run Compliance Test
+                        Run ECDD Compliance Test
                       </>
                     )}
                   </Button>
@@ -625,11 +733,11 @@ export default function SmrSelectionForm() {
             )}
 
             {/* Test Results */}
-            {testResults[activeSmrId] && (
+            {testResults[activeId] && (
               <>
                 <Separator />
                 {(() => {
-                  const result = testResults[activeSmrId];
+                  const result = testResults[activeId];
                   const scoreColor =
                     result.overallScore >= 85
                       ? "text-emerald-700 bg-emerald-100"
@@ -660,7 +768,6 @@ export default function SmrSelectionForm() {
                         </span>
                       </div>
 
-                      {/* Overall score bar */}
                       <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${scoreBarColor}`}
@@ -668,7 +775,6 @@ export default function SmrSelectionForm() {
                         />
                       </div>
 
-                      {/* Flags */}
                       {result.flags.length > 0 && (
                         <div className="rounded-lg border border-red-200 bg-red-50 p-3">
                           <p className="mb-1.5 text-xs font-semibold text-red-800">
@@ -688,24 +794,32 @@ export default function SmrSelectionForm() {
                         </div>
                       )}
 
-                      {/* Category breakdown */}
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         {[
                           {
-                            key: "completeness",
-                            label: "Documentation Completeness",
-                            data: result.completeness,
+                            key: "kycCompleteness",
+                            label: "KYC Completeness",
+                            data: result.kycCompleteness,
                           },
                           {
-                            key: "timeliness",
-                            label: "Filing Timeliness",
-                            data: result.timeliness,
+                            key: "sofVerification",
+                            label: "SOF/SOW Verification",
+                            data: result.sofVerification,
                           },
-                          { key: "narrative", label: "Narrative Quality", data: result.narrative },
                           {
-                            key: "regulatory",
-                            label: "Regulatory Alignment",
-                            data: result.regulatory,
+                            key: "beneficialOwnership",
+                            label: "Beneficial Ownership",
+                            data: result.beneficialOwnership,
+                          },
+                          {
+                            key: "pepScreening",
+                            label: "PEP & Sanctions Screening",
+                            data: result.pepScreening,
+                          },
+                          {
+                            key: "riskAssessment",
+                            label: "Risk Assessment Quality",
+                            data: result.riskAssessment,
                           },
                         ].map((cat) => {
                           const catColor =
@@ -745,43 +859,53 @@ export default function SmrSelectionForm() {
                   );
                 })()}
 
-                {/* Review Outcome - only visible after test */}
+                {/* Review Outcome - only after test */}
                 <Separator />
                 <div className="space-y-3">
                   <Label>Review Outcome</Label>
                   <p className="text-xs text-muted-foreground">
-                    Based on the test results above, select the appropriate outcome for this SMR.
+                    Based on the test results above, select the appropriate outcome for this ECDD
+                    case.
                   </p>
                   <RadioGroup
                     value={review.reviewOutcome}
-                    onValueChange={(value) => updateReview(activeSmrId, { reviewOutcome: value })}
+                    onValueChange={(value) => updateReview(activeId, { reviewOutcome: value })}
                     className="flex flex-wrap gap-4"
                   >
                     <div className="flex items-center gap-2">
+                      <RadioGroupItem value="compliant" id={`${activeId}-outcome-compliant`} />
+                      <Label
+                        htmlFor={`${activeId}-outcome-compliant`}
+                        className="cursor-pointer font-normal"
+                      >
+                        Compliant
+                      </Label>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <RadioGroupItem
-                        value="satisfactory"
-                        id={`${activeSmrId}-outcome-satisfactory`}
+                        value="deficiencies"
+                        id={`${activeId}-outcome-deficiencies`}
                       />
                       <Label
-                        htmlFor={`${activeSmrId}-outcome-satisfactory`}
+                        htmlFor={`${activeId}-outcome-deficiencies`}
                         className="cursor-pointer font-normal"
                       >
-                        Satisfactory
+                        Deficiencies Found
                       </Label>
                     </div>
                     <div className="flex items-center gap-2">
-                      <RadioGroupItem value="issues" id={`${activeSmrId}-outcome-issues`} />
+                      <RadioGroupItem value="exit" id={`${activeId}-outcome-exit`} />
                       <Label
-                        htmlFor={`${activeSmrId}-outcome-issues`}
+                        htmlFor={`${activeId}-outcome-exit`}
                         className="cursor-pointer font-normal"
                       >
-                        Issues Identified
+                        Recommend Exit
                       </Label>
                     </div>
                     <div className="flex items-center gap-2">
-                      <RadioGroupItem value="escalation" id={`${activeSmrId}-outcome-escalation`} />
+                      <RadioGroupItem value="escalation" id={`${activeId}-outcome-escalation`} />
                       <Label
-                        htmlFor={`${activeSmrId}-outcome-escalation`}
+                        htmlFor={`${activeId}-outcome-escalation`}
                         className="cursor-pointer font-normal"
                       >
                         Requires Escalation
@@ -791,13 +915,13 @@ export default function SmrSelectionForm() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label htmlFor={`${activeSmrId}-notes`}>Review Notes</Label>
+                  <Label htmlFor={`${activeId}-notes`}>Review Notes</Label>
                   <Textarea
-                    id={`${activeSmrId}-notes`}
-                    placeholder="Add any observations, findings, or notes for this SMR..."
+                    id={`${activeId}-notes`}
+                    placeholder="Add any observations, findings, or recommendations for this ECDD case..."
                     rows={3}
                     value={review.reviewNotes}
-                    onChange={(e) => updateReview(activeSmrId, { reviewNotes: e.target.value })}
+                    onChange={(e) => updateReview(activeId, { reviewNotes: e.target.value })}
                   />
                 </div>
               </>
@@ -805,31 +929,31 @@ export default function SmrSelectionForm() {
           </CardContent>
         </Card>
 
-        {/* Navigation between SMRs */}
+        {/* Navigation */}
         <div className="flex items-center justify-between">
           <Button
             type="button"
             variant="outline"
-            onClick={() => setActiveSmrId(null)}
+            onClick={() => setActiveId(null)}
             className="gap-2 bg-transparent"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Form
           </Button>
           {(() => {
-            const currentIndex = selectedSmrIds.indexOf(activeSmrId);
-            const nextId = selectedSmrIds[currentIndex + 1];
+            const currentIndex = selectedIds.indexOf(activeId);
+            const nextId = selectedIds[currentIndex + 1];
             if (nextId) {
               return (
                 <Button
                   type="button"
                   onClick={() => {
-                    setActiveSmrId(nextId);
+                    setActiveId(nextId);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
                   className="gap-2"
                 >
-                  Next SMR
+                  Next Record
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               );
@@ -838,7 +962,7 @@ export default function SmrSelectionForm() {
               <Button
                 type="button"
                 onClick={() => {
-                  setActiveSmrId(null);
+                  setActiveId(null);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 className="gap-2"
@@ -859,21 +983,21 @@ export default function SmrSelectionForm() {
   if (submitted) {
     return (
       <div className="space-y-6">
-        {/* Success banner */}
         <Card className="border-emerald-200 bg-emerald-50">
           <CardContent className="flex flex-col items-center gap-3 py-8 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
               <CheckCircle2 className="h-7 w-7 text-emerald-600" />
             </div>
-            <h2 className="text-xl font-semibold text-emerald-900">Form Submitted Successfully</h2>
+            <h2 className="text-xl font-semibold text-emerald-900">
+              ECDD Form Submitted Successfully
+            </h2>
             <p className="max-w-md text-sm text-emerald-700">
-              Your SMR selection compliance form has been recorded. Below is a summary of the
-              submitted information for your records.
+              Your Enhanced Customer Due Diligence selection form has been recorded. Below is a
+              summary for your records.
             </p>
           </CardContent>
         </Card>
 
-        {/* Summary */}
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
@@ -884,14 +1008,14 @@ export default function SmrSelectionForm() {
           <CardContent className="space-y-5">
             <div>
               <h3 className="mb-2 text-sm font-semibold text-foreground">
-                SMR Register Population
+                ECDD Register Population
               </h3>
               <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
                 <SummaryField
-                  label="Reporting Period"
+                  label="Review Period"
                   value={`${formData.periodFrom || "N/A"} to ${formData.periodTo || "N/A"}`}
                 />
-                <SummaryField label="Total SMRs in Register" value={formData.totalSmrs} />
+                <SummaryField label="Total Records in Register" value={formData.totalRecords} />
                 <SummaryField label="Register Source" value={formData.registerSource || "N/A"} />
               </dl>
             </div>
@@ -909,7 +1033,7 @@ export default function SmrSelectionForm() {
             <div>
               <h3 className="mb-2 text-sm font-semibold text-foreground">Sample Details</h3>
               <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
-                <SummaryField label="SMRs Selected" value={String(selectedSmrIds.length)} />
+                <SummaryField label="Records Selected" value={String(selectedIds.length)} />
                 <SummaryField label="Date of Selection" value={formData.dateOfSelection || "N/A"} />
                 <SummaryField label="Selected By" value={formData.selectedBy || "N/A"} />
               </dl>
@@ -922,13 +1046,15 @@ export default function SmrSelectionForm() {
                 <SummaryField
                   label="Outcome"
                   value={
-                    formData.overallOutcome === "satisfactory"
-                      ? "Satisfactory"
-                      : formData.overallOutcome === "issues"
-                        ? "Issues Identified"
-                        : formData.overallOutcome === "escalation"
-                          ? "Requires Escalation"
-                          : "N/A"
+                    formData.overallOutcome === "compliant"
+                      ? "Compliant"
+                      : formData.overallOutcome === "deficiencies"
+                        ? "Deficiencies Found"
+                        : formData.overallOutcome === "exit"
+                          ? "Recommend Exit"
+                          : formData.overallOutcome === "escalation"
+                            ? "Requires Escalation"
+                            : "N/A"
                   }
                 />
                 <SummaryField label="Remarks" value={formData.overallRemarks || "N/A"} span2 />
@@ -937,13 +1063,13 @@ export default function SmrSelectionForm() {
           </CardContent>
         </Card>
 
-        {/* Per-SMR Review Results */}
+        {/* Per-record review results */}
         {selectedRecords.length > 0 && (
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
                 <ClipboardList className="h-5 w-5 text-primary" />
-                Individual SMR Review Results ({selectedRecords.length})
+                Individual ECDD Review Results ({selectedRecords.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -959,7 +1085,7 @@ export default function SmrSelectionForm() {
                       <div>
                         <p className="font-medium text-foreground">{record.referenceNo}</p>
                         <p className="text-sm text-muted-foreground">
-                          {record.customerName} &middot; {formatCurrency(record.transactionValue)}
+                          {record.customerName} &middot; {record.customerType}
                         </p>
                       </div>
                       <div className="flex gap-2">
@@ -970,22 +1096,26 @@ export default function SmrSelectionForm() {
                         </span>
                         <span
                           className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
-                            review.reviewOutcome === "satisfactory"
+                            review.reviewOutcome === "compliant"
                               ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                              : review.reviewOutcome === "issues"
-                                ? "bg-red-100 text-red-800 border-red-200"
-                                : review.reviewOutcome === "escalation"
-                                  ? "bg-amber-100 text-amber-800 border-amber-200"
-                                  : "bg-zinc-100 text-zinc-700 border-zinc-200"
+                              : review.reviewOutcome === "deficiencies"
+                                ? "bg-amber-100 text-amber-800 border-amber-200"
+                                : review.reviewOutcome === "exit"
+                                  ? "bg-red-100 text-red-800 border-red-200"
+                                  : review.reviewOutcome === "escalation"
+                                    ? "bg-red-100 text-red-800 border-red-200"
+                                    : "bg-zinc-100 text-zinc-700 border-zinc-200"
                           }`}
                         >
-                          {review.reviewOutcome === "satisfactory"
-                            ? "Satisfactory"
-                            : review.reviewOutcome === "issues"
-                              ? "Issues Identified"
-                              : review.reviewOutcome === "escalation"
-                                ? "Requires Escalation"
-                                : "Not Reviewed"}
+                          {review.reviewOutcome === "compliant"
+                            ? "Compliant"
+                            : review.reviewOutcome === "deficiencies"
+                              ? "Deficiencies Found"
+                              : review.reviewOutcome === "exit"
+                                ? "Recommend Exit"
+                                : review.reviewOutcome === "escalation"
+                                  ? "Requires Escalation"
+                                  : "Not Reviewed"}
                         </span>
                       </div>
                     </div>
@@ -1029,16 +1159,15 @@ export default function SmrSelectionForm() {
                 );
               })}
               <div className="mt-3 flex justify-end text-sm text-muted-foreground">
-                Total selected value:{" "}
+                Total annual turnover:{" "}
                 <span className="ml-1 font-medium text-foreground">
-                  {formatCurrency(totalSelectedValue)}
+                  {formatCurrency(totalSelectedTurnover)}
                 </span>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Actions */}
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-end">
           <Button
             variant="outline"
@@ -1060,21 +1189,21 @@ export default function SmrSelectionForm() {
   // Main Form View
   // =============================================
   return (
-    <form onSubmit={handleSubmit} className="space-y-6  ">
-      {/* Section 1: SMR Register Population */}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Section 1: ECDD Register Population */}
       <Card>
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
             <FileText className="h-5 w-5 text-primary" />
-            <span>1. SMR Register Population</span>
+            <span>1. ECDD Register Population</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="periodFrom">Reporting Period From</Label>
+              <Label htmlFor="ecdd-periodFrom">Review Period From</Label>
               <Input
-                id="periodFrom"
+                id="ecdd-periodFrom"
                 type="date"
                 value={formData.periodFrom}
                 onChange={(e) => updateField("periodFrom", e.target.value)}
@@ -1082,32 +1211,34 @@ export default function SmrSelectionForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="periodTo">Reporting Period To</Label>
+              <Label htmlFor="ecdd-periodTo">Review Period To</Label>
               <Input
-                id="periodTo"
+                id="ecdd-periodTo"
                 type="date"
                 value={formData.periodTo}
                 onChange={(e) => updateField("periodTo", e.target.value)}
                 required
               />
             </div>
-            {/* <div className="space-y-2">
-              <Label htmlFor="totalSmrs">Total Number of SMRs in Register</Label>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="ecdd-totalRecords">Total ECDD Records in Register</Label>
               <Input
-                id="totalSmrs"
+                id="ecdd-totalRecords"
                 type="number"
                 min="0"
-                value={formData.totalSmrs}
+                value={formData.totalRecords}
                 readOnly
                 required
               />
-            </div> */}
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="registerSource">Source of Register (System / Report Name)</Label>
+              <Label htmlFor="ecdd-registerSource">Source of Register (System / Report Name)</Label>
               <Input
-                id="registerSource"
+                id="ecdd-registerSource"
                 type="text"
-                placeholder="e.g. AML Monitoring System"
+                placeholder="e.g. CDD Management System"
                 value={formData.registerSource}
                 onChange={(e) => updateField("registerSource", e.target.value)}
                 required
@@ -1139,8 +1270,11 @@ export default function SmrSelectionForm() {
                 { value: "mixed", label: "Mixed" },
               ].map((option) => (
                 <div key={option.value} className="flex items-center gap-2">
-                  <RadioGroupItem value={option.value} id={`method-${option.value}`} />
-                  <Label htmlFor={`method-${option.value}`} className="cursor-pointer font-normal">
+                  <RadioGroupItem value={option.value} id={`ecdd-method-${option.value}`} />
+                  <Label
+                    htmlFor={`ecdd-method-${option.value}`}
+                    className="cursor-pointer font-normal"
+                  >
                     {option.label}
                   </Label>
                 </div>
@@ -1148,9 +1282,9 @@ export default function SmrSelectionForm() {
             </RadioGroup>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="methodReason">Reason for Choosing This Method</Label>
+            <Label htmlFor="ecdd-methodReason">Reason for Choosing This Method</Label>
             <Textarea
-              id="methodReason"
+              id="ecdd-methodReason"
               placeholder="Describe the rationale for the chosen selection method..."
               rows={3}
               value={formData.methodReason}
@@ -1159,31 +1293,29 @@ export default function SmrSelectionForm() {
             />
           </div>
 
-          {/* Random: count input + generate button */}
           {isRandom && (
             <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4">
               <p className="mb-3 text-sm text-muted-foreground">
-                Specify how many SMRs to randomly select from the register, then click the button
-                below.
+                Specify how many ECDD records to randomly select from the register.
               </p>
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end">
                 <div className="w-full space-y-2 sm:w-40">
-                  <Label htmlFor="randomCount">Number to Select</Label>
+                  <Label htmlFor="ecdd-randomCount">Number to Select</Label>
                   <Input
-                    id="randomCount"
+                    id="ecdd-randomCount"
                     type="number"
                     min="1"
-                    max={SMR_REGISTER.length}
+                    max={ECDD_REGISTER.length}
                     placeholder="e.g. 5"
-                    value={formData.numberOfSmrs}
-                    onChange={(e) => updateField("numberOfSmrs", e.target.value)}
+                    value={formData.numberOfRecords}
+                    onChange={(e) => updateField("numberOfRecords", e.target.value)}
                   />
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleRandomSelect}
-                  disabled={!formData.numberOfSmrs}
+                  disabled={!formData.numberOfRecords}
                   className="bg-transparent"
                 >
                   <Shuffle className="mr-2 h-4 w-4" />
@@ -1195,7 +1327,7 @@ export default function SmrSelectionForm() {
         </CardContent>
       </Card>
 
-      {/* Section 3: Selection Criteria (conditional) */}
+      {/* Section 3: Selection Criteria (Targeted) */}
       {showTargetedCriteria && (
         <Card>
           <CardHeader className="pb-4">
@@ -1205,76 +1337,73 @@ export default function SmrSelectionForm() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="suspicionReason">Suspicion Reason / Typology</Label>
-              <Textarea
-                id="suspicionReason"
-                placeholder="e.g. Structuring, Unusual cash activity, Trade-based laundering..."
-                rows={2}
-                value={formData.suspicionReason}
-                onChange={(e) => updateField("suspicionReason", e.target.value)}
-              />
-            </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="timePeriodFrom">Time Period From (Filing Dates)</Label>
-                <Input
-                  id="timePeriodFrom"
-                  type="date"
-                  value={formData.timePeriodFrom}
-                  onChange={(e) => updateField("timePeriodFrom", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="timePeriodTo">Time Period To (Filing Dates)</Label>
-                <Input
-                  id="timePeriodTo"
-                  type="date"
-                  value={formData.timePeriodTo}
-                  onChange={(e) => updateField("timePeriodTo", e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="customerRiskLevel">Customer Risk Level</Label>
+                <Label htmlFor="ecdd-customerType">Customer Type</Label>
                 <Select
-                  value={formData.customerRiskLevel}
-                  onValueChange={(value) => updateField("customerRiskLevel", value)}
+                  value={formData.customerType}
+                  onValueChange={(value) => updateField("customerType", value)}
                 >
-                  <SelectTrigger id="customerRiskLevel">
-                    <SelectValue placeholder="Select risk level" />
+                  <SelectTrigger id="ecdd-customerType">
+                    <SelectValue placeholder="Select customer type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="corporate">Corporate</SelectItem>
+                    <SelectItem value="individual">Individual</SelectItem>
+                    <SelectItem value="dnfbp">DNFBP</SelectItem>
+                    <SelectItem value="npo">NPO</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="transactionThreshold">Transaction Value Threshold</Label>
-                <Input
-                  id="transactionThreshold"
-                  type="text"
-                  placeholder="e.g. > 50,000"
-                  value={formData.transactionThreshold}
-                  onChange={(e) => updateField("transactionThreshold", e.target.value)}
-                />
+                <Label htmlFor="ecdd-riskLevel">Risk Level</Label>
+                <Select
+                  value={formData.riskLevel}
+                  onValueChange={(value) => updateField("riskLevel", value)}
+                >
+                  <SelectTrigger id="ecdd-riskLevel">
+                    <SelectValue placeholder="Select risk level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="veryhigh">Very High</SelectItem>
+                    <SelectItem value="pep">PEP</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ecdd-ecddTrigger">ECDD Trigger Criteria</Label>
+              <Textarea
+                id="ecdd-ecddTrigger"
+                placeholder="e.g. PEP status, high-risk jurisdiction, complex ownership..."
+                rows={2}
+                value={formData.ecddTrigger}
+                onChange={(e) => updateField("ecddTrigger", e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ecdd-turnoverThreshold">Annual Turnover Threshold</Label>
+              <Input
+                id="ecdd-turnoverThreshold"
+                type="text"
+                placeholder="e.g. > 10,000,000"
+                value={formData.turnoverThreshold}
+                onChange={(e) => updateField("turnoverThreshold", e.target.value)}
+              />
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Section: SMR Register */}
+      {/* Section: ECDD Register Table */}
       {formData.selectionMethod && (
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
               <ClipboardList className="h-5 w-5 text-primary" />
               <span>
-                {showTargetedCriteria ? "4" : "3"}. SMR Register
+                {showTargetedCriteria ? "4" : "3"}. ECDD Register
                 {isRandom && (
                   <span className="ml-2 text-sm font-normal text-muted-foreground">
                     (auto-selected)
@@ -1289,11 +1418,10 @@ export default function SmrSelectionForm() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Selected summary badges */}
-            {selectedSmrIds.length > 0 && (
+            {selectedIds.length > 0 && (
               <div className="space-y-2">
                 <p className="text-sm font-medium text-foreground">
-                  Selected ({selectedSmrIds.length})
+                  Selected ({selectedIds.length})
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {selectedRecords.map((r) => (
@@ -1301,7 +1429,7 @@ export default function SmrSelectionForm() {
                       {r.referenceNo}
                       <button
                         type="button"
-                        onClick={() => removeSmr(r.id)}
+                        onClick={() => removeRecord(r.id)}
                         className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10"
                         aria-label={`Remove ${r.referenceNo}`}
                       >
@@ -1313,8 +1441,7 @@ export default function SmrSelectionForm() {
               </div>
             )}
 
-            {/* Table of all SMRs */}
-            <div className="rounded-lg border">
+            <div className="overflow-x-auto rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
@@ -1324,17 +1451,18 @@ export default function SmrSelectionForm() {
                       </TableHead>
                     )}
                     <TableHead>Ref No.</TableHead>
-                    <TableHead>Filing Date</TableHead>
+                    <TableHead>Review Date</TableHead>
                     <TableHead>Customer</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Risk</TableHead>
-                    <TableHead>Suspicion Type</TableHead>
-                    <TableHead className="text-right">Value</TableHead>
+                    <TableHead>ECDD Trigger</TableHead>
+                    <TableHead className="text-right">Turnover</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {SMR_REGISTER.map((record) => {
-                    const isSelected = selectedSmrIds.includes(record.id);
+                  {ECDD_REGISTER.map((record) => {
+                    const isSelected = selectedIds.includes(record.id);
                     return (
                       <TableRow
                         key={record.id}
@@ -1345,14 +1473,21 @@ export default function SmrSelectionForm() {
                           <TableCell>
                             <Checkbox
                               checked={isSelected}
-                              onCheckedChange={() => toggleSmr(record.id)}
+                              onCheckedChange={() => toggleRecord(record.id)}
                               aria-label={`Select ${record.referenceNo}`}
                             />
                           </TableCell>
                         )}
                         <TableCell className="font-medium">{record.referenceNo}</TableCell>
-                        <TableCell className="tabular-nums">{record.filingDate}</TableCell>
+                        <TableCell className="tabular-nums">{record.reviewDate}</TableCell>
                         <TableCell>{record.customerName}</TableCell>
+                        <TableCell>
+                          <span
+                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${CUSTOMER_TYPE_COLORS[record.customerType] || "bg-zinc-100 text-zinc-700 border-zinc-200"}`}
+                          >
+                            {record.customerType}
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <span
                             className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${RISK_COLORS[record.riskLevel]}`}
@@ -1360,9 +1495,11 @@ export default function SmrSelectionForm() {
                             {record.riskLevel}
                           </span>
                         </TableCell>
-                        <TableCell>{record.suspicionType}</TableCell>
+                        <TableCell className="max-w-[150px] truncate">
+                          {record.ecddTrigger}
+                        </TableCell>
                         <TableCell className="text-right tabular-nums">
-                          {formatCurrency(record.transactionValue)}
+                          {formatCurrency(record.annualTurnover)}
                         </TableCell>
                         <TableCell>
                           <span
@@ -1378,9 +1515,9 @@ export default function SmrSelectionForm() {
               </Table>
             </div>
 
-            {isRandom && selectedSmrIds.length === 0 && (
+            {isRandom && selectedIds.length === 0 && (
               <p className="text-center text-sm text-muted-foreground">
-                Use the &quot;Pick Randomly&quot; button above to auto-select SMRs.
+                Use the &quot;Pick Randomly&quot; button above to auto-select ECDD records.
               </p>
             )}
           </CardContent>
@@ -1400,24 +1537,24 @@ export default function SmrSelectionForm() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="numberOfSmrs">Number of SMRs Selected</Label>
+              <Label htmlFor="ecdd-numberOfRecords">Number of Records Selected</Label>
               <Input
-                id="numberOfSmrs"
+                id="ecdd-numberOfRecords"
                 type="number"
                 min="1"
                 value={
-                  isTargeted || isMixed ? String(selectedSmrIds.length) : formData.numberOfSmrs
+                  isTargeted || isMixed ? String(selectedIds.length) : formData.numberOfRecords
                 }
                 readOnly={isTargeted || isMixed}
                 placeholder="e.g. 5"
-                onChange={(e) => updateField("numberOfSmrs", e.target.value)}
+                onChange={(e) => updateField("numberOfRecords", e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dateOfSelection">Date of Selection</Label>
+              <Label htmlFor="ecdd-dateOfSelection">Date of Selection</Label>
               <Input
-                id="dateOfSelection"
+                id="ecdd-dateOfSelection"
                 type="date"
                 value={formData.dateOfSelection}
                 onChange={(e) => updateField("dateOfSelection", e.target.value)}
@@ -1425,9 +1562,9 @@ export default function SmrSelectionForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="selectedBy">Selected By</Label>
+              <Label htmlFor="ecdd-selectedBy">Selected By</Label>
               <Input
-                id="selectedBy"
+                id="ecdd-selectedBy"
                 type="text"
                 placeholder="Name / Department"
                 value={formData.selectedBy}
@@ -1439,47 +1576,45 @@ export default function SmrSelectionForm() {
         </CardContent>
       </Card>
 
-      {/* Section: Review Selected SMRs (click to open detail) */}
-      {selectedSmrIds.length > 0 && (
+      {/* Section: Review Selected Records */}
+      {selectedIds.length > 0 && (
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
               <Search className="h-5 w-5 text-primary" />
               <span>
                 {showTargetedCriteria ? "6" : formData.selectionMethod ? "5" : "4"}. Review Selected
-                SMRs
+                ECDD Records
               </span>
             </CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
-              Click on each SMR to open its detail view and complete the review focus section.
+              Click on each record to open its detail view and complete the ECDD review.
             </p>
           </CardHeader>
           <CardContent className="space-y-2">
-            {/* Progress indicator */}
             <div className="mb-4 flex items-center gap-3">
               <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                 <div
                   className="h-full rounded-full bg-primary transition-all duration-300"
                   style={{
-                    width: `${selectedSmrIds.length > 0 ? (reviewedCount / selectedSmrIds.length) * 100 : 0}%`,
+                    width: `${selectedIds.length > 0 ? (reviewedCount / selectedIds.length) * 100 : 0}%`,
                   }}
                 />
               </div>
               <span className="text-sm font-medium text-muted-foreground">
-                {reviewedCount}/{selectedSmrIds.length} reviewed
+                {reviewedCount}/{selectedIds.length} reviewed
               </span>
             </div>
 
-            {/* SMR list items */}
             {selectedRecords.map((record) => {
-              const reviewed = isSmrReviewed(record.id);
+              const reviewed = isRecordReviewed(record.id);
               const review = getReview(record.id);
               return (
                 <button
                   key={record.id}
                   type="button"
                   onClick={() => {
-                    setActiveSmrId(record.id);
+                    setActiveId(record.id);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
                   className={`flex w-full items-center gap-4 rounded-lg border p-4 text-left transition-colors hover:bg-muted/50 ${
@@ -1511,24 +1646,26 @@ export default function SmrSelectionForm() {
                       {reviewed && (
                         <span
                           className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
-                            review.reviewOutcome === "satisfactory"
+                            review.reviewOutcome === "compliant"
                               ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                              : review.reviewOutcome === "issues"
-                                ? "bg-red-100 text-red-800 border-red-200"
-                                : "bg-amber-100 text-amber-800 border-amber-200"
+                              : review.reviewOutcome === "deficiencies"
+                                ? "bg-amber-100 text-amber-800 border-amber-200"
+                                : "bg-red-100 text-red-800 border-red-200"
                           }`}
                         >
-                          {review.reviewOutcome === "satisfactory"
-                            ? "Satisfactory"
-                            : review.reviewOutcome === "issues"
-                              ? "Issues Identified"
-                              : "Requires Escalation"}
+                          {review.reviewOutcome === "compliant"
+                            ? "Compliant"
+                            : review.reviewOutcome === "deficiencies"
+                              ? "Deficiencies Found"
+                              : review.reviewOutcome === "exit"
+                                ? "Recommend Exit"
+                                : "Requires Escalation"}
                         </span>
                       )}
                     </div>
                     <p className="mt-0.5 truncate text-sm text-muted-foreground">
-                      {record.customerName} &middot; {record.suspicionType} &middot;{" "}
-                      {formatCurrency(record.transactionValue)}
+                      {record.customerName} &middot; {record.customerType} &middot;{" "}
+                      {formatCurrency(record.annualTurnover)}
                     </p>
                   </div>
                   <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
@@ -1539,9 +1676,9 @@ export default function SmrSelectionForm() {
         </Card>
       )}
 
-      {/* Section: Overall Review Outcome (shown only when all SMRs are reviewed) */}
-      {selectedSmrIds.length > 0 && (
-        <Card className={!allSmrsReviewed ? "opacity-60 pointer-events-none" : ""}>
+      {/* Section: Overall Review Outcome */}
+      {selectedIds.length > 0 && (
+        <Card className={!allReviewed ? "opacity-60 pointer-events-none" : ""}>
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
               <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -1550,10 +1687,10 @@ export default function SmrSelectionForm() {
                 Outcome
               </span>
             </CardTitle>
-            {!allSmrsReviewed && (
+            {!allReviewed && (
               <div className="mt-2 flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
                 <AlertCircle className="h-4 w-4 shrink-0" />
-                <span>Please review all selected SMRs before completing this section.</span>
+                <span>Please review all selected ECDD records before completing this section.</span>
               </div>
             )}
           </CardHeader>
@@ -1566,30 +1703,36 @@ export default function SmrSelectionForm() {
                 className="flex flex-wrap gap-4"
               >
                 <div className="flex items-center gap-2">
-                  <RadioGroupItem value="satisfactory" id="overall-satisfactory" />
-                  <Label htmlFor="overall-satisfactory" className="cursor-pointer font-normal">
-                    Satisfactory
+                  <RadioGroupItem value="compliant" id="ecdd-overall-compliant" />
+                  <Label htmlFor="ecdd-overall-compliant" className="cursor-pointer font-normal">
+                    Compliant
                   </Label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <RadioGroupItem value="issues" id="overall-issues" />
-                  <Label htmlFor="overall-issues" className="cursor-pointer font-normal">
-                    Issues Identified
+                  <RadioGroupItem value="deficiencies" id="ecdd-overall-deficiencies" />
+                  <Label htmlFor="ecdd-overall-deficiencies" className="cursor-pointer font-normal">
+                    Deficiencies Found
                   </Label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <RadioGroupItem value="escalation" id="overall-escalation" />
-                  <Label htmlFor="overall-escalation" className="cursor-pointer font-normal">
+                  <RadioGroupItem value="exit" id="ecdd-overall-exit" />
+                  <Label htmlFor="ecdd-overall-exit" className="cursor-pointer font-normal">
+                    Recommend Exit
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="escalation" id="ecdd-overall-escalation" />
+                  <Label htmlFor="ecdd-overall-escalation" className="cursor-pointer font-normal">
                     Requires Escalation
                   </Label>
                 </div>
               </RadioGroup>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="overallRemarks">Remarks / Summary</Label>
+              <Label htmlFor="ecdd-overallRemarks">Remarks / Summary</Label>
               <Textarea
-                id="overallRemarks"
-                placeholder="Provide an overall summary of the review findings..."
+                id="ecdd-overallRemarks"
+                placeholder="Provide an overall summary of the ECDD review findings..."
                 rows={4}
                 value={formData.overallRemarks}
                 onChange={(e) => updateField("overallRemarks", e.target.value)}
@@ -1612,7 +1755,7 @@ export default function SmrSelectionForm() {
         <Button
           type="submit"
           className="w-full sm:w-auto"
-          disabled={selectedSmrIds.length > 0 && !allSmrsReviewed}
+          disabled={selectedIds.length > 0 && !allReviewed}
         >
           Submit Form
         </Button>
