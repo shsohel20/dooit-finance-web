@@ -23,101 +23,101 @@ import UserForm from "@/views/user-and-role/form";
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
 });
- const roles = [
-    {
-      name: "System Administrator",
-      users: 4,
-      permissions: [
-        {
-          title: "Manage users",
-          name: "manage_users",
-          description: "Create, update, deactivate users and assign roles.",
-        },
-        {
-          name: "manage_roles_permissions",
-          description: "Create and modify roles and control permission mappings.",
-          title: "Manage roles permissions",
-        },
-        {
-          name: "system_configuration",
-          title: "System configuration",
-          description: "Update system-wide settings, thresholds, and integrations.",
-        },
-        {
-          name: "view_all_data",
-          title: "View all data",
-          description: "Access all customer, transaction, and audit data.",
-        },
-        {
-          name: "audit_logs_access",
-          title: "Audit logs access",
-          description: "View and export system audit and activity logs.",
-        },
-      ],
-    },
-    {
-      name: "Compliance Officer",
-      users: 8,
-      permissions: [
-        {
-          name: "review_suspicious_activity",
-          title: "Review suspicious activity",
-          description: "Review flagged transactions and potential compliance breaches.",
-        },
-        {
-          name: "approve_or_reject_cases",
-          title: "Approve or reject cases",
-          description: "Approve, reject, or escalate compliance and risk cases.",
-        },
-        {
-          name: "generate_compliance_reports",
-          title: "Generate compliance reports",
-          description: "Generate and export regulatory and compliance reports.",
-        },
-        {
-          name: "manage_sanctions_pep_rules",
-          title: "Manage sanctions, PEP, and risk rules",
-          description: "Configure and maintain sanctions, PEP, and risk rules.",
-        },
-        {
-          name: "view_audit_logs",
-          title: "View audit logs",
-          description: "View audit logs related to compliance actions.",
-        },
-      ],
-    },
-    {
-      name: "KYC Analyst",
-      users: 22,
-      permissions: [
-        {
-          name: "view_customer_profiles",
-          title: "View customer profiles",
-          description: "View customer personal, identity, and risk information.",
-        },
-        {
-          name: "verify_kyc_documents",
-          title: "Verify KYC documents",
-          description: "Review and verify customer KYC documents.",
-        },
-        {
-          name: "update_kyc_status",
-          title: "Update KYC status",
-          description: "Update KYC status such as approved, rejected, or pending.",
-        },
-        {
-          name: "add_kyc_notes",
-          title: "Add KYC notes",
-          description: "Add internal notes and observations to KYC cases.",
-        },
-        {
-          name: "raise_compliance_case",
-          title: "Raise compliance case",
-          description: "Flag customers or transactions for compliance review.",
-        },
-      ],
-    },
-  ];
+const roles = [
+  {
+    name: "System Administrator",
+    users: 4,
+    permissions: [
+      {
+        title: "Manage users",
+        name: "manage_users",
+        description: "Create, update, deactivate users and assign roles.",
+      },
+      {
+        name: "manage_roles_permissions",
+        description: "Create and modify roles and control permission mappings.",
+        title: "Manage roles permissions",
+      },
+      {
+        name: "system_configuration",
+        title: "System configuration",
+        description: "Update system-wide settings, thresholds, and integrations.",
+      },
+      {
+        name: "view_all_data",
+        title: "View all data",
+        description: "Access all customer, transaction, and audit data.",
+      },
+      {
+        name: "audit_logs_access",
+        title: "Audit logs access",
+        description: "View and export system audit and activity logs.",
+      },
+    ],
+  },
+  {
+    name: "Compliance Officer",
+    users: 8,
+    permissions: [
+      {
+        name: "review_suspicious_activity",
+        title: "Review suspicious activity",
+        description: "Review flagged transactions and potential compliance breaches.",
+      },
+      {
+        name: "approve_or_reject_cases",
+        title: "Approve or reject cases",
+        description: "Approve, reject, or escalate compliance and risk cases.",
+      },
+      {
+        name: "generate_compliance_reports",
+        title: "Generate compliance reports",
+        description: "Generate and export regulatory and compliance reports.",
+      },
+      {
+        name: "manage_sanctions_pep_rules",
+        title: "Manage sanctions, PEP, and risk rules",
+        description: "Configure and maintain sanctions, PEP, and risk rules.",
+      },
+      {
+        name: "view_audit_logs",
+        title: "View audit logs",
+        description: "View audit logs related to compliance actions.",
+      },
+    ],
+  },
+  {
+    name: "KYC Analyst",
+    users: 22,
+    permissions: [
+      {
+        name: "view_customer_profiles",
+        title: "View customer profiles",
+        description: "View customer personal, identity, and risk information.",
+      },
+      {
+        name: "verify_kyc_documents",
+        title: "Verify KYC documents",
+        description: "Review and verify customer KYC documents.",
+      },
+      {
+        name: "update_kyc_status",
+        title: "Update KYC status",
+        description: "Update KYC status such as approved, rejected, or pending.",
+      },
+      {
+        name: "add_kyc_notes",
+        title: "Add KYC notes",
+        description: "Add internal notes and observations to KYC cases.",
+      },
+      {
+        name: "raise_compliance_case",
+        title: "Raise compliance case",
+        description: "Flag customers or transactions for compliance review.",
+      },
+    ],
+  },
+];
 export default function UserManagementDashboard() {
   const [activeTab, setActiveTab] = useState("all-users");
   const [searchQuery, setSearchQuery] = useState("");
@@ -127,7 +127,7 @@ export default function UserManagementDashboard() {
   const [limit, setLimit] = useState(10);
   const [openUserForm, setOpenUserForm] = useState(false);
   const [id, setId] = useState(null);
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     try {
       const roles = await getAllRoles();
       console.log("roles", roles);
@@ -135,8 +135,8 @@ export default function UserManagementDashboard() {
     } catch (error) {
       console.error("Error fetching roles:", error);
     }
-  };
-  const fetchUsers = async () => {
+  }, []);
+  const fetchUsers = useCallback(async () => {
     const queryParams = {
       page: currentPage,
       limit: limit,
@@ -149,7 +149,7 @@ export default function UserManagementDashboard() {
     } catch (error) {
       console.error("Error fetching users:", error);
     }
-  };
+  }, [currentPage, limit]);
   useEffect(() => {
     fetchRoles();
   }, []);
@@ -165,9 +165,9 @@ export default function UserManagementDashboard() {
   ];
 
   const handleEditUser = (id) => {
-    setId(id)
-    setOpenUserForm(true)
-  }
+    setId(id);
+    setOpenUserForm(true);
+  };
   const handleDeleteUser = async (id) => {
     // try {
     //   const response = await deleteUser(id)
@@ -177,7 +177,7 @@ export default function UserManagementDashboard() {
     // } catch (error) {
     //   console.error("Error deleting user:", error);
     // }
-  }
+  };
 
   const usersColumns = [
     {
@@ -189,10 +189,20 @@ export default function UserManagementDashboard() {
           {/* <Button size="sm" variant="outline" className="">
             <EyeIcon />
           </Button> */}
-          <Button size="sm" variant="outline" className="" onClick={() => handleEditUser(row.original._id)}>
+          <Button
+            size="sm"
+            variant="outline"
+            className=""
+            onClick={() => handleEditUser(row.original._id)}
+          >
             <PencilIcon />
           </Button>
-          <Button size="sm" variant="outline" className="" onClick={() => handleDeleteUser(row.original._id)}>
+          <Button
+            size="sm"
+            variant="outline"
+            className=""
+            onClick={() => handleDeleteUser(row.original._id)}
+          >
             <TrashIcon />
           </Button>
         </div>
@@ -381,14 +391,17 @@ export default function UserManagementDashboard() {
           </Tabs>
         </div>
       </main>
-    {openUserForm && <UserForm
-        open={openUserForm}
-        setOpen={setOpenUserForm}
-        allRoles={allRoles?.data || []}
-      fetchUsers={fetchUsers}
-      id={id}
-      setId={setId}
-      />}
+      {openUserForm && (
+        <UserForm
+          open={openUserForm}
+          setOpen={setOpenUserForm}
+          allRoles={allRoles?.data || []}
+          fetchUsers={fetchUsers}
+          id={id}
+          setId={setId}
+          fetchRoles={fetchRoles}
+        />
+      )}
     </div>
   );
 }
