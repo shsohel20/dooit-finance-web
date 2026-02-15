@@ -10,12 +10,13 @@ const getAllRoles = async () => {
 
 const getAllUsers = async (queryParams) => {
   const queryString = getQueryString(queryParams);
+  //need to be tagged
   const response = await fetchWithAuth(`user?${queryString}`);
   return response.json();
 };
 
 export const createUser = async (data) => {
-  const response = await fetchWithAuth("user", {
+  const response = await fetchWithAuth("user/new", {
     method: "POST",
     body: JSON.stringify(data),
   });

@@ -30,6 +30,7 @@ const initialState = {
   password: "",
   role: "",
   isActive: true,
+  userName: "",
 };
 
 export default function UserForm({ open, setOpen, allRoles, fetchUsers, id, setId, fetchRoles }) {
@@ -44,6 +45,7 @@ export default function UserForm({ open, setOpen, allRoles, fetchUsers, id, setI
   });
   const commonSchema = z.object({
     name: z.string().min(1, "Name is required"),
+    userName: z.string().min(1, "User Name is required"),
     email: z.string().email("Invalid email address"),
     role: z.string().min(1, "Role is required"),
     isActive: z.boolean(),
@@ -69,10 +71,11 @@ export default function UserForm({ open, setOpen, allRoles, fetchUsers, id, setI
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
+      console.log("data", JSON.stringify(data, null, 2));
       const action = id ? updateUser(id, data) : createUser(data);
       const response = await action;
       console.log("response", response);
-      if (response.success) {
+      if (response.succeed) {
         fetchUsers();
         toast.success(id ? "User updated successfully!" : "User created successfully!");
         setOpen(false);
@@ -120,6 +123,13 @@ export default function UserForm({ open, setOpen, allRoles, fetchUsers, id, setI
         </SheetHeader>
         <div className="space-y-4 px-4.5">
           <FormField form={form} name="name" label="Name" type="text" placeholder="Name" />
+          <FormField
+            form={form}
+            name="userName"
+            label="User Name"
+            type="text"
+            placeholder="User Name"
+          />
           <FormField form={form} name="email" label="Email" type="email" placeholder="Email" />
           <FormField
             form={form}

@@ -141,7 +141,6 @@ export default function UserManagementDashboard() {
       page: currentPage,
       limit: limit,
     };
-    console.log("call");
 
     try {
       const users = await getAllUsers(queryParams);

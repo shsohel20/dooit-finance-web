@@ -1,59 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FileText, Plus } from "lucide-react";
-import { ReportsList } from "./reports-list";
-import { SuspiciousMatterReportForm } from "@/components/smr-form";
-import { ECDDForm } from "@/components/ecdd-form";
-import { IFTIForm } from "@/components/ifti-form";
-import { TTRForm } from "@/components/ttr-form";
-import { GFSForm } from "@/components/gfs-form";
+
 import { RiskAssessmentDashboard } from "@/components/risk-assessment/dashboard";
 
 export default function RiskAssessmentSection() {
-  const [activeReport, setActiveReport] = useState("overview");
-  const [selectedReportType, setSelectedReportType] = useState(null);
-  const [editingReportId, setEditingReportId] = useState(null);
-
-  const reportTypes = [
-    { id: "smr", label: "SMR", description: "Suspicious Matter Reports" },
-    {
-      id: "ecdd",
-      label: "ECDD",
-      description: "Enhanced Customer Due Diligence",
-    },
-    {
-      id: "ifti",
-      label: "IFTI",
-      description: "International Funds Transfer Instructions",
-    },
-    { id: "ttr", label: "TTR", description: "Threshold Transaction Reports" },
-    { id: "gfs", label: "GFS", description: "Grounds for Suspicion" },
-  ];
-
-  const handleViewReports = (type) => {
-    setSelectedReportType(type);
-    setActiveReport("list");
-  };
-
-  const handleCreateReport = (type) => {
-    setEditingReportId(null);
-    setActiveReport(type);
-  };
-
-  const handleEditReport = (reportId, type) => {
-    setEditingReportId(reportId);
-    setActiveReport(type);
-  };
-
   // if (activeReport === "list" && selectedReportType) {
   //   return (
   //     <div className="space-y-6">
@@ -181,30 +132,7 @@ export default function RiskAssessmentSection() {
 
   return (
     <div className="space-y-6">
-      {/* <div className="flex items-center gap-4">
-        <Button variant="outline" onClick={() => setActiveReport("overview")}>
-          ← Back to Reports
-        </Button>
-        <div>
-          <h2 className="text-2xl font-bold">
-            {reportTypes.find((r) => r.id === activeReport)?.label ||
-              "Risk Assessment"}
-          </h2>
-          <p className="text-muted-foreground">
-            {reportTypes.find((r) => r.id === activeReport)?.description ||
-              "Institutional & Customer Risk Management"}
-          </p>
-        </div>
-      </div> */}
       <RiskAssessmentDashboard />
-      {/* {activeReport === "smr" && (
-        <SuspiciousMatterReportForm reportId={editingReportId} />
-      )}
-      {activeReport === "ecdd" && <ECDDForm reportId={editingReportId} />}
-      {activeReport === "ifti" && <IFTIForm reportId={editingReportId} />}
-      {activeReport === "ttr" && <TTRForm reportId={editingReportId} />}
-      {activeReport === "gfs" && <GFSForm reportId={editingReportId} />} */}
-      {/* {activeReport === "risk-assessment" && <RiskAssessmentDashboard />} */}
     </div>
   );
 }
