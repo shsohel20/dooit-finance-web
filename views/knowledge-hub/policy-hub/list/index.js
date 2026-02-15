@@ -1,44 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, BookOpen, FileText, HelpCircle,  Tag, Eye } from "lucide-react";
+import { Search, BookOpen, FileText, HelpCircle, Tag, Eye, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import useGetUser from "@/hooks/useGetUser";
 
-import { getAllPolicyDocuments } from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
+import {
+  downloadPolicy,
+  getAllPolicyDocuments,
+} from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
 import { Skeleton } from "@/components/ui/skeleton";
 // make a skeleton loader for the table
 
 const PolicyListSkeleton = () => {
   return (
     <div className="grid md:grid-cols-2 gap-6">
-   {Array.from({ length: 10 }).map((_, index) => (
-     <div
-       key={index}
-      className="p-2 rounded-lg border border-border bg-card "
-     >
-       <h3 className="font-semibold text-foreground mb-2">
-         <Skeleton className="w-full h-4" />
-       </h3>
-         <Skeleton className="w-full h-10" />
-        <div className="flex items-center justify-between ">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted-foreground">
+      {Array.from({ length: 10 }).map((_, index) => (
+        <div key={index} className="p-2 rounded-lg border border-border bg-card ">
+          <h3 className="font-semibold text-foreground mb-2">
+            <Skeleton className="w-full h-4" />
+          </h3>
+          <Skeleton className="w-full h-10" />
+          <div className="flex items-center justify-between ">
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground">
+                <Skeleton className="w-full h-10" />
+              </span>
+              <span className="text-xs text-muted-foreground">
+                <Skeleton className="w-full h-10" />
+              </span>
+            </div>
+            <div className="flex items-center gap-2 w-20 ">
+              {/* <Eye className="h-4 w-4" /> */}
               <Skeleton className="w-full h-10" />
-            </span>
-           <span className="text-xs text-muted-foreground">
-             <Skeleton className="w-full h-10" />
-           </span>
-        </div>
-        <div className="flex items-center gap-2 w-20 ">
-                    {/* <Eye className="h-4 w-4" /> */}
-              <Skeleton className="w-full h-10" />
+            </div>
           </div>
         </div>
-      </div>
-   ))}
-   </div>
+      ))}
+    </div>
   );
 };
 
@@ -48,7 +48,8 @@ export default function PolicyList() {
   const [isLoading, setIsLoading] = useState(true);
   const { loggedInUser } = useGetUser();
   const [data, setData] = useState(null);
- const router = useRouter();``
+  const router = useRouter();
+  ``;
   const categories = [
     {
       icon: BookOpen,
@@ -123,20 +124,28 @@ export default function PolicyList() {
 
   useEffect(() => {
     const fetchData = async () => {
-
-     try {
-       setIsLoading(true);
-      const data = await getAllPolicyDocuments();
-      setData(data);
-     } catch (error) {
-      // console.log('error', error);
-     } finally {
-      setIsLoading(false);
-     }
-
+      try {
+        setIsLoading(true);
+        const data = await getAllPolicyDocuments();
+        setData(data);
+      } catch (error) {
+        // console.log('error', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
   }, []);
+  const handleDownload = async (policy) => {
+    const response = await downloadPolicy(policy.id);
+    if (response.success) {
+      const url = response.data.url;
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = policy.metadata?.company_name;
+      a.click();
+    }
+  };
   return (
     <div className="min-h-screen ">
       {/* Header */}
@@ -165,7 +174,7 @@ export default function PolicyList() {
           </div>
         </div>
       </div>
-{/* test */}
+      {/* test */}
       {/* Main Content */}
       <div className="  py-12">
         {/* Browse by Category */}
@@ -174,7 +183,7 @@ export default function PolicyList() {
           <div className="grid md:grid-cols-4 gap-6">
             {categories.map((cat, i) => {
               const IconComponent = cat.icon;
-              
+
               return (
                 <div
                   key={i}
@@ -250,29 +259,49 @@ export default function PolicyList() {
           </div>
 
           {/* Policy Cards */}
-         {activeTab === "All Policies" && isLoading ? <PolicyListSkeleton /> : <div className="grid md:grid-cols-2 gap-6">
-            {data?.data?.map((policy, i) => (
-              <div
-                key={i}
-                className="p-6 rounded-lg border border-border bg-card hover:border-primary/50 transition-all"
-              >
-                <h3 className="font-semibold text-foreground mb-2">{policy?.metadata?.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{policy.metadata?.description}</p>
-                <div className="flex items-center justify-between ">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs text-muted-foreground">
-                      Last updated: {policy.updatedAt}
-                    </span>
-                    <span className="text-xs text-muted-foreground">PDF, {policy.fileSize}</span>
+          {activeTab === "All Policies" && isLoading ? (
+            <PolicyListSkeleton />
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {data?.data?.map((policy, i) => (
+                <div
+                  key={i}
+                  className="p-6 rounded-lg border border-border bg-card hover:border-primary/50 transition-all relative"
+                >
+                  <h3 className="font-semibold text-foreground mb-2">{policy?.metadata?.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {policy.metadata?.description}
+                  </p>
+                  <div className="flex items-center justify-between ">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-muted-foreground">
+                        Last updated: {policy.updatedAt}
+                      </span>
+                      <span className="text-xs text-muted-foreground">PDF, {policy.fileSize}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleDownload(policy)}>
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/client/knowledge-hub/policy-hub/details?id=${policy.id}`,
+                          )
+                        }
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                        View
+                      </Button>
+                    </div>
                   </div>
-                  <Button onClick={() => router.push(`/dashboard/client/knowledge-hub/policy-hub/details?id=${policy.id}`)} variant="outline" size="sm" className="flex items-center gap-2">
-                    <Eye className="h-4 w-4" />
-                    View
-                  </Button>
                 </div>
-              </div>
-            ))}
-          </div>}
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </div>

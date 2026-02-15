@@ -1,16 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  CheckCircle2,
-  Clock,
-  AlertTriangle,
-  Search,
-  Settings,
-  HelpCircle,
-  ChevronLeft,
-  X,
-} from "lucide-react";
+import { CheckCircle2, Clock, AlertTriangle, Search, Settings, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,11 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-
-const forms = [
+import SMReffectiveness from "./SMReffectiveness";
+import GoverningBodyForm from "../../testing-and-governance/governing-body/page";
+import { useRouter } from "next/navigation";
+import EcddSelectionForm from "./EcddForm";
+export const forms = [
   {
     id: 1,
     title: "Maintain Your AML/CTF Program",
@@ -34,6 +25,7 @@ const forms = [
     lastUpdated: "15 Aug 2024",
     dueDate: null,
     type: "Program",
+    component: null,
   },
   {
     id: 2,
@@ -42,6 +34,7 @@ const forms = [
     lastUpdated: null,
     dueDate: "30 Sep 2024",
     type: "Evaluation",
+    component: null,
   },
   {
     id: 3,
@@ -50,6 +43,7 @@ const forms = [
     lastUpdated: null,
     dueDate: "15 Sep 2024",
     type: "SMR",
+    component: <SMReffectiveness />,
   },
   {
     id: 4,
@@ -58,6 +52,7 @@ const forms = [
     lastUpdated: "1 Aug 2024",
     dueDate: null,
     type: "Officer",
+    component: null,
   },
   {
     id: 5,
@@ -66,6 +61,7 @@ const forms = [
     lastUpdated: null,
     dueDate: "20 Oct 2024",
     type: "CDD",
+    component: <EcddSelectionForm />,
   },
   {
     id: 6,
@@ -74,6 +70,16 @@ const forms = [
     lastUpdated: "10 Aug 2024",
     dueDate: null,
     type: "Monitoring",
+    component: null,
+  },
+  {
+    id: 7,
+    title: "Governing Body",
+    status: "complete",
+    lastUpdated: "10 Aug 2024",
+    dueDate: null,
+    type: "Governing Body",
+    component: <GoverningBodyForm />,
   },
 ];
 
@@ -103,123 +109,15 @@ function statusLabel(status) {
   }
 }
 
-function FormDetail({ form, onBack }) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex-1">
-          <h2 className="text-xl font-semibold text-foreground">{form.title}</h2>
-          <p className="text-sm text-muted-foreground">AUSTRAC Regulatory Form</p>
-        </div>
-        <Button variant="ghost" size="icon">
-          <HelpCircle className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <Card className="border-border bg-card">
-        <CardContent className="p-6">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Section 1: General Information
-          </h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label className="text-sm text-muted-foreground">Reporting Entity Name</Label>
-              <Input placeholder="Enter entity name" />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label className="text-sm text-muted-foreground">ABN/ACN</Label>
-              <Input placeholder="Enter ABN or ACN" />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label className="text-sm text-muted-foreground">Reporting Period Start</Label>
-              <Input type="date" />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label className="text-sm text-muted-foreground">Reporting Period End</Label>
-              <Input type="date" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border bg-card">
-        <CardContent className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Enhanced Fields
-            </h3>
-            <div className="flex items-center gap-2">
-              <Label className="text-sm text-muted-foreground">Show Advanced Fields</Label>
-              <Switch checked={showAdvanced} onCheckedChange={setShowAdvanced} />
-            </div>
-          </div>
-
-          {showAdvanced && (
-            <div className="flex flex-col gap-6">
-              <div>
-                <h4 className="mb-3 text-sm font-medium text-foreground">
-                  Enterprise Control Mapping
-                </h4>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-sm text-muted-foreground">Control ID</Label>
-                    <div className="flex gap-2">
-                      <Input placeholder="Auto-generated" readOnly className="flex-1" />
-                      <Button variant="outline" size="sm">
-                        Generate
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-sm text-muted-foreground">Regulatory Obligation</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select section" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="s36">Section 36 - CDD</SelectItem>
-                        <SelectItem value="s41">Section 41 - SMR</SelectItem>
-                        <SelectItem value="s81">Section 81 - Compliance</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h4 className="mb-3 text-sm font-medium text-foreground">Testing Impact</h4>
-                <div className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-sm text-muted-foreground">Interim Controls</Label>
-                    <Textarea placeholder="Describe any interim control measures..." rows={3} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-end gap-3">
-        <Button variant="outline">Save as Draft</Button>
-        <Button>Submit for Approval</Button>
-      </div>
-    </div>
-  );
-}
-
 export default function FormsHubPage() {
   const [selectedForm, setSelectedForm] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const router = useRouter();
 
-  if (selectedForm) {
-    return <FormDetail form={selectedForm} onBack={() => setSelectedForm(null)} />;
-  }
+  // if (selectedForm) {
+  //   return <FormDetail form={selectedForm} onBack={() => setSelectedForm(null)} />;
+  // }
 
   const filteredForms = forms.filter((form) => {
     const matchesStatus = statusFilter === "all" || form.status === statusFilter;
@@ -227,13 +125,17 @@ export default function FormsHubPage() {
     return matchesStatus && matchesSearch;
   });
 
+  const handleFormClick = (form) => {
+    setSelectedForm(form);
+    router.push(`/dashboard/client/grc/forms-hub/form?id=${form.id}`);
+  };
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            AUSTRAC Forms Hub
+            Governance Forms Hub
           </h1>
           <p className="text-sm text-muted-foreground">
             Complete all regulatory forms in one place
@@ -284,12 +186,12 @@ export default function FormsHubPage() {
       </Card>
 
       {/* Forms Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filteredForms.map((form) => (
           <Card
             key={form.id}
             className="cursor-pointer border-border bg-card transition-colors hover:bg-accent"
-            onClick={() => setSelectedForm(form)}
+            onClick={() => handleFormClick(form)}
           >
             <CardContent className="flex flex-col gap-3 p-5">
               <div className="flex items-start justify-between">
@@ -311,7 +213,7 @@ export default function FormsHubPage() {
                 className="w-full bg-transparent"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedForm(form);
+                  handleFormClick(form);
                 }}
               >
                 {form.status === "complete"

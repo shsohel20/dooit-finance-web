@@ -116,6 +116,13 @@ export default function ClientSidebar({ ...props }) {
       title: "Risk Assessment",
       icon: IconAlertTriangle,
       url: "/dashboard/client/risk-assessment",
+      children: [
+        {
+          title: "Customer Risk Assessment",
+          url: "/dashboard/client/risk-assessment",
+          icon: IconListDetails,
+        },
+      ],
     },
   ];
 
@@ -439,7 +446,7 @@ export default function ClientSidebar({ ...props }) {
           icon: IconDatabase,
         },
         {
-          title: "Forms Hub",
+          title: "Effectiveness form",
           url: "/dashboard/client/grc/forms-hub",
           icon: IconDatabase,
         },

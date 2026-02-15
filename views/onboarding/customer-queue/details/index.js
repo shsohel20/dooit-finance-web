@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 import { getCustomerById } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 import { cn, dateShowFormat } from "@/lib/utils";
-import { RelationsTree } from "./RelationsTree";
 
 export const DetailViewModal = ({ details, fetching }) => {
   const [reviewDocuments, setReviewDocuments] = useState(false);

@@ -135,9 +135,9 @@ export default function PersonnelDueDiligenceForm() {
           <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
             Where the compliance officer and governing body are the same person
           </p>
-          <p className="text-xs text-muted-foreground">
+          {/* <p className="text-xs text-muted-foreground">
             AUSTRAC version 29/01/2026 • Internal version 1.0
-          </p>
+          </p> */}
         </div>
 
         {/* Introduction */}
@@ -147,12 +147,6 @@ export default function PersonnelDueDiligenceForm() {
               This form applies when an anti-money laundering and counter-terrorism financing
               (AML/CTF) compliance officer also serves as the practice&apos;s governing body. It
               outlines the due diligence requirements and how to record the appointment.
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mt-3">
-              AUSTRAC considers it sufficient for the individual to attest to their own suitability,
-              supported by relevant information, as they serve both as the practice&apos;s governing
-              body (and would therefore be liable if an unsuitable person held these roles) and are
-              fully aware of their own circumstances.
             </p>
           </CardContent>
         </Card>

@@ -1,4 +1,4 @@
-'use server';
+"use server";
 import { getQueryString } from "@/lib/utils";
 import { fetchWithAuth } from "@/services/serverApi";
 
@@ -51,6 +51,21 @@ export const updatePolicy = async (id, data) => {
     return res;
   } catch (error) {
     console.error("Error updating policy:", error);
+    return [];
+  }
+};
+
+export const downloadPolicy = async (id) => {
+  try {
+    const endpoint = `policy-hub/${id}/download`;
+    console.log("endpoint", endpoint);
+    const response = await fetchWithAuth(endpoint);
+    if (!response.ok) {
+      throw new Error("Failed to download policy");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Error downloading policy:", error);
     return [];
   }
 };

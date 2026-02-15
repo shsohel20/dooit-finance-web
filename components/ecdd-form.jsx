@@ -4,6 +4,7 @@ import {
   createEcdd,
   autoPopulatedEcddData,
   updateEcdd,
+  getAlertEcddData,
 } from '@/app/dashboard/client/report-compliance/ecdd/actions';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -169,9 +170,10 @@ export function ECDDForm({ caseNumber, id }) {
 
   useEffect(() => {
     if (id) {
-      getDataById();
+      // getDataById();
     } else if (caseNumber) {
-      getDataFromAIAnalysis();
+      // getDataFromAIAnalysis();
+      getDataFromAlert();
     }
   }, [id, caseNumber]);
 
@@ -185,6 +187,22 @@ export function ECDDForm({ caseNumber, id }) {
       setValue('caseNumber', caseNumber);
       console.log('Failed to get data', error);
       // toast.error("Failed to get data");
+    } finally {
+      setFetching(false);
+    }
+  };
+
+  const getDataFromAlert = async () => {
+    setFetching(true);
+    // console.log('caseNumber', caseNumber);
+
+    try {
+      const response = await getAlertEcddData(caseNumber);
+      // console.log('response alet ecdd data', response);
+      const formattedData = getFormattedData(response?.data);
+      reset(formattedData);
+    } catch (error) {
+      console.log('Failed to get data', error);
     } finally {
       setFetching(false);
     }

@@ -14,6 +14,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { get } from 'react-hook-form';
 import { cn } from '@/lib/utils';
+import CustomSelect from '../AsyncPaginatedSelect';
 
 export function FormField({
   form,
@@ -73,23 +74,13 @@ export function FormField({
           control={control}
           name={name}
           render={({ field }) => (
-            <Select
-              value={field.value || ''}
-              onValueChange={field.onChange}
-              // {...field}
+            <CustomSelect
+              options={options}
+              value={field.value}
+              onChange={field.onChange}
+              placeholder={placeholder}
               {...props}
-            >
-              <SelectTrigger id={name}>
-                <SelectValue placeholder={placeholder || ''} />
-              </SelectTrigger>
-              <SelectContent>
-                {options?.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           )}
         />
         {error && <p className="text-sm text-destructive">{error}</p>}
