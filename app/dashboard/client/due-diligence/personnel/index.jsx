@@ -9,7 +9,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -26,6 +32,7 @@ export default function PersonnelDueDiligenceForm() {
   const [position, setPosition] = useState("");
   const [dateOfPDD, setDateOfPDD] = useState("");
   const [purposeOfPDD, setPurposeOfPDD] = useState([]);
+  const [professionalBody, setProfessionalBody] = useState("");
 
   // Step 2 state
   const [membershipVerification, setMembershipVerification] = useState({
@@ -257,26 +264,42 @@ export default function PersonnelDueDiligenceForm() {
               Step 2: Professional Association Membership/Licenses
             </CardTitle>
             <CardDescription>
-              Check if the candidate is currently a member of one of the accounting professional
-              associations, specifically CPA Australia, Chartered Accountants Australia & New
-              Zealand or the Institute of Public Accountants. If you know the candidate is not a
-              member, you can skip this step.
+              Select the professional body that the candidate is a member of.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <Label>Professional Body Membership/Licenses</Label>
-              <Select>
-                <SelectTrigger className={'w-52'}>
-                  <SelectValue placeholder="Select Professional Body" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cpa">CPA Australia</SelectItem>
-                  <SelectItem value="chartered">Chartered Accountants Australia & New Zealand</SelectItem>
-                  <SelectItem value="public">Institute of Public Accountants</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex flex-col gap-2">
+              <div className="overflow-x-auto">
+                <Label>Professional Body Membership/Licenses</Label>
+                <Select
+                  value={professionalBody}
+                  onValueChange={(value) => setProfessionalBody(value)}
+                >
+                  <SelectTrigger className={"w-52"}>
+                    <SelectValue placeholder="Select Professional Body" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cpa">CPA Australia</SelectItem>
+                    <SelectItem value="chartered">
+                      Chartered Accountants Australia & New Zealand
+                    </SelectItem>
+                    <SelectItem value="public">Institute of Public Accountants</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                {professionalBody === "other" && (
+                  <div className="max-w-52">
+                    <Label htmlFor="otherProfessionalBody">Other Professional Body</Label>
+                    <Input
+                      id="otherProfessionalBody"
+                      // value={otherProfessionalBody}
+                      // onChange={(e) => setOtherProfessionalBody(e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import {
   Upload,
   Download,
@@ -20,7 +19,6 @@ import {
   Save,
   Loader2,
 } from 'lucide-react';
-import ResizableTable from '../ui/Resizabletable';
 import { cn, riskLevelVariants } from '@/lib/utils';
 import { IconPennant } from '@tabler/icons-react';
 import { Badge } from '../ui/badge';
