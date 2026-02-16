@@ -107,7 +107,7 @@ export function CaseRequestForm({ open, setOpen, getRFI, caseNumber, setCaseNumb
         caseNumber: details?.uid,
       },
     };
-    console.log("[v0] Form submitted:", JSON.stringify(submiitedData, null, 2));
+
     try {
       setIsSubmitting(true);
       const response = await createRFI(submiitedData);
@@ -125,7 +125,7 @@ export function CaseRequestForm({ open, setOpen, getRFI, caseNumber, setCaseNumb
       console.error("Failed to create RFI", error);
       setIsSubmitting(false);
     }
-    console.log("[v0] Form submitted:", JSON.stringify(submiitedData, null, 2));
+
     // Handle form submission here
   };
 

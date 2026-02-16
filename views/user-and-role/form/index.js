@@ -71,10 +71,8 @@ export default function UserForm({ open, setOpen, allRoles, fetchUsers, id, setI
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
-      console.log("data", JSON.stringify(data, null, 2));
       const action = id ? updateUser(id, data) : createUser(data);
       const response = await action;
-      console.log("response", response);
       if (response.succeed) {
         fetchUsers();
         toast.success(id ? "User updated successfully!" : "User created successfully!");
