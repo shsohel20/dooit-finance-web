@@ -30,7 +30,7 @@ export function RiskAssessmentDashboard() {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="customer">Customer Risk</TabsTrigger>
-          <TabsTrigger value="institutional">Institutional Risk</TabsTrigger>
+          {/* <TabsTrigger value="institutional">Institutional Risk</TabsTrigger> */}
           <TabsTrigger value="matrices">Matrices</TabsTrigger>
           {/* <TabsTrigger value="reports">Reports</TabsTrigger> */}
         </TabsList>
@@ -44,9 +44,9 @@ export function RiskAssessmentDashboard() {
           <RiskMatrix />
         </TabsContent>
 
-        <TabsContent value="institutional" className="space-y-6">
+        {/* <TabsContent value="institutional" className="space-y-6">
           <InstitutionalRiskRegistry />
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="customer" className="space-y-6">
           <CustomerRiskAssessment />

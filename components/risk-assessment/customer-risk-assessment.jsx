@@ -125,7 +125,6 @@ export function CustomerRiskAssessment() {
   });
 
   const [data, setData] = useState([]);
-  const [riskFactors, setRiskFactors] = useState({});
   const [customerOptions, setCustomerOptions] = useState([]);
   const form = useForm({
     defaultValues: initialValues,
@@ -133,44 +132,44 @@ export function CustomerRiskAssessment() {
 
   const fetchRiskFactors = async () => {
     const response = await getRiskFactors();
-    console.log('response risk factors', response?.data);
+    console.log('response risk factors', response.data);
     const countries = response.data.countries.map((item) => ({
-      label: item.country,
+      label: `${item.country} (score: ${item.score})`,
       value: item.country,
     }));
     setCountriesOptions(countries);
     const customerTypes = response.data.customerType.map((item) => ({
-      label: item.value.split('_').join(' '),
+      label: `${item.value.split('_').join(' ')} (score: ${item.score})`,
       value: item.value,
     }));
     setCustomerTypesOptions(customerTypes);
     const jurisdictions = response.data.jurisdiction.map((item) => ({
-      label: item.value,
+      label: `${item.value} (score: ${item.score})`,
       value: item.value,
     }));
     setJurisdictionsOptions(jurisdictions);
     const customerRetentions = response.data.customerRetention.map((item) => ({
-      label: item.value,
+      label: `${item.value} (score: ${item.score})`,
       value: item.value,
     }));
     setCustomerRetentionsOptions(customerRetentions);
     const products = response.data.product.map((item) => ({
-      label: item.value,
+      label: `${item.value} (score: ${item.score})`,
       value: item.value,
     }));
     setProductsOptions(products);
     const channels = response.data.channel.map((item) => ({
-      label: item.value,
+      label: `${item.value} (score: ${item.score})`,
       value: item.value,
     }));
     setChannelsOptions(channels);
     const occupations = response.data.occupation.map((item) => ({
-      label: item.value,
+      label: `${item.value} (score: ${item.score})`,
       value: item.value,
     }));
     setOccupationsOptions(occupations);
     const industries = response.data.industry.map((item) => ({
-      label: item.value.split('_').join(' '),
+      label: `${item.value.split('_').join(' ')} (score: ${item.score})`,
       value: item.value,
     }));
     setIndustriesOptions(industries);
