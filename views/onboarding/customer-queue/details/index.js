@@ -69,11 +69,11 @@ export const DetailViewModal = ({ details, fetching }) => {
 
   return (
     <div className="grid grid-cols-12 gap-4 ">
-      <div className="col-span-8">
+      <div className="col-span-9">
         <div className=" mx-auto ">
           {/* User Profile Section */}
-          <Card className="mb-6 overflow-hidden border-border/50">
-            <div className="p-6">
+          <Card className="mb-6 overflow-hidden ">
+            <div className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
                   <Avatar className="size-16 border-2 border-primary/20">
@@ -84,7 +84,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                   </Avatar>
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">
-                      <h2 className="text-2xl font-semibold capitalize">
+                      <h2 className=" font-semibold capitalize">
                         {details?.personalKyc?.personal_form?.customer_details?.given_name +
                           " " +
                           details?.personalKyc?.personal_form?.customer_details?.middle_name +
@@ -123,16 +123,16 @@ export const DetailViewModal = ({ details, fetching }) => {
           </Card>
 
           {/* Status Cards Grid */}
-          <div className="grid gap-4 md:grid-cols-2 mb-6">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4  mb-6">
             {/* Current Status Card */}
-            <Card className="border-border/50 hover:border-primary/30 transition-colors">
-              <div className="p-5">
-                <div className="flex items-start justify-between mb-4">
+            <Card className=" hover:border-primary/30 transition-colors">
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-lg bg-accent/50">
                       <Clock className="size-5 text-accent-foreground" />
                     </div>
-                    <h3 className="font-semibold">Current Status</h3>
+                    <h3 className="text-sm">Current Status</h3>
                   </div>
                   <Badge
                     className={cn(
@@ -153,14 +153,14 @@ export const DetailViewModal = ({ details, fetching }) => {
             </Card>
 
             {/* Risk Assessment Card */}
-            <Card className="border-border/50 hover:border-danger/30 transition-colors">
-              <div className="p-5">
-                <div className="flex items-start justify-between mb-4">
+            <Card className=" hover:border-danger/30 transition-colors">
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-lg bg-danger/15">
                       <AlertCircle className="size-5 text-danger" />
                     </div>
-                    <h3 className="font-semibold">Risk Assessment</h3>
+                    <h3 className="text-sm">Risk Assessment</h3>
                   </div>
                   <Badge className="bg-danger/15 text-danger hover:bg-danger/20 border-danger/30">
                     <TrendingUp className="size-3 mr-1" />
@@ -173,17 +173,17 @@ export const DetailViewModal = ({ details, fetching }) => {
               </div>
             </Card>
             <Card
-              className={`border-border/50 transition-colors ${isPep ? "hover:border-warning/30" : "hover:border-border"}`}
+              className={` transition-colors ${isPep ? "hover:border-warning/30" : "hover:border-border"}`}
             >
-              <div className="p-5">
-                <div className="flex items-start justify-between mb-4">
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className={`p-2 rounded-lg ${isPep ? "bg-warning/15" : "bg-muted"}`}>
                       <AlertTriangle
                         className={`size-5 ${isPep ? "text-warning-foreground" : "text-muted-foreground"}`}
                       />
                     </div>
-                    <h3 className="font-semibold">PEP Status</h3>
+                    <h3 className="text-sm">PEP Status</h3>
                   </div>
                   {isPep ? (
                     <Badge className="bg-warning/15 text-warning-foreground hover:bg-warning/20 border-warning/30">
@@ -206,10 +206,10 @@ export const DetailViewModal = ({ details, fetching }) => {
             </Card>
 
             <Card
-              className={`border-border/50 transition-colors ${isSanctioned ? "hover:border-destructive/30" : "hover:border-border"}`}
+              className={` transition-colors ${isSanctioned ? "hover:border-destructive/30" : "hover:border-border"}`}
             >
-              <div className="p-5">
-                <div className="flex items-start justify-between mb-4">
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div
                       className={`p-2 rounded-lg ${isSanctioned ? "bg-destructive/15" : "bg-muted"}`}
@@ -218,7 +218,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                         className={`size-5 ${isSanctioned ? "text-destructive" : "text-muted-foreground"}`}
                       />
                     </div>
-                    <h3 className="font-semibold">Sanctions</h3>
+                    <h3 className="text-sm">Sanctions</h3>
                   </div>
                   {isSanctioned ? (
                     <Badge className="bg-destructive/15 text-destructive hover:bg-destructive/20 border-destructive/30">
@@ -246,39 +246,39 @@ export const DetailViewModal = ({ details, fetching }) => {
             {/* Left Column - Personal Information */}
             <div className="">
               {/* Personal Information */}
-              <Card className="border-border/50">
+              <Card className="">
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                    <User className="size-5 text-primary" />
+                  <h3 className="text-sm font-semibold mb-6 flex items-center gap-2">
+                    <User className="size-5  text-primary" />
                     Personal Information
                   </h3>
                   <div className="space-y-5">
-                    <div className="flex items-center justify-between py-3 border-b border-border/50">
+                    <div className="flex items-center justify-between py-3 border-b ">
                       <div className="flex items-center gap-3">
                         <Phone className="size-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">
                           Phone Number
                         </span>
                       </div>
-                      <span className="text-sm font-mono">2347689316687</span>
+                      <span className="text-sm font-mono font-medium">2347689316687</span>
                     </div>
 
-                    <div className="flex items-center justify-between py-3 border-b border-border/50">
+                    <div className="flex items-center justify-between py-3 border-b ">
                       <div className="flex items-center gap-3">
                         <Calendar className="size-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">
                           Date of Birth
                         </span>
                       </div>
-                      <span className="text-sm">12 Aug 2025</span>
+                      <span className="text-sm font-medium">12 Aug 1999</span>
                     </div>
 
-                    <div className="flex items-center justify-between py-3 border-b border-border/50">
+                    <div className="flex items-center justify-between py-3 border-b ">
                       <div className="flex items-center gap-3">
                         <Globe className="size-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">Country</span>
                       </div>
-                      <span className="text-sm capitalize">Afghanistan</span>
+                      <span className="text-sm font-medium capitalize">Afghanistan</span>
                     </div>
 
                     <div className="flex items-start justify-between py-3">
@@ -286,7 +286,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                         <MapPin className="size-4 text-muted-foreground mt-0.5" />
                         <span className="text-sm font-medium text-muted-foreground">Address</span>
                       </div>
-                      <span className="text-sm text-right max-w-xs leading-relaxed">
+                      <span className="text-sm text-right max-w-xs leading-relaxed font-medium">
                         Apartment 4A, Green View Residences, 25 Wentworth Avenue, Sydney NSW 2000
                       </span>
                     </div>
@@ -298,9 +298,9 @@ export const DetailViewModal = ({ details, fetching }) => {
             {/* Right Column - Timeline & Activity */}
             <div className="space-y-6">
               {/* Onboarding Timeline */}
-              <Card className="border-border/50">
+              <Card className="">
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                  <h3 className="text-sm font-semibold mb-6 flex items-center gap-2">
                     <Clock className="size-5 text-primary" />
                     Onboarding Timeline
                   </h3>
@@ -329,7 +329,7 @@ export const DetailViewModal = ({ details, fetching }) => {
             </div>
             <div>
               {/* Activity Log */}
-              {/* <Card className="border-border/50">
+              {/* <Card className="">
                 <div className="p-6">
                   <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
                     <TrendingUp className="size-5 text-primary" />
@@ -382,21 +382,21 @@ export const DetailViewModal = ({ details, fetching }) => {
           </div>
         </div>
       </div>
-      <div className="col-span-4">
-        <Card className="border-border/50 ">
+      <div className="col-span-3">
+        <Card className="">
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
                 <BarChart3 className="size-5 text-primary" />
                 Risk Assessment Breakdown
               </h3>
-              <div className="flex items-center gap-3">
-                <Badge className={getLabelColor(riskAssessment?.pibLabel)} variant="outline">
+              <div className="flex items-center ">
+                {/* <Badge className={getLabelColor(riskAssessment?.pibLabel)} variant="outline">
                   {riskAssessment?.pibLabel}
-                </Badge>
+                </Badge> */}
                 <div className="text-right">
                   <div className="text-xs text-muted-foreground">Total Score</div>
-                  <div className={`text-2xl font-bold ${getRiskColor(totalRiskScore)}`}>
+                  <div className={`text-xl font-bold ${getRiskColor(totalRiskScore)}`}>
                     {totalRiskScore}
                   </div>
                 </div>
@@ -404,7 +404,7 @@ export const DetailViewModal = ({ details, fetching }) => {
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Channel</span>
@@ -424,7 +424,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                 </Badge>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Customer Retention</span>
@@ -444,7 +444,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                 </Badge>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Customer Type</span>
@@ -464,7 +464,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                 </Badge>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Industry</span>
@@ -508,7 +508,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                 </Badge>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Occupation</span>
@@ -528,7 +528,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                 </Badge>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border border-border/50">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Product</span>

@@ -19,6 +19,7 @@ import {
   IconList,
   IconPennant,
   IconSearch,
+  IconUserPlus,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
@@ -39,12 +40,14 @@ import { useAlertStore } from "@/app/store/useAlertStore";
 
 import { CaseRequestForm } from "@/views/monitoring-and-cases/case-details/ecdd/RFIForm";
 import dynamic from "next/dynamic";
+import AssignAnalystForm from "@/views/monitoring-and-cases/case-details/AssignAnalystForm";
 
 const ListView = ({}) => {
   const { alerts, fetching, totalItems, currentPage, limit, setCurrentPage, setLimit } =
     useAlertStore();
   const [caseNumber, setCaseNumber] = useState(null);
   const [openRfi, setOpenRfi] = useState(false);
+  const [openAssignToAnalyst, setOpenAssignToAnalyst] = useState(false);
   const router = useRouter();
   const riskVariants = {
     Low: "info",
@@ -70,6 +73,10 @@ const ListView = ({}) => {
     setCaseNumber(data?.uid);
 
     setOpenRfi(true);
+  };
+  const handleAssignToAnalyst = (data) => {
+    setOpenAssignToAnalyst(true);
+    setCaseNumber(data?._id);
   };
   const columns = [
     {
@@ -128,12 +135,16 @@ const ListView = ({}) => {
                     )
                   }
                 >
-                  <IconEye className="mr-2 size-3 text-muted-foreground/70" />
+                  <IconEye className="mr-2 size-4 " />
                   View
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleGenerateEcdd(row?.original?.uid)}>
-                  <IconFilePlus className="mr-2 size-3 " />
+                  <IconFilePlus className="mr-2 size-4 " />
                   Generate ECDD
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAssignToAnalyst(row?.original)}>
+                  <IconUserPlus className="mr-2 size-4 " />
+                  Assign to Analyst
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -257,6 +268,14 @@ const ListView = ({}) => {
           setOpen={setOpenRfi}
           caseNumber={caseNumber}
           setCaseNumber={setCaseNumber}
+        />
+      )}
+      {openAssignToAnalyst && (
+        <AssignAnalystForm
+          open={openAssignToAnalyst}
+          setOpen={setOpenAssignToAnalyst}
+          id={caseNumber}
+          setId={setCaseNumber}
         />
       )}
     </div>
