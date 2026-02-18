@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 // import { PartyTreeView } from "./party-tree.view";
 import { PartyNodeDiagram } from "./party-node-diagram";
-
 export const dummyData = {
   partyId: "P-5000",
   partyName: "Sheikh Hasina",
@@ -13,6 +12,21 @@ export const dummyData = {
   pepFlag: true,
   riskRating: "HIGH",
   status: "ACTIVE",
+  transactions: [
+    {
+      transactionId: "T-1000",
+      from: "Hasina Family Trust",
+      to: "Sheikh Hasina",
+      relationType: "TRANSACTIONAL",
+      amount: 1200000,
+      currency: "USD",
+      frequency: "ANNUAL",
+      purpose: "Family support",
+      riskFlag: "TRUST_TO_PEP",
+      type: "INCOMING",
+      dateRange: "2025",
+    },
+  ],
   children: [
     {
       partyId: "P-5001",
@@ -23,6 +37,21 @@ export const dummyData = {
       relationType: "FAMILY",
       riskRating: "MEDIUM",
       status: "ACTIVE",
+      transactions: [
+        {
+          transactionId: "T-9003",
+          from: "Sheikh Hasina",
+          to: "Sajeeb Wazed Joy",
+          relationType: "TRANSACTIONAL",
+          amount: 500000,
+          currency: "USD",
+          frequency: "ANNUAL",
+          purpose: "Family support and investments",
+          riskFlag: "PEP_FAMILY_TRANSFER",
+          type: "INCOMING",
+          dateRange: "2025",
+        },
+      ],
       children: [
         {
           partyId: "P-5002",
@@ -33,6 +62,34 @@ export const dummyData = {
           relationType: "SOCIAL",
           riskRating: "MEDIUM",
           status: "ACTIVE",
+          transactions: [
+            {
+              transactionId: "T-9001",
+              from: "Sajeeb Wazed Joy",
+              to: "Rakib Hasan",
+              relationType: "TRANSACTIONAL",
+              amount: 250000,
+              currency: "USD",
+              frequency: "MONTHLY",
+              purpose: "Consulting & advisory",
+              riskFlag: "PEP_TO_ASSOCIATE",
+              type: "INCOMING",
+              dateRange: "2025-01 to 2025-06",
+            },
+            {
+              transactionId: "T-9006",
+              from: "Rakib Hasan",
+              to: "Hasina Family Trust",
+              relationType: "TRANSACTIONAL",
+              amount: 180000,
+              currency: "USD",
+              frequency: "ANNUAL",
+              purpose: "Profit sharing",
+              riskFlag: "ASSOCIATE_TO_TRUST",
+              type: "OUTGOING",
+              dateRange: "2025",
+            },
+          ],
           children: [
             {
               partyId: "P-5003",
@@ -44,21 +101,22 @@ export const dummyData = {
               ownershipPercentage: 55,
               riskRating: "HIGH",
               status: "ACTIVE",
+              transactions: [
+                {
+                  transactionId: "T-9007",
+                  from: "Rakib Tech Solutions Ltd",
+                  to: "Joy Digital Services",
+                  relationType: "TRANSACTIONAL",
+                  amount: 600000,
+                  currency: "USD",
+                  frequency: "QUARTERLY",
+                  purpose: "Technology services",
+                  riskFlag: "RELATED_PARTY_TRANSFER",
+                  type: "OUTGOING",
+                  dateRange: "2025-Q1 to 2025-Q3",
+                },
+              ],
               children: [],
-            },
-          ],
-          transactions: [
-            {
-              transactionId: "T-9001",
-              from: "Sajeeb Wazed Joy",
-              to: "Rakib Hasan",
-              relationType: "TRANSACTIONAL",
-              amount: 250000,
-              currency: "USD",
-              frequency: "MONTHLY",
-              purpose: "Personal and consulting expenses",
-              riskFlag: "PEP_TO_ASSOCIATE",
-              dateRange: "2025-01 to 2025-06",
             },
           ],
         },
@@ -72,6 +130,21 @@ export const dummyData = {
           ownershipPercentage: 100,
           riskRating: "MEDIUM",
           status: "ACTIVE",
+          transactions: [
+            {
+              transactionId: "T-9008",
+              from: "Joy Digital Services",
+              to: "Sheikh Hasina",
+              relationType: "TRANSACTIONAL",
+              amount: 300000,
+              currency: "USD",
+              frequency: "ANNUAL",
+              purpose: "Dividend payout",
+              riskFlag: "BUSINESS_TO_PEP",
+              type: "OUTGOING",
+              dateRange: "2025",
+            },
+          ],
           children: [
             {
               partyId: "P-5005",
@@ -83,7 +156,6 @@ export const dummyData = {
               ownershipPercentage: 70,
               riskRating: "MEDIUM",
               status: "ACTIVE",
-              children: [],
               transactions: [
                 {
                   transactionId: "T-9002",
@@ -95,25 +167,13 @@ export const dummyData = {
                   frequency: "QUARTERLY",
                   purpose: "Operational funding",
                   riskFlag: "RELATED_PARTY_TRANSFER",
+                  type: "INCOMING",
                   dateRange: "2025-Q1 to 2025-Q3",
                 },
               ],
+              children: [],
             },
           ],
-        },
-      ],
-      transactions: [
-        {
-          transactionId: "T-9003",
-          from: "Sheikh Hasina",
-          to: "Sajeeb Wazed Joy",
-          relationType: "TRANSACTIONAL",
-          amount: 500000,
-          currency: "USD",
-          frequency: "ANNUAL",
-          purpose: "Family support and investments",
-          riskFlag: "PEP_FAMILY_TRANSFER",
-          dateRange: "2025",
         },
       ],
     },
@@ -126,6 +186,34 @@ export const dummyData = {
       relationType: "FAMILY",
       riskRating: "LOW",
       status: "ACTIVE",
+      transactions: [
+        {
+          transactionId: "T-9010",
+          from: "Sheikh Hasina",
+          to: "Saima Wazed Putul",
+          relationType: "TRANSACTIONAL",
+          amount: 400000,
+          currency: "USD",
+          frequency: "ANNUAL",
+          purpose: "Family support",
+          riskFlag: "PEP_FAMILY_TRANSFER",
+          type: "INCOMING",
+          dateRange: "2025",
+        },
+        {
+          transactionId: "T-9011",
+          to: "Sheikh Hasina",
+          from: "Saima Wazed Putul",
+          relationType: "TRANSACTIONAL",
+          amount: 280000,
+          currency: "USD",
+          frequency: "ANNUAL",
+          purpose: "Family support",
+          riskFlag: "PEP_FAMILY_TRANSFER",
+          type: "OUTGOING",
+          dateRange: "2025",
+        },
+      ],
       children: [
         {
           partyId: "P-5007",
@@ -136,7 +224,6 @@ export const dummyData = {
           relationType: "CONTROL",
           riskRating: "MEDIUM",
           status: "ACTIVE",
-          children: [],
           transactions: [
             {
               transactionId: "T-9004",
@@ -148,9 +235,11 @@ export const dummyData = {
               frequency: "ANNUAL",
               purpose: "Donations",
               riskFlag: "PEP_NONPROFIT_TRANSFER",
+              type: "INCOMING",
               dateRange: "2025",
             },
           ],
+          children: [],
         },
       ],
     },
@@ -163,33 +252,22 @@ export const dummyData = {
       relationType: "LEGAL_STRUCTURE",
       riskRating: "HIGH",
       status: "ACTIVE",
-      children: [
+      transactions: [
         {
-          partyId: "P-5001",
-          partyName: "Sajeeb Wazed Joy",
-          partyType: "INDIVIDUAL",
-          role: "BENEFICIARY",
-          relationshipToParent: "BENEFICIARY",
-          relationType: "BENEFICIAL_INTEREST",
-          riskRating: "MEDIUM",
-          status: "ACTIVE",
-          children: [],
-          transactions: [
-            {
-              transactionId: "T-9005",
-              from: "Hasina Family Trust",
-              to: "Sajeeb Wazed Joy",
-              relationType: "TRANSACTIONAL",
-              amount: 750000,
-              currency: "USD",
-              frequency: "ANNUAL",
-              purpose: "Trust distribution",
-              riskFlag: "TRUST_TO_BENEFICIARY",
-              dateRange: "2025",
-            },
-          ],
+          transactionId: "T-9005",
+          from: "Hasina Family Trust",
+          to: "Sajeeb Wazed Joy",
+          relationType: "TRANSACTIONAL",
+          amount: 750000,
+          currency: "USD",
+          frequency: "ANNUAL",
+          purpose: "Trust distribution",
+          riskFlag: "TRUST_TO_BENEFICIARY",
+          type: "OUTGOING",
+          dateRange: "2025",
         },
       ],
+      children: [],
     },
   ],
 };
@@ -200,125 +278,125 @@ export function RelationsTree() {
   const collapseAllRef = useRef(null);
   return (
     <main className="min-h-screen ">
-    <div className="mx-auto max-w-7xl px-6 py-8">
-      {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight text-balance">
-            Party Relationship Graph
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Click a node to expand its children. Drag nodes to rearrange.
-            Scroll to zoom, drag the canvas to pan.
-          </p>
-        </div>
+      <div className="mx-auto max-w-7xl px-6 py-8">
+        {/* Header */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight text-balance">
+              Party Relationship Graph
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Click a node to expand its children. Drag nodes to rearrange. Scroll to zoom, drag the
+              canvas to pan.
+            </p>
+          </div>
 
-        <div className="flex items-center gap-3">
-          {/* Expand / Collapse buttons */}
-          <button
-            type="button"
-            onClick={() => expandAllRef.current?.()}
-            className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary transition-colors"
-          >
-            Expand All
-          </button>
-          <button
-            type="button"
-            onClick={() => collapseAllRef.current?.()}
-            className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-secondary transition-colors"
-          >
-            Collapse All
-          </button>
-
-          {/* View mode toggle */}
-          <div className="flex items-center rounded-lg border border-border bg-card p-1 gap-1">
+          <div className="flex items-center gap-3">
+            {/* Expand / Collapse buttons */}
             <button
               type="button"
-              onClick={() => setViewMode("family")}
-              className={`rounded-md px-4 py-1.5 text-xs font-semibold transition-colors ${
-                viewMode === "family"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
+              onClick={() => expandAllRef.current?.()}
+              className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary transition-colors"
             >
-              Family / Relationship
+              Expand All
             </button>
             <button
               type="button"
-              onClick={() => setViewMode("transaction")}
-              className={`rounded-md px-4 py-1.5 text-xs font-semibold transition-colors ${
-                viewMode === "transaction"
-                  ? "text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
-              style={viewMode === "transaction" ? { backgroundColor: "#ea580c" } : undefined}
+              onClick={() => collapseAllRef.current?.()}
+              className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-secondary transition-colors"
             >
-              Transactions
+              Collapse All
             </button>
+
+            {/* View mode toggle */}
+            <div className="flex items-center rounded-lg border border-border bg-card p-1 gap-1">
+              <button
+                type="button"
+                onClick={() => setViewMode("family")}
+                className={`rounded-md px-4 py-1.5 text-xs font-semibold transition-colors ${
+                  viewMode === "family"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                }`}
+              >
+                Family / Relationship
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("transaction")}
+                className={`rounded-md px-4 py-1.5 text-xs font-semibold transition-colors ${
+                  viewMode === "transaction"
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                }`}
+                style={viewMode === "transaction" ? { backgroundColor: "#ea580c" } : undefined}
+              >
+                Transactions
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Tabs */}
+        <Tabs defaultValue="graph" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="graph">Graph View</TabsTrigger>
+            {/* <TabsTrigger value="tree">Tree View</TabsTrigger> */}
+            <TabsTrigger value="diagram">Tree View</TabsTrigger>
+          </TabsList>
+
+          {/* Graph View Tab */}
+          <TabsContent value="graph" className="mt-0">
+            <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+              {/* Legend Bar */}
+              <div className="border-b border-border px-6 py-3">
+                <GraphLegend viewMode={viewMode} />
+              </div>
+
+              {/* Graph */}
+              <div className="h-[680px]">
+                <PartyTreeGraph
+                  data={dummyData}
+                  viewMode={viewMode}
+                  expandAllRef={expandAllRef}
+                  collapseAllRef={collapseAllRef}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Tree View Tab */}
+          <TabsContent value="tree" className="mt-0">
+            <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+              {/* Legend Bar */}
+              <div className="border-b border-border px-6 py-3">
+                <GraphLegend viewMode={viewMode} />
+              </div>
+
+              {/* Tree */}
+              <div className="h-[680px]">
+                {/* <PartyTreeView data={dummyData} viewMode={viewMode} /> */}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Node Diagram Tab */}
+          <TabsContent value="diagram" className="mt-0">
+            <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+              {/* Legend Bar */}
+              <div className="border-b border-border px-6 py-3">
+                <GraphLegend viewMode={viewMode} />
+              </div>
+
+              {/* Diagram */}
+              <div className="h-[680px]">
+                <PartyNodeDiagram data={dummyData} viewMode={viewMode} />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Tabs */}
-      <Tabs defaultValue="graph" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="graph">Graph View</TabsTrigger>
-          {/* <TabsTrigger value="tree">Tree View</TabsTrigger> */}
-          <TabsTrigger value="diagram">Tree View</TabsTrigger>
-        </TabsList>
-
-        {/* Graph View Tab */}
-        <TabsContent value="graph" className="mt-0">
-          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-            {/* Legend Bar */}
-            <div className="border-b border-border px-6 py-3">
-              <GraphLegend viewMode={viewMode} />
-            </div>
-
-            {/* Graph */}
-            <div className="h-[680px]">
-              <PartyTreeGraph
-                data={dummyData}
-                viewMode={viewMode}
-                expandAllRef={expandAllRef}
-                collapseAllRef={collapseAllRef}
-              />
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* Tree View Tab */}
-        <TabsContent value="tree" className="mt-0">
-          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-            {/* Legend Bar */}
-            <div className="border-b border-border px-6 py-3">
-              <GraphLegend viewMode={viewMode} />
-            </div>
-
-            {/* Tree */}
-            <div className="h-[680px]">
-              {/* <PartyTreeView data={dummyData} viewMode={viewMode} /> */}
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* Node Diagram Tab */}
-        <TabsContent value="diagram" className="mt-0">
-          <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-            {/* Legend Bar */}
-            <div className="border-b border-border px-6 py-3">
-              <GraphLegend viewMode={viewMode} />
-            </div>
-
-            {/* Diagram */}
-            <div className="h-[680px]">
-              <PartyNodeDiagram data={dummyData} viewMode={viewMode} />
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  </main>
+    </main>
   );
 }
 

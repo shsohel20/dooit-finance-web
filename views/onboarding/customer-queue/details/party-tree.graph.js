@@ -2,46 +2,62 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-
-
 /* ─── Color helpers ──────────────────────────────────── */
 function getRiskColor(risk) {
   switch (risk) {
-    case "LOW": return "#16a34a";
-    case "MEDIUM": return "#d97706";
-    case "HIGH": return "#dc2626";
-    default: return "#6b7280";
+    case "LOW":
+      return "#16a34a";
+    case "MEDIUM":
+      return "#d97706";
+    case "HIGH":
+      return "#dc2626";
+    default:
+      return "#6b7280";
   }
 }
 
 function getTypeColor(type) {
   switch (type) {
-    case "INDIVIDUAL": return "#2563eb";
-    case "BUSINESS": return "#9333ea";
-    case "LEGAL_ENTITY": return "#0d9488";
-    default: return "#6b7280";
+    case "INDIVIDUAL":
+      return "#2563eb";
+    case "BUSINESS":
+      return "#9333ea";
+    case "LEGAL_ENTITY":
+      return "#0d9488";
+    default:
+      return "#6b7280";
   }
 }
 
 function getTypeBg(type) {
   switch (type) {
-    case "INDIVIDUAL": return "#eff6ff";
-    case "BUSINESS": return "#faf5ff";
-    case "LEGAL_ENTITY": return "#f0fdfa";
-    default: return "#f9fafb";
+    case "INDIVIDUAL":
+      return "#eff6ff";
+    case "BUSINESS":
+      return "#faf5ff";
+    case "LEGAL_ENTITY":
+      return "#f0fdfa";
+    default:
+      return "#f9fafb";
   }
 }
 
 function getRelationColor(rel) {
   switch (rel) {
-    case "FAMILY": return "#2563eb";
-    case "SOCIAL": return "#8b5cf6";
+    case "FAMILY":
+      return "#2563eb";
+    case "SOCIAL":
+      return "#8b5cf6";
     case "OWNERSHIP":
-    case "CONTROL": return "#9333ea";
+    case "CONTROL":
+      return "#9333ea";
     case "LEGAL_STRUCTURE":
-    case "BENEFICIAL_INTEREST": return "#0d9488";
-    case "TRANSACTIONAL": return "#ea580c";
-    default: return "#64748b";
+    case "BENEFICIAL_INTEREST":
+      return "#0d9488";
+    case "TRANSACTIONAL":
+      return "#ea580c";
+    default:
+      return "#64748b";
   }
 }
 
@@ -52,13 +68,7 @@ function formatCurrency(amount) {
 }
 
 /* ─── Build registry ─────────────────────────────────── */
-function buildRegistry(
-  node,
-  parentKey,
-  depth,
-  registry,
-  allLinks
-) {
+function buildRegistry(node, parentKey, depth, registry, allLinks) {
   const uniqueKey = parentKey ? `${parentKey}>${node.partyId}` : node.partyId;
   const childKeys = node.children.map((c) => `${uniqueKey}>${c.partyId}`);
 
@@ -100,23 +110,11 @@ function buildRegistry(
 }
 
 /* ─── Radial layout ──────────────────────────────────── */
-function computeRadialPositions(
-  registry,
-  expandedKeys,
-  rootKey,
-  cx,
-  cy,
-  baseRadius
-) {
+function computeRadialPositions(registry, expandedKeys, rootKey, cx, cy, baseRadius) {
   const positions = new Map();
   positions.set(rootKey, { x: cx, y: cy });
 
-  function placeChildren(
-    parentKey,
-    angleStart,
-    angleEnd,
-    depth
-  ) {
+  function placeChildren(parentKey, angleStart, angleEnd, depth) {
     const node = registry.get(parentKey);
     if (!node || !expandedKeys.has(parentKey)) return;
 
@@ -144,12 +142,7 @@ function computeRadialPositions(
 const NODE_RADIUS = 36;
 const BASE_ORBIT_RADIUS = 180;
 
-export function PartyTreeGraph({
-  data,
-  viewMode,
-  expandAllRef,
-  collapseAllRef,
-}) {
+export function PartyTreeGraph({ data, viewMode, expandAllRef, collapseAllRef }) {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
 
@@ -220,6 +213,8 @@ export function PartyTreeGraph({
     return computeRadialPositions(registry, expandedKeys, rootKey, cx, cy, BASE_ORBIT_RADIUS);
   }, [registry, expandedKeys, rootKey, dimensions]);
 
+  console.log("radialPositions", radialPositions);
+
   const nodePositions = useMemo(() => {
     const merged = new Map();
     for (const [key, pos] of radialPositions) {
@@ -234,7 +229,9 @@ export function PartyTreeGraph({
     for (const key of nodePositions.keys()) {
       const node = registry.get(key);
       if (node?.parentKey && nodePositions.has(node.parentKey)) {
-        const linkData = allLinks.find((l) => l.sourceKey === node.parentKey && l.targetKey === key);
+        const linkData = allLinks.find(
+          (l) => l.sourceKey === node.parentKey && l.targetKey === key,
+        );
         if (linkData) {
           // In transaction mode, only show links that have transactions
           if (viewMode === "transaction") {
@@ -251,7 +248,10 @@ export function PartyTreeGraph({
   /* ─── Node click ───────────────────────────────────── */
   const handleNodeClick = useCallback(
     (key) => {
-      if (hasDraggedRef.current) { hasDraggedRef.current = false; return; }
+      if (hasDraggedRef.current) {
+        hasDraggedRef.current = false;
+        return;
+      }
       const node = registry.get(key);
       if (!node || !node.hasChildren) return;
 
@@ -261,14 +261,22 @@ export function PartyTreeGraph({
           next.delete(key);
           const removeDesc = (k) => {
             const n = registry.get(k);
-            if (n) for (const ck of n.childKeys) { next.delete(ck); removeDesc(ck); }
+            if (n)
+              for (const ck of n.childKeys) {
+                next.delete(ck);
+                removeDesc(ck);
+              }
           };
           removeDesc(key);
           setDraggedPositions((prev) => {
             const next = new Map(prev);
             const removePos = (k) => {
               const n = registry.get(k);
-              if (n) for (const ck of n.childKeys) { next.delete(ck); removePos(ck); }
+              if (n)
+                for (const ck of n.childKeys) {
+                  next.delete(ck);
+                  removePos(ck);
+                }
             };
             removePos(key);
             return next;
@@ -283,22 +291,19 @@ export function PartyTreeGraph({
         return next;
       });
     },
-    [registry]
+    [registry],
   );
 
   /* ─── Coordinate conversion (uses ref to avoid stale closures) */
-  const screenToSVG = useCallback(
-    (clientX, clientY) => {
-      const rect = svgRef.current?.getBoundingClientRect();
-      const vb = viewBoxRef.current;
-      if (!rect) return { x: clientX, y: clientY };
-      return {
-        x: vb.x + ((clientX - rect.left) / rect.width) * vb.w,
-        y: vb.y + ((clientY - rect.top) / rect.height) * vb.h,
-      };
-    },
-    []
-  );
+  const screenToSVG = useCallback((clientX, clientY) => {
+    const rect = svgRef.current?.getBoundingClientRect();
+    const vb = viewBoxRef.current;
+    if (!rect) return { x: clientX, y: clientY };
+    return {
+      x: vb.x + ((clientX - rect.left) / rect.width) * vb.w,
+      y: vb.y + ((clientY - rect.top) / rect.height) * vb.h,
+    };
+  }, []);
 
   /* ─── Node drag start ──────────────────────────────── */
   const handlePointerDown = useCallback(
@@ -312,26 +317,23 @@ export function PartyTreeGraph({
       dragRef.current = { key, startMouse: svgPt, startPos: { ...pos } };
       hasDraggedRef.current = false;
     },
-    [screenToSVG, nodePositions]
+    [screenToSVG, nodePositions],
   );
 
   /* ─── Canvas pan start ─────────────────────────────── */
-  const handleCanvasPointerDown = useCallback(
-    (e) => {
-      if (interactionMode.current === "drag") return;
-      interactionMode.current = "pan";
-      const vb = viewBoxRef.current;
-      panRef.current = {
-        startMouse: { x: e.clientX, y: e.clientY },
-        startViewBox: { x: vb.x, y: vb.y },
-      };
-    },
-    []
-  );
+  const handleCanvasPointerDown = useCallback((e) => {
+    if (interactionMode.current === "drag") return;
+    interactionMode.current = "pan";
+    const vb = viewBoxRef.current;
+    panRef.current = {
+      startMouse: { x: e.clientX, y: e.clientY },
+      startViewBox: { x: vb.x, y: vb.y },
+    };
+  }, []);
 
   /* ─── Unified pointer move ─────────────────────────── */
   const handlePointerMove = useCallback(
-      (e) => {
+    (e) => {
       if (interactionMode.current === "drag" && dragRef.current) {
         const svgPt = screenToSVG(e.clientX, e.clientY);
         const dx = svgPt.x - dragRef.current.startMouse.x;
@@ -358,7 +360,7 @@ export function PartyTreeGraph({
         setViewBox({ ...vb, x: newX, y: newY });
       }
     },
-    [screenToSVG]
+    [screenToSVG],
   );
 
   /* ─── Unified pointer up ──────────────────────────── */
@@ -390,7 +392,7 @@ export function PartyTreeGraph({
       });
       setZoom(newZoom);
     },
-    [dimensions]
+    [dimensions],
   );
 
   /* ─── Tooltip ──────────────────────────────────────── */
@@ -416,12 +418,15 @@ export function PartyTreeGraph({
         setTooltip(null);
       }
     },
-    [registry, allLinks]
+    [registry, allLinks],
   );
 
   /* ─── Render ───────────────────────────────────────── */
   return (
-    <div ref={containerRef} className="relative w-full h-full min-h-[560px] select-none overflow-hidden">
+    <div
+      ref={containerRef}
+      className="relative w-full h-full min-h-[560px] select-none overflow-hidden"
+    >
       <svg
         ref={svgRef}
         width={dimensions.width}
@@ -446,10 +451,26 @@ export function PartyTreeGraph({
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          <marker id="arrow" viewBox="0 0 10 6" refX="10" refY="3" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+          <marker
+            id="arrow"
+            viewBox="0 0 10 6"
+            refX="10"
+            refY="3"
+            markerWidth="8"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
             <path d="M 0 0 L 10 3 L 0 6 z" fill="#94a3b8" />
           </marker>
-          <marker id="arrow-tx" viewBox="0 0 10 6" refX="10" refY="3" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
+          <marker
+            id="arrow-tx"
+            viewBox="0 0 10 6"
+            refX="10"
+            refY="3"
+            markerWidth="8"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
             <path d="M 0 0 L 10 3 L 0 6 z" fill="#ea580c" />
           </marker>
         </defs>
@@ -461,9 +482,24 @@ export function PartyTreeGraph({
           const r = BASE_ORBIT_RADIUS * d;
           return (
             <g key={`orbit-${d}`}>
-              <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="6 4" opacity="0.6" />
+              <circle
+                cx={cx}
+                cy={cy}
+                r={r}
+                fill="none"
+                stroke="#e2e8f0"
+                strokeWidth="1"
+                strokeDasharray="6 4"
+                opacity="0.6"
+              />
               <text x={cx + r + 6} y={cy - 4} fill="#94a3b8" fontSize="10" fontWeight="500">
-                {d === 1 ? "1st degree" : d === 2 ? "2nd degree" : d === 3 ? "3rd degree" : `${d}th degree`}
+                {d === 1
+                  ? "1st degree"
+                  : d === 2
+                    ? "2nd degree"
+                    : d === 3
+                      ? "3rd degree"
+                      : `${d}th degree`}
               </text>
             </g>
           );
@@ -546,7 +582,9 @@ export function PartyTreeGraph({
                   fontWeight="700"
                   className="pointer-events-none"
                   opacity={isNew ? 0 : 1}
-                  style={isNew ? { animation: "fadeInLink 0.5s ease-out 0.15s forwards" } : undefined}
+                  style={
+                    isNew ? { animation: "fadeInLink 0.5s ease-out 0.15s forwards" } : undefined
+                  }
                 >
                   {formatCurrency(link.transaction.amount)} {link.transaction.currency}
                 </text>
@@ -566,7 +604,11 @@ export function PartyTreeGraph({
           const typeColor = getTypeColor(node.partyType);
           const typeBg = getTypeBg(node.partyType);
           const riskColor = getRiskColor(node.riskRating);
-          const initials = node.name.split(" ").map((w) => w[0]).join("").slice(0, 2);
+          const initials = node.name
+            .split(" ")
+            .map((w) => w[0])
+            .join("")
+            .slice(0, 2);
 
           // In transaction mode, dim nodes without transactions if not root
           const hasTx = node.transactions.length > 0 || key === rootKey;
@@ -580,19 +622,48 @@ export function PartyTreeGraph({
               onClick={() => handleNodeClick(key)}
               onMouseEnter={(e) => handleNodeHover(key, e)}
               onMouseLeave={() => handleNodeHover(null)}
-              style={isNew ? { animation: "fadeInNode 0.45s ease-out forwards", opacity: 0 } : { opacity: dimmed ? 0.4 : 1 }}
+              style={
+                isNew
+                  ? { animation: "fadeInNode 0.45s ease-out forwards", opacity: 0 }
+                  : { opacity: dimmed ? 0.4 : 1 }
+              }
             >
               {/* Expanded outer ring */}
               {isExpanded && (
                 <>
-                  <circle cx={pos.x} cy={pos.y} r={NODE_RADIUS + 10} fill="none" stroke={typeColor} strokeWidth="1" opacity="0.12" />
-                  <circle cx={pos.x} cy={pos.y} r={NODE_RADIUS + 5} fill="none" stroke={typeColor} strokeWidth="1.5" opacity="0.25" filter="url(#glow-ring)" />
+                  <circle
+                    cx={pos.x}
+                    cy={pos.y}
+                    r={NODE_RADIUS + 10}
+                    fill="none"
+                    stroke={typeColor}
+                    strokeWidth="1"
+                    opacity="0.12"
+                  />
+                  <circle
+                    cx={pos.x}
+                    cy={pos.y}
+                    r={NODE_RADIUS + 5}
+                    fill="none"
+                    stroke={typeColor}
+                    strokeWidth="1.5"
+                    opacity="0.25"
+                    filter="url(#glow-ring)"
+                  />
                 </>
               )}
 
               {/* Hover ring */}
               {isHovered && !isExpanded && (
-                <circle cx={pos.x} cy={pos.y} r={NODE_RADIUS + 4} fill="none" stroke={typeColor} strokeWidth="1" opacity="0.3" />
+                <circle
+                  cx={pos.x}
+                  cy={pos.y}
+                  r={NODE_RADIUS + 4}
+                  fill="none"
+                  stroke={typeColor}
+                  strokeWidth="1"
+                  opacity="0.3"
+                />
               )}
 
               {/* Main circle */}
@@ -629,7 +700,15 @@ export function PartyTreeGraph({
 
               {/* Inactive dashed ring */}
               {node.status === "INACTIVE" && (
-                <circle cx={pos.x} cy={pos.y} r={NODE_RADIUS + 2} fill="none" stroke="#dc2626" strokeWidth="1.5" strokeDasharray="3 3" />
+                <circle
+                  cx={pos.x}
+                  cy={pos.y}
+                  r={NODE_RADIUS + 2}
+                  fill="none"
+                  stroke="#dc2626"
+                  strokeWidth="1.5"
+                  strokeDasharray="3 3"
+                />
               )}
 
               {/* Degree badge (top-left) */}
@@ -661,22 +740,77 @@ export function PartyTreeGraph({
               {/* Expand/collapse badge */}
               {node.hasChildren && !isExpanded && (
                 <>
-                  <circle cx={pos.x + NODE_RADIUS * 0.7} cy={pos.y + NODE_RADIUS * 0.7} r={9} fill="white" stroke="#cbd5e1" strokeWidth="1" />
-                  <text x={pos.x + NODE_RADIUS * 0.7} y={pos.y + NODE_RADIUS * 0.7 + 1} textAnchor="middle" dominantBaseline="central" fill="#64748b" fontSize="12" fontWeight="bold" className="pointer-events-none">+</text>
+                  <circle
+                    cx={pos.x + NODE_RADIUS * 0.7}
+                    cy={pos.y + NODE_RADIUS * 0.7}
+                    r={9}
+                    fill="white"
+                    stroke="#cbd5e1"
+                    strokeWidth="1"
+                  />
+                  <text
+                    x={pos.x + NODE_RADIUS * 0.7}
+                    y={pos.y + NODE_RADIUS * 0.7 + 1}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fill="#64748b"
+                    fontSize="12"
+                    fontWeight="bold"
+                    className="pointer-events-none"
+                  >
+                    +
+                  </text>
                 </>
               )}
               {node.hasChildren && isExpanded && (
                 <>
-                  <circle cx={pos.x + NODE_RADIUS * 0.7} cy={pos.y + NODE_RADIUS * 0.7} r={9} fill={typeColor} opacity="0.15" stroke={typeColor} strokeWidth="1" />
-                  <text x={pos.x + NODE_RADIUS * 0.7} y={pos.y + NODE_RADIUS * 0.7 + 1} textAnchor="middle" dominantBaseline="central" fill={typeColor} fontSize="14" fontWeight="bold" className="pointer-events-none">-</text>
+                  <circle
+                    cx={pos.x + NODE_RADIUS * 0.7}
+                    cy={pos.y + NODE_RADIUS * 0.7}
+                    r={9}
+                    fill={typeColor}
+                    opacity="0.15"
+                    stroke={typeColor}
+                    strokeWidth="1"
+                  />
+                  <text
+                    x={pos.x + NODE_RADIUS * 0.7}
+                    y={pos.y + NODE_RADIUS * 0.7 + 1}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fill={typeColor}
+                    fontSize="14"
+                    fontWeight="bold"
+                    className="pointer-events-none"
+                  >
+                    -
+                  </text>
                 </>
               )}
 
               {/* Transaction indicator in transaction mode */}
               {viewMode === "transaction" && node.transactions.length > 0 && (
                 <>
-                  <circle cx={pos.x - NODE_RADIUS * 0.7} cy={pos.y + NODE_RADIUS * 0.7} r={9} fill="#fff7ed" stroke="#fed7aa" strokeWidth="1" />
-                  <text x={pos.x - NODE_RADIUS * 0.7} y={pos.y + NODE_RADIUS * 0.7 + 0.5} textAnchor="middle" dominantBaseline="central" fill="#ea580c" fontSize="8" fontWeight="700" className="pointer-events-none">$</text>
+                  <circle
+                    cx={pos.x - NODE_RADIUS * 0.7}
+                    cy={pos.y + NODE_RADIUS * 0.7}
+                    r={9}
+                    fill="#fff7ed"
+                    stroke="#fed7aa"
+                    strokeWidth="1"
+                  />
+                  <text
+                    x={pos.x - NODE_RADIUS * 0.7}
+                    y={pos.y + NODE_RADIUS * 0.7 + 0.5}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fill="#ea580c"
+                    fontSize="8"
+                    fontWeight="700"
+                    className="pointer-events-none"
+                  >
+                    $
+                  </text>
                 </>
               )}
 
@@ -728,12 +862,22 @@ export function PartyTreeGraph({
       {/* Animations */}
       <style jsx>{`
         @keyframes fadeInNode {
-          from { opacity: 0; transform: scale(0.5); }
-          to { opacity: 1; transform: scale(1); }
+          from {
+            opacity: 0;
+            transform: scale(0.5);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
         @keyframes fadeInLink {
-          from { opacity: 0; }
-          to { opacity: 0.7; }
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 0.7;
+          }
         }
       `}</style>
 
@@ -741,15 +885,26 @@ export function PartyTreeGraph({
       {tooltip && (
         <div
           className="absolute pointer-events-none z-50 rounded-lg border border-border bg-card px-4 py-3 shadow-xl"
-          style={{ left: tooltip.x, top: tooltip.y, transform: "translate(-50%, -100%)", maxWidth: 280 }}
+          style={{
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: "translate(-50%, -100%)",
+            maxWidth: 280,
+          }}
         >
           <div className="text-sm font-semibold text-foreground">{tooltip.node.name}</div>
           <div className="mt-1.5 flex items-center gap-2">
-            <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: getTypeColor(tooltip.node.partyType) }} />
+            <span
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ backgroundColor: getTypeColor(tooltip.node.partyType) }}
+            />
             <span className="text-xs text-muted-foreground">{tooltip.node.partyType}</span>
           </div>
           <div className="mt-1 flex items-center gap-2">
-            <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: getRiskColor(tooltip.node.riskRating) }} />
+            <span
+              className="inline-block h-2 w-2 rounded-full"
+              style={{ backgroundColor: getRiskColor(tooltip.node.riskRating) }}
+            />
             <span className="text-xs text-muted-foreground">Risk: {tooltip.node.riskRating}</span>
           </div>
           {tooltip.node.depth > 0 && (
@@ -758,21 +913,33 @@ export function PartyTreeGraph({
             </div>
           )}
           {tooltip.node.relationship && (
-            <div className="text-xs text-muted-foreground mt-1">Relation: {tooltip.node.relationship}</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Relation: {tooltip.node.relationship}
+            </div>
           )}
           {tooltip.node.relationType && (
-            <div className="text-xs text-muted-foreground mt-1">Type: {tooltip.node.relationType.replace(/_/g, " ")}</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Type: {tooltip.node.relationType.replace(/_/g, " ")}
+            </div>
           )}
           {tooltip.node.ownershipPercentage != null && (
-            <div className="text-xs text-muted-foreground mt-1">Ownership: {tooltip.node.ownershipPercentage}%</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Ownership: {tooltip.node.ownershipPercentage}%
+            </div>
           )}
-          <div className="text-xs text-muted-foreground mt-1">Role: {tooltip.node.role.replace(/_/g, " ")}</div>
+          <div className="text-xs text-muted-foreground mt-1">
+            Role: {tooltip.node.role.replace(/_/g, " ")}
+          </div>
           {tooltip.node.transactions.length > 0 && (
             <div className="mt-2 pt-2 border-t border-border">
-              <div className="text-xs font-semibold" style={{ color: "#ea580c" }}>Transactions:</div>
+              <div className="text-xs font-semibold" style={{ color: "#ea580c" }}>
+                Transactions:
+              </div>
               {tooltip.node.transactions.map((tx) => (
                 <div key={tx.transactionId} className="mt-1 text-xs text-muted-foreground">
-                  <div>{tx.from} {"-->"} {tx.to}</div>
+                  <div>
+                    {tx.from} {"-->"} {tx.to}
+                  </div>
                   <div className="font-semibold" style={{ color: "#c2410c" }}>
                     {formatCurrency(tx.amount)} {tx.currency} ({tx.frequency})
                   </div>
@@ -782,7 +949,10 @@ export function PartyTreeGraph({
             </div>
           )}
           {tooltip.node.hasChildren && (
-            <div className="text-xs mt-1.5 font-medium" style={{ color: getTypeColor(tooltip.node.partyType) }}>
+            <div
+              className="text-xs mt-1.5 font-medium"
+              style={{ color: getTypeColor(tooltip.node.partyType) }}
+            >
               {expandedKeys.has(tooltip.node.uniqueKey) ? "Click to collapse" : "Click to expand"}
             </div>
           )}
