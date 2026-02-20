@@ -2,204 +2,159 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-/* ─── Color helpers ──────────────────────────────────── */
-function getRiskColor(risk) {
-  switch (risk) {
-    case "LOW":
-      return "#16a34a";
-    case "MEDIUM":
-      return "#d97706";
-    case "HIGH":
-      return "#dc2626";
-    default:
-      return "#6b7280";
+
+const TX_MIN_WIDTH = 1.5;
+const TX_MAX_WIDTH = 8;
+
+
+/* ─── Colors ────────────────────────────────────────── */
+const PALETTE = {
+  individual: { fill: "#2563eb", bg: "#eff6ff", ring: "#bfdbfe" },
+  business: { fill: "#7c3aed", bg: "#f5f3ff", ring: "#ddd6fe" },
+} ;
+
+function palette(type) {
+  return type === "individual" ? PALETTE.individual : PALETTE.business;
+}
+
+function getRelColor(rel) {
+  return rel === "family" ? "#3b82f6" : "#94a3b8";
+}
+
+function fmt(amount, currency) {
+  if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)}M ${currency}`;
+  if (amount >= 1_000) return `${(amount / 1_000).toFixed(0)}K ${currency}`;
+  return `${amount} ${currency}`;
+}
+
+/* ─── Radial layout ─────────────────────────────────── */
+const NODE_R = 32;
+const ORBIT = 180;
+
+function computeRadial(
+  entities,
+  expanded,
+  cx,
+  cy,
+) {
+  const pos = new Map();
+  const kids = new Map();
+
+  for (const e of entities) {
+    if (e.invitedBy) {
+      const list = kids.get(e.invitedBy) || [];
+      list.push(e);
+      kids.set(e.invitedBy, list);
+    }
   }
-}
 
-function getTypeColor(type) {
-  switch (type) {
-    case "INDIVIDUAL":
-      return "#2563eb";
-    case "BUSINESS":
-      return "#9333ea";
-    case "LEGAL_ENTITY":
-      return "#0d9488";
-    default:
-      return "#6b7280";
-  }
-}
+  const root = entities.find((e) => e.invitedBy === null);
+  if (!root) return pos;
+  pos.set(root.name, { x: cx, y: cy });
 
-function getTypeBg(type) {
-  switch (type) {
-    case "INDIVIDUAL":
-      return "#eff6ff";
-    case "BUSINESS":
-      return "#faf5ff";
-    case "LEGAL_ENTITY":
-      return "#f0fdfa";
-    default:
-      return "#f9fafb";
-  }
-}
-
-function getRelationColor(rel) {
-  switch (rel) {
-    case "FAMILY":
-      return "#2563eb";
-    case "SOCIAL":
-      return "#8b5cf6";
-    case "OWNERSHIP":
-    case "CONTROL":
-      return "#9333ea";
-    case "LEGAL_STRUCTURE":
-    case "BENEFICIAL_INTEREST":
-      return "#0d9488";
-    case "TRANSACTIONAL":
-      return "#ea580c";
-    default:
-      return "#64748b";
-  }
-}
-
-function formatCurrency(amount) {
-  if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
-  if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`;
-  return `$${amount}`;
-}
-
-/* ─── Build registry ─────────────────────────────────── */
-function buildRegistry(node, parentKey, depth, registry, allLinks) {
-  const uniqueKey = parentKey ? `${parentKey}>${node.partyId}` : node.partyId;
-  const childKeys = node.children.map((c) => `${uniqueKey}>${c.partyId}`);
-
-  const txs = node.transactions || [];
-
-  registry.set(uniqueKey, {
-    uniqueKey,
-    id: node.partyId,
-    name: node.partyName,
-    partyType: node.partyType,
-    role: node.role,
-    riskRating: node.riskRating,
-    status: node.status,
-    relationship: node.relationshipToParent,
-    relationType: node.relationType,
-    ownershipPercentage: node.ownershipPercentage,
-    depth,
-    parentKey,
-    childKeys,
-    hasChildren: node.children.length > 0,
-    transactions: txs,
-  });
-
-  if (parentKey) {
-    // Find a transaction on this node from parent to this child
-    const tx = txs.length > 0 ? txs[0] : undefined;
-    allLinks.push({
-      sourceKey: parentKey,
-      targetKey: uniqueKey,
-      label: node.relationshipToParent || "",
-      relationType: node.relationType,
-      transaction: tx,
+  function place(parent, aS, aE, d) {
+    if (!expanded.has(parent)) return;
+    const ch = kids.get(parent) || [];
+    if (!ch.length) return;
+    const r = ORBIT * d;
+    const step = (aE - aS) / ch.length;
+    ch.forEach((c, i) => {
+      const a = aS + step * (i + 0.5);
+      pos.set(c.name, { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+      place(c.name, aS + step * i, aS + step * (i + 1), d + 1);
     });
   }
-
-  for (const child of node.children) {
-    buildRegistry(child, uniqueKey, depth + 1, registry, allLinks);
-  }
+  place(root.name, 0, 2 * Math.PI, 1);
+  return pos;
 }
 
-/* ─── Radial layout ──────────────────────────────────── */
-function computeRadialPositions(registry, expandedKeys, rootKey, cx, cy, baseRadius) {
-  const positions = new Map();
-  positions.set(rootKey, { x: cx, y: cy });
-
-  function placeChildren(parentKey, angleStart, angleEnd, depth) {
-    const node = registry.get(parentKey);
-    if (!node || !expandedKeys.has(parentKey)) return;
-
-    const visibleChildren = node.childKeys.filter((ck) => registry.has(ck));
-    if (visibleChildren.length === 0) return;
-
-    const radius = baseRadius * depth;
-    const arcSpan = angleEnd - angleStart;
-    const step = arcSpan / visibleChildren.length;
-
-    visibleChildren.forEach((childKey, i) => {
-      const angle = angleStart + step * (i + 0.5);
-      const x = cx + radius * Math.cos(angle);
-      const y = cy + radius * Math.sin(angle);
-      positions.set(childKey, { x, y });
-      placeChildren(childKey, angleStart + step * i, angleStart + step * (i + 1), depth + 1);
-    });
-  }
-
-  placeChildren(rootKey, 0, 2 * Math.PI, 1);
-  return positions;
-}
-
-/* ─── Main component ─────────────────────────────────── */
-const NODE_RADIUS = 36;
-const BASE_ORBIT_RADIUS = 180;
-
-export function PartyTreeGraph({ data, viewMode, expandAllRef, collapseAllRef }) {
+/* ─── Component ─────────────────────────────────────── */
+export function PartyTreeGraph({
+  entities,
+  expandAllRef,
+  collapseAllRef,
+}) {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
 
-  const [dimensions, setDimensions] = useState({ width: 1000, height: 600 });
-  const [expandedKeys, setExpandedKeys] = useState(new Set());
-  const [recentlyRevealed, setRecentlyRevealed] = useState(new Set());
-  const [hoveredKey, setHoveredKey] = useState(null);
-  const [tooltip, setTooltip] = useState(null);
-  const [draggedPositions, setDraggedPositions] = useState(new Map());
-  const dragRef = useRef(null);
-  const hasDraggedRef = useRef(false);
-  const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 1000, h: 600 });
-  const viewBoxRef = useRef(viewBox);
-  viewBoxRef.current = viewBox;
-  const [zoom, setZoom] = useState(1);
-  const zoomRef = useRef(zoom);
-  zoomRef.current = zoom;
-  const panRef = useRef(null);
-  const interactionMode = useRef("none");
+  const [dims, setDims] = useState({ width: 1000, height: 700 });
+  const [expanded, setExpanded] = useState(new Set());
+  const [revealed, setRevealed] = useState(new Set());
+  const [hoveredTx, setHoveredTx] = useState(null);
+  const [hoveredNode, setHoveredNode] = useState(null);
 
+  const [dragged, setDragged] = useState(new Map());
+  const dragRef = useRef(null);
+  const didDrag = useRef(false);
+
+  const [vb, setVb] = useState({ x: 0, y: 0, w: 1000, h: 700 });
+  const vbR = useRef(vb);
+  vbR.current = vb;
+  const [zoom, setZoom] = useState(1);
+  const zR = useRef(zoom);
+  zR.current = zoom;
+  const panRef = useRef(null);
+  const mode = useRef("none");
+
+  /* Resize */
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const obs = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect;
-      setDimensions({ width, height: Math.max(560, height) });
+    const obs = new ResizeObserver(([e]) => {
+      const { width, height } = e.contentRect;
+      setDims({ width, height: Math.max(560, height) });
     });
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
   useEffect(() => {
-    setViewBox({ x: 0, y: 0, w: dimensions.width, h: dimensions.height });
-  }, [dimensions]);
+    setVb({ x: 0, y: 0, w: dims.width, h: dims.height });
+  }, [dims]);
 
-  const rootKey = data.partyId;
+  /* Maps */
+  const eMap = useMemo(() => {
+    const m = new Map();
+    for (const e of entities) m.set(e.name, e);
+    return m;
+  }, [entities]);
 
-  const { registry, allLinks } = useMemo(() => {
-    const registry = new Map();
-    const allLinks = [];
-    buildRegistry(data, null, 0, registry, allLinks);
-    return { registry, allLinks };
-  }, [data]);
-
-  /* ─── Expand / Collapse All ─────────────────────────── */
-  const expandAll = useCallback(() => {
-    const allKeys = new Set();
-    for (const [key, node] of registry) {
-      if (node.hasChildren) allKeys.add(key);
+  const kidsOf = useMemo(() => {
+    const m = new Map();
+    for (const e of entities) {
+      if (e.invitedBy) {
+        const l = m.get(e.invitedBy) || [];
+        l.push(e.name);
+        m.set(e.invitedBy, l);
+      }
     }
-    setExpandedKeys(allKeys);
-    setDraggedPositions(new Map());
-  }, [registry]);
+    return m;
+  }, [entities]);
+
+  const rootName = useMemo(() => entities.find((e) => e.invitedBy === null)?.name ?? "", [entities]);
+
+  const depthOf = useMemo(() => {
+    const d = new Map();
+    d.set(rootName, 0);
+    const walk = (n, depth) => {
+      for (const c of kidsOf.get(n) || []) { d.set(c, depth + 1); walk(c, depth + 1); }
+    };
+    walk(rootName, 0);
+    return d;
+  }, [rootName, kidsOf]);
+
+  /* Expand / Collapse all */
+  const expandAll = useCallback(() => {
+    const all = new Set();
+    for (const [n] of kidsOf) all.add(n);
+    if (rootName) all.add(rootName);
+    setExpanded(all);
+    setDragged(new Map());
+  }, [kidsOf, rootName]);
 
   const collapseAll = useCallback(() => {
-    setExpandedKeys(new Set());
-    setDraggedPositions(new Map());
+    setExpanded(new Set());
+    setDragged(new Map());
   }, []);
 
   useEffect(() => {
@@ -207,652 +162,435 @@ export function PartyTreeGraph({ data, viewMode, expandAllRef, collapseAllRef })
     if (collapseAllRef) collapseAllRef.current = collapseAll;
   }, [expandAll, collapseAll, expandAllRef, collapseAllRef]);
 
-  const radialPositions = useMemo(() => {
-    const cx = dimensions.width / 2;
-    const cy = dimensions.height / 2;
-    return computeRadialPositions(registry, expandedKeys, rootKey, cx, cy, BASE_ORBIT_RADIUS);
-  }, [registry, expandedKeys, rootKey, dimensions]);
+  /* Positions */
+  const radial = useMemo(
+    () => computeRadial(entities, expanded, dims.width / 2, dims.height / 2),
+    [entities, expanded, dims],
+  );
 
-  console.log("radialPositions", radialPositions);
+  const nPos = useMemo(() => {
+    const m = new Map();
+    for (const [n, p] of radial) m.set(n, dragged.get(n) ?? p);
+    return m;
+  }, [radial, dragged]);
 
-  const nodePositions = useMemo(() => {
-    const merged = new Map();
-    for (const [key, pos] of radialPositions) {
-      merged.set(key, draggedPositions.get(key) ?? pos);
+  /* Links */
+  const { relLinks, txLinks } = useMemo(() => {
+    const relLinks = [];
+    const txLinks = [];
+
+    for (const e of entities) {
+      if (e.invitedBy && nPos.has(e.name) && nPos.has(e.invitedBy)) {
+        relLinks.push({ kind: "relation", sourceName: e.invitedBy, targetName: e.name, relation: e.relation, relationType: e.relationType });
+      }
     }
-    return merged;
-  }, [radialPositions, draggedPositions]);
 
-  // Build visible links based on view mode
-  const visibleLinks = useMemo(() => {
-    const links = [];
-    for (const key of nodePositions.keys()) {
-      const node = registry.get(key);
-      if (node?.parentKey && nodePositions.has(node.parentKey)) {
-        const linkData = allLinks.find(
-          (l) => l.sourceKey === node.parentKey && l.targetKey === key,
-        );
-        if (linkData) {
-          // In transaction mode, only show links that have transactions
-          if (viewMode === "transaction") {
-            if (linkData.transaction) links.push(linkData);
-          } else {
-            links.push(linkData);
+    // Outgoing links (red dashed): drawn from sender -> receiver
+    for (const e of entities) {
+      if (!nPos.has(e.name)) continue;
+      for (const tx of e.outgoingTransactions) {
+        if (tx.to && nPos.has(tx.to))
+          txLinks.push({ kind: "outgoing", sourceName: e.name, targetName: tx.to, amount: tx.amount, currency: tx.currency, purpose: tx.purpose });
+      }
+    }
+
+    // Incoming links (green solid): drawn from sender -> this entity
+    // These are always drawn separately even if a matching outgoing exists,
+    // because the green line represents the receiver's perspective.
+    const inSeen = new Set();
+    for (const e of entities) {
+      if (!nPos.has(e.name)) continue;
+      for (const tx of e.incomingTransactions) {
+        if (tx.from && nPos.has(tx.from)) {
+          // Deduplicate within incoming only (avoid drawing the same incoming twice)
+          const k = `${tx.from}~${e.name}~${tx.amount}~${tx.purpose}`;
+          if (!inSeen.has(k)) {
+            inSeen.add(k);
+            txLinks.push({ kind: "incoming", sourceName: tx.from, targetName: e.name, amount: tx.amount, currency: tx.currency, purpose: tx.purpose });
           }
         }
       }
     }
-    return links;
-  }, [nodePositions, registry, allLinks, viewMode]);
 
-  /* ─── Node click ───────────────────────────────────── */
-  const handleNodeClick = useCallback(
-    (key) => {
-      if (hasDraggedRef.current) {
-        hasDraggedRef.current = false;
-        return;
-      }
-      const node = registry.get(key);
-      if (!node || !node.hasChildren) return;
+    return { relLinks, txLinks };
+  }, [entities, nPos]);
 
-      setExpandedKeys((prev) => {
+  const maxAmt = useMemo(() => {
+    let m = 0;
+    for (const l of txLinks) if (l.amount > m) m = l.amount;
+    return m || 1;
+  }, [txLinks]);
+
+  const txW = (a) => TX_MIN_WIDTH + (a / maxAmt) * (TX_MAX_WIDTH - TX_MIN_WIDTH);
+
+  /* Node click */
+  const onClick = useCallback(
+    (name) => {
+      if (didDrag.current) { didDrag.current = false; return; }
+      const ch = kidsOf.get(name);
+      if (!ch?.length) return;
+
+      setExpanded((prev) => {
         const next = new Set(prev);
-        if (next.has(key)) {
-          next.delete(key);
-          const removeDesc = (k) => {
-            const n = registry.get(k);
-            if (n)
-              for (const ck of n.childKeys) {
-                next.delete(ck);
-                removeDesc(ck);
-              }
-          };
-          removeDesc(key);
-          setDraggedPositions((prev) => {
-            const next = new Map(prev);
-            const removePos = (k) => {
-              const n = registry.get(k);
-              if (n)
-                for (const ck of n.childKeys) {
-                  next.delete(ck);
-                  removePos(ck);
-                }
-            };
-            removePos(key);
-            return next;
-          });
+        if (next.has(name)) {
+          next.delete(name);
+          const rm = (n) => { for (const c of kidsOf.get(n) || []) { next.delete(c); rm(c); } };
+          rm(name);
+          setDragged((d) => { const nd = new Map(d); const r = (n) => { for (const c of kidsOf.get(n) || []) { nd.delete(c); r(c); } }; r(name); return nd; });
         } else {
-          next.add(key);
-          if (node) {
-            setRecentlyRevealed(new Set(node.childKeys));
-            setTimeout(() => setRecentlyRevealed(new Set()), 500);
-          }
+          next.add(name);
+          setRevealed(new Set(ch));
+          setTimeout(() => setRevealed(new Set()), 500);
         }
         return next;
       });
     },
-    [registry],
+    [kidsOf],
   );
 
-  /* ─── Coordinate conversion (uses ref to avoid stale closures) */
-  const screenToSVG = useCallback((clientX, clientY) => {
-    const rect = svgRef.current?.getBoundingClientRect();
-    const vb = viewBoxRef.current;
-    if (!rect) return { x: clientX, y: clientY };
-    return {
-      x: vb.x + ((clientX - rect.left) / rect.width) * vb.w,
-      y: vb.y + ((clientY - rect.top) / rect.height) * vb.h,
-    };
+  /* Pointer helpers */
+  const s2svg = useCallback((cx, cy) => {
+    const r = svgRef.current?.getBoundingClientRect();
+    const v = vbR.current;
+    if (!r) return { x: cx, y: cy };
+    return { x: v.x + ((cx - r.left) / r.width) * v.w, y: v.y + ((cy - r.top) / r.height) * v.h };
   }, []);
 
-  /* ─── Node drag start ──────────────────────────────── */
-  const handlePointerDown = useCallback(
-    (key, e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      interactionMode.current = "drag";
-      const svgPt = screenToSVG(e.clientX, e.clientY);
-      const pos = nodePositions.get(key);
-      if (!pos) return;
-      dragRef.current = { key, startMouse: svgPt, startPos: { ...pos } };
-      hasDraggedRef.current = false;
-    },
-    [screenToSVG, nodePositions],
-  );
+  const onNodeDown = useCallback((name, e) => {
+    e.stopPropagation(); e.preventDefault();
+    mode.current = "drag";
+    const pt = s2svg(e.clientX, e.clientY);
+    const p = nPos.get(name);
+    if (!p) return;
+    dragRef.current = { name, sm: pt, sp: { ...p } };
+    didDrag.current = false;
+  }, [s2svg, nPos]);
 
-  /* ─── Canvas pan start ─────────────────────────────── */
-  const handleCanvasPointerDown = useCallback((e) => {
-    if (interactionMode.current === "drag") return;
-    interactionMode.current = "pan";
-    const vb = viewBoxRef.current;
-    panRef.current = {
-      startMouse: { x: e.clientX, y: e.clientY },
-      startViewBox: { x: vb.x, y: vb.y },
-    };
+  const onCanvasDown = useCallback((e) => {
+    if (mode.current === "drag") return;
+    mode.current = "pan";
+    const v = vbR.current;
+    panRef.current = { sm: { x: e.clientX, y: e.clientY }, sv: { x: v.x, y: v.y } };
   }, []);
 
-  /* ─── Unified pointer move ─────────────────────────── */
-  const handlePointerMove = useCallback(
-    (e) => {
-      if (interactionMode.current === "drag" && dragRef.current) {
-        const svgPt = screenToSVG(e.clientX, e.clientY);
-        const dx = svgPt.x - dragRef.current.startMouse.x;
-        const dy = svgPt.y - dragRef.current.startMouse.y;
-        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasDraggedRef.current = true;
-        setDraggedPositions((prev) => {
-          const next = new Map(prev);
-          next.set(dragRef.current.key, {
-            x: dragRef.current.startPos.x + dx,
-            y: dragRef.current.startPos.y + dy,
-          });
-          return next;
-        });
-        return;
-      }
-      if (interactionMode.current === "pan" && panRef.current) {
-        const rect = svgRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const vb = viewBoxRef.current;
-        const sx = vb.w / rect.width;
-        const sy = vb.h / rect.height;
-        const newX = panRef.current.startViewBox.x - (e.clientX - panRef.current.startMouse.x) * sx;
-        const newY = panRef.current.startViewBox.y - (e.clientY - panRef.current.startMouse.y) * sy;
-        setViewBox({ ...vb, x: newX, y: newY });
-      }
-    },
-    [screenToSVG],
-  );
-
-  /* ─── Unified pointer up ──────────────────────────── */
-  const handlePointerUp = useCallback(() => {
-    dragRef.current = null;
-    panRef.current = null;
-    interactionMode.current = "none";
-  }, []);
-
-  /* ─── Zoom via wheel ──────────────────────────────── */
-  const handleWheel = useCallback(
-    (e) => {
-      e.preventDefault();
-      const factor = e.deltaY > 0 ? 1.08 : 0.92;
-      const z = zoomRef.current;
-      const vb = viewBoxRef.current;
-      const newZoom = Math.max(0.3, Math.min(4, z * factor));
-      const rect = svgRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const mx = vb.x + ((e.clientX - rect.left) / rect.width) * vb.w;
-      const my = vb.y + ((e.clientY - rect.top) / rect.height) * vb.h;
-      const newW = dimensions.width / newZoom;
-      const newH = dimensions.height / newZoom;
-      setViewBox({
-        x: mx - ((mx - vb.x) / vb.w) * newW,
-        y: my - ((my - vb.y) / vb.h) * newH,
-        w: newW,
-        h: newH,
+  const onMove = useCallback((e) => {
+    if (mode.current === "drag") {
+      const d = dragRef.current;
+      if (!d) return;
+      const pt = s2svg(e.clientX, e.clientY);
+      const dx = pt.x - d.sm.x;
+      const dy = pt.y - d.sm.y;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didDrag.current = true;
+      const targetName = d.name;
+      const newX = d.sp.x + dx;
+      const newY = d.sp.y + dy;
+      setDragged((prev) => {
+        const next = new Map(prev);
+        next.set(targetName, { x: newX, y: newY });
+        return next;
       });
-      setZoom(newZoom);
-    },
-    [dimensions],
-  );
+      return;
+    }
+    if (mode.current === "pan") {
+      const p = panRef.current;
+      if (!p) return;
+      const r = svgRef.current?.getBoundingClientRect();
+      if (!r) return;
+      const v = vbR.current;
+      const sx = v.w / r.width;
+      const sy = v.h / r.height;
+      setVb({
+        ...v,
+        x: p.sv.x - (e.clientX - p.sm.x) * sx,
+        y: p.sv.y - (e.clientY - p.sm.y) * sy,
+      });
+    }
+  }, [s2svg]);
 
-  /* ─── Tooltip ──────────────────────────────────────── */
-  const handleNodeHover = useCallback(
-    (key, event) => {
-      setHoveredKey(key);
-      if (key && event) {
-        const node = registry.get(key);
-        if (node) {
-          const rect = containerRef.current?.getBoundingClientRect();
-          if (rect) {
-            // Find link to this node
-            const link = allLinks.find((l) => l.targetKey === key);
-            setTooltip({
-              x: event.clientX - rect.left,
-              y: event.clientY - rect.top - 14,
-              node,
-              link,
-            });
-          }
-        }
-      } else {
-        setTooltip(null);
-      }
-    },
-    [registry, allLinks],
-  );
+  const onUp = useCallback(() => { dragRef.current = null; panRef.current = null; mode.current = "none"; }, []);
 
-  /* ─── Render ───────────────────────────────────────── */
+  const onWheel = useCallback((e) => {
+    e.preventDefault();
+    const f = e.deltaY > 0 ? 1.08 : 0.92;
+    const z = zR.current;
+    const v = vbR.current;
+    const nz = Math.max(0.3, Math.min(4, z * f));
+    const r = svgRef.current?.getBoundingClientRect();
+    if (!r) return;
+    const mx = v.x + ((e.clientX - r.left) / r.width) * v.w;
+    const my = v.y + ((e.clientY - r.top) / r.height) * v.h;
+    const nw = dims.width / nz;
+    const nh = dims.height / nz;
+    setVb({ x: mx - ((mx - v.x) / v.w) * nw, y: my - ((my - v.y) / v.h) * nh, w: nw, h: nh });
+    setZoom(nz);
+  }, [dims]);
+
+  /* Tx line hover */
+  const txEnter = useCallback((link, e) => {
+    const r = containerRef.current?.getBoundingClientRect();
+    if (!r) return;
+    setHoveredTx({ link, x: e.clientX - r.left, y: e.clientY - r.top - 14 });
+  }, []);
+  const txMove = useCallback((e) => {
+    if (!hoveredTx) return;
+    const r = containerRef.current?.getBoundingClientRect();
+    if (!r) return;
+    setHoveredTx((p) => p ? { ...p, x: e.clientX - r.left, y: e.clientY - r.top - 14 } : null);
+  }, [hoveredTx]);
+  const txLeave = useCallback(() => setHoveredTx(null), []);
+
+  /* Node hover */
+    const nodeEnter = useCallback((name, e) => {
+    const ent = eMap.get(name);
+    if (!ent) return;
+    const r = containerRef.current?.getBoundingClientRect();
+    if (!r) return;
+    setHoveredNode({ e: ent, x: e.clientX - r.left, y: e.clientY - r.top - 14 });
+  }, [eMap]);
+  const nodeLeave = useCallback(() => setHoveredNode(null), []);
+
+  /* Line geometry */
+  function lg(s, t, off = 0) {
+    const a = nPos.get(s);
+    const b = nPos.get(t);
+    if (!a || !b) return null;
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const d = Math.sqrt(dx * dx + dy * dy) || 1;
+    const nx = dx / d;
+    const ny = dy / d;
+    const px = -ny * off;
+    const py = nx * off;
+    return {
+      x1: a.x + nx * (NODE_R + 4) + px, y1: a.y + ny * (NODE_R + 4) + py,
+      x2: b.x - nx * (NODE_R + 4) + px, y2: b.y - ny * (NODE_R + 4) + py,
+      mx: (a.x + b.x) / 2 + px, my: (a.y + b.y) / 2 + py,
+    };
+  }
+
+  /* ─── Render ─────────────────────────────────────────── */
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full h-full min-h-[560px] select-none overflow-hidden"
-    >
+    <div ref={containerRef} className="relative w-full h-full min-h-[560px] select-none overflow-hidden bg-[#fafafa]">
       <svg
         ref={svgRef}
-        width={dimensions.width}
-        height={dimensions.height}
-        viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
+        width={dims.width}
+        height={dims.height}
+        viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`}
         className="w-full h-full cursor-grab active:cursor-grabbing"
         style={{ touchAction: "none" }}
-        onPointerDown={handleCanvasPointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-        onWheel={handleWheel}
+        onPointerDown={onCanvasDown}
+        onPointerMove={onMove}
+        onPointerUp={onUp}
+        onPointerLeave={onUp}
+        onWheel={onWheel}
       >
         <defs>
-          <filter id="node-shadow" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#94a3b8" floodOpacity="0.25" />
+          <filter id="ns" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="3" floodColor="#64748b" floodOpacity="0.12" />
           </filter>
-          <filter id="glow-ring" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
+          <filter id="gl" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="5" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
-          <marker
-            id="arrow"
-            viewBox="0 0 10 6"
-            refX="10"
-            refY="3"
-            markerWidth="8"
-            markerHeight="6"
-            orient="auto-start-reverse"
-          >
-            <path d="M 0 0 L 10 3 L 0 6 z" fill="#94a3b8" />
-          </marker>
-          <marker
-            id="arrow-tx"
-            viewBox="0 0 10 6"
-            refX="10"
-            refY="3"
-            markerWidth="8"
-            markerHeight="6"
-            orient="auto-start-reverse"
-          >
-            <path d="M 0 0 L 10 3 L 0 6 z" fill="#ea580c" />
-          </marker>
+          {/* Glow filter for high-amount tx lines */}
+          <filter id="txGlowRed" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b" />
+            <feColorMatrix in="b" type="matrix" values="1 0 0 0 0.1  0 0 0 0 0  0 0 0 0 0  0 0 0 0.35 0" result="cr" />
+            <feMerge><feMergeNode in="cr" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <filter id="txGlowGreen" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b" />
+            <feColorMatrix in="b" type="matrix" values="0 0 0 0 0  0 1 0 0 0.1  0 0 0 0 0  0 0 0 0.35 0" result="cg" />
+            <feMerge><feMergeNode in="cg" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
         </defs>
 
-        {/* Degree-of-separation orbit rings */}
-        {[1, 2, 3, 4].map((d) => {
-          const cx = dimensions.width / 2;
-          const cy = dimensions.height / 2;
-          const r = BASE_ORBIT_RADIUS * d;
+        {/* Orbit rings */}
+        {[1, 2, 3].map((d) => (
+          <g key={`o${d}`}>
+            <circle cx={dims.width / 2} cy={dims.height / 2} r={ORBIT * d} fill="none" stroke="#e2e8f0" strokeWidth="0.75" strokeDasharray="4 6" opacity="0.6" />
+            <text x={dims.width / 2 + ORBIT * d + 4} y={dims.height / 2 - 4} fill="#cbd5e1" fontSize="9" fontWeight="500">
+              {d === 1 ? "1st" : d === 2 ? "2nd" : "3rd"}
+            </text>
+          </g>
+        ))}
+
+        {/* Relation links */}
+        {relLinks.map((l) => {
+          const g = lg(l.sourceName, l.targetName);
+          if (!g) return null;
+          const isNew = revealed.has(l.targetName);
+          const c = getRelColor(l.relationType);
           return (
-            <g key={`orbit-${d}`}>
-              <circle
-                cx={cx}
-                cy={cy}
-                r={r}
-                fill="none"
-                stroke="#e2e8f0"
-                strokeWidth="1"
-                strokeDasharray="6 4"
-                opacity="0.6"
-              />
-              <text x={cx + r + 6} y={cy - 4} fill="#94a3b8" fontSize="10" fontWeight="500">
-                {d === 1
-                  ? "1st degree"
-                  : d === 2
-                    ? "2nd degree"
-                    : d === 3
-                      ? "3rd degree"
-                      : `${d}th degree`}
+            <g key={`r~${l.sourceName}~${l.targetName}`}>
+              <line x1={g.x1} y1={g.y1} x2={g.x2} y2={g.y2} stroke={c} strokeWidth={1.2} opacity={isNew ? 0 : 0.35} strokeLinecap="round" style={isNew ? { animation: "fiL .5s ease-out forwards" } : undefined} />
+              <rect x={g.mx - 30} y={g.my - 8} width={60} height={16} rx={8} fill="white" stroke="#e2e8f0" strokeWidth="0.5" opacity={isNew ? 0 : 0.95} style={isNew ? { animation: "fiL .5s ease-out .15s forwards" } : undefined} />
+              <text x={g.mx} y={g.my + 0.5} textAnchor="middle" dominantBaseline="central" fill={c} fontSize="7.5" fontWeight="500" letterSpacing="0.01em" className="pointer-events-none" opacity={isNew ? 0 : 1} style={isNew ? { animation: "fiL .5s ease-out .15s forwards" } : undefined}>
+                {l.relation}
               </text>
             </g>
           );
         })}
 
-        {/* Links */}
-        {visibleLinks.map((link) => {
-          const s = nodePositions.get(link.sourceKey);
-          const t = nodePositions.get(link.targetKey);
-          if (!s || !t) return null;
+        {/* Transaction links */}
+        {txLinks.map((l, i) => {
+          const isOut = l.kind === "outgoing";
+          const col = isOut ? "#dc2626" : "#16a34a";
+          const bgF = isOut ? "#fef2f2" : "#f0fdf4";
+          const bgS = isOut ? "#fecaca" : "#bbf7d0";
+          const off = isOut ? 10 : -10;
+          const g = lg(l.sourceName, l.targetName, off);
+          if (!g) return null;
+          const hovered = hoveredTx?.link === l;
+          const bw = txW(l.amount);
+          const ratio = l.amount / maxAmt;
+          const isLarge = ratio > 0.6;
+          const isMedium = ratio > 0.3;
+          const glowFilter = isLarge ? (isOut ? "url(#txGlowRed)" : "url(#txGlowGreen)") : undefined;
 
-          const isNew = recentlyRevealed.has(link.targetKey);
-          const dx = t.x - s.x;
-          const dy = t.y - s.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const nx = dx / (dist || 1);
-          const ny = dy / (dist || 1);
-
-          const sx = s.x + nx * (NODE_RADIUS + 2);
-          const sy = s.y + ny * (NODE_RADIUS + 2);
-          const tx = t.x - nx * (NODE_RADIUS + 2);
-          const ty = t.y - ny * (NODE_RADIUS + 2);
-
-          const lx = (sx + tx) / 2;
-          const ly = (sy + ty) / 2;
-
-          const isTransaction = viewMode === "transaction" && link.transaction;
-          const linkColor = isTransaction ? "#ea580c" : getRelationColor(link.relationType);
-          const linkWidth = isTransaction ? 2.5 : 1.5;
+          // Badge size scales with amount
+          const badgeW = isLarge ? 80 : isMedium ? 68 : 58;
+          const badgeH = isLarge ? 20 : isMedium ? 17 : 14;
+          const badgeR = badgeH / 2;
+          const badgeFont = isLarge ? 9 : isMedium ? 8 : 7;
 
           return (
-            <g key={`${link.sourceKey}~${link.targetKey}`}>
+            <g key={`t~${l.kind}~${l.sourceName}~${l.targetName}~${i}`}>
+              {/* Hit area */}
+              <line x1={g.x1} y1={g.y1} x2={g.x2} y2={g.y2} stroke="transparent" strokeWidth={Math.max(16, bw + 10)} className="cursor-pointer" onMouseEnter={(e) => txEnter(l, e)} onMouseMove={txMove} onMouseLeave={txLeave} />
+              {/* Visible line */}
               <line
-                x1={sx}
-                y1={sy}
-                x2={tx}
-                y2={ty}
-                stroke={linkColor}
-                strokeWidth={linkWidth}
-                opacity={isNew ? 0 : 0.7}
-                markerEnd={isTransaction ? "url(#arrow-tx)" : "url(#arrow)"}
-                style={isNew ? { animation: "fadeInLink 0.5s ease-out forwards" } : undefined}
+                x1={g.x1} y1={g.y1} x2={g.x2} y2={g.y2}
+                stroke={col}
+                strokeWidth={hovered ? bw + 1.5 : bw}
+                strokeDasharray={isOut ? "6 3" : "none"}
+                opacity={hovered ? 1 : isLarge ? 0.7 : 0.45}
+                strokeLinecap="round"
+                filter={hovered || isLarge ? glowFilter : undefined}
+                className="pointer-events-none transition-all duration-150"
               />
-
-              {/* Relationship / Transaction label */}
+              {/* Amount badge */}
               <rect
-                x={lx - 44}
-                y={ly - 18}
-                width={88}
-                height={isTransaction ? 32 : 18}
-                rx={4}
-                fill="white"
-                stroke={isTransaction ? "#fed7aa" : "#e2e8f0"}
-                strokeWidth="1"
-                opacity={isNew ? 0 : 0.95}
-                style={isNew ? { animation: "fadeInLink 0.5s ease-out 0.15s forwards" } : undefined}
+                x={g.mx - badgeW / 2} y={g.my - badgeH / 2}
+                width={badgeW} height={badgeH} rx={badgeR}
+                fill={hovered ? col : bgF}
+                stroke={hovered ? col : bgS}
+                strokeWidth={isLarge ? 1 : 0.5}
+                className="pointer-events-none"
+                filter={isLarge && !hovered ? glowFilter : undefined}
               />
               <text
-                x={lx}
-                y={ly - (isTransaction ? 6 : 7)}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill={linkColor}
-                fontSize="8"
-                fontWeight="600"
+                x={g.mx} y={g.my + 0.5}
+                textAnchor="middle" dominantBaseline="central"
+                fill={hovered ? "#fff" : col}
+                fontSize={badgeFont}
+                fontWeight={isLarge ? "800" : "700"}
+                letterSpacing="0.02em"
                 className="pointer-events-none"
-                opacity={isNew ? 0 : 1}
-                style={isNew ? { animation: "fadeInLink 0.5s ease-out 0.15s forwards" } : undefined}
               >
-                {link.label}
+                {fmt(l.amount, l.currency)}
               </text>
-              {isTransaction && link.transaction && (
-                <text
-                  x={lx}
-                  y={ly + 7}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  fill="#c2410c"
-                  fontSize="9"
-                  fontWeight="700"
-                  className="pointer-events-none"
-                  opacity={isNew ? 0 : 1}
-                  style={
-                    isNew ? { animation: "fadeInLink 0.5s ease-out 0.15s forwards" } : undefined
-                  }
-                >
-                  {formatCurrency(link.transaction.amount)} {link.transaction.currency}
-                </text>
+              {/* Large amount visual emphasis -- small icon */}
+              {isLarge && !hovered && (
+                <circle cx={g.mx - badgeW / 2 + 7} cy={g.my} r={3} fill={col} opacity="0.5" className="pointer-events-none">
+                  <animate attributeName="r" values="2.5;4;2.5" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.5;0.2;0.5" dur="2s" repeatCount="indefinite" />
+                </circle>
               )}
             </g>
           );
         })}
 
         {/* Nodes */}
-        {Array.from(nodePositions.entries()).map(([key, pos]) => {
-          const node = registry.get(key);
-          if (!node) return null;
-
-          const isExpanded = expandedKeys.has(key);
-          const isHovered = hoveredKey === key;
-          const isNew = recentlyRevealed.has(key);
-          const typeColor = getTypeColor(node.partyType);
-          const typeBg = getTypeBg(node.partyType);
-          const riskColor = getRiskColor(node.riskRating);
-          const initials = node.name
-            .split(" ")
-            .map((w) => w[0])
-            .join("")
-            .slice(0, 2);
-
-          // In transaction mode, dim nodes without transactions if not root
-          const hasTx = node.transactions.length > 0 || key === rootKey;
-          const dimmed = viewMode === "transaction" && !hasTx && !isExpanded;
+        {Array.from(nPos.entries()).map(([name, pos]) => {
+          const ent = eMap.get(name);
+          if (!ent) return null;
+          const isExp = expanded.has(name);
+          const isNew = revealed.has(name);
+          const hasK = (kidsOf.get(name) || []).length > 0;
+          const p = palette(ent.type);
+          const depth = depthOf.get(name) ?? 0;
+          const ini = name.split(" ").map((w) => w[0]).join("").slice(0, 2);
+          const tOut = ent.outgoingTransactions.reduce((s, t) => s + t.amount, 0);
+          const tIn = ent.incomingTransactions.reduce((s, t) => s + t.amount, 0);
 
           return (
             <g
-              key={key}
+              key={name}
               className="cursor-pointer"
-              onPointerDown={(e) => handlePointerDown(key, e)}
-              onClick={() => handleNodeClick(key)}
-              onMouseEnter={(e) => handleNodeHover(key, e)}
-              onMouseLeave={() => handleNodeHover(null)}
-              style={
-                isNew
-                  ? { animation: "fadeInNode 0.45s ease-out forwards", opacity: 0 }
-                  : { opacity: dimmed ? 0.4 : 1 }
-              }
+              onPointerDown={(e) => onNodeDown(name, e)}
+              onClick={() => onClick(name)}
+              onMouseEnter={(e) => nodeEnter(name, e)}
+              onMouseLeave={nodeLeave}
+              style={isNew ? { animation: "fiN .4s ease-out forwards", opacity: 0 } : undefined}
             >
-              {/* Expanded outer ring */}
-              {isExpanded && (
-                <>
-                  <circle
-                    cx={pos.x}
-                    cy={pos.y}
-                    r={NODE_RADIUS + 10}
-                    fill="none"
-                    stroke={typeColor}
-                    strokeWidth="1"
-                    opacity="0.12"
-                  />
-                  <circle
-                    cx={pos.x}
-                    cy={pos.y}
-                    r={NODE_RADIUS + 5}
-                    fill="none"
-                    stroke={typeColor}
-                    strokeWidth="1.5"
-                    opacity="0.25"
-                    filter="url(#glow-ring)"
-                  />
-                </>
-              )}
-
-              {/* Hover ring */}
-              {isHovered && !isExpanded && (
-                <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r={NODE_RADIUS + 4}
-                  fill="none"
-                  stroke={typeColor}
-                  strokeWidth="1"
-                  opacity="0.3"
-                />
+              {/* Expanded glow */}
+              {isExp && (
+                <circle cx={pos.x} cy={pos.y} r={NODE_R + 8} fill="none" stroke={p.fill} strokeWidth="1.5" opacity="0.15" filter="url(#gl)" />
               )}
 
               {/* Main circle */}
               <circle
-                cx={pos.x}
-                cy={pos.y}
-                r={NODE_RADIUS}
-                fill={isExpanded ? typeColor : typeBg}
-                stroke={isExpanded ? typeColor : isHovered ? typeColor : "#cbd5e1"}
-                strokeWidth={isExpanded ? 2.5 : 1.5}
-                filter="url(#node-shadow)"
+                cx={pos.x} cy={pos.y} r={NODE_R}
+                fill={isExp ? p.fill : "#fff"}
+                stroke={isExp ? p.fill : "#e2e8f0"}
+                strokeWidth={isExp ? 2 : 1}
+                filter="url(#ns)"
               />
 
-              {/* Inner border */}
-              <circle
-                cx={pos.x}
-                cy={pos.y}
-                r={NODE_RADIUS - 3}
-                fill="none"
-                stroke={isExpanded ? "rgba(255,255,255,0.2)" : typeColor}
-                strokeWidth="0.5"
-                opacity={isExpanded ? 1 : 0.15}
-              />
-
-              {/* Risk dot */}
-              <circle
-                cx={pos.x + NODE_RADIUS * 0.62}
-                cy={pos.y - NODE_RADIUS * 0.62}
-                r={5}
-                fill={riskColor}
-                stroke="white"
-                strokeWidth="2"
-              />
+              {/* Inner accent ring */}
+              {isExp && <circle cx={pos.x} cy={pos.y} r={NODE_R - 2.5} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.75" />}
 
               {/* Inactive dashed ring */}
-              {node.status === "INACTIVE" && (
-                <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r={NODE_RADIUS + 2}
-                  fill="none"
-                  stroke="#dc2626"
-                  strokeWidth="1.5"
-                  strokeDasharray="3 3"
-                />
+              {!ent.active && <circle cx={pos.x} cy={pos.y} r={NODE_R + 3} fill="none" stroke="#ef4444" strokeWidth="1" strokeDasharray="3 2" opacity="0.6" />}
+
+              {/* Degree badge */}
+              {depth > 0 && (
+                <>
+                  <circle cx={pos.x - NODE_R * 0.65} cy={pos.y - NODE_R * 0.65} r={7} fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.75" />
+                  <text x={pos.x - NODE_R * 0.65} y={pos.y - NODE_R * 0.65 + 0.5} textAnchor="middle" dominantBaseline="central" fill="#94a3b8" fontSize="7.5" fontWeight="600" className="pointer-events-none">{depth}</text>
+                </>
               )}
 
-              {/* Degree badge (top-left) */}
-              {node.depth > 0 && (
+              {/* Type badge */}
+              <circle cx={pos.x + NODE_R * 0.65} cy={pos.y - NODE_R * 0.65} r={7} fill={p.bg} stroke={p.ring} strokeWidth="0.75" />
+              <text x={pos.x + NODE_R * 0.65} y={pos.y - NODE_R * 0.65 + 0.5} textAnchor="middle" dominantBaseline="central" fill={p.fill} fontSize="7" fontWeight="700" className="pointer-events-none">
+                {ent.type === "individual" ? "P" : "B"}
+              </text>
+
+              {/* Expand / Collapse badge */}
+              {hasK && (
                 <>
-                  <circle
-                    cx={pos.x - NODE_RADIUS * 0.62}
-                    cy={pos.y - NODE_RADIUS * 0.62}
-                    r={8}
-                    fill="white"
-                    stroke="#cbd5e1"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x={pos.x - NODE_RADIUS * 0.62}
-                    y={pos.y - NODE_RADIUS * 0.62 + 0.5}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fill="#64748b"
-                    fontSize="8"
-                    fontWeight="700"
-                    className="pointer-events-none"
-                  >
-                    {node.depth}
+                  <circle cx={pos.x + NODE_R * 0.7} cy={pos.y + NODE_R * 0.7} r={8} fill={isExp ? p.bg : "#f8fafc"} stroke={isExp ? p.ring : "#e2e8f0"} strokeWidth="0.75" />
+                  <text x={pos.x + NODE_R * 0.7} y={pos.y + NODE_R * 0.7 + 0.5} textAnchor="middle" dominantBaseline="central" fill={isExp ? p.fill : "#94a3b8"} fontSize="11" fontWeight="600" className="pointer-events-none">
+                    {isExp ? "\u2212" : "+"}
                   </text>
                 </>
               )}
 
-              {/* Expand/collapse badge */}
-              {node.hasChildren && !isExpanded && (
+              {/* Out / In indicators */}
+              {tOut > 0 && (
                 <>
-                  <circle
-                    cx={pos.x + NODE_RADIUS * 0.7}
-                    cy={pos.y + NODE_RADIUS * 0.7}
-                    r={9}
-                    fill="white"
-                    stroke="#cbd5e1"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x={pos.x + NODE_RADIUS * 0.7}
-                    y={pos.y + NODE_RADIUS * 0.7 + 1}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fill="#64748b"
-                    fontSize="12"
-                    fontWeight="bold"
-                    className="pointer-events-none"
-                  >
-                    +
-                  </text>
+                  <circle cx={pos.x - NODE_R * 0.7} cy={pos.y + NODE_R * 0.7} r={7} fill="#fef2f2" stroke="#fecaca" strokeWidth="0.5" />
+                  <text x={pos.x - NODE_R * 0.7} y={pos.y + NODE_R * 0.7 + 0.5} textAnchor="middle" dominantBaseline="central" fill="#dc2626" fontSize="5.5" fontWeight="700" className="pointer-events-none">OUT</text>
                 </>
               )}
-              {node.hasChildren && isExpanded && (
+              {tIn > 0 && (
                 <>
-                  <circle
-                    cx={pos.x + NODE_RADIUS * 0.7}
-                    cy={pos.y + NODE_RADIUS * 0.7}
-                    r={9}
-                    fill={typeColor}
-                    opacity="0.15"
-                    stroke={typeColor}
-                    strokeWidth="1"
-                  />
-                  <text
-                    x={pos.x + NODE_RADIUS * 0.7}
-                    y={pos.y + NODE_RADIUS * 0.7 + 1}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fill={typeColor}
-                    fontSize="14"
-                    fontWeight="bold"
-                    className="pointer-events-none"
-                  >
-                    -
-                  </text>
-                </>
-              )}
-
-              {/* Transaction indicator in transaction mode */}
-              {viewMode === "transaction" && node.transactions.length > 0 && (
-                <>
-                  <circle
-                    cx={pos.x - NODE_RADIUS * 0.7}
-                    cy={pos.y + NODE_RADIUS * 0.7}
-                    r={9}
-                    fill="#fff7ed"
-                    stroke="#fed7aa"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x={pos.x - NODE_RADIUS * 0.7}
-                    y={pos.y + NODE_RADIUS * 0.7 + 0.5}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fill="#ea580c"
-                    fontSize="8"
-                    fontWeight="700"
-                    className="pointer-events-none"
-                  >
-                    $
-                  </text>
+                  <circle cx={pos.x - NODE_R * 0.7 + (tOut > 0 ? 16 : 0)} cy={pos.y + NODE_R * 0.7} r={7} fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="0.5" />
+                  <text x={pos.x - NODE_R * 0.7 + (tOut > 0 ? 16 : 0)} y={pos.y + NODE_R * 0.7 + 0.5} textAnchor="middle" dominantBaseline="central" fill="#16a34a" fontSize="5.5" fontWeight="700" className="pointer-events-none">IN</text>
                 </>
               )}
 
               {/* Initials */}
-              <text
-                x={pos.x}
-                y={pos.y - 2}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill={isExpanded ? "white" : "#1e293b"}
-                fontSize="13"
-                fontWeight="700"
-                className="pointer-events-none"
-              >
-                {initials}
-              </text>
+              <text x={pos.x} y={pos.y - 1} textAnchor="middle" dominantBaseline="central" fill={isExp ? "#fff" : "#1e293b"} fontSize="12" fontWeight="700" letterSpacing="0.02em" className="pointer-events-none">{ini}</text>
 
-              {/* Type label */}
-              <text
-                x={pos.x}
-                y={pos.y + 13}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill={isExpanded ? "rgba(255,255,255,0.65)" : "#94a3b8"}
-                fontSize="7"
-                fontWeight="500"
-                className="pointer-events-none"
-              >
-                {node.partyType}
-              </text>
+              {/* Type sublabel */}
+              <text x={pos.x} y={pos.y + 11} textAnchor="middle" dominantBaseline="central" fill={isExp ? "rgba(255,255,255,0.6)" : "#94a3b8"} fontSize="6.5" className="pointer-events-none capitalize">{ent.type}</text>
 
-              {/* Name below */}
-              <text
-                x={pos.x}
-                y={pos.y + NODE_RADIUS + 16}
-                textAnchor="middle"
-                fill={isExpanded ? "#1e293b" : "#64748b"}
-                fontSize="10"
-                fontWeight={isExpanded ? "600" : "400"}
-                className="pointer-events-none"
-              >
-                {node.name.length > 20 ? `${node.name.slice(0, 18)}...` : node.name}
+              {/* Name */}
+              <text x={pos.x} y={pos.y + NODE_R + 14} textAnchor="middle" fill={isExp ? "#0f172a" : "#64748b"} fontSize="9" fontWeight={isExp ? "600" : "400"} className="pointer-events-none">
+                {name.length > 22 ? `${name.slice(0, 20)}...` : name}
               </text>
             </g>
           );
@@ -861,147 +599,98 @@ export function PartyTreeGraph({ data, viewMode, expandAllRef, collapseAllRef })
 
       {/* Animations */}
       <style jsx>{`
-        @keyframes fadeInNode {
-          from {
-            opacity: 0;
-            transform: scale(0.5);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes fadeInLink {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 0.7;
-          }
-        }
+        @keyframes fiN { from { opacity:0; transform:scale(.6); } to { opacity:1; transform:scale(1); } }
+        @keyframes fiL { from { opacity:0; } to { opacity:.6; } }
       `}</style>
 
-      {/* Tooltip */}
-      {tooltip && (
+      {/* Tx tooltip */}
+      {hoveredTx && (() => {
+        const isOut = hoveredTx.link.kind === "outgoing";
+        const col = isOut ? "#dc2626" : "#16a34a";
+        const label = isOut ? "Outgoing" : "Incoming";
+        return (
+          <div
+            className="absolute pointer-events-none z-50 rounded-xl border bg-card/95 backdrop-blur-sm px-4 py-3 shadow-lg"
+            style={{ left: hoveredTx.x, top: hoveredTx.y, transform: "translate(-50%,-100%)", maxWidth: 260, borderColor: isOut ? "#fecaca" : "#bbf7d0" }}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span className="inline-block h-1.5 w-3 rounded-full" style={{ backgroundColor: col }} />
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: col }}>{label}</span>
+            </div>
+            <div className="text-sm font-bold text-foreground">{fmt(hoveredTx.link.amount, hoveredTx.link.currency)}</div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">{hoveredTx.link.sourceName}</span>
+              <span className="mx-1 text-muted-foreground/50">{"->"}</span>
+              <span className="font-medium text-foreground">{hoveredTx.link.targetName}</span>
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">{hoveredTx.link.purpose}</div>
+          </div>
+        );
+      })()}
+
+      {/* Node tooltip */}
+      {hoveredNode && !hoveredTx && (
         <div
-          className="absolute pointer-events-none z-50 rounded-lg border border-border bg-card px-4 py-3 shadow-xl"
-          style={{
-            left: tooltip.x,
-            top: tooltip.y,
-            transform: "translate(-50%, -100%)",
-            maxWidth: 280,
-          }}
+          className="absolute pointer-events-none z-50 rounded-xl border border-border bg-card/95 backdrop-blur-sm px-4 py-3 shadow-lg"
+          style={{ left: hoveredNode.x, top: hoveredNode.y, transform: "translate(-50%,-100%)", maxWidth: 280 }}
         >
-          <div className="text-sm font-semibold text-foreground">{tooltip.node.name}</div>
-          <div className="mt-1.5 flex items-center gap-2">
-            <span
-              className="inline-block h-2 w-2 rounded-full"
-              style={{ backgroundColor: getTypeColor(tooltip.node.partyType) }}
-            />
-            <span className="text-xs text-muted-foreground">{tooltip.node.partyType}</span>
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: palette(hoveredNode.e.type).fill }} />
+            <span className="text-sm font-semibold text-foreground">{hoveredNode.e.name}</span>
           </div>
-          <div className="mt-1 flex items-center gap-2">
-            <span
-              className="inline-block h-2 w-2 rounded-full"
-              style={{ backgroundColor: getRiskColor(tooltip.node.riskRating) }}
-            />
-            <span className="text-xs text-muted-foreground">Risk: {tooltip.node.riskRating}</span>
+          <div className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+            <div className="capitalize">{hoveredNode.e.type} &middot; {hoveredNode.e.client}</div>
+            <div>Relation: <span className="font-medium" style={{ color: getRelColor(hoveredNode.e.relationType) }}>{hoveredNode.e.relation}</span></div>
+            <div>Channel: {hoveredNode.e.onboardingChannel}</div>
+            {hoveredNode.e.notes && <div className="italic">{hoveredNode.e.notes}</div>}
           </div>
-          {tooltip.node.depth > 0 && (
-            <div className="text-xs text-muted-foreground mt-1">
-              Degree of separation: {tooltip.node.depth}
-            </div>
+          {(depthOf.get(hoveredNode.e.name) ?? 0) > 0 && (
+            <div className="mt-1.5 text-[11px] text-muted-foreground">Degree: {depthOf.get(hoveredNode.e.name)}</div>
           )}
-          {tooltip.node.relationship && (
-            <div className="text-xs text-muted-foreground mt-1">
-              Relation: {tooltip.node.relationship}
-            </div>
-          )}
-          {tooltip.node.relationType && (
-            <div className="text-xs text-muted-foreground mt-1">
-              Type: {tooltip.node.relationType.replace(/_/g, " ")}
-            </div>
-          )}
-          {tooltip.node.ownershipPercentage != null && (
-            <div className="text-xs text-muted-foreground mt-1">
-              Ownership: {tooltip.node.ownershipPercentage}%
-            </div>
-          )}
-          <div className="text-xs text-muted-foreground mt-1">
-            Role: {tooltip.node.role.replace(/_/g, " ")}
-          </div>
-          {tooltip.node.transactions.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-border">
-              <div className="text-xs font-semibold" style={{ color: "#ea580c" }}>
-                Transactions:
-              </div>
-              {tooltip.node.transactions.map((tx) => (
-                <div key={tx.transactionId} className="mt-1 text-xs text-muted-foreground">
-                  <div>
-                    {tx.from} {"-->"} {tx.to}
-                  </div>
-                  <div className="font-semibold" style={{ color: "#c2410c" }}>
-                    {formatCurrency(tx.amount)} {tx.currency} ({tx.frequency})
-                  </div>
-                  <div>{tx.purpose}</div>
+          {(hoveredNode.e.outgoingTransactions.length > 0 || hoveredNode.e.incomingTransactions.length > 0) && (
+            <div className="mt-2 pt-2 border-t border-border space-y-1">
+              {hoveredNode.e.outgoingTransactions.length > 0 && (
+                <div>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#dc2626" }}>Out ({hoveredNode.e.outgoingTransactions.length})</span>
+                  {hoveredNode.e.outgoingTransactions.map((tx, i) => (
+                    <div key={i} className="text-[11px] text-muted-foreground">{fmt(tx.amount, tx.currency)} to {tx.to}</div>
+                  ))}
                 </div>
-              ))}
+              )}
+              {hoveredNode.e.incomingTransactions.length > 0 && (
+                <div>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#16a34a" }}>In ({hoveredNode.e.incomingTransactions.length})</span>
+                  {hoveredNode.e.incomingTransactions.map((tx, i) => (
+                    <div key={i} className="text-[11px] text-muted-foreground">{fmt(tx.amount, tx.currency)} from {tx.from}</div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
-          {tooltip.node.hasChildren && (
-            <div
-              className="text-xs mt-1.5 font-medium"
-              style={{ color: getTypeColor(tooltip.node.partyType) }}
-            >
-              {expandedKeys.has(tooltip.node.uniqueKey) ? "Click to collapse" : "Click to expand"}
+          {(kidsOf.get(hoveredNode.e.name) || []).length > 0 && (
+            <div className="mt-1.5 text-[11px] font-medium" style={{ color: palette(hoveredNode.e.type).fill }}>
+              {expanded.has(hoveredNode.e.name) ? "Click to collapse" : "Click to expand"}
             </div>
           )}
         </div>
       )}
 
       {/* Zoom controls */}
-      <div className="absolute bottom-4 right-4 flex flex-col gap-1">
-        <button
-          type="button"
-          className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-foreground text-sm font-bold hover:bg-secondary transition-colors"
-          onClick={() => {
-            const nz = Math.min(4, zoom * 1.25);
-            const nw = dimensions.width / nz;
-            const nh = dimensions.height / nz;
-            const cx = viewBox.x + viewBox.w / 2;
-            const cy = viewBox.y + viewBox.h / 2;
-            setViewBox({ x: cx - nw / 2, y: cy - nh / 2, w: nw, h: nh });
-            setZoom(nz);
-          }}
-        >
-          +
-        </button>
-        <button
-          type="button"
-          className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-foreground text-sm font-bold hover:bg-secondary transition-colors"
-          onClick={() => {
-            const nz = Math.max(0.3, zoom * 0.8);
-            const nw = dimensions.width / nz;
-            const nh = dimensions.height / nz;
-            const cx = viewBox.x + viewBox.w / 2;
-            const cy = viewBox.y + viewBox.h / 2;
-            setViewBox({ x: cx - nw / 2, y: cy - nh / 2, w: nw, h: nh });
-            setZoom(nz);
-          }}
-        >
-          -
-        </button>
-        <button
-          type="button"
-          className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground text-xs hover:bg-secondary transition-colors"
-          onClick={() => {
-            setViewBox({ x: 0, y: 0, w: dimensions.width, h: dimensions.height });
-            setZoom(1);
-            setDraggedPositions(new Map());
-          }}
-        >
-          R
-        </button>
+      <div className="absolute bottom-4 right-4 flex flex-col gap-1.5">
+        {[
+          { label: "+", fn: () => { const nz = Math.min(4, zoom * 1.25); const nw = dims.width / nz; const nh = dims.height / nz; const cx = vb.x + vb.w / 2; const cy = vb.y + vb.h / 2; setVb({ x: cx - nw / 2, y: cy - nh / 2, w: nw, h: nh }); setZoom(nz); } },
+          { label: "\u2212", fn: () => { const nz = Math.max(0.3, zoom * 0.8); const nw = dims.width / nz; const nh = dims.height / nz; const cx = vb.x + vb.w / 2; const cy = vb.y + vb.h / 2; setVb({ x: cx - nw / 2, y: cy - nh / 2, w: nw, h: nh }); setZoom(nz); } },
+          { label: "R", fn: () => { setVb({ x: 0, y: 0, w: dims.width, h: dims.height }); setZoom(1); setDragged(new Map()); } },
+        ].map(({ label, fn }) => (
+          <button
+            key={label}
+            type="button"
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-card text-foreground text-xs font-medium shadow-sm hover:bg-accent transition-colors"
+            onClick={fn}
+          >
+            {label}
+          </button>
+        ))}
       </div>
     </div>
   );
