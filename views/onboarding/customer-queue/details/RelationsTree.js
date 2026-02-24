@@ -9,7 +9,7 @@ const FILTERS = [
   { mode: "all", label: "All", icon: Network },
   { mode: "relations", label: "Relations", icon: Users },
   { mode: "transactions", label: "Transactions", icon: ArrowLeftRight },
-  { mode: "ip", label: "IP Addresses", icon: Globe },
+  // { mode: "ip", label: "IP Addresses", icon: Globe },
 ];
 
 export const partyEntities = {
@@ -22,11 +22,71 @@ export const partyEntities = {
   status: "ACTIVE",
   ipAddress: "103.21.244.10",
   transactions: [
-    { transactionId: "T-1001", from: "Hasina Family Trust", to: "Sheikh Hasina", relationType: "TRANSACTIONAL", amount: 1200000, currency: "USD", frequency: "ANNUAL", purpose: "Family support", riskFlag: "TRUST_TO_PEP", type: "INCOMING", dateRange: "2025" },
-    { transactionId: "T-1002", from: "Joy Digital Services", to: "Sheikh Hasina", relationType: "TRANSACTIONAL", amount: 300000, currency: "USD", frequency: "ANNUAL", purpose: "Dividend", riskFlag: "BUSINESS_TO_PEP", type: "INCOMING", dateRange: "2025" },
-    { transactionId: "T-1003", from: "Sheikh Hasina", to: "Hasina Family Trust", relationType: "TRANSACTIONAL", amount: 450000, currency: "USD", frequency: "ANNUAL", purpose: "Trust funding", riskFlag: "PEP_TO_TRUST", type: "OUTGOING", dateRange: "2025" },
-    { transactionId: "T-1004", from: "Sheikh Hasina", to: "Bangladesh Future Foundation", relationType: "TRANSACTIONAL", amount: 200000, currency: "USD", frequency: "ANNUAL", purpose: "Charitable donation", riskFlag: "PEP_TO_NGO", type: "OUTGOING", dateRange: "2025" },
-    { transactionId: "T-1005", from: "Prime Minister's Office", to: "Sheikh Hasina", relationType: "TRANSACTIONAL", amount: 50000, currency: "USD", frequency: "MONTHLY", purpose: "Official salary", riskFlag: "GOVERNMENT_TO_PEP", type: "INCOMING", dateRange: "2025" },
+    {
+      transactionId: "T-1001",
+      from: "Hasina Family Trust",
+      to: "Sheikh Hasina",
+      relationType: "TRANSACTIONAL",
+      amount: 1200000,
+      currency: "USD",
+      frequency: "ANNUAL",
+      purpose: "Family support",
+      riskFlag: "TRUST_TO_PEP",
+      type: "INCOMING",
+      dateRange: "2025",
+    },
+    {
+      transactionId: "T-1002",
+      from: "Joy Digital Services",
+      to: "Sheikh Hasina",
+      relationType: "TRANSACTIONAL",
+      amount: 300000,
+      currency: "USD",
+      frequency: "ANNUAL",
+      purpose: "Dividend",
+      riskFlag: "BUSINESS_TO_PEP",
+      type: "INCOMING",
+      dateRange: "2025",
+    },
+    {
+      transactionId: "T-1003",
+      from: "Sheikh Hasina",
+      to: "Hasina Family Trust",
+      relationType: "TRANSACTIONAL",
+      amount: 450000,
+      currency: "USD",
+      frequency: "ANNUAL",
+      purpose: "Trust funding",
+      riskFlag: "PEP_TO_TRUST",
+      type: "OUTGOING",
+      dateRange: "2025",
+    },
+    {
+      transactionId: "T-1004",
+      from: "Sheikh Hasina",
+      to: "Bangladesh Future Foundation",
+      relationType: "TRANSACTIONAL",
+      amount: 200000,
+      currency: "USD",
+      frequency: "ANNUAL",
+      purpose: "Charitable donation",
+      riskFlag: "PEP_TO_NGO",
+      type: "OUTGOING",
+      dateRange: "2025",
+    },
+    {
+      transactionId: "T-1005",
+      from: "Prime Minister's Office",
+      to: "Sheikh Hasina",
+      relationType: "TRANSACTIONAL",
+      amount: 50000,
+      currency: "USD",
+      frequency: "MONTHLY",
+      purpose: "Official salary",
+      riskFlag: "GOVERNMENT_TO_PEP",
+      type: "INCOMING",
+      dateRange: "2025",
+    },
   ],
   children: [
     // IMMEDIATE FAMILY - Children of Sheikh Hasina
@@ -871,8 +931,8 @@ export const partyEntities = {
       children: [],
     },
     // Additional business partners
-  ]
-}
+  ],
+};
 
 function flatten(node, parent, out) {
   out.push({
@@ -893,9 +953,9 @@ function flatten(node, parent, out) {
   for (const child of node?.children) flatten(child, node.partyName, out);
 }
 const _flat = [];
-flatten(partyEntities, null, _flat)
+flatten(partyEntities, null, _flat);
 const entities = _flat;
-console.log( "entities", entities )
+console.log("entities", entities);
 
 export function RelationsTree() {
   const [viewMode, setViewMode] = useState("family");
@@ -904,7 +964,7 @@ export function RelationsTree() {
   const collapseAllRef = useRef(null);
   return (
     <main className="min-h-screen ">
-      <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className=" px-6 py-8">
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -935,7 +995,6 @@ export function RelationsTree() {
             </button>
 
             {/* View mode toggle */}
-           
           </div>
         </div>
 
@@ -957,39 +1016,39 @@ export function RelationsTree() {
 
               {/* Graph */}
               <div className="h-[680px]">
-              <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-              {/* Filter bar + Legend */}
-              <div className="border-b border-border px-5 py-3 flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 p-0.5 rounded-lg bg-secondary/50">
-                    {FILTERS.map(({ mode: m, label, icon: Icon }) => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => setFilterMode(m)}
-                        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
-                          filterMode === m
-                            ? "bg-card text-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-                        }`}
-                      >
-                        <Icon className="h-3.5 w-3.5" />
-                        {label}
-                      </button>
-                    ))}
+                <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+                  {/* Filter bar + Legend */}
+                  <div className="border-b border-border px-5 py-3 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 p-0.5 rounded-lg bg-secondary/50">
+                        {FILTERS.map(({ mode: m, label, icon: Icon }) => (
+                          <button
+                            key={m}
+                            type="button"
+                            onClick={() => setFilterMode(m)}
+                            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+                              filterMode === m
+                                ? "bg-card text-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground hover:bg-card/50"
+                            }`}
+                          >
+                            <Icon className="h-3.5 w-3.5" />
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <GraphLegend filterMode={filterMode} />
+                  </div>
+                  <div className="h-[700px]">
+                    <PartyTreeGraph
+                      entities={entities}
+                      filterMode={filterMode}
+                      expandAllRef={expandAllRef}
+                      collapseAllRef={collapseAllRef}
+                    />
                   </div>
                 </div>
-                <GraphLegend filterMode={filterMode} />
-              </div>
-              <div className="h-[700px]">
-                <PartyTreeGraph
-                  entities={entities}
-                  filterMode={filterMode}
-                  expandAllRef={expandAllRef}
-                  collapseAllRef={collapseAllRef}
-                />
-              </div>
-            </div>
               </div>
             </div>
           </TabsContent>
@@ -1019,7 +1078,7 @@ export function RelationsTree() {
 
               {/* Diagram */}
               <div className="h-[680px]">
-                <PartyNodeDiagram entities={entities}  />
+                <PartyNodeDiagram entities={entities} />
               </div>
             </div>
           </TabsContent>

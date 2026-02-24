@@ -1,20 +1,21 @@
-"use client";
-import React from "react";
+'use client';
+import React from 'react';
 
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ECDDRegister } from "./ecdd-register";
-import { BreachIncidentRegister } from "./breach-incident-register";
-import { ThirdPartyRegister } from "./third-party-register";
-import { EscalationsExemptionsRegister } from "./escalations-exemptions-register";
-import { ExternalRequestsRegister } from "./external-requests-register";
-import { ConflictsRegister } from "./conflicts-register";
-import { RiskStatusRegister } from "./risk-status-register";
-import { SMRRegister } from "./smr-register";
-import { TrainingSection } from "../training/training-section";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ECDDRegister } from './ecdd-register';
+import { BreachIncidentRegister } from './breach-incident-register';
+import { ThirdPartyRegister } from './third-party-register';
+import { EscalationsExemptionsRegister } from './escalations-exemptions-register';
+import { ExternalRequestsRegister } from './external-requests-register';
+import { ConflictsRegister } from './conflicts-register';
+import { RiskStatusRegister } from './risk-status-register';
+import { SMRRegister } from './smr-register';
+import { TrainingSection } from '../training/training-section';
+import ExceptionRegisterPage from './exceptions';
 
 export function RegistersSection() {
-  const [activeTab, setActiveTab] = useState("ecdd");
+  const [activeTab, setActiveTab] = useState('ecdd');
 
   return (
     <div className="space-y-6">
@@ -32,7 +33,7 @@ export function RegistersSection() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-9 gap-2">
+        <TabsList className="">
           <TabsTrigger value="ecdd" className="text-xs">
             ECDD & RFI
           </TabsTrigger>
@@ -59,6 +60,9 @@ export function RegistersSection() {
           </TabsTrigger>
           <TabsTrigger value="training" className="text-xs">
             Training
+          </TabsTrigger>
+          <TabsTrigger value="exception" className="text-xs">
+            Exception
           </TabsTrigger>
         </TabsList>
 
@@ -96,6 +100,9 @@ export function RegistersSection() {
 
         <TabsContent value="training" className="space-y-4">
           <TrainingSection />
+        </TabsContent>
+        <TabsContent value="exception" className="space-y-4">
+          <ExceptionRegisterPage />
         </TabsContent>
       </Tabs>
     </div>

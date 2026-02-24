@@ -200,9 +200,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
       <div className="container  px-4">
         <Card className="border-none shadow-lg">
           <CardHeader className="bg-primary text-primary-foreground rounded-t-lg py-4">
-            <CardTitle className="text-2xl">
-              AML/CTF Compliance Officer
-            </CardTitle>
+            <CardTitle className="text-2xl">AML/CTF Compliance Officer</CardTitle>
             <CardDescription className="text-primary-foreground/80">
               Use this form to conduct personnel due diligence on and appoint an AML/CTF compliance
               officer
@@ -274,12 +272,10 @@ export default function ComplianceOfficerDueDiligenceForm() {
             {currentStep === 2 && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold border-b pb-2">
-                  Step 2: Check if the candidate is a member of an accounting professional
-                  association
+                  Step 2: Check if the candidate is a member of a professional association
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Check if the candidate is currently a member of professional
-                  associations.
+                  Check if the candidate is currently a member of professional associations.
                 </p>
 
                 <div className="overflow-x-auto">
@@ -292,9 +288,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
                         <th className="border p-3 text-left text-sm font-medium">
                           Description/process notes
                         </th>
-                        <th className="border p-3 text-center text-sm font-medium w-20">
-                          Attach
-                        </th>
+                        <th className="border p-3 text-center text-sm font-medium w-20">Attach</th>
                         <th className="border p-3 text-center text-sm font-medium w-28">
                           Verified by
                         </th>
@@ -306,7 +300,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
                     <tbody>
                       <tr>
                         <td className="border p-3 text-sm font-medium">
-                        Member of a professional body/association
+                          Member of a professional body/association
                         </td>
                         <td className="border p-3 text-sm text-muted-foreground">
                           Verify they are a member by searching the register of members on the
@@ -343,10 +337,11 @@ export default function ComplianceOfficerDueDiligenceForm() {
                       </tr>
                       <tr>
                         <td className="border p-3 text-sm font-medium">
-                        Holding Relevant Licences
+                          Holding Relevant Licences
                         </td>
                         <td className="border p-3 text-sm text-muted-foreground">
-                          Verify they are holding relevant licences by searching the register of members on the
+                          Verify they are holding relevant licences by searching the register of
+                          members on the
                         </td>
                         <td className="border p-3 text-center">
                           <Checkbox
@@ -387,7 +382,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
                       </tr>
                       <tr>
                         <td className="border p-3 text-sm font-medium">
-                       National criminal history check
+                          National criminal history check
                         </td>
                         <td className="border p-3 text-sm text-muted-foreground">
                           Complete a national criminal history check through an approved provider.
@@ -458,9 +453,7 @@ export default function ComplianceOfficerDueDiligenceForm() {
                         <th className="border p-3 text-left text-sm font-medium">
                           Description/process notes
                         </th>
-                        <th className="border p-3 text-center text-sm font-medium w-20">
-                          Attach
-                        </th>
+                        <th className="border p-3 text-center text-sm font-medium w-20">Attach</th>
                         <th className="border p-3 text-center text-sm font-medium w-28">
                           Verified by
                         </th>
@@ -1075,11 +1068,11 @@ export default function ComplianceOfficerDueDiligenceForm() {
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   Assess the candidate&apos;s suitability under the &apos;fit and proper&apos;
-                  criteria. If the person is a member of an accounting professional association, you
-                  have carried out a national criminal history check and you have no reasonable
-                  doubts about their integrity or identity, you can assess the person&apos;s
-                  suitability based on their capability, criminal history and any conflicts of
-                  interest, and mark all other factors as suitable.
+                  criteria. If the person is a member of a professional association, you have
+                  carried out a national criminal history check and you have no reasonable doubts
+                  about their integrity or identity, you can assess the person&apos;s suitability
+                  based on their capability, criminal history and any conflicts of interest, and
+                  mark all other factors as suitable.
                 </p>
 
                 <div className="space-y-6">

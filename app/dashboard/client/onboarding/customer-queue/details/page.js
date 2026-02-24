@@ -53,6 +53,11 @@ export default function CustomerQueueDetails() {
         <TabsContent value="osint">
           <OSINTPage />
         </TabsContent>
+        <TabsContent value="transactions">
+          <div className="min-h-56 grid place-items-center border rounded-md">
+            No transactions yet
+          </div>
+        </TabsContent>
       </Tabs>
       {/* <DetailViewModal currentId={id} /> */}
     </div>
