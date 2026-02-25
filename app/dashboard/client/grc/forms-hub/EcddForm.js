@@ -853,7 +853,11 @@ export default function EcddSelectionForm() {
                                 {cat.data.details}
                               </p>
                               <div>
-                                <Input type="textarea" placeholder="Your feedback" />
+                                <Textarea
+                                  type="textarea"
+                                  placeholder="Your feedback"
+                                  // onChange={() => {}}
+                                />
                               </div>
                             </div>
                           );
