@@ -923,7 +923,7 @@ export default function EcddSelectionForm() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label htmlFor={`${activeId}-notes`}>Review Notes</Label>
+                  <Label htmlFor={`${activeId}-notes`}>Review Notes </Label>
                   <Textarea
                     id={`${activeId}-notes`}
                     placeholder="Add any observations, findings, or recommendations for this ECDD case..."
