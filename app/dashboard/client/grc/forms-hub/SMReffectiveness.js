@@ -737,6 +737,12 @@ export default function SmrSelectionForm() {
                               <p className="text-xs leading-relaxed text-muted-foreground">
                                 {cat.data.details}
                               </p>
+                              <div>
+                                <Textarea
+                                  placeholder="Add any observations, findings, or notes for this SMR..."
+                                  rows={3}
+                                />
+                              </div>
                             </div>
                           );
                         })}
