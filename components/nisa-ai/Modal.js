@@ -99,6 +99,7 @@ export default function Modal({ isOpen, setIsOpen }) {
     try {
       setLoading(true);
       const res = await chatWithNissa(payload);
+      console.log('res', res);
 
       const data = res.success
         ? {

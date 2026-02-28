@@ -1,19 +1,18 @@
-'use client'
+"use client";
 
-import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { useLoggedInUser } from "@/app/store/useLoggedInUser"
-import { Mail, Phone, Globe, MapPin, FileText, Building2, Calendar } from "lucide-react"
-import LabelDetails from "@/components/LabelDetails"
-import { IconEdit } from "@tabler/icons-react"
-import { useRouter } from "next/navigation"
-
-
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useLoggedInUser } from "@/app/store/useLoggedInUser";
+import { Mail, Phone, Globe, MapPin, FileText, Building2, Calendar } from "lucide-react";
+import LabelDetails from "@/components/LabelDetails";
+import { IconEdit } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 
 export default function CustomerProfile() {
   const { loggedInUser: userData } = useLoggedInUser();
-  const router = useRouter()
+  console.log("userData", userData);
+  const router = useRouter();
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -21,14 +20,20 @@ export default function CustomerProfile() {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    })
-  }
+    });
+  };
   const handleEdit = () => {
-    router.push('/dashboard/client/profile/edit')
-  }
+    router.push("/dashboard/client/profile/edit");
+  };
 
   return (
-    <div className="min-h-screen bg-white p-6 md:p-12">
+    <div className="min-h-screen bg-white p-6 md:p-12 relative">
+      <div className="absolute top-0 right-0">
+        {/* edit button */}
+        <Button onClick={handleEdit} variant="outline" size="sm" className={"bg-white"}>
+          <IconEdit /> Edit
+        </Button>
+      </div>
       <div className="mx-auto max-w-7xl space-y-8 ">
         {/* Header Section */}
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:gap-8 ">
@@ -38,7 +43,7 @@ export default function CustomerProfile() {
               <img
                 src={userData?.photoUrl || "/placeholder.svg"}
                 alt={userData?.name}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
               {userData?.isActive && (
                 <div className="absolute bottom-2 right-2 h-4 w-4 rounded-full border-2 border-background bg-green-500" />
@@ -50,7 +55,9 @@ export default function CustomerProfile() {
           <div className="flex-1 space-y-4 flex justify-between items-start">
             <div className="space-y-4">
               <div>
-                <h1 className="text-4xl font-bold tracking-tight text-foreground">{userData?.userName}</h1>
+                <h1 className="text-4xl font-bold tracking-tight text-foreground">
+                  {userData?.userName}
+                </h1>
                 <p className="mt-2 text-lg text-muted-foreground">{userData?.name}</p>
               </div>
 
@@ -61,7 +68,10 @@ export default function CustomerProfile() {
                 <Badge variant="outline" className="capitalize">
                   {userData?.userType}
                 </Badge>
-                <Badge variant="default" className={userData?.isActive ? "bg-green-600" : "bg-gray-600"}>
+                <Badge
+                  variant="default"
+                  className={userData?.isActive ? "bg-green-600" : "bg-gray-600"}
+                >
                   {userData?.isActive ? "Active" : "Inactive"}
                 </Badge>
               </div>
@@ -69,7 +79,10 @@ export default function CustomerProfile() {
               <div className="flex flex-col gap-2  text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  <a href={`mailto:${userData?.email}`} className="hover:text-foreground transition-colors">
+                  <a
+                    href={`mailto:${userData?.email}`}
+                    className="hover:text-foreground transition-colors"
+                  >
                     {userData?.email}
                   </a>
                 </div>
@@ -79,10 +92,21 @@ export default function CustomerProfile() {
                 </div>
               </div>
             </div>
-            {/* edit button */}
-            <Button onClick={handleEdit} variant="outline" size="lg" className={'bg-white'}>
-              <IconEdit /> Edit
-            </Button>
+
+            <div className="flex items-center gap-6 w-max px-2  py-4 rounded ">
+              <div className="flex-shrink-0">
+                <div className="relative size-40 overflow-hidden   bg-muted mx-auto">
+                  <img
+                    src={userData?.qr || "/placeholder.svg"}
+                    alt={userData?.name}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Scan this QR code to get a onboarding link
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -102,7 +126,10 @@ export default function CustomerProfile() {
                   <div className="space-y-3 ">
                     <LabelDetails label="Company Name" value={userData?.client?.name} />
                     <LabelDetails label="Type" value={userData?.client?.clientType} />
-                    <LabelDetails label="Registration" value={userData?.client?.registrationNumber} />
+                    <LabelDetails
+                      label="Registration"
+                      value={userData?.client?.registrationNumber}
+                    />
                     <LabelDetails label="Tax ID" value={userData?.client?.taxId} />
                     <LabelDetails label="Industry" value={userData?.client?.metadata?.industry} />
                     <div className="flex items-center justify-between pt-2">
@@ -118,7 +145,9 @@ export default function CustomerProfile() {
               {/* Contact Info Card */}
               <Card className="p-6 space-y-4 bg-card">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Contact Information</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">
+                    Contact Information
+                  </h3>
                   <div className="space-y-3">
                     <div className="flex items-start gap-2">
                       <Mail className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
@@ -158,8 +187,10 @@ export default function CustomerProfile() {
                     <div className="flex items-start gap-2">
                       <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted-foreground" />
                       <div className="">
-                        <LabelDetails label="Address" value={`${userData?.client?.address?.street}, ${userData?.client?.address?.city}, ${userData?.client?.address?.state}, ${userData?.client?.address?.country}, ${userData?.client?.address?.zipcode}`} />
-
+                        <LabelDetails
+                          label="Address"
+                          value={`${userData?.client?.address?.street}, ${userData?.client?.address?.city}, ${userData?.client?.address?.state}, ${userData?.client?.address?.country}, ${userData?.client?.address?.zipcode}`}
+                        />
                       </div>
                     </div>
                   </div>
@@ -172,7 +203,9 @@ export default function CustomerProfile() {
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-foreground">Primary Contact</h3>
-                      {userData.client.contacts[0].primary && <Badge variant="secondary">Primary</Badge>}
+                      {userData.client.contacts[0].primary && (
+                        <Badge variant="secondary">Primary</Badge>
+                      )}
                     </div>
                     <div className="space-y-3 ">
                       <LabelDetails label="Name" value={userData.client.contacts[0].name} />
@@ -203,17 +236,25 @@ export default function CustomerProfile() {
               {/* Legal Representative Card */}
               <Card className="p-6 space-y-4 bg-card">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Legal Representative</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">
+                    Legal Representative
+                  </h3>
                   <div className="space-y-3">
                     <LabelDetails label="Name" value={userData.client.legalRepresentative.name} />
-                    <LabelDetails label="Designation" value={userData.client.legalRepresentative.designation} />
+                    <LabelDetails
+                      label="Designation"
+                      value={userData.client.legalRepresentative.designation}
+                    />
                     <div className="flex items-center gap-2">
                       {/* <Mail className="h-4 w-4 text-muted-foreground" /> */}
                       <a
                         href={`mailto:${userData.client.legalRepresentative.email}`}
                         className=" text-foreground hover:text-accent transition-colors"
                       >
-                        <LabelDetails label="Email" value={userData.client.legalRepresentative.email} />
+                        <LabelDetails
+                          label="Email"
+                          value={userData.client.legalRepresentative.email}
+                        />
                       </a>
                     </div>
                     <div className="flex items-center gap-2">
@@ -222,7 +263,10 @@ export default function CustomerProfile() {
                         href={`tel:${userData.client.legalRepresentative.phone}`}
                         className=" text-foreground hover:text-accent transition-colors"
                       >
-                        <LabelDetails label="Phone" value={userData.client.legalRepresentative.phone} />
+                        <LabelDetails
+                          label="Phone"
+                          value={userData.client.legalRepresentative.phone}
+                        />
                       </a>
                     </div>
                   </div>
@@ -269,14 +313,22 @@ export default function CustomerProfile() {
             <Card className="p-6 bg-card">
               <h3 className="text-lg font-semibold text-foreground mb-4">Account Settings</h3>
               <div className="grid gap-4 md:grid-cols-2">
-                <LabelDetails label="Billing Cycle" value={userData.client.settings.billingCycle} className="capitalize" />
+                <LabelDetails
+                  label="Billing Cycle"
+                  value={userData.client.settings.billingCycle}
+                  className="capitalize"
+                />
                 <LabelDetails label="Currency" value={userData?.client?.settings?.currency} />
-                <LabelDetails label="Source" value={userData?.client?.metadata?.source} className="capitalize" />
+                <LabelDetails
+                  label="Source"
+                  value={userData?.client?.metadata?.source}
+                  className="capitalize"
+                />
               </div>
             </Card>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

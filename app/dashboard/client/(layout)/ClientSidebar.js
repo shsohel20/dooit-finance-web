@@ -316,6 +316,16 @@ export default function ClientSidebar({ ...props }) {
           url: "/dashboard/client/knowledge-hub/training-hub/dashboard",
           icon: IconLayoutDashboard,
         },
+        {
+          title: "Assignments",
+          url: "/dashboard/client/knowledge-hub/training-hub/assignments",
+          icon: IconLayoutDashboard,
+        },
+        {
+          title: "Reports",
+          url: "/dashboard/client/knowledge-hub/training-hub/reports",
+          icon: IconLayoutDashboard,
+        },
       ],
       // children: [
       //   {

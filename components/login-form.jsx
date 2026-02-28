@@ -57,6 +57,7 @@ export function LoginForm({ className, token, cid, ...props }) {
       return '/';
     }
   };
+  console.log('session', session);
 
   useEffect(() => {
     if (session.data) {
@@ -73,8 +74,8 @@ export function LoginForm({ className, token, cid, ...props }) {
       ...data,
       redirect: false,
     });
+    console.log('res', res);
     const user = res.user;
-    console.log('user', res);
 
     if (res.error) {
       toast.error('Something went wrong');

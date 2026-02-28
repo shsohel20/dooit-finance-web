@@ -86,7 +86,9 @@ export default function ManagerDashboardPage() {
             <Button
               size="lg"
               className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-semibold gap-2"
-              onClick={() => router.push("/manager/assignments")}
+              onClick={() =>
+                router.push("/dashboard/client/knowledge-hub/training-hub/assignments")
+              }
             >
               <ClipboardList className="w-5 h-5" />
               Assign Modules
@@ -95,7 +97,9 @@ export default function ManagerDashboardPage() {
               size="lg"
               variant="outline"
               className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 font-semibold gap-2 bg-transparent"
-              onClick={() => router.push("/manager/assignments?tab=retake")}
+              onClick={() =>
+                router.push("/dashboard/client/knowledge-hub/training-hub/assignments?tab=retake")
+              }
             >
               <RotateCcw className="w-5 h-5" />
               Manage Retakes
