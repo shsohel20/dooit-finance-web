@@ -458,10 +458,10 @@ export default function PersonnelDueDiligenceForm() {
               <br />
               <br />
               <span className="text-xs">
-                If you are currently a member of one of the accounting professional associations
-                (CPA Australia, Chartered Accountants Australia & New Zealand, or the Institute of
-                Public Accountants), you can use this as evidence that you meet all relevant fields
-                except for capability and conflicts of interest.
+                If you are currently a member of one of the professional associations (CPA
+                Australia, Chartered Accountants Australia & New Zealand, or the Institute of Public
+                Accountants), you can use this as evidence that you meet all relevant fields except
+                for capability and conflicts of interest.
               </span>
             </CardDescription>
           </CardHeader>

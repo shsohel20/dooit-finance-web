@@ -46,6 +46,7 @@ import {
   CircleCheck,
   TriangleAlert,
 } from "lucide-react";
+import { InputGroupTextarea } from "@/components/ui/input-group";
 
 const ECDD_REGISTER = [
   {
@@ -851,6 +852,13 @@ export default function EcddSelectionForm() {
                               <p className="text-xs leading-relaxed text-muted-foreground">
                                 {cat.data.details}
                               </p>
+                              <div>
+                                <Textarea
+                                  type="textarea"
+                                  placeholder="Your feedback"
+                                  // onChange={() => {}}
+                                />
+                              </div>
                             </div>
                           );
                         })}
@@ -915,7 +923,7 @@ export default function EcddSelectionForm() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <Label htmlFor={`${activeId}-notes`}>Review Notes</Label>
+                  <Label htmlFor={`${activeId}-notes`}>Review Notes </Label>
                   <Textarea
                     id={`${activeId}-notes`}
                     placeholder="Add any observations, findings, or recommendations for this ECDD case..."

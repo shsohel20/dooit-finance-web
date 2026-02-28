@@ -78,7 +78,7 @@ export function SiteHeader() {
           <Button variant="secondary" size="sm">
             Help <IconHelpCircle />
           </Button>
-          <Select defaultValue="production">
+          <Select defaultValue="sandbox">
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Select environment" />
             </SelectTrigger>

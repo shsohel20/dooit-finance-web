@@ -32,6 +32,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             userType: decodedToken.userType,
             id: decodedToken.id,
           };
+          // console.log("user", user);
           if (data.success) {
             return user;
           } else {

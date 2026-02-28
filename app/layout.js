@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { EncryptDecryptFAB } from "@/components/EncryptBtn";
 import ChatBotNissa from "@/components/nisa-ai";
+import { ModuleProvider } from "@/contexts/module-context";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -28,7 +29,10 @@ export default function RootLayout({ children }) {
         {/* <AuthProvider> */}
         <EncryptDecryptFAB />
         <ChatBotNissa />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {" "}
+          <ModuleProvider>{children}</ModuleProvider>
+        </AuthProvider>
         <Toaster />
         {/* </AuthProvider> */}
       </body>

@@ -1,8 +1,8 @@
-"use client";
-import { inviteTokenValidation } from "@/app/accept-invite/actions";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+'use client';
+import { inviteTokenValidation } from '@/app/accept-invite/actions';
+import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 
 export default function TokenValidation({ token, cid }) {
   const router = useRouter();
@@ -11,15 +11,19 @@ export default function TokenValidation({ token, cid }) {
   const validateToken = async () => {
     setLoading(true);
     const response = await inviteTokenValidation(token, cid);
-    console.log('response', response);
+    console.log('response from token validation', response);
     if (response.success) {
       const userId = response.data.userId;
-      if (userId) {
-        localStorage.setItem("invite_token", token);
-        localStorage.setItem("invite_cid", cid);
-        router.push(`/auth/login?token=${token}&cid=${cid}`);
+      if (response?.data?.userExists) {
+        localStorage.setItem('invite_token', token);
+        localStorage.setItem('invite_cid', cid);
+        router.push(
+          `/auth/login?token=${token}&cid=${cid}&email=${response?.data?.email}`
+        );
       } else {
-        router.push(`/auth/register?token=${token}&cid=${cid}`);
+        router.push(
+          `/auth/register?token=${token}&cid=${cid}&email=${response?.data?.email}`
+        );
       }
       setLoading(false);
     } else {

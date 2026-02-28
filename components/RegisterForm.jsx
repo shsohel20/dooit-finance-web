@@ -34,13 +34,19 @@ const registerSchema = z
     message: 'Passwords do not match',
     path: ['confirmPassword'], // field where the error will appear
   });
-export default function RegisterForm({ className, token, cid, ...props }) {
+export default function RegisterForm({
+  className,
+  token,
+  cid,
+  email,
+  ...props
+}) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const initialValues = {
     name: '',
     userName: '',
-    email: '',
+    email: email || '',
     password: '',
 
     confirmPassword: '',

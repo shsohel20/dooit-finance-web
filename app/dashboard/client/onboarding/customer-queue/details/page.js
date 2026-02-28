@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RelationsTree } from "@/views/onboarding/customer-queue/details/RelationsTree";
 import { getCustomerById } from "../actions";
 import Documents from "@/views/onboarding/customer-queue/details/Document";
+import OSINTPage from "@/views/onboarding/customer-queue/osint";
 
 export default function CustomerQueueDetails() {
   const id = useSearchParams().get("id");
@@ -38,6 +39,7 @@ export default function CustomerQueueDetails() {
           <TabsTrigger value="relations">Relations</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="osint">OSINT</TabsTrigger>
         </TabsList>
         <TabsContent value="details">
           <DetailViewModal details={details} fetching={fetching} />
@@ -47,6 +49,14 @@ export default function CustomerQueueDetails() {
         </TabsContent>
         <TabsContent value="documents">
           <Documents documents={details} />
+        </TabsContent>
+        <TabsContent value="osint">
+          <OSINTPage />
+        </TabsContent>
+        <TabsContent value="transactions">
+          <div className="min-h-56 grid place-items-center border rounded-md">
+            No transactions yet
+          </div>
         </TabsContent>
       </Tabs>
       {/* <DetailViewModal currentId={id} /> */}

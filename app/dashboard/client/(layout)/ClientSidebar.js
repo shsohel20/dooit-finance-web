@@ -312,21 +312,38 @@ export default function ClientSidebar({ ...props }) {
       icon: IconDatabase,
       children: [
         {
-          title: "Anti-Money Laundering Training",
-          url: "/dashboard/client/risk-rule-engine/training-module/anti-money-laundering",
-          icon: IconDatabase,
+          title: "Dashboard",
+          url: "/dashboard/client/knowledge-hub/training-hub/dashboard",
+          icon: IconLayoutDashboard,
         },
         {
-          title: "AML Red Flags",
-          url: "/dashboard/client/risk-rule-engine/training-module/aml-red-flags",
-          icon: IconAlertTriangle,
+          title: "Assignments",
+          url: "/dashboard/client/knowledge-hub/training-hub/assignments",
+          icon: IconLayoutDashboard,
         },
         {
-          title: "Our Ecosystem",
-          url: "/dashboard/client/risk-rule-engine/training-module/our-ecosystem",
-          icon: IconDatabase,
+          title: "Reports",
+          url: "/dashboard/client/knowledge-hub/training-hub/reports",
+          icon: IconLayoutDashboard,
         },
       ],
+      // children: [
+      //   {
+      //     title: "Anti-Money Laundering Training",
+      //     url: "/dashboard/client/risk-rule-engine/training-module/anti-money-laundering",
+      //     icon: IconDatabase,
+      //   },
+      //   {
+      //     title: "AML Red Flags",
+      //     url: "/dashboard/client/risk-rule-engine/training-module/aml-red-flags",
+      //     icon: IconAlertTriangle,
+      //   },
+      //   {
+      //     title: "Our Ecosystem",
+      //     url: "/dashboard/client/risk-rule-engine/training-module/our-ecosystem",
+      //     icon: IconDatabase,
+      //   },
+      // ],
     },
     {
       title: "System Settings",
