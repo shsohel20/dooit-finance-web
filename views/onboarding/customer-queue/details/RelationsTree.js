@@ -1015,7 +1015,7 @@ export function RelationsTree() {
               </div> */}
 
               {/* Graph */}
-              <div className="h-[680px]">
+              <div className="h-[1580px]">
                 <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
                   {/* Filter bar + Legend */}
                   <div className="border-b border-border px-5 py-3 flex flex-col gap-3">
@@ -1040,7 +1040,7 @@ export function RelationsTree() {
                     </div>
                     <GraphLegend filterMode={filterMode} />
                   </div>
-                  <div className="h-[700px]">
+                  <div className="h-[1500px]">
                     <PartyTreeGraph
                       entities={entities}
                       filterMode={filterMode}

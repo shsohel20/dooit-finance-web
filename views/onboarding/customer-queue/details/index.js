@@ -24,12 +24,14 @@ import {
   ShieldAlert,
   ImageIcon,
   Download,
+  GitPullRequest,
 } from "lucide-react";
 import { getCustomerById } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 import { cn, dateShowFormat } from "@/lib/utils";
+import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
 
 export const DetailViewModal = ({ details, fetching }) => {
-  const [reviewDocuments, setReviewDocuments] = useState(false);
+  const [openRelatedParties, setOpenRelatedParties] = useState(false);
 
   console.log("details => ", details);
 
@@ -69,6 +71,12 @@ export const DetailViewModal = ({ details, fetching }) => {
 
   return (
     <div className="grid grid-cols-12 gap-4 ">
+      {/* related parties */}
+      <div className="fixed top-1/2 right-0 transform -translate-y-1/2">
+        <Button variant="outline" size="icon" onClick={() => setOpenRelatedParties(true)}>
+          <GitPullRequest />
+        </Button>
+      </div>
       <div className="col-span-9">
         <div className=" mx-auto ">
           {/* User Profile Section */}
@@ -565,6 +573,9 @@ export const DetailViewModal = ({ details, fetching }) => {
           </div>
         </Card>
       </div>
+      {openRelatedParties && (
+        <RelatedPartyDrawer open={openRelatedParties} setOpen={setOpenRelatedParties} />
+      )}
     </div>
   );
 };
