@@ -34,3 +34,10 @@ export const createInstantReport = async (reportData) => {
   });
   return response.json();
 };
+
+export const getCustomerTransactions = async (customerId) => {
+  const response = await fetchWithAuth(`transaction?customer=${customerId}`, {
+    method: "GET",
+  });
+  return response.json();
+};

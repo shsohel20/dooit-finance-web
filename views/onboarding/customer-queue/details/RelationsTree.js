@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PartyNodeDiagram } from "./party-node-diagram";
 import { Network, Users, ArrowLeftRight, Globe } from "lucide-react";
 import partyEntities from "./demo.json";
+import { Input } from "@/components/ui/input";
 const FILTERS = [
   { mode: "all", label: "All", icon: Network },
   { mode: "relations", label: "Relations", icon: Users },
@@ -1038,7 +1039,10 @@ export function RelationsTree() {
                         ))}
                       </div>
                     </div>
-                    <GraphLegend filterMode={filterMode} />
+                    <div className="flex items-center justify-between gap-2">
+                      <GraphLegend filterMode={filterMode} />
+                      <Input type="text" placeholder="Search" className="w-64" />
+                    </div>
                   </div>
                   <div className="h-[1500px]">
                     <PartyTreeGraph
@@ -1085,29 +1089,5 @@ export function RelationsTree() {
         </Tabs>
       </div>
     </main>
-  );
-}
-
-function StatCard({ label, value, accent }) {
-  const accentColor =
-    accent === "green"
-      ? "#22c55e"
-      : accent === "red"
-        ? "#ef4444"
-        : accent === "amber"
-          ? "#f59e0b"
-          : "#0ea5e9";
-
-  return (
-    <div className="rounded-lg border border-border bg-card px-4 py-3">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="mt-1 flex items-center gap-2">
-        <span
-          className="inline-block h-2 w-2 rounded-full"
-          style={{ backgroundColor: accentColor }}
-        />
-        <span className="text-xl font-bold text-foreground">{value}</span>
-      </div>
-    </div>
   );
 }
