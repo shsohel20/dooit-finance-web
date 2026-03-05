@@ -7,6 +7,7 @@ import { RelationsTree } from "@/views/onboarding/customer-queue/details/Relatio
 import { getCustomerById } from "../actions";
 import Documents from "@/views/onboarding/customer-queue/details/Document";
 import OSINTPage from "@/views/onboarding/customer-queue/osint";
+import { Transactions } from "@/views/onboarding/customer-queue/details/Transactions";
 
 export default function CustomerQueueDetails() {
   const id = useSearchParams().get("id");
@@ -54,9 +55,7 @@ export default function CustomerQueueDetails() {
           <OSINTPage />
         </TabsContent>
         <TabsContent value="transactions">
-          <div className="min-h-56 grid place-items-center border rounded-md">
-            No transactions yet
-          </div>
+          <Transactions customerId={id} />
         </TabsContent>
       </Tabs>
       {/* <DetailViewModal currentId={id} /> */}
