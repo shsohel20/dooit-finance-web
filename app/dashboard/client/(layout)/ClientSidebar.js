@@ -306,9 +306,28 @@ export default function ClientSidebar({ ...props }) {
         },
       ],
     },
+
     {
-      title: "Training Module",
-      url: "/dashboard/client/risk-rule-engine/training-module",
+      title: "System Settings",
+      icon: IconListDetails,
+      children: [
+        {
+          title: "Privacy",
+          url: "/dashboard/client/system-settings/privacy",
+          icon: IconDatabase,
+        },
+        {
+          title: "Role Management",
+          url: "/dashboard/client/user-and-role-management",
+          icon: IconDatabase,
+        },
+      ],
+    },
+  ];
+  const TrainingModule = [
+    {
+      title: "Manager",
+      // url: "/dashboard/client/risk-rule-engine/training-module",
       icon: IconDatabase,
       children: [
         {
@@ -327,38 +346,44 @@ export default function ClientSidebar({ ...props }) {
           icon: IconLayoutDashboard,
         },
       ],
-      // children: [
-      //   {
-      //     title: "Anti-Money Laundering Training",
-      //     url: "/dashboard/client/risk-rule-engine/training-module/anti-money-laundering",
-      //     icon: IconDatabase,
-      //   },
-      //   {
-      //     title: "AML Red Flags",
-      //     url: "/dashboard/client/risk-rule-engine/training-module/aml-red-flags",
-      //     icon: IconAlertTriangle,
-      //   },
-      //   {
-      //     title: "Our Ecosystem",
-      //     url: "/dashboard/client/risk-rule-engine/training-module/our-ecosystem",
-      //     icon: IconDatabase,
-      //   },
-      // ],
     },
     {
-      title: "System Settings",
-      icon: IconListDetails,
+      title: "Admin",
+      // url: "/dashboard/client/risk-rule-engine/training-module/admin",
+      icon: IconDatabase,
       children: [
         {
-          title: "Privacy",
-          url: "/dashboard/client/system-settings/privacy",
-          icon: IconDatabase,
+          title: "Dashboard",
+          url: "/dashboard/client/knowledge-hub/training-hub/admin/dashboard",
+          icon: IconLayoutDashboard,
         },
         {
-          title: "Role Management",
-          url: "/dashboard/client/user-and-role-management",
-          icon: IconDatabase,
+          title: "Assignments",
+          url: "/dashboard/client/knowledge-hub/training-hub/admin/assignments",
+          icon: IconLayoutDashboard,
         },
+        {
+          title: "Reports",
+          url: "/dashboard/client/knowledge-hub/training-hub/admin/reports",
+          icon: IconLayoutDashboard,
+        },
+      ],
+    },
+    {
+      title: "Learner",
+      icon: IconDatabase,
+      url: "/dashboard/client/knowledge-hub/training-hub/learner",
+      children: [
+        {
+          title: "Dashboard",
+          url: "/dashboard/client/knowledge-hub/training-hub/learner/dashboard",
+          icon: IconLayoutDashboard,
+        },
+        // {
+        //   title: "Quiz",
+        //   url: "/dashboard/client/knowledge-hub/training-hub/learner/quiz",
+        //   icon: IconLayoutDashboard,
+        // },
       ],
     },
   ];
@@ -514,6 +539,7 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
         <NavMain items={configurationMenuItems} label="Configuration" />
+        <NavMain items={TrainingModule} label="Training Module" />
         <NavMain items={grcModule} label="Testing & Governance" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
