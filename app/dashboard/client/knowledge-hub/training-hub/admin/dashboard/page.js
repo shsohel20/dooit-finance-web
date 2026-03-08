@@ -240,7 +240,9 @@ export default function DashboardPage() {
                   variant="ghost"
                   size="sm"
                   className="text-muted-foreground"
-                  onClick={() => router.push("/reports")}
+                  onClick={() =>
+                    router.push("/dashboard/client/knowledge-hub/training-hub/reports")
+                  }
                 >
                   View All
                   <ArrowRight className="w-3.5 h-3.5 ml-1" />
@@ -329,7 +331,9 @@ export default function DashboardPage() {
               <Button
                 variant="outline"
                 className="w-full mt-2 gap-2 bg-transparent"
-                onClick={() => router.push("/modules")}
+                onClick={() =>
+                  router.push("/dashboard/client/knowledge-hub/training-hub/admin/modules")
+                }
               >
                 <BookOpen className="w-4 h-4" />
                 Manage Modules
@@ -345,7 +349,9 @@ export default function DashboardPage() {
             <CardContent className="space-y-2">
               <button
                 type="button"
-                onClick={() => router.push("/modules")}
+                onClick={() =>
+                  router.push("/dashboard/client/knowledge-hub/training-hub/admin/modules")
+                }
                 className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors text-left group"
               >
                 <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
@@ -360,7 +366,11 @@ export default function DashboardPage() {
 
               <button
                 type="button"
-                onClick={() => router.push("/assignments/manage")}
+                onClick={() =>
+                  router.push(
+                    "/dashboard/client/knowledge-hub/training-hub/admin/assignments/manage",
+                  )
+                }
                 className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors text-left group"
               >
                 <div className="p-2 rounded-lg bg-accent/10 text-accent group-hover:bg-accent/20 transition-colors">
@@ -375,7 +385,7 @@ export default function DashboardPage() {
 
               <button
                 type="button"
-                onClick={() => router.push("/reports")}
+                onClick={() => router.push("/dashboard/client/knowledge-hub/training-hub/reports")}
                 className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors text-left group"
               >
                 <div className="p-2 rounded-lg bg-[hsl(38_92%_50%)]/10 text-[hsl(38_92%_50%)] group-hover:bg-[hsl(38_92%_50%)]/20 transition-colors">
@@ -406,7 +416,11 @@ export default function DashboardPage() {
                     variant="link"
                     size="sm"
                     className="px-0 mt-1 h-auto text-destructive"
-                    onClick={() => router.push("/assignments/manage")}
+                    onClick={() =>
+                      router.push(
+                        "/dashboard/client/knowledge-hub/training-hub/admin/assignments/manage",
+                      )
+                    }
                   >
                     Review now
                   </Button>

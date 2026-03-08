@@ -38,7 +38,7 @@ export default function LearnerDashboardPage() {
   const { getModuleAssignments, getModuleById, getLearnerProgress, retakeModule } = useModules();
 
   const assignments = getModuleAssignments(user?.id || "");
-  const assignedModules = [assignments[0], assignments[1]];
+  const assignedModules = assignments.map((a) => getModuleById(a.moduleId)).filter(Boolean);
 
   const getModuleStatus = (moduleId) => {
     const progress = getLearnerProgress(user?.id || "", moduleId);

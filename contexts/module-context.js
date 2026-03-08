@@ -493,7 +493,7 @@ export function ModuleProvider({ children }) {
   };
 
   const getLearnerProgress = (learnerId, moduleId) => {
-    return progress.find((p) => p.learnerId === learnerId && p.moduleId === moduleId);
+    return progress.find((p) => p.learnerId === learnerId);
   };
 
   const getModuleAssignments = (learnerId) => {
