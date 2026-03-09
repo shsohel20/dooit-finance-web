@@ -410,6 +410,10 @@ export function ModuleProvider({ children }) {
       dueDate,
       maxAttempts,
     };
+    // const uniqueAssignments = [...new Set(assignments.map((a) => a.moduleId))];
+    // if (uniqueAssignments.includes(moduleId)) {
+    //   return;
+    // }
     setAssignments((prev) => [...prev, newAssignment]);
 
     // Initialize progress for each learner

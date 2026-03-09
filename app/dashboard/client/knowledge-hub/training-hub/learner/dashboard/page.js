@@ -78,7 +78,9 @@ export default function LearnerDashboardPage() {
   // const notStartedCount = assignedModules.filter(
   //   (m) => m && getModuleStatus(m.id) === "not-started",
   // ).length;
-  const notStartedCount = [assignedModules[0], assignedModules[2]];
+  const notStartedCount = assignedModules.filter(
+    (m) => m && getModuleStatus(m.id) === "not-started",
+  ).length;
   const avgProgress =
     assignedModules.length > 0
       ? Math.round(

@@ -233,11 +233,11 @@ export default function ClientSidebar({ ...props }) {
       icon: IconBook,
       url: "/dashboard/client/knowledge-hub/policy-hub",
     },
-    {
-      title: "Training Hub",
-      icon: GraduationCap,
-      url: "/dashboard/client/knowledge-hub/training-hub",
-    },
+    // {
+    //   title: "Training Hub",
+    //   icon: GraduationCap,
+    //   url: "/dashboard/client/knowledge-hub/training-hub",
+    // },
     {
       title: "EWRA",
       icon: IconWorld,
@@ -340,11 +340,6 @@ export default function ClientSidebar({ ...props }) {
           url: "/dashboard/client/knowledge-hub/training-hub/assignments",
           icon: IconLayoutDashboard,
         },
-        {
-          title: "Reports",
-          url: "/dashboard/client/knowledge-hub/training-hub/reports",
-          icon: IconLayoutDashboard,
-        },
       ],
     },
     {
@@ -358,8 +353,13 @@ export default function ClientSidebar({ ...props }) {
           icon: IconLayoutDashboard,
         },
         {
+          title: "Modules",
+          url: "/dashboard/client/knowledge-hub/training-hub/admin/modules",
+          icon: IconLayoutDashboard,
+        },
+        {
           title: "Assignments",
-          url: "/dashboard/client/knowledge-hub/training-hub/admin/assignments",
+          url: "/dashboard/client/knowledge-hub/training-hub/admin/assignments/manage",
           icon: IconLayoutDashboard,
         },
         {
@@ -385,6 +385,11 @@ export default function ClientSidebar({ ...props }) {
         //   icon: IconLayoutDashboard,
         // },
       ],
+    },
+    {
+      title: "Reports",
+      url: "/dashboard/client/knowledge-hub/training-hub/reports",
+      icon: IconLayoutDashboard,
     },
   ];
 

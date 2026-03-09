@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useModules } from "@/contexts/module-context";
-import { useAuth } from "@/contexts/auth-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -76,7 +75,12 @@ export default function TrainingPage() {
           <BookOpen className="w-10 h-10 text-muted-foreground" />
         </div>
         <p className="text-lg font-medium text-foreground mb-2">Module Not Found</p>
-        <Button onClick={() => router.push("/learner/dashboard")} className="gap-2 mt-4">
+        <Button
+          onClick={() =>
+            router.push("/dashboard/client/knowledge-hub/training-hub/learner/dashboard")
+          }
+          className="gap-2 mt-4"
+        >
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </Button>
@@ -162,11 +166,13 @@ export default function TrainingPage() {
 
     return (
       // <MainLayout>
-      <div className="max-w-4xl mx-auto py-6">
+      <div className="max-w-6xl mx-auto py-6 w-full">
         {/* Header */}
         <Button
           variant="ghost"
-          onClick={() => router.push("/learner/dashboard")}
+          onClick={() =>
+            router.push("/dashboard/client/knowledge-hub/training-hub/learner/dashboard")
+          }
           className="gap-2 text-muted-foreground hover:text-foreground mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -177,9 +183,9 @@ export default function TrainingPage() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2 text-balance">
-                {module.title}
+                {moduleData.title}
               </h1>
-              <p className="text-muted-foreground leading-relaxed">{module.description}</p>
+              <p className="text-muted-foreground leading-relaxed">{moduleData.description}</p>
             </div>
             {allDone && (
               <Badge className="bg-[hsl(142,71%,45%)]/10 text-[hsl(142,71%,45%)] border-0 gap-1.5 px-3 py-1.5 flex-shrink-0">
@@ -425,7 +431,7 @@ export default function TrainingPage() {
 
     return (
       // <MainLayout>
-      <div className="max-w-3xl mx-auto py-6">
+      <div className="max-w-6xl w-full mx-auto py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <Button
@@ -591,7 +597,7 @@ export default function TrainingPage() {
                   Congratulations!
                 </h1>
                 <p className="text-muted-foreground leading-relaxed">
-                  You have completed all {totalParts} parts of <strong>{module.title}</strong>.
+                  You have completed all {totalParts} parts of <strong>{moduleData.title}</strong>.
                 </p>
               </div>
 
@@ -615,7 +621,9 @@ export default function TrainingPage() {
               </div>
 
               <Button
-                onClick={() => router.push("/learner/dashboard")}
+                onClick={() =>
+                  router.push("/dashboard/client/knowledge-hub/training-hub/learner/dashboard")
+                }
                 className="w-full h-12 text-base gap-2 bg-gradient-to-r from-[hsl(142,71%,45%)] to-[hsl(168,76%,42%)] hover:opacity-90"
                 size="lg"
               >
@@ -632,7 +640,7 @@ export default function TrainingPage() {
     // Individual part result
     return (
       // <MainLayout>
-      <div className="max-w-xl mx-auto py-12">
+      <div className="max-w-4xl mx-auto py-12">
         <Card className="overflow-hidden shadow-2xl border-0">
           <div
             className={`h-2 ${
