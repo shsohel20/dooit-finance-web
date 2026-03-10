@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const TX_MIN_W = 2;
-const TX_MAX_W = 10;
+const TX_MIN_W = 0.05;
+const TX_MAX_W = 0.09;
 const BASE_NODE_R = 32;
 const BASE_ORBIT = 170;
 const MIN_NODE_R = 18;
