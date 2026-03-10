@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const TX_MIN_W = 0.05;
-const TX_MAX_W = 0.09;
+const TX_MIN_W = 0.08;
+const TX_MAX_W = 1.3;
 const BASE_NODE_R = 32;
 const BASE_ORBIT = 170;
 const MIN_NODE_R = 18;
@@ -196,44 +196,178 @@ function computeRadial(entities, expanded, cx, cy, width, height) {
 }
 
 /* ─── Transaction-specific layout with adaptive spacing ── */
+// function computeTxLayout(entities, cx, cy, width, height) {
+//   const pos = new Map();
+//   const root = entities.find((e) => e.parentName === null);
+//   if (!root)
+//     return {
+//       positions: pos,
+//       outgoingNames: new Set(),
+//       incomingNames: new Set(),
+//       rootName: "",
+//       nodeRadius: BASE_NODE_R,
+//     };
+
+//   const outgoingNames = new Set();
+//   const incomingNames = new Set();
+//   const entityMap = new Map();
+//   for (const e of entities) entityMap.set(e.name, e);
+
+//   for (const e of entities) {
+//     for (const tx of e.transactions) {
+//       if (tx.type === "OUTGOING" && tx.to && entityMap.has(tx.to)) {
+//         outgoingNames.add(e.name);
+//         outgoingNames.add(tx.to);
+//       }
+//       if (tx.type === "INCOMING" && tx.from && entityMap.has(tx.from)) {
+//         incomingNames.add(e.name);
+//         incomingNames.add(tx.from);
+//       }
+//     }
+//   }
+
+//   outgoingNames.delete(root.name);
+//   incomingNames.delete(root.name);
+
+//   const outArr = Array.from(outgoingNames);
+//   const inArr = Array.from(incomingNames).filter((n) => !outgoingNames.has(n));
+//   const totalNodes = 1 + outArr.length + inArr.length;
+
+//   // Adaptive sizing - more aggressive for large datasets
+//   const scaleFactor = Math.max(0.35, Math.min(1, 20 / Math.max(totalNodes, 1)));
+//   const nodeRadius = Math.max(MIN_NODE_R, Math.round(BASE_NODE_R * scaleFactor));
+//   const minGap = nodeRadius + 8;
+//   const nodeHeight = nodeRadius * 2 + minGap;
+
+//   pos.set(root.name, { x: cx, y: cy });
+
+//   // Layout outgoing nodes on LEFT in a grid
+//   const outCount = outArr.length;
+//   const leftWidth = cx - 100;
+//   const availHeight = height - 60;
+
+//   // Calculate optimal grid for outgoing
+//   const outRowsMax = Math.floor(availHeight / nodeHeight);
+//   const outCols = Math.ceil(outCount / outRowsMax);
+//   const outColWidth = Math.min(nodeRadius * 3, leftWidth / Math.max(1, outCols));
+//   const outRowHeight = availHeight / Math.ceil(outCount / outCols);
+
+//   outArr.forEach((name, i) => {
+//     const col = Math.floor(i / outRowsMax);
+//     const row = i % outRowsMax;
+//     const x = 60 + col * outColWidth + outColWidth / 2;
+//     const y = 30 + row * outRowHeight + outRowHeight / 2;
+//     pos.set(name, { x, y });
+//   });
+
+//   // Layout incoming nodes on RIGHT in a grid
+//   const inCount = inArr.length;
+//   const rightWidth = width - cx - 100;
+
+//   const inRowsMax = Math.floor(availHeight / nodeHeight);
+//   const inCols = Math.ceil(inCount / inRowsMax);
+//   const inColWidth = Math.min(nodeRadius * 3, rightWidth / Math.max(1, inCols));
+//   const inRowHeight = availHeight / Math.ceil(inCount / Math.max(1, inCols));
+
+//   inArr.forEach((name, i) => {
+//     const col = Math.floor(i / inRowsMax);
+//     const row = i % inRowsMax;
+//     const x = width - 60 - col * inColWidth - inColWidth / 2;
+//     const y = 30 + row * inRowHeight + inRowHeight / 2;
+//     pos.set(name, { x, y });
+//   });
+
+//   // Position remaining entities with collision detection
+//   for (const e of entities) {
+//     if (!pos.has(e.name)) {
+//       const outAmt = e.transactions
+//         .filter((t) => t.type === "OUTGOING")
+//         .reduce((s, t) => s + t.amount, 0);
+//       const inAmt = e.transactions
+//         .filter((t) => t.type === "INCOMING")
+//         .reduce((s, t) => s + t.amount, 0);
+//       const side = outAmt >= inAmt ? "left" : "right";
+//       const baseX = side === "left" ? cx / 2 : cx + (width - cx) / 2;
+
+//       let bestY = cy;
+//       let bestDist = 0;
+//       for (let testY = 50; testY < height - 50; testY += nodeHeight / 2) {
+//         let minDist = Infinity;
+//         for (const [, p] of pos) {
+//           const d = Math.sqrt((p.x - baseX) ** 2 + (p.y - testY) ** 2);
+//           minDist = Math.min(minDist, d);
+//         }
+//         if (minDist > bestDist) {
+//           bestDist = minDist;
+//           bestY = testY;
+//         }
+//       }
+//       pos.set(e.name, { x: baseX, y: bestY });
+//     }
+//   }
+
+//   // Apply collision resolution
+//   const resolved = resolveCollisions(pos, nodeRadius, 20);
+
+//   return { positions: resolved, outgoingNames, incomingNames, rootName: root.name, nodeRadius };
+// }
+
 function computeTxLayout(entities, cx, cy, width, height) {
   const pos = new Map();
   const root = entities.find((e) => e.parentName === null);
   if (!root)
     return {
       positions: pos,
-      outgoingNames: new Set(),
-      incomingNames: new Set(),
+      outgoingOnlyNames: new Set(),
+      incomingOnlyNames: new Set(),
+      bidirectionalNames: new Set(),
       rootName: "",
       nodeRadius: BASE_NODE_R,
     };
 
-  const outgoingNames = new Set();
-  const incomingNames = new Set();
+  // Track which entities have outgoing/incoming transactions
+  const hasOutgoing = new Set();
+  const hasIncoming = new Set();
   const entityMap = new Map();
   for (const e of entities) entityMap.set(e.name, e);
 
   for (const e of entities) {
     for (const tx of e.transactions) {
       if (tx.type === "OUTGOING" && tx.to && entityMap.has(tx.to)) {
-        outgoingNames.add(e.name);
-        outgoingNames.add(tx.to);
+        hasOutgoing.add(e.name);
+        hasIncoming.add(tx.to); // The target receives incoming
       }
       if (tx.type === "INCOMING" && tx.from && entityMap.has(tx.from)) {
-        incomingNames.add(e.name);
-        incomingNames.add(tx.from);
+        hasIncoming.add(e.name);
+        hasOutgoing.add(tx.from); // The source has outgoing
       }
     }
   }
 
-  outgoingNames.delete(root.name);
-  incomingNames.delete(root.name);
+  // Categorize: outgoing-only (left), incoming-only (right), bidirectional (center cluster)
+  const outgoingOnlyNames = new Set();
+  const incomingOnlyNames = new Set();
+  const bidirectionalNames = new Set();
 
-  const outArr = Array.from(outgoingNames);
-  const inArr = Array.from(incomingNames).filter((n) => !outgoingNames.has(n));
-  const totalNodes = 1 + outArr.length + inArr.length;
+  for (const name of new Set([...hasOutgoing, ...hasIncoming])) {
+    if (name === root.name) continue;
+    const hasOut = hasOutgoing.has(name);
+    const hasIn = hasIncoming.has(name);
+    if (hasOut && hasIn) {
+      bidirectionalNames.add(name);
+    } else if (hasOut) {
+      outgoingOnlyNames.add(name);
+    } else if (hasIn) {
+      incomingOnlyNames.add(name);
+    }
+  }
 
-  // Adaptive sizing - more aggressive for large datasets
+  const outArr = Array.from(outgoingOnlyNames);
+  const inArr = Array.from(incomingOnlyNames);
+  const biArr = Array.from(bidirectionalNames);
+  const totalNodes = 1 + outArr.length + inArr.length + biArr.length;
+
+  // Adaptive sizing
   const scaleFactor = Math.max(0.35, Math.min(1, 20 / Math.max(totalNodes, 1)));
   const nodeRadius = Math.max(MIN_NODE_R, Math.round(BASE_NODE_R * scaleFactor));
   const minGap = nodeRadius + 8;
@@ -241,75 +375,70 @@ function computeTxLayout(entities, cx, cy, width, height) {
 
   pos.set(root.name, { x: cx, y: cy });
 
-  // Layout outgoing nodes on LEFT in a grid
-  const outCount = outArr.length;
-  const leftWidth = cx - 100;
   const availHeight = height - 60;
 
-  // Calculate optimal grid for outgoing
-  const outRowsMax = Math.floor(availHeight / nodeHeight);
-  const outCols = Math.ceil(outCount / outRowsMax);
-  const outColWidth = Math.min(nodeRadius * 3, leftWidth / Math.max(1, outCols));
-  const outRowHeight = availHeight / Math.ceil(outCount / outCols);
+  // Layout outgoing-only nodes on LEFT
+  const outCount = outArr.length;
+  if (outCount > 0) {
+    const outRowsMax = Math.max(1, Math.floor(availHeight / nodeHeight));
+    const outCols = Math.ceil(outCount / outRowsMax);
+    const leftZoneWidth = cx * 0.35;
+    const outColWidth = leftZoneWidth / Math.max(1, outCols);
+    const actualRows = Math.ceil(outCount / outCols);
+    const outRowHeight = availHeight / actualRows;
 
-  outArr.forEach((name, i) => {
-    const col = Math.floor(i / outRowsMax);
-    const row = i % outRowsMax;
-    const x = 60 + col * outColWidth + outColWidth / 2;
-    const y = 30 + row * outRowHeight + outRowHeight / 2;
-    pos.set(name, { x, y });
-  });
+    outArr.forEach((name, i) => {
+      const col = Math.floor(i / actualRows);
+      const row = i % actualRows;
+      const x = 50 + col * outColWidth + outColWidth / 2;
+      const y = 30 + row * outRowHeight + outRowHeight / 2;
+      pos.set(name, { x, y });
+    });
+  }
 
-  // Layout incoming nodes on RIGHT in a grid
+  // Layout incoming-only nodes on RIGHT
   const inCount = inArr.length;
-  const rightWidth = width - cx - 100;
+  if (inCount > 0) {
+    const inRowsMax = Math.max(1, Math.floor(availHeight / nodeHeight));
+    const inCols = Math.ceil(inCount / inRowsMax);
+    const rightZoneWidth = (width - cx) * 0.35;
+    const inColWidth = rightZoneWidth / Math.max(1, inCols);
+    const actualRows = Math.ceil(inCount / inCols);
+    const inRowHeight = availHeight / actualRows;
 
-  const inRowsMax = Math.floor(availHeight / nodeHeight);
-  const inCols = Math.ceil(inCount / inRowsMax);
-  const inColWidth = Math.min(nodeRadius * 3, rightWidth / Math.max(1, inCols));
-  const inRowHeight = availHeight / Math.ceil(inCount / Math.max(1, inCols));
+    inArr.forEach((name, i) => {
+      const col = Math.floor(i / actualRows);
+      const row = i % actualRows;
+      const x = width - 50 - col * inColWidth - inColWidth / 2;
+      const y = 30 + row * inRowHeight + inRowHeight / 2;
+      pos.set(name, { x, y });
+    });
+  }
 
-  inArr.forEach((name, i) => {
-    const col = Math.floor(i / inRowsMax);
-    const row = i % inRowsMax;
-    const x = width - 60 - col * inColWidth - inColWidth / 2;
-    const y = 30 + row * inRowHeight + inRowHeight / 2;
-    pos.set(name, { x, y });
-  });
-
-  // Position remaining entities with collision detection
-  for (const e of entities) {
-    if (!pos.has(e.name)) {
-      const outAmt = e.transactions
-        .filter((t) => t.type === "OUTGOING")
-        .reduce((s, t) => s + t.amount, 0);
-      const inAmt = e.transactions
-        .filter((t) => t.type === "INCOMING")
-        .reduce((s, t) => s + t.amount, 0);
-      const side = outAmt >= inAmt ? "left" : "right";
-      const baseX = side === "left" ? cx / 2 : cx + (width - cx) / 2;
-
-      let bestY = cy;
-      let bestDist = 0;
-      for (let testY = 50; testY < height - 50; testY += nodeHeight / 2) {
-        let minDist = Infinity;
-        for (const [, p] of pos) {
-          const d = Math.sqrt((p.x - baseX) ** 2 + (p.y - testY) ** 2);
-          minDist = Math.min(minDist, d);
-        }
-        if (minDist > bestDist) {
-          bestDist = minDist;
-          bestY = testY;
-        }
-      }
-      pos.set(e.name, { x: baseX, y: bestY });
-    }
+  // Layout bidirectional nodes in a cluster around the center (but offset)
+  const biCount = biArr.length;
+  if (biCount > 0) {
+    // Arrange in a circular cluster around the root
+    const clusterRadius = Math.min(120, Math.max(60, biCount * 8));
+    biArr.forEach((name, i) => {
+      const angle = (i / biCount) * 2 * Math.PI - Math.PI / 2;
+      const x = cx + clusterRadius * Math.cos(angle);
+      const y = cy + clusterRadius * Math.sin(angle);
+      pos.set(name, { x, y });
+    });
   }
 
   // Apply collision resolution
-  const resolved = resolveCollisions(pos, nodeRadius, 20);
+  const resolved = resolveCollisions(pos, nodeRadius, 30);
 
-  return { positions: resolved, outgoingNames, incomingNames, rootName: root.name, nodeRadius };
+  return {
+    positions: resolved,
+    outgoingOnlyNames,
+    incomingOnlyNames,
+    bidirectionalNames,
+    rootName: root.name,
+    nodeRadius,
+  };
 }
 
 /* ─── Component ──────────────────────────────────────── */
@@ -671,6 +800,26 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
   const nodeLeave = useCallback(() => setHoveredNode(null), []);
 
   /* ─── Line geometry ────────────────────────────────── */
+  // function lg(s, t, off = 0) {
+  //   const a = nPos.get(s),
+  //     b = nPos.get(t);
+  //   if (!a || !b) return null;
+  //   const dx = b.x - a.x,
+  //     dy = b.y - a.y;
+  //   const d = Math.sqrt(dx * dx + dy * dy) || 1;
+  //   const nx = dx / d,
+  //     ny = dy / d;
+  //   const px = -ny * off,
+  //     py = nx * off;
+  //   return {
+  //     x1: a.x + nx * (nodeRadius + 4) + px,
+  //     y1: a.y + ny * (nodeRadius + 4) + py,
+  //     x2: b.x - nx * (nodeRadius + 4) + px,
+  //     y2: b.y - ny * (nodeRadius + 4) + py,
+  //     mx: (a.x + b.x) / 2 + px,
+  //     my: (a.y + b.y) / 2 + py,
+  //   };
+  // }
   function lg(s, t, off = 0) {
     const a = nPos.get(s),
       b = nPos.get(t);
@@ -937,109 +1086,69 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
           txLinks.map((l, i) => {
             const isOut = l.kind === "OUTGOING";
             const col = isOut ? "#dc2626" : "#16a34a";
-            const bgF = isOut ? "#fef2f2" : "#f0fdf4";
-            const bgS = isOut ? "#fecaca" : "#bbf7d0";
             const g = lg(l.sourceName, l.targetName, 0);
             if (!g) return null;
             const hovered = hoveredTx?.link === l;
-            const bw = txW(l.amount);
-            const ratio = l.amount / maxAmt;
-            const isLarge = ratio > 0.5;
-            const glow = isLarge ? (isOut ? "url(#txGlowR)" : "url(#txGlowG)") : undefined;
-            const badgeW = isLarge ? 90 : 72;
-            const badgeH = isLarge ? 22 : 18;
-            const badgeFont = isLarge ? 9 : 7.5;
+            const baseWidth = txW(l.amount);
+            const glowFilter = isOut ? "url(#txGlowR)" : "url(#txGlowG)";
 
             return (
               <g key={`t~${l.kind}~${l.sourceName}~${l.targetName}~${i}`}>
-                {/* Hit area */}
+                {/* Hit area - larger for easier hovering */}
                 <line
                   x1={g.x1}
                   y1={g.y1}
                   x2={g.x2}
                   y2={g.y2}
                   stroke="transparent"
-                  strokeWidth={Math.max(20, bw + 14)}
+                  strokeWidth={16}
                   className="cursor-pointer"
                   onMouseEnter={(e) => txEnter(l, e)}
                   onMouseMove={txMove}
                   onMouseLeave={txLeave}
                 />
-                {/* Main line */}
+                {/* Main line - thin by default, glows on hover */}
                 <line
                   x1={g.x1}
                   y1={g.y1}
                   x2={g.x2}
                   y2={g.y2}
                   stroke={col}
-                  strokeWidth={hovered ? bw + 2 : bw}
-                  strokeDasharray={isOut ? "10 5" : "none"}
-                  opacity={hovered ? 1 : isLarge ? 0.85 : 0.55}
+                  strokeWidth={hovered ? 3 : baseWidth}
+                  strokeDasharray={isOut ? "6 3" : "none"}
+                  opacity={hovered ? 1 : 0.25}
                   strokeLinecap="round"
-                  filter={hovered || isLarge ? glow : undefined}
-                  className="pointer-events-none transition-all duration-150"
+                  filter={hovered ? glowFilter : undefined}
+                  className="pointer-events-none transition-all duration-200"
                 />
-                {/* Amount badge */}
-                <rect
-                  x={g.mx - badgeW / 2}
-                  y={g.my - badgeH / 2}
-                  width={badgeW}
-                  height={badgeH}
-                  rx={badgeH / 2}
-                  fill={hovered ? col : bgF}
-                  stroke={hovered ? col : bgS}
-                  strokeWidth={isLarge ? 2 : 1}
-                  className="pointer-events-none"
-                  style={{
-                    filter:
-                      isLarge && !hovered ? "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" : undefined,
-                  }}
-                />
-                {/* Direction arrow */}
-                <text
-                  x={g.mx - badgeW / 2 + 12}
-                  y={g.my + 1}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  fill={hovered ? "#fff" : col}
-                  fontSize={badgeFont + 4}
-                  fontWeight="500"
-                  className="pointer-events-none"
-                >
-                  {isOut ? "\u2190" : "\u2192"}
-                </text>
-                {/* Amount */}
-                <text
-                  x={g.mx + 6}
-                  y={g.my + 1}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  fill={hovered ? "#fff" : col}
-                  fontSize={badgeFont}
-                  fontWeight={isLarge ? "800" : "700"}
-                  letterSpacing="0.02em"
-                  className="pointer-events-none"
-                >
-                  {fmt(l.amount, l.currency)}
-                </text>
-                {/* Pulse for large */}
-                {isLarge && !hovered && (
-                  <circle
-                    cx={g.mx + badgeW / 2 - 10}
-                    cy={g.my}
-                    r={4}
-                    fill={col}
-                    opacity="0.7"
-                    className="pointer-events-none"
-                  >
-                    <animate attributeName="r" values="3;6;3" dur="1.5s" repeatCount="indefinite" />
-                    <animate
-                      attributeName="opacity"
-                      values="0.7;0.2;0.7"
-                      dur="1.5s"
-                      repeatCount="indefinite"
+                {/* Show amount badge only on hover */}
+                {hovered && (
+                  <>
+                    <rect
+                      x={g.mx - 36}
+                      y={g.my - 10}
+                      width={72}
+                      height={20}
+                      rx={10}
+                      fill={col}
+                      className="pointer-events-none"
+                      style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" }}
                     />
-                  </circle>
+                    <text
+                      x={g.mx}
+                      y={g.my + 1}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      fill="#fff"
+                      fontSize="9"
+                      fontWeight="700"
+                      letterSpacing="0.02em"
+                      className="pointer-events-none"
+                    >
+                      {isOut ? "\u2190 " : "\u2192 "}
+                      {fmt(l.amount, l.currency)}
+                    </text>
+                  </>
                 )}
               </g>
             );
