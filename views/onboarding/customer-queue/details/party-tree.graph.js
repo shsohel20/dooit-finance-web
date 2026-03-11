@@ -370,63 +370,57 @@ function computeTxLayout(entities, cx, cy, width, height) {
   // Adaptive sizing
   const scaleFactor = Math.max(0.35, Math.min(1, 20 / Math.max(totalNodes, 1)));
   const nodeRadius = Math.max(MIN_NODE_R, Math.round(BASE_NODE_R * scaleFactor));
-  const minGap = nodeRadius + 8;
-  const nodeHeight = nodeRadius * 2 + minGap;
 
   pos.set(root.name, { x: cx, y: cy });
 
-  const availHeight = height - 60;
+  // Helper to arrange nodes in a cluster (spiral/circular pattern)
+  const placeCluster = (arr, centerX, centerY, baseRadius) => {
+    const count = arr.length;
+    if (count === 0) return;
 
-  // Layout outgoing-only nodes on LEFT
-  const outCount = outArr.length;
-  if (outCount > 0) {
-    const outRowsMax = Math.max(1, Math.floor(availHeight / nodeHeight));
-    const outCols = Math.ceil(outCount / outRowsMax);
-    const leftZoneWidth = cx * 0.35;
-    const outColWidth = leftZoneWidth / Math.max(1, outCols);
-    const actualRows = Math.ceil(outCount / outCols);
-    const outRowHeight = availHeight / actualRows;
+    if (count <= 8) {
+      // Simple circle for small clusters
+      arr.forEach((name, i) => {
+        const angle = (i / count) * 2 * Math.PI - Math.PI / 2;
+        const x = centerX + baseRadius * Math.cos(angle);
+        const y = centerY + baseRadius * Math.sin(angle);
+        pos.set(name, { x, y });
+      });
+    } else {
+      // Multi-ring spiral for larger clusters
+      const nodesPerRing = 8;
+      const ringGap = nodeRadius * 2.5;
+      arr.forEach((name, i) => {
+        const ring = Math.floor(i / nodesPerRing);
+        const indexInRing = i % nodesPerRing;
+        const nodesInThisRing = Math.min(nodesPerRing, count - ring * nodesPerRing);
+        const radius = baseRadius + ring * ringGap;
+        const angleOffset = ring * 0.3; // Stagger each ring slightly
+        const angle = angleOffset + (indexInRing / nodesInThisRing) * 2 * Math.PI - Math.PI / 2;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+        pos.set(name, { x, y });
+      });
+    }
+  };
 
-    outArr.forEach((name, i) => {
-      const col = Math.floor(i / actualRows);
-      const row = i % actualRows;
-      const x = 50 + col * outColWidth + outColWidth / 2;
-      const y = 30 + row * outRowHeight + outRowHeight / 2;
-      pos.set(name, { x, y });
-    });
-  }
+  // Calculate cluster centers and radii based on node counts
+  const outBaseRadius = Math.max(50, Math.min(100, outArr.length * 6));
+  const inBaseRadius = Math.max(50, Math.min(100, inArr.length * 6));
+  const biBaseRadius = Math.max(60, Math.min(120, biArr.length * 8));
 
-  // Layout incoming-only nodes on RIGHT
-  const inCount = inArr.length;
-  if (inCount > 0) {
-    const inRowsMax = Math.max(1, Math.floor(availHeight / nodeHeight));
-    const inCols = Math.ceil(inCount / inRowsMax);
-    const rightZoneWidth = (width - cx) * 0.35;
-    const inColWidth = rightZoneWidth / Math.max(1, inCols);
-    const actualRows = Math.ceil(inCount / inCols);
-    const inRowHeight = availHeight / actualRows;
+  // Outgoing cluster on LEFT
+  const outClusterX = cx * 0.35;
+  const outClusterY = cy;
+  placeCluster(outArr, outClusterX, outClusterY, outBaseRadius);
 
-    inArr.forEach((name, i) => {
-      const col = Math.floor(i / actualRows);
-      const row = i % actualRows;
-      const x = width - 50 - col * inColWidth - inColWidth / 2;
-      const y = 30 + row * inRowHeight + inRowHeight / 2;
-      pos.set(name, { x, y });
-    });
-  }
+  // Incoming cluster on RIGHT
+  const inClusterX = cx + (width - cx) * 0.65;
+  const inClusterY = cy;
+  placeCluster(inArr, inClusterX, inClusterY, inBaseRadius);
 
-  // Layout bidirectional nodes in a cluster around the center (but offset)
-  const biCount = biArr.length;
-  if (biCount > 0) {
-    // Arrange in a circular cluster around the root
-    const clusterRadius = Math.min(120, Math.max(60, biCount * 8));
-    biArr.forEach((name, i) => {
-      const angle = (i / biCount) * 2 * Math.PI - Math.PI / 2;
-      const x = cx + clusterRadius * Math.cos(angle);
-      const y = cy + clusterRadius * Math.sin(angle);
-      pos.set(name, { x, y });
-    });
-  }
+  // Bidirectional cluster around CENTER
+  placeCluster(biArr, cx, cy, biBaseRadius);
 
   // Apply collision resolution
   const resolved = resolveCollisions(pos, nodeRadius, 30);
@@ -458,7 +452,7 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
   const [vb, setVb] = useState({ x: 0, y: 0, w: 1000, h: 700 });
   const vbR = useRef(vb);
   vbR.current = vb;
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.5);
   const zR = useRef(zoom);
   zR.current = zoom;
   const panRef = useRef(null);
@@ -483,6 +477,7 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
     for (const e of entities) m.set(e.name, e);
     return m;
   }, [entities]);
+
   const kidsOf = useMemo(() => {
     const m = new Map();
     for (const e of entities) {
@@ -843,7 +838,6 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
 
   const showRel = filterMode === "all" || filterMode === "relations";
   const showTx = filterMode === "all" || filterMode === "transactions";
-  const showIp = filterMode === "all" || filterMode === "ip";
   const isTxMode = filterMode === "transactions";
 
   /* ─── Render ───────────────────────────────────────── */
@@ -915,77 +909,6 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
         {/* Transaction mode: Zone backgrounds */}
         {isTxMode && (
           <>
-            {/* Left zone (Outgoing) */}
-            {/* <rect x={0} y={0} width={dims.width * 0.4} height={dims.height} fill="url(#leftZone)" /> */}
-            {/* <rect x={0} y={0} width={4} height={dims.height} fill="#dc2626" opacity="0.3" /> */}
-            {/* Right zone (Incoming) */}
-            {/* <rect
-              x={dims.width * 0.6}
-              y={0}
-              width={dims.width * 0.4}
-              height={dims.height}
-              fill="url(#rightZone)"
-            />
-            <rect
-              x={dims.width - 4}
-              y={0}
-              width={4}
-              height={dims.height}
-              fill="#16a34a"
-              opacity="0.3"
-            /> */}
-            {/* Zone labels */}
-            <g>
-              <text x={60} y={40} fill="#dc2626" fontSize="14" fontWeight="700" opacity="0.8">
-                OUTGOING
-              </text>
-              <text x={60} y={58} fill="#b91c1c" fontSize="10" fontWeight="500" opacity="0.6">
-                Money sent out
-              </text>
-              <line
-                x1={60}
-                y1={72}
-                x2={120}
-                y2={72}
-                stroke="#dc2626"
-                strokeWidth="3"
-                strokeDasharray="8 4"
-                opacity="0.6"
-              />
-            </g>
-            <g>
-              <text
-                x={dims.width - 60}
-                y={40}
-                fill="#16a34a"
-                fontSize="14"
-                fontWeight="700"
-                opacity="0.8"
-                textAnchor="end"
-              >
-                INCOMING
-              </text>
-              <text
-                x={dims.width - 60}
-                y={58}
-                fill="#15803d"
-                fontSize="10"
-                fontWeight="500"
-                opacity="0.6"
-                textAnchor="end"
-              >
-                Money received
-              </text>
-              <line
-                x1={dims.width - 120}
-                y1={72}
-                x2={dims.width - 60}
-                y2={72}
-                stroke="#16a34a"
-                strokeWidth="3"
-                opacity="0.6"
-              />
-            </g>
             {/* Center divider */}
             <line
               x1={dims.width / 2}
@@ -1050,7 +973,7 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
                   strokeLinecap="round"
                   style={isNew ? { animation: "fiL .5s ease-out forwards" } : undefined}
                 />
-                <rect
+                {/* <rect
                   x={g.mx - 32}
                   y={g.my - 9}
                   width={64}
@@ -1061,8 +984,8 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
                   strokeWidth="0.5"
                   opacity={isNew ? 0 : 0.95}
                   style={isNew ? { animation: "fiL .5s ease-out .15s forwards" } : undefined}
-                />
-                <text
+                /> */}
+                {/* <text
                   x={g.mx}
                   y={g.my + 0.5}
                   textAnchor="middle"
@@ -1076,7 +999,7 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
                   style={isNew ? { animation: "fiL .5s ease-out .15s forwards" } : undefined}
                 >
                   {l.relation.toUpperCase()}
-                </text>
+                </text> */}
               </g>
             );
           })}
