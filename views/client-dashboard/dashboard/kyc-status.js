@@ -7,10 +7,10 @@ import { kycStatusData } from "@/lib/dashboard-data";
 import { Clock, CheckCircle, XCircle, FileSearch } from "lucide-react";
 
 const COLORS = {
-  approved: "hsl(var(--success))",
-  pending: "hsl(var(--warning))",
-  rejected: "hsl(var(--destructive))",
-  inReview: "hsl(var(--primary))",
+  approved: "var(--success)",
+  pending: "var(--warning)",
+  rejected: "var(--destructive)",
+  inReview: "var(--info)",
 };
 
 export function KYCStatusChart() {
