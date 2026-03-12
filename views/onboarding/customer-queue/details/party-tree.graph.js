@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const TX_MIN_W = 0.08;
-const TX_MAX_W = 1.3;
+const TX_MIN_W = 0.5;
+const TX_MAX_W = 2;
 const BASE_NODE_R = 32;
 const BASE_ORBIT = 170;
 const MIN_NODE_R = 18;
@@ -196,122 +196,6 @@ function computeRadial(entities, expanded, cx, cy, width, height) {
 }
 
 /* ─── Transaction-specific layout with adaptive spacing ── */
-// function computeTxLayout(entities, cx, cy, width, height) {
-//   const pos = new Map();
-//   const root = entities.find((e) => e.parentName === null);
-//   if (!root)
-//     return {
-//       positions: pos,
-//       outgoingNames: new Set(),
-//       incomingNames: new Set(),
-//       rootName: "",
-//       nodeRadius: BASE_NODE_R,
-//     };
-
-//   const outgoingNames = new Set();
-//   const incomingNames = new Set();
-//   const entityMap = new Map();
-//   for (const e of entities) entityMap.set(e.name, e);
-
-//   for (const e of entities) {
-//     for (const tx of e.transactions) {
-//       if (tx.type === "OUTGOING" && tx.to && entityMap.has(tx.to)) {
-//         outgoingNames.add(e.name);
-//         outgoingNames.add(tx.to);
-//       }
-//       if (tx.type === "INCOMING" && tx.from && entityMap.has(tx.from)) {
-//         incomingNames.add(e.name);
-//         incomingNames.add(tx.from);
-//       }
-//     }
-//   }
-
-//   outgoingNames.delete(root.name);
-//   incomingNames.delete(root.name);
-
-//   const outArr = Array.from(outgoingNames);
-//   const inArr = Array.from(incomingNames).filter((n) => !outgoingNames.has(n));
-//   const totalNodes = 1 + outArr.length + inArr.length;
-
-//   // Adaptive sizing - more aggressive for large datasets
-//   const scaleFactor = Math.max(0.35, Math.min(1, 20 / Math.max(totalNodes, 1)));
-//   const nodeRadius = Math.max(MIN_NODE_R, Math.round(BASE_NODE_R * scaleFactor));
-//   const minGap = nodeRadius + 8;
-//   const nodeHeight = nodeRadius * 2 + minGap;
-
-//   pos.set(root.name, { x: cx, y: cy });
-
-//   // Layout outgoing nodes on LEFT in a grid
-//   const outCount = outArr.length;
-//   const leftWidth = cx - 100;
-//   const availHeight = height - 60;
-
-//   // Calculate optimal grid for outgoing
-//   const outRowsMax = Math.floor(availHeight / nodeHeight);
-//   const outCols = Math.ceil(outCount / outRowsMax);
-//   const outColWidth = Math.min(nodeRadius * 3, leftWidth / Math.max(1, outCols));
-//   const outRowHeight = availHeight / Math.ceil(outCount / outCols);
-
-//   outArr.forEach((name, i) => {
-//     const col = Math.floor(i / outRowsMax);
-//     const row = i % outRowsMax;
-//     const x = 60 + col * outColWidth + outColWidth / 2;
-//     const y = 30 + row * outRowHeight + outRowHeight / 2;
-//     pos.set(name, { x, y });
-//   });
-
-//   // Layout incoming nodes on RIGHT in a grid
-//   const inCount = inArr.length;
-//   const rightWidth = width - cx - 100;
-
-//   const inRowsMax = Math.floor(availHeight / nodeHeight);
-//   const inCols = Math.ceil(inCount / inRowsMax);
-//   const inColWidth = Math.min(nodeRadius * 3, rightWidth / Math.max(1, inCols));
-//   const inRowHeight = availHeight / Math.ceil(inCount / Math.max(1, inCols));
-
-//   inArr.forEach((name, i) => {
-//     const col = Math.floor(i / inRowsMax);
-//     const row = i % inRowsMax;
-//     const x = width - 60 - col * inColWidth - inColWidth / 2;
-//     const y = 30 + row * inRowHeight + inRowHeight / 2;
-//     pos.set(name, { x, y });
-//   });
-
-//   // Position remaining entities with collision detection
-//   for (const e of entities) {
-//     if (!pos.has(e.name)) {
-//       const outAmt = e.transactions
-//         .filter((t) => t.type === "OUTGOING")
-//         .reduce((s, t) => s + t.amount, 0);
-//       const inAmt = e.transactions
-//         .filter((t) => t.type === "INCOMING")
-//         .reduce((s, t) => s + t.amount, 0);
-//       const side = outAmt >= inAmt ? "left" : "right";
-//       const baseX = side === "left" ? cx / 2 : cx + (width - cx) / 2;
-
-//       let bestY = cy;
-//       let bestDist = 0;
-//       for (let testY = 50; testY < height - 50; testY += nodeHeight / 2) {
-//         let minDist = Infinity;
-//         for (const [, p] of pos) {
-//           const d = Math.sqrt((p.x - baseX) ** 2 + (p.y - testY) ** 2);
-//           minDist = Math.min(minDist, d);
-//         }
-//         if (minDist > bestDist) {
-//           bestDist = minDist;
-//           bestY = testY;
-//         }
-//       }
-//       pos.set(e.name, { x: baseX, y: bestY });
-//     }
-//   }
-
-//   // Apply collision resolution
-//   const resolved = resolveCollisions(pos, nodeRadius, 20);
-
-//   return { positions: resolved, outgoingNames, incomingNames, rootName: root.name, nodeRadius };
-// }
-
 function computeTxLayout(entities, cx, cy, width, height) {
   const pos = new Map();
   const root = entities.find((e) => e.parentName === null);
@@ -445,6 +329,7 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
   const [hoveredTx, setHoveredTx] = useState(null);
   const [hoveredIp, setHoveredIp] = useState(null);
   const [hoveredNode, setHoveredNode] = useState(null);
+  const [selectedTxNode, setSelectedTxNode] = useState(null);
 
   const [dragged, setDragged] = useState(new Map());
   const dragRef = useRef(null);
@@ -452,7 +337,7 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
   const [vb, setVb] = useState({ x: 0, y: 0, w: 1000, h: 700 });
   const vbR = useRef(vb);
   vbR.current = vb;
-  const [zoom, setZoom] = useState(0.5);
+  const [zoom, setZoom] = useState(1);
   const zR = useRef(zoom);
   zR.current = zoom;
   const panRef = useRef(null);
@@ -477,7 +362,6 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
     for (const e of entities) m.set(e.name, e);
     return m;
   }, [entities]);
-
   const kidsOf = useMemo(() => {
     const m = new Map();
     for (const e of entities) {
@@ -544,6 +428,50 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
     return m;
   }, [basePositions, dragged]);
 
+  // Auto-zoom to fit all nodes when positions change
+  useEffect(() => {
+    if (nPos.size === 0) return;
+
+    // Calculate bounding box of all nodes
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity;
+    for (const [, pos] of nPos) {
+      minX = Math.min(minX, pos.x - nodeRadius - 20);
+      maxX = Math.max(maxX, pos.x + nodeRadius + 20);
+      minY = Math.min(minY, pos.y - nodeRadius - 30);
+      maxY = Math.max(maxY, pos.y + nodeRadius + 30);
+    }
+
+    const contentWidth = maxX - minX;
+    const contentHeight = maxY - minY;
+    const padding = 60;
+
+    // Only auto-zoom if content exceeds view
+    if (contentWidth > dims.width - padding * 2 || contentHeight > dims.height - padding * 2) {
+      const scaleX = (dims.width - padding * 2) / contentWidth;
+      const scaleY = (dims.height - padding * 2) / contentHeight;
+      const newZoom = Math.min(scaleX, scaleY, 1); // Don't zoom in, only out
+
+      if (newZoom < 0.95) {
+        // Only adjust if significant zoom needed
+        const newW = dims.width / newZoom;
+        const newH = dims.height / newZoom;
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+
+        setVb({
+          x: centerX - newW / 2,
+          y: centerY - newH / 2,
+          w: newW,
+          h: newH,
+        });
+        setZoom(newZoom);
+      }
+    }
+  }, [nPos, nodeRadius, dims, filterMode]);
+
   /* ─── Build links ──────────────────────────────────── */
   const { relLinks, txLinks, ipLinks, maxAmt } = useMemo(() => {
     const relLinks = [];
@@ -562,29 +490,63 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
       }
     }
 
-    // Transaction links
-    const txSeen = new Set();
+    // Transaction links - aggregate by source-target-direction pair, sum amounts
+    const txAggMap = new Map();
+    for (const e of entities) {
+      if (e.parentName && nPos.has(e.name) && nPos.has(e.parentName)) {
+        relLinks.push({
+          sourceName: e.parentName,
+          targetName: e.name,
+          relation: e.relation,
+          relationType: e.relationType,
+        });
+      }
+    }
+
     for (const e of entities) {
       if (!nPos.has(e.name)) continue;
       for (const tx of e.transactions) {
         const other = tx.type === "OUTGOING" ? tx.to : tx.from;
-        if (!nPos.has(other)) continue;
+        if (!other || !nPos.has(other)) continue;
         const src = tx.type === "OUTGOING" ? e.name : other;
         const tgt = tx.type === "OUTGOING" ? other : e.name;
-        const key = `${tx.type}~${src}~${tgt}~${tx.amount}~${tx.purpose}`;
-        if (txSeen.has(key)) continue;
-        txSeen.add(key);
-        txLinks.push({
-          kind: tx.type,
-          sourceName: src,
-          targetName: tgt,
-          amount: tx.amount,
-          currency: tx.currency,
-          purpose: tx.purpose,
-          riskFlag: tx.riskFlag,
-          frequency: tx.frequency,
-        });
+
+        // Key by direction + source + target to aggregate same-direction transactions
+        const key = `${tx.type}~${src}~${tgt}`;
+        const existing = txAggMap.get(key);
+
+        if (existing) {
+          existing.amount += tx.amount;
+          existing.count += 1;
+          if (tx.purpose) existing.purposes.add(tx.purpose);
+          if (tx.riskFlag) existing.riskFlag = true;
+        } else {
+          txAggMap.set(key, {
+            kind: tx.type,
+            sourceName: src,
+            targetName: tgt,
+            amount: tx.amount,
+            currency: tx.currency,
+            count: 1,
+            purposes: new Set(tx.purpose ? [tx.purpose] : []),
+            riskFlag: tx.riskFlag,
+          });
+        }
       }
+    }
+
+    // Convert aggregated map to txLinks array
+    for (const [, agg] of txAggMap) {
+      txLinks.push({
+        kind: agg.kind,
+        sourceName: agg.sourceName,
+        targetName: agg.targetName,
+        amount: agg.amount,
+        currency: agg.currency,
+        purpose: agg.count > 1 ? `${agg.count} transactions` : Array.from(agg.purposes).join(", "),
+        riskFlag: agg.riskFlag,
+        frequency: agg.count > 1 ? `${agg.count}x` : undefined,
+      });
     }
 
     // IP links
@@ -623,7 +585,13 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
         didDrag.current = false;
         return;
       }
-      if (filterMode === "transactions") return; // No expand in tx mode
+
+      // In transaction mode, toggle node selection to highlight connected transactions
+      if (filterMode === "transactions") {
+        setSelectedTxNode((prev) => (prev === name ? null : name));
+        return;
+      }
+
       const ch = kidsOf.get(name);
       if (!ch?.length) return;
       setExpanded((prev) => {
@@ -659,6 +627,13 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
     [kidsOf, filterMode],
   );
 
+  // Clear selected node when switching away from transaction mode
+  useEffect(() => {
+    if (filterMode !== "transactions") {
+      setSelectedTxNode(null);
+    }
+  }, [filterMode]);
+
   /* ─── Pointer handlers ─────────────────────────────── */
   const s2svg = useCallback((cx, cy) => {
     const r = svgRef.current?.getBoundingClientRect();
@@ -681,14 +656,21 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
     [s2svg, nPos],
   );
 
-  const onCanvasDown = useCallback((e) => {
-    if (mode.current === "drag") return;
-    mode.current = "pan";
-    panRef.current = {
-      sm: { x: e.clientX, y: e.clientY },
-      sv: { x: vbR.current.x, y: vbR.current.y },
-    };
-  }, []);
+  const onCanvasDown = useCallback(
+    (e) => {
+      if (mode.current === "drag") return;
+      mode.current = "pan";
+      panRef.current = {
+        sm: { x: e.clientX, y: e.clientY },
+        sv: { x: vbR.current.x, y: vbR.current.y },
+      };
+      // Clear transaction node selection when clicking on background
+      if (filterMode === "transactions" && selectedTxNode) {
+        setSelectedTxNode(null);
+      }
+    },
+    [filterMode, selectedTxNode],
+  );
 
   const onMove = useCallback(
     (e) => {
@@ -795,26 +777,6 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
   const nodeLeave = useCallback(() => setHoveredNode(null), []);
 
   /* ─── Line geometry ────────────────────────────────── */
-  // function lg(s, t, off = 0) {
-  //   const a = nPos.get(s),
-  //     b = nPos.get(t);
-  //   if (!a || !b) return null;
-  //   const dx = b.x - a.x,
-  //     dy = b.y - a.y;
-  //   const d = Math.sqrt(dx * dx + dy * dy) || 1;
-  //   const nx = dx / d,
-  //     ny = dy / d;
-  //   const px = -ny * off,
-  //     py = nx * off;
-  //   return {
-  //     x1: a.x + nx * (nodeRadius + 4) + px,
-  //     y1: a.y + ny * (nodeRadius + 4) + py,
-  //     x2: b.x - nx * (nodeRadius + 4) + px,
-  //     y2: b.y - ny * (nodeRadius + 4) + py,
-  //     mx: (a.x + b.x) / 2 + px,
-  //     my: (a.y + b.y) / 2 + py,
-  //   };
-  // }
   function lg(s, t, off = 0) {
     const a = nPos.get(s),
       b = nPos.get(t);
@@ -838,6 +800,7 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
 
   const showRel = filterMode === "all" || filterMode === "relations";
   const showTx = filterMode === "all" || filterMode === "transactions";
+  const showIp = filterMode === "all" || filterMode === "ip";
   const isTxMode = filterMode === "transactions";
 
   /* ─── Render ───────────────────────────────────────── */
@@ -895,33 +858,7 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          {/* Gradient backgrounds for left/right zones */}
-          {/* <linearGradient id="leftZone" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#fef2f2" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#fef2f2" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="rightZone" x1="100%" y1="0%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="#f0fdf4" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#f0fdf4" stopOpacity="0" />
-          </linearGradient> */}
         </defs>
-
-        {/* Transaction mode: Zone backgrounds */}
-        {isTxMode && (
-          <>
-            {/* Center divider */}
-            <line
-              x1={dims.width / 2}
-              y1={30}
-              x2={dims.width / 2}
-              y2={dims.height - 30}
-              stroke="#e2e8f0"
-              strokeWidth="1"
-              strokeDasharray="6 6"
-              opacity="0.5"
-            />
-          </>
-        )}
 
         {/* Normal mode: Orbit rings */}
         {!isTxMode &&
@@ -953,15 +890,15 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
             );
           })}
 
-        {/* ── Relation links ── */}
+        {/* ── Relation links ─�� */}
         {showRel &&
-          relLinks.map((l) => {
+          relLinks.map((l, i) => {
             const g = lg(l.sourceName, l.targetName);
             if (!g) return null;
             const isNew = revealed.has(l.targetName);
             const c = relColor(l.relationType);
             return (
-              <g key={`r~${l.sourceName}~${l.targetName}`}>
+              <g key={`r~${l.sourceName}~${l.targetName}-${i}`}>
                 <line
                   x1={g.x1}
                   y1={g.y1}
@@ -1009,11 +946,25 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
           txLinks.map((l, i) => {
             const isOut = l.kind === "OUTGOING";
             const col = isOut ? "#dc2626" : "#16a34a";
+
             const g = lg(l.sourceName, l.targetName, 0);
             if (!g) return null;
             const hovered = hoveredTx?.link === l;
             const baseWidth = txW(l.amount);
             const glowFilter = isOut ? "url(#txGlowR)" : "url(#txGlowG)";
+
+            // Check if this link is connected to the selected node
+            const isConnectedToSelected =
+              selectedTxNode &&
+              (l.sourceName === selectedTxNode || l.targetName === selectedTxNode);
+            const hasSelection = selectedTxNode !== null;
+
+            // Determine visual state: highlighted if connected to selected node or hovered
+            const isHighlighted = hovered || isConnectedToSelected;
+            const shouldDim = hasSelection && !isConnectedToSelected;
+
+            // Show transaction count if aggregated
+            const txCount = l.frequency?.endsWith("x") ? l.frequency : null;
 
             return (
               <g key={`t~${l.kind}~${l.sourceName}~${l.targetName}~${i}`}>
@@ -1024,42 +975,42 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
                   x2={g.x2}
                   y2={g.y2}
                   stroke="transparent"
-                  strokeWidth={16}
+                  strokeWidth={12}
                   className="cursor-pointer"
                   onMouseEnter={(e) => txEnter(l, e)}
                   onMouseMove={txMove}
                   onMouseLeave={txLeave}
                 />
-                {/* Main line - thin by default, glows on hover */}
+                {/* Main line - thin by default, glows when highlighted */}
                 <line
                   x1={g.x1}
                   y1={g.y1}
                   x2={g.x2}
                   y2={g.y2}
                   stroke={col}
-                  strokeWidth={hovered ? 3 : baseWidth}
+                  strokeWidth={isHighlighted ? 2.5 : baseWidth}
                   strokeDasharray={isOut ? "6 3" : "none"}
-                  opacity={hovered ? 1 : 0.25}
+                  opacity={shouldDim ? 0.08 : isHighlighted ? 1 : 0.3}
                   strokeLinecap="round"
-                  filter={hovered ? glowFilter : undefined}
+                  filter={isHighlighted ? glowFilter : undefined}
                   className="pointer-events-none transition-all duration-200"
                 />
-                {/* Show amount badge only on hover */}
-                {hovered && (
+                {/* Show amount badge when highlighted (hover or selected) */}
+                {isHighlighted && (
                   <>
                     <rect
-                      x={g.mx - 36}
-                      y={g.my - 10}
-                      width={72}
-                      height={20}
-                      rx={10}
+                      x={g.mx - 44}
+                      y={g.my - 12}
+                      width={88}
+                      height={24}
+                      rx={12}
                       fill={col}
                       className="pointer-events-none"
                       style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" }}
                     />
                     <text
                       x={g.mx}
-                      y={g.my + 1}
+                      y={g.my - 1}
                       textAnchor="middle"
                       dominantBaseline="central"
                       fill="#fff"
@@ -1071,6 +1022,20 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
                       {isOut ? "\u2190 " : "\u2192 "}
                       {fmt(l.amount, l.currency)}
                     </text>
+                    {txCount && (
+                      <text
+                        x={g.mx}
+                        y={g.my + 9}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        fill="rgba(255,255,255,0.8)"
+                        fontSize="7"
+                        fontWeight="600"
+                        className="pointer-events-none"
+                      >
+                        {l.purpose}
+                      </text>
+                    )}
                   </>
                 )}
               </g>
@@ -1078,63 +1043,6 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
           })}
 
         {/* ── IP links ── */}
-        {/* {showIp &&
-          ipLinks.map((l, i) => {
-            const g = lg(l.sourceName, l.targetName, filterMode === "ip" ? 0 : -16);
-            if (!g) return null;
-            const hovered = hoveredIp?.link === l;
-            return (
-              <g key={`ip~${l.sourceName}~${l.targetName}~${i}`}>
-                <line
-                  x1={g.x1}
-                  y1={g.y1}
-                  x2={g.x2}
-                  y2={g.y2}
-                  stroke="transparent"
-                  strokeWidth={16}
-                  className="cursor-pointer"
-                  onMouseEnter={(e) => ipEnter(l, e)}
-                  onMouseMove={ipMove}
-                  onMouseLeave={ipLeave}
-                />
-                <line
-                  x1={g.x1}
-                  y1={g.y1}
-                  x2={g.x2}
-                  y2={g.y2}
-                  stroke="#f97316"
-                  strokeWidth={hovered ? 3 : 2}
-                  strokeDasharray="4 5"
-                  opacity={hovered ? 1 : 0.5}
-                  strokeLinecap="round"
-                  className="pointer-events-none transition-all duration-150"
-                />
-                <rect
-                  x={g.mx - 30}
-                  y={g.my - 8}
-                  width={60}
-                  height={16}
-                  rx={8}
-                  fill={hovered ? "#f97316" : "#fff7ed"}
-                  stroke={hovered ? "#f97316" : "#fed7aa"}
-                  strokeWidth="0.75"
-                  className="pointer-events-none"
-                />
-                <text
-                  x={g.mx}
-                  y={g.my + 0.5}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  fill={hovered ? "#fff" : "#ea580c"}
-                  fontSize="7"
-                  fontWeight="700"
-                  className="pointer-events-none"
-                >
-                  {l.subnet}
-                </text>
-              </g>
-            );
-          })} */}
 
         {/* ── Nodes ── */}
         {Array.from(nPos.entries()).map(([name, pos]) => {
@@ -1153,11 +1061,41 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
           const rc = riskColor(ent.riskRating);
           const isRoot = ent.parentName === null;
 
-          // In tx mode, highlight root differently
+          // In tx mode, highlight root and selected nodes differently
+          const isSelected = isTxMode && selectedTxNode === name;
+          const hasAnySelection = isTxMode && selectedTxNode !== null;
+          const isConnectedToSelected =
+            hasAnySelection &&
+            txLinks.some(
+              (l) =>
+                (l.sourceName === selectedTxNode || l.targetName === selectedTxNode) &&
+                (l.sourceName === name || l.targetName === name),
+            );
+          const shouldDimNode =
+            hasAnySelection && !isSelected && !isConnectedToSelected && name !== selectedTxNode;
+
           const nr = isTxMode && isRoot ? nodeRadius + 8 : nodeRadius;
-          const nodeFill = isTxMode && isRoot ? "#1e293b" : isExp ? p.fill : "#fff";
-          const nodeStroke = isTxMode && isRoot ? "#0f172a" : isExp ? p.fill : "#e2e8f0";
-          const textFill = isTxMode && isRoot ? "#fff" : isExp ? "#fff" : "#1e293b";
+          const nodeFill = isSelected
+            ? "#6366f1"
+            : isTxMode && isRoot
+              ? "#1e293b"
+              : isExp
+                ? p.fill
+                : "#fff";
+          const nodeStroke = isSelected
+            ? "#4f46e5"
+            : isTxMode && isRoot
+              ? "#0f172a"
+              : isExp
+                ? p.fill
+                : "#e2e8f0";
+          const textFill = isSelected
+            ? "#fff"
+            : isTxMode && isRoot
+              ? "#fff"
+              : isExp
+                ? "#fff"
+                : "#1e293b";
           const fontSize = Math.max(8, Math.round(nodeRadius * 0.38));
           const smallFontSize = Math.max(5, Math.round(nodeRadius * 0.2));
 
@@ -1170,17 +1108,47 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
               onMouseEnter={(e) => nodeEnter(name, e)}
               onMouseLeave={nodeLeave}
               style={isNew ? { animation: "fiN .4s ease-out forwards", opacity: 0 } : undefined}
+              opacity={shouldDimNode ? 0.25 : 1}
             >
-              {/* Glow ring for expanded/root */}
-              {(isExp || (isTxMode && isRoot)) && (
+              {/* Selection ring for selected node in tx mode */}
+              {isSelected && (
+                <circle
+                  cx={pos.x}
+                  cy={pos.y}
+                  r={nr + 10}
+                  fill="none"
+                  stroke="#6366f1"
+                  strokeWidth="3"
+                  opacity="0.6"
+                  filter="url(#gl)"
+                >
+                  <animate
+                    attributeName="r"
+                    values={`${nr + 8};${nr + 12};${nr + 8}`}
+                    dur="1.5s"
+                    repeatCount="indefinite"
+                  />
+                  <animate
+                    attributeName="opacity"
+                    values="0.6;0.3;0.6"
+                    dur="1.5s"
+                    repeatCount="indefinite"
+                  />
+                </circle>
+              )}
+
+              {/* Glow ring for expanded/root/connected nodes */}
+              {(isExp || (isTxMode && isRoot) || isConnectedToSelected) && !isSelected && (
                 <circle
                   cx={pos.x}
                   cy={pos.y}
                   r={nr + 6}
                   fill="none"
-                  stroke={isTxMode && isRoot ? "#475569" : p.fill}
+                  stroke={
+                    isConnectedToSelected ? "#6366f1" : isTxMode && isRoot ? "#475569" : p.fill
+                  }
                   strokeWidth="2"
-                  opacity="0.15"
+                  opacity={isConnectedToSelected ? 0.4 : 0.15}
                   filter="url(#gl)"
                 />
               )}
@@ -1325,24 +1293,38 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
                 </>
               )}
 
-              {/* Initials */}
-              <text
-                x={pos.x}
-                y={pos.y - (nr > 24 ? 2 : 0)}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill={textFill}
-                fontSize={fontSize}
-                fontWeight="700"
-                letterSpacing="0.02em"
-                className="pointer-events-none"
-              >
-                {ini}
-              </text>
+              {/* Entity type icon */}
+              {ent.partyType === "INDIVIDUAL" ? (
+                /* Person icon for individuals */
+                <g
+                  transform={`translate(${pos.x - nr * 0.35}, ${pos.y - nr * 0.4})`}
+                  className="pointer-events-none"
+                >
+                  <svg width={nr * 0.7} height={nr * 0.7} viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="8" r="4" fill={textFill} />
+                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6" fill={textFill} />
+                  </svg>
+                </g>
+              ) : (
+                /* Building icon for business/legal entity */
+                <g
+                  transform={`translate(${pos.x - nr * 0.35}, ${pos.y - nr * 0.4})`}
+                  className="pointer-events-none"
+                >
+                  <svg width={nr * 0.7} height={nr * 0.7} viewBox="0 0 24 24" fill="none">
+                    <path d="M3 21V7l9-4 9 4v14H3z" fill={textFill} />
+                    <rect x="7" y="10" width="3" height="3" fill={nodeFill} />
+                    <rect x="14" y="10" width="3" height="3" fill={nodeFill} />
+                    <rect x="7" y="15" width="3" height="3" fill={nodeFill} />
+                    <rect x="14" y="15" width="3" height="3" fill={nodeFill} />
+                  </svg>
+                </g>
+              )}
+              {/* Entity type label below icon */}
               {nr >= 24 && (
                 <text
                   x={pos.x}
-                  y={pos.y + fontSize * 0.8}
+                  y={pos.y + nr * 0.35}
                   textAnchor="middle"
                   dominantBaseline="central"
                   fill={
