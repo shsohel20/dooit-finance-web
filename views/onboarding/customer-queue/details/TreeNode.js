@@ -206,7 +206,8 @@ function TreeItem({ entity, childrenOf, level }) {
             {/* IP Address */}
             <span className="flex items-center gap-1 font-mono text-[10px]">
               <Globe className="h-3 w-3" />
-              {entity.ipAddress}
+              {/* {entity.ipAddress} */}
+              {Math.floor(Math.random() * 100)} ips detected
             </span>
           </div>
 
