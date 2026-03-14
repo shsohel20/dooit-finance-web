@@ -13,6 +13,7 @@ export default function DashboardClientPage() {
   const clientType = loggedInUser?.client?.clientType;
   const isRealState = clientType === "Real Estate";
   const isFinancial = clientType === "Financial";
+  console.log("clientType", clientType);
   const isPreciousMetal = clientType === "Precious Metal";
   const isCrypto = clientType === "Crypto";
 
