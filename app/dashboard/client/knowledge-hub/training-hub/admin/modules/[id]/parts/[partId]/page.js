@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useModules } from "@/contexts/module-context";
 import { Button } from "@/components/ui/button";
@@ -23,18 +23,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
-
+import { getModuleById, getPartById } from "../../../../actions";
+const trueFalseOptions = [
+  { value: "A", label: "True" },
+  { value: "B", label: "False" },
+];
 export default function PartEditorPage() {
   const params = useParams();
   const router = useRouter();
   const user = { id: "1", role: "admin" };
-  const { getModuleById, addQuestion, deleteQuestion } = useModules();
+  const { addQuestion, deleteQuestion } = useModules();
   const moduleId = params.id;
   const partId = params.partId;
-
-  const moduleData = getModuleById(moduleId);
-  const part = moduleData?.parts.find((p) => p.id === partId);
-
+  const [part, setPart] = useState(null);
+  const [moduleData, setModuleData] = useState(null);
+  console.log("part", part);
   const [openDialog, setOpenDialog] = useState(false);
   const [questionText, setQuestionText] = useState("");
   const [questionType, setQuestionType] = useState("multiple-choice");
@@ -42,6 +45,19 @@ export default function PartEditorPage() {
   const [correctAnswer, setCorrectAnswer] = useState("0");
   const [explanation, setExplanation] = useState("");
 
+  useEffect(() => {
+    if (!partId) return;
+    const fetchPart = async () => {
+      const res = await getPartById(partId);
+      setPart(res.data);
+    };
+    fetchPart();
+    const fetchModule = async () => {
+      const res = await getModuleById(moduleId);
+      setModuleData(res.data);
+    };
+    fetchModule();
+  }, [partId]);
   if (!user || !moduleData || !part) {
     return (
       <div className="text-center py-12">
@@ -64,13 +80,13 @@ export default function PartEditorPage() {
       return;
     }
 
-    const finalOptions = questionType === "true-false" ? ["True", "False"] : options;
+    const finalOptions = questionType === "true-false" ? trueFalseOptions : options;
 
     addQuestion(moduleId, partId, {
       question: questionText,
       type: questionType,
       options: finalOptions,
-      correctAnswer: parseInt(correctAnswer),
+      correctAnswer: correctAnswer,
       explanation,
     });
 
@@ -115,13 +131,13 @@ export default function PartEditorPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+                  <SelectItem value="single">Multiple Choice</SelectItem>
                   <SelectItem value="true-false">True/False</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {questionType === "multiple-choice" && (
+            {questionType === "single" && (
               <div className="space-y-3">
                 <Label>Options</Label>
                 {options.map((option, index) => (
@@ -151,8 +167,8 @@ export default function PartEditorPage() {
                     <input
                       type="radio"
                       name="true-false"
-                      checked={correctAnswer === "0"}
-                      onChange={() => setCorrectAnswer("0")}
+                      checked={correctAnswer === "A"}
+                      onChange={() => setCorrectAnswer("A")}
                     />
                     <span>True</span>
                   </label>
@@ -160,8 +176,8 @@ export default function PartEditorPage() {
                     <input
                       type="radio"
                       name="true-false"
-                      checked={correctAnswer === "1"}
-                      onChange={() => setCorrectAnswer("1")}
+                      checked={correctAnswer === "B"}
+                      onChange={() => setCorrectAnswer("B")}
                     />
                     <span>False</span>
                   </label>
@@ -210,7 +226,7 @@ export default function PartEditorPage() {
           <CardContent>
             <div className="bg-muted rounded-lg p-4 text-center">
               <p className="text-sm text-muted-foreground mb-2">Video URL:</p>
-              <p className="text-foreground break-all">{part.videoUrl}</p>
+              <p className="text-foreground break-all">{part.video?.url}</p>
             </div>
           </CardContent>
         </Card>

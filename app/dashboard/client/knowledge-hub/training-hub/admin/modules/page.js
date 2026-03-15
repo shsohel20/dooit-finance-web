@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreateModuleDialog } from "@/components/create-module-dialog";
 import { useModules } from "@/contexts/module-context";
@@ -43,11 +43,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
+import { getModules } from "../actions";
 
 export default function ModulesPage() {
   const router = useRouter();
   const user = { role: "admin" };
-  const { modules, deleteModule } = useModules();
+  // const { modules, deleteModule } = useModules();
+  const [modules, setModules] = useState([]);
   const [view, setView] = useState("card");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -60,6 +62,13 @@ export default function ModulesPage() {
     return matchesSearch && matchesStatus;
   });
 
+  useEffect(() => {
+    const fetchModules = async () => {
+      const res = await getModules();
+      setModules(res.data);
+    };
+    fetchModules();
+  }, []);
   const publishedCount = modules.filter((m) => m.status === "published").length;
   const draftCount = modules.filter((m) => m.status === "draft").length;
   const totalParts = modules.reduce((a, m) => a + m.parts.length, 0);
@@ -281,7 +290,7 @@ export default function ModulesPage() {
                                 <Edit2 className="w-4 h-4 mr-2" /> Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => deleteModule(module.id)}
+                                // onClick={() => deleteModule(module.id)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" /> Delete
@@ -360,7 +369,7 @@ export default function ModulesPage() {
                             <Edit2 className="w-4 h-4 mr-2" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => deleteModule(module.id)}
+                            // onClick={() => deleteModule(module.id)}
                             className="text-destructive"
                           >
                             <Trash2 className="w-4 h-4 mr-2" /> Delete
