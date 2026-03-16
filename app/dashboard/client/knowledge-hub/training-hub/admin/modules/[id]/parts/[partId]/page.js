@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
-import { getModuleById, getPartById, getQuestions } from "../../../../actions";
+import { getModuleById, getPartById, deleteQuestion } from "../../../../actions";
 import QuestionModal from "./QuestionModal";
 import { toast } from "sonner";
 
@@ -21,14 +21,14 @@ export default function PartEditorPage() {
   const [moduleData, setModuleData] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
-  const [questions, setQuestions] = useState([]);
+  const fetchPart = useCallback(async () => {
+    const res = await getPartById(partId);
+    setPart(res.data);
+  }, [partId]);
 
   useEffect(() => {
     if (!partId) return;
-    const fetchPart = async () => {
-      const res = await getPartById(partId);
-      setPart(res.data);
-    };
+
     fetchPart();
     const fetchModule = async () => {
       const res = await getModuleById(moduleId);
@@ -37,28 +37,15 @@ export default function PartEditorPage() {
     fetchModule();
   }, [partId]);
 
-  const fetchQuestions = useCallback(async () => {
-    const res = await getQuestions(partId);
-    console.log("res", res);
-    setQuestions(res.data);
-  }, [partId]);
-
-  useEffect(() => {
-    if (!partId) return;
-    // fetchQuestions();
-  }, [fetchQuestions, partId]);
-
-  const deleteQuestion = useCallback(
-    async (questionId) => {
-      // const res = await deleteQuestion(moduleId, partId, questionId);
-      // console.log("res", res);
-      // if (res.success) {
-      //   toast.success("Question deleted successfully");
-      //   fetchQuestions();
-      // }
-    },
-    [moduleId, partId],
-  );
+  const handleDeleteQuestion = async (questionId) => {
+    const res = await deleteQuestion(questionId);
+    if (res.success) {
+      toast.success("Question deleted successfully");
+      fetchPart();
+    } else {
+      toast.error("Failed to delete question");
+    }
+  };
 
   if (!user || !moduleData || !part) {
     return (
@@ -74,7 +61,12 @@ export default function PartEditorPage() {
   return (
     <>
       {/* Add Question Dialog - Rendered at root level for proper positioning */}
-      <QuestionModal openDialog={openDialog} setOpenDialog={setOpenDialog} partId={partId} />
+      <QuestionModal
+        openDialog={openDialog}
+        setOpenDialog={setOpenDialog}
+        partId={partId}
+        fetchPart={fetchPart}
+      />
 
       <div className="space-y-6">
         {/* Header */}
@@ -105,7 +97,7 @@ export default function PartEditorPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Questions ({questions.length})</CardTitle>
+              <CardTitle>Questions ({part.questions.length})</CardTitle>
               <CardDescription>Learners will answer these after watching the video</CardDescription>
             </div>
             <Button size="sm" className="gap-2" onClick={() => setOpenDialog(true)}>
@@ -114,13 +106,13 @@ export default function PartEditorPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            {questions.length === 0 ? (
+            {part.questions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>No questions yet. Add one to get started.</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {questions.map((question, index) => (
+                {part.questions.map((question, index) => (
                   <div
                     key={question.id}
                     className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors"
@@ -146,7 +138,7 @@ export default function PartEditorPage() {
                                   : "text-muted-foreground"
                               }`}
                             >
-                              {String.fromCharCode(65 + optIndex)}) {option}
+                              {String.fromCharCode(65 + optIndex)}) {option?.text}
                             </div>
                           ))}
                         </div>
@@ -159,7 +151,7 @@ export default function PartEditorPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => deleteQuestion(moduleId, partId, question.id)}
+                        onClick={() => handleDeleteQuestion(question.id)}
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>

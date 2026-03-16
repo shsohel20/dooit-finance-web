@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useModules } from "@/contexts/module-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,16 +10,15 @@ import { Progress } from "@/components/ui/progress";
 import {
   BookOpen,
   CheckCircle2,
-  Users,
   TrendingUp,
   Plus,
   ArrowRight,
-  Clock,
   AlertTriangle,
   BarChart3,
   FileText,
   Activity,
 } from "lucide-react";
+import { getModules } from "../actions";
 
 const mockActivities = [
   {
@@ -82,13 +81,22 @@ const statusConfig = {
 export default function DashboardPage() {
   const router = useRouter();
   const user = { role: "admin", name: "John Doe" };
-  const { modules, assignments } = useModules();
+  const [modules, setModules] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  // const { modules, assignments } = useModules();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  const fetchModules = useCallback(async () => {
+    const res = await getModules();
+    setModules(res?.data || []);
+  }, []);
+  useEffect(() => {
+    fetchModules();
+  }, [fetchModules]);
   // useEffect(() => {
   //   if (user?.role === "manager") {
   //     router.push("/manager/dashboard");

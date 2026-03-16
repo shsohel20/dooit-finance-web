@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useModules } from "@/contexts/module-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +45,7 @@ import {
   AlertTriangle,
   ArrowRight,
 } from "lucide-react";
+import { getModules } from "../../actions";
 
 const mockLearners = [
   { id: "1", name: "John Doe", email: "john.doe@company.com", department: "Compliance" },
@@ -56,7 +57,8 @@ const mockLearners = [
 
 export default function ManageAssignmentsPage() {
   const user = { id: "1", role: "admin", name: "John Doe" };
-  const { modules, assignments, getLearnerProgress, retakeModule, assignModule } = useModules();
+  const [modules, setModules] = useState([]);
+  const { assignments, getLearnerProgress, retakeModule, assignModule } = useModules();
   const [viewMode, setViewMode] = useState("list");
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [search, setSearch] = useState("");
@@ -68,6 +70,13 @@ export default function ManageAssignmentsPage() {
 
   const publishedModules = modules.filter((m) => m.status === "published");
 
+  const fetchModules = useCallback(async () => {
+    const res = await getModules();
+    setModules(res?.data || []);
+  }, []);
+  useEffect(() => {
+    fetchModules();
+  }, [fetchModules]);
   const filteredAssignments = assignments.filter((a) => {
     const moduleData = modules.find((m) => m.id === a.moduleId);
     if (!moduleData) return false;
@@ -349,8 +358,8 @@ export default function ManageAssignmentsPage() {
             <DialogHeader>
               <DialogTitle>Confirm Retake</DialogTitle>
               <DialogDescription>
-                This will reset the learner's progress and allow them to retake the module from the
-                beginning.
+                This will reset the learner&apos;s progress and allow them to retake the module from
+                the beginning.
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end gap-2 mt-4">

@@ -30,29 +30,17 @@ const trueFalseOptions = [
   { key: "A", text: "True" },
   { key: "B", text: "False" },
 ];
-// {
-//   "text": "What does KYC stand for?",
-//   "type": "single",
-//   "options": [
-//     { "key": "A", "text": "Know Your Customer" },
-//     { "key": "B", "text": "Keep Your Cash" },
-//     { "key": "C", "text": "Key Year Compliance" },
-//     { "key": "D", "text": "Knowledge Year Certificate" }
-//   ],
-//   "correctAnswers": ["A"],
-//   "explanation": "KYC stands for Know Your Customer, a process used to verify the identity of clients.",
-//   "points": 1,
-//   "order": 1
-// }
+
 export default function QuestionModal({ openDialog, setOpenDialog, partId, fetchQuestions }) {
   const [form, setForm] = useState({
     text: "",
     type: "single",
-    correctAnswers: "A",
+    // correctAnswers: "A",
     explanation: "",
     points: "",
     order: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState(optionTypes);
   const [correctAnswer, setCorrectAnswer] = useState("0");
 
@@ -65,10 +53,11 @@ export default function QuestionModal({ openDialog, setOpenDialog, partId, fetch
     const payload = {
       ...form,
       options,
-      correctAnswers: [form.correctAnswers],
+      correctAnswers: [correctAnswer],
     };
+    setIsLoading(true);
     const res = await createQuestion(payload, partId);
-    console.log("res", res);
+    setIsLoading(false);
     if (res.success) {
       toast.success("Question created successfully");
       setOpenDialog(false);
@@ -123,8 +112,8 @@ export default function QuestionModal({ openDialog, setOpenDialog, partId, fetch
                   <Input
                     type="radio"
                     name="correct"
-                    checked={correctAnswer === index.toString()}
-                    onChange={() => setCorrectAnswer(index.toString())}
+                    checked={correctAnswer === option.key}
+                    onChange={() => setCorrectAnswer(option.key)}
                     className="w-6"
                   />
                 </div>
@@ -157,44 +146,6 @@ export default function QuestionModal({ openDialog, setOpenDialog, partId, fetch
               </div>
             </div>
           )}
-          {/* correct answers */}
-          <div className="space-y-2">
-            <Label htmlFor="correctAnswers">Correct Answer</Label>
-            {form.type === "single" && (
-              <Select
-                value={form.correctAnswers}
-                onValueChange={(val) => setForm({ ...form, correctAnswers: val })}
-              >
-                <SelectTrigger id="correctAnswers">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {options.map((option) => (
-                    <SelectItem key={option.key} value={option.key}>
-                      {option.key}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            {form.type === "true-false" && (
-              <Select
-                value={form.correctAnswers}
-                onValueChange={(val) => setForm({ ...form, correctAnswers: val })}
-              >
-                <SelectTrigger id="correctAnswers">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {trueFalseOptions.map((option) => (
-                    <SelectItem key={option.key} value={option.key}>
-                      {option.text}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="explanation">Explanation (Optional)</Label>
@@ -233,7 +184,9 @@ export default function QuestionModal({ openDialog, setOpenDialog, partId, fetch
             <Button variant="outline" onClick={() => setOpenDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAddQuestion}>Add Question</Button>
+            <Button disabled={isLoading} onClick={handleAddQuestion}>
+              {isLoading ? "Adding..." : "Add Question"}
+            </Button>
           </div>
         </div>
       </DialogContent>

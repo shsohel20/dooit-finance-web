@@ -53,9 +53,9 @@ export const createQuestion = async (data, partId) => {
   return response.json();
 };
 
-export const getQuestions = async (partId) => {
-  const response = await fetchWithAuth(`training-modules/parts/${partId}/questions`, {
-    method: "GET",
+export const deleteQuestion = async (questionId) => {
+  const response = await fetchWithAuth(`training-modules/questions/${questionId}`, {
+    method: "DELETE",
   });
   return response.json();
 };
