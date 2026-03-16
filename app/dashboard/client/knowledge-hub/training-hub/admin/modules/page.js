@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreateModuleDialog } from "@/components/create-module-dialog";
 import { useModules } from "@/contexts/module-context";
@@ -62,11 +62,12 @@ export default function ModulesPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const fetchModules = useCallback(async () => {
+    const res = await getModules();
+    setModules(res.data);
+  }, []);
+
   useEffect(() => {
-    const fetchModules = async () => {
-      const res = await getModules();
-      setModules(res.data);
-    };
     fetchModules();
   }, []);
   const publishedCount = modules.filter((m) => m.status === "published").length;
@@ -88,7 +89,7 @@ export default function ModulesPage() {
             Manage and organize your compliance training content.
           </p>
         </div>
-        {canEdit && <CreateModuleDialog />}
+        {canEdit && <CreateModuleDialog getAll={fetchModules} />}
       </div>
 
       {/* Summary Row */}

@@ -1,49 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useModules } from "@/contexts/module-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
-import { getModuleById, getPartById } from "../../../../actions";
-const trueFalseOptions = [
-  { value: "A", label: "True" },
-  { value: "B", label: "False" },
-];
+import { getModuleById, getPartById, getQuestions } from "../../../../actions";
+import QuestionModal from "./QuestionModal";
+import { toast } from "sonner";
+
 export default function PartEditorPage() {
   const params = useParams();
   const router = useRouter();
   const user = { id: "1", role: "admin" };
-  const { addQuestion, deleteQuestion } = useModules();
   const moduleId = params.id;
   const partId = params.partId;
   const [part, setPart] = useState(null);
   const [moduleData, setModuleData] = useState(null);
-  console.log("part", part);
   const [openDialog, setOpenDialog] = useState(false);
-  const [questionText, setQuestionText] = useState("");
-  const [questionType, setQuestionType] = useState("multiple-choice");
-  const [options, setOptions] = useState(["", "", "", ""]);
-  const [correctAnswer, setCorrectAnswer] = useState("0");
-  const [explanation, setExplanation] = useState("");
+
+  const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
     if (!partId) return;
@@ -58,6 +36,30 @@ export default function PartEditorPage() {
     };
     fetchModule();
   }, [partId]);
+
+  const fetchQuestions = useCallback(async () => {
+    const res = await getQuestions(partId);
+    console.log("res", res);
+    setQuestions(res.data);
+  }, [partId]);
+
+  useEffect(() => {
+    if (!partId) return;
+    // fetchQuestions();
+  }, [fetchQuestions, partId]);
+
+  const deleteQuestion = useCallback(
+    async (questionId) => {
+      // const res = await deleteQuestion(moduleId, partId, questionId);
+      // console.log("res", res);
+      // if (res.success) {
+      //   toast.success("Question deleted successfully");
+      //   fetchQuestions();
+      // }
+    },
+    [moduleId, partId],
+  );
+
   if (!user || !moduleData || !part) {
     return (
       <div className="text-center py-12">
@@ -69,142 +71,10 @@ export default function PartEditorPage() {
     );
   }
 
-  const handleAddQuestion = () => {
-    if (!questionText.trim()) {
-      alert("Please enter a question");
-      return;
-    }
-
-    if (questionType === "multiple-choice" && options.some((o) => !o.trim())) {
-      alert("Please fill in all options");
-      return;
-    }
-
-    const finalOptions = questionType === "true-false" ? trueFalseOptions : options;
-
-    addQuestion(moduleId, partId, {
-      question: questionText,
-      type: questionType,
-      options: finalOptions,
-      correctAnswer: correctAnswer,
-      explanation,
-    });
-
-    setQuestionText("");
-    setOptions(["", "", "", ""]);
-    setCorrectAnswer("0");
-    setExplanation("");
-    setOpenDialog(false);
-  };
-
-  const handleOptionChange = (index, value) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
-  };
-
   return (
     <>
       {/* Add Question Dialog - Rendered at root level for proper positioning */}
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Add New Question</DialogTitle>
-            <DialogDescription>Create a question for learners to answer</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="question-text">Question</Label>
-              <Textarea
-                id="question-text"
-                placeholder="Enter the question..."
-                value={questionText}
-                onChange={(e) => setQuestionText(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="question-type">Question Type</Label>
-              <Select value={questionType} onValueChange={(val) => setQuestionType(val)}>
-                <SelectTrigger id="question-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="single">Multiple Choice</SelectItem>
-                  <SelectItem value="true-false">True/False</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {questionType === "single" && (
-              <div className="space-y-3">
-                <Label>Options</Label>
-                {options.map((option, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      placeholder={`Option ${index + 1}`}
-                      value={option}
-                      onChange={(e) => handleOptionChange(index, e.target.value)}
-                    />
-                    <Input
-                      type="radio"
-                      name="correct"
-                      checked={correctAnswer === index.toString()}
-                      onChange={() => setCorrectAnswer(index.toString())}
-                      className="w-6"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {questionType === "true-false" && (
-              <div className="space-y-2">
-                <Label>Correct Answer</Label>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="true-false"
-                      checked={correctAnswer === "A"}
-                      onChange={() => setCorrectAnswer("A")}
-                    />
-                    <span>True</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="true-false"
-                      checked={correctAnswer === "B"}
-                      onChange={() => setCorrectAnswer("B")}
-                    />
-                    <span>False</span>
-                  </label>
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="explanation">Explanation (Optional)</Label>
-              <Textarea
-                id="explanation"
-                placeholder="Explain why this is the correct answer..."
-                value={explanation}
-                onChange={(e) => setExplanation(e.target.value)}
-                rows={2}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setOpenDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddQuestion}>Add Question</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <QuestionModal openDialog={openDialog} setOpenDialog={setOpenDialog} partId={partId} />
 
       <div className="space-y-6">
         {/* Header */}
@@ -235,7 +105,7 @@ export default function PartEditorPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Questions ({part.questions.length})</CardTitle>
+              <CardTitle>Questions ({questions.length})</CardTitle>
               <CardDescription>Learners will answer these after watching the video</CardDescription>
             </div>
             <Button size="sm" className="gap-2" onClick={() => setOpenDialog(true)}>
@@ -244,13 +114,13 @@ export default function PartEditorPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            {part.questions.length === 0 ? (
+            {questions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>No questions yet. Add one to get started.</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {part.questions.map((question, index) => (
+                {questions.map((question, index) => (
                   <div
                     key={question.id}
                     className="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors"

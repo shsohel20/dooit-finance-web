@@ -44,3 +44,18 @@ export const getPartById = async (partId) => {
   });
   return response.json();
 };
+
+export const createQuestion = async (data, partId) => {
+  const response = await fetchWithAuth(`training-modules/parts/${partId}/questions`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
+export const getQuestions = async (partId) => {
+  const response = await fetchWithAuth(`training-modules/parts/${partId}/questions`, {
+    method: "GET",
+  });
+  return response.json();
+};

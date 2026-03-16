@@ -76,6 +76,7 @@ export default function PartModal({ openDialog, setOpenDialog, moduleId, fetchPa
       toast.success("Part created successfully");
       setOpenDialog(false);
       fetchParts();
+      form.reset();
     } else {
       toast.error("Failed to create part");
     }

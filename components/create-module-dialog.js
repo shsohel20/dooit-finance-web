@@ -39,7 +39,7 @@ const initialState = {
   status: 'draft',
 };
 
-export function CreateModuleDialog({ onModuleCreated }) {
+export function CreateModuleDialog({ getAll }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState(initialState);
@@ -59,6 +59,7 @@ export function CreateModuleDialog({ onModuleCreated }) {
         setFormData(initialState);
         setOpen(false);
         toast.success('Module created successfully');
+        getAll();
       } else {
         toast.error('Failed to create module');
       }
