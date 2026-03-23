@@ -59,3 +59,11 @@ export const deleteQuestion = async (questionId) => {
   });
   return response.json();
 };
+export const assignAssignment = async (data, moduleId) => {
+  const response = await fetchWithAuth(`training-assignments/${moduleId}/assign`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  console.log("response", response);
+  return response.json();
+};

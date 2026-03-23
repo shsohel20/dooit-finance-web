@@ -45,7 +45,9 @@ import {
   AlertTriangle,
   ArrowRight,
 } from "lucide-react";
-import { getModules } from "../../actions";
+import { getModules, assignAssignment } from "../../actions";
+import { getAllUsers } from "@/app/dashboard/client/user-and-role-management/actions";
+import { toast } from "sonner";
 
 const mockLearners = [
   { id: "1", name: "John Doe", email: "john.doe@company.com", department: "Compliance" },
@@ -57,7 +59,18 @@ const mockLearners = [
 
 export default function ManageAssignmentsPage() {
   const user = { id: "1", role: "admin", name: "John Doe" };
+  const [users, setUsers] = useState([]);
+  const fetchUsers = useCallback(async () => {
+    const res = await getAllUsers();
+    // console.log("res", res);
+    setUsers(res?.data || []);
+  }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
   const [modules, setModules] = useState([]);
+  const [maxAttempts, setMaxAttempts] = useState(3);
+  const [dueDate, setDueDate] = useState("");
   const { assignments, getLearnerProgress, retakeModule, assignModule } = useModules();
   const [viewMode, setViewMode] = useState("list");
   const [selectedAssignment, setSelectedAssignment] = useState(null);
@@ -67,6 +80,7 @@ export default function ManageAssignmentsPage() {
   const [newLearnerSearch, setNewLearnerSearch] = useState("");
   const [selectedLearners, setSelectedLearners] = useState([]);
   const [retakeConfirm, setRetakeConfirm] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const publishedModules = modules.filter((m) => m.status === "published");
 
@@ -89,13 +103,38 @@ export default function ManageAssignmentsPage() {
     : null;
 
   const totalLearners = assignments.reduce((a, b) => a + b.assignedTo.length, 0);
-
-  const handleAssign = () => {
-    if (!newModuleId || selectedLearners.length === 0 || !user) return;
-    assignModule(newModuleId, selectedLearners, user.id);
+  console.log("selectedLearners", selectedLearners);
+  const clearForms = () => {
     setNewModuleId("");
     setSelectedLearners([]);
-    setAssignDialogOpen(false);
+    setDueDate("");
+    setMaxAttempts(3);
+  };
+  const handleAssign = async () => {
+    setIsSubmitting(true);
+    const payload = {
+      dueDate: dueDate,
+      maxAttempts: maxAttempts,
+      learnerIds: selectedLearners,
+    };
+    console.log("payload", payload);
+    try {
+      const response = await assignAssignment(payload, newModuleId);
+      console.log("response", response);
+      if (response.succeed) {
+        toast.success("Assignment assigned successfully");
+        clearForms();
+        setAssignDialogOpen(false);
+      } else {
+        toast.error(response.error);
+      }
+    } catch (error) {
+      console.error("error", error);
+      //  setIsSubmitting(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+    // if (!newModuleId || selectedLearners.length === 0 || !user) return;
   };
 
   const toggleLearner = (id) => {
@@ -104,7 +143,7 @@ export default function ManageAssignmentsPage() {
     );
   };
 
-  const filteredNewLearners = mockLearners.filter(
+  const filteredNewLearners = users?.filter(
     (l) =>
       l.name.toLowerCase().includes(newLearnerSearch.toLowerCase()) ||
       l.email.toLowerCase().includes(newLearnerSearch.toLowerCase()),
@@ -448,9 +487,9 @@ export default function ManageAssignmentsPage() {
                       className="pl-10"
                     />
                   </div>
-                  {selectedLearners.length > 0 && (
+                  {users.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
-                      {selectedLearners.map((id) => {
+                      {users.map((id) => {
                         const l = mockLearners.find((x) => x.id === id);
                         return l ? (
                           <Badge
@@ -491,21 +530,41 @@ export default function ManageAssignmentsPage() {
                             <p className="text-xs text-muted-foreground">{learner.email}</p>
                           </div>
                           <Badge variant="outline" className="text-[10px]">
-                            {learner.department}
+                            {learner.role}
                           </Badge>
                         </button>
                       );
                     })}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Due Date</Label>
+                      <Input
+                        type="date"
+                        value={dueDate}
+                        onChange={(e) => setDueDate(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Max Attempts</Label>
+                      <Input
+                        type="number"
+                        value={maxAttempts}
+                        onChange={(e) => setMaxAttempts(e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <Button
                   className="w-full gap-2"
                   onClick={handleAssign}
-                  disabled={!newModuleId || selectedLearners.length === 0}
+                  disabled={!newModuleId || selectedLearners.length === 0 || isSubmitting}
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  Assign to {selectedLearners.length} Learner
+                  {isSubmitting
+                    ? "Assigning..."
+                    : `Assign to ${selectedLearners.length} Learner${selectedLearners.length !== 1 ? "s" : ""}`}
                   {selectedLearners.length !== 1 ? "s" : ""}
                 </Button>
               </div>
