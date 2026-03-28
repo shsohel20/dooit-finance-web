@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 const TX_MIN_W = 0.5;
 const TX_MAX_W = 2;
 const BASE_NODE_R = 32;
-const BASE_ORBIT = 170;
+const BASE_ORBIT = 110;
 const MIN_NODE_R = 18;
 const MIN_ORBIT = 90;
 
@@ -163,7 +163,7 @@ function computeRadial(entities, expanded, cx, cy, width, height) {
     if (!expanded.has(parent)) return;
     const ch = kids.get(parent) || [];
     if (!ch.length) return;
-    const r = orbitSpacing * d;
+    const r = orbitSpacing * d + 0.2;
 
     // Calculate arc weights based on subtree sizes
     const childWeights = ch.map((c) => {
@@ -182,7 +182,10 @@ function computeRadial(entities, expanded, cx, cy, width, height) {
     ch.forEach((c, i) => {
       const arcSpan = ((aE - aS) * childWeights[i]) / totalWeight;
       const a = currentAngle + arcSpan / 2;
-      pos.set(c.name, { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+      pos.set(c.name, {
+        x: cx + r * Math.cos(a),
+        y: cy + r * Math.sin(a),
+      });
       place(c.name, currentAngle, currentAngle + arcSpan, d + 1);
       currentAngle += arcSpan;
     });

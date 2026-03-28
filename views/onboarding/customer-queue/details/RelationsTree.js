@@ -7,8 +7,10 @@ import { PartyNodeDiagram } from "./party-node-diagram";
 import { Network, Users, ArrowLeftRight, Globe } from "lucide-react";
 import partyEntities from "./demo.json";
 import { Input } from "@/components/ui/input";
+import { AlertsTable } from "./AlertsTable";
+import { Osiint } from "./Osiint";
 const FILTERS = [
-  { mode: "all", label: "All", icon: Network },
+  // { mode: "all", label: "All", icon: Network },
   { mode: "relations", label: "Relations", icon: Users },
   { mode: "transactions", label: "Transactions", icon: ArrowLeftRight },
   // { mode: "ip", label: "IP Addresses", icon: Globe },
@@ -960,11 +962,11 @@ const entities = _flat;
 
 export function RelationsTree() {
   const [viewMode, setViewMode] = useState("family");
-  const [filterMode, setFilterMode] = useState("all");
+  const [filterMode, setFilterMode] = useState("relations");
   const expandAllRef = useRef(null);
   const collapseAllRef = useRef(null);
   return (
-    <main className="min-h-screen ">
+    <main className="min-h-screen relative ">
       <div className=" px-6 py-8">
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -999,95 +1001,100 @@ export function RelationsTree() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="graph" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="graph">Graph View</TabsTrigger>
-            {/* <TabsTrigger value="tree">Tree View</TabsTrigger> */}
-            <TabsTrigger value="diagram">Tree View</TabsTrigger>
-          </TabsList>
+        <div className="relative grid grid-cols-12 gap-4">
+          <div className="col-span-3 space-y-4 sticky top-20 bg-white border rounded-md p-4 max-h-[80vh] overflow-y-auto">
+            <AlertsTable />
+            <Osiint />
+          </div>
+          {/* Tabs */}
 
-          {/* Graph View Tab */}
-          <TabsContent value="graph" className="mt-0">
-            <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-              {/* Legend Bar */}
-              {/* <div className="border-b border-border px-6 py-3">
-                <GraphLegend viewMode={viewMode} />
-              </div> */}
-
-              {/* Graph */}
-              <div className="h-[1580px]">
-                <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-                  {/* Filter bar + Legend */}
-                  <div className="border-b border-border px-5 py-3 flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 p-0.5 rounded-lg bg-secondary/50">
-                        {FILTERS.map(({ mode: m, label, icon: Icon }) => (
-                          <button
-                            key={m}
-                            type="button"
-                            onClick={() => setFilterMode(m)}
-                            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
-                              filterMode === m
-                                ? "bg-card text-foreground shadow-sm"
-                                : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-                            }`}
-                          >
-                            <Icon className="h-3.5 w-3.5" />
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <GraphLegend filterMode={filterMode} />
-                      <Input type="text" placeholder="Search" className="w-64" />
+          <div className="col-span-9 relative">
+            <div className="h-[700px]">
+              <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+                {/* Filter bar + Legend */}
+                <div className="border-b border-border px-5 py-3 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 p-0.5 rounded-lg bg-secondary/50">
+                      {FILTERS.map(({ mode: m, label, icon: Icon }) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setFilterMode(m)}
+                          className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+                            filterMode === m
+                              ? "bg-card text-foreground shadow-sm"
+                              : "text-muted-foreground hover:text-foreground hover:bg-card/50"
+                          }`}
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                          {label}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                  <div className="h-[1500px]">
-                    <PartyTreeGraph
-                      entities={entities}
-                      filterMode={filterMode}
-                      expandAllRef={expandAllRef}
-                      collapseAllRef={collapseAllRef}
-                    />
+                  <div className="flex items-center justify-between gap-2">
+                    <GraphLegend filterMode={filterMode} />
+                    <Input type="text" placeholder="Search" className="w-64" />
                   </div>
+                </div>
+                <div className="h-[700px]">
+                  <PartyTreeGraph
+                    entities={entities}
+                    filterMode={filterMode}
+                    expandAllRef={expandAllRef}
+                    collapseAllRef={collapseAllRef}
+                  />
                 </div>
               </div>
             </div>
-          </TabsContent>
-
-          {/* Tree View Tab */}
-          <TabsContent value="tree" className="mt-0">
-            <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-              {/* Legend Bar */}
-              <div className="border-b border-border px-6 py-3">
-                <GraphLegend viewMode={viewMode} />
-              </div>
-
-              {/* Tree */}
-              <div className="h-[680px]">
-                {/* <PartyTreeView data={dummyData} viewMode={viewMode} /> */}
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Node Diagram Tab */}
-          <TabsContent value="diagram" className="mt-0">
-            <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-              {/* Legend Bar */}
-              <div className="border-b border-border px-6 py-3">
-                <GraphLegend viewMode={viewMode} />
-              </div>
-
-              {/* Diagram */}
-              <div className="h-[680px]">
-                <PartyNodeDiagram entities={entities} />
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
     </main>
   );
 }
+
+//  <Tabs defaultValue="graph" className="w-full col-span-9">
+//    <TabsList className="mb-4">
+//      <TabsTrigger value="graph">Graph View</TabsTrigger>
+
+//      <TabsTrigger value="diagram">Tree View</TabsTrigger>
+//    </TabsList>
+
+//    {/* Graph View Tab */}
+//    <TabsContent value="graph" className="mt-0">
+//      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+//        {/* Graph */}
+//      </div>
+//    </TabsContent>
+
+//    {/* Tree View Tab */}
+//    <TabsContent value="tree" className="mt-0">
+//      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+//        {/* Legend Bar */}
+//        <div className="border-b border-border px-6 py-3">
+//          <GraphLegend viewMode={viewMode} />
+//        </div>
+
+//        {/* Tree */}
+//        <div className="h-[680px]">
+//          {/* <PartyTreeView data={dummyData} viewMode={viewMode} /> */}
+//        </div>
+//      </div>
+//    </TabsContent>
+
+//    {/* Node Diagram Tab */}
+//    <TabsContent value="diagram" className="mt-0">
+//      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+//        {/* Legend Bar */}
+//        <div className="border-b border-border px-6 py-3">
+//          <GraphLegend viewMode={viewMode} />
+//        </div>
+
+//        {/* Diagram */}
+//        <div className="h-[680px]">
+//          <PartyNodeDiagram entities={entities} />
+//        </div>
+//      </div>
+//    </TabsContent>
+//  </Tabs>;
