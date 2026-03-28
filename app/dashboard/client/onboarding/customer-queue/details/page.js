@@ -60,7 +60,6 @@ export default function CustomerQueueDetails() {
           <Transactions customerId={id} />
         </TabsContent>
       </Tabs>
-      <TransactionTable />
       {/* <DetailViewModal currentId={id} /> */}
     </div>
   );

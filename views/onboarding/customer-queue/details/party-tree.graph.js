@@ -1546,7 +1546,7 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
       )}
 
       {/* Zoom controls */}
-      <div className="absolute bottom-4 right-4 flex flex-col gap-1.5">
+      <div className="absolute bottom-8 right-4 flex flex-col gap-1.5">
         {[
           {
             label: "+",

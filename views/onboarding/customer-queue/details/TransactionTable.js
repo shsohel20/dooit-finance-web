@@ -78,7 +78,9 @@ export default function TransactionTable() {
 
   return (
     <div
-      className={cn("fixed inset-x-0 bottom-0 z-50 flex flex-col justify-end pointer-events-none")}
+      className={cn(
+        "absolute inset-x-0 bottom-0 z-50 flex flex-col justify-end pointer-events-none",
+      )}
       aria-label="Transaction drawer"
     >
       <div
@@ -90,15 +92,15 @@ export default function TransactionTable() {
         <button
           type="button"
           onClick={() => setExpanded((e) => !e)}
-          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/50 rounded-t-xl transition-colors"
+          className="flex w-full items-center justify-between gap-3 px-4 py-1 text-left hover:bg-muted/50 rounded-t-xl transition-colors"
         >
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Receipt className="size-4" />
+            <span className="flex size-4 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Receipt className="size-2" />
             </span>
             <div className="min-w-0">
               <p className="text-sm font-semibold leading-tight">Transactions</p>
-              <p className="truncate text-xs text-muted-foreground">{ACCOUNT_LABEL}</p>
+              {/* <p className="truncate text-xs text-muted-foreground">{ACCOUNT_LABEL}</p> */}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2 text-muted-foreground">
