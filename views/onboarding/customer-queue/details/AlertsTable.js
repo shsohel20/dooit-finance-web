@@ -1,14 +1,12 @@
 import React from "react";
 import dummyAlerts from "./dummyAlerts.json";
 import { Input } from "@/components/ui/input";
-import { SearchIcon } from "lucide-react";
+import { AlertTriangle, CheckIcon, SearchIcon } from "lucide-react";
+import { AlertIcon } from "@/components/ui/alert";
 
 export const AlertsTable = () => {
   return (
     <div className="space-y-4 max-h-max  ">
-      {/* create a table with dummyalerts data
-      id, entityName, alertType, riskLevel, alertScore, title, transactionId, amount, status, timestamp. style this
-      */}
       <div className="">
         <h2 className="text-lg font-bold">Alerts</h2>
         <p className="text-sm text-muted-foreground">
@@ -29,17 +27,8 @@ export const AlertsTable = () => {
       <table className="w-full">
         <thead>
           <tr className="bg-muted">
-            {/* <th>ID</th> */}
             <th className="p-2">Title</th>
-            {/* <th>Entity Name</th> */}
-            {/* <th>Alert Type</th> */}
             <th className="text-nowrap p-2"> Score</th>
-            {/* <th>Risk Level</th> */}
-            {/*
-            <th>Transaction ID</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Timestamp</th> */}
           </tr>
         </thead>
         <tbody>
@@ -50,14 +39,18 @@ export const AlertsTable = () => {
             >
               {/* <td>{alert.id}</td> */}
               <td className="p-2">{alert.title}</td>
-              {/* <td>{alert.entityName}</td> */}
-              {/* <td>{alert.alertType}</td> */}
-              {/* <td>{alert.riskLevel}</td> */}
-              <td className="p-2 text-right">{alert.alertScore}</td>
-              {/* <td>{alert.transactionId}</td>
-              <td>{alert.amount}</td>
-              <td>{alert.status}</td>
-              <td>{alert.timestamp}</td> */}
+
+              <td className="p-2 text-right flex items-center gap-1">
+                {alert.alertScore >= 70 ? (
+                  <AlertTriangle className="size-4 text-red-500" />
+                ) : alert.alertScore >= 40 ? (
+                  <AlertTriangle className="size-4 text-blue-500" />
+                ) : alert.alertScore >= 20 ? (
+                  <AlertTriangle className="size-4 text-green-500" />
+                ) : null}
+                {/* <AlertTriangle /> */}
+                {alert.alertScore}
+              </td>
             </tr>
           ))}
         </tbody>

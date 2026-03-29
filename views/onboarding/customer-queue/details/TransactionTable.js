@@ -85,14 +85,14 @@ export default function TransactionTable() {
     >
       <div
         className={cn(
-          "pointer-events-auto mx-auto w-full max-w-[min(100%,1200px)] border-t border-x border-border bg-background/95 backdrop-blur-md shadow-[0_-8px_30px_rgba(0,0,0,0.12)] rounded-t-xl transition-[max-height] duration-300 ease-out",
+          "pointer-events-auto mx-auto w-full max-w-[min(100%,1200px)] border-t border-x border-border bg-background/95 backdrop-blur-md shadow-[0_-8px_30px_rgba(0,0,0,0.12)]  transition-[max-height] duration-300 ease-out",
           expanded ? "max-h-[min(70vh,640px)]" : "max-h-[52px]",
         )}
       >
         <button
           type="button"
           onClick={() => setExpanded((e) => !e)}
-          className="flex w-full items-center justify-between gap-3 px-4 py-1 text-left hover:bg-muted/50 rounded-t-xl transition-colors"
+          className="flex w-full items-center justify-between gap-3 px-4 py-1 text-left hover:bg-muted/50 transition-colors"
         >
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex size-4 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">

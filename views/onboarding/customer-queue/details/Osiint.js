@@ -59,7 +59,7 @@ export function Osiint({ data }) {
   const activitySignals = report.activitySignals ?? [];
 
   return (
-    <div className="space-y-6 mt-6">
+    <div className="space-y-10 mt-6">
       <div className="">
         <div className="">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -155,12 +155,12 @@ export function Osiint({ data }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+                  <tr className="border-b bg-muted text-left text-xs font-medium text-neutral-800">
                     <th className="p-2 font-medium">Headline</th>
-                    <th className="p-2 font-medium">Source</th>
+                    {/* <th className="p-2 font-medium">Source</th> */}
                     <th className="p-2 font-medium whitespace-nowrap">Published</th>
                     <th className="p-2 font-medium text-right whitespace-nowrap">Score</th>
-                    <th className="p-2 font-medium whitespace-nowrap">Sentiment</th>
+                    {/* <th className="p-2 font-medium whitespace-nowrap">Sentiment</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -169,8 +169,11 @@ export function Osiint({ data }) {
                       key={m.id}
                       className="border-b border-border/50 last:border-0 hover:bg-muted/30"
                     >
-                      <td className="p-2 align-top font-medium max-w-md">{m.headline}</td>
-                      <td className="p-2 align-top text-muted-foreground">{m.source}</td>
+                      <td className="p-2 align-top font-medium w-full max-w-md text-xs">
+                        {m.headline}
+                        <p className="text-xs text-muted-foreground">{m.source}</p>
+                      </td>
+                      {/* <td className="p-2 align-top text-muted-foreground">{m.source}</td> */}
                       <td className="p-2 align-top whitespace-nowrap text-muted-foreground">
                         {m.publishedDate}
                       </td>
@@ -181,13 +184,13 @@ export function Osiint({ data }) {
                           {m.riskScore ?? "—"}
                         </span>
                       </td>
-                      <td className="p-2 align-top">
+                      {/* <td className="p-2 align-top">
                         {m.sentiment != null && (
                           <Badge variant="outline" className={sentimentBadge(m.sentiment)}>
                             {m.sentiment}
                           </Badge>
                         )}
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -228,7 +231,7 @@ export function Osiint({ data }) {
           </div>
         </div>
 
-        <Card>
+        {/* <Card>
           <div className="p-6">
             <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
               <MapPin className="size-4 text-primary" />
@@ -254,11 +257,11 @@ export function Osiint({ data }) {
               </ul>
             )}
           </div>
-        </Card>
+        </Card> */}
       </div>
 
-      <Card>
-        <div className="p-6">
+      <div>
+        <div className="">
           <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
             <Activity className="size-4 text-primary" />
             Activity signals
@@ -285,7 +288,7 @@ export function Osiint({ data }) {
             </ul>
           )}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
