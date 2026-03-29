@@ -1,20 +1,10 @@
 "use client";
 
 import React from "react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn, dateShowFormatWithTime } from "@/lib/utils";
 import dummyOsiintReport from "./dummyOsiintReport.json";
-import {
-  ExternalLink,
-  Globe2,
-  Newspaper,
-  ShieldAlert,
-  Users,
-  MapPin,
-  Activity,
-  Radar,
-} from "lucide-react";
+import { ExternalLink, Globe2, Newspaper, Users, Activity, Radar } from "lucide-react";
 
 function scoreTone(score) {
   if (score <= 30) return "text-success";
@@ -28,20 +18,6 @@ function scoreBadgeClass(score) {
   return "bg-danger/15 text-danger border-danger/30";
 }
 
-function sentimentBadge(sentiment) {
-  const s = (sentiment || "").toLowerCase();
-  if (s === "negative") return "bg-danger/15 text-danger border-danger/30";
-  if (s === "positive") return "bg-success/15 text-success border-success/30";
-  return "bg-muted text-muted-foreground border-border";
-}
-
-function geoRiskBadge(level) {
-  const l = (level || "").toLowerCase();
-  if (l === "high") return "bg-danger/15 text-danger border-danger/30";
-  if (l === "medium") return "bg-warning/15 text-warning-foreground border-warning/30";
-  return "bg-success/15 text-success border-success/30";
-}
-
 function confidenceBadge(confidence) {
   const c = (confidence || "").toLowerCase();
   if (c === "high") return "bg-success/15 text-success border-success/30";
@@ -53,9 +29,7 @@ export function Osiint({ data }) {
   const report = data && typeof data === "object" ? data : dummyOsiintReport;
   const profiles = report.profiles ?? [];
   const adverseMedia = report.adverseMedia ?? [];
-  const watchlists = report.watchlists ?? [];
   const associates = report.associates ?? [];
-  const geographicExposure = report.geographicExposure ?? [];
   const activitySignals = report.activitySignals ?? [];
 
   return (
