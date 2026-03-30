@@ -45,10 +45,10 @@ export function RelationsTree() {
   const collapseAllRef = useRef(null);
   return (
     <main className="min-h-screen relative ">
-      <div className=" px-6 py-8">
+      <div className="">
         {/* Header */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+        <div className="mb-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-end">
+          {/* <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight text-balance">
               Party Relationship Graph
             </h1>
@@ -56,7 +56,7 @@ export function RelationsTree() {
               Click a node to expand its children. Drag nodes to rearrange. Scroll to zoom, drag the
               canvas to pan.
             </p>
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-3">
             {/* Expand / Collapse buttons */}

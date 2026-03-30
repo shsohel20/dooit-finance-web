@@ -133,7 +133,7 @@ export function Osiint({ data }) {
                     <th className="p-2 font-medium">Headline</th>
                     {/* <th className="p-2 font-medium">Source</th> */}
                     <th className="p-2 font-medium whitespace-nowrap">Published</th>
-                    <th className="p-2 font-medium text-right whitespace-nowrap">Score</th>
+                    {/* <th className="p-2 font-medium text-right whitespace-nowrap">Score</th> */}
                     {/* <th className="p-2 font-medium whitespace-nowrap">Sentiment</th> */}
                   </tr>
                 </thead>
@@ -151,13 +151,13 @@ export function Osiint({ data }) {
                       <td className="p-2 align-top whitespace-nowrap text-muted-foreground">
                         {m.publishedDate}
                       </td>
-                      <td className="p-2 align-top text-right">
+                      {/* <td className="p-2 align-top text-right">
                         <span
                           className={cn("font-semibold tabular-nums", scoreTone(m.riskScore ?? 0))}
                         >
                           {m.riskScore ?? "—"}
                         </span>
-                      </td>
+                      </td> */}
                       {/* <td className="p-2 align-top">
                         {m.sentiment != null && (
                           <Badge variant="outline" className={sentimentBadge(m.sentiment)}>
