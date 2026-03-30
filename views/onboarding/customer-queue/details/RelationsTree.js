@@ -1,14 +1,14 @@
 import { PartyTreeGraph } from "./party-tree.graph";
 import { GraphLegend } from "./graph-legend";
 import { useState, useRef } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-import { Network, Users, ArrowLeftRight, Globe } from "lucide-react";
+import { Users, ArrowLeftRight, Radar } from "lucide-react";
 import partyEntities from "./demo.json";
 import { Input } from "@/components/ui/input";
 import { AlertsTable } from "./AlertsTable";
 import { Osiint } from "./Osiint";
 import TransactionTable from "./TransactionTable";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 const FILTERS = [
   // { mode: "all", label: "All", icon: Network },
   { mode: "relations", label: "Relations", icon: Users },
@@ -39,25 +39,27 @@ flatten(partyEntities, null, _flat);
 const entities = _flat;
 
 export function RelationsTree() {
-  const [viewMode, setViewMode] = useState("family");
   const [filterMode, setFilterMode] = useState("relations");
+  const [osintOpen, setOsintOpen] = useState(false);
   const expandAllRef = useRef(null);
   const collapseAllRef = useRef(null);
   return (
     <main className="min-h-screen relative ">
+      <Sheet open={osintOpen} onOpenChange={setOsintOpen}>
+        <SheetContent side="right" className="w-[480px] sm:max-w-[860px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <Radar className="size-4 text-primary" />
+              OSINT Report
+            </SheetTitle>
+          </SheetHeader>
+          <Osiint />
+        </SheetContent>
+      </Sheet>
+
       <div className="">
         {/* Header */}
         <div className="mb-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-end">
-          {/* <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight text-balance">
-              Party Relationship Graph
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Click a node to expand its children. Drag nodes to rearrange. Scroll to zoom, drag the
-              canvas to pan.
-            </p>
-          </div> */}
-
           <div className="flex items-center gap-3">
             {/* Expand / Collapse buttons */}
             <button
@@ -74,15 +76,21 @@ export function RelationsTree() {
             >
               Collapse All
             </button>
-
-            {/* View mode toggle */}
+            <button
+              type="button"
+              onClick={() => setOsintOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary transition-colors"
+            >
+              <Radar className="size-3.5" />
+              OSINT
+            </button>
           </div>
         </div>
 
         <div className="relative grid grid-cols-12 gap-4">
-          <div className="col-span-3 space-y-4 sticky top-20 bg-white border rounded-md p-4 h-[80vh] overflow-y-auto">
+          <div className="col-span-3 space-y-4 sticky top-20 bg-white border rounded-md p-4 h-max overflow-y-auto">
             <AlertsTable />
-            <Osiint />
+            {/* <Osiint /> */}
           </div>
           {/* Tabs */}
 

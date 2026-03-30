@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn, dateShowFormatWithTime } from "@/lib/utils";
 import dummyOsiintReport from "./dummyOsiintReport.json";
-import { ExternalLink, Globe2, Newspaper, Users, Activity, Radar } from "lucide-react";
+import { ExternalLink, Globe2, Newspaper, Users, Activity, Radar, Search } from "lucide-react";
 
 function scoreTone(score) {
   if (score <= 30) return "text-success";
@@ -26,14 +26,36 @@ function confidenceBadge(confidence) {
 }
 
 export function Osiint({ data }) {
+  const [query, setQuery] = useState("");
   const report = data && typeof data === "object" ? data : dummyOsiintReport;
-  const profiles = report.profiles ?? [];
-  const adverseMedia = report.adverseMedia ?? [];
-  const associates = report.associates ?? [];
-  const activitySignals = report.activitySignals ?? [];
+
+  const q = query.toLowerCase();
+  const profiles = (report.profiles ?? []).filter(
+    (p) => !q || p.source?.toLowerCase().includes(q) || p.url?.toLowerCase().includes(q),
+  );
+  const adverseMedia = (report.adverseMedia ?? []).filter(
+    (m) => !q || m.headline?.toLowerCase().includes(q) || m.source?.toLowerCase().includes(q),
+  );
+  const associates = (report.associates ?? []).filter(
+    (a) => !q || a.name?.toLowerCase().includes(q) || a.relation?.toLowerCase().includes(q),
+  );
+  const activitySignals = (report.activitySignals ?? []).filter(
+    (s) => !q || s.type?.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q),
+  );
 
   return (
-    <div className="space-y-10 mt-6">
+    <div className="space-y-4  px-6">
+      <div className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2">
+        <Search className="size-4 text-muted-foreground shrink-0" />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search profiles, media, associates…"
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        />
+      </div>
+
       <div className="">
         <div className="">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
