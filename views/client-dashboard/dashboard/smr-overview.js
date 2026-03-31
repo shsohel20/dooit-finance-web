@@ -124,7 +124,7 @@ export function SMROverview() {
                 />
                 <XAxis
                   type="number"
-                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
                   axisLine={false}
                   tickLine={false}
                   domain={[0, 100]}
@@ -133,15 +133,15 @@ export function SMROverview() {
                 <YAxis
                   type="category"
                   dataKey="name"
-                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  tick={{ fontSize: 10, fill: " var(--muted-foreground" }}
                   axisLine={false}
                   tickLine={false}
                   width={70}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
+                    backgroundColor: " var(--card)",
+                    border: "1px solid  var(--border)",
                     borderRadius: "8px",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                   }}
@@ -149,7 +149,7 @@ export function SMROverview() {
                 />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                   {offenceData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${(index % 5) + 1}))`} />
+                    <Cell key={`cell-${index}`} fill={` var(--chart-${(index % 5) + 1})`} />
                   ))}
                 </Bar>
               </BarChart>

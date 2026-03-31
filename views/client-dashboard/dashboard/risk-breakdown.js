@@ -5,10 +5,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 import { riskAssessmentData } from "@/lib/dashboard-data";
 
 const COLORS = {
-  unacceptable: "hsl(var(--destructive))",
+  unacceptable: "var(--danger)",
   high: "hsl(25, 95%, 53%)",
   medium: "hsl(45, 93%, 47%)",
-  low: "hsl(var(--success))",
+  low: "var(--success)",
 };
 
 export function RiskBreakdownChart() {

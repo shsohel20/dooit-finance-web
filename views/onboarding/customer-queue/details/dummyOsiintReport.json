@@ -1,0 +1,83 @@
+{
+  "entityName": "Sheikh Hasina",
+  "entityType": "Individual",
+  "riskCategory": "Politically Exposed Person (PEP)",
+  "overallRiskScore": 82,
+  "profiles": [
+    {
+      "source": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Sheikh_Hasina",
+      "confidence": "high"
+    },
+    {
+      "source": "Government Portal",
+      "url": "https://pmo.gov.bd/",
+      "confidence": "high"
+    }
+  ],
+  "adverseMedia": [
+    {
+      "id": "MEDIA-001",
+      "headline": "Public criticism over recent economic policies",
+      "source": "International News Agency",
+      "publishedDate": "2026-03-20",
+      "riskScore": 65,
+      "sentiment": "negative"
+    },
+    {
+      "id": "MEDIA-002",
+      "headline": "Debate on governance and transparency",
+      "source": "Regional News Outlet",
+      "publishedDate": "2026-03-18",
+      "riskScore": 60,
+      "sentiment": "neutral"
+    }
+  ],
+  "watchlists": [
+    {
+      "listName": "Global PEP Database",
+      "match": true,
+      "riskScore": 90
+    },
+    {
+      "listName": "Sanctions List",
+      "match": false,
+      "riskScore": 10
+    }
+  ],
+  "associates": [
+    {
+      "name": "Political Associate A",
+      "relation": "Cabinet Member",
+      "riskScore": 55
+    },
+    {
+      "name": "Business Associate B",
+      "relation": "Indirect Business Link",
+      "riskScore": 70
+    }
+  ],
+  "geographicExposure": [
+    {
+      "country": "Bangladesh",
+      "riskLevel": "medium"
+    },
+    {
+      "country": "United Kingdom",
+      "riskLevel": "low"
+    }
+  ],
+  "activitySignals": [
+    {
+      "type": "Public Speech",
+      "description": "Addressed national economic reforms",
+      "date": "2026-03-25"
+    },
+    {
+      "type": "International Visit",
+      "description": "Diplomatic meeting with foreign leaders",
+      "date": "2026-03-22"
+    }
+  ],
+  "lastUpdated": "2026-03-28T10:00:00Z"
+}

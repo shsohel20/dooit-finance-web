@@ -1,0 +1,67 @@
+[
+  {
+    "id": "AML-1001",
+    "entityName": "Sheikh Hasina",
+    "alertType": "PEP_MATCH",
+    "riskLevel": "high",
+    "alertScore": 85,
+    "title": "Politically Exposed Person Detected",
+    "status": "open",
+    "timestamp": "2026-03-28T09:12:00Z"
+  },
+  {
+    "id": "AML-1002",
+    "entityName": "Sheikh Hasina",
+    "alertType": "LARGE_TRANSACTION",
+    "riskLevel": "medium",
+    "alertScore": 65,
+    "title": "Unusual Large Transaction",
+    "transactionId": "TXN-778921",
+    "amount": 250000,
+    "status": "under_review",
+    "timestamp": "2026-03-28T08:45:00Z"
+  },
+  {
+    "id": "AML-1003",
+    "entityName": "Sheikh Hasina",
+    "alertType": "HIGH_RISK_JURISDICTION",
+    "riskLevel": "high",
+    "alertScore": 90,
+    "title": "Transaction with High-Risk Jurisdiction",
+    "transactionId": "TXN-889122",
+    "status": "open",
+    "timestamp": "2026-03-27T22:10:00Z"
+  },
+  {
+    "id": "AML-1004",
+    "entityName": "Sheikh Hasina",
+    "alertType": "STRUCTURING",
+    "riskLevel": "high",
+    "alertScore": 95,
+    "title": "Structuring Detected",
+    "transactionId": "TXN-552311",
+    "status": "investigating",
+    "timestamp": "2026-03-27T16:30:00Z"
+  },
+  {
+    "id": "AML-1005",
+    "entityName": "Sheikh Hasina",
+    "alertType": "SANCTIONS_SCREENING",
+    "riskLevel": "low",
+    "alertScore": 40,
+    "title": "Sanctions Screening Clear",
+    "status": "closed",
+    "timestamp": "2026-03-26T10:05:00Z"
+  },
+  {
+    "id": "AML-1006",
+    "entityName": "Sheikh Hasina",
+    "alertType": "UNUSUAL_PATTERN",
+    "riskLevel": "medium",
+    "alertScore": 70,
+    "title": "Behavioral Anomaly",
+    "transactionId": "TXN-667890",
+    "status": "under_review",
+    "timestamp": "2026-03-25T13:20:00Z"
+  }
+]

@@ -410,6 +410,10 @@ export function ModuleProvider({ children }) {
       dueDate,
       maxAttempts,
     };
+    // const uniqueAssignments = [...new Set(assignments.map((a) => a.moduleId))];
+    // if (uniqueAssignments.includes(moduleId)) {
+    //   return;
+    // }
     setAssignments((prev) => [...prev, newAssignment]);
 
     // Initialize progress for each learner
@@ -493,7 +497,7 @@ export function ModuleProvider({ children }) {
   };
 
   const getLearnerProgress = (learnerId, moduleId) => {
-    return progress.find((p) => p.learnerId === learnerId && p.moduleId === moduleId);
+    return progress.find((p) => p.learnerId === learnerId);
   };
 
   const getModuleAssignments = (learnerId) => {
