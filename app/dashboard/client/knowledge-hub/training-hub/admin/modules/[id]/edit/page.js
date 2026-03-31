@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Trash2, Edit2 } from "lucide-react";
-import { getAllParts, getModuleById } from "../../../actions";
+import { getAllParts, getModuleById } from "../../../../actions";
 import PartModal from "../PartModal";
 
 export default function ModuleEditorPage() {

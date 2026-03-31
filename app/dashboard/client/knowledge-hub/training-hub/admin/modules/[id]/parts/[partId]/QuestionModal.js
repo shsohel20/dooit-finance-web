@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { createQuestion } from "../../../../actions";
+import { createQuestion } from "../../../../../actions";
 import { toast } from "sonner";
 
 const optionTypes = [

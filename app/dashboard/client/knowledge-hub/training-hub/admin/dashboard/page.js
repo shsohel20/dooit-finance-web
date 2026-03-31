@@ -18,7 +18,7 @@ import {
   FileText,
   Activity,
 } from "lucide-react";
-import { getModules } from "../actions";
+import { getModules } from "../../actions";
 
 const mockActivities = [
   {

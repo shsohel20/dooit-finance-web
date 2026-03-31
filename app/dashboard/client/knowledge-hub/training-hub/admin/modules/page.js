@@ -43,7 +43,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
-import { getModules } from "../actions";
+import { getModules } from "../../actions";
 
 export default function ModulesPage() {
   const router = useRouter();

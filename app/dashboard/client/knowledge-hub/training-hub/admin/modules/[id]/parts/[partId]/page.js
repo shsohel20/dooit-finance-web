@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
-import { getModuleById, getPartById, deleteQuestion } from "../../../../actions";
+import { getModuleById, getPartById, deleteQuestion } from "../../../../../actions";
 import QuestionModal from "./QuestionModal";
 import { toast } from "sonner";
 

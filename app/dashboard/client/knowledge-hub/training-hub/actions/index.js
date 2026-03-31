@@ -67,3 +67,16 @@ export const assignAssignment = async (data, moduleId) => {
   console.log("response", response);
   return response.json();
 };
+export const getAssignmentsforAdmin = async () => {
+  const response = await fetchWithAuth("training-assignments", {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const getMyAssignments = async () => {
+  const response = await fetchWithAuth("training-assignments/mine", {
+    method: "GET",
+  });
+  return response.json();
+};

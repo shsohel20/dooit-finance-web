@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { FormField } from "@/components/ui/FormField";
-import { createPart } from "../../actions";
+import { createPart } from "../../../actions";
 import { toast } from "sonner";
 
 const initialState = {

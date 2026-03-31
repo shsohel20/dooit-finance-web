@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useModules } from '@/contexts/module-context';
 import { Plus } from 'lucide-react';
-import { createModule } from '@/app/dashboard/client/knowledge-hub/training-hub/admin/actions';
+import { createModule } from '@/app/dashboard/client/knowledge-hub/training-hub/actions';
 import {
   Select,
   SelectContent,

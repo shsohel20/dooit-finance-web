@@ -31,13 +31,23 @@ import {
   ArrowRight,
   GraduationCap,
 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { getMyAssignments } from "../../actions";
 
 export default function LearnerDashboardPage() {
   const router = useRouter();
   const user = { id: "1", role: "learner", name: "John Doe" };
   const { getModuleAssignments, getModuleById, getLearnerProgress, retakeModule } = useModules();
-
-  const assignments = getModuleAssignments(user?.id || "");
+  const [assignments, setAssignments] = useState([]);
+  console.log("assignments", assignments);
+  const fetchAssignments = useCallback(async () => {
+    const res = await getMyAssignments();
+    setAssignments(res?.data || []);
+  }, []);
+  useEffect(() => {
+    fetchAssignments();
+  }, [fetchAssignments]);
+  // const assignments = getModuleAssignments(user?.id || "");
   const assignedModules = assignments.map((a) => getModuleById(a.moduleId)).filter(Boolean);
 
   const getModuleStatus = (moduleId) => {
