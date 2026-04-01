@@ -80,3 +80,10 @@ export const getMyAssignments = async () => {
   });
   return response.json();
 };
+
+export const getMyProgressForModule = async (moduleId) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}`, {
+    method: "GET",
+  });
+  return response.json();
+};

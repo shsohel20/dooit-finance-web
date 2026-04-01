@@ -20,7 +20,6 @@ import {
 import {
   Clock,
   CheckCircle,
-  AlertCircle,
   Play,
   RotateCcw,
   TrendingUp,
@@ -48,7 +47,7 @@ export default function LearnerDashboardPage() {
     fetchAssignments();
   }, [fetchAssignments]);
   // const assignments = getModuleAssignments(user?.id || "");
-  const assignedModules = assignments.map((a) => getModuleById(a.moduleId)).filter(Boolean);
+  const assignedModules = assignments;
 
   const getModuleStatus = (moduleId) => {
     const progress = getLearnerProgress(user?.id || "", moduleId);
@@ -71,6 +70,7 @@ export default function LearnerDashboardPage() {
   };
 
   const handleStartModule = (moduleId) => {
+    console.log("moduleId", moduleId);
     router.push(`/dashboard/client/knowledge-hub/training-hub/learner/training/${moduleId}`);
   };
 
@@ -247,7 +247,7 @@ export default function LearnerDashboardPage() {
                         </span>
                       </div>
                       <Button
-                        onClick={() => handleStartModule(module?.id || "")}
+                        onClick={() => handleStartModule(module?.module?._id || "")}
                         className="w-full gap-2 group-hover:shadow-md transition-shadow"
                       >
                         <Play className="w-4 h-4" />
@@ -275,21 +275,23 @@ export default function LearnerDashboardPage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {assignedModules
-                .filter((m) => m && getModuleStatus(m.id) === "in-progress")
+                .filter((m) => m && getModuleStatus(m.module?._id) === "in-progress")
                 .map((module) => {
                   const percentage = getProgressPercentage(module?.id || "");
                   return (
                     <Card
-                      key={module?.id}
+                      key={module?._id}
                       className="group overflow-hidden border-[hsl(38,92%,50%)]/15 hover:shadow-lg hover:border-[hsl(38,92%,50%)]/30 transition-all duration-300"
                     >
                       <div className="h-1 bg-gradient-to-r from-[hsl(38,92%,50%)] to-[hsl(38,92%,50%)]/60" />
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1">
-                            <CardTitle className="text-lg leading-snug">{module?.title}</CardTitle>
+                            <CardTitle className="text-lg leading-snug">
+                              {module?.module?.title}
+                            </CardTitle>
                             <CardDescription className="mt-1.5 line-clamp-2">
-                              {module?.description}
+                              {module?.module?.description}
                             </CardDescription>
                           </div>
                           <Badge className="bg-[hsl(38,92%,50%)]/10 text-[hsl(38,92%,50%)] border-0 flex-shrink-0">
@@ -303,7 +305,7 @@ export default function LearnerDashboardPage() {
                           <p className="text-xs text-muted-foreground">{percentage}% complete</p>
                         </div>
                         <Button
-                          onClick={() => handleStartModule(module?.id || "")}
+                          onClick={() => handleStartModule(module?.module?._id || "")}
                           variant="outline"
                           className="w-full gap-2 bg-transparent group-hover:bg-[hsl(38,92%,50%)]/5 group-hover:border-[hsl(38,92%,50%)]/30 transition-all"
                         >
