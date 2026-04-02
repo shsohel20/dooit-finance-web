@@ -13,6 +13,7 @@ import {
 import ReactPlayer from "react-player";
 import { useRouter } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
+import _ from "lodash";
 
 export default function PartScreen({ partId, moduleId }) {
   const hasCalledApi = useRef(false);
@@ -45,6 +46,11 @@ export default function PartScreen({ partId, moduleId }) {
   };
 
   useEffect(() => {
+    if (progressData) {
+      handleReady();
+    }
+  }, []); // for debugging - remove in production
+  useEffect(() => {
     getPartData();
   }, [partId]);
   useEffect(() => {
@@ -68,20 +74,7 @@ export default function PartScreen({ partId, moduleId }) {
   };
 
   // Fires when buffer advances — tracks how much is loaded
-  const handleProgress = () => {
-    const player = playerRef.current;
-    if (!player || seekingRef.current || !player.buffered?.length) return;
-
-    const loadedSeconds = player.buffered.end(player.buffered.length - 1);
-    setPlayerState((prev) => ({
-      ...prev,
-      loadedSeconds,
-      loaded: loadedSeconds / player.duration,
-    }));
-  };
-
-  // On pause, send the current playedSeconds to the API
-  const handlePause = async () => {
+  const handleProgress = async () => {
     const player = playerRef.current;
     if (!player) return;
 
@@ -92,7 +85,15 @@ export default function PartScreen({ partId, moduleId }) {
       watchedSeconds,
       durationSec: partData?.video?.durationSec,
     };
+    console.log("handleProgress — updateVideoProgress payload", payload);
     const res = await updateVideoProgress(moduleId, payload);
+  };
+
+  const handleDebouncedProgressUpdate = _.debounce(handleProgress, 3000);
+
+  // On pause, send the current playedSeconds to the API
+  const handlePause = async () => {
+    handleProgress();
   };
 
   const handleEnded = async () => {
@@ -108,6 +109,18 @@ export default function PartScreen({ partId, moduleId }) {
     console.log("onEnded — updateVideoProgress payload", payload);
     const res = await updateVideoProgress(moduleId, payload);
     console.log("updateVideoProgress res", res);
+  };
+
+  const handleReady = () => {
+    const player = playerRef.current;
+    if (!player || !progressData) return;
+    const lastWatched =
+      progressData?.watchRecords?.find((itm) => itm.part === partId)?.watchedSeconds || 0;
+    console.log("laswatched", lastWatched);
+    if (lastWatched && lastWatched > 0) {
+      player.currentTime = lastWatched;
+      // console.log("Resumed from", lastWatched, "seconds");
+    }
   };
 
   // ── Render ─────────────────────────────────────────────────────
@@ -135,10 +148,11 @@ export default function PartScreen({ partId, moduleId }) {
           <ReactPlayer
             ref={setPlayerRef}
             src={partData?.video?.url}
+            onReady={handleReady}
             style={{ width: "100%", height: "auto", aspectRatio: "16/9" }}
             onStart={handleStartWatchingVideo}
             // onTimeUpdate={handleTimeUpdate}
-            onProgress={handleProgress}
+            onProgress={handleDebouncedProgressUpdate}
             // onDurationChange={handleDurationChange}
             // onSeeking={handleSeeking}
             // onSeeked={handleSeeked}
