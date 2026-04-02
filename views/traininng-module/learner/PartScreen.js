@@ -1,10 +1,9 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, HelpCircle, Lock } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { ArrowLeft } from "lucide-react";
 import {
   getMyProgressForModule,
   getPartById,
@@ -13,57 +12,107 @@ import {
 } from "@/app/dashboard/client/knowledge-hub/training-hub/actions";
 import ReactPlayer from "react-player";
 import { useRouter } from "next/navigation";
+import { Progress } from "@/components/ui/progress";
 
 export default function PartScreen({ partId, moduleId }) {
   const hasCalledApi = useRef(false);
+  const playerRef = useRef(null);
+  const seekingRef = useRef(false); // use ref instead of state to avoid stale closure in handlers
+
   const [partData, setPartData] = useState(null);
   const [progressData, setProgressData] = useState(null);
+  const [playerState, setPlayerState] = useState({
+    played: 0,
+    loaded: 0,
+    playedSeconds: 0,
+    duration: 0,
+  });
+
   const router = useRouter();
-  const progressRef = useRef(0);
+
+  // ── Data fetching ──────────────────────────────────────────────
   const getPartData = async () => {
     const res = await getPartById(partId);
-    console.log("partData", res.data);
+    // console.log("partData", res.data);
     setPartData(res.data);
+  };
+
+  console.log("progressData", progressData);
+  const getProgressData = async () => {
+    const res = await getMyProgressForModule(moduleId);
+    // console.log("progressData", res.data);
+    setProgressData(res.data);
   };
 
   useEffect(() => {
     getPartData();
   }, [partId]);
-
-  const getProgressData = async () => {
-    const res = await getMyProgressForModule(moduleId);
-    console.log("progressData", res.data);
-    setProgressData(res.data);
-  };
-
-  const handleStartWatchingVideo = async () => {
-    if (!hasCalledApi.current) {
-      hasCalledApi.current = true;
-      const res = await startWatchingVideo(moduleId);
-      console.log("res", res);
-    }
-  };
-
   useEffect(() => {
     getProgressData();
   }, [moduleId]);
 
-  const updateWatchingProgress = async (playedSeconds) => {
-    const payload = {
-      partId: partId,
-      watchedSeconds: playedSeconds,
-      durationSec: partData?.video?.durationSec,
-    };
-    console.log("payload", payload);
+  // ── Player ref (useCallback pattern from docs) ─────────────────
+  const setPlayerRef = useCallback((player) => {
+    if (!player) return;
+    playerRef.current = player;
+  }, []);
 
-    // const res = await updateVideoProgress(moduleId, payload);
-    // console.log("res", res);
+  // ── Player event handlers ──────────────────────────────────────
+  const handleStartWatchingVideo = async () => {
+    if (progressData && progressData.status === "started") {
+      return;
+    } else {
+      const res = await startWatchingVideo(moduleId);
+      console.log("startWatchingVideo res", res);
+    }
   };
 
+  // Fires when buffer advances — tracks how much is loaded
+  const handleProgress = () => {
+    const player = playerRef.current;
+    if (!player || seekingRef.current || !player.buffered?.length) return;
+
+    const loadedSeconds = player.buffered.end(player.buffered.length - 1);
+    setPlayerState((prev) => ({
+      ...prev,
+      loadedSeconds,
+      loaded: loadedSeconds / player.duration,
+    }));
+  };
+
+  // On pause, send the current playedSeconds to the API
+  const handlePause = async () => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    const watchedSeconds = player.currentTime;
+
+    const payload = {
+      partId,
+      watchedSeconds,
+      durationSec: partData?.video?.durationSec,
+    };
+    const res = await updateVideoProgress(moduleId, payload);
+  };
+
+  const handleEnded = async () => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    // Send final progress when video finishes
+    const payload = {
+      partId,
+      watchedSeconds: player.duration,
+      durationSec: partData?.video?.durationSec,
+    };
+    console.log("onEnded — updateVideoProgress payload", payload);
+    const res = await updateVideoProgress(moduleId, payload);
+    console.log("updateVideoProgress res", res);
+  };
+
+  // ── Render ─────────────────────────────────────────────────────
   return (
-    // <MainLayout>
     <div className="py-6">
-      {/* Breadcrumb */}
       <Button
         variant="ghost"
         onClick={() => router.back()}
@@ -74,86 +123,41 @@ export default function PartScreen({ partId, moduleId }) {
       </Button>
 
       <div className="">
-        <Badge variant="secondary" className=" border-0">
+        <Badge variant="secondary" className="border-0">
           Part {partData?.index + 1} of {partData?.module?.parts?.length}
         </Badge>
         <h1 className="text-2xl font-bold text-foreground mb-1">{partData?.title}</h1>
         <p className="text-muted-foreground text-sm">Watch the video to unlock the quiz</p>
       </div>
 
-      {/* Video Card */}
       <Card className="overflow-hidden shadow-xl border-0 mb-6">
         <div className="aspect-video bg-secondary/80 relative">
           <ReactPlayer
+            ref={setPlayerRef}
             src={partData?.video?.url}
-            style={{ width: "100%", height: "auto", aspectRatio: "16/9", "--controls": "none" }}
+            style={{ width: "100%", height: "auto", aspectRatio: "16/9" }}
             onStart={handleStartWatchingVideo}
-            // onProgress={(data) => {
-            //   console.log("playedSeconds", data);
-            //   progressRef.current = data?.timeStamp;
-            // }}
-            onProgress={(state) => {
-              console.log("state", state);
-            }}
-            onPause={(data) => {
-              console.log("data", data);
-              updateWatchingProgress(progressRef.current); // update on pause
-            }}
+            // onTimeUpdate={handleTimeUpdate}
+            onProgress={handleProgress}
+            // onDurationChange={handleDurationChange}
+            // onSeeking={handleSeeking}
+            // onSeeked={handleSeeked}
+            onPause={handlePause}
+            onEnded={handleEnded}
+            onError={(e) => console.log("onError", e)}
+            controls={true}
           />
-          {/* <video
-            ref={videoRef}
-            src={activePart.videoUrl}
-            className="w-full h-full object-cover"
-            controls
-            onTimeUpdate={handleTimeUpdate}
-            onLoadedData={() => setVideoReady(true)}
-            crossOrigin="anonymous"
-          /> */}
         </div>
 
         <CardContent className="pt-5 pb-5">
-          {/* Progress */}
-          {/* <div className="space-y-2 mb-5">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">Video Progress</span>
-              <Badge
-                className={`border-0 text-xs ${
-                  watchPercent >= 80
-                    ? "bg-[hsl(142,71%,45%)]/10 text-[hsl(142,71%,45%)]"
-                    : "bg-primary/10 text-primary"
-                }`}
-              >
-                {watchPercent}% Watched
-              </Badge>
-            </div>
-            <Progress value={watchPercent} className="h-2.5" />
-            {watchPercent < 80 && (
-              <p className="text-xs text-muted-foreground">Watch at least 80% to unlock the quiz</p>
-            )}
-          </div> */}
-
-          {/* Take Quiz Button */}
-          {/* <Button
-            className="w-full h-12 text-base gap-2"
-            onClick={startQuiz}
-            disabled={!canTakeQuiz}
-          >
-            {canTakeQuiz ? (
-              <>
-                <HelpCircle className="w-5 h-5" />
-                Take Quiz ({activePart.questions.length} question
-                {activePart.questions.length !== 1 ? "s" : ""})
-              </>
-            ) : (
-              <>
-                <Lock className="w-5 h-5" />
-                Watch Video to Unlock Quiz
-              </>
-            )}
-          </Button> */}
+          {/* Debug: played fraction — remove in production */}
+          <div className="text-xs text-muted-foreground">
+            Progress: {(playerState.played * 100).toFixed(1)}% |{" "}
+            <Progress value={(playerState.played * 100).toFixed(1)} />
+            {playerState.playedSeconds.toFixed(0)}s / {playerState.duration.toFixed(0)}s
+          </div>
         </CardContent>
       </Card>
     </div>
-    // </MainLayout>
   );
 }
