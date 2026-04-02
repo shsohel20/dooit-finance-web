@@ -321,7 +321,9 @@ export default function TrainingPage() {
                             setActivePartIndex(idx);
                             setWatchPercent(0);
                             setVideoReady(false);
-                            setPhase("video");
+                            router.push(
+                              `/dashboard/client/knowledge-hub/training-hub/learner/training/${moduleId}/part/${part.id}`,
+                            );
                           }}
                           className="gap-2"
                         >

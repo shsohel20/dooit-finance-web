@@ -87,3 +87,19 @@ export const getMyProgressForModule = async (moduleId) => {
   });
   return response.json();
 };
+
+export const startWatchingVideo = async (moduleId) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}/start`, {
+    method: "POST",
+    // body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
+export const updateVideoProgress = async (moduleId, data) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}/watch`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
