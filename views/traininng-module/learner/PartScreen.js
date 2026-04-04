@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import {
   getMyProgressForModule,
@@ -16,18 +16,11 @@ import { Progress } from "@/components/ui/progress";
 import _ from "lodash";
 
 export default function PartScreen({ partId, moduleId }) {
-  const hasCalledApi = useRef(false);
   const playerRef = useRef(null);
-  const seekingRef = useRef(false); // use ref instead of state to avoid stale closure in handlers
 
+  const [watchedPercent, setWatchedPercent] = useState(0);
   const [partData, setPartData] = useState(null);
   const [progressData, setProgressData] = useState(null);
-  const [playerState, setPlayerState] = useState({
-    played: 0,
-    loaded: 0,
-    playedSeconds: 0,
-    duration: 0,
-  });
 
   const router = useRouter();
 
@@ -38,13 +31,16 @@ export default function PartScreen({ partId, moduleId }) {
     setPartData(res.data);
   };
 
-  console.log("progressData", progressData);
   const getProgressData = async () => {
     const res = await getMyProgressForModule(moduleId);
     // console.log("progressData", res.data);
     setProgressData(res.data);
     if (res.data) {
       handleReady(res.data);
+      const watchedRecord = res.data.watchRecords?.find((itm) => itm.part === partId);
+      if (watchedRecord) {
+        setWatchedPercent(watchedRecord.watchPercent);
+      }
     }
   };
 
@@ -68,7 +64,6 @@ export default function PartScreen({ partId, moduleId }) {
       return;
     } else {
       const res = await startWatchingVideo(moduleId);
-      console.log("startWatchingVideo res", res);
     }
   };
 
@@ -78,16 +73,23 @@ export default function PartScreen({ partId, moduleId }) {
     if (!player) return;
 
     const watchedSeconds = player.currentTime;
-
     const payload = {
       partId,
       watchedSeconds,
       durationSec: partData?.video?.durationSec,
     };
     const res = await updateVideoProgress(moduleId, payload);
+    if (res.data) {
+      const duration = player?.duration || 0;
+      const watchedSeconds = res.data.watchedSeconds || 0;
+      const watchedPercent =
+        watchedSeconds && duration ? Math.floor((watchedSeconds / duration) * 100) : 0;
+
+      setWatchedPercent(watchedPercent);
+    }
   };
 
-  const handleDebouncedProgressUpdate = _.debounce(handleProgress, 3000);
+  const handleDebouncedProgressUpdate = useRef(_.debounce(() => handleProgress(), 3000)).current;
 
   // On pause, send the current playedSeconds to the API
   const handlePause = async () => {
@@ -118,11 +120,19 @@ export default function PartScreen({ partId, moduleId }) {
     }
   };
 
-  const watchedData = progressData?.watchRecords?.find((itm) => itm.part === partId);
+  const handleSeeking = () => {
+    handleProgress();
+  };
+
+  const handleQuiz = () => {
+    router.push(
+      `/dashboard/client/knowledge-hub/training-hub/learner/training/${moduleId}/part/${partId}/quiz`,
+    );
+  };
 
   // ── Render ─────────────────────────────────────────────────────
   return (
-    <div className="py-6">
+    <div className="">
       <Button
         variant="ghost"
         onClick={() => router.back()}
@@ -133,9 +143,9 @@ export default function PartScreen({ partId, moduleId }) {
       </Button>
 
       <div className="">
-        <Badge variant="secondary" className="border-0">
-          Part {partData?.index + 1} of {partData?.module?.parts?.length}
-        </Badge>
+        {/* <Badge variant="secondary" className="border-0">
+          Part {partData?.index + 1} of {progressData?.watchRecords?.length}
+        </Badge> */}
         <h1 className="text-2xl font-bold text-foreground mb-1">{partData?.title}</h1>
         <p className="text-muted-foreground text-sm">Watch the video to unlock the quiz</p>
       </div>
@@ -152,6 +162,7 @@ export default function PartScreen({ partId, moduleId }) {
             onProgress={handleDebouncedProgressUpdate}
             // onDurationChange={handleDurationChange}
             // onSeeking={handleSeeking}
+            onSeeked={handleSeeking}
             // onSeeked={handleSeeked}
             onPause={handlePause}
             onEnded={handleEnded}
@@ -163,9 +174,16 @@ export default function PartScreen({ partId, moduleId }) {
         <CardContent className="pt-5 pb-5">
           {/* Debug: played fraction — remove in production */}
           <div className="text-xs text-muted-foreground">
-            Progress: {watchedData?.watchPercent}% | <Progress value={watchedData?.watchPercent} />
+            Progress: {watchedPercent}% | <Progress value={watchedPercent} />
             {/* {playerState.playedSeconds.toFixed(0)}s / {playerState.duration.toFixed(0)}s */}
           </div>
+
+          {/* <CardFooter className={"mt-4"}> */}
+          {/* Unlock Quiz */}
+          <Button onClick={handleQuiz} disabled={watchedPercent < 90} className={"w-full mt-4"}>
+            Unlock Quiz
+          </Button>
+          {/* </CardFooter> */}
         </CardContent>
       </Card>
     </div>

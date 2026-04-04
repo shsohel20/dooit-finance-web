@@ -103,3 +103,11 @@ export const updateVideoProgress = async (moduleId, data) => {
   });
   return response.json();
 };
+
+export const submitQuiz = async (moduleId, data) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}/attempts`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};

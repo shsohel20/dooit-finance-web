@@ -1,9 +1,17 @@
-import React, { useState } from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import {
+  getMyProgressForModule,
+  getPartById,
+  submitQuiz,
+} from "@/app/dashboard/client/knowledge-hub/training-hub/actions";
+import { useRouter, useSearchParams } from "next/navigation";
+import ResultScreen from "./ResultScreen";
 
 export default function QuizScreen({
   activePart,
@@ -11,22 +19,71 @@ export default function QuizScreen({
   // setCurrentQIndex,
   setPhase,
   activePartIndex,
-  partData,
+  // partData,
+  partId,
+  moduleId,
 }) {
+  const [partData, setPartData] = useState(null);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [answers, setAnswers] = useState({});
+  const [progressData, setProgressData] = useState(null);
+  const [resultData, setResultData] = useState(null);
   const questions = partData?.questions;
-  const currentQ = questions[currentQIndex];
+  const currentQ = questions?.[currentQIndex];
   const answeredCount = Object.keys(answers).length;
-  const allAnswered = answeredCount === questions.length;
-  const qProgressPercent = Math.round(((currentQIndex + 1) / questions.length) * 100);
+  const allAnswered = answeredCount === questions?.length;
+  const qProgressPercent = Math.round(((currentQIndex + 1) / questions?.length) * 100);
 
-  const options = currentQ.options || [];
+  //router
+  const router = useRouter();
 
-  const submitPartQuiz = () => {
-    setPhase("part-result");
+  console.log("partId", partId);
+  const options = currentQ?.options || [];
+
+  const submitPartQuiz = async () => {
+    // setPhase("part-result");
+    const mapAnswers = {
+      0: "A",
+      1: "B",
+      2: "C",
+      3: "D",
+    };
+    const updatedAnswers = [];
+    for (const [key, value] of Object.entries(answers)) {
+      updatedAnswers.push({
+        questionId: key,
+        selectedAnswer: mapAnswers[value] || value, // Map index to letter or use value directly if not in map
+      });
+    }
+    const payload = {
+      partId,
+      answers: updatedAnswers,
+    };
+    const res = await submitQuiz(moduleId, payload);
+    setResultData(res?.data || null);
+  };
+  console.log("partData", partData);
+  const getPartData = async () => {
+    const res = await getPartById(partId);
+    // console.log("progressData", res.data);
+    setPartData(res?.data || null);
   };
 
+  const getProgressData = async () => {
+    const res = await getMyProgressForModule(moduleId);
+    console.log("progressData", res.data);
+    setProgressData(res?.data || null);
+  };
+  useEffect(() => {
+    getPartData();
+  }, [partId]);
+  useEffect(() => {
+    getProgressData();
+  }, [moduleId]);
+
+  if (resultData) {
+    return <ResultScreen result={resultData} />;
+  }
   return (
     // <MainLayout>
     <div className="max-w-6xl w-full mx-auto py-6">
@@ -34,7 +91,7 @@ export default function QuizScreen({
       <div className="flex items-center justify-between mb-6">
         <Button
           variant="ghost"
-          onClick={() => setPhase("video")}
+          onClick={() => router?.back()}
           className="gap-2 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -58,12 +115,12 @@ export default function QuizScreen({
               Question {currentQIndex + 1} of {partData?.questions.length}
             </span>
             <span className="text-sm font-semibold text-primary">
-              {answeredCount}/{questions.length} answered
+              {answeredCount}/{questions?.length} answered
             </span>
           </div>
           <Progress value={qProgressPercent} className="h-2 mb-4" />
           <div className="flex gap-1.5 flex-wrap">
-            {questions.map((q, i) => (
+            {questions?.map((q, i) => (
               <button
                 key={q.id}
                 onClick={() => setCurrentQIndex(i)}
@@ -87,19 +144,19 @@ export default function QuizScreen({
         <CardHeader className="bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 pb-4">
           <div className="flex items-center gap-3 mb-3">
             <Badge className="bg-primary/10 text-primary border-0 font-semibold">
-              Question {currentQIndex + 1} of {questions.length}
+              Question {currentQIndex + 1} of {questions?.length}
             </Badge>
-            {currentQ.type === "true-false" && (
+            {currentQ?.type === "true-false" && (
               <Badge variant="secondary" className="border-0">
                 True / False
               </Badge>
             )}
           </div>
-          <CardTitle className="text-lg leading-relaxed">{currentQ.text}</CardTitle>
+          <CardTitle className="text-lg leading-relaxed">{currentQ?.text}</CardTitle>
         </CardHeader>
         <CardContent className="pt-6 pb-6">
           <div className="space-y-3">
-            {options.map((option, i) => {
+            {options?.map((option, i) => {
               const isSelected = answers[currentQ.id] === i;
               const letter = String.fromCharCode(65 + i);
               return (
@@ -146,7 +203,7 @@ export default function QuizScreen({
           Previous
         </Button>
 
-        {currentQIndex < questions.length - 1 ? (
+        {currentQIndex < questions?.length - 1 ? (
           <Button onClick={() => setCurrentQIndex(currentQIndex + 1)} className="gap-2" size="sm">
             Next
             <ArrowRight className="w-4 h-4" />
@@ -158,7 +215,7 @@ export default function QuizScreen({
         )}
       </div>
 
-      {!allAnswered && currentQIndex === questions.length - 1 && (
+      {!allAnswered && currentQIndex === questions?.length - 1 && (
         <p className="text-center text-sm text-muted-foreground mt-4">
           Answer all {questions.length - answeredCount} remaining question
           {questions.length - answeredCount > 1 ? "s" : ""} to submit
