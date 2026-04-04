@@ -43,13 +43,12 @@ export default function PartScreen({ partId, moduleId }) {
     const res = await getMyProgressForModule(moduleId);
     // console.log("progressData", res.data);
     setProgressData(res.data);
+    if (res.data) {
+      handleReady(res.data);
+    }
   };
 
-  useEffect(() => {
-    if (progressData) {
-      handleReady();
-    }
-  }, []); // for debugging - remove in production
+  // for debugging - remove in production
   useEffect(() => {
     getPartData();
   }, [partId]);
@@ -85,7 +84,6 @@ export default function PartScreen({ partId, moduleId }) {
       watchedSeconds,
       durationSec: partData?.video?.durationSec,
     };
-    console.log("handleProgress — updateVideoProgress payload", payload);
     const res = await updateVideoProgress(moduleId, payload);
   };
 
@@ -106,22 +104,21 @@ export default function PartScreen({ partId, moduleId }) {
       watchedSeconds: player.duration,
       durationSec: partData?.video?.durationSec,
     };
-    console.log("onEnded — updateVideoProgress payload", payload);
     const res = await updateVideoProgress(moduleId, payload);
-    console.log("updateVideoProgress res", res);
   };
 
-  const handleReady = () => {
+  const handleReady = (progressData) => {
     const player = playerRef.current;
     if (!player || !progressData) return;
     const lastWatched =
       progressData?.watchRecords?.find((itm) => itm.part === partId)?.watchedSeconds || 0;
-    console.log("laswatched", lastWatched);
     if (lastWatched && lastWatched > 0) {
       player.currentTime = lastWatched;
       // console.log("Resumed from", lastWatched, "seconds");
     }
   };
+
+  const watchedData = progressData?.watchRecords?.find((itm) => itm.part === partId);
 
   // ── Render ─────────────────────────────────────────────────────
   return (
@@ -166,9 +163,8 @@ export default function PartScreen({ partId, moduleId }) {
         <CardContent className="pt-5 pb-5">
           {/* Debug: played fraction — remove in production */}
           <div className="text-xs text-muted-foreground">
-            Progress: {(playerState.played * 100).toFixed(1)}% |{" "}
-            <Progress value={(playerState.played * 100).toFixed(1)} />
-            {playerState.playedSeconds.toFixed(0)}s / {playerState.duration.toFixed(0)}s
+            Progress: {watchedData?.watchPercent}% | <Progress value={watchedData?.watchPercent} />
+            {/* {playerState.playedSeconds.toFixed(0)}s / {playerState.duration.toFixed(0)}s */}
           </div>
         </CardContent>
       </Card>
