@@ -33,8 +33,6 @@ import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
 export const DetailViewModal = ({ details, fetching }) => {
   const [openRelatedParties, setOpenRelatedParties] = useState(false);
 
-  console.log("details => ", details);
-
   const riskAssessment = details?.riskAssessment || {};
 
   const totalRiskScore = Object.values(riskAssessment)

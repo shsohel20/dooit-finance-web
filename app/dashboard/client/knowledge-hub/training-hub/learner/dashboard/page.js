@@ -32,6 +32,42 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { getMyAssignments } from "../../actions";
+import { cn } from "@/lib/utils";
+
+const dashboardData = [
+  {
+    id: "1",
+    title: "Overall Progress",
+    icon: TrendingUp,
+    value: "75%",
+    iconColor: "text-green-500",
+    bgIconColor: "bg-green-500/10",
+  },
+  {
+    id: "2",
+    title: "Passed",
+    icon: Trophy,
+    value: "5 Modules",
+    iconColor: "text-yellow-500",
+    bgIconColor: "bg-yellow-500/10",
+  },
+  {
+    id: "3",
+    title: "In Progress",
+    icon: Clock,
+    value: "2 Modules",
+    iconColor: "text-blue-500",
+    bgIconColor: "bg-blue-500/10",
+  },
+  {
+    id: "4",
+    title: "Not Started",
+    icon: Target,
+    value: "3 Modules",
+    iconColor: "text-gray-500",
+    bgIconColor: "bg-gray-500/10",
+  },
+];
 
 export default function LearnerDashboardPage() {
   const router = useRouter();
@@ -48,6 +84,7 @@ export default function LearnerDashboardPage() {
   }, [fetchAssignments]);
   // const assignments = getModuleAssignments(user?.id || "");
   const assignedModules = assignments;
+  console.log("assignedModules", assignedModules);
 
   const getModuleStatus = (moduleId) => {
     const progress = getLearnerProgress(user?.id || "", moduleId);
@@ -125,7 +162,7 @@ export default function LearnerDashboardPage() {
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 tracking-tighter">
             Welcome back, {user?.name?.split(" ")[0]}
           </h1>
           <p className="text-sm text-muted-foreground">Continue your compliance training journey</p>
@@ -138,65 +175,30 @@ export default function LearnerDashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="overflow-hidden border-0 shadow-md">
-          <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-6 h-6 text-primary" />
+        {dashboardData.map((item) => (
+          <Card
+            key={item.id}
+            className="bg-linear-to-t from-muted overflow-hidden border-t border-b-0 border-x-0 border-muted to-white  "
+          >
+            {/* <div className="h-1 " /> */}
+            <CardContent className="pt-5 pb-5 ">
+              <div className="flex items-center gap-4">
+                <div
+                  className={cn(
+                    "w-12 h-12 rounded-xl  flex items-center justify-center flex-shrink-0 ",
+                    `${item.bgIconColor || "bg-muted/10"}`,
+                  )}
+                >
+                  <item.icon className={`w-6 h-6 ${item.iconColor}`} />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{item.title}</p>
+                  <p className="text-2xl font-bold text-foreground">{item?.value}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Overall Progress</p>
-                <p className="text-2xl font-bold text-foreground">{avgProgress}%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden border-0 shadow-md">
-          <div className="h-1 bg-gradient-to-r from-[hsl(142,71%,45%)] to-[hsl(168,76%,42%)]" />
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[hsl(142,71%,45%)]/10 flex items-center justify-center flex-shrink-0">
-                <Trophy className="w-6 h-6 text-[hsl(142,71%,45%)]" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Passed</p>
-                <p className="text-2xl font-bold text-foreground">{passedCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden border-0 shadow-md">
-          <div className="h-1 bg-gradient-to-r from-[hsl(38,92%,50%)] to-[hsl(38,92%,50%)]/60" />
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[hsl(38,92%,50%)]/10 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-6 h-6 text-[hsl(38,92%,50%)]" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">In Progress</p>
-                <p className="text-2xl font-bold text-foreground">{inProgressCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden border-0 shadow-md">
-          <div className="h-1 bg-gradient-to-r from-muted-foreground to-muted-foreground/60" />
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
-                <Target className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Not Started</p>
-                <p className="text-2xl font-bold text-foreground">{notStartedCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Module Sections */}

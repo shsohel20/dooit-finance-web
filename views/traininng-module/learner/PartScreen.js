@@ -146,7 +146,7 @@ export default function PartScreen({ partId, moduleId }) {
         {/* <Badge variant="secondary" className="border-0">
           Part {partData?.index + 1} of {progressData?.watchRecords?.length}
         </Badge> */}
-        <h1 className="text-2xl font-bold text-foreground mb-1">{partData?.title}</h1>
+        <h1 className="text-2xl  font-bold text-foreground mb-1">{partData?.title}</h1>
         <p className="text-muted-foreground text-sm">Watch the video to unlock the quiz</p>
       </div>
 

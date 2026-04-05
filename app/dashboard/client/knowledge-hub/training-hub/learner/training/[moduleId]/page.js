@@ -177,9 +177,10 @@ export default function TrainingPage() {
   if (phase === "overview") {
     const allDone = completedParts.size === totalParts;
 
+    console.log("moduleData", moduleData);
     return (
       // <MainLayout>
-      <div className="max-w-6xl mx-auto py-6 w-full">
+      <div className="max-w-6xl mx-auto  w-full">
         {/* Header */}
         <Button
           variant="ghost"
@@ -195,7 +196,7 @@ export default function TrainingPage() {
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2 text-balance">
+              <h1 className="text-3xl font-bold text-foreground mb-2 text-balance tracking-tighter">
                 {moduleData.title}
               </h1>
               <p className="text-muted-foreground leading-relaxed">{moduleData.description}</p>
