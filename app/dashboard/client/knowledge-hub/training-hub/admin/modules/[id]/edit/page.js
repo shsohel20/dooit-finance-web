@@ -23,9 +23,7 @@ export default function ModuleEditorPage() {
 
   // const moduleData = getModuleById(moduleId);
   const [openDialog, setOpenDialog] = useState(false);
-  const [newPartTitle, setNewPartTitle] = useState("");
-  const [newPartVideo, setNewPartVideo] = useState("");
-  const [editingModule, setEditingModule] = useState(moduleData);
+
   const [isLoading, setIsLoading] = useState(false);
 
   // Update editingModule when module changes
@@ -102,31 +100,12 @@ export default function ModuleEditorPage() {
             </p>
           </div>
         </div>
-        {moduleData.status === "draft" && <Button onClick={handlePublish}>Publish Module</Button>}
+        {/* {moduleData.status === "draft" && <Button onClick={handlePublish}>Publish Module</Button>} */}
       </div>
 
-      {/* Module Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Module Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4">
-            <div>
-              <Label className="text-muted-foreground">Title</Label>
-              <p className="text-lg font-semibold">{moduleData.title}</p>
-            </div>
-            <div>
-              <Label className="text-muted-foreground">Description</Label>
-              <p className="text-base">{moduleData.description || "No description"}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Parts Section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className={"border-0"}>
+        <CardHeader className="flex flex-row items-center justify-between p-0">
           <div>
             <CardTitle>Module Parts ({moduleData.parts.length})</CardTitle>
             <CardDescription>Each part contains a video and questions</CardDescription>
@@ -140,7 +119,7 @@ export default function ModuleEditorPage() {
           />
           {/* )} */}
         </CardHeader>
-        <CardContent>
+        <CardContent className={"p-0"}>
           {parts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>No parts yet. Add one to get started.</p>

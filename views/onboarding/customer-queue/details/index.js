@@ -78,7 +78,7 @@ export const DetailViewModal = ({ details, fetching }) => {
       <div className="col-span-9">
         <div className=" mx-auto ">
           {/* User Profile Section */}
-          <Card className="mb-6 overflow-hidden ">
+          <Card className="mb-6 overflow-hidden border-0 bg-muted/50">
             <div className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
@@ -131,14 +131,14 @@ export const DetailViewModal = ({ details, fetching }) => {
           {/* Status Cards Grid */}
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4  mb-6">
             {/* Current Status Card */}
-            <Card className=" hover:border-primary/30 transition-colors">
+            <Card className="border-0 bg-muted/20">
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-lg bg-accent/50">
                       <Clock className="size-5 text-accent-foreground" />
                     </div>
-                    <h3 className="text-sm">Current Status</h3>
+                    <h3 className="text-sm">Status</h3>
                   </div>
                   <Badge
                     className={cn(
@@ -152,14 +152,14 @@ export const DetailViewModal = ({ details, fetching }) => {
                     {details?.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   Awaiting manual verification of address proof documentation.
                 </p>
               </div>
             </Card>
 
             {/* Risk Assessment Card */}
-            <Card className=" hover:border-danger/30 transition-colors">
+            <Card className="border-0">
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -173,13 +173,13 @@ export const DetailViewModal = ({ details, fetching }) => {
                     Risk
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Flagged for foreign transaction history requiring additional review.
+                <p className="text-xs text-muted-foreground leading-relaxed ">
+                  Flagged for foreign transactions requiring additional review.
                 </p>
               </div>
             </Card>
             <Card
-              className={` transition-colors ${isPep ? "hover:border-warning/30" : "hover:border-border"}`}
+              className={`border-0 transition-colors ${isPep ? "hover:border-warning/30" : "hover:border-border"}`}
             >
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
@@ -203,7 +203,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   {isPep
                     ? "User identified as politically exposed person. Enhanced due diligence required."
                     : "No politically exposed person indicators detected."}
@@ -212,7 +212,7 @@ export const DetailViewModal = ({ details, fetching }) => {
             </Card>
 
             <Card
-              className={` transition-colors ${isSanctioned ? "hover:border-destructive/30" : "hover:border-border"}`}
+              className={`border-0 transition-colors ${isSanctioned ? "hover:border-destructive/30" : "hover:border-border"}`}
             >
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
@@ -232,13 +232,13 @@ export const DetailViewModal = ({ details, fetching }) => {
                       Flagged
                     </Badge>
                   ) : (
-                    <Badge className="bg-muted text-muted-foreground hover:bg-muted border-border">
+                    <Badge className="bg-muted text-muted-foreground hover:bg-muted border-border ">
                       <CheckCircle2 className="size-3 mr-1" />
                       Clear
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   {isSanctioned
                     ? "User appears on sanctions list. Immediate review required."
                     : "No matches found on sanctions or watchlists."}
@@ -248,12 +248,12 @@ export const DetailViewModal = ({ details, fetching }) => {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-12 lg:grid-cols-2">
             {/* Left Column - Personal Information */}
             <div className="">
               {/* Personal Information */}
-              <Card className="">
-                <div className="p-6">
+              <Card className="border-0">
+                <div className="">
                   <h3 className="text-sm font-semibold mb-6 flex items-center gap-2">
                     <User className="size-5  text-primary" />
                     Personal Information
@@ -304,8 +304,8 @@ export const DetailViewModal = ({ details, fetching }) => {
             {/* Right Column - Timeline & Activity */}
             <div className="space-y-6">
               {/* Onboarding Timeline */}
-              <Card className="">
-                <div className="p-6">
+              <Card className="border-0">
+                <div className="">
                   <h3 className="text-sm font-semibold mb-6 flex items-center gap-2">
                     <Clock className="size-5 text-primary" />
                     Onboarding Timeline
@@ -333,64 +333,12 @@ export const DetailViewModal = ({ details, fetching }) => {
                 </div>
               </Card>
             </div>
-            <div>
-              {/* Activity Log */}
-              {/* <Card className="">
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                    <TrendingUp className="size-5 text-primary" />
-                    Activity Log
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex gap-3">
-                      <div className="p-1.5 rounded-full bg-success/15 h-fit">
-                        <CheckCircle2 className="size-3 text-success" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Identity verified</p>
-                        <p className="text-xs text-muted-foreground">2 hours ago</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <div className="p-1.5 rounded-full bg-warning/15 h-fit">
-                        <Clock className="size-3 text-warning-foreground" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Address proof pending</p>
-                        <p className="text-xs text-muted-foreground">5 hours ago</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <div className="p-1.5 rounded-full bg-primary/15 h-fit">
-                        <FileText className="size-3 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Documents uploaded</p>
-                        <p className="text-xs text-muted-foreground">1 day ago</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <div className="p-1.5 rounded-full bg-muted h-fit">
-                        <User className="size-3 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Account created</p>
-                        <p className="text-xs text-muted-foreground">27 days ago</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card> */}
-            </div>
           </div>
         </div>
       </div>
       <div className="col-span-3">
-        <Card className="">
-          <div className="p-6">
+        <Card className="border-0">
+          <div className="">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <BarChart3 className="size-5 text-primary" />

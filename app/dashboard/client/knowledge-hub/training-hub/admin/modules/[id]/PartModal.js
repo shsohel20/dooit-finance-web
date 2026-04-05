@@ -160,7 +160,12 @@ export default function PartModal({ openDialog, setOpenDialog, moduleId, fetchPa
             />
           </div>
 
-          <Button disabled={isLoading} onClick={form.handleSubmit(handleAddPart)} type="submit">
+          <Button
+            className={"w-full"}
+            disabled={isLoading}
+            onClick={form.handleSubmit(handleAddPart)}
+            type="submit"
+          >
             {isLoading ? "Adding..." : "Add Part"}
           </Button>
         </div>

@@ -83,11 +83,9 @@ export default function ModulesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-primary mb-1">Module Library</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Training Modules</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage and organize your compliance training content.
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tighter">
+            Training Modules
+          </h1>
         </div>
         {canEdit && <CreateModuleDialog getAll={fetchModules} />}
       </div>
@@ -120,7 +118,7 @@ export default function ModulesPage() {
             color: "text-[hsl(38_92%_50%)] bg-[hsl(38_92%_50%)]/10",
           },
         ].map((stat) => (
-          <Card key={stat.label} className="border-border/60">
+          <Card key={stat.label} className="border-0 bg-muted/30">
             <CardContent className="flex items-center gap-3 py-4">
               <div className={`p-2 rounded-lg ${stat.color}`}>
                 <stat.icon className="w-4 h-4" />
