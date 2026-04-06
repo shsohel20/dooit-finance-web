@@ -39,8 +39,7 @@ const initialState = {
   status: 'published',
 };
 
-export function CreateModuleDialog({ getAll }) {
-  const [open, setOpen] = useState(false);
+export function CreateModuleDialog({ getAll, setOpen, open }) {
   const [formData, setFormData] = useState(initialState);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -67,12 +66,12 @@ export function CreateModuleDialog({ getAll }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      {/* <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="w-4 h-4" />
           Create Module
         </Button>
-      </DialogTrigger>
+      </DialogTrigger> */}
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Create New Module</DialogTitle>

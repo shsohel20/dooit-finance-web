@@ -5,11 +5,13 @@ import { useRouter, useParams } from "next/navigation";
 import { useModules } from "@/contexts/module-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import ReactPlayer from "react-player";
+import { ArrowLeft, Edit, Plus, Trash2 } from "lucide-react";
 import { getModuleById, getPartById, deleteQuestion } from "../../../../../actions";
 import QuestionModal from "./QuestionModal";
 import { toast } from "sonner";
+import PartModal from "../../PartModal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PartEditorPage() {
   const params = useParams();
@@ -20,10 +22,14 @@ export default function PartEditorPage() {
   const [part, setPart] = useState(null);
   const [moduleData, setModuleData] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openPartForm, setOpenPartForm] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchPart = useCallback(async () => {
+    setLoading(true);
     const res = await getPartById(partId);
     setPart(res.data);
+    setLoading(false);
   }, [partId]);
 
   useEffect(() => {
@@ -47,16 +53,25 @@ export default function PartEditorPage() {
     }
   };
 
-  if (!user || !moduleData || !part) {
+  if (!user || !moduleData || !part || loading) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Part not found</p>
-        <Button onClick={() => router.back()} className="mt-4">
-          Go Back
-        </Button>
+      <div>
+        <Skeleton className={"h-[60vh] w-full"} />
+        <Skeleton className={"h-10 w-1/3 mt-4"} />
+        <Skeleton className={"h-6 w-1/4 mt-2"} />
       </div>
     );
   }
+
+  // if (loading) {
+  //   return (
+  //     <div>
+  //       <Skeleton className={"h-[60vh] w-full"} />
+  //       <Skeleton className={"h-10 w-1/3 mt-4"} />
+  //       <Skeleton className={"h-6 w-1/4 mt-2"} />
+  //     </div>
+  //   );
+  // }
 
   return (
     <>
@@ -65,7 +80,7 @@ export default function PartEditorPage() {
         openDialog={openDialog}
         setOpenDialog={setOpenDialog}
         partId={partId}
-        fetchPart={fetchPart}
+        fetchQuestions={fetchPart}
       />
 
       <div className="space-y-6">
@@ -74,24 +89,41 @@ export default function PartEditorPage() {
           <Button variant="ghost" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{part.title}</h1>
-            <p className="text-muted-foreground">{moduleData.title}</p>
+          <div className="flex items-center justify-between w-full">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">{part.title}</h1>
+              <p className="text-muted-foreground">{moduleData.title}</p>
+            </div>
+            <div>
+              <Button variant={"outline"} onClick={() => setOpenPartForm(true)}>
+                <Edit /> Edit
+              </Button>
+              {openPartForm && (
+                <PartModal
+                  openDialog={openPartForm}
+                  setOpenDialog={setOpenPartForm}
+                  moduleId={moduleId}
+                  fetchParts={fetchPart}
+                  partData={part}
+                />
+              )}
+            </div>
           </div>
         </div>
 
         {/* Video Preview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Video</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-muted rounded-lg p-4 text-center">
-              <p className="text-sm text-muted-foreground mb-2">Video URL:</p>
-              <p className="text-foreground break-all">{part.video?.url}</p>
-            </div>
-          </CardContent>
-        </Card>
+
+        <div className="bg-muted rounded-lg p-4 text-center h-[60vh]">
+          <ReactPlayer
+            // ref={setPlayerRef}
+            src={part.video?.url}
+            // onReady={handleReady}
+            style={{ width: "100%", height: "100%", aspectRatio: "16/9" }}
+            // onTimeUpdate={handleTimeUpdate}
+
+            controls={true}
+          />
+        </div>
 
         {/* Questions Section */}
         <Card>

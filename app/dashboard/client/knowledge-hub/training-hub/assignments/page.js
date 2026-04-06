@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useModules } from "@/contexts/module-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,8 +47,6 @@ import {
   XCircle,
   Clock,
   Filter,
-  ChevronDown,
-  ChevronUp,
   Eye,
   ArrowLeft,
   Award,
@@ -56,6 +54,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useLoggedInUser } from "@/app/store/useLoggedInUser";
+import { getAssignmentsforAdmin, getAssignmentsForManager } from "../actions";
 
 // Mock learner data
 const mockLearners = [
@@ -67,10 +66,7 @@ const mockLearners = [
 ];
 
 export default function ManagerAssignmentsPage() {
-  const searchParams = useSearchParams();
-  // const { user } = useAuth();
-  const { modules, assignments, progress, assignModule, retakeModule, getLearnerProgress } =
-    useModules();
+  const { modules, progress, assignModule, retakeModule, getLearnerProgress } = useModules();
   const { loggedInUser: user } = useLoggedInUser();
 
   // Assign form state
@@ -93,6 +89,14 @@ export default function ManagerAssignmentsPage() {
   const [retakeConfirm, setRetakeConfirm] = useState(null);
   const [retakeSuccess, setRetakeSuccess] = useState(false);
 
+  const [assignments, setAssignments] = useState([]);
+  const fetchAssignments = useCallback(async () => {
+    const res = await getAssignmentsForManager();
+    setAssignments(res?.data || []);
+  }, []);
+  useEffect(() => {
+    fetchAssignments();
+  }, [fetchAssignments]);
   const publishedModules = modules.filter((m) => m.status === "published");
 
   const filteredLearners = mockLearners.filter(
@@ -130,6 +134,7 @@ export default function ManagerAssignmentsPage() {
     setTimeout(() => setRetakeSuccess(false), 3000);
   };
 
+  console.log("assignments", assignments);
   // Build enriched assignment data with per-learner progress
   const enrichedAssignments = assignments.map((assignment) => {
     const mod = modules.find((m) => m.id === assignment.moduleId);
