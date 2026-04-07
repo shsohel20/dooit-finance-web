@@ -57,6 +57,7 @@ export default function ModulesPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [openModuleForm, setOpenModuleForm] = useState(false);
+  const [editId, setEditId] = useState(null);
 
   const canEdit = user?.role === "admin";
 
@@ -84,6 +85,11 @@ export default function ModulesPage() {
     0,
   );
 
+  const handleEdit = (module) => {
+    setOpenModuleForm(true);
+    setEditId(module.id);
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -98,6 +104,8 @@ export default function ModulesPage() {
             open={openModuleForm}
             setOpen={setOpenModuleForm}
             getAll={fetchModules}
+            editId={editId}
+            setEditId={setEditId}
             // moduleData={}
           />
         )}
@@ -256,10 +264,7 @@ export default function ModulesPage() {
                           key={module.id}
                           className="cursor-pointer hover:bg-muted/40 transition-colors"
                           onClick={() => {
-                            if (canEdit)
-                              router.push(
-                                `/dashboard/client/knowledge-hub/training-hub/admin/modules/${module.id}/edit`,
-                              );
+                            if (canEdit) handleEdit(module);
                           }}
                         >
                           <TableCell>
@@ -339,7 +344,115 @@ export default function ModulesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {filtered.map((module) => {
                 const qCount = module.parts.reduce((a, p) => a + p.questions.length, 0);
-                return <CardView key={module?._id} module={module} canEdit={canEdit} />;
+                return (
+                  <Card
+                    key={module.id}
+                    className="border-border/60 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300  group"
+                  >
+                    {/* Color bar */}
+                    <div
+                      className={`h-1.5 ${module.status === "published" ? "bg-gradient-to-r from-[hsl(142_71%_45%)] to-accent" : "bg-gradient-to-r from-[hsl(38_92%_50%)] to-[hsl(38_92%_50%)]/50"}`}
+                    />
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge
+                              variant="outline"
+                              className={
+                                module.status === "published"
+                                  ? "bg-[hsl(142_71%_45%)]/10 text-[hsl(142_71%_45%)] border-0 text-xs"
+                                  : "bg-[hsl(38_92%_50%)]/10 text-[hsl(38_92%_50%)] border-0 text-xs"
+                              }
+                            >
+                              {module.status === "published" ? "Published" : "Draft"}
+                            </Badge>
+                          </div>
+                          <CardTitle
+                            onClick={() => {
+                              if (canEdit)
+                                router.push(
+                                  `/dashboard/client/knowledge-hub/training-hub/admin/modules/${module.id}/edit`,
+                                );
+                            }}
+                            className="text-base group-hover:text-primary transition-colors group-hover:underline cursor-pointer"
+                          >
+                            {module.title}
+                          </CardTitle>
+                        </div>
+                        {canEdit && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEdit(module)}>
+                                <Edit2 className="w-4 h-4 mr-2" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                // onClick={() => deleteModule(module.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <CardDescription className="line-clamp-2 text-sm">
+                        {module.description}
+                      </CardDescription>
+
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="text-center p-2 rounded-lg bg-muted/40">
+                          <p className="text-lg font-bold text-foreground">{module.parts.length}</p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            Parts
+                          </p>
+                        </div>
+                        <div className="text-center p-2 rounded-lg bg-muted/40">
+                          <p className="text-lg font-bold text-foreground">{qCount}</p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            Questions
+                          </p>
+                        </div>
+                        <div className="text-center p-2 rounded-lg bg-muted/40">
+                          <p className="text-lg font-bold text-foreground">
+                            {module.parts.length > 0 ? Math.round(qCount / module.parts.length) : 0}
+                          </p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            Avg/Part
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          {new Date(module.createdAt).toLocaleDateString()}
+                        </div>
+                        {/* {canEdit && (
+                          <span
+                            className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+                            onClick={() => handleEdit(module)}
+                          >
+                            Edit <Edit2 className="w-3 h-3" />
+                          </span>
+                        )} */}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
               })}
             </div>
           )}
@@ -348,120 +461,3 @@ export default function ModulesPage() {
     </div>
   );
 }
-
-const CardView = ({ module, canEdit }) => {
-  const router = useRouter();
-  const [openModuleForm, setOpenModuleForm] = useState(false);
-  const qCount = module.parts.reduce((a, p) => a + p.questions.length, 0);
-  return (
-    <Card
-      key={module.id}
-      className="border-border/60 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300  group"
-    >
-      {/* {
-        openModuleForm && (
-          <CreateModuleDialog
-            open={openModuleForm}
-            setOpen={setOpenModuleForm}
-            getAll={() => {}}
-            moduleData={module}
-          />
-        )
-      } */}
-      {/* Color bar */}
-      <div
-        className={`h-1.5 ${module.status === "published" ? "bg-gradient-to-r from-[hsl(142_71%_45%)] to-accent" : "bg-gradient-to-r from-[hsl(38_92%_50%)] to-[hsl(38_92%_50%)]/50"}`}
-      />
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <Badge
-                variant="outline"
-                className={
-                  module.status === "published"
-                    ? "bg-[hsl(142_71%_45%)]/10 text-[hsl(142_71%_45%)] border-0 text-xs"
-                    : "bg-[hsl(38_92%_50%)]/10 text-[hsl(38_92%_50%)] border-0 text-xs"
-                }
-              >
-                {module.status === "published" ? "Published" : "Draft"}
-              </Badge>
-            </div>
-            <CardTitle
-              onClick={() => {
-                if (canEdit)
-                  router.push(
-                    `/dashboard/client/knowledge-hub/training-hub/admin/modules/${module.id}/edit`,
-                  );
-              }}
-              className="text-base group-hover:text-primary transition-colors group-hover:underline cursor-pointer"
-            >
-              {module.title}
-            </CardTitle>
-          </div>
-          {canEdit && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setOpenModuleForm(true)}>
-                  <Edit2 className="w-4 h-4 mr-2" /> Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  // onClick={() => deleteModule(module.id)}
-                  className="text-destructive"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <CardDescription className="line-clamp-2 text-sm">{module.description}</CardDescription>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="text-center p-2 rounded-lg bg-muted/40">
-            <p className="text-lg font-bold text-foreground">{module.parts.length}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Parts</p>
-          </div>
-          <div className="text-center p-2 rounded-lg bg-muted/40">
-            <p className="text-lg font-bold text-foreground">{qCount}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Questions</p>
-          </div>
-          <div className="text-center p-2 rounded-lg bg-muted/40">
-            <p className="text-lg font-bold text-foreground">
-              {module.parts.length > 0 ? Math.round(qCount / module.parts.length) : 0}
-            </p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Avg/Part</p>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-border/50">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock className="w-3 h-3" />
-            {new Date(module.createdAt).toLocaleDateString()}
-          </div>
-          {canEdit && (
-            <span
-              className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
-              onClick={() => setOpenModuleForm(true)}
-            >
-              Edit <Edit2 className="w-3 h-3" />
-            </span>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};

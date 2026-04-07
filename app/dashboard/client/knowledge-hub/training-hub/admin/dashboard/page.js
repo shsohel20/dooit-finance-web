@@ -17,6 +17,7 @@ import {
   BarChart3,
   FileText,
   Activity,
+  Table,
 } from "lucide-react";
 import { getModules } from "../../actions";
 
@@ -204,8 +205,8 @@ export default function DashboardPage() {
               router.push("/dashboard/client/knowledge-hub/training-hub/admin/modules")
             }
           >
-            <Plus className="w-4 h-4" />
-            Create Module
+            <Table className="w-4 h-4" />
+            All Modules
           </Button>
         )}
       </div>
