@@ -18,7 +18,7 @@ import { Clock, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 
 export function AlertsOverview() {
   return (
-    <Card className="border-border/50 shadow-sm">
+    <Card className="border-0 p-0">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div>

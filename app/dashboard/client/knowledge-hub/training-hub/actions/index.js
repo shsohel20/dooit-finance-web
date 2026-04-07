@@ -31,6 +31,14 @@ export const createPart = async (data, moduleId) => {
   });
   return response.json();
 };
+
+export const updatePart = async (data, partId) => {
+  const response = await fetchWithAuth(`training-modules/parts/${partId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
 export const getAllParts = async (moduleId) => {
   const response = await fetchWithAuth(`training-modules/${moduleId}/parts`, {
     method: "GET",
@@ -65,5 +73,64 @@ export const assignAssignment = async (data, moduleId) => {
     body: JSON.stringify(data),
   });
   console.log("response", response);
+  return response.json();
+};
+export const getAssignmentsforAdmin = async () => {
+  const response = await fetchWithAuth("training-assignments", {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const getAssignmentsForManager = async () => {
+  const response = await fetchWithAuth("training-assignments/by-me", {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const getMyAssignments = async () => {
+  const response = await fetchWithAuth("training-assignments/mine", {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const getMyProgressForModule = async (moduleId) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}`, {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const startWatchingVideo = async (moduleId) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}/start`, {
+    method: "POST",
+    // body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
+export const updateVideoProgress = async (moduleId, data) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}/watch`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
+export const submitQuiz = async (moduleId, data) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}/attempts`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
+export const publishModule = async (moduleId, data) => {
+  const response = await fetchWithAuth(`training-modules/${moduleId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
   return response.json();
 };

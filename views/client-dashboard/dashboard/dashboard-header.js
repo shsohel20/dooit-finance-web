@@ -28,11 +28,11 @@ export function DashboardHeader() {
   };
 
   return (
-    <header className="border-b border-border bg-card">
+    <header className=" bg-card">
       <div className=" px-4 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
           {/* Left side - Branding */}
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-lg">D</span>
             </div>
@@ -40,7 +40,7 @@ export function DashboardHeader() {
               <h1 className="text-xl font-bold text-foreground tracking-tight">Dooit.AI</h1>
               <p className="text-sm text-muted-foreground">AML/CTF Compliance Dashboard</p>
             </div>
-          </div>
+          </div> */}
 
           {/* Right side - Controls */}
           <div className="flex items-center gap-2">

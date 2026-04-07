@@ -45,7 +45,7 @@ import {
   AlertTriangle,
   ArrowRight,
 } from "lucide-react";
-import { getModules, assignAssignment } from "../../actions";
+import { getModules, assignAssignment, getAssignmentsforAdmin } from "../../../actions";
 import { getAllUsers } from "@/app/dashboard/client/user-and-role-management/actions";
 import { toast } from "sonner";
 
@@ -56,7 +56,10 @@ const mockLearners = [
   { id: "learner4", name: "David Brown", email: "david@company.com", department: "Legal" },
   { id: "3", name: "Demo Learner", email: "learner@aml.com", department: "Training" },
 ];
-
+const getLearnerProgress = (learnerId, moduleId) => {
+  // const res = await getLearnerProgressforAdmin(learnerId, moduleId);
+  // return res?.data || null;
+};
 export default function ManageAssignmentsPage() {
   const user = { id: "1", role: "admin", name: "John Doe" };
   const [users, setUsers] = useState([]);
@@ -71,7 +74,15 @@ export default function ManageAssignmentsPage() {
   const [modules, setModules] = useState([]);
   const [maxAttempts, setMaxAttempts] = useState(3);
   const [dueDate, setDueDate] = useState("");
-  const { assignments, getLearnerProgress, retakeModule, assignModule } = useModules();
+
+  const [assignments, setAssignments] = useState([]);
+  const fetchAssignments = useCallback(async () => {
+    const res = await getAssignmentsforAdmin();
+    setAssignments(res?.data || []);
+  }, []);
+  useEffect(() => {
+    fetchAssignments();
+  }, [fetchAssignments]);
   const [viewMode, setViewMode] = useState("list");
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [search, setSearch] = useState("");
@@ -82,7 +93,7 @@ export default function ManageAssignmentsPage() {
   const [retakeConfirm, setRetakeConfirm] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const publishedModules = modules.filter((m) => m.status === "published");
+  const publishedModules = modules;
 
   const fetchModules = useCallback(async () => {
     const res = await getModules();
@@ -92,7 +103,7 @@ export default function ManageAssignmentsPage() {
     fetchModules();
   }, [fetchModules]);
   const filteredAssignments = assignments.filter((a) => {
-    const moduleData = modules.find((m) => m.id === a.moduleId);
+    const moduleData = modules.find((m) => m.id === a.module?._id);
     if (!moduleData) return false;
     return moduleData.title.toLowerCase().includes(search.toLowerCase());
   });
@@ -102,8 +113,8 @@ export default function ManageAssignmentsPage() {
     ? modules.find((m) => m.id === currentAssignment.moduleId)
     : null;
 
-  const totalLearners = assignments.reduce((a, b) => a + b.assignedTo.length, 0);
-  console.log("selectedLearners", selectedLearners);
+  console.log("assignments", assignments);
+  // const totalLearners = assignments.reduce((a, b) => a + b.assignedTo.length, 0);
   const clearForms = () => {
     setNewModuleId("");
     setSelectedLearners([]);
@@ -117,11 +128,11 @@ export default function ManageAssignmentsPage() {
       maxAttempts: maxAttempts,
       learnerIds: selectedLearners,
     };
-    console.log("payload", payload);
+    // console.log("payload", payload);
     try {
       const response = await assignAssignment(payload, newModuleId);
-      console.log("response", response);
-      if (response.succeed) {
+      // console.log("response", response);
+      if (response.success) {
         toast.success("Assignment assigned successfully");
         clearForms();
         setAssignDialogOpen(false);
@@ -587,18 +598,18 @@ export default function ManageAssignmentsPage() {
               icon: BookOpen,
               color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10",
             },
-            {
-              label: "Total Learners",
-              value: totalLearners,
-              icon: Users,
-              color: "text-accent bg-accent/10",
-            },
-            {
-              label: "Avg per Module",
-              value: assignments.length > 0 ? Math.round(totalLearners / assignments.length) : 0,
-              icon: FileText,
-              color: "text-[hsl(38_92%_50%)] bg-[hsl(38_92%_50%)]/10",
-            },
+            // {
+            //   label: "Total Learners",
+            //   value: totalLearners,
+            //   icon: Users,
+            //   color: "text-accent bg-accent/10",
+            // },
+            // {
+            //   label: "Avg per Module",
+            //   value: assignments.length > 0 ? Math.round(totalLearners / assignments.length) : 0,
+            //   icon: FileText,
+            //   color: "text-[hsl(38_92%_50%)] bg-[hsl(38_92%_50%)]/10",
+            // },
           ].map((stat) => (
             <Card key={stat.label} className="border-border/60">
               <CardContent className="flex items-center gap-3 py-4">
@@ -644,9 +655,10 @@ export default function ManageAssignmentsPage() {
         ) : (
           <div className="space-y-3">
             {filteredAssignments.map((assignment) => {
-              const moduleData = modules.find((m) => m.id === assignment.moduleId);
+              const moduleData = modules.find((m) => m.id === assignment.module?._id);
               if (!moduleData) return null;
-              const learners = mockLearners.filter((l) => assignment.assignedTo.includes(l.id));
+              const learners =
+                mockLearners.filter((l) => assignment.assignedTo?.includes(l.id)) || [];
               const qCount = moduleData.parts.reduce((a, p) => a + p.questions.length, 0);
 
               let passedCount = 0;
@@ -659,7 +671,7 @@ export default function ManageAssignmentsPage() {
 
               return (
                 <Card
-                  key={assignment.id}
+                  key={assignment._id}
                   className="border-border/60 overflow-hidden hover:shadow-md transition-all group"
                 >
                   <CardContent className="py-5">

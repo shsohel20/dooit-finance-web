@@ -19,8 +19,8 @@ export function MetricCard({
   const TrendIcon = isPositiveTrend ? ArrowUpRight : ArrowDownRight;
 
   return (
-    <Card className={cn("border-border/50 shadow-sm hover:shadow-md transition-shadow", className)}>
-      <CardContent className="p-6">
+    <Card className={cn("border-0 hover:shadow-md transition-shadow", className)}>
+      <CardContent className="">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">{title}</p>

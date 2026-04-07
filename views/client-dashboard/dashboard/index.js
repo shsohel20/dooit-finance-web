@@ -17,11 +17,10 @@ export default function ClientDashboardPage() {
     <div className="min-h-screen ">
       <DashboardHeader />
 
-      <main className=" px-4 py-6">
+      <main className=" ">
         {/* Executive Summary Cards */}
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Executive Summary</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <section className="mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ">
             <MetricCard
               title="Total Customers"
               value={executiveMetrics.totalCustomers.value}
@@ -54,8 +53,7 @@ export default function ClientDashboardPage() {
         </section>
 
         {/* Risk Assessment Section */}
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Risk Assessment</h2>
+        <section className="mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <RiskTrendChart />
@@ -67,8 +65,7 @@ export default function ClientDashboardPage() {
         </section>
 
         {/* Alerts & KYC Section */}
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Alerts & KYC Management</h2>
+        <section className="mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <AlertsOverview />
@@ -80,8 +77,7 @@ export default function ClientDashboardPage() {
         </section>
 
         {/* SMR & Compliance Section */}
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-foreground mb-4">SMR & Compliance</h2>
+        <section className="mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <SMROverview />
             <ComplianceStatus />
@@ -89,8 +85,7 @@ export default function ClientDashboardPage() {
         </section>
 
         {/* Transaction Analytics Section */}
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Transaction Analytics</h2>
+        <section className="mb-16">
           <TransactionChannels />
         </section>
 

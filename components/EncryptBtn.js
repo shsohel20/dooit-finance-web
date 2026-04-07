@@ -20,7 +20,7 @@ export function EncryptDecryptFAB() {
       onClick={handleToggle}
       className={`
         group fixed bottom-18 right-0 z-40 flex items-center  size-13
-        rounded-md justify-center transition-all duration-300 ease-out
+        rounded-md justify-center transition-all duration-300 ease-out overflow-hidden
         ${
           isEncrypted
             ? 'bg-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:bg-emerald-500'

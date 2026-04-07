@@ -24,7 +24,7 @@ export function RiskBreakdownChart() {
   ];
 
   return (
-    <Card className="border-border/50 shadow-sm">
+    <Card className="border-0 p-0">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold text-foreground">
           Risk Level Distribution

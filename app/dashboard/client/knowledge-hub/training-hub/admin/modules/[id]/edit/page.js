@@ -8,9 +8,10 @@ import { useModules } from "@/contexts/module-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Trash2, Edit2 } from "lucide-react";
-import { getAllParts, getModuleById } from "../../../actions";
+import { ArrowLeft, Trash2, Edit2, Plus } from "lucide-react";
+import { getAllParts, getModuleById, publishModule } from "../../../../actions";
 import PartModal from "../PartModal";
+import { toast } from "sonner";
 
 export default function ModuleEditorPage() {
   const [moduleData, setModuleData] = useState(null);
@@ -18,25 +19,24 @@ export default function ModuleEditorPage() {
   const params = useParams();
   const router = useRouter();
   const user = { id: "1", role: "admin" };
-  const { updateModule, addPart, deletePart, publishModule } = useModules();
+  const { updateModule, addPart, deletePart } = useModules();
+  const [isPublishing, setIsPublishing] = useState(false);
   const moduleId = params.id;
 
   // const moduleData = getModuleById(moduleId);
   const [openDialog, setOpenDialog] = useState(false);
-  const [newPartTitle, setNewPartTitle] = useState("");
-  const [newPartVideo, setNewPartVideo] = useState("");
-  const [editingModule, setEditingModule] = useState(moduleData);
+
   const [isLoading, setIsLoading] = useState(false);
 
+  const fetchModule = async () => {
+    setIsLoading(true);
+    const res = await getModuleById(moduleId);
+    // console.log("res", res);
+    setModuleData(res.data);
+    setIsLoading(false);
+  };
   // Update editingModule when module changes
   useEffect(() => {
-    const fetchModule = async () => {
-      setIsLoading(true);
-      const res = await getModuleById(moduleId);
-      // console.log("res", res);
-      setModuleData(res.data);
-      setIsLoading(false);
-    };
     fetchModule();
   }, [moduleId]);
   //usecallback
@@ -73,13 +73,21 @@ export default function ModuleEditorPage() {
     );
   }
 
-  const handlePublish = () => {
-    if (module.parts.length === 0) {
-      alert("Add at least one part before publishing");
+  const handlePublish = async () => {
+    if (moduleData.parts.length === 0) {
+      toast("Add at least one part before publishing");
       return;
     }
-    publishModule(moduleId);
-    alert("Module published successfully!");
+    const data = {
+      status: "published",
+    };
+    setIsPublishing(true);
+    const res = await publishModule(moduleId, data);
+    if (res.success) {
+      toast.success("Module published successfully");
+      fetchModule();
+    }
+    setIsPublishing(false);
   };
 
   return (
@@ -102,45 +110,36 @@ export default function ModuleEditorPage() {
             </p>
           </div>
         </div>
-        {moduleData.status === "draft" && <Button onClick={handlePublish}>Publish Module</Button>}
+        {moduleData.status === "draft" && (
+          <Button variant={"outline"} onClick={handlePublish} disabled={isPublishing}>
+            {isPublishing ? "Publishing..." : "Publish Module"}
+          </Button>
+        )}
       </div>
 
-      {/* Module Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Module Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4">
-            <div>
-              <Label className="text-muted-foreground">Title</Label>
-              <p className="text-lg font-semibold">{moduleData.title}</p>
-            </div>
-            <div>
-              <Label className="text-muted-foreground">Description</Label>
-              <p className="text-base">{moduleData.description || "No description"}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Parts Section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className={"border-0"}>
+        <CardHeader className="flex flex-row items-center justify-between p-0">
           <div>
             <CardTitle>Module Parts ({moduleData.parts.length})</CardTitle>
             <CardDescription>Each part contains a video and questions</CardDescription>
           </div>
           {/* {openDialog && ( */}
-          <PartModal
-            openDialog={openDialog}
-            setOpenDialog={setOpenDialog}
-            moduleId={moduleId}
-            fetchParts={fetchParts}
-          />
+          {openDialog && (
+            <PartModal
+              openDialog={openDialog}
+              setOpenDialog={setOpenDialog}
+              moduleId={moduleId}
+              fetchParts={fetchParts}
+            />
+          )}
+          <Button size="sm" className="gap-2" onClick={() => setOpenDialog(true)}>
+            <Plus className="w-4 h-4" />
+            Add Part
+          </Button>
           {/* )} */}
         </CardHeader>
-        <CardContent>
+        <CardContent className={"p-0"}>
           {parts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>No parts yet. Add one to get started.</p>

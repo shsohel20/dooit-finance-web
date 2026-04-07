@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { FormField } from "@/components/ui/FormField";
-import { createPart } from "../../actions";
+import { createPart, updatePart } from "../../../actions";
 import { toast } from "sonner";
 
 const initialState = {
@@ -49,10 +49,39 @@ const getVideoProvider = (url) => {
     return "self-hosted";
   }
 };
-export default function PartModal({ openDialog, setOpenDialog, moduleId, fetchParts }) {
+export default function PartModal({ openDialog, setOpenDialog, moduleId, fetchParts, partData }) {
   const form = useForm({
     defaultValues: initialState,
   });
+
+  useEffect(() => {
+    if (partData) {
+      const {
+        title,
+        description,
+        order,
+        video,
+        minWatchPercent,
+        passAllRequired,
+        maxRetries,
+        estimatedTimeMin,
+      } = partData;
+      form.reset({
+        title,
+        description,
+        order,
+        video: {
+          url: video.url,
+          provider: video.provider || getVideoProvider(video.url),
+          durationSec: video.durationSec || 0,
+        },
+        minWatchPercent,
+        passAllRequired,
+        maxRetries,
+        estimatedTimeMin,
+      });
+    }
+  }, []);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAddPart = async (data) => {
@@ -71,7 +100,8 @@ export default function PartModal({ openDialog, setOpenDialog, moduleId, fetchPa
     console.log("payload", JSON.stringify(payload, null, 2));
 
     setIsLoading(true);
-    const res = await createPart(payload, moduleId);
+    const action = partData ? updatePart(payload, partData?._id) : createPart(payload, moduleId);
+    const res = await action;
     if (res.success) {
       toast.success("Part created successfully");
       setOpenDialog(false);
@@ -85,16 +115,16 @@ export default function PartModal({ openDialog, setOpenDialog, moduleId, fetchPa
 
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-      <DialogTrigger asChild>
+      {/* <DialogTrigger asChild>
         <Button size="sm" className="gap-2">
           <Plus className="w-4 h-4" />
           Add Part
         </Button>
-      </DialogTrigger>
+      </DialogTrigger> */}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Part</DialogTitle>
-          <DialogDescription>Create a new part with a video URL</DialogDescription>
+          <DialogTitle>Manage Part</DialogTitle>
+          {/* <DialogDescription>Create a new part with a video URL</DialogDescription> */}
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -160,8 +190,13 @@ export default function PartModal({ openDialog, setOpenDialog, moduleId, fetchPa
             />
           </div>
 
-          <Button disabled={isLoading} onClick={form.handleSubmit(handleAddPart)} type="submit">
-            {isLoading ? "Adding..." : "Add Part"}
+          <Button
+            className={"w-full"}
+            disabled={isLoading}
+            onClick={form.handleSubmit(handleAddPart)}
+            type="submit"
+          >
+            {isLoading ? "Saving..." : "Save"}
           </Button>
         </div>
       </DialogContent>

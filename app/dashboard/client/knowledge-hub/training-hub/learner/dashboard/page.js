@@ -20,7 +20,6 @@ import {
 import {
   Clock,
   CheckCircle,
-  AlertCircle,
   Play,
   RotateCcw,
   TrendingUp,
@@ -31,14 +30,61 @@ import {
   ArrowRight,
   GraduationCap,
 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { getMyAssignments } from "../../actions";
+import { cn } from "@/lib/utils";
+
+const dashboardData = [
+  {
+    id: "1",
+    title: "Overall Progress",
+    icon: TrendingUp,
+    value: "75%",
+    iconColor: "text-green-500",
+    bgIconColor: "bg-green-500/10",
+  },
+  {
+    id: "2",
+    title: "Passed",
+    icon: Trophy,
+    value: "5 Modules",
+    iconColor: "text-yellow-500",
+    bgIconColor: "bg-yellow-500/10",
+  },
+  {
+    id: "3",
+    title: "In Progress",
+    icon: Clock,
+    value: "2 Modules",
+    iconColor: "text-blue-500",
+    bgIconColor: "bg-blue-500/10",
+  },
+  {
+    id: "4",
+    title: "Not Started",
+    icon: Target,
+    value: "3 Modules",
+    iconColor: "text-gray-500",
+    bgIconColor: "bg-gray-500/10",
+  },
+];
 
 export default function LearnerDashboardPage() {
   const router = useRouter();
   const user = { id: "1", role: "learner", name: "John Doe" };
   const { getModuleAssignments, getModuleById, getLearnerProgress, retakeModule } = useModules();
-
-  const assignments = getModuleAssignments(user?.id || "");
-  const assignedModules = assignments.map((a) => getModuleById(a.moduleId)).filter(Boolean);
+  const [assignments, setAssignments] = useState([]);
+  console.log("assignments", assignments);
+  const fetchAssignments = useCallback(async () => {
+    const res = await getMyAssignments();
+    setAssignments(res?.data || []);
+  }, []);
+  useEffect(() => {
+    fetchAssignments();
+  }, [fetchAssignments]);
+  // const assignments = getModuleAssignments(user?.id || "");
+  const assignedModules = assignments;
+  console.log("assignedModules", assignedModules);
 
   const getModuleStatus = (moduleId) => {
     const progress = getLearnerProgress(user?.id || "", moduleId);
@@ -61,6 +107,7 @@ export default function LearnerDashboardPage() {
   };
 
   const handleStartModule = (moduleId) => {
+    console.log("moduleId", moduleId);
     router.push(`/dashboard/client/knowledge-hub/training-hub/learner/training/${moduleId}`);
   };
 
@@ -115,7 +162,7 @@ export default function LearnerDashboardPage() {
       {/* Welcome Header */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 tracking-tighter">
             Welcome back, {user?.name?.split(" ")[0]}
           </h1>
           <p className="text-sm text-muted-foreground">Continue your compliance training journey</p>
@@ -128,65 +175,30 @@ export default function LearnerDashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="overflow-hidden border-0 shadow-md">
-          <div className="h-1 bg-gradient-to-r from-primary to-primary/60" />
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-6 h-6 text-primary" />
+        {dashboardData.map((item) => (
+          <Card
+            key={item.id}
+            className="bg-linear-to-t from-muted overflow-hidden border-t border-b-0 border-x-0 border-muted to-white  "
+          >
+            {/* <div className="h-1 " /> */}
+            <CardContent className="pt-5 pb-5 ">
+              <div className="flex items-center gap-4">
+                <div
+                  className={cn(
+                    "w-12 h-12 rounded-xl  flex items-center justify-center flex-shrink-0 ",
+                    `${item.bgIconColor || "bg-muted/10"}`,
+                  )}
+                >
+                  <item.icon className={`w-6 h-6 ${item.iconColor}`} />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{item.title}</p>
+                  <p className="text-2xl font-bold text-foreground">{item?.value}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Overall Progress</p>
-                <p className="text-2xl font-bold text-foreground">{avgProgress}%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden border-0 shadow-md">
-          <div className="h-1 bg-gradient-to-r from-[hsl(142,71%,45%)] to-[hsl(168,76%,42%)]" />
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[hsl(142,71%,45%)]/10 flex items-center justify-center flex-shrink-0">
-                <Trophy className="w-6 h-6 text-[hsl(142,71%,45%)]" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Passed</p>
-                <p className="text-2xl font-bold text-foreground">{passedCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden border-0 shadow-md">
-          <div className="h-1 bg-gradient-to-r from-[hsl(38,92%,50%)] to-[hsl(38,92%,50%)]/60" />
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[hsl(38,92%,50%)]/10 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-6 h-6 text-[hsl(38,92%,50%)]" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">In Progress</p>
-                <p className="text-2xl font-bold text-foreground">{inProgressCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden border-0 shadow-md">
-          <div className="h-1 bg-gradient-to-r from-muted-foreground to-muted-foreground/60" />
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
-                <Target className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Not Started</p>
-                <p className="text-2xl font-bold text-foreground">{notStartedCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Module Sections */}
@@ -237,7 +249,7 @@ export default function LearnerDashboardPage() {
                         </span>
                       </div>
                       <Button
-                        onClick={() => handleStartModule(module?.id || "")}
+                        onClick={() => handleStartModule(module?.module?._id || "")}
                         className="w-full gap-2 group-hover:shadow-md transition-shadow"
                       >
                         <Play className="w-4 h-4" />
@@ -265,21 +277,23 @@ export default function LearnerDashboardPage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {assignedModules
-                .filter((m) => m && getModuleStatus(m.id) === "in-progress")
+                .filter((m) => m && getModuleStatus(m.module?._id) === "in-progress")
                 .map((module) => {
                   const percentage = getProgressPercentage(module?.id || "");
                   return (
                     <Card
-                      key={module?.id}
+                      key={module?._id}
                       className="group overflow-hidden border-[hsl(38,92%,50%)]/15 hover:shadow-lg hover:border-[hsl(38,92%,50%)]/30 transition-all duration-300"
                     >
                       <div className="h-1 bg-gradient-to-r from-[hsl(38,92%,50%)] to-[hsl(38,92%,50%)]/60" />
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1">
-                            <CardTitle className="text-lg leading-snug">{module?.title}</CardTitle>
+                            <CardTitle className="text-lg leading-snug">
+                              {module?.module?.title}
+                            </CardTitle>
                             <CardDescription className="mt-1.5 line-clamp-2">
-                              {module?.description}
+                              {module?.module?.description}
                             </CardDescription>
                           </div>
                           <Badge className="bg-[hsl(38,92%,50%)]/10 text-[hsl(38,92%,50%)] border-0 flex-shrink-0">
@@ -293,7 +307,7 @@ export default function LearnerDashboardPage() {
                           <p className="text-xs text-muted-foreground">{percentage}% complete</p>
                         </div>
                         <Button
-                          onClick={() => handleStartModule(module?.id || "")}
+                          onClick={() => handleStartModule(module?.module?._id || "")}
                           variant="outline"
                           className="w-full gap-2 bg-transparent group-hover:bg-[hsl(38,92%,50%)]/5 group-hover:border-[hsl(38,92%,50%)]/30 transition-all"
                         >

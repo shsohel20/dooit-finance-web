@@ -12,6 +12,10 @@ import {
   IconAlertTriangle,
   IconUsers,
   IconCards,
+  IconUserCircle,
+  IconCreditCard,
+  IconNotification,
+  IconLogout,
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import {
@@ -22,7 +26,16 @@ import {
   SelectItem,
 } from './ui/select';
 import { CreditCard } from 'lucide-react';
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import { signOut } from 'next-auth/react';
 export function SiteHeader() {
   const pathname = usePathname();
   const router = useRouter();
@@ -44,6 +57,12 @@ export function SiteHeader() {
       icon: <IconAlertTriangle size={14} />,
     },
   ];
+  const logout = async () => {
+    signOut({
+      // redirect: true,
+      callbackUrl: '/auth/login',
+    });
+  };
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 bg-sidebar-bg  transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)  py-8 sticky top-0 z-10">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -87,20 +106,68 @@ export function SiteHeader() {
               <SelectItem value="sandbox">Sandbox</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            onClick={() => router.push('/dashboard/client/profile')}
-            variant="ghost"
-            asChild
-            size="sm"
-            className="hidden sm:flex cursor-pointer"
-          >
-            <span>
-              <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-            </span>
-          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                // onClick={() => router.push('/dashboard/client/profile')}
+                variant="ghost"
+                asChild
+                size="sm"
+                className="hidden sm:flex cursor-pointer"
+              >
+                <span>
+                  <Avatar>
+                    <AvatarImage src="https://github.com/shadcn.png" />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+              side={'bottom'}
+              align="end"
+              sideOffset={4}
+            >
+              {/* <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={user?.avatar} alt={user?.name} />
+                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user?.name}</span>
+                    <span className="text-muted-foreground truncate text-xs">
+                      {user?.email}
+                    </span>
+                  </div>
+                </div>
+              </DropdownMenuLabel> */}
+              {/* <DropdownMenuSeparator /> */}
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  onClick={() => router.push('/dashboard/client/profile')}
+                >
+                  <IconUserCircle />
+                  Account
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <IconCreditCard />
+                  Billing
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <IconNotification />
+                  Notifications
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout}>
+                <IconLogout />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
