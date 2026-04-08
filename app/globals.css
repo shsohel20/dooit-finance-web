@@ -98,8 +98,8 @@
   border-width: 5px;
 }
 @theme inline {
-  /* --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback"; */
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --font-heading: var(--font-mono);
   --font-mono: var(--font-mono);
   --color-purple: var(--purple);
