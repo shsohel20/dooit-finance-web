@@ -34,14 +34,10 @@ import {
   PieChart,
   FileInput,
   FileText,
-  GraduationCap,
-  Home,
   Newspaper,
-  Scale,
   Search,
   ShieldHalf,
   ShieldUser,
-  Users,
   Wallet,
   Send,
   Download,
@@ -284,9 +280,21 @@ export default function ClientSidebar({ ...props }) {
 
   const configurationMenuItems = [
     {
-      title: "User & Role Management",
+      title: "User & Role",
       icon: IconListDetails,
       url: "/dashboard/client/user-and-role-management",
+      children: [
+        {
+          title: "Users",
+          url: "/dashboard/client/user-and-role-management/users",
+          icon: IconListDetails,
+        },
+        {
+          title: "Roles",
+          url: "/dashboard/client/user-and-role-management/roles",
+          icon: IconListDetails,
+        },
+      ],
     },
     {
       title: "Risk Rule Engine",

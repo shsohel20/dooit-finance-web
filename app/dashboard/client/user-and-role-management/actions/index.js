@@ -47,4 +47,9 @@ export const addRole = async (data) => {
   });
   return response.json();
 };
+
+export const getAllPermissions = async () => {
+  const response = await fetchWithAuth("role-permissions/permissions/all");
+  return response.json();
+};
 export { getAllRoles, getAllUsers };
