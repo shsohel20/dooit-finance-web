@@ -94,6 +94,7 @@ export default function RolesPage() {
           open={openPermissions}
           onClose={() => setOpenPermissions(false)}
           role={selectedRole}
+          setRole={setSelectedRole}
         />
       )}
     </div>

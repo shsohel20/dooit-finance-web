@@ -12,11 +12,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  createPermission,
   getAllPermissions,
   getAllUsers,
+  getPermissionById,
+  updatePermission,
 } from "@/app/dashboard/client/user-and-role-management/actions";
 import CustomSelect from "@/components/AsyncPaginatedSelect";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 function normalizeRolePermissions(raw) {
   if (!raw || !Array.isArray(raw)) return [];
@@ -25,12 +29,14 @@ function normalizeRolePermissions(raw) {
 
 const NO_USER = "";
 
-const PermissionDrawer = ({ open = true, onClose = () => {}, role }) => {
+const PermissionDrawer = ({ open = true, onClose = () => {}, role, setRole }) => {
   const [allPermissions, setAllPermissions] = useState(null);
   const [userOptions, setUserOptions] = useState([]);
   const [permissionChecked, setPermissionChecked] = useState({});
   const [restrictedByModule, setRestrictedByModule] = useState({});
   const [restrictedByPermission, setRestrictedByPermission] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [roleData, setRoleData] = useState(null);
 
   const modules = useMemo(() => {
     const raw = allPermissions?.data ?? allPermissions;
@@ -44,6 +50,14 @@ const PermissionDrawer = ({ open = true, onClose = () => {}, role }) => {
     };
     fetchPermissions();
   }, []);
+  useEffect(() => {
+    const fetchRoleData = async () => {
+      if (!modules.length) return;
+      const res = await getPermissionById(role._id);
+      setRoleData(res?.data || null);
+    };
+    fetchRoleData();
+  }, [role?._id, modules]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -58,22 +72,32 @@ const PermissionDrawer = ({ open = true, onClose = () => {}, role }) => {
   }, []);
 
   const applyRoleToModules = useCallback(() => {
-    if (!role || !modules.length) return;
-    const granted = new Set(normalizeRolePermissions(role.permissions));
+    if (!roleData || !modules.length) return;
+    const restrictedUsers = roleData?.restrictedUsers || [];
+    const moduleRestrictedUsers = {};
+    const permissionRestrictedUsers = {};
+    const granted = new Set(normalizeRolePermissions(roleData?.permissions ?? []));
     const nextPerm = {};
-    const nextModRestrict = {};
-    const nextPermRestrict = {};
     modules.forEach((mod) => {
-      nextModRestrict[mod.key] = NO_USER;
+      // nextModRestrict[mod.key] = NO_USER;
       (mod.permissions ?? []).forEach((p) => {
         nextPerm[p.value] = granted.has(p.value);
-        nextPermRestrict[p.value] = NO_USER;
+        // nextPermRestrict[p.value] = NO_USER;
       });
     });
     setPermissionChecked(nextPerm);
-    setRestrictedByModule(nextModRestrict);
-    setRestrictedByPermission(nextPermRestrict);
-  }, [role, modules]);
+    restrictedUsers?.forEach((user) => {
+      user.modules.forEach((mod) => {
+        moduleRestrictedUsers[mod] = user.user?._id;
+      });
+      user.options.forEach((opt) => {
+        permissionRestrictedUsers[opt] = user.user?._id;
+      });
+    });
+
+    setRestrictedByModule(moduleRestrictedUsers);
+    setRestrictedByPermission(permissionRestrictedUsers);
+  }, [role, modules, roleData]);
 
   useEffect(() => {
     applyRoleToModules();
@@ -127,16 +151,89 @@ const PermissionDrawer = ({ open = true, onClose = () => {}, role }) => {
 
   const roleName = role?.name ?? "Role";
 
+  const handleClose = () => {
+    setIsSaving(false);
+    setPermissionChecked({});
+    setRestrictedByModule({});
+    setRestrictedByPermission({});
+    setRole(null);
+    onClose();
+  };
+
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+    const restrictedModules = Object.keys(restrictedByModule).filter(
+      (p) => restrictedByModule[p] !== "",
+    );
+    const restrictedPermissions = Object.keys(restrictedByPermission).filter(
+      (p) => restrictedByPermission[p] !== "",
+    );
+
+    let restrictedUsers = [];
+    for (const mod of restrictedModules) {
+      const alreadyExistsUser = restrictedUsers.find((u) => u.user === restrictedByModule[mod]);
+      const alreadyExistsModule = alreadyExistsUser?.modules.find((m) => m === mod);
+      if (!alreadyExistsUser) {
+        restrictedUsers.push({
+          user: restrictedByModule[mod],
+          modules: [mod],
+          options: restrictedPermissions,
+        });
+      } else {
+        if (!alreadyExistsModule) {
+          alreadyExistsUser.modules.push(mod);
+        }
+      }
+    }
+    for (const perm of restrictedPermissions) {
+      const alreadyExistsUser = restrictedUsers.find(
+        (u) => u.user === restrictedByPermission[perm],
+      );
+      const alreadyExistsPermission = alreadyExistsUser?.options.find((p) => p === perm);
+
+      if (!alreadyExistsUser) {
+        restrictedUsers.push({
+          // ...alreadyExistsUser,
+          user: restrictedByPermission[perm],
+          modules: [],
+          options: [perm],
+        });
+      } else {
+        if (!alreadyExistsPermission) {
+          alreadyExistsUser.options.push(perm);
+        }
+      }
+    }
+
+    const payload = {
+      role: role._id,
+      // selected permissions
+      permissions: Object.keys(permissionChecked).filter((p) => permissionChecked[p]),
+      restrictedUsers,
+      expiresAt: null, //TODO: Add expiration date
+    };
+    const res = roleData
+      ? await updatePermission(role._id, payload)
+      : await createPermission(payload);
+    setIsSaving(false);
+    if (res.success) {
+      toast.success("Permissions saved!");
+      handleClose();
+    } else {
+      toast.error("Failed to save permissions");
+    }
+  };
+
   return (
-    <Sheet open={open} onOpenChange={onClose}>
+    <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent className="sm:max-w-2xl flex flex-col">
         <SheetHeader>
           <SheetTitle>Permissions</SheetTitle>
           <SheetDescription>{roleName} permissions</SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col flex-1 min-h-0 px-2 py-4">
-          <h2 className="text-sm text-gray-600 mb-4 shrink-0">
-            Selected permissions <span className="text-gray-900">({selectedCount})</span>
+        <div className="flex flex-col flex-1 min-h-0 px-4 pb-4">
+          <h2 className="text-sm text-gray-600 mb-4 shrink-0 pl-4">
+            Selected permissions <span className="text-gray-900 ">({selectedCount})</span>
           </h2>
           <div className="flex-1 min-h-0 overflow-y-auto rounded-lg  bg-card">
             {modules.length === 0 ? (
@@ -148,7 +245,7 @@ const PermissionDrawer = ({ open = true, onClose = () => {}, role }) => {
                   const modRestrictDisabled = !modChecked && !indeterminate;
                   return (
                     <div key={mod.key} className="p-4 space-y-3">
-                      <div className="flex items-start gap-3 bg-gray-100 px-4 rounded-md py-2">
+                      <div className="flex items-center gap-3  px-4 rounded-md py-2">
                         <Checkbox
                           id={`module-${mod.key}`}
                           checked={indeterminate ? "indeterminate" : modChecked}
@@ -244,8 +341,8 @@ const PermissionDrawer = ({ open = true, onClose = () => {}, role }) => {
             )}
           </div>
           <div className="mt-4 flex justify-end shrink-0">
-            <Button size="sm" type="button">
-              Save Changes
+            <Button disabled={isSaving} size="sm" type="button" onClick={handleSaveChanges}>
+              {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </div>
