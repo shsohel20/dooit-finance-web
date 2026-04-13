@@ -48,6 +48,14 @@ export const addRole = async (data) => {
   return response.json();
 };
 
+export const updateRole = async (id, data) => {
+  const response = await fetchWithAuth(`role/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
 export const getAllPermissions = async () => {
   const response = await fetchWithAuth("role-permissions/permissions/all");
   return response.json();
@@ -62,7 +70,6 @@ export const createPermission = async (data) => {
 };
 
 export const updatePermission = async (id, data) => {
-  console.log("put run");
   const response = await fetchWithAuth(`role-permissions/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
