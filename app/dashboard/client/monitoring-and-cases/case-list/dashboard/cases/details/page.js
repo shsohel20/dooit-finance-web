@@ -37,127 +37,200 @@ export default function CaseDetails() {
     ],
   };
 
+  const infoCardClass = "rounded-xl border border-slate-200 bg-white p-5 md:p-6";
+  const labelClass = "text-xs font-semibold uppercase tracking-wide text-slate-500";
+  const valueClass = "mt-1 text-sm font-medium text-slate-900";
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-3xl font-bold mb-2">{caseData.caseName}</h1>
-        <p className="text-gray-600">Case ID: {caseData.datauid}</p>
+    <div className="mx-auto w-full max-w-7xl space-y-6  p-4 md:p-6">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 md:p-7">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Case Overview
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold text-slate-900 md:text-3xl">
+              {caseData.caseName}
+            </h1>
+            <p className="mt-2 text-sm text-slate-600">Case ID: {caseData.datauid}</p>
+          </div>
+          <div className="inline-flex w-fit items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+            Active Investigation
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <p className={labelClass}>Files Uploaded</p>
+            <p className="mt-1 text-xl font-semibold text-slate-900">
+              {caseData.fileUploads.length}
+            </p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <p className={labelClass}>Transactions</p>
+            <p className="mt-1 text-xl font-semibold text-slate-900">
+              {caseData.transactions.length}
+            </p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <p className={labelClass}>Activity Events</p>
+            <p className="mt-1 text-xl font-semibold text-slate-900">{caseData.activity.length}</p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">Basic Customer Info</h2>
-          <p>
-            <strong>Email:</strong> {caseData.customerInfo.email}
-          </p>
-          <p>
-            <strong>Age:</strong> {caseData.customerInfo.age}
-          </p>
-          <p>
-            <strong>Relationship:</strong> {caseData.customerInfo.relationship}
-          </p>
+        <div className={infoCardClass}>
+          <h2 className="text-lg font-semibold text-slate-900">Basic Customer Info</h2>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <p className={labelClass}>Email</p>
+              <p className={valueClass}>{caseData.customerInfo.email}</p>
+            </div>
+            <div>
+              <p className={labelClass}>Age</p>
+              <p className={valueClass}>{caseData.customerInfo.age}</p>
+            </div>
+            <div className="sm:col-span-2">
+              <p className={labelClass}>Relationship</p>
+              <p className={valueClass}>{caseData.customerInfo.relationship}</p>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">ATM Information</h2>
-          <p>
-            <strong>Device Types:</strong>
+        {/* <div className={infoCardClass}>
+          <h2 className="text-lg font-semibold text-slate-900">ATM Information</h2>
+          <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Device Types
           </p>
-          <ul className="list-disc list-inside">
+          <ul className="mt-3 flex flex-wrap gap-2">
             {caseData.atmInfo.deviceTypes.map((device, index) => (
-              <li key={index}>{device}</li>
+              <li
+                key={index}
+                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-700"
+              >
+                {device}
+              </li>
             ))}
           </ul>
-        </div>
+        </div> */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">Case Assignment</h2>
-          <p>Assigned to: {caseData.caseAssign}</p>
+        <div className={infoCardClass}>
+          <h2 className="text-lg font-semibold text-slate-900">Case Assignment</h2>
+          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <p className={labelClass}>Assigned Investigator</p>
+            <p className={valueClass}>{caseData.caseAssign}</p>
+          </div>
         </div>
 
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">Related Cases</h2>
-          <ul className="list-disc list-inside">
+        <div className={infoCardClass}>
+          <h2 className="text-lg font-semibold text-slate-900">Related Cases</h2>
+          <ul className="mt-4 space-y-2">
             {caseData.relatedCases.map((caseId, index) => (
-              <li key={index}>{caseId}</li>
+              <li
+                key={index}
+                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700"
+              >
+                {caseId}
+              </li>
             ))}
           </ul>
         </div>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">File Upload Information</h2>
+      <div className={infoCardClass}>
+        <h2 className="text-lg font-semibold text-slate-900">File Upload Information</h2>
         {caseData.fileUploads.length > 0 ? (
-          <table className="min-w-full table-auto">
-            <thead>
-              <tr>
-                <th className="px-4 py-2">File Name</th>
-                <th className="px-4 py-2">Size</th>
-                <th className="px-4 py-2">Uploaded At</th>
-              </tr>
-            </thead>
-            <tbody>
-              {caseData.fileUploads.map((file, index) => (
-                <tr key={index}>
-                  <td className="border px-4 py-2">{file.name}</td>
-                  <td className="border px-4 py-2">{file.size}</td>
-                  <td className="border px-4 py-2">{file.uploadedAt}</td>
+          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    File Name
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    Size
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    Uploaded At
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {caseData.fileUploads.map((file, index) => (
+                  <tr key={index} className="text-sm text-slate-700">
+                    <td className="px-4 py-3 font-medium text-slate-900">{file.name}</td>
+                    <td className="px-4 py-3">{file.size}</td>
+                    <td className="px-4 py-3">{file.uploadedAt}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p>No files uploaded.</p>
+          <p className="mt-4 text-sm text-slate-600">No files uploaded.</p>
         )}
       </div>
 
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">Transactions</h2>
+      <div className={infoCardClass}>
+        <h2 className="text-lg font-semibold text-slate-900">Transactions</h2>
         {caseData.transactions.length > 0 ? (
-          <table className="min-w-full table-auto">
-            <thead>
-              <tr>
-                <th className="px-4 py-2">Transaction ID</th>
-                <th className="px-4 py-2">Amount</th>
-                <th className="px-4 py-2">Date</th>
-                <th className="px-4 py-2">Type</th>
-              </tr>
-            </thead>
-            <tbody>
-              {caseData.transactions.map((txn, index) => (
-                <tr key={index}>
-                  <td className="border px-4 py-2">{txn.id}</td>
-                  <td className="border px-4 py-2">{txn.amount}</td>
-                  <td className="border px-4 py-2">{txn.date}</td>
-                  <td className="border px-4 py-2">{txn.type}</td>
+          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    Transaction ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    Amount
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    Type
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {caseData.transactions.map((txn, index) => (
+                  <tr key={index} className="text-sm text-slate-700">
+                    <td className="px-4 py-3 font-medium text-slate-900">{txn.id}</td>
+                    <td className="px-4 py-3">{txn.amount}</td>
+                    <td className="px-4 py-3">{txn.date}</td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700">
+                        {txn.type}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p>No transactions available.</p>
+          <p className="mt-4 text-sm text-slate-600">No transactions available.</p>
         )}
       </div>
 
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-2xl font-semibold mb-4">Activity</h2>
+      <div className={infoCardClass}>
+        <h2 className="text-lg font-semibold text-slate-900">Activity</h2>
         {caseData.activity.length > 0 ? (
-          <ul className="space-y-2">
+          <ul className="mt-4 space-y-3">
             {caseData.activity.map((act, index) => (
-              <li key={index} className="border-b pb-2">
-                <p>
-                  <strong>{act.action}</strong>
-                </p>
-                <p className="text-sm text-gray-600">
-                  {act.timestamp} by {act.user}
+              <li key={index} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-slate-900">{act.action}</p>
+                <p className="mt-1 text-xs text-slate-600">
+                  {act.timestamp} - {act.user}
                 </p>
               </li>
             ))}
           </ul>
         ) : (
-          <p>No recent activity.</p>
+          <p className="mt-4 text-sm text-slate-600">No recent activity.</p>
         )}
       </div>
     </div>
