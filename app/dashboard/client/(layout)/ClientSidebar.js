@@ -24,6 +24,7 @@ import {
   IconUsers,
   IconWorld,
   IconBuilding,
+  IconObjectScan,
 } from "@tabler/icons-react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -66,6 +67,11 @@ export default function ClientSidebar({ ...props }) {
       title: "Companies",
       icon: IconBuilding,
       url: "/dashboard/client/companies",
+    },
+    {
+      title: "Case manager",
+      icon: IconObjectScan,
+      url: "/dashboard/client/monitoring-and-cases/case-manager",
     },
     {
       title: "Customers",
