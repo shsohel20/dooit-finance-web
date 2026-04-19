@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const getRolesColumns = (handleViewPermissions, handleEditRole) => {
   return [
@@ -55,6 +56,7 @@ export default function RolesPage() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [openRoleForm, setOpenRoleForm] = useState(false);
   const [roleInput, setRoleInput] = useState("");
+  const router = useRouter();
   const fetchRoles = useCallback(async () => {
     try {
       const roles = await getAllRoles();
@@ -78,6 +80,7 @@ export default function RolesPage() {
   const handleViewPermissions = (role) => {
     setSelectedRole(role);
     setOpenPermissions(true);
+    // router.push(`/dashboard/client/user-and-role-management/roles/${role._id}/permissions`);
   };
   const handleEditRole = (role) => {
     setRoleInput(role.name);

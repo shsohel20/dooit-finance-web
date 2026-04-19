@@ -8,8 +8,6 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   createPermission,
@@ -18,16 +16,19 @@ import {
   getPermissionById,
   updatePermission,
 } from "@/app/dashboard/client/user-and-role-management/actions";
-import CustomSelect from "@/components/AsyncPaginatedSelect";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import ListView from "@/views/privacy/permissions/ListView";
 
 function normalizeRolePermissions(raw) {
   if (!raw || !Array.isArray(raw)) return [];
   return raw.map((p) => (typeof p === "string" ? p : (p?.value ?? p?.name ?? ""))).filter(Boolean);
 }
 
-const NO_USER = "";
+function asUserIdList(raw) {
+  if (Array.isArray(raw)) return raw.filter(Boolean);
+  if (typeof raw === "string" && raw) return [raw];
+  return [];
+}
 
 const PermissionDrawer = ({ open = true, onClose = () => {}, role, setRole }) => {
   const [allPermissions, setAllPermissions] = useState(null);
@@ -79,34 +80,35 @@ const PermissionDrawer = ({ open = true, onClose = () => {}, role, setRole }) =>
     const granted = new Set(normalizeRolePermissions(roleData?.permissions ?? []));
     const nextPerm = {};
     modules.forEach((mod) => {
-      // nextModRestrict[mod.key] = NO_USER;
       (mod.permissions ?? []).forEach((p) => {
         nextPerm[p.value] = granted.has(p.value);
-        // nextPermRestrict[p.value] = NO_USER;
       });
     });
     setPermissionChecked(nextPerm);
     restrictedUsers?.forEach((user) => {
+      const uid = user.user?._id;
+      if (!uid) return;
       user.modules.forEach((mod) => {
-        moduleRestrictedUsers[mod] = user.user?._id;
+        if (!moduleRestrictedUsers[mod]) moduleRestrictedUsers[mod] = [];
+        if (!moduleRestrictedUsers[mod].includes(uid)) {
+          moduleRestrictedUsers[mod].push(uid);
+        }
       });
       user.options.forEach((opt) => {
-        permissionRestrictedUsers[opt] = user.user?._id;
+        if (!permissionRestrictedUsers[opt]) permissionRestrictedUsers[opt] = [];
+        if (!permissionRestrictedUsers[opt].includes(uid)) {
+          permissionRestrictedUsers[opt].push(uid);
+        }
       });
     });
 
     setRestrictedByModule(moduleRestrictedUsers);
     setRestrictedByPermission(permissionRestrictedUsers);
-  }, [role, modules, roleData]);
+  }, [modules, roleData]);
 
   useEffect(() => {
     applyRoleToModules();
   }, [applyRoleToModules]);
-
-  const userSelectOptions = useMemo(
-    () => [{ label: "No restriction", value: NO_USER }, ...userOptions],
-    [userOptions],
-  );
 
   const setAllInModule = (mod, checked) => {
     setPermissionChecked((prev) => {
@@ -162,48 +164,33 @@ const PermissionDrawer = ({ open = true, onClose = () => {}, role, setRole }) =>
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
-    const restrictedModules = Object.keys(restrictedByModule).filter(
-      (p) => restrictedByModule[p] !== "",
-    );
-    const restrictedPermissions = Object.keys(restrictedByPermission).filter(
-      (p) => restrictedByPermission[p] !== "",
-    );
+    const byUser = new Map();
 
-    let restrictedUsers = [];
-    for (const mod of restrictedModules) {
-      const alreadyExistsUser = restrictedUsers.find((u) => u.user === restrictedByModule[mod]);
-      const alreadyExistsModule = alreadyExistsUser?.modules.find((m) => m === mod);
-      if (!alreadyExistsUser) {
-        restrictedUsers.push({
-          user: restrictedByModule[mod],
-          modules: [mod],
-          options: restrictedPermissions,
-        });
-      } else {
-        if (!alreadyExistsModule) {
-          alreadyExistsUser.modules.push(mod);
-        }
+    const ensure = (uid) => {
+      if (!uid) return null;
+      if (!byUser.has(uid)) {
+        byUser.set(uid, { user: uid, modules: [], options: [] });
       }
-    }
-    for (const perm of restrictedPermissions) {
-      const alreadyExistsUser = restrictedUsers.find(
-        (u) => u.user === restrictedByPermission[perm],
-      );
-      const alreadyExistsPermission = alreadyExistsUser?.options.find((p) => p === perm);
+      return byUser.get(uid);
+    };
 
-      if (!alreadyExistsUser) {
-        restrictedUsers.push({
-          // ...alreadyExistsUser,
-          user: restrictedByPermission[perm],
-          modules: [],
-          options: [perm],
-        });
-      } else {
-        if (!alreadyExistsPermission) {
-          alreadyExistsUser.options.push(perm);
-        }
-      }
-    }
+    Object.entries(restrictedByModule).forEach(([mod, users]) => {
+      const list = asUserIdList(users);
+      list.forEach((uid) => {
+        const row = ensure(uid);
+        if (row && !row.modules.includes(mod)) row.modules.push(mod);
+      });
+    });
+
+    Object.entries(restrictedByPermission).forEach(([perm, users]) => {
+      const list = asUserIdList(users);
+      list.forEach((uid) => {
+        const row = ensure(uid);
+        if (row && !row.options.includes(perm)) row.options.push(perm);
+      });
+    });
+
+    const restrictedUsers = Array.from(byUser.values());
 
     const payload = {
       role: role._id,
@@ -226,7 +213,7 @@ const PermissionDrawer = ({ open = true, onClose = () => {}, role, setRole }) =>
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className="sm:max-w-2xl flex flex-col">
+      <SheetContent className="sm:max-w-3xl flex flex-col">
         <SheetHeader>
           <SheetTitle>Permissions</SheetTitle>
           <SheetDescription>{roleName} permissions</SheetDescription>
@@ -235,109 +222,26 @@ const PermissionDrawer = ({ open = true, onClose = () => {}, role, setRole }) =>
           <h2 className="text-sm text-gray-600 mb-4 shrink-0 pl-4">
             Selected permissions <span className="text-gray-900 ">({selectedCount})</span>
           </h2>
-          <div className="flex-1 min-h-0 overflow-y-auto rounded-lg  bg-card">
+          <div className="flex-1 min-h-0 overflow-y-auto rounded-lg">
             {modules.length === 0 ? (
               <p className="text-sm text-muted-foreground p-4">Loading permissions…</p>
             ) : (
-              <div className="divide-y ">
-                {modules.map((mod) => {
-                  const { checked: modChecked, indeterminate } = getModuleAggregate(mod);
-                  const modRestrictDisabled = !modChecked && !indeterminate;
-                  return (
-                    <div key={mod.key} className="p-4 space-y-3">
-                      <div className="flex items-center gap-3  px-4 rounded-md py-2">
-                        <Checkbox
-                          id={`module-${mod.key}`}
-                          checked={indeterminate ? "indeterminate" : modChecked}
-                          onCheckedChange={(v) => onModuleCheckboxChange(mod, v)}
-                          className="mt-1"
-                        />
-                        <div className="flex-1 min-w-0 space-y-1">
-                          <Label
-                            htmlFor={`module-${mod.key}`}
-                            className="text-base font-semibold text-gray-900 cursor-pointer"
-                          >
-                            {mod.module}
-                          </Label>
-                          <p className="text-xs text-muted-foreground font-mono">{mod.key}</p>
-                        </div>
-                        <div
-                          className={cn(
-                            "w-[220px] shrink-0 space-y-1",
-                            modRestrictDisabled && "pointer-events-none opacity-50",
-                          )}
-                        >
-                          <span className="text-[0.7rem] font-medium text-muted-foreground block">
-                            Restrict to user
-                          </span>
-                          <CustomSelect
-                            placeholder="User"
-                            searchPlaceholder="Search users…"
-                            options={userSelectOptions}
-                            value={restrictedByModule[mod.key] ?? NO_USER}
-                            onChange={(e) =>
-                              setRestrictedByModule((prev) => ({
-                                ...prev,
-                                [mod.key]: e.target.value ?? NO_USER,
-                              }))
-                            }
-                          />
-                        </div>
-                      </div>
-                      <ul className="pl-4 space-y-2   ml-2">
-                        {(mod.permissions ?? []).map((p) => {
-                          const isOn = !!permissionChecked[p.value];
-                          return (
-                            <li key={p.value}>
-                              <div className="flex  items-center bg-gray-50 px-4 rounded-md py-2 gap-3">
-                                <Checkbox
-                                  id={`perm-${p.value}`}
-                                  checked={isOn}
-                                  onCheckedChange={(v) => onPermissionCheckboxChange(p.value, v)}
-                                  className="mt-1"
-                                />
-                                <div className="flex-1 min-w-0 space-y-0.5">
-                                  <Label
-                                    htmlFor={`perm-${p.value}`}
-                                    className="text-sm font-medium text-gray-800 cursor-pointer"
-                                  >
-                                    {p.label}
-                                  </Label>
-                                  <p className="text-xs text-muted-foreground font-mono">
-                                    {p.value}
-                                  </p>
-                                </div>
-                                <div
-                                  className={cn(
-                                    "w-[220px] shrink-0 space-y-1",
-                                    !isOn && "pointer-events-none opacity-50",
-                                  )}
-                                >
-                                  <span className="text-[0.7rem] font-medium text-muted-foreground block">
-                                    Restrict to user
-                                  </span>
-                                  <CustomSelect
-                                    placeholder="User"
-                                    searchPlaceholder="Search users…"
-                                    options={userSelectOptions}
-                                    value={restrictedByPermission[p.value] ?? NO_USER}
-                                    onChange={(e) =>
-                                      setRestrictedByPermission((prev) => ({
-                                        ...prev,
-                                        [p.value]: e.target.value ?? NO_USER,
-                                      }))
-                                    }
-                                  />
-                                </div>
-                              </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  );
-                })}
-              </div>
+              <ListView
+                modules={modules}
+                permissionChecked={permissionChecked}
+                restrictedByModule={restrictedByModule}
+                restrictedByPermission={restrictedByPermission}
+                userOptions={userOptions}
+                getModuleAggregate={getModuleAggregate}
+                onModuleCheckboxChange={onModuleCheckboxChange}
+                onPermissionCheckboxChange={onPermissionCheckboxChange}
+                onModuleUsersChange={(modKey, ids) =>
+                  setRestrictedByModule((prev) => ({ ...prev, [modKey]: ids }))
+                }
+                onPermissionUsersChange={(permValue, ids) =>
+                  setRestrictedByPermission((prev) => ({ ...prev, [permValue]: ids }))
+                }
+              />
             )}
           </div>
           <div className="mt-4 flex justify-end shrink-0">
