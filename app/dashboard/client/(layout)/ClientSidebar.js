@@ -56,7 +56,31 @@ export default function ClientSidebar({ ...props }) {
   const isPreciousMetal = clientType === "Precious Metal";
   const isCrypto = clientType === "Crypto";
   const isBranch = loggedInUser?.role === "branch";
+  const isDooit = loggedInUser?.userType === "dooit";
+  console.log("isDooit", isDooit);
 
+  const dooitMenuItems = [
+    {
+      title: "Dashboard",
+      icon: IconLayoutDashboard,
+      url: "/dashboard/client",
+    },
+    {
+      title: "Customers",
+      icon: IconUsers,
+      url: "/dashboard/client/onboarding/customer-queue",
+    },
+    {
+      title: "Companies",
+      icon: IconBuilding,
+      url: "/dashboard/client/companies",
+    },
+    {
+      title: "Case manager",
+      icon: IconObjectScan,
+      url: "/dashboard/client/monitoring-and-cases/case-manager",
+    },
+  ];
   const onBoardingMenuItems = [
     {
       title: "Dashboard",
@@ -534,7 +558,7 @@ export default function ClientSidebar({ ...props }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={onBoardingMenuItems} label="Onboarding" />
+        {isDooit && <NavMain items={dooitMenuItems} label="Dooit" />}
         {isRealState && (
           <>
             {realStateMenu.map((item) => (
