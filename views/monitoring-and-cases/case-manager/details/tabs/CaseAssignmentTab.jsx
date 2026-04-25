@@ -14,12 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { StatusPill } from "@/components/ui/StatusPill";
-import {
-  IconUserCheck,
-  IconHistory,
-  IconAlertTriangle,
-  IconCheck,
-} from "@tabler/icons-react";
+import { IconUserCheck, IconHistory, IconAlertTriangle, IconCheck } from "@tabler/icons-react";
 import { analysts } from "@/lib/case-manager-data";
 import { dateShowFormat } from "@/lib/utils";
 
@@ -46,7 +41,7 @@ export default function CaseAssignmentTab({ caseData }) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {/* Current Assignment */}
-      <Card className="border border-border shadow-sm">
+      <Card className="border-0">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <IconUserCheck className="size-4" />
@@ -93,11 +88,7 @@ export default function CaseAssignmentTab({ caseData }) {
             />
           </div>
 
-          <Button
-            size="sm"
-            className="w-full gap-1.5"
-            onClick={handleSave}
-          >
+          <Button size="sm" className="w-full gap-1.5" onClick={handleSave}>
             {saved ? (
               <>
                 <IconCheck className="size-3.5" />
@@ -111,7 +102,7 @@ export default function CaseAssignmentTab({ caseData }) {
       </Card>
 
       {/* Assignment History */}
-      <Card className="border border-border shadow-sm">
+      <Card className="border-0 border-l rounded-none">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <IconHistory className="size-4" />

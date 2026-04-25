@@ -3,12 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { Badge } from "@/components/ui/badge";
-import {
-  IconBuilding,
-  IconUsers,
-  IconNetwork,
-  IconPennant,
-} from "@tabler/icons-react";
+import { IconBuilding, IconUsers, IconNetwork, IconPennant } from "@tabler/icons-react";
 
 const riskVariants = {
   High: "danger",
@@ -21,9 +16,9 @@ export default function RelationshipsTab({ caseData }) {
   if (!rel) return null;
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2">
       {/* Companies */}
-      <Card className="border border-border shadow-sm">
+      <Card className="border-0">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <IconBuilding className="size-4" />
@@ -63,7 +58,10 @@ export default function RelationshipsTab({ caseData }) {
           ) : (
             <div className="flex flex-col gap-3">
               {rel.individuals?.map((ind, i) => (
-                <div key={i} className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
+                <div
+                  key={i}
+                  className="flex items-center justify-between rounded-lg border bg-muted/30 p-3"
+                >
                   <div>
                     <p className="text-sm font-semibold text-heading">{ind.name}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">{ind.relationship}</p>
@@ -81,7 +79,7 @@ export default function RelationshipsTab({ caseData }) {
       </Card>
 
       {/* Stakeholders */}
-      <Card className="border border-border shadow-sm">
+      {/* <Card className="border border-border shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <IconNetwork className="size-4" />
@@ -109,7 +107,7 @@ export default function RelationshipsTab({ caseData }) {
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }

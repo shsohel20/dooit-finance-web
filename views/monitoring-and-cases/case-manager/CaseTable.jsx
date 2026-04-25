@@ -5,15 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import dynamic from "next/dynamic";
 import {
   IconEye,
   IconFolder,
@@ -21,20 +13,16 @@ import {
   IconChevronLeft,
   IconChevronRight,
 } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
-import { useCaseManagerStore } from "@/app/store/useCaseManagerStore";
 import { dateShowFormat } from "@/lib/utils";
+
+const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
+  ssr: false,
+});
 
 const riskVariants = {
   High: "danger",
   Medium: "warning",
   Low: "info",
-};
-
-const riskRowBg = {
-  High: "bg-red-50/40 hover:bg-red-50",
-  Medium: "bg-yellow-50/40 hover:bg-yellow-50",
-  Low: "hover:bg-muted/40",
 };
 
 const statusVariants = {
@@ -62,105 +50,117 @@ export default function CaseTable({ cases, loading }) {
     },
     [router],
   );
-
-  if (loading) {
-    return (
-      <div className="space-y-2 p-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full rounded" />
-        ))}
-      </div>
-    );
-  }
-
-  if (!cases || cases.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-        <IconFolder className="mb-3 size-10 opacity-40" />
-        <p className="text-sm">No cases found</p>
-      </div>
-    );
-  }
+  const columns = [
+    {
+      id: "uid",
+      header: "Case ID",
+      accessorKey: "uid",
+      size: 120,
+      cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">{row.original.uid}</span>,
+    },
+    {
+      id: "customerName",
+      header: "Customer Name",
+      accessorKey: "customerName",
+      size: 220,
+      cell: ({ row }) => (
+        <button
+          type="button"
+          className="text-left hover:underline"
+          onClick={() => handleRowClick(row.original)}
+        >
+          <p className="font-semibold text-heading text-sm">{row.original.customerName}</p>
+          <p className="text-xs text-muted-foreground">{row.original.caseType}</p>
+        </button>
+      ),
+    },
+    {
+      id: "customerType",
+      header: "Type",
+      accessorKey: "customerType",
+      size: 120,
+      cell: ({ row }) => (
+        <Badge variant="outline" className="text-xs capitalize">
+          {row.original.customerType}
+        </Badge>
+      ),
+    },
+    {
+      id: "caseType",
+      header: "Case Type",
+      accessorKey: "caseType",
+      size: 130,
+      cell: ({ row }) => <span className="text-sm">{row.original.caseType}</span>,
+    },
+    {
+      id: "riskTag",
+      header: "Risk",
+      accessorKey: "riskTag",
+      size: 120,
+      cell: ({ row }) => (
+        <StatusPill icon={<IconPennant />} variant={riskVariants[row.original.riskTag]}>
+          {row.original.riskTag}
+        </StatusPill>
+      ),
+    },
+    {
+      id: "folderCount",
+      header: "Folders",
+      accessorKey: "folderCount",
+      size: 100,
+      cell: ({ row }) => (
+        <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+          <IconFolder className="size-3.5" />
+          {row.original.folderCount}
+        </span>
+      ),
+    },
+    {
+      id: "lastScreeningTime",
+      header: "Last Screening",
+      accessorKey: "lastScreeningTime",
+      size: 170,
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">{dateShowFormat(row.original.lastScreeningTime)}</span>
+      ),
+    },
+    {
+      id: "assignedAnalyst",
+      header: "Analyst",
+      accessorKey: "assignedAnalyst",
+      size: 140,
+      cell: ({ row }) => <span className="text-sm">{row.original.assignedAnalyst}</span>,
+    },
+    {
+      id: "status",
+      header: "Status",
+      accessorKey: "status",
+      size: 130,
+      cell: ({ row }) => <StatusPill variant={statusVariants[row.original.status]}>{row.original.status}</StatusPill>,
+    },
+    {
+      id: "actions",
+      header: "Action",
+      accessorKey: "actions",
+      size: 80,
+      cell: ({ row }) => (
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleRowClick(row.original)}>
+          <IconEye className="size-4" />
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div>
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader className="sticky top-0 z-10 bg-white">
-            <TableRow className="text-xs uppercase tracking-wide">
-              <TableHead className="w-32">Case ID</TableHead>
-              <TableHead>Customer Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Case Type</TableHead>
-              <TableHead>Risk</TableHead>
-              <TableHead className="text-center">Folders</TableHead>
-              <TableHead>Last Screening</TableHead>
-              <TableHead>Analyst</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-center w-20">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginated.map((item) => (
-              <TableRow
-                key={item._id}
-                onClick={() => handleRowClick(item)}
-                className={cn(
-                  "cursor-pointer transition-colors",
-                  riskRowBg[item.riskTag] || "hover:bg-muted/40",
-                )}
-              >
-                <TableCell className="font-mono text-xs text-muted-foreground">
-                  {item.uid}
-                </TableCell>
-                <TableCell>
-                  <div>
-                    <p className="font-semibold text-heading text-sm">{item.customerName}</p>
-                    <p className="text-xs text-muted-foreground">{item.caseType}</p>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="text-xs capitalize">
-                    {item.customerType}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-sm">{item.caseType}</TableCell>
-                <TableCell>
-                  <StatusPill icon={<IconPennant />} variant={riskVariants[item.riskTag]}>
-                    {item.riskTag}
-                  </StatusPill>
-                </TableCell>
-                <TableCell className="text-center">
-                  <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                    <IconFolder className="size-3.5" />
-                    {item.folderCount}
-                  </span>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {dateShowFormat(item.lastScreeningTime)}
-                </TableCell>
-                <TableCell className="text-sm">{item.assignedAnalyst}</TableCell>
-                <TableCell>
-                  <StatusPill variant={statusVariants[item.status]}>{item.status}</StatusPill>
-                </TableCell>
-                <TableCell
-                  className="text-center"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                    onClick={() => handleRowClick(item)}
-                  >
-                    <IconEye className="size-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <CustomResizableTable
+        columns={columns}
+        data={paginated}
+        loading={loading}
+        tableId="case-manager-table"
+        mainClass="case-manager-table"
+        onDoubleClick={handleRowClick}
+      />
 
       {/* Pagination */}
       {totalPages > 1 && (

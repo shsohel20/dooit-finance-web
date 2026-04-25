@@ -5,12 +5,10 @@ import CaseHeader from "./CaseHeader";
 import CaseTabs from "./CaseTabs";
 import { mockCases } from "@/lib/case-manager-data";
 import { IconFolderOff } from "@tabler/icons-react";
+import FilesTab from "./tabs/FilesTab";
 
 export default function CaseDetails({ caseId }) {
-  const caseData = useMemo(
-    () => mockCases.find((c) => c._id === caseId) || null,
-    [caseId],
-  );
+  const caseData = useMemo(() => mockCases.find((c) => c._id === caseId) || null, [caseId]);
 
   if (!caseData) {
     return (
@@ -23,9 +21,14 @@ export default function CaseDetails({ caseId }) {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <CaseHeader caseData={caseData} />
-      <CaseTabs caseData={caseData} />
+    <div className="grid grid-cols-12 gap-4">
+      <div className="flex flex-col gap-5 xl:col-span-9 col-span-12">
+        <CaseHeader caseData={caseData} />
+        <CaseTabs caseData={caseData} />
+      </div>
+      <div className="xl:col-span-3 col-span-12">
+        <FilesTab caseData={caseData} />
+      </div>
     </div>
   );
 }

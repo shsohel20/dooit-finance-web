@@ -24,7 +24,7 @@ export default function CustomerInfoTab({ caseData }) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card className="border border-border shadow-sm">
+      <Card className="border-0">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <IconUser className="size-4" />
@@ -35,9 +35,7 @@ export default function CustomerInfoTab({ caseData }) {
           <InfoRow icon={IconUser} label="Full Name" value={c.name} />
           {c.age && <InfoRow icon={IconUser} label="Age" value={`${c.age} years`} />}
           {c.dateOfBirth && <InfoRow icon={IconUser} label="Date of Birth" value={c.dateOfBirth} />}
-          {c.nationality && (
-            <InfoRow icon={IconUser} label="Nationality" value={c.nationality} />
-          )}
+          {c.nationality && <InfoRow icon={IconUser} label="Nationality" value={c.nationality} />}
           {c.occupation && <InfoRow icon={IconUser} label="Occupation" value={c.occupation} />}
           <InfoRow
             icon={IconUser}
@@ -51,7 +49,7 @@ export default function CustomerInfoTab({ caseData }) {
         </CardContent>
       </Card>
 
-      <Card className="border border-border shadow-sm">
+      <Card className="border-0 border-l rounded-none">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <IconMail className="size-4" />
@@ -62,18 +60,12 @@ export default function CustomerInfoTab({ caseData }) {
           <InfoRow icon={IconMail} label="Email" value={c.email} />
           <InfoRow icon={IconPhone} label="Phone" value={c.phone} />
           <InfoRow icon={IconMapPin} label="Address" value={c.address} />
-          {c.idType && (
-            <InfoRow icon={IconId} label="ID Type" value={c.idType} />
-          )}
-          {c.idNumber && (
-            <InfoRow icon={IconId} label="ID Number" value={c.idNumber} />
-          )}
+          {c.idType && <InfoRow icon={IconId} label="ID Type" value={c.idType} />}
+          {c.idNumber && <InfoRow icon={IconId} label="ID Number" value={c.idNumber} />}
           {c.registrationNo && (
             <InfoRow icon={IconId} label="Registration No." value={c.registrationNo} />
           )}
-          {c.industry && (
-            <InfoRow icon={IconUser} label="Industry" value={c.industry} />
-          )}
+          {c.industry && <InfoRow icon={IconUser} label="Industry" value={c.industry} />}
         </CardContent>
       </Card>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,21 +14,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   IconSearch,
   IconArrowRight,
   IconAlertTriangle,
   IconCircleCheck,
   IconArrowsSort,
 } from "@tabler/icons-react";
-import { cn, dateShowFormatWithTime } from "@/lib/utils";
+import { dateShowFormatWithTime } from "@/lib/utils";
+
+const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
+  ssr: false,
+});
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(amount);
@@ -60,11 +57,86 @@ export default function TransactionsTab({ caseData }) {
     return list;
   }, [transactions, search, statusFilter, sortAmt]);
 
-  const toggleSort = () => {
-    setSortAmt((prev) => (prev === null ? "desc" : prev === "desc" ? "asc" : null));
-  };
-
   const flaggedCount = transactions.filter((t) => t.status === "flagged").length;
+  const columns = useMemo(
+    () => [
+      {
+        id: "id",
+        header: "Transaction ID",
+        cell: ({ row }) => (
+          <span className="font-mono text-xs text-muted-foreground">{row.original.id}</span>
+        ),
+        size: 160,
+      },
+      {
+        id: "amount",
+        header: () => (
+          <button
+            className="flex items-center gap-1 hover:text-heading transition-colors"
+            onClick={() =>
+              setSortAmt((prev) => (prev === null ? "desc" : prev === "desc" ? "asc" : null))
+            }
+          >
+            Amount
+            <IconArrowsSort className="size-3.5" />
+          </button>
+        ),
+        cell: ({ row }) => (
+          <div className="font-semibold text-heading">
+            {formatCurrency(row.original.amount)}
+            <span className="ml-1 text-xs font-normal text-muted-foreground">
+              {row.original.currency}
+            </span>
+          </div>
+        ),
+        size: 160,
+      },
+      {
+        id: "senderReceiver",
+        header: "Sender → Receiver",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1.5">
+            <span className="text-heading">{row.original.sender}</span>
+            <IconArrowRight className="size-3.5 text-muted-foreground shrink-0" />
+            <span className="text-heading">{row.original.receiver}</span>
+          </div>
+        ),
+        size: 260,
+      },
+      {
+        id: "location",
+        header: "Location",
+        cell: ({ row }) => <span className="text-muted-foreground">{row.original.location}</span>,
+        size: 160,
+      },
+      {
+        id: "date",
+        header: "Date",
+        cell: ({ row }) => (
+          <span className="text-xs text-muted-foreground">
+            {dateShowFormatWithTime(row.original.date)}
+          </span>
+        ),
+        size: 180,
+      },
+      {
+        id: "status",
+        header: "Status",
+        cell: ({ row }) =>
+          row.original.status === "flagged" ? (
+            <StatusPill icon={<IconAlertTriangle />} variant="danger">
+              Flagged
+            </StatusPill>
+          ) : (
+            <StatusPill icon={<IconCircleCheck />} variant="success">
+              Normal
+            </StatusPill>
+          ),
+        size: 140,
+      },
+    ],
+    [],
+  );
 
   if (transactions.length === 0) {
     return (
@@ -77,10 +149,10 @@ export default function TransactionsTab({ caseData }) {
   }
 
   return (
-    <Card className="border border-border shadow-sm">
-      <CardHeader className="pb-2">
+    <Card className="border-0">
+      <CardHeader className="p-0">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2 px-0">
             Transactions ({transactions.length})
             {flaggedCount > 0 && (
               <Badge className="bg-red-100 text-red-700 border-red-200 text-xs" variant="outline">
@@ -115,75 +187,14 @@ export default function TransactionsTab({ caseData }) {
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="text-xs uppercase tracking-wide">
-                <TableHead className="w-28">Transaction ID</TableHead>
-                <TableHead>
-                  <button
-                    className="flex items-center gap-1 hover:text-heading transition-colors"
-                    onClick={toggleSort}
-                  >
-                    Amount
-                    <IconArrowsSort className="size-3.5" />
-                  </button>
-                </TableHead>
-                <TableHead>Sender → Receiver</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((txn) => (
-                <TableRow
-                  key={txn.id}
-                  className={cn(
-                    "text-sm transition-colors",
-                    txn.status === "flagged" && "bg-red-50/50 hover:bg-red-50",
-                  )}
-                >
-                  <TableCell className="font-mono text-xs text-muted-foreground">
-                    {txn.id}
-                  </TableCell>
-                  <TableCell className="font-semibold text-heading">
-                    {formatCurrency(txn.amount)}
-                    <span className="ml-1 text-xs font-normal text-muted-foreground">
-                      {txn.currency}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-heading">{txn.sender}</span>
-                      <IconArrowRight className="size-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-heading">{txn.receiver}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{txn.location}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {dateShowFormatWithTime(txn.date)}
-                  </TableCell>
-                  <TableCell>
-                    {txn.status === "flagged" ? (
-                      <StatusPill icon={<IconAlertTriangle />} variant="danger">
-                        Flagged
-                      </StatusPill>
-                    ) : (
-                      <StatusPill icon={<IconCircleCheck />} variant="success">
-                        Normal
-                      </StatusPill>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CustomResizableTable
+            mainClass="case-transactions-table"
+            tableId="case-transactions-table"
+            columns={columns}
+            data={filtered}
+            className="border-0"
+          />
         </div>
-        {filtered.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            No transactions match filters.
-          </p>
-        )}
       </CardContent>
     </Card>
   );

@@ -26,15 +26,27 @@ const TransactionsTab = lazy(() => import("./tabs/TransactionsTab"));
 const ActivityTimelineTab = lazy(() => import("./tabs/ActivityTimelineTab"));
 
 const TABS = [
-  { id: "customer", label: "Customer Info", icon: IconUser, component: CustomerInfoTab },
-  { id: "atm", label: "ATM Info", icon: IconCreditCard, component: ATMInfoTab },
-  { id: "relationships", label: "Relationships", icon: IconNetwork, component: RelationshipsTab },
   { id: "assignment", label: "Case Assignment", icon: IconUserCheck, component: CaseAssignmentTab },
-  { id: "devices", label: "Device Info", icon: IconDevices, component: DeviceInfoTab },
   { id: "related", label: "Related Cases", icon: IconLink, component: RelatedCasesTab },
-  { id: "files", label: "Files", icon: IconFolder, component: FilesTab },
-  { id: "transactions", label: "Transactions", icon: IconArrowsExchange, component: TransactionsTab },
-  { id: "timeline", label: "Activity Timeline", icon: IconTimeline, component: ActivityTimelineTab },
+  { id: "customer", label: "Customer Info", icon: IconUser, component: CustomerInfoTab },
+
+  {
+    id: "transactions",
+    label: "Transactions",
+    icon: IconArrowsExchange,
+    component: TransactionsTab,
+  },
+  { id: "relationships", label: "Relationships", icon: IconNetwork, component: RelationshipsTab },
+  { id: "atm", label: "ATM Info", icon: IconCreditCard, component: ATMInfoTab },
+  // { id: "files", label: "Files", icon: IconFolder, component: FilesTab },
+  { id: "devices", label: "Device Info", icon: IconDevices, component: DeviceInfoTab },
+
+  {
+    id: "timeline",
+    label: "Activity Timeline",
+    icon: IconTimeline,
+    component: ActivityTimelineTab,
+  },
 ];
 
 function TabLoadingSkeleton() {
@@ -48,15 +60,15 @@ function TabLoadingSkeleton() {
 }
 
 export default function CaseTabs({ caseData }) {
-  const [activeTab, setActiveTab] = useState("customer");
+  const [activeTab, setActiveTab] = useState("assignment");
 
   const ActiveComponent = TABS.find((t) => t.id === activeTab)?.component;
 
   return (
-    <div className="flex flex-col gap-0 lg:flex-row">
+    <div className="flex flex-col gap-0 ">
       {/* Sidebar */}
-      <aside className="shrink-0 lg:w-52 xl:w-56">
-        <nav className="flex flex-row flex-wrap gap-1 rounded-xl border bg-white p-2 shadow-sm lg:flex-col lg:flex-nowrap lg:gap-0.5 lg:rounded-xl lg:p-2">
+      <aside className="shrink-0 ">
+        <nav className="flex flex-row flex-wrap gap-1 rounded-xl  bg-gray-50 p-2 ">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -65,9 +77,9 @@ export default function CaseTabs({ caseData }) {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
+                  "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors text-xs",
                   isActive
-                    ? "bg-primary text-primary-foreground font-medium shadow-sm"
+                    ? "bg-primary text-primary-foreground font-medium "
                     : "text-muted-foreground hover:bg-muted hover:text-heading",
                 )}
               >
@@ -80,7 +92,7 @@ export default function CaseTabs({ caseData }) {
       </aside>
 
       {/* Content */}
-      <div className="flex-1 lg:pl-4 mt-4 lg:mt-0">
+      <div className="flex-1  mt-4 ">
         <Suspense fallback={<TabLoadingSkeleton />}>
           {ActiveComponent && <ActiveComponent caseData={caseData} />}
         </Suspense>

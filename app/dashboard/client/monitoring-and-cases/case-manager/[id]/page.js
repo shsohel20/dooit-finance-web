@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function CaseDetailsPage({ params }) {
   return (
-    <div className="p-4 md:p-6">
+    <div className="">
       <CaseDetails caseId={params.id} />
     </div>
   );

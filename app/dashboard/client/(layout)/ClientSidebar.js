@@ -558,6 +558,7 @@ export default function ClientSidebar({ ...props }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        <NavMain items={onBoardingMenuItems} label="Onboarding" />
         {isDooit && <NavMain items={dooitMenuItems} label="Dooit" />}
         {isRealState && (
           <>

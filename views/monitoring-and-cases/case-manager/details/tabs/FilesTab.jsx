@@ -75,7 +75,7 @@ export default function FilesTab({ caseData }) {
   return (
     <div className="flex flex-col gap-4">
       {/* Upload Zone */}
-      <Card className="border border-border shadow-sm">
+      <Card className="border border-border ">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <IconUpload className="size-4" />
@@ -84,12 +84,17 @@ export default function FilesTab({ caseData }) {
         </CardHeader>
         <CardContent>
           <div
-            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
             className={`cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
-              dragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted/30"
+              dragging
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50 hover:bg-muted/30"
             }`}
           >
             <IconUpload className="mx-auto mb-2 size-8 text-muted-foreground" />
@@ -113,7 +118,7 @@ export default function FilesTab({ caseData }) {
       </Card>
 
       {/* File List */}
-      <Card className="border border-border shadow-sm">
+      <Card className="border border-border ">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <IconFile className="size-4" />
@@ -122,9 +127,7 @@ export default function FilesTab({ caseData }) {
         </CardHeader>
         <CardContent>
           {files.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              No files uploaded yet.
-            </p>
+            <p className="py-6 text-center text-sm text-muted-foreground">No files uploaded yet.</p>
           ) : (
             <div className="divide-y">
               {files.map((file, i) => {
