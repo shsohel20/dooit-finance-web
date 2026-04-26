@@ -11,13 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   IconSearch,
   IconFilter,
@@ -92,7 +86,15 @@ export default function CaseManagerDashboard() {
     const csvContent = [
       ["Case ID", "Customer Name", "Type", "Risk", "Status", "Analyst", "Created Date"].join(","),
       ...filteredCases.map((c) =>
-        [c.uid, `"${c.customerName}"`, c.customerType, c.riskTag, c.status, c.assignedAnalyst, c.createdDate].join(","),
+        [
+          c.uid,
+          `"${c.customerName}"`,
+          c.customerType,
+          c.riskTag,
+          c.status,
+          c.assignedAnalyst,
+          c.createdDate,
+        ].join(","),
       ),
     ].join("\n");
 
@@ -116,12 +118,7 @@ export default function CaseManagerDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5 text-xs"
-            onClick={handleExport}
-          >
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={handleExport}>
             <IconDownload className="size-3.5" />
             Export
           </Button>
@@ -138,7 +135,11 @@ export default function CaseManagerDashboard() {
           onClick={() => setShowAnalytics((v) => !v)}
           className="mb-3 flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-heading transition-colors"
         >
-          {showAnalytics ? <IconChevronUp className="size-4" /> : <IconChevronDown className="size-4" />}
+          {showAnalytics ? (
+            <IconChevronUp className="size-4" />
+          ) : (
+            <IconChevronDown className="size-4" />
+          )}
           {showAnalytics ? "Hide" : "Show"} Analytics
         </button>
 
@@ -151,7 +152,7 @@ export default function CaseManagerDashboard() {
       </div>
 
       {/* Table Section */}
-      <Card className="border border-border shadow-sm overflow-hidden">
+      <Card className="overflow-hidden border-0 bg-gray-50 shadow-none">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-2 border-b p-4">
           {/* Search */}
@@ -245,7 +246,7 @@ export default function CaseManagerDashboard() {
           </div>
         </div>
 
-        <CardContent className="p-0">
+        <CardContent className="p-0 ">
           <CaseTable cases={filteredCases} loading={loading} />
         </CardContent>
       </Card>
