@@ -45,13 +45,15 @@ export function LoginForm({ className, token, cid, ...props }) {
   });
 
   const getRoute = (session) => {
-    if (session.data?.user?.userType === 'dooit') {
-      return '/dashboard/admin';
-    } else if (session.data.user.userType === 'user' && token) {
+    if (session.data.user.userType === 'user' && token) {
       return '/auth/registration-type';
     } else if (session.data.user.userType === 'user') {
       return '/customer/dashboard';
-    } else if (session.data?.user?.userType === 'client' || 'branch') {
+    } else if (
+      session.data?.user?.userType === 'client' ||
+      'branch' ||
+      'dooit'
+    ) {
       return '/dashboard/client';
     } else {
       return '/';

@@ -8,8 +8,7 @@ export default function ClientLayout({ children }) {
   const { loggedInUser } = useGetUser();
 
   const clientType = loggedInUser?.client?.clientType;
-  const isRealState = clientType === "Real Estate";
-  const isFinancial = clientType === "Financial";
+
   return (
     <SidebarProvider
       style={{

@@ -28,8 +28,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        // className={`font-sans antialiased ${montserrat.className} text-sm`}
-        className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}
+        className={`font-sans antialiased ${montserrat.className} text-sm`}
+        // className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}
         suppressHydrationWarning
       >
         {/* <AuthProvider> */}

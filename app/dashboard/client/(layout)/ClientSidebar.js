@@ -24,6 +24,7 @@ import {
   IconUsers,
   IconWorld,
   IconBuilding,
+  IconObjectScan,
 } from "@tabler/icons-react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -34,14 +35,10 @@ import {
   PieChart,
   FileInput,
   FileText,
-  GraduationCap,
-  Home,
   Newspaper,
-  Scale,
   Search,
   ShieldHalf,
   ShieldUser,
-  Users,
   Wallet,
   Send,
   Download,
@@ -59,7 +56,31 @@ export default function ClientSidebar({ ...props }) {
   const isPreciousMetal = clientType === "Precious Metal";
   const isCrypto = clientType === "Crypto";
   const isBranch = loggedInUser?.role === "branch";
+  const isDooit = loggedInUser?.userType === "dooit";
+  console.log("isDooit", isDooit);
 
+  const dooitMenuItems = [
+    {
+      title: "Dashboard",
+      icon: IconLayoutDashboard,
+      url: "/dashboard/client",
+    },
+    {
+      title: "Customers",
+      icon: IconUsers,
+      url: "/dashboard/client/onboarding/customer-queue",
+    },
+    {
+      title: "Companies",
+      icon: IconBuilding,
+      url: "/dashboard/client/companies",
+    },
+    {
+      title: "Case manager",
+      icon: IconObjectScan,
+      url: "/dashboard/client/monitoring-and-cases/case-manager",
+    },
+  ];
   const onBoardingMenuItems = [
     {
       title: "Dashboard",
@@ -70,6 +91,11 @@ export default function ClientSidebar({ ...props }) {
       title: "Companies",
       icon: IconBuilding,
       url: "/dashboard/client/companies",
+    },
+    {
+      title: "Case manager",
+      icon: IconObjectScan,
+      url: "/dashboard/client/monitoring-and-cases/case-manager",
     },
     {
       title: "Customers",
@@ -284,9 +310,21 @@ export default function ClientSidebar({ ...props }) {
 
   const configurationMenuItems = [
     {
-      title: "User & Role Management",
+      title: "User & Role",
       icon: IconListDetails,
       url: "/dashboard/client/user-and-role-management",
+      children: [
+        {
+          title: "Users",
+          url: "/dashboard/client/user-and-role-management/users",
+          icon: IconListDetails,
+        },
+        {
+          title: "Roles",
+          url: "/dashboard/client/user-and-role-management/roles",
+          icon: IconListDetails,
+        },
+      ],
     },
     {
       title: "Risk Rule Engine",
@@ -521,6 +559,7 @@ export default function ClientSidebar({ ...props }) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={onBoardingMenuItems} label="Onboarding" />
+        {isDooit && <NavMain items={dooitMenuItems} label="Dooit" />}
         {isRealState && (
           <>
             {realStateMenu.map((item) => (

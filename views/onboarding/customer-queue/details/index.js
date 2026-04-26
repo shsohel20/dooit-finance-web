@@ -29,22 +29,14 @@ import {
 import { getCustomerById } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 import { cn, dateShowFormat } from "@/lib/utils";
 import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
+import RiskScoreCard from "@/components/RiskScoreCard";
 
 export const DetailViewModal = ({ details, fetching }) => {
+  console.log("details", details);
   const [openRelatedParties, setOpenRelatedParties] = useState(false);
 
   const riskAssessment = details?.riskAssessment || {};
 
-  const totalRiskScore = Object.values(riskAssessment)
-    .filter((item) => typeof item === "object" && "score" in item)
-    .reduce((sum, item) => sum + item.score, 0);
-
-  const getLabelColor = (label) => {
-    if (label === "Unacceptable") return "bg-destructive/15 text-destructive border-destructive/30";
-    if (label === "High") return "bg-danger/15 text-danger border-danger/30";
-    if (label === "Medium") return "bg-warning/15 text-warning-foreground border-warning/30";
-    return "bg-success/15 text-success border-success/30";
-  };
   const getRiskColor = (score) => {
     if (score === 0) return "text-success";
     if (score <= 20) return "text-success";
@@ -60,11 +52,12 @@ export const DetailViewModal = ({ details, fetching }) => {
 
   const isPep = details?.isPEP;
   const isSanctioned = details?.sanction;
-  const getDocumentTypeLabel = (type) => {
-    return type
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+
+  const getAddress = () => {
+    const addressObj = details?.personalKyc?.personal_form?.residential_address;
+    if (!addressObj) return "Address not provided";
+    const { address, city, state, postal_code, country } = addressObj;
+    return `${address ?? ""}${city ? ", " + city : ""}${state ? ", " + state : ""}${postal_code ? ", " + postal_code : ""}${country ? ", " + country : ""}`;
   };
 
   return (
@@ -266,7 +259,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                           Phone Number
                         </span>
                       </div>
-                      <span className="text-sm font-mono font-medium">2347689316687</span>
+                      <span className="text-sm font-mono font-medium">{details?.user?.phone}</span>
                     </div>
 
                     <div className="flex items-center justify-between py-3 border-b ">
@@ -284,7 +277,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                         <Globe className="size-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">Country</span>
                       </div>
-                      <span className="text-sm font-medium capitalize">Afghanistan</span>
+                      <span className="text-sm font-medium capitalize">{details?.country}</span>
                     </div>
 
                     <div className="flex items-start justify-between py-3">
@@ -293,7 +286,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                         <span className="text-sm font-medium text-muted-foreground">Address</span>
                       </div>
                       <span className="text-sm text-right max-w-xs leading-relaxed font-medium">
-                        Apartment 4A, Green View Residences, 25 Wentworth Avenue, Sydney NSW 2000
+                        {getAddress()}
                       </span>
                     </div>
                   </div>
@@ -350,15 +343,15 @@ export const DetailViewModal = ({ details, fetching }) => {
                 </Badge> */}
                 <div className="text-right">
                   <div className="text-xs text-muted-foreground">Total Score</div>
-                  <div className={`text-xl font-bold ${getRiskColor(totalRiskScore)}`}>
-                    {totalRiskScore}
+                  <div className={`text-xl font-bold ${getRiskColor(details?.riskScore)}`}>
+                    {details?.riskScore}
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
+              {/* <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Channel</span>
@@ -376,9 +369,10 @@ export const DetailViewModal = ({ details, fetching }) => {
                 >
                   Score: {riskAssessment?.channel?.score}
                 </Badge>
-              </div>
+              </div> */}
+              <RiskScoreCard name="Channel" item={riskAssessment?.channel} />
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
+              {/* <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Customer Retention</span>
@@ -396,9 +390,10 @@ export const DetailViewModal = ({ details, fetching }) => {
                 >
                   Score: {riskAssessment?.customerRetention?.score}
                 </Badge>
-              </div>
+              </div> */}
+              <RiskScoreCard name="Customer Retention" item={riskAssessment?.customerRetention} />
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border">
+              {/* <div className="flex items-center justify-between p-4 rounded-lg bg-card border">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Customer Type</span>
@@ -416,9 +411,10 @@ export const DetailViewModal = ({ details, fetching }) => {
                 >
                   Score: {riskAssessment?.customerType?.score}
                 </Badge>
-              </div>
+              </div> */}
+              <RiskScoreCard name="Customer Type" item={riskAssessment?.customerType} />
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
+              {/* <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Industry</span>
@@ -436,9 +432,10 @@ export const DetailViewModal = ({ details, fetching }) => {
                 >
                   Score: {riskAssessment?.industry?.score}
                 </Badge>
-              </div>
+              </div> */}
+              <RiskScoreCard name="Industry" item={riskAssessment?.industry} />
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-destructive/5 border border-destructive/30">
+              {/* <div className="flex items-center justify-between p-4 rounded-lg bg-destructive/5 border border-destructive/30">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Jurisdiction</span>
@@ -460,9 +457,12 @@ export const DetailViewModal = ({ details, fetching }) => {
                 >
                   Score: {riskAssessment?.jurisdiction?.score}
                 </Badge>
-              </div>
+              </div> */}
+              <RiskScoreCard name="Jurisdiction" item={riskAssessment?.jurisdiction} />
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
+              <RiskScoreCard name="Occupation" item={riskAssessment?.occupation} />
+
+              {/* <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Occupation</span>
@@ -480,9 +480,9 @@ export const DetailViewModal = ({ details, fetching }) => {
                 >
                   Score: {riskAssessment?.occupation?.score}
                 </Badge>
-              </div>
+              </div> */}
 
-              <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
+              {/* <div className="flex items-center justify-between p-4 rounded-lg bg-card border ">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium">Product</span>
@@ -500,7 +500,8 @@ export const DetailViewModal = ({ details, fetching }) => {
                 >
                   Score: {riskAssessment?.product?.score}
                 </Badge>
-              </div>
+              </div> */}
+              <RiskScoreCard name="Product" item={riskAssessment?.product} />
             </div>
 
             <div className="mt-6 p-4 rounded-lg bg-muted/50 border border-border">

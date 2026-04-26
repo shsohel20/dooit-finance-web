@@ -24,6 +24,14 @@ export const getModuleById = async (id) => {
   return response.json();
 };
 
+export const updateModule = async (data, moduleId) => {
+  const response = await fetchWithAuth(`training-modules/${moduleId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
 export const createPart = async (data, moduleId) => {
   const response = await fetchWithAuth(`training-modules/${moduleId}/parts`, {
     method: "POST",
