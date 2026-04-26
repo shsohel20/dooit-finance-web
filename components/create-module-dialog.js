@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useState } from 'react';
@@ -18,7 +18,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useModules } from '@/contexts/module-context';
 import { Plus } from 'lucide-react';
-import { createModule } from '@/app/dashboard/client/knowledge-hub/training-hub/actions';
+import {
+  createModule,
+  getModuleById,
+  updateModule,
+} from '@/app/dashboard/client/knowledge-hub/training-hub/actions';
 import {
   Select,
   SelectContent,
@@ -39,9 +43,40 @@ const initialState = {
   status: 'published',
 };
 
-export function CreateModuleDialog({ getAll, setOpen, open }) {
+export function CreateModuleDialog({
+  getAll,
+  setOpen,
+  open,
+  editId,
+  setEditId,
+}) {
   const [formData, setFormData] = useState(initialState);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (editId) {
+      // Fetch module data by ID and populate formData for editing
+      // Example:
+      const fetchModuleData = async () => {
+        setIsLoading(true);
+        try {
+          const res = await getModuleById(editId);
+          if (res.success) {
+            setFormData({
+              title: res.data.title,
+              description: res.data.description,
+              status: res.data.status,
+            });
+          } else {
+            toast.error('Failed to fetch module data');
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchModuleData();
+    }
+  }, [editId]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -49,8 +84,11 @@ export function CreateModuleDialog({ getAll, setOpen, open }) {
 
     setIsLoading(true);
     try {
-      const res = await createModule(formData);
-      // console.log('res', res);
+      const action = editId
+        ? updateModule(formData, editId)
+        : createModule(formData);
+      const res = await action;
+      console.log('res', res);
       if (res.success) {
         setFormData(initialState);
         setOpen(false);
@@ -64,8 +102,14 @@ export function CreateModuleDialog({ getAll, setOpen, open }) {
     }
   };
 
+  const onClose = () => {
+    setFormData(initialState);
+    setEditId?.(null);
+    setOpen(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onClose}>
       {/* <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="w-4 h-4" />
@@ -74,10 +118,10 @@ export function CreateModuleDialog({ getAll, setOpen, open }) {
       </DialogTrigger> */}
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Module</DialogTitle>
-          <DialogDescription>
+          <DialogTitle>Manage module</DialogTitle>
+          {/* <DialogDescription>
             You can add parts and questions after creation.
-          </DialogDescription>
+          </DialogDescription> */}
         </DialogHeader>
         <form onSubmit={handleCreate} className="space-y-4">
           <div className="space-y-2">
@@ -137,7 +181,7 @@ export function CreateModuleDialog({ getAll, setOpen, open }) {
               type="submit"
               disabled={!formData.title.trim() || isLoading}
             >
-              {isLoading ? 'Creating...' : 'Create Module'}
+              {isLoading ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </form>

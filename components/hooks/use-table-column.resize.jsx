@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 // Debounce function to limit expensive operations
 function useDebounce(value, delay) {
@@ -47,7 +47,7 @@ export function useTableColumnResize(tableId, enableResizing = true) {
   const handleSetColumnSizing = useCallback((newSizing) => {
     setColumnSizing((prev) => {
       const nextState =
-        typeof newSizing === "function" ? newSizing(prev) : newSizing;
+        typeof newSizing === 'function' ? newSizing(prev) : newSizing;
 
       // Check if this is a real user change and not just the initial load
       if (
@@ -76,7 +76,7 @@ export function useTableColumnResize(tableId, enableResizing = true) {
         }
       } catch (error) {
         console.warn(
-          "Failed to load saved column sizing from localStorage:",
+          'Failed to load saved column sizing from localStorage:',
           error
         );
       } finally {
@@ -98,7 +98,7 @@ export function useTableColumnResize(tableId, enableResizing = true) {
           JSON.stringify(debouncedColumnSizing)
         );
       } catch (error) {
-        console.warn("Failed to save column sizing to localStorage:", error);
+        console.warn('Failed to save column sizing to localStorage:', error);
       }
     }
   }, [debouncedColumnSizing, tableId, enableResizing]);
@@ -114,7 +114,7 @@ export function useTableColumnResize(tableId, enableResizing = true) {
         localStorage.removeItem(`table-column-sizing-${tableId}`);
       } catch (error) {
         console.warn(
-          "Failed to remove column sizing from localStorage:",
+          'Failed to remove column sizing from localStorage:',
           error
         );
       }

@@ -1,18 +1,31 @@
 'use client';
 
+import { toggleEncryption } from '@/app/dashboard/client/action';
+import useGetUser from '@/hooks/useGetUser';
 import { Lock, Unlock } from 'lucide-react';
 import { useState } from 'react';
 
 export function EncryptDecryptFAB() {
-  const [isEncrypted, setIsEncrypted] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const { loggedInUser, getUser } = useGetUser();
+  const [isEncrypted, setIsEncrypted] = useState(
+    loggedInUser?.client?.isEncrypted || false
+  );
+  console.log('Current encryption state:', isEncrypted);
 
-  const handleToggle = () => {
+  const handleToggle = async () => {
     setIsAnimating(true);
-    setTimeout(() => {
-      setIsEncrypted(!isEncrypted);
+    const payload = {
+      encrypted: !isEncrypted,
+    };
+    console.log('payload', JSON.stringify(payload, null, 2));
+
+    const res = await toggleEncryption(payload);
+    console.log('Encryption toggle response:', res);
+    if (res.success) {
+      setIsEncrypted((prev) => !prev);
       setIsAnimating(false);
-    }, 200);
+    }
   };
 
   return (
