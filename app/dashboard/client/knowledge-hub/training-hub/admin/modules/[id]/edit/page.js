@@ -4,12 +4,20 @@ import React, { useCallback } from "react";
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useModules } from "@/contexts/module-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { ArrowLeft, Trash2, Edit2, Plus } from "lucide-react";
-import { getAllParts, getModuleById, publishModule } from "../../../../actions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { getAllParts, getModuleById, publishModule, deletePart } from "../../../../actions";
 import PartModal from "../PartModal";
 import { toast } from "sonner";
 
@@ -19,14 +27,12 @@ export default function ModuleEditorPage() {
   const params = useParams();
   const router = useRouter();
   const user = { id: "1", role: "admin" };
-  const { updateModule, addPart, deletePart } = useModules();
   const [isPublishing, setIsPublishing] = useState(false);
   const moduleId = params.id;
-
-  // const moduleData = getModuleById(moduleId);
   const [openDialog, setOpenDialog] = useState(false);
-
   const [isLoading, setIsLoading] = useState(false);
+  const [deletePartTarget, setDeletePartTarget] = useState(null);
+  const [isDeletingPart, setIsDeletingPart] = useState(false);
 
   const fetchModule = async () => {
     setIsLoading(true);
@@ -73,6 +79,21 @@ export default function ModuleEditorPage() {
     );
   }
 
+  const handleDeletePart = async () => {
+    if (!deletePartTarget) return;
+    setIsDeletingPart(true);
+    const res = await deletePart(deletePartTarget._id);
+    setIsDeletingPart(false);
+    setDeletePartTarget(null);
+    if (res.success) {
+      toast.success("Part deleted");
+      fetchParts();
+      fetchModule();
+    } else {
+      toast.error("Failed to delete part");
+    }
+  };
+
   const handlePublish = async () => {
     if (moduleData.parts.length === 0) {
       toast("Add at least one part before publishing");
@@ -91,6 +112,27 @@ export default function ModuleEditorPage() {
   };
 
   return (
+    <>
+    <AlertDialog open={!!deletePartTarget} onOpenChange={(open) => !open && setDeletePartTarget(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Part</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete &quot;{deletePartTarget?.title}&quot;? This will also remove all questions in this part.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeletingPart}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDeletePart}
+            disabled={isDeletingPart}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {isDeletingPart ? "Deleting..." : "Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -159,7 +201,7 @@ export default function ModuleEditorPage() {
                         </span>
                         <h3 className="text-lg font-semibold text-foreground">{part.title}</h3>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">{part.videoUrl}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{part.video?.url}</p>
                       <p className="text-sm text-muted-foreground mt-2">
                         {part.questions.length} question{part.questions.length !== 1 ? "s" : ""}
                       </p>
@@ -179,7 +221,7 @@ export default function ModuleEditorPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => deletePart(moduleId, part.id)}
+                        onClick={() => setDeletePartTarget(part)}
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>
@@ -192,5 +234,6 @@ export default function ModuleEditorPage() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }

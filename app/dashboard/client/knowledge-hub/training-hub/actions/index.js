@@ -142,3 +142,83 @@ export const publishModule = async (moduleId, data) => {
   });
   return response.json();
 };
+
+export const deleteModule = async (moduleId) => {
+  const response = await fetchWithAuth(`training-modules/${moduleId}`, {
+    method: "DELETE",
+  });
+  return response.json();
+};
+
+export const deletePart = async (partId) => {
+  const response = await fetchWithAuth(`training-modules/parts/${partId}`, {
+    method: "DELETE",
+  });
+  return response.json();
+};
+
+export const updateQuestion = async (data, questionId) => {
+  const response = await fetchWithAuth(`training-modules/questions/${questionId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
+export const completeModule = async (moduleId) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}/complete`, {
+    method: "POST",
+  });
+  return response.json();
+};
+
+export const grantRetake = async (moduleId, data) => {
+  const response = await fetchWithAuth(`training-modules/${moduleId}/retake`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
+export const getModuleLearners = async (moduleId) => {
+  const response = await fetchWithAuth(`training-modules/${moduleId}/learners`, {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const getReportsOverview = async () => {
+  const response = await fetchWithAuth("training-reports/overview", {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const getReportsLearners = async () => {
+  const response = await fetchWithAuth("training-reports/learners", {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const getModuleAccess = async (moduleId) => {
+  const response = await fetchWithAuth(`training-modules/${moduleId}/access`, {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const assignModuleAccess = async (moduleId, data) => {
+  const response = await fetchWithAuth(`training-modules/${moduleId}/access`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
+
+export const deleteModuleAccess = async (accessId) => {
+  const response = await fetchWithAuth(`training-modules/access/${accessId}`, {
+    method: "DELETE",
+  });
+  return response.json();
+};

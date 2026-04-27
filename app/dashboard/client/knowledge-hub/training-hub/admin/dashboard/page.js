@@ -18,6 +18,7 @@ import {
   FileText,
   Activity,
   Table,
+  ShieldCheck,
 } from "lucide-react";
 import { getModules } from "../../actions";
 
@@ -403,6 +404,23 @@ export default function DashboardPage() {
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">View Reports</p>
                   <p className="text-xs text-muted-foreground">Analytics & progress</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  router.push("/dashboard/client/knowledge-hub/training-hub/admin/access")
+                }
+                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors text-left group"
+              >
+                <div className="p-2 rounded-lg bg-[hsl(262_83%_58%)]/10 text-[hsl(262_83%_58%)] group-hover:bg-[hsl(262_83%_58%)]/20 transition-colors">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">Module Access</p>
+                  <p className="text-xs text-muted-foreground">Manage org scoping</p>
                 </div>
                 <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>

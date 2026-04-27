@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useModules } from "@/contexts/module-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,47 +43,39 @@ import {
   FileText,
   AlertTriangle,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
-import { getModules, assignAssignment, getAssignmentsforAdmin } from "../../../actions";
+import {
+  getModules,
+  assignAssignment,
+  getAssignmentsforAdmin,
+  getModuleLearners,
+  grantRetake,
+} from "../../../actions";
 import { getAllUsers } from "@/app/dashboard/client/user-and-role-management/actions";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const mockLearners = [
-  { id: "1", name: "John Doe", email: "john.doe@company.com", department: "Compliance" },
-  { id: "learner2", name: "Michael Chen", email: "michael@company.com", department: "Operations" },
-  { id: "learner3", name: "Sarah Williams", email: "sarah@company.com", department: "Compliance" },
-  { id: "learner4", name: "David Brown", email: "david@company.com", department: "Legal" },
-  { id: "3", name: "Demo Learner", email: "learner@aml.com", department: "Training" },
-];
-const getLearnerProgress = (learnerId, moduleId) => {
-  // const res = await getLearnerProgressforAdmin(learnerId, moduleId);
-  // return res?.data || null;
+const STATUS_CFG = {
+  passed: { bg: "bg-[hsl(142_71%_45%)]/10", text: "text-[hsl(142_71%_45%)]", label: "Passed" },
+  completed: { bg: "bg-[hsl(142_71%_45%)]/10", text: "text-[hsl(142_71%_45%)]", label: "Passed" },
+  failed: { bg: "bg-destructive/10", text: "text-destructive", label: "Failed" },
+  "in-progress": { bg: "bg-primary/10", text: "text-primary", label: "In Progress" },
+  pending: { bg: "bg-muted", text: "text-muted-foreground", label: "Not Started" },
+  overdue: { bg: "bg-[hsl(38_92%_50%)]/10", text: "text-[hsl(38_92%_50%)]", label: "Overdue" },
 };
+
 export default function ManageAssignmentsPage() {
   const user = { id: "1", role: "admin", name: "John Doe" };
   const [users, setUsers] = useState([]);
-  const fetchUsers = useCallback(async () => {
-    const res = await getAllUsers();
-    // console.log("res", res);
-    setUsers(res?.data || []);
-  }, []);
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
   const [modules, setModules] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const [maxAttempts, setMaxAttempts] = useState(3);
   const [dueDate, setDueDate] = useState("");
-
-  const [assignments, setAssignments] = useState([]);
-  const fetchAssignments = useCallback(async () => {
-    const res = await getAssignmentsforAdmin();
-    setAssignments(res?.data || []);
-  }, []);
-  useEffect(() => {
-    fetchAssignments();
-  }, [fetchAssignments]);
   const [viewMode, setViewMode] = useState("list");
-  const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const [selectedModuleId, setSelectedModuleId] = useState(null);
+  const [moduleLearners, setModuleLearners] = useState([]);
+  const [learnersLoading, setLearnersLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [newModuleId, setNewModuleId] = useState("");
@@ -92,60 +83,101 @@ export default function ManageAssignmentsPage() {
   const [selectedLearners, setSelectedLearners] = useState([]);
   const [retakeConfirm, setRetakeConfirm] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRetaking, setIsRetaking] = useState(false);
 
-  const publishedModules = modules;
+  const fetchUsers = useCallback(async () => {
+    const res = await getAllUsers();
+    setUsers(res?.data || []);
+  }, []);
 
   const fetchModules = useCallback(async () => {
     const res = await getModules();
     setModules(res?.data || []);
   }, []);
-  useEffect(() => {
-    fetchModules();
-  }, [fetchModules]);
-  const filteredAssignments = assignments.filter((a) => {
-    const moduleData = modules.find((m) => m.id === a.module?._id);
-    if (!moduleData) return false;
-    return moduleData.title.toLowerCase().includes(search.toLowerCase());
-  });
 
-  const currentAssignment = assignments.find((a) => a.id === selectedAssignment);
-  const currentModule = currentAssignment
-    ? modules.find((m) => m.id === currentAssignment.moduleId)
+  const fetchAssignments = useCallback(async () => {
+    const res = await getAssignmentsforAdmin();
+    setAssignments(res?.data || []);
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+    fetchModules();
+    fetchAssignments();
+  }, []);
+
+  // Group assignments by module
+  const moduleGroups = assignments.reduce((acc, a) => {
+    const moduleId = a.module?._id;
+    if (!moduleId) return acc;
+    if (!acc[moduleId]) {
+      acc[moduleId] = { module: a.module, assignments: [], dueDate: a.dueDate };
+    }
+    acc[moduleId].assignments.push(a);
+    return acc;
+  }, {});
+  const groupedList = Object.values(moduleGroups);
+
+  const filteredGroups = groupedList.filter(({ module }) =>
+    module?.title?.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const selectedModule = selectedModuleId
+    ? (moduleGroups[selectedModuleId]?.module || modules.find((m) => m._id === selectedModuleId))
     : null;
 
-  console.log("assignments", assignments);
-  // const totalLearners = assignments.reduce((a, b) => a + b.assignedTo.length, 0);
   const clearForms = () => {
     setNewModuleId("");
     setSelectedLearners([]);
     setDueDate("");
     setMaxAttempts(3);
   };
+
   const handleAssign = async () => {
     setIsSubmitting(true);
-    const payload = {
-      dueDate: dueDate,
-      maxAttempts: maxAttempts,
-      learnerIds: selectedLearners,
-    };
-    // console.log("payload", payload);
     try {
-      const response = await assignAssignment(payload, newModuleId);
-      // console.log("response", response);
+      const response = await assignAssignment(
+        { dueDate, maxAttempts: Number(maxAttempts), learnerIds: selectedLearners },
+        newModuleId,
+      );
       if (response.success) {
-        toast.success("Assignment assigned successfully");
+        toast.success(
+          `Assigned to ${response.inserted} learner(s). ${response.roleBlocked > 0 ? `${response.roleBlocked} blocked by role rules.` : ""}`,
+        );
         clearForms();
         setAssignDialogOpen(false);
+        fetchAssignments();
       } else {
-        toast.error(response.error);
+        toast.error(response.message || "Assignment failed");
       }
-    } catch (error) {
-      console.error("error", error);
-      //  setIsSubmitting(false);
+    } catch {
+      toast.error("An error occurred");
     } finally {
       setIsSubmitting(false);
     }
-    // if (!newModuleId || selectedLearners.length === 0 || !user) return;
+  };
+
+  const handleViewDetails = async (moduleId) => {
+    setSelectedModuleId(moduleId);
+    setViewMode("detail");
+    setLearnersLoading(true);
+    const res = await getModuleLearners(moduleId);
+    setModuleLearners(res?.data || []);
+    setLearnersLoading(false);
+  };
+
+  const handleRetakeConfirm = async () => {
+    if (!retakeConfirm) return;
+    setIsRetaking(true);
+    const res = await grantRetake(retakeConfirm.moduleId, { learnerId: retakeConfirm.learnerId });
+    setIsRetaking(false);
+    setRetakeConfirm(null);
+    if (res.success) {
+      toast.success("Retake granted");
+      handleViewDetails(retakeConfirm.moduleId);
+    } else {
+      toast.error(res.message || "Failed to grant retake");
+    }
   };
 
   const toggleLearner = (id) => {
@@ -154,10 +186,10 @@ export default function ManageAssignmentsPage() {
     );
   };
 
-  const filteredNewLearners = users?.filter(
+  const filteredNewLearners = users.filter(
     (l) =>
-      l.name.toLowerCase().includes(newLearnerSearch.toLowerCase()) ||
-      l.email.toLowerCase().includes(newLearnerSearch.toLowerCase()),
+      l.name?.toLowerCase().includes(newLearnerSearch.toLowerCase()) ||
+      l.email?.toLowerCase().includes(newLearnerSearch.toLowerCase()),
   );
 
   if (user?.role !== "admin") {
@@ -168,15 +200,11 @@ export default function ManageAssignmentsPage() {
     );
   }
 
-  // Detail View
-  if (viewMode === "detail" && currentAssignment && currentModule) {
-    const learners = mockLearners.filter((l) => currentAssignment.assignedTo.includes(l.id));
-    const qCount = currentModule.parts.reduce((a, p) => a + p.questions.length, 0);
-
+  // ── Detail View ──────────────────────────────────────────────────────────
+  if (viewMode === "detail" && selectedModule) {
     return (
       <>
         <div className="space-y-6">
-          {/* Back button */}
           <button
             type="button"
             onClick={() => setViewMode("list")}
@@ -186,100 +214,66 @@ export default function ManageAssignmentsPage() {
             Back to Assignments
           </button>
 
-          {/* Module Header Card */}
+          {/* Module Header */}
           <Card className="border-border/60 overflow-hidden">
             <div className="h-1.5 bg-gradient-to-r from-primary via-accent to-[hsl(142_71%_45%)]" />
             <CardContent className="pt-6 pb-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-2xl bg-primary/10 text-primary">
-                    <BookOpen className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-foreground">{currentModule.title}</h2>
-                    <p className="text-muted-foreground mt-1">{currentModule.description}</p>
-                    <div className="flex items-center gap-4 mt-3">
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground">{selectedModule.title}</h2>
+                  <p className="text-muted-foreground mt-1">{selectedModule.description}</p>
+                  <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5" />
+                      {moduleLearners.length} learners
+                    </span>
+                    {selectedModule.parts?.length > 0 && (
+                      <span className="flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5" />
-                        {currentModule.parts.length} parts
-                      </div>
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        {qCount} questions
-                      </div>
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <Users className="w-3.5 h-3.5" />
-                        {learners.length} learners
-                      </div>
-                      {currentAssignment.dueDate && (
-                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <Clock className="w-3.5 h-3.5" />
-                          Due {new Date(currentAssignment.dueDate).toLocaleDateString()}
-                        </div>
-                      )}
-                    </div>
+                        {selectedModule.parts.length} parts
+                      </span>
+                    )}
                   </div>
                 </div>
-                <Badge
-                  variant="outline"
-                  className="bg-[hsl(142_71%_45%)]/10 text-[hsl(142_71%_45%)] border-0"
-                >
-                  Active
-                </Badge>
               </div>
             </CardContent>
           </Card>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {(() => {
-              let passed = 0,
-                failed = 0,
-                inProg = 0,
-                notStarted = 0;
-              learners.forEach((l) => {
-                const p = getLearnerProgress(l.id, currentModule.id);
-                if (p?.isPassed) passed++;
-                else if (p?.completedAt) failed++;
-                else if (p && p.attempts.length > 0) inProg++;
-                else notStarted++;
-              });
-              return [
-                {
-                  label: "Passed",
-                  value: passed,
-                  color: "text-[hsl(142_71%_45%)]",
-                  bg: "bg-[hsl(142_71%_45%)]/10",
-                },
-                {
-                  label: "Failed",
-                  value: failed,
-                  color: "text-destructive",
-                  bg: "bg-destructive/10",
-                },
-                { label: "In Progress", value: inProg, color: "text-primary", bg: "bg-primary/10" },
-                {
-                  label: "Not Started",
-                  value: notStarted,
-                  color: "text-muted-foreground",
-                  bg: "bg-muted/50",
-                },
-              ].map((s) => (
-                <Card key={s.label} className="border-border/60">
-                  <CardContent className="py-4 flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center`}
-                    >
-                      <span className={`text-lg font-bold ${s.color}`}>{s.value}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{s.label}</p>
-                  </CardContent>
-                </Card>
-              ));
-            })()}
-          </div>
+          {!learnersLoading && moduleLearners.length > 0 && (() => {
+            const passed = moduleLearners.filter((l) => l.isPassed).length;
+            const failed = moduleLearners.filter(
+              (l) => l.completedAt && !l.isPassed,
+            ).length;
+            const inProg = moduleLearners.filter(
+              (l) => l.startedAt && !l.completedAt,
+            ).length;
+            const notStarted = moduleLearners.filter((l) => !l.startedAt).length;
+            return (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: "Passed", value: passed, color: "text-[hsl(142_71%_45%)]", bg: "bg-[hsl(142_71%_45%)]/10" },
+                  { label: "Failed", value: failed, color: "text-destructive", bg: "bg-destructive/10" },
+                  { label: "In Progress", value: inProg, color: "text-primary", bg: "bg-primary/10" },
+                  { label: "Not Started", value: notStarted, color: "text-muted-foreground", bg: "bg-muted/50" },
+                ].map((s) => (
+                  <Card key={s.label} className="border-border/60">
+                    <CardContent className="py-4 flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center`}>
+                        <span className={`text-lg font-bold ${s.color}`}>{s.value}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{s.label}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            );
+          })()}
 
-          {/* Learner Table */}
+          {/* Learners Table */}
           <Card className="border-border/60 overflow-hidden">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -288,144 +282,122 @@ export default function ManageAssignmentsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="overflow-x-auto -mx-6 px-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/30 hover:bg-muted/30">
-                      <TableHead className="font-semibold">Learner</TableHead>
-                      <TableHead className="font-semibold">Department</TableHead>
-                      <TableHead className="font-semibold">Score</TableHead>
-                      <TableHead className="font-semibold">Status</TableHead>
-                      <TableHead className="font-semibold">Attempts</TableHead>
-                      <TableHead className="text-right font-semibold">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {learners.map((learner) => {
-                      const prog = getLearnerProgress(learner.id, currentModule.id);
-                      const status = prog?.isPassed
-                        ? "passed"
-                        : prog?.completedAt
-                          ? "failed"
-                          : prog && prog.attempts.length > 0
-                            ? "in-progress"
-                            : "not-started";
-                      const statusCfg = {
-                        passed: {
-                          bg: "bg-[hsl(142_71%_45%)]/10",
-                          text: "text-[hsl(142_71%_45%)]",
-                          label: "Passed",
-                        },
-                        failed: {
-                          bg: "bg-destructive/10",
-                          text: "text-destructive",
-                          label: "Failed",
-                        },
-                        "in-progress": {
-                          bg: "bg-primary/10",
-                          text: "text-primary",
-                          label: "In Progress",
-                        },
-                        notStarted: {
-                          bg: "bg-muted",
-                          text: "text-muted-foreground",
-                          label: "Not Started",
-                        },
-                      };
-                      const cfg = statusCfg["notStarted"];
+              {learnersLoading ? (
+                <div className="space-y-3">
+                  {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+                </div>
+              ) : moduleLearners.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  No learners assigned yet.
+                </div>
+              ) : (
+                <div className="overflow-x-auto -mx-6 px-6">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/30 hover:bg-muted/30">
+                        <TableHead className="font-semibold">Learner</TableHead>
+                        <TableHead className="font-semibold">Score</TableHead>
+                        <TableHead className="font-semibold">Status</TableHead>
+                        <TableHead className="font-semibold">Attempts</TableHead>
+                        <TableHead className="font-semibold">Completed</TableHead>
+                        <TableHead className="text-right font-semibold">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {moduleLearners.map((item) => {
+                        const learner = item.learner || item;
+                        const score = item.score ?? item.finalScore ?? 0;
+                        const statusKey = item.status ||
+                          (item.isPassed ? "passed" : item.completedAt ? "failed" : item.startedAt ? "in-progress" : "pending");
+                        const cfg = STATUS_CFG[statusKey] || STATUS_CFG.pending;
+                        const canRetake = statusKey === "failed";
 
-                      return (
-                        <TableRow key={learner.id} className="hover:bg-muted/30">
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                                {learner.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
+                        return (
+                          <TableRow key={item._id} className="hover:bg-muted/30">
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                                  {learner.name?.split(" ").map((n) => n[0]).join("") || "?"}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-foreground text-sm">{learner.name}</p>
+                                  <p className="text-xs text-muted-foreground">{learner.email}</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-medium text-foreground text-sm">
-                                  {learner.name}
-                                </p>
-                                <p className="text-xs text-muted-foreground">{learner.email}</p>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Progress value={score} className="w-16 h-1.5" />
+                                <span
+                                  className={`text-sm font-semibold ${score >= 70 ? "text-[hsl(142_71%_45%)]" : score > 0 ? "text-destructive" : "text-muted-foreground"}`}
+                                >
+                                  {score > 0 ? `${Math.round(score)}%` : "-"}
+                                </span>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {learner.department}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Progress value={prog?.score ?? 0} className="w-16 h-1.5" />
-                              <span className="text-sm font-medium text-foreground">
-                                {Math.round(prog?.score ?? 0)}%
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={`${cfg.bg} ${cfg.text} border-0 text-xs`}
-                            >
-                              {cfg.label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm text-foreground">
-                            {prog?.attemptCount ?? 0}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {status === "failed" && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="gap-1.5 text-[hsl(38_92%_50%)] border-[hsl(38_92%_50%)]/30 hover:bg-[hsl(38_92%_50%)]/10 bg-transparent"
-                                onClick={() =>
-                                  setRetakeConfirm({
-                                    learnerId: learner.id,
-                                    moduleId: currentModule.id,
-                                  })
-                                }
-                              >
-                                <RotateCcw className="w-3.5 h-3.5" />
-                                Retake
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={`${cfg.bg} ${cfg.text} border-0 text-xs`}>
+                                {cfg.label}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-foreground">
+                              {item.attemptRound ?? "-"}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {item.completedAt
+                                ? new Date(item.completedAt).toLocaleDateString()
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {canRetake && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="gap-1.5 text-[hsl(38_92%_50%)] border-[hsl(38_92%_50%)]/30 hover:bg-[hsl(38_92%_50%)]/10 bg-transparent"
+                                  onClick={() =>
+                                    setRetakeConfirm({
+                                      learnerId: learner._id,
+                                      moduleId: selectedModuleId,
+                                      learnerName: learner.name,
+                                    })
+                                  }
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5" />
+                                  Retake
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
         {/* Retake Dialog */}
-        <Dialog open={!!retakeConfirm} onOpenChange={() => setRetakeConfirm(null)}>
+        <Dialog open={!!retakeConfirm} onOpenChange={() => !isRetaking && setRetakeConfirm(null)}>
           <DialogContent className="sm:max-w-[400px]">
             <DialogHeader>
               <DialogTitle>Confirm Retake</DialogTitle>
               <DialogDescription>
-                This will reset the learner&apos;s progress and allow them to retake the module from
-                the beginning.
+                Grant <strong>{retakeConfirm?.learnerName}</strong> a retake? This resets their
+                progress for a new attempt round.
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setRetakeConfirm(null)}>
+              <Button variant="outline" onClick={() => setRetakeConfirm(null)} disabled={isRetaking}>
                 Cancel
               </Button>
               <Button
-                className="bg-[hsl(38_92%_50%)] text-[hsl(0_0%_100%)] hover:bg-[hsl(38_92%_45%)]"
-                onClick={() => {
-                  if (retakeConfirm) {
-                    retakeModule(retakeConfirm.learnerId, retakeConfirm.moduleId);
-                    setRetakeConfirm(null);
-                  }
-                }}
+                className="bg-[hsl(38_92%_50%)] text-white hover:bg-[hsl(38_92%_45%)]"
+                onClick={handleRetakeConfirm}
+                disabled={isRetaking}
               >
-                <RotateCcw className="w-4 h-4 mr-2" />
+                {isRetaking ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RotateCcw className="w-4 h-4 mr-2" />}
                 Confirm Retake
               </Button>
             </div>
@@ -435,7 +407,7 @@ export default function ManageAssignmentsPage() {
     );
   }
 
-  // List View
+  // ── List View ────────────────────────────────────────────────────────────
   return (
     <>
       <div className="space-y-8">
@@ -462,20 +434,22 @@ export default function ManageAssignmentsPage() {
               </DialogHeader>
               <div className="space-y-5 mt-2">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Module</Label>
+                  <Label className="text-sm font-medium">Module (Published Only)</Label>
                   <Select value={newModuleId} onValueChange={setNewModuleId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a module..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {publishedModules.map((m) => (
-                        <SelectItem key={m.id} value={m.id}>
-                          <div className="flex items-center gap-2">
-                            <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
-                            {m.title}
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {modules
+                        .filter((m) => m.status === "published")
+                        .map((m) => (
+                          <SelectItem key={m._id} value={m._id}>
+                            <div className="flex items-center gap-2">
+                              <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
+                              {m.title}
+                            </div>
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -484,9 +458,7 @@ export default function ManageAssignmentsPage() {
                   <Label className="text-sm font-medium">
                     Learners{" "}
                     {selectedLearners.length > 0 && (
-                      <span className="text-primary ml-1">
-                        ({selectedLearners.length} selected)
-                      </span>
+                      <span className="text-primary ml-1">({selectedLearners.length} selected)</span>
                     )}
                   </Label>
                   <div className="relative">
@@ -498,10 +470,10 @@ export default function ManageAssignmentsPage() {
                       className="pl-10"
                     />
                   </div>
-                  {users.length > 0 && (
+                  {selectedLearners.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
-                      {users.map((id) => {
-                        const l = mockLearners.find((x) => x.id === id);
+                      {selectedLearners.map((id) => {
+                        const l = users.find((x) => x._id === id);
                         return l ? (
                           <Badge
                             key={id}
@@ -509,7 +481,7 @@ export default function ManageAssignmentsPage() {
                             className="cursor-pointer hover:bg-destructive/20 transition-colors"
                             onClick={() => toggleLearner(id)}
                           >
-                            {l.name} x
+                            {l.name} ×
                           </Badge>
                         ) : null;
                       })}
@@ -517,12 +489,12 @@ export default function ManageAssignmentsPage() {
                   )}
                   <div className="space-y-1 max-h-48 overflow-y-auto border border-border rounded-lg p-1">
                     {filteredNewLearners.map((learner) => {
-                      const isSelected = selectedLearners.includes(learner.id);
+                      const isSelected = selectedLearners.includes(learner._id);
                       return (
                         <button
-                          key={learner.id}
+                          key={learner._id}
                           type="button"
-                          onClick={() => toggleLearner(learner.id)}
+                          onClick={() => toggleLearner(learner._id)}
                           className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors text-left ${
                             isSelected ? "bg-primary/10" : "hover:bg-muted/50"
                           }`}
@@ -532,17 +504,17 @@ export default function ManageAssignmentsPage() {
                               isSelected ? "bg-primary border-primary" : "border-border"
                             }`}
                           >
-                            {isSelected && (
-                              <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
-                            )}
+                            {isSelected && <CheckCircle2 className="w-3 h-3 text-primary-foreground" />}
                           </div>
                           <div className="flex-1">
                             <p className="text-sm font-medium text-foreground">{learner.name}</p>
                             <p className="text-xs text-muted-foreground">{learner.email}</p>
                           </div>
-                          <Badge variant="outline" className="text-[10px]">
-                            {learner.role}
-                          </Badge>
+                          {learner.role && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {learner.role}
+                            </Badge>
+                          )}
                         </button>
                       );
                     })}
@@ -550,14 +522,10 @@ export default function ManageAssignmentsPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Due Date</Label>
-                      <Input
-                        type="date"
-                        value={dueDate}
-                        onChange={(e) => setDueDate(e.target.value)}
-                      />
+                      <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
                     </div>
                     <div>
-                      <Label>Max Attempts</Label>
+                      <Label>Max Attempts (0 = unlimited)</Label>
                       <Input
                         type="number"
                         value={maxAttempts}
@@ -576,40 +544,33 @@ export default function ManageAssignmentsPage() {
                   {isSubmitting
                     ? "Assigning..."
                     : `Assign to ${selectedLearners.length} Learner${selectedLearners.length !== 1 ? "s" : ""}`}
-                  {selectedLearners.length !== 1 ? "s" : ""}
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
         </div>
 
-        {/* Summary Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {/* Summary */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[
+            {
+              label: "Module Groups",
+              value: groupedList.length,
+              icon: BookOpen,
+              color: "text-primary bg-primary/10",
+            },
             {
               label: "Total Assignments",
               value: assignments.length,
               icon: CheckCircle2,
-              color: "text-primary bg-primary/10",
-            },
-            {
-              label: "Published Modules",
-              value: publishedModules.length,
-              icon: BookOpen,
               color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10",
             },
-            // {
-            //   label: "Total Learners",
-            //   value: totalLearners,
-            //   icon: Users,
-            //   color: "text-accent bg-accent/10",
-            // },
-            // {
-            //   label: "Avg per Module",
-            //   value: assignments.length > 0 ? Math.round(totalLearners / assignments.length) : 0,
-            //   icon: FileText,
-            //   color: "text-[hsl(38_92%_50%)] bg-[hsl(38_92%_50%)]/10",
-            // },
+            {
+              label: "Learners",
+              value: users.length,
+              icon: Users,
+              color: "text-accent bg-accent/10",
+            },
           ].map((stat) => (
             <Card key={stat.label} className="border-border/60">
               <CardContent className="flex items-center gap-3 py-4">
@@ -629,15 +590,15 @@ export default function ManageAssignmentsPage() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search assignments by module name..."
+            placeholder="Search by module name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
           />
         </div>
 
-        {/* Assignments List */}
-        {filteredAssignments.length === 0 ? (
+        {/* Module Groups List */}
+        {filteredGroups.length === 0 ? (
           <Card className="border-dashed border-2 border-border">
             <CardContent className="flex flex-col items-center justify-center py-16">
               <div className="p-4 rounded-full bg-muted/50 mb-4">
@@ -654,37 +615,29 @@ export default function ManageAssignmentsPage() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {filteredAssignments.map((assignment) => {
-              const moduleData = modules.find((m) => m.id === assignment.module?._id);
-              if (!moduleData) return null;
-              const learners =
-                mockLearners.filter((l) => assignment.assignedTo?.includes(l.id)) || [];
-              const qCount = moduleData.parts.reduce((a, p) => a + p.questions.length, 0);
-
-              let passedCount = 0;
-              let failedCount = 0;
-              learners.forEach((l) => {
-                const p = getLearnerProgress(l.id, moduleData.id);
-                if (p?.isPassed) passedCount++;
-                else if (p?.completedAt) failedCount++;
-              });
+            {filteredGroups.map(({ module, assignments: groupAssignments }) => {
+              const passedCount = groupAssignments.filter((a) => a.isPassed).length;
+              const failedCount = groupAssignments.filter(
+                (a) => a.completedAt && !a.isPassed,
+              ).length;
+              const completionRate =
+                groupAssignments.length > 0
+                  ? Math.round((passedCount / groupAssignments.length) * 100)
+                  : 0;
 
               return (
                 <Card
-                  key={assignment._id}
+                  key={module._id}
                   className="border-border/60 overflow-hidden hover:shadow-md transition-all group"
                 >
                   <CardContent className="py-5">
                     <div className="flex items-center gap-5">
-                      {/* Icon */}
                       <div className="p-3 rounded-2xl bg-primary/10 text-primary shrink-0">
                         <BookOpen className="w-5 h-5" />
                       </div>
-
-                      {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-foreground">{moduleData.title}</h3>
+                          <h3 className="font-semibold text-foreground">{module.title}</h3>
                           {failedCount > 0 && (
                             <Badge
                               variant="outline"
@@ -698,64 +651,30 @@ export default function ManageAssignmentsPage() {
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Users className="w-3 h-3" />
-                            {learners.length} learners
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <FileText className="w-3 h-3" />
-                            {moduleData.parts.length} parts
+                            {groupAssignments.length} learner{groupAssignments.length !== 1 ? "s" : ""}
                           </span>
                           <span className="flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" />
-                            {qCount} questions
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {new Date(assignment.assignedAt).toLocaleDateString()}
+                            {passedCount} passed
                           </span>
                         </div>
                       </div>
-
-                      {/* Completion Bar */}
                       <div className="hidden md:flex items-center gap-3 shrink-0 w-36">
-                        <Progress
-                          value={learners.length > 0 ? (passedCount / learners.length) * 100 : 0}
-                          className="h-2 flex-1"
-                        />
+                        <Progress value={completionRate} className="h-2 flex-1" />
                         <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                          {passedCount}/{learners.length}
+                          {passedCount}/{groupAssignments.length}
                         </span>
                       </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        {failedCount > 0 && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-1.5 text-[hsl(38_92%_50%)] border-[hsl(38_92%_50%)]/30 hover:bg-[hsl(38_92%_50%)]/10 bg-transparent"
-                            onClick={() => {
-                              setSelectedAssignment(assignment.id);
-                              setViewMode("detail");
-                            }}
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                            Retake
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="gap-1.5"
-                          onClick={() => {
-                            setSelectedAssignment(assignment.id);
-                            setViewMode("detail");
-                          }}
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          Details
-                          <ArrowRight className="w-3 h-3" />
-                        </Button>
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="gap-1.5 shrink-0"
+                        onClick={() => handleViewDetails(module._id)}
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        Details
+                        <ArrowRight className="w-3 h-3" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -765,29 +684,30 @@ export default function ManageAssignmentsPage() {
         )}
       </div>
 
-      {/* Retake Dialog */}
-      <Dialog open={!!retakeConfirm} onOpenChange={() => setRetakeConfirm(null)}>
+      {/* Retake Dialog (list view) */}
+      <Dialog open={!!retakeConfirm} onOpenChange={() => !isRetaking && setRetakeConfirm(null)}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
             <DialogTitle>Confirm Retake</DialogTitle>
             <DialogDescription>
-              This will reset the learner's progress and allow them to retake the module.
+              Grant <strong>{retakeConfirm?.learnerName}</strong> a retake? This resets their
+              progress for a new attempt round.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setRetakeConfirm(null)}>
+            <Button variant="outline" onClick={() => setRetakeConfirm(null)} disabled={isRetaking}>
               Cancel
             </Button>
             <Button
-              className="bg-[hsl(38_92%_50%)] text-[hsl(0_0%_100%)] hover:bg-[hsl(38_92%_45%)]"
-              onClick={() => {
-                if (retakeConfirm) {
-                  retakeModule(retakeConfirm.learnerId, retakeConfirm.moduleId);
-                  setRetakeConfirm(null);
-                }
-              }}
+              className="bg-[hsl(38_92%_50%)] text-white hover:bg-[hsl(38_92%_45%)]"
+              onClick={handleRetakeConfirm}
+              disabled={isRetaking}
             >
-              <RotateCcw className="w-4 h-4 mr-2" />
+              {isRetaking ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <RotateCcw className="w-4 h-4 mr-2" />
+              )}
               Confirm Retake
             </Button>
           </div>

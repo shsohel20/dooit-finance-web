@@ -7,8 +7,10 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
   getMyProgressForModule,
+  getModuleById,
   getPartById,
   submitQuiz,
+  completeModule,
 } from "@/app/dashboard/client/knowledge-hub/training-hub/actions";
 import { useRouter, useSearchParams } from "next/navigation";
 import ResultScreen from "./ResultScreen";
@@ -24,6 +26,7 @@ export default function QuizScreen({
   moduleId,
 }) {
   const [partData, setPartData] = useState(null);
+  const [moduleData, setModuleData] = useState(null);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [progressData, setProgressData] = useState(null);
@@ -41,26 +44,25 @@ export default function QuizScreen({
   const options = currentQ?.options || [];
 
   const submitPartQuiz = async () => {
-    // setPhase("part-result");
-    const mapAnswers = {
-      0: "A",
-      1: "B",
-      2: "C",
-      3: "D",
-    };
-    const updatedAnswers = [];
-    for (const [key, value] of Object.entries(answers)) {
-      updatedAnswers.push({
-        questionId: key,
-        selectedAnswer: mapAnswers[value] || value, // Map index to letter or use value directly if not in map
-      });
-    }
-    const payload = {
-      partId,
-      answers: updatedAnswers,
-    };
+    const mapAnswers = { 0: "A", 1: "B", 2: "C", 3: "D" };
+    const updatedAnswers = Object.entries(answers).map(([key, value]) => ({
+      questionId: key,
+      selectedAnswer: mapAnswers[value] ?? value,
+    }));
+    const payload = { partId, answers: updatedAnswers };
     const res = await submitQuiz(moduleId, payload);
-    setResultData(res?.data || null);
+    const result = res?.data || null;
+    setResultData(result);
+
+    // If this part was passed, check if all parts are now complete
+    if (result?.passed && moduleData) {
+      const totalParts = moduleData.parts?.length ?? 0;
+      // currentPartIndex is 0-based and advances after completion
+      // if it equals totalParts, the learner has finished every part
+      if (totalParts > 0 && result.currentPartIndex >= totalParts) {
+        await completeModule(moduleId).catch(() => {});
+      }
+    }
   };
   console.log("partData", partData);
   const getPartData = async () => {
@@ -79,6 +81,9 @@ export default function QuizScreen({
   }, [partId]);
   useEffect(() => {
     getProgressData();
+    getModuleById(moduleId).then((res) => {
+      if (res?.data) setModuleData(res.data);
+    });
   }, [moduleId]);
 
   if (resultData) {

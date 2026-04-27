@@ -44,7 +44,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
-import { getModules } from "../../actions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { getModules, deleteModule } from "../../actions";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ModulesPage() {
@@ -58,6 +68,8 @@ export default function ModulesPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [openModuleForm, setOpenModuleForm] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const canEdit = user?.role === "admin";
 
@@ -90,7 +102,39 @@ export default function ModulesPage() {
     setEditId(module.id);
   };
 
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    const res = await deleteModule(deleteTarget._id);
+    setIsDeleting(false);
+    setDeleteTarget(null);
+    if (res.success) {
+      fetchModules();
+    }
+  };
+
   return (
+    <>
+    <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Module</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete &quot;{deleteTarget?.title}&quot;? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDeleteConfirm}
+            disabled={isDeleting}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {isDeleting ? "Deleting..." : "Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -317,11 +361,11 @@ export default function ModulesPage() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => setOpenModuleForm(true)}>
+                                  <DropdownMenuItem onClick={() => router.push(`/dashboard/client/knowledge-hub/training-hub/admin/modules/${module._id}/edit`)}>
                                     <Edit2 className="w-4 h-4 mr-2" /> Edit
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    // onClick={() => deleteModule(module.id)}
+                                    onClick={() => setDeleteTarget(module)}
                                     className="text-destructive"
                                   >
                                     <Trash2 className="w-4 h-4 mr-2" /> Delete
@@ -392,11 +436,11 @@ export default function ModulesPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEdit(module)}>
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/client/knowledge-hub/training-hub/admin/modules/${module._id}/edit`)}>
                                 <Edit2 className="w-4 h-4 mr-2" /> Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                // onClick={() => deleteModule(module.id)}
+                                onClick={() => setDeleteTarget(module)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" /> Delete
@@ -459,5 +503,6 @@ export default function ModulesPage() {
         </>
       )}
     </div>
+    </>
   );
 }
