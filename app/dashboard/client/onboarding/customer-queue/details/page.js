@@ -47,7 +47,7 @@ export default function CustomerQueueDetails() {
           <DetailViewModal details={details} fetching={fetching} />
         </TabsContent>
         <TabsContent value="relations">
-          <RelationsTree relations={details?.relations || []} />
+          <RelationsTree relations={details?.relations || []} details={details} />
           {/* <RelatedParty /> */}
         </TabsContent>
         <TabsContent value="documents">

@@ -28,7 +28,7 @@ const formSchema = z.object({
       email: z.string(),
       phone: z.string(),
       primary: z.boolean(),
-    })
+    }),
   ),
   address: z.object({
     street: z.string(),
@@ -57,7 +57,7 @@ const formSchema = z.object({
       url: z.string(),
       mimeType: z.string(),
       type: z.string(),
-    })
+    }),
   ),
   status: z.string().min(1, "Status is required"),
   settings: z.object({
@@ -247,11 +247,7 @@ export function ClientForm({ id }) {
       </Tabs>
       {currentStep == tabs.length ? null : (
         <div className="flex gap-4 mt-4 justify-end">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 1}
-          >
+          <Button variant="outline" onClick={handleBack} disabled={currentStep === 1}>
             Back
           </Button>
           <Button onClick={handleNext} disabled={currentStep === tabs.length}>

@@ -51,7 +51,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { getModules, getModuleAccess, assignModuleAccess, deleteModuleAccess } from "../../actions";
-import { getAllClients } from "@/app/dashboard/admin/client/actions";
+import { getAllClients } from "@/app/dashboard/client/list/actions";
 import { getBranches } from "@/app/dashboard/client/branch/actions";
 import { getAllRoles } from "@/app/dashboard/client/user-and-role-management/actions";
 import { toast } from "sonner";
@@ -244,8 +244,7 @@ export default function ModuleAccessPage() {
             {/* Branch */}
             <div className="space-y-2">
               <Label className="font-semibold">
-                Branch{" "}
-                <span className="text-xs font-normal text-muted-foreground">(optional)</span>
+                Branch <span className="text-xs font-normal text-muted-foreground">(optional)</span>
               </Label>
               <Select value={formBranch} onValueChange={setFormBranch}>
                 <SelectTrigger className="h-11">
@@ -355,10 +354,7 @@ export default function ModuleAccessPage() {
                           <div className="flex items-center gap-2">
                             <BookOpen className="w-4 h-4 text-primary" />
                             <span>{m.title}</span>
-                            <Badge
-                              variant="outline"
-                              className="ml-1 text-xs py-0 capitalize"
-                            >
+                            <Badge variant="outline" className="ml-1 text-xs py-0 capitalize">
                               {m.status}
                             </Badge>
                           </div>
@@ -432,11 +428,7 @@ export default function ModuleAccessPage() {
                   <p className="text-xs mt-1">
                     Add a scope so the right organisations can see this module.
                   </p>
-                  <Button
-                    size="sm"
-                    className="gap-2 mt-4"
-                    onClick={() => setAddOpen(true)}
-                  >
+                  <Button size="sm" className="gap-2 mt-4" onClick={() => setAddOpen(true)}>
                     <Plus className="w-4 h-4" />
                     Add First Rule
                   </Button>
@@ -466,9 +458,7 @@ export default function ModuleAccessPage() {
                           : null;
                         const ruleRoles =
                           rule.roles?.length > 0
-                            ? rule.roles.map((r) =>
-                                typeof r === "object" ? r.name : roleName(r),
-                              )
+                            ? rule.roles.map((r) => (typeof r === "object" ? r.name : roleName(r)))
                             : null;
 
                         return (
@@ -548,8 +538,8 @@ export default function ModuleAccessPage() {
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
                   <span className="font-semibold text-foreground">How access scopes work:</span>{" "}
-                  Each rule grants a client (and optionally a branch) access to the module. If
-                  roles are left blank, all roles within the scope are permitted.
+                  Each rule grants a client (and optionally a branch) access to the module. If roles
+                  are left blank, all roles within the scope are permitted.
                 </p>
                 <p>
                   When a new scope is saved, every active user matching the client/branch/role

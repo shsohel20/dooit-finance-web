@@ -1,5 +1,5 @@
-'use client';
-import { getClientById } from "@/app/dashboard/admin/client/actions";
+"use client";
+import { getClientById } from "@/app/dashboard/client/list/actions";
 import { PageDescription, PageHeader, PageTitle } from "@/components/common";
 import LabelDetails from "@/components/LabelDetails";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { IconEdit } from "@tabler/icons-react";
 import { Fragment, useEffect, useState } from "react";
 
-
-
 export default function ClientDetails({ id }) {
   const [loading, setLoading] = useState(true);
   const [client, setClient] = useState(null);
-  console.log('client', client);
+  console.log("client", client);
 
   useEffect(() => {
     setLoading(true);
@@ -33,14 +31,18 @@ export default function ClientDetails({ id }) {
           <PageTitle>Client Details</PageTitle>
           <PageDescription>View the client details here.</PageDescription>
         </PageHeader>
-        <Button><IconEdit /> Edit</Button>
+        <Button>
+          <IconEdit /> Edit
+        </Button>
       </div>
       <div className=" mt-8 space-y-4">
         {/* Company Information */}
         <div className="p-8 border rounded-lg">
           <div className=" mb-12">
             <h4 className="font-medium text-base">Company Information</h4>
-            <p className="text-muted-foreground">View the company information of the client here.</p>
+            <p className="text-muted-foreground">
+              View the company information of the client here.
+            </p>
           </div>
           <div className="grid grid-cols-6 gap-8 ">
             <div className="">
@@ -60,7 +62,11 @@ export default function ClientDetails({ id }) {
               <LabelDetails label="Website" value={client?.website} loading={loading} />
             </div>
             <div className="">
-              <LabelDetails label="Registration Number" value={client?.registrationNumber} loading={loading} />
+              <LabelDetails
+                label="Registration Number"
+                value={client?.registrationNumber}
+                loading={loading}
+              />
             </div>
             <div className="">
               <LabelDetails label="Tax ID" value={client?.taxId} loading={loading} />
@@ -68,7 +74,6 @@ export default function ClientDetails({ id }) {
             <div className="">
               <LabelDetails label="Status" value={client?.status} loading={loading} />
             </div>
-
           </div>
         </div>
 
@@ -93,13 +98,31 @@ export default function ClientDetails({ id }) {
         <div className="p-8 border rounded-lg">
           <div className=" mb-12">
             <h4 className="font-medium text-base">Legal Representative</h4>
-            <p className="text-muted-foreground">View the legal representative of the client here.</p>
+            <p className="text-muted-foreground">
+              View the legal representative of the client here.
+            </p>
           </div>
           <div className="grid grid-cols-6 gap-8 ">
-            <LabelDetails label="Name" value={client?.legalRepresentative?.name} loading={loading} />
-            <LabelDetails label="Email" value={client?.legalRepresentative?.email} loading={loading} />
-            <LabelDetails label="Phone" value={client?.legalRepresentative?.phone} loading={loading} />
-            <LabelDetails label="Designation" value={client?.legalRepresentative?.designation} loading={loading} />
+            <LabelDetails
+              label="Name"
+              value={client?.legalRepresentative?.name}
+              loading={loading}
+            />
+            <LabelDetails
+              label="Email"
+              value={client?.legalRepresentative?.email}
+              loading={loading}
+            />
+            <LabelDetails
+              label="Phone"
+              value={client?.legalRepresentative?.phone}
+              loading={loading}
+            />
+            <LabelDetails
+              label="Designation"
+              value={client?.legalRepresentative?.designation}
+              loading={loading}
+            />
           </div>
         </div>
 
@@ -110,11 +133,15 @@ export default function ClientDetails({ id }) {
             <p className="text-muted-foreground">View the settings of the client here.</p>
           </div>
           <div className="grid grid-cols-6 gap-8 ">
-            <LabelDetails label="Billing Cycle" value={client?.settings?.billingCycle} loading={loading} />
+            <LabelDetails
+              label="Billing Cycle"
+              value={client?.settings?.billingCycle}
+              loading={loading}
+            />
             <LabelDetails label="Currency" value={client?.settings?.currency} loading={loading} />
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

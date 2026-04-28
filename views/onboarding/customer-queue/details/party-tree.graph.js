@@ -1,5 +1,6 @@
 "use client";
 
+import { getCustomerRelations } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const TX_MIN_W = 0.5;
@@ -323,7 +324,9 @@ function computeTxLayout(entities, cx, cy, width, height) {
 }
 
 /* ─── Component ──────────────────────────────────────── */
-export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAllRef }) {
+export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAllRef, details }) {
+  console.log("entities", entities);
+  console.log("details", details);
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const [dims, setDims] = useState({ width: 1000, height: 700 });
@@ -333,6 +336,7 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
   const [hoveredIp, setHoveredIp] = useState(null);
   const [hoveredNode, setHoveredNode] = useState(null);
   const [selectedTxNode, setSelectedTxNode] = useState(null);
+  const [allEntities, setAllEntities] = useState([]);
 
   const [dragged, setDragged] = useState(new Map());
   const dragRef = useRef(null);
@@ -346,7 +350,20 @@ export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAll
   const panRef = useRef(null);
   const mode = useRef("none");
 
+  const getAllEntities = async () => {
+    const payload = {
+      entity_type: "customer", // customer | company | non_individual
+      entity_id: details.uid,
+      max_hops: 3,
+      include_transactions: true,
+    };
+    const response = await getCustomerRelations(payload);
+    console.log("response", response);
+    setAllEntities(response);
+  };
+
   useEffect(() => {
+    getAllEntities();
     const el = containerRef.current;
     if (!el) return;
     const obs = new ResizeObserver(([e]) => {

@@ -66,6 +66,11 @@ export default function ClientSidebar({ ...props }) {
       url: "/dashboard/client",
     },
     {
+      title: "Clients",
+      icon: IconUsers,
+      url: "/dashboard/client/list",
+    },
+    {
       title: "Customers",
       icon: IconUsers,
       url: "/dashboard/client/onboarding/customer-queue",
@@ -404,6 +409,11 @@ export default function ClientSidebar({ ...props }) {
           icon: IconLayoutDashboard,
         },
         {
+          title: "Module Access",
+          url: "/dashboard/client/knowledge-hub/training-hub/admin/access",
+          icon: IconLayoutDashboard,
+        },
+        {
           title: "Reports",
           url: "/dashboard/client/knowledge-hub/training-hub/admin/reports",
           icon: IconLayoutDashboard,
@@ -558,7 +568,7 @@ export default function ClientSidebar({ ...props }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={onBoardingMenuItems} label="Onboarding" />
+        {!isDooit && <NavMain items={onBoardingMenuItems} label="Onboarding" />}
         {isDooit && <NavMain items={dooitMenuItems} label="Dooit" />}
         {isRealState && (
           <>
