@@ -1,23 +1,6 @@
-/* @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"); */
-/* @import url(https://fonts.googleapis.com/css?family=Satisfy);
-@import url(https://fonts.googleapis.com/css?family=Acme); */
-
 @import "tailwindcss";
 
 @import "tw-animate-css";
-
-/* @font-face {
-  font-family: "font-sf-pro-bold";
-  src: url("/assets/fonts/SFPRODISPLAYBOLD.woff2") format("woff2");
-}
-@font-face {
-  font-family: "font-sf-pro-regular";
-  src: url("/assets/fonts/SFPRODISPLAYREGULAR.woff2") format("woff2");
-}
-@font-face {
-  font-family: "font-sf-pro-medium";
-  src: url("/assets/fonts/SFPRODISPLAYMEDIUM.woff2") format("woff2");
-} */
 
 @custom-variant dark (&:is(.dark *));
 .border-red {
@@ -178,6 +161,7 @@ body {
   font-size: 0.8rem;
   background: #fefefe;
   color: var(--smoke-700);
+  font-family: var(--font-sans);
   /* font-family: "font-sf-pro-regular", sans-serif; */
 }
 .container {

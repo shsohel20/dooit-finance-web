@@ -293,7 +293,7 @@ const CustomResizableTable = ({
               <>
                 <TableBody>
                   {Array.from({ length: 10 }).map((_, index) => (
-                    <TableRow key={`skeleton-row-${index}`} className="">
+                    <TableRow key={`skeleton-row-${index}`} className="my-3">
                       {orderedColumns.map((header) => {
                         return (
                           <TableCell
