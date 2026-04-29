@@ -66,8 +66,6 @@ const RegistrationType = () => {
   };
   const handleContinue = () => {
     if (selectedType && country) {
-      // localStorage.setItem('registration_type', selectedType?.value);
-      // localStorage.setItem('country', country?.value?.toLowerCase());
       setRegisterType(selectedType?.value);
       setCountryStore(country?.value?.toLowerCase());
 
@@ -77,6 +75,8 @@ const RegistrationType = () => {
       } else {
         router.push(`/customer/registration/${selectedType?.value}`);
       }
+
+      // router.push(`/customer/registration/${selectedType?.value}`);
     }
   };
   return (
@@ -86,7 +86,7 @@ const RegistrationType = () => {
           Choose Registration Type
         </h1>
         <p className="text-center">Select the option that best describes you to get started.</p>
-        <div className="py-8  flex flex-col gap-4 items-center justify-center">
+        <div className="py-8  grid md:grid-cols-2 grid-cols-1   gap-4 items-center justify-center">
           {types.map((type, index) => (
             <div
               onClick={() => handleSelectType(type)}
@@ -103,7 +103,7 @@ const RegistrationType = () => {
               className={cn(
                 "flex items-center gap-4 py-2.5 px-4 border rounded-lg cursor-pointer transition-all duration-300 w-[400px] focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2",
                 {
-                  "border-yellow-500 w-[460px]  px-6": selectedType?.type === type.type,
+                  "border-yellow-500   px-6": selectedType?.type === type.type,
                 },
               )}
             >

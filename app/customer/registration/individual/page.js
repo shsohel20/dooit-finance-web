@@ -106,7 +106,7 @@ const CustomerRegistration = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { customerRegisterData, setCustomerRegisterData, registerType, country } =
     useCustomerRegisterStore();
-  const [verifyingStatus, setVerifyingStatus] = useState("idle");
+  const [verifyingStatus, setVerifyingStatus] = useState("verified");
   const [verifiedMsg, setVerifiedMsg] = useState(null);
 
   const {
@@ -119,7 +119,6 @@ const CustomerRegistration = () => {
     resolver: zodResolver(personalInfoSchema),
     mode: "onChange",
   });
-  console.log("errors", errors);
   const onSubmit = (data) => {
     setCustomerRegisterData(data);
     router.push("/customer/registration/individual/preview");
@@ -188,7 +187,7 @@ const CustomerRegistration = () => {
                     <>
                       {Object.keys(errors[key]).map((subKey) => {
                         return (
-                          <div key={subKey + key}>
+                          <div key={`${key}/${subKey}`}>
                             <Alert variant="destructive">
                               {" "}
                               <AlertTitle className={"capitalize"}>

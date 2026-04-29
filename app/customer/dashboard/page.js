@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import useGetUser from "@/hooks/useGetUser";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const VerificationSuccess = () => {
   return (
@@ -58,10 +58,16 @@ const VerificationFailed = () => {
   );
 };
 
-export const ProfileCard = ({loggedInUser}) => {
+export const ProfileCard = ({ loggedInUser }) => {
   return (
     <div className="flex items-center gap-4 bg-brown flex-shrink-0 max-w-[400px] py-8 px-8 rounded-md">
-      <div className="size-20 rounded-full bg-white text-white"></div>
+      <div className="size-20 rounded-full bg-white text-white">
+        <img
+          src={loggedInUser?.photoUrl}
+          alt="profile"
+          className="w-full h-full object-cover rounded-full"
+        />
+      </div>
       <div>
         <h4 className="text-2xl font-bold tracking-tighter">{loggedInUser?.name}</h4>
         <p>{loggedInUser?.email}</p>
@@ -72,15 +78,8 @@ export const ProfileCard = ({loggedInUser}) => {
 
 const Dashboard = () => {
   const { loggedInUser } = useGetUser();
-  //dummy verification promise
-  const verificationPromise = new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve({
-        //a random number between 0 and 1
-        progress: Math.random(),
-      });
-    }, 1000);
-  });
+
+  console.log("loggedInUser", JSON.stringify(loggedInUser?.customer.personalKyc, null, 2));
 
   return (
     <div className="container pt-8">

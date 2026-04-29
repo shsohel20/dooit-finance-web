@@ -27,7 +27,7 @@ import {
   Save,
   Camera,
 } from "lucide-react";
-import { useLoggedInUser, useLoggedInUserStore } from "@/app/store/useLoggedInUser";
+import { useLoggedInUser } from "@/app/store/useLoggedInUser";
 import { useFieldArray, useForm } from "react-hook-form";
 import { FormField } from "@/components/ui/FormField";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,7 +48,7 @@ export function ClientEditForm() {
   const isBranch = formData?.userType === "branch";
 
   const router = useRouter();
-  const formDataByUserType=isClient ? formData: {...formData, client: formData?.branch}
+  const formDataByUserType = isClient ? formData : { ...formData, client: formData?.branch };
   const form = useForm({
     defaultValues: formDataByUserType,
     mode: "onChange",
@@ -143,13 +143,10 @@ export function ClientEditForm() {
     const action = isClient ? updateClientProfile : isBranch ? updateBranchProfile : updateProfile;
     const id = isClient ? formData?.client?._id : formData?.id;
     const dataToSend = isClient || isBranch ? data.client : data;
-    console.log("data to send", JSON.stringify(dataToSend, null, 2));
     const response = await action(dataToSend, id);
-    console.log("edit response", response);
     if (response.success) {
       toast.success("Profile updated successfully");
       const response = await getLoggedInUser();
-      console.log("getLoggedInUser response", response);
       if (response.success) {
         setLoggedInUser(response.data);
       }

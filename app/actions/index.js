@@ -13,7 +13,6 @@ export const fileUploadOnCloudinary = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
   //add headers
-  console.log("image server url", IMAGE_SERVER_URL);
   const res = await fetch(`${IMAGE_SERVER_URL}files/upload-api`, {
     method: "POST",
     headers: {

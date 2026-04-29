@@ -8,7 +8,10 @@ const initialFormData = {
     other_names: "",
     referral: "",
   },
-  document_type: null,
+  document_type: {
+    value: "",
+    label: "",
+  },
   contact_details: {
     email: "",
     phone: "",
@@ -45,7 +48,22 @@ const initialFormData = {
     is_sole_trader: false,
     business_details: {},
   },
-  documents: [],
+  documents: [
+    // {
+    //   name: "",
+    //   url: "",
+    //   mimeType: "",
+    //   type: "front",
+    //   docType: "",
+    // },
+    // {
+    //   name: "",
+    //   url: "",
+    //   mimeType: "",
+    //   type: "back",
+    //   docType: "",
+    // },
+  ],
   declaration: {
     declarations_accepted: false,
     signatory_name: "",
