@@ -1,16 +1,15 @@
-import React from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from '@/components/ui/badge'
-import CustomerQueueList from '@/views/onboarding/customer-queue/list'
+import React from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import CustomerQueueList from "@/views/onboarding/customer-queue/list";
 
-import CustomerQueueHeader from '@/views/onboarding/customer-queue/header';
-import PendingCollection from '@/views/onboarding/customer-queue/list/PendingCollection';
-import Rejected from '@/views/onboarding/customer-queue/list/Rejected';
-import Verified from '@/views/onboarding/customer-queue/list/Verified';
-import CustomerDashboard from '@/views/onboarding/customer-queue/list/Dashboard';
+import CustomerQueueHeader from "@/views/onboarding/customer-queue/header";
+import PendingCollection from "@/views/onboarding/customer-queue/list/PendingCollection";
+import Rejected from "@/views/onboarding/customer-queue/list/Rejected";
+import Verified from "@/views/onboarding/customer-queue/list/Verified";
+import CustomerDashboard from "@/views/onboarding/customer-queue/list/Dashboard";
 
 export default function Page() {
-
   return (
     <div>
       <div>
@@ -26,27 +25,23 @@ export default function Page() {
               Pending
               <Badge variant="secondary">13</Badge>
             </TabsTrigger>
-            <TabsTrigger value="rejected-applications">
-              Rejected
-            </TabsTrigger>
-            <TabsTrigger value="in_review">
-              In Review
-            </TabsTrigger>
+            <TabsTrigger value="rejected-applications">Rejected</TabsTrigger>
+            <TabsTrigger value="in_review">In Review</TabsTrigger>
           </TabsList>
           <TabsContent value="all-applications">
-            <CustomerQueueList kycStatus='' />
+            <CustomerQueueList kycStatus="" />
           </TabsContent>
           <TabsContent value="pending-collection">
-            <PendingCollection kycStatus='pending' />
+            <PendingCollection kycStatus="pending" />
           </TabsContent>
           <TabsContent value="rejected-applications">
-            <Rejected kycStatus='rejected' />
+            <Rejected kycStatus="rejected" />
           </TabsContent>
           <TabsContent value="in_review">
-            <Verified kycStatus='verified' />
+            <Verified kycStatus="verified" />
           </TabsContent>
         </Tabs>
       </div>
     </div>
-  )
+  );
 }

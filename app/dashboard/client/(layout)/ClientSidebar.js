@@ -80,11 +80,6 @@ export default function ClientSidebar({ ...props }) {
       icon: IconBuilding,
       url: "/dashboard/client/companies",
     },
-    {
-      title: "Case manager",
-      icon: IconObjectScan,
-      url: "/dashboard/client/monitoring-and-cases/case-manager",
-    },
   ];
   const onBoardingMenuItems = [
     {
@@ -97,11 +92,11 @@ export default function ClientSidebar({ ...props }) {
       icon: IconBuilding,
       url: "/dashboard/client/companies",
     },
-    {
-      title: "Case manager",
-      icon: IconObjectScan,
-      url: "/dashboard/client/monitoring-and-cases/case-manager",
-    },
+    // {
+    //   title: "Case manager",
+    //   icon: IconObjectScan,
+    //   url: "/dashboard/client/monitoring-and-cases/case-manager",
+    // },
     {
       title: "Customers",
       icon: IconUsers,
@@ -236,15 +231,14 @@ export default function ClientSidebar({ ...props }) {
   ];
   const monitoringMenuItems = [
     {
-      title: "Case Management",
-      icon: Newspaper,
-      children: [
-        {
-          title: "Alerts",
-          url: "/dashboard/client/monitoring-and-cases/case-list",
-          icon: IconAlertTriangle,
-        },
-      ],
+      title: "Case manager",
+      icon: IconObjectScan,
+      url: "/dashboard/client/monitoring-and-cases/case-manager",
+    },
+    {
+      title: "Alerts",
+      url: "/dashboard/client/monitoring-and-cases/case-list",
+      icon: IconAlertTriangle,
     },
     {
       title: "ECDD",
@@ -570,6 +564,8 @@ export default function ClientSidebar({ ...props }) {
       <SidebarContent>
         {!isDooit && <NavMain items={onBoardingMenuItems} label="Onboarding" />}
         {isDooit && <NavMain items={dooitMenuItems} label="Dooit" />}
+        <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
+
         {isRealState && (
           <>
             {realStateMenu.map((item) => (
@@ -593,7 +589,6 @@ export default function ClientSidebar({ ...props }) {
         )}
         <NavMain items={dueDiligenceMenu} label="Due Diligence" />
         <NavMain items={reportingMenuItems} label="Reporting & Registers" />
-        <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
         <NavMain items={configurationMenuItems} label="Configuration" />
         <NavMain items={TrainingModule} label="Training Module" />
