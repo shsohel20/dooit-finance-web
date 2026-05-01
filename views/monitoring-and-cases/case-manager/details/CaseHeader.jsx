@@ -75,6 +75,21 @@ export default function CaseHeader({ caseData }) {
         </div>
 
         <div className="flex flex-col gap-2 text-sm shrink-0">
+          <div className="mb-1 flex w-full flex-wrap gap-2 sm:justify-end">
+            <Button
+              size="sm"
+              className="h-8 min-w-[84px] bg-heading px-3 text-xs font-semibold tracking-wide text-white shadow-sm hover:bg-heading/90"
+            >
+              ECDD
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 min-w-[84px] border-heading/30 bg-white/90 px-3 text-xs font-semibold tracking-wide text-heading shadow-sm hover:bg-white"
+            >
+              SMR
+            </Button>
+          </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <IconUser className="size-4 shrink-0" />
             <span>
