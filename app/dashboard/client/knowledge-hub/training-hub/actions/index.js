@@ -222,3 +222,10 @@ export const deleteModuleAccess = async (accessId) => {
   });
   return response.json();
 };
+
+export const getModuleAccessData = async (moduleId) => {
+  const response = await fetchWithAuth(`training-modules/${moduleId}/access`, {
+    method: "GET",
+  });
+  return response.json();
+};

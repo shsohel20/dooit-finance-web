@@ -58,6 +58,7 @@ import {
 import { getModules, deleteModule } from "../../actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import ModuleAccessForm from "@/views/knowledge-hub/training/ModuleAccessForm";
+import BulkAccessForm from "@/views/knowledge-hub/training/BulkAccessForm";
 
 export default function ModulesPage() {
   const router = useRouter();
@@ -532,10 +533,9 @@ export default function ModulesPage() {
                   );
                 })}
                 {addAccessFormOpen && (
-                  <ModuleAccessForm
-                    addOpen={addAccessFormOpen}
-                    setAddAccessFormOpen={setAddAccessFormOpen}
-                    setAddOpen={setAddAccessFormOpen}
+                  <BulkAccessForm
+                    open={addAccessFormOpen}
+                    setOpen={setAddAccessFormOpen}
                     selectedModule={selectedModule}
                   />
                 )}

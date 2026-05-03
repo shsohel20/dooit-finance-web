@@ -25,8 +25,6 @@ import useGetUser from "@/hooks/useGetUser";
 import BulkAccessForm from "./BulkAccessForm";
 
 export default function ModuleAccessForm({ addOpen, setAddOpen, selectedModule }) {
-  const [formClient, setFormClient] = useState("");
-  const [formBranch, setFormBranch] = useState("none");
   const { loggedInUser } = useGetUser();
   const isClient = loggedInUser?.userType === "client";
   const isDooit = loggedInUser?.userType === "dooit";
