@@ -26,6 +26,7 @@ export function FormField({
   options,
   description,
   loading = false,
+  onChange,
   ...props
 }) {
   const {
@@ -43,7 +44,10 @@ export function FormField({
             <Checkbox
               id={name}
               checked={field.value || false}
-              onCheckedChange={field.onChange}
+              onCheckedChange={(value) => {
+                field.onChange(value);
+                onChange?.(value);
+              }}
               {...props}
             />
             {label && (
@@ -77,7 +81,10 @@ export function FormField({
             <CustomSelect
               options={options}
               value={field.value}
-              onChange={field.onChange}
+              onChange={(value) => {
+                field.onChange(value);
+                onChange?.(value);
+              }}
               placeholder={placeholder}
               {...props}
             />
@@ -109,6 +116,10 @@ export function FormField({
               placeholder={placeholder}
               {...field}
               value={field.value || ''}
+              onChange={(e) => {
+                field.onChange(e.target.value);
+                onChange?.(e.target.value);
+              }}
               {...props}
             />
           )}
@@ -139,6 +150,10 @@ export function FormField({
             {...field}
             value={field.value || ''}
             error={error}
+            onChange={(e) => {
+              field.onChange(e.target.value);
+              onChange?.(e.target.value);
+            }}
             {...props}
           />
         )}

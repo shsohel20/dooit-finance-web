@@ -11,7 +11,6 @@ export function EncryptDecryptFAB() {
   const [isEncrypted, setIsEncrypted] = useState(
     loggedInUser?.client?.isEncrypted || false
   );
-  console.log('Current encryption state:', isEncrypted);
 
   const handleToggle = async () => {
     setIsAnimating(true);

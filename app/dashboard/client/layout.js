@@ -2,13 +2,8 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import ClientSidebar from "./(layout)/ClientSidebar";
 import { SiteHeader } from "@/components/site-header";
-import useGetUser from "@/hooks/useGetUser";
 
 export default function ClientLayout({ children }) {
-  const { loggedInUser } = useGetUser();
-
-  const clientType = loggedInUser?.client?.clientType;
-
   return (
     <SidebarProvider
       style={{

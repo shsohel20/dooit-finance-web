@@ -91,8 +91,8 @@ export default function ModuleAccessPage() {
         getAllRoles(),
       ]);
       setModules(mRes?.data || []);
-      setClients(cRes?.data?.clients || cRes?.data || []);
-      setBranches(bRes?.data || []);
+      // setClients(cRes?.data?.clients || cRes?.data || []);
+      // setBranches(bRes?.data || []);
       setRoles(rRes?.data || []);
       setBootstrapLoading(false);
     })();
