@@ -44,7 +44,13 @@ function emptyRow(defaultClient = "") {
   return { id: newRowId(), client: defaultClient, branch: "none", roles: [] };
 }
 
-export default function BulkAccessForm({ bulkOpen, setBulkOpen, selectedModule, onSuccess }) {
+export default function BulkAccessForm({
+  bulkOpen,
+  setBulkOpen,
+  selectedModule,
+  onSuccess,
+  setAddOpen,
+}) {
   const { loggedInUser } = useGetUser();
   const isClient = loggedInUser?.userType === "client";
   const lockedClientId = isClient ? loggedInUser?.client?._id : "";
@@ -143,9 +149,13 @@ export default function BulkAccessForm({ bulkOpen, setBulkOpen, selectedModule, 
       return;
     }
     setIsSubmitting(true);
+    console.log("payload", JSON.stringify(payload, null, 2));
     const res = await assignModuleAccess(selectedModule._id, payload);
+    console.log("res", res);
     setIsSubmitting(false);
+
     if (res.success !== false && !res.error) {
+      setAddOpen(false);
       const { inserted = 0, skipped = 0, autoAssigned = 0 } = res;
       toast.success(
         `Bulk access assigned. ${inserted} added, ${skipped} skipped, ${autoAssigned} learners auto-enrolled.`,
@@ -220,7 +230,7 @@ export default function BulkAccessForm({ bulkOpen, setBulkOpen, selectedModule, 
                 <Label className="">Branch</Label>
                 <CustomSelect
                   value={row.branch}
-                  onChange={(v) => updateRow(index, { branch: v })}
+                  onChange={(v) => updateRow(index, { branch: v?.target?.value })}
                   disabled={!row.client || isSubmitting}
                   options={branchOptionsFor(row.client).map((b) => ({
                     label: b.name,

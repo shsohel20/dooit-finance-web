@@ -112,6 +112,7 @@ export default function ModuleAccessForm({ addOpen, setAddOpen, selectedModule }
           bulkOpen={bulkAccessFormOpen}
           setBulkOpen={setBulkAccessFormOpen}
           selectedModule={selectedModule}
+          setAddOpen={setAddOpen}
         />
       ) : (
         <DialogContent className="sm:max-w-[520px]">
