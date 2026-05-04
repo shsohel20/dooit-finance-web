@@ -43,11 +43,10 @@ export default function BulkAccessForm({ open, setOpen, selectedModule, onSucces
   const [branchesByClient, setBranchesByClient] = useState({});
   const [rows, setRows] = useState([emptyRow()]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [moduleData, setModuleData] = useState(null);
 
-  const fetchModuleData = async () => {
+  const fetchModuleData = useCallback(async () => {
     const res = await getModuleAccessData(selectedModule._id);
-    console.log(" rpw res", res);
+    // console.log(" rpw res", res);
 
     const updatedData = res.data.map((item) => ({
       ...item,
@@ -56,23 +55,16 @@ export default function BulkAccessForm({ open, setOpen, selectedModule, onSucces
       roles: item.roles.map((role) => role._id),
     }));
     setRows(updatedData);
-  };
+  }, [selectedModule]);
 
   useEffect(() => {
     fetchModuleData();
-  }, [selectedModule]);
+  }, [fetchModuleData]);
 
   const resetForm = useCallback(() => {
     setRows([emptyRow(lockedClientId)]);
     setBranchesByClient({});
   }, [lockedClientId]);
-
-  const loadBranchesForClient = async (clientId) => {
-    if (!clientId) return;
-    const res = await getBranches(clientId);
-    console.log("res", res);
-    setBranchesByClient((prev) => ({ ...prev, [clientId]: res?.data || [] }));
-  };
 
   useEffect(() => {
     if (!open) return;
@@ -91,47 +83,17 @@ export default function BulkAccessForm({ open, setOpen, selectedModule, onSucces
     });
   }, [open, lockedClientId]);
 
-  const updateRow = (index, patch) => {
-    setRows((prev) => {
-      const next = [...prev];
-      next[index] = { ...next[index], ...patch };
-      return next;
-    });
-  };
-
-  const setClientForRow = async (index, e) => {
-    const clientId = e?.target?.value;
-    updateRow(index, { client: clientId, branch: "none" });
-    if (clientId) await loadBranchesForClient(clientId);
-  };
-
   const addRow = () => setRows((prev) => [...prev, emptyRow(lockedClientId)]);
 
-  const removeRow = async (index) => {
+  const removeRow = useCallback(async (index) => {
     const res = await deleteModuleAccess(rows[index].id);
-    console.log("res", res);
     if (res.success !== false && !res.error) {
       toast.success("Access removed");
       fetchModuleData();
     } else {
       toast.error(res.message || "Failed to remove access");
     }
-    setRows((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== index)));
-  };
-
-  const toggleRole = (rowIndex, roleId) => {
-    setRows((prev) => {
-      const next = [...prev];
-      const r = next[rowIndex].roles;
-      next[rowIndex] = {
-        ...next[rowIndex],
-        roles: r.includes(roleId) ? r.filter((x) => x !== roleId) : [...r, roleId],
-      };
-      return next;
-    });
-  };
-
-  const roleName = (id) => roles.find((r) => r._id === id)?.name || id;
+  }, []);
 
   const buildPayload = () =>
     rows
@@ -177,8 +139,6 @@ export default function BulkAccessForm({ open, setOpen, selectedModule, onSucces
     }
   };
 
-  const branchOptionsFor = (clientId) => branchesByClient[clientId] || [];
-
   return (
     <Dialog
       open={open}
@@ -194,9 +154,7 @@ export default function BulkAccessForm({ open, setOpen, selectedModule, onSucces
           </DialogTitle>
           <DialogDescription>
             Add multiple access scopes for{" "}
-            <span className="font-semibold text-foreground">{selectedModule?.title}</span>. Each row
-            is sent as one object in the request array (client required; branch optional; empty
-            roles means all roles). Matching active users will be auto-enrolled.
+            <span className="font-semibold text-foreground">{selectedModule?.title}</span>.
           </DialogDescription>
         </DialogHeader>
 
@@ -207,98 +165,17 @@ export default function BulkAccessForm({ open, setOpen, selectedModule, onSucces
           </Button>
         </div> */}
           {rows.map((row, index) => (
-            <div
+            <Row
               key={row.id}
-              className="rounded-xl border border-border bg-muted/20 p-4 space-y-4 relative"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Scope {index + 1}
-                </span>
-                {rows.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 text-destructive hover:text-destructive"
-                    onClick={() => removeRow(index)}
-                    disabled={isSubmitting}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="">
-                  <Label className="">Client</Label>
-                  <CustomSelect
-                    value={row.client}
-                    onChange={(v) => setClientForRow(index, v)}
-                    disabled={isClient || isSubmitting}
-                    options={clients.map((c) => ({ label: c.name, value: c._id }))}
-                    placeholder="Select a client..."
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="">Branch</Label>
-                  <CustomSelect
-                    value={row.branch}
-                    onChange={(v) => updateRow(index, { branch: v?.target?.value })}
-                    disabled={!row.client || isSubmitting}
-                    options={branchOptionsFor(row.client).map((b) => ({
-                      label: b.name,
-                      value: b._id,
-                    }))}
-                    placeholder="Select a branch..."
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="font-semibold">
-                  Roles{" "}
-                  <span className="text-xs font-normal text-muted-foreground">
-                    (leave blank for all roles)
-                  </span>
-                </Label>
-                <div className="border border-border rounded-xl overflow-hidden max-h-[160px] overflow-y-auto bg-background">
-                  {roles.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-4">No roles found</p>
-                  ) : (
-                    roles.map((role) => (
-                      <label
-                        key={role._id}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 cursor-pointer border-b border-border last:border-0 transition-colors"
-                      >
-                        <Checkbox
-                          checked={row.roles.includes(role._id)}
-                          onCheckedChange={() => toggleRole(index, role._id)}
-                          disabled={isSubmitting}
-                        />
-                        <Shield className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-foreground">{role.name}</span>
-                      </label>
-                    ))
-                  )}
-                </div>
-                {row.roles.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {row.roles.map((id) => (
-                      <Badge
-                        key={id}
-                        variant="secondary"
-                        className="cursor-pointer hover:bg-destructive/10"
-                        onClick={() => !isSubmitting && toggleRole(index, id)}
-                      >
-                        {roleName(id)} ×
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+              row={row}
+              setRows={setRows}
+              index={index}
+              isSubmitting={isSubmitting}
+              removeRow={removeRow}
+              roles={roles}
+              clients={clients}
+              isClient={isClient}
+            />
           ))}
 
           <Button
@@ -335,3 +212,135 @@ export default function BulkAccessForm({ open, setOpen, selectedModule, onSucces
     </Dialog>
   );
 }
+
+const Row = ({ row, index, isSubmitting, removeRow, roles, clients, isClient, setRows }) => {
+  const [branchOptions, setBranchOptions] = useState([]);
+  const loadBranchesForClient = async (clientId) => {
+    if (!clientId) return;
+    const res = await getBranches(clientId);
+    const options = res?.data?.map((b) => ({ label: b.name, value: b._id }));
+    // console.log("options", options);
+    setBranchOptions(options);
+  };
+  useEffect(() => {
+    if (row.client) {
+      loadBranchesForClient(row.client);
+    }
+  }, [row.client]);
+  // console.log(
+  //   "clients",
+  //   clients.find((c) => c._id === row.client),
+  // );
+  const updateRow = (index, patch) => {
+    setRows((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], ...patch };
+      return next;
+    });
+  };
+  const setClientForRow = async (index, e) => {
+    const clientId = e?.target?.value;
+    updateRow(index, { client: clientId, branch: "" });
+    if (clientId) await loadBranchesForClient(clientId);
+  };
+  const toggleRole = useCallback((rowIndex, roleId) => {
+    setRows((prev) => {
+      const next = [...prev];
+      const r = next[rowIndex].roles;
+      next[rowIndex] = {
+        ...next[rowIndex],
+        roles: r.includes(roleId) ? r.filter((x) => x !== roleId) : [...r, roleId],
+      };
+      return next;
+    });
+  }, []);
+  const roleName = useCallback((id) => roles.find((r) => r._id === id)?.name || id, [roles]);
+  return (
+    <div key={row.id} className="rounded-xl border bg-muted/20 pt-5 pb-3 px-6 space-y-4 relative">
+      {/* <div className="flex items-center justify-between gap-2"> */}
+      {/* <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Scope {index + 1}
+        </span> */}
+      {/* {rows.length > 1 && ( */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="h-8 text-destructive hover:text-destructive absolute top-1 right-2"
+        onClick={() => removeRow(index)}
+        disabled={isSubmitting}
+      >
+        <Trash2 className="w-4 h-4" />
+      </Button>
+      {/* )} */}
+      {/* </div> */}
+
+      <div className="grid grid-cols-2 gap-2">
+        <div className="">
+          <Label className="">Client</Label>
+          <CustomSelect
+            value={row.client}
+            onChange={(v) => setClientForRow(index, v)}
+            disabled={isClient || isSubmitting}
+            options={clients.map((c) => ({ label: c.name, value: c._id }))}
+            placeholder="Select a client..."
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="">Branch</Label>
+          <CustomSelect
+            value={row.branch}
+            onChange={(v) => updateRow(index, { branch: v?.target?.value })}
+            disabled={!row.client || isSubmitting}
+            options={branchOptions}
+            placeholder="Select a branch..."
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="font-semibold">
+          Roles{" "}
+          <span className="text-xs font-normal text-muted-foreground">
+            (leave blank for all roles)
+          </span>
+        </Label>
+        <div className="border border-border rounded-xl overflow-hidden max-h-[160px] overflow-y-auto bg-background">
+          {roles.length === 0 ? (
+            <p className="text-sm text-muted-foreground p-4">No roles found</p>
+          ) : (
+            roles.map((role) => (
+              <label
+                key={role._id}
+                className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 cursor-pointer border-b border-border last:border-0 transition-colors"
+              >
+                <Checkbox
+                  checked={row.roles.includes(role._id)}
+                  onCheckedChange={() => toggleRole(index, role._id)}
+                  disabled={isSubmitting}
+                />
+                <Shield className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">{role.name}</span>
+              </label>
+            ))
+          )}
+        </div>
+        {row.roles.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {row.roles.map((id) => (
+              <Badge
+                key={id}
+                variant="secondary"
+                className="cursor-pointer hover:bg-destructive/10"
+                onClick={() => !isSubmitting && toggleRole(index, id)}
+              >
+                {roleName(id)} ×
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
