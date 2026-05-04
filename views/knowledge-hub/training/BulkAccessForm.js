@@ -17,6 +17,7 @@ import {
   assignModuleAccess,
   getModuleAccessData,
   deleteModuleAccess,
+  updateModuleAccess,
 } from "@/app/dashboard/client/knowledge-hub/training-hub/actions";
 import { toast } from "sonner";
 import { getAllClients } from "@/app/dashboard/client/list/actions";
@@ -43,18 +44,23 @@ export default function BulkAccessForm({ open, setOpen, selectedModule, onSucces
   const [branchesByClient, setBranchesByClient] = useState({});
   const [rows, setRows] = useState([emptyRow()]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
 
   const fetchModuleData = useCallback(async () => {
     const res = await getModuleAccessData(selectedModule._id);
-    // console.log(" rpw res", res);
-
-    const updatedData = res.data.map((item) => ({
-      ...item,
-      client: item.client._id,
-      branch: item.branch ? item.branch._id : "",
-      roles: item.roles.map((role) => role._id),
-    }));
-    setRows(updatedData);
+    if (res.data.length > 0) {
+      setIsEdit(true);
+      const updatedData = res.data.map((item) => ({
+        ...item,
+        client: item.client._id,
+        branch: item.branch ? item.branch._id : "",
+        roles: item.roles.map((role) => role._id),
+      }));
+      setRows(updatedData);
+    } else {
+      setIsEdit(false);
+      setRows([emptyRow(lockedClientId)]);
+    }
   }, [selectedModule]);
 
   useEffect(() => {
@@ -121,16 +127,16 @@ export default function BulkAccessForm({ open, setOpen, selectedModule, onSucces
     }
     setIsSubmitting(true);
     console.log("payload", JSON.stringify(payload, null, 2));
-    const res = await assignModuleAccess(selectedModule._id, payload);
+    const res = isEdit
+      ? await updateModuleAccess(selectedModule._id, payload)
+      : await assignModuleAccess(selectedModule._id, payload);
     console.log("res", res);
     setIsSubmitting(false);
 
     if (res.success !== false && !res.error) {
       setOpen(false);
       const { inserted = 0, skipped = 0, autoAssigned = 0 } = res;
-      toast.success(
-        `Bulk access assigned. ${inserted} added, ${skipped} skipped, ${autoAssigned} learners auto-enrolled.`,
-      );
+      toast.success(`Bulk access assigned.`);
       setOpen(false);
       resetForm();
       onSuccess?.();

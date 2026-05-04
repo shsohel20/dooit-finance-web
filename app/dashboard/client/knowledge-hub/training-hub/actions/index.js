@@ -215,6 +215,13 @@ export const assignModuleAccess = async (moduleId, data) => {
   });
   return response.json();
 };
+export const updateModuleAccess = async (moduleId, data) => {
+  const response = await fetchWithAuth(`training-modules/${moduleId}/access`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
 
 export const deleteModuleAccess = async (accessId) => {
   const response = await fetchWithAuth(`training-modules/access/${accessId}`, {
