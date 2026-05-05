@@ -26,11 +26,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`font-sans antialiased ${montserrat.className} text-sm`}
         // className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}
-        suppressHydrationWarning
+        suppressHydrationWarning={true}
       >
         {/* <AuthProvider> */}
         <EncryptDecryptFAB />

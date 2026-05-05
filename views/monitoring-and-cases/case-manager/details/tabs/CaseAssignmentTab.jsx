@@ -1,126 +1,226 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { StatusPill } from "@/components/ui/StatusPill";
-import { IconUserCheck, IconHistory, IconAlertTriangle, IconCheck } from "@tabler/icons-react";
-import { analysts } from "@/lib/case-manager-data";
-import { dateShowFormat } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  IconUserCheck,
+  IconAlertTriangle,
+  IconCheck,
+  IconLoader2,
+  IconChevronDown,
+  IconX,
+} from "@tabler/icons-react";
+import {
+  getInvestigators,
+  assignInvestigators,
+} from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
+import { useCaseManagerStore } from "@/app/store/useCaseManagerStore";
 
 const priorityVariants = {
-  High: "danger",
-  Medium: "warning",
-  Low: "info",
+  low: "info",
+  medium: "warning",
+  high: "danger",
+  critical: "dark",
 };
 
-export default function CaseAssignmentTab({ caseData }) {
-  const assignment = caseData?.assignment;
-  const [selectedAnalyst, setSelectedAnalyst] = useState(assignment?.assignedAnalyst || "");
-  const [notes, setNotes] = useState(assignment?.notes || "");
+export default function CaseAssignmentTab({ caseData, onCaseUpdate }) {
+  const { investigators, setInvestigators, submitting, setSubmitting } = useCaseManagerStore();
+  const [loadingInvestigators, setLoadingInvestigators] = useState(false);
+  const [selected, setSelected] = useState(
+    (caseData?.assignedTo || []).map((u) => u._id),
+  );
+  const [open, setOpen] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  if (!assignment) return null;
+  useEffect(() => {
+    if (investigators.length > 0) return;
+    const load = async () => {
+      setLoadingInvestigators(true);
+      try {
+        const res = await getInvestigators();
+        if (res?.succeed) setInvestigators(res.data);
+      } finally {
+        setLoadingInvestigators(false);
+      }
+    };
+    load();
+  }, [investigators.length, setInvestigators]);
 
-  const handleSave = () => {
-    // In production this would call an API
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const toggleInvestigator = (id) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
   };
+
+  const handleSave = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const res = await assignInvestigators(caseData._id, selected);
+      if (res?.succeed) {
+        onCaseUpdate?.({ ...caseData, assignedTo: res.data.assignedTo });
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const selectedInvestigators = investigators.filter((u) => selected.includes(u._id));
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      {/* Current Assignment */}
+      {/* Assign investigators */}
       <Card className="border-0">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <IconUserCheck className="size-4" />
-            Current Assignment
+            Assign Investigators
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Priority display */}
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Assigned Analyst</Label>
-            <Select value={selectedAnalyst} onValueChange={setSelectedAnalyst}>
-              <SelectTrigger className="h-9 text-sm">
-                <SelectValue placeholder="Select analyst" />
-              </SelectTrigger>
-              <SelectContent>
-                {analysts.map((a) => (
-                  <SelectItem key={a.id} value={a.name}>
-                    {a.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <p className="text-xs text-muted-foreground">Priority</p>
+            <StatusPill
+              icon={<IconAlertTriangle />}
+              variant={priorityVariants[caseData?.priority]}
+            >
+              <span className="capitalize">{caseData?.priority}</span>
+            </StatusPill>
           </div>
 
+          {/* Investigator multi-select */}
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Priority Level</Label>
-            <div className="flex items-center gap-2">
-              <StatusPill
-                icon={<IconAlertTriangle />}
-                variant={priorityVariants[assignment.priority]}
-              >
-                {assignment.priority}
-              </StatusPill>
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Analyst Notes</Label>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={4}
-              placeholder="Add notes..."
-              className="text-sm resize-none"
-            />
-          </div>
-
-          <Button size="sm" className="w-full gap-1.5" onClick={handleSave}>
-            {saved ? (
-              <>
-                <IconCheck className="size-3.5" />
-                Saved
-              </>
+            <p className="text-xs text-muted-foreground">Investigators</p>
+            {loadingInvestigators ? (
+              <Skeleton className="h-9 w-full" />
             ) : (
-              "Save Changes"
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-between h-9 text-sm font-normal"
+                  >
+                    {selectedInvestigators.length === 0
+                      ? "Select investigators..."
+                      : `${selectedInvestigators.length} selected`}
+                    <IconChevronDown className="size-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search investigators..." className="h-9" />
+                    <CommandEmpty>No investigators found.</CommandEmpty>
+                    <CommandGroup className="max-h-56 overflow-y-auto">
+                      {investigators.map((u) => {
+                        const isSelected = selected.includes(u._id);
+                        return (
+                          <CommandItem
+                            key={u._id}
+                            value={u.name}
+                            onSelect={() => toggleInvestigator(u._id)}
+                            className="gap-2"
+                          >
+                            <Avatar className="h-6 w-6 shrink-0">
+                              <AvatarImage src={u.avatar} />
+                              <AvatarFallback className="text-[9px]">
+                                {u.name?.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="flex-1 text-sm">{u.name}</span>
+                            {isSelected && <IconCheck className="size-4 text-primary" />}
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             )}
+
+            {/* Selected chips */}
+            {selectedInvestigators.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {selectedInvestigators.map((u) => (
+                  <Badge
+                    key={u._id}
+                    variant="secondary"
+                    className="gap-1.5 pl-1.5 pr-1 py-0.5 text-xs"
+                  >
+                    <Avatar className="h-4 w-4">
+                      <AvatarImage src={u.avatar} />
+                      <AvatarFallback className="text-[7px]">
+                        {u.name?.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {u.name}
+                    <button
+                      type="button"
+                      onClick={() => toggleInvestigator(u._id)}
+                      className="hover:text-destructive"
+                    >
+                      <IconX className="size-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <Button size="sm" className="w-full gap-1.5" onClick={handleSave} disabled={submitting}>
+            {submitting ? (
+              <IconLoader2 className="size-3.5 animate-spin" />
+            ) : saved ? (
+              <IconCheck className="size-3.5" />
+            ) : null}
+            {saved ? "Saved" : "Save Assignment"}
           </Button>
         </CardContent>
       </Card>
 
-      {/* Assignment History */}
+      {/* Current assignment summary */}
       <Card className="border-0 border-l rounded-none">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <IconHistory className="size-4" />
-            Assignment History
+            <IconUserCheck className="size-4" />
+            Currently Assigned
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {assignment.history?.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No history available.</p>
+          {(caseData?.assignedTo || []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">No investigators assigned.</p>
           ) : (
-            <div className="relative ml-3 space-y-0 border-l border-border pl-5">
-              {assignment.history?.map((h, i) => (
-                <div key={i} className="relative pb-5 last:pb-0">
-                  <span className="absolute -left-[22px] flex size-3.5 items-center justify-center rounded-full bg-primary ring-2 ring-background" />
-                  <p className="text-sm font-semibold text-heading">{h.analyst}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {h.action} · {dateShowFormat(h.date)}
-                  </p>
+            <div className="space-y-2">
+              {caseData.assignedTo.map((u) => (
+                <div key={u._id} className="flex items-center gap-2.5 rounded-lg border p-2">
+                  <Avatar className="h-8 w-8 shrink-0">
+                    <AvatarImage src={u.avatar} />
+                    <AvatarFallback className="text-[10px]">
+                      {u.name?.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-semibold text-heading">{u.name}</p>
+                    {u.email && (
+                      <p className="text-xs text-muted-foreground">{u.email}</p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

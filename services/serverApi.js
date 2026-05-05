@@ -14,7 +14,7 @@ export async function fetchWithAuth(endpoint, options = {}, isAi = false, isNisa
   const allOptions = {
     headers: {
       ...options.headers,
-      Authorization: `Bearer ${token}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       "Content-Type": "application/json",
     },
     ...options,

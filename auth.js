@@ -22,6 +22,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
 
           const data = await res.json();
+
+          if (!res.ok || !data.success || typeof data.token !== "string") {
+            return null;
+          }
+
           const decodedToken = jwtDecode(data.token);
           const user = {
             ...decodedToken,
@@ -32,12 +37,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             userType: decodedToken.userType,
             id: decodedToken.id,
           };
-          // console.log("user", user);
-          if (data.success) {
-            return user;
-          } else {
-            return null;
-          }
+          return user;
         } catch (error) {
           console.error("Login error:", error);
           return null;
@@ -60,6 +60,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      if (typeof token.accessToken !== "string") return session;
       const decodedToken = jwtDecode(token.accessToken);
       session.user = {
         ...decodedToken,

@@ -1,86 +1,61 @@
 'use client'
-
 import { useState } from 'react'
-import { Plus, Trash2, Copy } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import RuleEditor from './RuleEditor'
 import ExistingRulesPage from './Existing'
 import RuleTesterPage from './Tester'
 import ChangeHistory from './History'
 
+const TABS = [
+  { value: 'builder', label: 'Rule Builder' },
+  { value: 'existing', label: 'Existing Rules' },
+  { value: 'tester', label: 'Rule Tester' },
+  { value: 'history', label: 'Change History' },
+]
+
 export default function RuleConfigurationForm() {
-  const [activeTab, setActiveTab] = useState('Rule Builder')
-  const [ruleName, setRuleName] = useState('')
-  const [ruleId, setRuleId] = useState('')
-  const [category, setCategory] = useState('')
-  const [priority, setPriority] = useState('')
-  const [description, setDescription] = useState('')
-  const [ruleStatus, setRuleStatus] = useState('draft')
-  const [conditions, setConditions] = useState([
-    { field: 'Transaction Amount', operator: 'Greater Than', value: '10000' },
-  ])
-  const [actions, setActions] = useState([
-    { action: 'Generate Alert', value: 'High value transaction detected' },
-  ])
+  const [activeTab, setActiveTab] = useState('builder')
 
-  const addCondition = () => {
-    setConditions([...conditions, { field: '', operator: '', value: '' }])
-  }
-
-  const removeCondition = (index) => {
-    setConditions(conditions.filter((_, i) => i !== index))
-  }
-
-  const addAction = () => {
-    setActions([...actions, { action: '', value: '' }])
-  }
-
-  const removeAction = (index) => {
-    setActions(actions.filter((_, i) => i !== index))
+  const handleRuleSaved = (rule) => {
+    if (rule?._id) {
+      setActiveTab('existing')
+    }
   }
 
   return (
-    <div className="min-h-screen ">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
-        <div className=" py-6">
-          <h1 className="text-3xl font-semibold text-gray-900">Rule Configuration</h1>
-        </div>
-      </header>
+    <div>
+      <div className="mb-5">
+        <h1 className="text-xl font-bold text-heading">Transaction Rule Builder</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Visually build, test, and manage AML detection rules
+        </p>
+      </div>
 
-      <main className="py-8">
-        {/* Tabs */}
-        <Tabs defaultValue="Rule Builder" value={activeTab} onValueChange={setActiveTab} className="mb-4">
-          <TabsList className="border-b border-gray-200 bg-white p-0 mb-6">
-            {['Rule Builder', 'Existing Rules', 'Rule Tester', 'Change History'].map((tab) => (
-              <TabsTrigger
-                key={tab}
-                value={tab}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6 h-9">
+          {TABS.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value} className="text-xs px-4">
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-              >
-                {tab}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <TabsContent value="builder">
+          <RuleEditor onSaved={handleRuleSaved} />
+        </TabsContent>
 
-          <TabsContent value="Rule Builder" className="mt-0">
-            <RuleEditor />
-          </TabsContent>
-          <TabsContent value="Existing Rules" className="mt-0">
-            <ExistingRulesPage />
-          </TabsContent>
-          <TabsContent value="Rule Tester" className="mt-0">
-            <RuleTesterPage />
-          </TabsContent>
-          <TabsContent value="Change History" className="mt-0">
-            <ChangeHistory />
-          </TabsContent>
-          {/* Other tabs */}
+        <TabsContent value="existing">
+          <ExistingRulesPage />
+        </TabsContent>
 
-        </Tabs>
-      </main>
+        <TabsContent value="tester">
+          <RuleTesterPage />
+        </TabsContent>
+
+        <TabsContent value="history">
+          <ChangeHistory />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

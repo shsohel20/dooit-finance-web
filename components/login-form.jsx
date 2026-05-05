@@ -79,8 +79,12 @@ export function LoginForm({ className, token, cid, ...props }) {
     console.log('res', res);
     const user = res.user;
 
-    if (res.error) {
-      toast.error('Something went wrong');
+    if (res?.error) {
+      if (res.error === 'CredentialsSignin') {
+        toast.error('Invalid email or password. Please try again.');
+      } else {
+        toast.error('Login failed. Please try again later.');
+      }
     }
 
     setIsLoading(false);
