@@ -9,12 +9,15 @@ export async function fetchWithAuth(endpoint, options = {}, isAi = false, isNisa
   const session = await auth(); // ✅ works anywhere on the server
   const token = session?.user?.accessToken;
   if (!token) {
-    console.log("No valid token found. User might not be logged in.");
+    return new Response(
+      JSON.stringify({ success: false, message: "Not authenticated" }),
+      { status: 401, headers: { "Content-Type": "application/json" } }
+    );
   }
   const allOptions = {
     headers: {
       ...options.headers,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     ...options,
