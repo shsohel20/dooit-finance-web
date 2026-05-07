@@ -21,16 +21,14 @@ export function EncryptDecryptFAB() {
     const payload = {
       encrypted: !isEncrypted,
     };
-    console.log('payload', JSON.stringify(payload, null, 2));
-
     const res = await toggleEncryption(payload);
     if (res.success) {
       // Refresh the page to reflect changes
       setIsEncrypted((prev) => !prev);
       setIsAnimating(false);
-      getUser();
-      // window.location.reload();
+      window.location.reload();
     }
+    // router.refresh();
   };
 
   return (

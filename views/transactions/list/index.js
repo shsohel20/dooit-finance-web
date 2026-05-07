@@ -64,7 +64,6 @@ const TransactionListView = () => {
   const [limit, setLimit] = useState(10);
   const totalItems = transactions?.totalRecords || 0;
   const router = useRouter();
-  const { loggedInUser } = useGetUser();
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -78,7 +77,7 @@ const TransactionListView = () => {
       setTransactions(transactions);
     };
     fetchTransactions();
-  }, [currentPage, limit, loggedInUser?.isDataEncrypted]);
+  }, [currentPage, limit]);
 
   const handleViewReportClick = (item) => {
     setCurrentItemReport(item);

@@ -14,7 +14,6 @@ export default function CustomerQueueDetails() {
   const id = useSearchParams().get("id");
   const [details, setDetails] = useState(null);
   const [fetching, setFetching] = useState(false);
-  const { loggedInUser } = useGetUser();
 
   const fetchDetails = async () => {
     setFetching(true);
@@ -33,7 +32,7 @@ export default function CustomerQueueDetails() {
     if (id) {
       fetchDetails();
     }
-  }, [id, loggedInUser?.isDataEncrypted]);
+  }, [id]);
   return (
     <div>
       <Tabs defaultValue="details">

@@ -330,7 +330,6 @@ export default function CustomerQueueList({ data, kycStatus }) {
   const [view, setView] = useState("list");
   const { currentPage, limit, customers, setCustomers, setFetching, setTotalItems } =
     useCustomerStore();
-  const { loggedInUser } = useGetUser();
   const initialState = {
     uid: "",
     type: "",
@@ -376,7 +375,7 @@ export default function CustomerQueueList({ data, kycStatus }) {
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, limit, kycStatus, loggedInUser?.isDataEncrypted]);
+  }, [currentPage, limit, kycStatus]);
 
   const handleFilterChange = (name, value) => {
     const updatedFilters = { ...filters, [name]: value };
