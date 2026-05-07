@@ -12,7 +12,7 @@ const fontSans = Geist({
   variable: "--font-sans",
 });
 // const sansFlex = SansFlex({ subsets: ["latin"], variable: "--font-sans-flex" });
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+const jetbrainsMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 const montserrat = Montserrat({
   subsets: ["latin"],
