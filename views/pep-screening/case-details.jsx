@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -26,9 +27,13 @@ import {
   MoreVertical,
   RefreshCw,
   Search,
+  Sparkles,
+  X,
+  Wand2,
 } from "lucide-react";
 import { MatchDetail } from "./match-detail";
 import CustomResizableTable from "@/components/ui/CustomResizable";
+import { Textarea } from "@/components/ui/textarea";
 
 const mockMatches = [
   {
@@ -48,6 +53,8 @@ const mockMatches = [
     countryLocation: "Bangladesh",
     category: "FORMER HEAD OF GOVERNMENT",
     count: 24,
+    ongoing: true,
+    actionRequired: true,
   },
   {
     id: 2,
@@ -63,6 +70,8 @@ const mockMatches = [
     countryLocation: "Bangladesh",
     category: "FORMER HEAD OF GOVERNMENT",
     count: 12,
+    ongoing: false,
+    actionRequired: 0,
   },
   {
     id: 3,
@@ -81,6 +90,8 @@ const mockMatches = [
     countryLocation: "Bangladesh / India",
     category: "SANCTIONS - FINANCIAL RESTRICTIONS",
     count: 18,
+    ongoing: false,
+    actionRequired: 0,
   },
   {
     id: 4,
@@ -99,6 +110,8 @@ const mockMatches = [
     countryLocation: "Bangladesh",
     category: "POLITICAL EXPOSURE",
     count: 15,
+    ongoing: false,
+    actionRequired: 3,
   },
   {
     id: 5,
@@ -114,6 +127,8 @@ const mockMatches = [
     countryLocation: "Bangladesh",
     category: "POLITICAL EXPOSURE",
     count: 8,
+    ongoing: false,
+    actionRequired: 0,
   },
   {
     id: 6,
@@ -129,6 +144,8 @@ const mockMatches = [
     countryLocation: "Bangladesh",
     category: "INDIRECT WATCHLIST",
     count: 6,
+    ongoing: false,
+    actionRequired: 0,
   },
   {
     id: 7,
@@ -147,6 +164,8 @@ const mockMatches = [
     countryLocation: "United Kingdom",
     category: "RELATIVE OF PEP",
     count: 5,
+    ongoing: false,
+    actionRequired: 0,
   },
   {
     id: 8,
@@ -162,6 +181,8 @@ const mockMatches = [
     countryLocation: "United States",
     category: "CHILD OF PEP",
     count: 4,
+    ongoing: false,
+    actionRequired: 0,
   },
   {
     id: 9,
@@ -177,6 +198,8 @@ const mockMatches = [
     countryLocation: "Bangladesh",
     category: "LOW RISK",
     count: 2,
+    ongoing: false,
+    actionRequired: 0,
   },
   {
     id: 10,
@@ -192,6 +215,8 @@ const mockMatches = [
     countryLocation: "Bangladesh",
     category: "LOW RISK",
     count: 1,
+    ongoing: false,
+    actionRequired: 0,
   },
   {
     id: 11,
@@ -207,6 +232,8 @@ const mockMatches = [
     countryLocation: "Bangladesh",
     category: "RELATED PARTY",
     count: 2,
+    ongoing: false,
+    actionRequired: 0,
   },
   {
     id: 12,
@@ -222,6 +249,8 @@ const mockMatches = [
     countryLocation: "Unknown",
     category: "LOW RISK",
     count: 1,
+    ongoing: false,
+    actionRequired: 0,
   },
 ];
 
@@ -243,12 +272,59 @@ const mockLinkedCases = [
   },
 ];
 
+const AI_SUMMARY = `Risk Assessment: HIGH
+
+The screening returned ${mockMatches.length} matches across multiple databases. The top 4 matches (scores 82–95%) are confirmed high-confidence matches for Sheikh Hasina Wazed, former Prime Minister of Bangladesh and a designated PEP. Multiple sanctions (SAN) and watchlist entries are present.
+
+Key Findings
+• 4 high-risk matches (score ≥ 80%) — immediate review recommended
+• 3 medium-risk matches (64–76%) — further investigation warranted
+• 5 low-risk matches (score < 60%) — likely false positives
+
+Recommendation: This subject requires enhanced due diligence. The top matches are consistent with the profile of a Tier 1 PEP subject under active financial sanctions. Low-scoring matches (< 60%) share partial name overlap only and can typically be dismissed as false positives pending manual confirmation.`;
+
 export function CaseDetails({ caseData, onBack, onBackToManager }) {
   const [activeTab, setActiveTab] = useState("world-check");
   const [selectedMatches, setSelectedMatches] = useState([]);
   const [selectedMatchIndex, setSelectedMatchIndex] = useState(null);
   const [openMatchDetail, setOpenMatchDetail] = useState(false);
   const [resolutions, setResolutions] = useState({});
+
+  const [showAiSummary, setShowAiSummary] = useState(false);
+  const [aiSummaryLoading, setAiSummaryLoading] = useState(false);
+  const [autoResolveFP, setAutoResolveFP] = useState(false);
+  const [autoResolveThreshold, setAutoResolveThreshold] = useState(75);
+
+  useEffect(() => {
+    if (!autoResolveFP) {
+      setResolutions((prev) => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach((key) => {
+          if (updated[key]?.autoResolved) delete updated[key];
+        });
+        return updated;
+      });
+      return;
+    }
+    setResolutions((prev) => {
+      const updated = { ...prev };
+      mockMatches.forEach((match) => {
+        const fpScore = 100 - match.matchStrength;
+        if (fpScore >= autoResolveThreshold && !updated[match.id]) {
+          updated[match.id] = { type: "false_positive", autoResolved: true };
+        }
+      });
+      return updated;
+    });
+  }, [autoResolveFP, autoResolveThreshold]);
+
+  const handleGenerateAiSummary = () => {
+    setShowAiSummary(true);
+    setAiSummaryLoading(true);
+    setTimeout(() => setAiSummaryLoading(false), 1400);
+  };
+
+  const autoResolvedCount = Object.values(resolutions).filter((r) => r?.autoResolved).length;
 
   const handleMatchClick = (index) => {
     setSelectedMatchIndex(index);
@@ -486,6 +562,17 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
     //   header: "Matched Alias",
     //   accessorKey: "matchedAlias",
     // },
+    //action required
+    {
+      id: "actionRequired",
+      header: "Action Required",
+      accessorKey: "actionRequired",
+      cell: ({ row }) => (
+        <div className="text-center">
+          <span className="text-xs text-muted-foreground">{row.original.actionRequired}</span>
+        </div>
+      ),
+    },
     {
       id: "matchStrength",
       header: "Match",
@@ -494,6 +581,19 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         <div className="text-end flex items-center gap-1 border rounded-full w-max px-2 py-1">
           {getMatchStrengthBar(row.original.matchStrength, row.original.matchStrengthColor)}
           <span className="text-xs text-muted-foreground">{row.original.matchStrength}</span>
+        </div>
+      ),
+    },
+    //ongoing yes or no
+    {
+      id: "ongoing",
+      header: "Ongoing",
+      accessorKey: "ongoing",
+      cell: ({ row }) => (
+        <div className="text-center">
+          <span className="text-xs text-muted-foreground">
+            {row.original.ongoing ? "Yes" : "No"}
+          </span>
         </div>
       ),
     },
@@ -583,8 +683,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       accessorKey: "resolution",
       cell: ({ row }) => {
         const res = resolutions[row.original.id];
-        if (!res)
-          return <span className="text-xs text-slate-400 italic">Unresolved</span>;
+        if (!res) return <span className="text-xs text-slate-400 italic">Unresolved</span>;
         if (res.type === "false_positive")
           return (
             <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
@@ -599,6 +698,13 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       },
       size: 120,
     },
+    //add ai summary textbox
+    {
+      id: "aiSummary",
+      header: "AI Summary",
+      accessorKey: "aiSummary",
+      cell: ({ row }) => <Textarea className="text-slate-600">{row.original.aiSummary}</Textarea>,
+    },
   ];
 
   const linkedCasesColumns = [
@@ -610,6 +716,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         <div className="text-slate-800 font-semibold">{row.original.caseName}</div>
       ),
     },
+    //linked
     {
       id: "relationship",
       header: "Relationship",
@@ -659,96 +766,48 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
 
   const renderWorldCheckTab = () => (
     <div className="flex-1 flex overflow-hidden">
+      {/* AI Summary Panel */}
+      {showAiSummary && (
+        <div className="w-80 shrink-0 border-l border-violet-100 bg-white flex flex-col order-last">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-violet-100 bg-violet-50">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-violet-600" />
+              <span className="text-sm font-semibold text-violet-800">AI Summary</span>
+            </div>
+            <button
+              onClick={() => setShowAiSummary(false)}
+              className="text-violet-400 hover:text-violet-700 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto p-4">
+            {aiSummaryLoading ? (
+              <div className="space-y-3">
+                {[100, 80, 90, 70, 85].map((w, i) => (
+                  <div
+                    key={i}
+                    className="h-3 bg-violet-100 rounded animate-pulse"
+                    style={{ width: `${w}%` }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs font-semibold text-violet-700 uppercase tracking-wide">
+                  {caseData.caseName}
+                </p>
+                <pre className="text-xs text-slate-700 whitespace-pre-wrap font-sans leading-relaxed">
+                  {AI_SUMMARY}
+                </pre>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-auto">
-          {/* <table className="w-full text-sm">
-            <thead className=" sticky top-0 z-10">
-              <tr className="border-b border-slate-200">
-                <th className="px-3 py-2 text-left w-10">
-                  <Checkbox />
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[180px]">
-                  Name
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[100px]">
-                  Matched Alias
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium w-24">
-                  Match Strength
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium w-24">Type</th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium w-16">Gender</th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium w-28">
-                  Date(s) of Birth
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium w-24">
-                  Place of Birth
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium w-24">Citizenship</th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium w-28">
-                  Country Location
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[120px]">
-                  Category
-                </th>
-                <th className="px-3 py-2 text-center text-slate-600 font-medium w-12"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockMatches.map((match, index) => (
-                <tr
-                  key={match.id}
-                  className={cn(
-                    "border-b border-slate-100 hover: transition-colors",
-                    selectedMatches.includes(match.id) && "bg-blue-50",
-                  )}
-                >
-                  <td className="px-3 py-2">
-                    <Checkbox
-                      checked={selectedMatches.includes(match.id)}
-                      onCheckedChange={() => handleSelectMatch(match.id)}
-                    />
-                  </td>
-                  <td
-                    className="px-3 py-2  hover:underline cursor-pointer font-medium"
-                    onClick={() => handleMatchClick(index)}
-                  >
-                    {match.name}
-                  </td>
-                  <td className="px-3 py-2 text-slate-600 whitespace-pre-line text-xs">
-                    {match.matchedAlias}
-                  </td>
-                  <td className="px-3 py-2">
-                    {getMatchStrengthBar(match.matchStrength, match.matchStrengthColor)}
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex gap-1">
-                      {match.types.map((type, idx) => (
-                        <span
-                          key={idx}
-                          className={cn(
-                            "px-1.5 py-0.5 rounded text-xs font-medium text-white",
-                            type.color,
-                          )}
-                        >
-                          {type.label}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 text-slate-600">{match.gender}</td>
-                  <td className="px-3 py-2 text-slate-600">{match.dateOfBirth}</td>
-                  <td className="px-3 py-2 text-slate-600">{match.placeOfBirth}</td>
-                  <td className="px-3 py-2 text-slate-600">{match.citizenship}</td>
-                  <td className="px-3 py-2 text-slate-600 text-xs whitespace-pre-line">
-                    {match.countryLocation}
-                  </td>
-                  <td className="px-3 py-2 text-slate-600 text-xs">{match.category}</td>
-                  <td className="px-3 py-2 text-center text-slate-400">{match.count}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table> */}
           <CustomResizableTable
             columns={matchedCasesColumns}
             data={mockMatches}
@@ -790,33 +849,86 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white py-2  flex items-center gap-1">
-        <button
-          onClick={() => setActiveTab("world-check")}
-          className={cn(
-            "px-4 py-2 text-sm font-medium flex items-center gap-2  transition-colors rounded-md",
-            activeTab === "world-check"
-              ? "bg-primary text-white"
-              : "border-transparent text-slate-600 hover:text-slate-800 hover:",
-          )}
-        >
-          <Search className="h-4 w-4" />
-          Dooit
-          <span className="bg-accent text-white text-xs px-1.5 py-0.5 rounded">348</span>
-        </button>
-        <button
-          onClick={() => setActiveTab("linked-cases")}
-          className={cn(
-            "px-4 py-2 text-sm font-medium flex items-center gap-2  transition-colors rounded-md",
-            activeTab === "linked-cases"
-              ? "bg-primary text-white"
-              : "border-transparent text-slate-600 hover:text-slate-800 hover:",
-          )}
-        >
-          <Link2 className="h-4 w-4" />
-          LINKED CASES
-        </button>
+      <div className="bg-white py-2 flex items-center justify-between gap-1">
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setActiveTab("world-check")}
+            className={cn(
+              "px-4 py-2 text-sm font-medium flex items-center gap-2  transition-colors rounded-md",
+              activeTab === "world-check"
+                ? "bg-primary text-white"
+                : "border-transparent text-slate-600 hover:text-slate-800 hover:",
+            )}
+          >
+            <Search className="h-4 w-4" />
+            Dooit
+            <span className="bg-accent text-white text-xs px-1.5 py-0.5 rounded">348</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("linked-cases")}
+            className={cn(
+              "px-4 py-2 text-sm font-medium flex items-center gap-2  transition-colors rounded-md",
+              activeTab === "linked-cases"
+                ? "bg-primary text-white"
+                : "border-transparent text-slate-600 hover:text-slate-800 hover:",
+            )}
+          >
+            <Link2 className="h-4 w-4" />
+            LINKED CASES
+          </button>
+        </div>
+
+        {activeTab === "world-check" && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleGenerateAiSummary}
+            className="gap-2 text-violet-600 border-violet-200 hover:bg-violet-50 hover:text-violet-700"
+          >
+            <Sparkles className="h-4 w-4" />
+            AI Summary
+          </Button>
+        )}
       </div>
+
+      {/* AI Controls Bar */}
+      {activeTab === "world-check" && (
+        <div className="bg-violet-50 border border-violet-100 rounded-lg px-4 py-2.5 mb-2 flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Wand2 className="h-4 w-4 text-violet-500" />
+            <span className="text-sm font-medium text-violet-800">
+              Auto-resolve false positives
+            </span>
+          </div>
+          <Switch
+            checked={autoResolveFP}
+            onCheckedChange={setAutoResolveFP}
+            className="data-[state=checked]:bg-violet-600"
+          />
+          {autoResolveFP && (
+            <>
+              <div className="flex items-center gap-3 ml-2">
+                <span className="text-xs text-violet-700 whitespace-nowrap">Threshold:</span>
+                <input
+                  type="range"
+                  min={50}
+                  max={100}
+                  step={5}
+                  value={autoResolveThreshold}
+                  onChange={(e) => setAutoResolveThreshold(Number(e.target.value))}
+                  className="w-32 accent-violet-600"
+                />
+                <span className="text-xs font-mono font-semibold text-violet-700 w-8">
+                  {autoResolveThreshold}%
+                </span>
+              </div>
+              <span className="text-xs text-violet-600 ml-auto">
+                {autoResolvedCount} match{autoResolvedCount !== 1 ? "es" : ""} auto-resolved
+              </span>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Archived Warning Banner */}
       {caseData.archived && (

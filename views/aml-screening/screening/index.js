@@ -1,15 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Building2,
-  User,
-  Globe,
-  Search,
-  Settings2,
-  Sparkles,
-  Ship,
-} from "lucide-react";
+import { Building2, User, Globe, Search, Settings2, Sparkles, Ship } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { Switch } from "@/components/ui/switch";
@@ -21,7 +13,7 @@ import { CaseManager } from "@/views/pep-screening/case-manager";
 import { MonitorCheck } from "lucide-react";
 
 export default function AMLSearchScreeningForm() {
-  const [entityType, setEntityType] = useState("organisation");
+  const [entityType, setEntityType] = useState("individual");
 
   const [activeTab, setActiveTab] = useState("screening");
 
@@ -79,18 +71,6 @@ export default function AMLSearchScreeningForm() {
                   <div className="flex ">
                     <div className="inline-flex p-1 rounded-md bg-muted/80 border border-border w-full">
                       <button
-                        onClick={() => setEntityType("organisation")}
-                        className={cn(
-                          "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
-                          entityType === "organisation"
-                            ? "bg-white text-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground",
-                        )}
-                      >
-                        <Building2 className="w-4 h-4" />
-                        Organisation
-                      </button>
-                      <button
                         onClick={() => setEntityType("individual")}
                         className={cn(
                           "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
@@ -102,6 +82,19 @@ export default function AMLSearchScreeningForm() {
                         <User className="w-4 h-4" />
                         Individual
                       </button>
+                      <button
+                        onClick={() => setEntityType("organisation")}
+                        className={cn(
+                          "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
+                          entityType === "organisation"
+                            ? "bg-white text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        <Building2 className="w-4 h-4" />
+                        Organisation
+                      </button>
+
                       <button
                         onClick={() => setEntityType("vessel")}
                         className={cn(
@@ -145,7 +138,6 @@ export default function AMLSearchScreeningForm() {
               </div>
             )}
           </div>
-
         </div>
       </div>
     </div>

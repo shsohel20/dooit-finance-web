@@ -49,7 +49,7 @@ export default function SearchForm({ formData, setFormData, type }) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Group</Label>
+              <Label>Affiliation</Label>
               <Input
                 placeholder="Optional"
                 value={formData.group}

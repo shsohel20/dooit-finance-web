@@ -317,9 +317,7 @@ export function CaseManager({ formData = null }) {
       id: "createdBy",
       header: "Created By",
       accessorKey: "createdBy",
-      cell: ({ row }) => (
-        <p className="text-end text-muted-foreground">{row.original.createdBy}</p>
-      ),
+      cell: ({ row }) => <p className="text-end text-muted-foreground">{row.original.createdBy}</p>,
     },
   ];
 
