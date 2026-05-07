@@ -71,6 +71,7 @@ import CustomSelect from "@/components/ui/CustomSelect";
 import { countriesData } from "@/constants";
 import dynamic from "next/dynamic";
 import { fileUploadOnCloudinary } from "@/app/actions";
+import useGetUser from "@/hooks/useGetUser";
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
 });
@@ -329,6 +330,7 @@ export default function CustomerQueueList({ data, kycStatus }) {
   const [view, setView] = useState("list");
   const { currentPage, limit, customers, setCustomers, setFetching, setTotalItems } =
     useCustomerStore();
+  const { loggedInUser } = useGetUser();
   const initialState = {
     uid: "",
     type: "",
@@ -374,7 +376,7 @@ export default function CustomerQueueList({ data, kycStatus }) {
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, limit, kycStatus]);
+  }, [currentPage, limit, kycStatus, loggedInUser?.isDataEncrypted]);
 
   const handleFilterChange = (name, value) => {
     const updatedFilters = { ...filters, [name]: value };

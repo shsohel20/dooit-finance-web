@@ -8,12 +8,13 @@ import { getCustomerById } from "../actions";
 import Documents from "@/views/onboarding/customer-queue/details/Document";
 import { Osiint } from "@/views/onboarding/customer-queue/details/Osiint";
 import { Transactions } from "@/views/onboarding/customer-queue/details/Transactions";
-import TransactionTable from "@/views/onboarding/customer-queue/details/TransactionTable";
+import useGetUser from "@/hooks/useGetUser";
 
 export default function CustomerQueueDetails() {
   const id = useSearchParams().get("id");
   const [details, setDetails] = useState(null);
   const [fetching, setFetching] = useState(false);
+  const { loggedInUser } = useGetUser();
 
   const fetchDetails = async () => {
     setFetching(true);
@@ -32,7 +33,7 @@ export default function CustomerQueueDetails() {
     if (id) {
       fetchDetails();
     }
-  }, [id]);
+  }, [id, loggedInUser?.isDataEncrypted]);
   return (
     <div>
       <Tabs defaultValue="details">

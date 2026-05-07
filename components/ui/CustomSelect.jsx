@@ -33,7 +33,7 @@ const CustomSelect = ({ label, error, ...props }) => {
             'border-red-500': error,
           }
         )}
-        menuPortalTarget={document.body}
+        // menuPortalTarget={document?.body}
         menuPlacement="auto"
         styles={{
           menuPortal: (base) => ({

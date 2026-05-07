@@ -48,6 +48,7 @@ import TransactionDashboard from "./Dashboard";
 import CustomPagination from "@/components/CustomPagination";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import useGetUser from "@/hooks/useGetUser";
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
 });
@@ -63,6 +64,7 @@ const TransactionListView = () => {
   const [limit, setLimit] = useState(10);
   const totalItems = transactions?.totalRecords || 0;
   const router = useRouter();
+  const { loggedInUser } = useGetUser();
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -76,7 +78,7 @@ const TransactionListView = () => {
       setTransactions(transactions);
     };
     fetchTransactions();
-  }, [currentPage, limit]);
+  }, [currentPage, limit, loggedInUser?.isDataEncrypted]);
 
   const handleViewReportClick = (item) => {
     setCurrentItemReport(item);

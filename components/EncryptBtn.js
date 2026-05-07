@@ -3,16 +3,18 @@
 import { toggleEncryption } from '@/app/dashboard/client/action';
 import useGetUser from '@/hooks/useGetUser';
 import { Lock, Unlock } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function EncryptDecryptFAB() {
   const [isAnimating, setIsAnimating] = useState(false);
   const { loggedInUser, getUser } = useGetUser();
   const [isEncrypted, setIsEncrypted] = useState(
-    loggedInUser?.client?.isEncrypted || false
+    loggedInUser?.isDataEncrypted || false
   );
 
-  console.log('isEncrypted', loggedInUser?.client?.isEncrypted);
+  useEffect(() => {
+    setIsEncrypted(loggedInUser?.isDataEncrypted || false);
+  }, [loggedInUser?.isDataEncrypted]);
 
   const handleToggle = async () => {
     setIsAnimating(true);
@@ -22,11 +24,11 @@ export function EncryptDecryptFAB() {
     console.log('payload', JSON.stringify(payload, null, 2));
 
     const res = await toggleEncryption(payload);
-    console.log('Encryption toggle response:', res);
     if (res.success) {
       // Refresh the page to reflect changes
       setIsEncrypted((prev) => !prev);
       setIsAnimating(false);
+      getUser();
       // window.location.reload();
     }
   };
@@ -51,7 +53,7 @@ export function EncryptDecryptFAB() {
 
       {/* Icon Container */}
       <div
-        className={`transition-all duration-300 ${isAnimating ? 'scale-50 opacity-0 rotate-12' : 'scale-100 opacity-100'}`}
+        className={`transition-all duration-300 ${isAnimating ? 'scale-60 opacity-0 rotate-12' : 'scale-100 opacity-100'}`}
       >
         {isEncrypted ? (
           <Lock className="h-5 w-5" strokeWidth={2.5} />
