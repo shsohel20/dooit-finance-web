@@ -54,7 +54,9 @@ const mockMatches = [
     category: "FORMER HEAD OF GOVERNMENT",
     count: 24,
     ongoing: true,
-    actionRequired: true,
+    actionRequired: 2,
+    bgColor: "bg-red-50",
+    aiSummary: "This matched with the name of the PEP and the date of birth is also correct.",
   },
   {
     id: 2,
@@ -72,6 +74,8 @@ const mockMatches = [
     count: 12,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This has some doubts but it is a match.",
   },
   {
     id: 3,
@@ -92,6 +96,8 @@ const mockMatches = [
     count: 18,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a false positive.",
   },
   {
     id: 4,
@@ -112,6 +118,8 @@ const mockMatches = [
     count: 15,
     ongoing: false,
     actionRequired: 3,
+    bgColor: "bg-red-50",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 5,
@@ -129,6 +137,8 @@ const mockMatches = [
     count: 8,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 6,
@@ -146,6 +156,8 @@ const mockMatches = [
     count: 6,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 7,
@@ -166,6 +178,8 @@ const mockMatches = [
     count: 5,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 8,
@@ -183,6 +197,7 @@ const mockMatches = [
     count: 4,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
   },
   {
     id: 9,
@@ -200,6 +215,8 @@ const mockMatches = [
     count: 2,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 10,
@@ -216,7 +233,8 @@ const mockMatches = [
     category: "LOW RISK",
     count: 1,
     ongoing: false,
-    actionRequired: 0,
+    actionRequired: 3,
+    bgColor: "bg-red-50",
   },
   {
     id: 11,
@@ -234,6 +252,7 @@ const mockMatches = [
     count: 2,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
   },
   {
     id: 12,
@@ -251,6 +270,8 @@ const mockMatches = [
     count: 1,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
 ];
 
@@ -547,7 +568,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       header: "Name",
       accessorKey: "name",
       cell: ({ row, index }) => (
-        <div onClick={() => handleMatchClick(index)} className="group">
+        <div onClick={() => handleMatchClick(index)} className="group ">
           <p className="text-slate-800 font-semibold group-hover:underline cursor-pointer">
             {row.original.name}
           </p>
@@ -557,18 +578,12 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         </div>
       ),
     },
-    // {
-    //   id: "matchedAlias",
-    //   header: "Matched Alias",
-    //   accessorKey: "matchedAlias",
-    // },
-    //action required
     {
       id: "actionRequired",
       header: "Action Required",
       accessorKey: "actionRequired",
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-center ">
           <span className="text-xs text-muted-foreground">{row.original.actionRequired}</span>
         </div>
       ),
@@ -637,16 +652,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         </div>
       ),
     },
-    // {
-    //   id: "placeOfBirth",
-    //   header: "Place of Birth",
-    //   accessorKey: "placeOfBirth",
-    //   cell: ({ row }) => (
-    //     <div className="text-center">
-    //       <span className="text-xs text-muted-foreground">{row.original.placeOfBirth}</span>
-    //     </div>
-    //   ),
-    // },
+
     {
       id: "citizenship",
       header: "Citizenship",
@@ -657,16 +663,6 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         </div>
       ),
     },
-    // {
-    //   id: "countryLocation",
-    //   header: "Country Location",
-    //   accessorKey: "countryLocation",
-    //   cell: ({ row }) => (
-    //     <div className="text-center">
-    //       <span className="text-xs text-muted-foreground">{row.original.countryLocation}</span>
-    //     </div>
-    //   ),
-    // },
     {
       id: "category",
       header: "Category",
@@ -698,12 +694,14 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       },
       size: 120,
     },
-    //add ai summary textbox
     {
       id: "aiSummary",
       header: "AI Summary",
       accessorKey: "aiSummary",
-      cell: ({ row }) => <Textarea className="text-slate-600">{row.original.aiSummary}</Textarea>,
+      cell: ({ row }) => (
+        <Textarea className="text-slate-600" readOnly value={row.original.aiSummary} />
+      ),
+      size: 300,
     },
   ];
 
@@ -769,7 +767,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       {/* AI Summary Panel */}
       {showAiSummary && (
         <div className="w-80 shrink-0 border-l border-violet-100 bg-white flex flex-col order-last">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-violet-100 bg-violet-50">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-violet-100 ">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-violet-600" />
               <span className="text-sm font-semibold text-violet-800">AI Summary</span>
@@ -806,14 +804,31 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         </div>
       )}
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto">
-          <CustomResizableTable
-            columns={matchedCasesColumns}
-            data={mockMatches}
-            tableId="pep-screening-matched-cases"
-            mainClass="pep-screening-matched-cases"
-          />
+      <div className="">
+        <div className="flex items-center justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 text-slate-600 gap-1">
+                <Download className="h-4 w-4" />
+                EXPORT
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>Export as CSV</DropdownMenuItem>
+              <DropdownMenuItem>Export as PDF</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-auto">
+            <CustomResizableTable
+              columns={matchedCasesColumns}
+              data={mockMatches}
+              tableId="pep-screening-matched-cases"
+              mainClass="pep-screening-matched-cases"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -883,7 +898,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
             variant="outline"
             size="sm"
             onClick={handleGenerateAiSummary}
-            className="gap-2 text-violet-600 border-violet-200 hover:bg-violet-50 hover:text-violet-700"
+            className="gap-2 text-violet-600 border-violet-200 hover: hover:text-violet-700"
           >
             <Sparkles className="h-4 w-4" />
             AI Summary
@@ -893,7 +908,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
 
       {/* AI Controls Bar */}
       {activeTab === "world-check" && (
-        <div className="bg-violet-50 border border-violet-100 rounded-lg px-4 py-2.5 mb-2 flex items-center gap-4 flex-wrap">
+        <div className=" border border-violet-100 rounded-lg px-4 py-2.5 mb-2 flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2">
             <Wand2 className="h-4 w-4 text-violet-500" />
             <span className="text-sm font-medium text-violet-800">

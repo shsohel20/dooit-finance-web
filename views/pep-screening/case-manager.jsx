@@ -26,6 +26,7 @@ const mockCases = [
     lastModifiedDateUser: "06-May-2026 09:15",
     lastModifiedDateOGS: "06-May-2026 09:00",
     createdBy: "AML Analyst",
+    aiSummary: "This matched with the name of the PEP and the date of birth is also correct.",
   },
   {
     id: 2,
@@ -43,6 +44,7 @@ const mockCases = [
     lastModifiedDateUser: "06-May-2026 09:15",
     lastModifiedDateOGS: "06-May-2026 09:00",
     createdBy: "AML Analyst",
+    aiSummary: "This has some doubts but it is a match.",
   },
   {
     id: 3,
@@ -60,6 +62,7 @@ const mockCases = [
     lastModifiedDateUser: "06-May-2026 09:15",
     lastModifiedDateOGS: "06-May-2026 09:00",
     createdBy: "AML Analyst",
+    aiSummary: "This is a false positive.",
   },
   {
     id: 4,
@@ -77,6 +80,7 @@ const mockCases = [
     lastModifiedDateUser: "06-May-2026 09:15",
     lastModifiedDateOGS: "06-May-2026 09:00",
     createdBy: "AML Analyst",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 5,
@@ -94,6 +98,7 @@ const mockCases = [
     lastModifiedDateUser: "06-May-2026 09:15",
     lastModifiedDateOGS: "06-May-2026 09:00",
     createdBy: "AML Analyst",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 6,
@@ -111,6 +116,7 @@ const mockCases = [
     lastModifiedDateUser: "06-May-2026 09:15",
     lastModifiedDateOGS: "06-May-2026 09:00",
     createdBy: "AML Analyst",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 7,
@@ -128,6 +134,7 @@ const mockCases = [
     lastModifiedDateUser: "06-May-2026 09:15",
     lastModifiedDateOGS: "06-May-2026 09:00",
     createdBy: "AML Analyst",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 8,
@@ -145,6 +152,7 @@ const mockCases = [
     lastModifiedDateUser: "06-May-2026 09:15",
     lastModifiedDateOGS: "06-May-2026 09:00",
     createdBy: "AML Analyst",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 9,
@@ -162,6 +170,7 @@ const mockCases = [
     lastModifiedDateUser: "06-May-2026 09:15",
     lastModifiedDateOGS: "06-May-2026 09:00",
     createdBy: "AML Analyst",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 10,
@@ -179,6 +188,7 @@ const mockCases = [
     lastModifiedDateUser: "06-May-2026 09:15",
     lastModifiedDateOGS: "06-May-2026 09:00",
     createdBy: "AML Analyst",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
 ];
 
@@ -189,7 +199,7 @@ const ratingColors = {
 };
 
 export function CaseManager({ formData = null }) {
-  const [selectedCase, setSelectedCase] = useState(null);
+  const [selectedCase, setSelectedCase] = useState("1");
 
   const handleCaseClick = (caseItem) => {
     setSelectedCase(caseItem);

@@ -99,6 +99,7 @@ const CustomResizableTable = ({
   loading = false,
   onDoubleClick,
   actions,
+  trBgColor,
   ...props
 }) => {
   const [highlightedId, setHighlightedId] = useState(null);
@@ -319,6 +320,7 @@ const CustomResizableTable = ({
                         data-highlighted={highlightedId === row?.original?.id}
                         className={cn(' hover:bg-neutral-100  font-medium ', {
                           'bg-blue-50 ': highlightedId === row?.original?.id,
+                          [row.bgColor]: row.bgColor,
                         })}
                       >
                         {orderedColumns.map((column) => {
