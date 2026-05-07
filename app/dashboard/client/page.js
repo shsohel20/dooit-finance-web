@@ -1,7 +1,6 @@
 "use client";
 
 import useGetUser from "@/hooks/useGetUser";
-import ClientDashboard from "@/views/client-dashboard";
 import ClientDashboardPage from "@/views/client-dashboard/dashboard";
 import CryptoCurrencyDashboard from "@/views/crypto-currency/dashboard";
 import PreciousMetalDashboard from "@/views/precious-metal/dashboard";

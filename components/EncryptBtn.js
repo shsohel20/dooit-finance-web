@@ -11,7 +11,8 @@ export function EncryptDecryptFAB() {
   const [isEncrypted, setIsEncrypted] = useState(
     loggedInUser?.client?.isEncrypted || false
   );
-  console.log('Current encryption state:', isEncrypted);
+
+  console.log('isEncrypted', loggedInUser?.client?.isEncrypted);
 
   const handleToggle = async () => {
     setIsAnimating(true);
@@ -23,8 +24,10 @@ export function EncryptDecryptFAB() {
     const res = await toggleEncryption(payload);
     console.log('Encryption toggle response:', res);
     if (res.success) {
+      // Refresh the page to reflect changes
       setIsEncrypted((prev) => !prev);
       setIsAnimating(false);
+      // window.location.reload();
     }
   };
 

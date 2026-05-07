@@ -1,5 +1,5 @@
 import AuthProvider from "@/providers/SessionProvider";
-import { Geist, Geist_Mono, Montserrat, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat, sansFlex, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { EncryptDecryptFAB } from "@/components/EncryptBtn";
@@ -11,7 +11,7 @@ const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
 });
-
+// const sansFlex = SansFlex({ subsets: ["latin"], variable: "--font-sans-flex" });
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 const montserrat = Montserrat({
@@ -28,8 +28,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`font-sans antialiased ${montserrat.className} text-sm`}
-        // className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}
+        // className={`font-sans antialiased ${montserrat.className} text-sm`}
+        className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}
         suppressHydrationWarning
       >
         {/* <AuthProvider> */}

@@ -1,13 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { cn, riskLevelVariants } from "@/lib/utils";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { CaseDetails } from "./case-details";
-import ResizableTable from "@/components/ui/Resizabletable";
-import { getCustomers } from "@/app/dashboard/client/onboarding/customer-queue/actions";
-
-import { StatusPill } from "@/components/ui/StatusPill";
-import { IconPennant } from "@tabler/icons-react";
 import dynamic from "next/dynamic";
 import { Input } from "@/components/ui/input";
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
@@ -17,386 +12,237 @@ const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizab
 const mockCases = [
   {
     id: 1,
-    caseName: "YANG XU",
-    linkedCases: 0,
+    caseName: "SHEIKH HASINA WAZED",
+    caseId: "AML2026001",
+    linkedCases: 3,
     caseRating: "High",
-    caseId: "CXP2300208",
-    mandatoryActions: 352,
-    unresolved: 352,
-    reviewRequired: 348,
-    ongoingScreening: false,
+    mandatoryActions: 12,
+    unresolved: 10,
+    reviewRequired: 8,
+    ongoingScreening: true,
     archived: false,
     assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "17-Jun-2025 22:47",
-    createdBy: "Mohammad Hossain",
+    lastModifiedBy: "System",
+    lastModifiedDateUser: "06-May-2026 09:15",
+    lastModifiedDateOGS: "06-May-2026 09:00",
+    createdBy: "AML Analyst",
   },
   {
     id: 2,
-    caseName: "JUN WANG",
-    linkedCases: 0,
-    caseRating: "High",
-    caseId: "CXP2300243",
-    mandatoryActions: 348,
-    unresolved: 348,
-    reviewRequired: 348,
+    caseName: "HASINA BEGUM SHEIKH",
+    caseId: "AML2026002",
+    linkedCases: 1,
+    caseRating: "Medium",
+    mandatoryActions: 6,
+    unresolved: 6,
+    reviewRequired: 4,
     ongoingScreening: false,
-    archived: true,
+    archived: false,
     assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "18-Jun-2025 18:01",
-    createdBy: "Mohammad Hossain",
+    lastModifiedBy: "System",
+    lastModifiedDateUser: "06-May-2026 09:15",
+    lastModifiedDateOGS: "06-May-2026 09:00",
+    createdBy: "AML Analyst",
   },
   {
     id: 3,
-    caseName: "Wei Li",
-    linkedCases: 0,
+    caseName: "SHEIKH REHANA",
+    caseId: "AML2026003",
+    linkedCases: 2,
     caseRating: "High",
-    caseId: "CXP2300350",
-    mandatoryActions: 328,
-    unresolved: 328,
-    reviewRequired: 328,
+    mandatoryActions: 8,
+    unresolved: 8,
+    reviewRequired: 5,
     ongoingScreening: false,
     archived: false,
     assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "17-Jun-2025 21:31",
-    createdBy: "Mohammad Hossain",
+    lastModifiedBy: "System",
+    lastModifiedDateUser: "06-May-2026 09:15",
+    lastModifiedDateOGS: "06-May-2026 09:00",
+    createdBy: "AML Analyst",
   },
   {
     id: 4,
-    caseName: "LI SHEN",
-    linkedCases: 0,
+    caseName: "SAJEEB WAZED JOY",
+    caseId: "AML2026004",
+    linkedCases: 1,
     caseRating: "High",
-    caseId: "CXP2300360",
-    mandatoryActions: 311,
-    unresolved: 311,
-    reviewRequired: 0,
+    mandatoryActions: 5,
+    unresolved: 5,
+    reviewRequired: 3,
     ongoingScreening: false,
     archived: false,
     assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:29",
-    lastModifiedDateOGS: "12-Jun-2025 20:31",
-    createdBy: "Mohammad Hossain",
+    lastModifiedBy: "System",
+    lastModifiedDateUser: "06-May-2026 09:15",
+    lastModifiedDateOGS: "06-May-2026 09:00",
+    createdBy: "AML Analyst",
   },
   {
     id: 5,
-    caseName: "wei zhang",
+    caseName: "SHAIKH HASINA",
+    caseId: "AML2026005",
     linkedCases: 0,
+    caseRating: "Medium",
+    mandatoryActions: 4,
+    unresolved: 4,
+    reviewRequired: 3,
+    ongoingScreening: false,
+    archived: false,
+    assignee: "",
+    lastModifiedBy: "System",
+    lastModifiedDateUser: "06-May-2026 09:15",
+    lastModifiedDateOGS: "06-May-2026 09:00",
+    createdBy: "AML Analyst",
+  },
+  {
+    id: 6,
+    caseName: "HASINA KHATUN",
+    caseId: "AML2026006",
+    linkedCases: 0,
+    caseRating: "Low",
+    mandatoryActions: 2,
+    unresolved: 2,
+    reviewRequired: 2,
+    ongoingScreening: false,
+    archived: false,
+    assignee: "",
+    lastModifiedBy: "System",
+    lastModifiedDateUser: "06-May-2026 09:15",
+    lastModifiedDateOGS: "06-May-2026 09:00",
+    createdBy: "AML Analyst",
+  },
+  {
+    id: 7,
+    caseName: "WAJED MIAH",
+    caseId: "AML2026007",
+    linkedCases: 1,
     caseRating: "High",
-    caseId: "5jb7icomkIiw1it55aq5Ici...",
-    mandatoryActions: 309,
-    unresolved: 308,
+    mandatoryActions: 3,
+    unresolved: 3,
+    reviewRequired: 2,
+    ongoingScreening: false,
+    archived: true,
+    assignee: "",
+    lastModifiedBy: "System",
+    lastModifiedDateUser: "06-May-2026 09:15",
+    lastModifiedDateOGS: "06-May-2026 09:00",
+    createdBy: "AML Analyst",
+  },
+  {
+    id: 8,
+    caseName: "SHIRIN SHARMIN CHAUDHURY",
+    caseId: "AML2026008",
+    linkedCases: 1,
+    caseRating: "Medium",
+    mandatoryActions: 4,
+    unresolved: 4,
+    reviewRequired: 2,
+    ongoingScreening: false,
+    archived: false,
+    assignee: "",
+    lastModifiedBy: "System",
+    lastModifiedDateUser: "06-May-2026 09:15",
+    lastModifiedDateOGS: "06-May-2026 09:00",
+    createdBy: "AML Analyst",
+  },
+  {
+    id: 9,
+    caseName: "HASINA BEGUM",
+    caseId: "AML2026009",
+    linkedCases: 0,
+    caseRating: "Low",
+    mandatoryActions: 1,
+    unresolved: 1,
     reviewRequired: 1,
     ongoingScreening: false,
     archived: false,
     assignee: "",
-    lastModifiedBy: "Mohammad Hossain",
-    lastModifiedDateUser: "05-Feb-2025 05:16",
-    lastModifiedDateOGS: "25-Jan-2025 23:29",
-    createdBy: "Mohammad Hossain",
-  },
-  {
-    id: 6,
-    caseName: "LIN HUANG",
-    linkedCases: 0,
-    caseRating: "High",
-    caseId: "CXP2300242",
-    mandatoryActions: 286,
-    unresolved: 286,
-    reviewRequired: 0,
-    ongoingScreening: false,
-    archived: false,
-    assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "14-Jun-2025 19:52",
-    createdBy: "Mohammad Hossain",
-  },
-  {
-    id: 7,
-    caseName: "Tian Li",
-    linkedCases: 0,
-    caseRating: "High",
-    caseId: "CXP2300257",
-    mandatoryActions: 285,
-    unresolved: 285,
-    reviewRequired: 0,
-    ongoingScreening: false,
-    archived: false,
-    assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "27-May-2025 21:14",
-    createdBy: "Mohammad Hossain",
-  },
-  {
-    id: 8,
-    caseName: "Shufeng Wang",
-    linkedCases: 0,
-    caseRating: "High",
-    caseId: "CXP2300315",
-    mandatoryActions: 281,
-    unresolved: 281,
-    reviewRequired: 0,
-    ongoingScreening: false,
-    archived: false,
-    assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "26-Apr-2025 20:34",
-    createdBy: "Mohammad Hossain",
-  },
-  {
-    id: 9,
-    caseName: "Xueping Wang",
-    linkedCases: 0,
-    caseRating: "High",
-    caseId: "CXP2300249",
-    mandatoryActions: 265,
-    unresolved: 265,
-    reviewRequired: 0,
-    ongoingScreening: false,
-    archived: false,
-    assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "09-May-2025 21:01",
-    createdBy: "Mohammad Hossain",
+    lastModifiedBy: "System",
+    lastModifiedDateUser: "06-May-2026 09:15",
+    lastModifiedDateOGS: "06-May-2026 09:00",
+    createdBy: "AML Analyst",
   },
   {
     id: 10,
-    caseName: "JUN ZHANG",
+    caseName: "HASENA SHIEK",
+    caseId: "AML2026010",
     linkedCases: 0,
-    caseRating: "High",
-    caseId: "CXP2300331",
-    mandatoryActions: 259,
-    unresolved: 259,
-    reviewRequired: 0,
+    caseRating: "Low",
+    mandatoryActions: 1,
+    unresolved: 1,
+    reviewRequired: 1,
     ongoingScreening: false,
     archived: false,
     assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "10-Jun-2025 22:20",
-    createdBy: "Mohammad Hossain",
-  },
-  {
-    id: 11,
-    caseName: "Xiaomeng Zhang",
-    linkedCases: 0,
-    caseRating: "Medium",
-    caseId: "CXP2300338",
-    mandatoryActions: 213,
-    unresolved: 213,
-    reviewRequired: 0,
-    ongoingScreening: false,
-    archived: false,
-    assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "29-Apr-2025 19:21",
-    createdBy: "Mohammad Hossain",
-  },
-  {
-    id: 12,
-    caseName: "Yunqing Li",
-    linkedCases: 0,
-    caseRating: "Medium",
-    caseId: "CXP2300328",
-    mandatoryActions: 210,
-    unresolved: 210,
-    reviewRequired: 0,
-    ongoingScreening: false,
-    archived: false,
-    assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "17-Jun-2025 21:45",
-    createdBy: "Mohammad Hossain",
-  },
-  {
-    id: 13,
-    caseName: "FENGYING WANG",
-    linkedCases: 0,
-    caseRating: "High",
-    caseId: "CXP2300204",
-    mandatoryActions: 207,
-    unresolved: 207,
-    reviewRequired: 0,
-    ongoingScreening: false,
-    archived: false,
-    assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "26-Apr-2025 20:17",
-    createdBy: "Mohammad Hossain",
-  },
-  {
-    id: 14,
-    caseName: "Yang Liu",
-    linkedCases: 0,
-    caseRating: "Medium",
-    caseId: "5jb7yyukoh43b1isyav0g...",
-    mandatoryActions: 197,
-    unresolved: 197,
-    reviewRequired: 0,
-    ongoingScreening: false,
-    archived: false,
-    assignee: "",
-    lastModifiedBy: "Mohammad Hossain",
-    lastModifiedDateUser: "05-Feb-2025 05:16",
-    lastModifiedDateOGS: "01-Jan-2025 04:57",
-    createdBy: "Mohammad Hossain",
-  },
-  {
-    id: 15,
-    caseName: "YUE SUN",
-    linkedCases: 0,
-    caseRating: "High",
-    caseId: "CXP2300161",
-    mandatoryActions: 195,
-    unresolved: 195,
-    reviewRequired: 0,
-    ongoingScreening: false,
-    archived: false,
-    assignee: "",
-    lastModifiedBy: "Michael Sapolu",
-    lastModifiedDateUser: "19-Jun-2025 04:28",
-    lastModifiedDateOGS: "22-May-2025 18:44",
-    createdBy: "Mohammad Hossain",
+    lastModifiedBy: "System",
+    lastModifiedDateUser: "06-May-2026 09:15",
+    lastModifiedDateOGS: "06-May-2026 09:00",
+    createdBy: "AML Analyst",
   },
 ];
 
-export function CaseManager({ formData = null }) {
-  const [selectedCases, setSelectedCases] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
-  const [selectedCase, setSelectedCase] = useState(null);
-  const [cases, setCases] = useState([]);
-  const [fetching, setFetching] = useState(false);
-  const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedCases([]);
-    } else {
-      setSelectedCases(mockCases.map((c) => c.id));
-    }
-    setSelectAll(!selectAll);
-  };
+const ratingColors = {
+  High: "bg-red-600 text-white",
+  Medium: "bg-amber-500 text-white",
+  Low: "bg-emerald-500 text-white",
+};
 
-  const handleSelectCase = (id) => {
-    if (selectedCases.includes(id)) {
-      setSelectedCases(selectedCases.filter((cId) => cId !== id));
-    } else {
-      setSelectedCases([...selectedCases, id]);
-    }
-  };
+export function CaseManager({ formData = null }) {
+  const [selectedCase, setSelectedCase] = useState(null);
 
   const handleCaseClick = (caseItem) => {
     setSelectedCase(caseItem);
   };
 
-  const fetchCustomers = async () => {
-    setFetching(true);
-    const queryParams = {
-      page: 1,
-      limit: 10,
-    };
-    try {
-      const response = await getCustomers(queryParams);
-      console.log("customers", response.data);
-      setCases(response.data);
-    } catch (error) {
-      console.error("Failed to get customers", error);
-    } finally {
-      setFetching(false);
-    }
-  };
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
-  const getRatingBadge = (rating) => {
-    const colors = {
-      High: "bg-red-600 text-white",
-      Medium: "bg-amber-500 text-white",
-      Low: "bg-emerald-500 text-white",
-    };
-    return (
-      <span className={cn("px-2 py-0.5 rounded text-xs font-medium", colors[rating])}>
-        {rating}
-      </span>
-    );
-  };
-
   if (selectedCase) {
     return <CaseDetails caseData={selectedCase} onBack={() => setSelectedCase(null)} />;
   }
+
   const columns = [
     {
-      id: "caseId",
-      header: "Case ID",
-      accessorKey: "uid",
+      id: "case",
+      header: "Case",
+      accessorKey: "caseName",
       cell: ({ row }) => (
-        <div className="" onClick={() => handleCaseClick(row.original)}>
-          <p className="capitalize font-bold cursor-pointer hover:underline">
-            {row?.original?.personalKyc?.personal_form?.customer_details?.given_name}{" "}
-            {row?.original?.personalKyc?.personal_form?.customer_details?.middle_name}{" "}
-            {row?.original?.personalKyc?.personal_form?.customer_details?.surname}
-          </p>
-          <p className="text-sm text-muted-foreground">{row?.original?._id}</p>
+        <div onClick={() => handleCaseClick(row.original)} className="cursor-pointer">
+          <p className="font-bold hover:underline">{row.original.caseName}</p>
+          <p className="text-xs text-muted-foreground">{row.original.caseId}</p>
         </div>
       ),
-      size: 100,
+      size: 220,
     },
-
+    {
+      id: "caseRating",
+      header: "Risk",
+      accessorKey: "caseRating",
+      cell: ({ row }) => (
+        <span
+          className={cn(
+            "px-2 py-0.5 rounded text-xs font-medium",
+            ratingColors[row.original.caseRating],
+          )}
+        >
+          {row.original.caseRating}
+        </span>
+      ),
+      size: 80,
+    },
     {
       id: "linkedCases",
       header: "Linked Cases",
       accessorKey: "linkedCases",
       cell: ({ row }) => (
-        <div>
-          <p className="font-mono text-end text-muted-foreground">
-            {row?.original?.linkedCases || 10}
-          </p>
-        </div>
+        <p className="text-end text-muted-foreground">{row.original.linkedCases}</p>
       ),
       size: 100,
     },
-    // {
-    //   id: "type",
-    //   header: "Case Type",
-    //   accessorKey: "type",
-    //   cell: ({ row }) => (
-    //     <div>
-    //       <p className="">{row?.original?.caseType}</p>
-    //     </div>
-    //   ),
-    //   size: 100,
-    // },
-    // {
-    //   id: "caseRating",
-    //   header: "Case Rating",
-    //   accessorKey: "caseRating",
-    //   cell: ({ row }) => (
-    //     <StatusPill icon={<IconPennant />} variant={riskLevelVariants[row?.original?.riskLabel]}>
-    //       {row?.original?.riskLabel}
-    //     </StatusPill>
-    //   ),
-    //   size: 100,
-    // },
-
     {
       id: "mandatoryActions",
       header: "Actions Required",
       accessorKey: "mandatoryActions",
       cell: ({ row }) => (
-        <div>
-          <p className="text-end text-muted-foreground">{row?.original?.mandatoryActions || 0}</p>
-        </div>
+        <p className="text-end text-muted-foreground">{row.original.mandatoryActions}</p>
       ),
     },
     {
@@ -404,9 +250,7 @@ export function CaseManager({ formData = null }) {
       header: "Unresolved",
       accessorKey: "unresolved",
       cell: ({ row }) => (
-        <div>
-          <p className="text-end text-muted-foreground">{row?.original?.unresolved || 0}</p>
-        </div>
+        <p className="text-end text-muted-foreground">{row.original.unresolved}</p>
       ),
       size: 100,
     },
@@ -415,22 +259,18 @@ export function CaseManager({ formData = null }) {
       header: "Review",
       accessorKey: "reviewRequired",
       cell: ({ row }) => (
-        <div>
-          <p className="text-end text-muted-foreground">{row?.original?.reviewRequired || 0}</p>
-        </div>
+        <p className="text-end text-muted-foreground">{row.original.reviewRequired}</p>
       ),
-      size: 100,
+      size: 80,
     },
     {
       id: "ongoingScreening",
-      header: "Ongoing Screening",
+      header: "Ongoing",
       accessorKey: "ongoingScreening",
       cell: ({ row }) => (
-        <div>
-          <p className="text-end text-muted-foreground">
-            {row?.original?.ongoingScreening ? "Yes" : "No"}
-          </p>
-        </div>
+        <p className="text-end text-muted-foreground">
+          {row.original.ongoingScreening ? "Yes" : "No"}
+        </p>
       ),
     },
     {
@@ -438,9 +278,7 @@ export function CaseManager({ formData = null }) {
       header: "Archived",
       accessorKey: "archived",
       cell: ({ row }) => (
-        <div>
-          <p className="text-end text-muted-foreground">{row?.original?.archived ? "Yes" : "No"}</p>
-        </div>
+        <p className="text-end text-muted-foreground">{row.original.archived ? "Yes" : "No"}</p>
       ),
     },
     {
@@ -448,9 +286,7 @@ export function CaseManager({ formData = null }) {
       header: "Assignee",
       accessorKey: "assignee",
       cell: ({ row }) => (
-        <div>
-          <p className="text-end text-muted-foreground">{row?.original?.assignee || "N/A"}</p>
-        </div>
+        <p className="text-end text-muted-foreground">{row.original.assignee || "N/A"}</p>
       ),
     },
     {
@@ -458,58 +294,44 @@ export function CaseManager({ formData = null }) {
       header: "Last Updated By",
       accessorKey: "lastModifiedBy",
       cell: ({ row }) => (
-        <div>
-          <p className="text-end text-muted-foreground">{row?.original?.analyst?.name || "N/A"}</p>
-        </div>
+        <p className="text-end text-muted-foreground">{row.original.lastModifiedBy}</p>
       ),
     },
     {
       id: "lastModifiedDateUser",
-      header: "Last Modified Date - User",
+      header: "Last Modified (User)",
       accessorKey: "lastModifiedDateUser",
       cell: ({ row }) => (
-        <div>
-          <p className="text-end text-muted-foreground">{row?.original?.analyst?.name || "N/A"}</p>
-        </div>
+        <p className="text-end text-muted-foreground">{row.original.lastModifiedDateUser}</p>
       ),
     },
     {
       id: "lastModifiedDateOGS",
-      header: "Last Modified Date - OGS",
+      header: "Last Modified (OGS)",
       accessorKey: "lastModifiedDateOGS",
       cell: ({ row }) => (
-        <div>
-          <p className="text-end text-muted-foreground">{row?.original?.analyst?.name || "N/A"}</p>
-        </div>
+        <p className="text-end text-muted-foreground">{row.original.lastModifiedDateOGS}</p>
       ),
     },
     {
       id: "createdBy",
       header: "Created By",
       accessorKey: "createdBy",
-      cell: ({ row }) => (
-        <div>
-          <p className="text-end text-muted-foreground">{row?.original?.analyst?.name || "N/A"}</p>
-        </div>
-      ),
+      cell: ({ row }) => <p className="text-end text-muted-foreground">{row.original.createdBy}</p>,
     },
   ];
 
   return (
-    <div className="  ">
-      {/* Case Manager Header */}
-      {/* filter and search */}
-      <div className="flex gap-2">
+    <div>
+      <div className="flex gap-2 mb-3">
         <Input type="text" placeholder="Search" />
         <Input type="text" placeholder="Case ID" />
       </div>
-      {/* Table */}
       <div className="flex-1 overflow-auto">
         <CustomResizableTable
           columns={columns}
-          data={cases}
+          data={mockCases}
           tableId="pep-screening-case-manager"
-          loading={fetching}
           mainClass="pep-screening-case-manager"
         />
       </div>
