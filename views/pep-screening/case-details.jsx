@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -12,18 +11,12 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import {
-  User,
-  FileText,
-  Globe,
   Link2,
-  FileSearch,
   ChevronDown,
-  ChevronRight,
   AlertTriangle,
   ArrowLeft,
   Filter,
   Download,
-  Archive,
   MoreVertical,
   RefreshCw,
   Search,
