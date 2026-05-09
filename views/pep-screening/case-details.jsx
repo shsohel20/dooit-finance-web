@@ -306,7 +306,6 @@ Recommendation: This subject requires enhanced due diligence. The top matches ar
 
 export function CaseDetails({ caseData, onBack, onBackToManager }) {
   const [activeTab, setActiveTab] = useState("world-check");
-  const [selectedMatches, setSelectedMatches] = useState([]);
   const [selectedMatchIndex, setSelectedMatchIndex] = useState(null);
   const [openMatchDetail, setOpenMatchDetail] = useState(false);
   const [resolutions, setResolutions] = useState({});
@@ -361,11 +360,19 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       green: "bg-emerald-500",
       orange: "bg-orange-500",
       yellow: "bg-amber-400",
+      red: "bg-red-500",
+    };
+    console.log("strength", strength);
+    const getColor = (strength) => {
+      if (strength >= 80) return bgColors.green;
+      if (strength >= 60) return bgColors.orange;
+      if (strength >= 40) return bgColors.yellow;
+      return bgColors.red;
     };
     return (
       <div className="w-20 h-3 bg-slate-200 rounded-sm overflow-hidden">
         <div
-          className={cn("h-full rounded-sm", bgColors[color])}
+          className={cn("h-full rounded-sm", getColor(strength))}
           style={{ width: `${strength}%` }}
         />
       </div>
@@ -450,108 +457,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         </div>
 
         {/* Linked Cases Table */}
-        {/* <div className="flex-1 overflow-auto">
-          <table className="w-full text-sm">
-            <thead className=" sticky top-0 z-10">
-              <tr className="border-b border-slate-200">
-                <th className="px-3 py-2 text-left w-10">
-                  <Checkbox />
-                </th>
-                <th className="px-3 py-2 text-left w-10 text-slate-600 font-medium"></th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[150px]">
-                  Case Name
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[120px]">
-                  Relationship
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium w-28">ID</th>
-                <th className="px-3 py-2 text-center text-slate-600 font-medium w-24">
-                  Mandatory Actions
-                </th>
-                <th className="px-3 py-2 text-center text-slate-600 font-medium" colSpan={2}>
-                  <div className="text-center">World-Check - Summary</div>
-                </th>
-                <th className="px-3 py-2 text-center text-slate-600 font-medium w-24">
-                  Ongoing Screening
-                </th>
-                <th className="px-3 py-2 text-center text-slate-600 font-medium w-20">Archived</th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[100px]">
-                  Assignee
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[120px]">
-                  Last Modified By
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[140px]">
-                  Last Modified Date - User
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[140px]">
-                  Last Modified Date - OGS
-                </th>
-              </tr>
-              <tr className="border-b border-slate-200 ">
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1 text-center text-slate-500 font-normal text-xs">
-                  Unresolved
-                </th>
-                <th className="px-3 py-1 text-center text-slate-500 font-normal text-xs">
-                  Review Required
-                </th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockLinkedCases.map((linkedCase) => (
-                <tr
-                  key={linkedCase.id}
-                  className="border-b border-slate-100 hover: transition-colors "
-                >
-                  <td className="px-3 py-2">
-                    <span className="text-slate-500">{linkedCase.id}</span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <User className="h-4 w-4 text-slate-400" />
-                  </td>
-                  <td className="px-3 py-2 text-slate-800 font-medium">{linkedCase.caseName}</td>
-                  <td className="px-3 py-2 text-slate-600">{linkedCase.relationship}</td>
-                  <td className="px-3 py-2 text-slate-600">{linkedCase.caseId}</td>
-                  <td className="px-3 py-2 text-center">
-                    <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs">
-                      {linkedCase.mandatoryActions}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-center">
-                    <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs">
-                      {linkedCase.unresolved}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-center text-slate-600">
-                    {linkedCase.reviewRequired}
-                  </td>
-                  <td className="px-3 py-2 text-center">
-                    <Checkbox checked={linkedCase.ongoingScreening} />
-                  </td>
-                  <td className="px-3 py-2 text-center">
-                    <Archive className="h-4 w-4 text-slate-400 mx-auto" />
-                  </td>
-                  <td className="px-3 py-2 text-slate-600">{linkedCase.assignee}</td>
-                  <td className="px-3 py-2 text-blue-600">{linkedCase.lastModifiedBy}</td>
-                  <td className="px-3 py-2 text-slate-600">{linkedCase.lastModifiedDateUser}</td>
-                  <td className="px-3 py-2 text-slate-600">{linkedCase.lastModifiedDateOGS}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div> */}
+
         <CustomResizableTable
           columns={linkedCasesColumns}
           data={mockLinkedCases}
@@ -577,16 +483,18 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
           </div>
         </div>
       ),
+      size: 100,
     },
     {
       id: "actionRequired",
-      header: "Action Required",
+      header: "Action",
       accessorKey: "actionRequired",
       cell: ({ row }) => (
         <div className="text-center ">
           <span className="text-xs text-muted-foreground">{row.original.actionRequired}</span>
         </div>
       ),
+      size: 60,
     },
     {
       id: "matchStrength",
@@ -662,6 +570,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
           <span className=" text-muted-foreground">{row.original.citizenship}</span>
         </div>
       ),
+      size: 60,
     },
     {
       id: "category",
@@ -672,6 +581,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
           <span className="text-xs text-muted-foreground">{row.original.category}</span>
         </div>
       ),
+      size: 20,
     },
     {
       id: "resolution",
@@ -701,7 +611,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       cell: ({ row }) => (
         <Textarea className="text-slate-600" readOnly value={row.original.aiSummary} />
       ),
-      size: 300,
+      // size: 300,
     },
   ];
 
@@ -763,10 +673,18 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
   ];
 
   const renderWorldCheckTab = () => (
-    <div className="flex-1 flex overflow-hidden">
+    <div className="flex-1 flex overflow-hidden ">
       {/* AI Summary Panel */}
       {showAiSummary && (
-        <div className="w-80 shrink-0 border-l border-violet-100 bg-white flex flex-col order-last">
+        <div
+          className={cn(
+            "w-80 shrink-0 border-l border-violet-100 bg-white flex flex-col order-last fixed top-1/3 right-0 z-[9999] transition-transform duration-700 ease-in-out ",
+            {
+              "translate-x-80": !showAiSummary,
+              "translate-x-0": showAiSummary,
+            },
+          )}
+        >
           <div className="flex items-center justify-between px-4 py-3 border-b border-violet-100 ">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-violet-600" />
@@ -779,7 +697,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
               <X className="h-4 w-4" />
             </button>
           </div>
-          <div className="flex-1 overflow-auto p-4">
+          <div className="flex-1 overflow-auto p-4 ">
             {aiSummaryLoading ? (
               <div className="space-y-3">
                 {[100, 80, 90, 70, 85].map((w, i) => (

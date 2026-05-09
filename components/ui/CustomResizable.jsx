@@ -271,7 +271,7 @@ const CustomResizableTable = ({
         >
           <Table
             id={tableId}
-            className={cn(mainClass, className, 'w-full  border ')}
+            className={cn(mainClass, className, 'w-full  border table-auto ')}
             {...props}
           >
             <TableHeader>
