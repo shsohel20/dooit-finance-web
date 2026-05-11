@@ -7,7 +7,7 @@ const useGetUser = () => {
   const getUser = async () => {
     const response = await getLoggedInUser();
     if (response.success) {
-      setLoggedInUser(response.data);
+      setLoggedInUser({ ...response.data, isDataEncrypted: response.encryptionStatus });
     }
   };
   useEffect(() => {

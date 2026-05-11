@@ -48,6 +48,7 @@ import TransactionDashboard from "./Dashboard";
 import CustomPagination from "@/components/CustomPagination";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import useGetUser from "@/hooks/useGetUser";
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
 });

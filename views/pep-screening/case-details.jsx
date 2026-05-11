@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -12,18 +11,12 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import {
-  User,
-  FileText,
-  Globe,
   Link2,
-  FileSearch,
   ChevronDown,
-  ChevronRight,
   AlertTriangle,
   ArrowLeft,
   Filter,
   Download,
-  Archive,
   MoreVertical,
   RefreshCw,
   Search,
@@ -54,7 +47,9 @@ const mockMatches = [
     category: "FORMER HEAD OF GOVERNMENT",
     count: 24,
     ongoing: true,
-    actionRequired: true,
+    actionRequired: 2,
+    bgColor: "bg-red-50",
+    aiSummary: "This matched with the name of the PEP and the date of birth is also correct.",
   },
   {
     id: 2,
@@ -72,6 +67,8 @@ const mockMatches = [
     count: 12,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This has some doubts but it is a match.",
   },
   {
     id: 3,
@@ -92,6 +89,8 @@ const mockMatches = [
     count: 18,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a false positive.",
   },
   {
     id: 4,
@@ -112,6 +111,8 @@ const mockMatches = [
     count: 15,
     ongoing: false,
     actionRequired: 3,
+    bgColor: "bg-red-50",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 5,
@@ -129,6 +130,8 @@ const mockMatches = [
     count: 8,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 6,
@@ -146,6 +149,8 @@ const mockMatches = [
     count: 6,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 7,
@@ -166,6 +171,8 @@ const mockMatches = [
     count: 5,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 8,
@@ -183,6 +190,7 @@ const mockMatches = [
     count: 4,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
   },
   {
     id: 9,
@@ -200,6 +208,8 @@ const mockMatches = [
     count: 2,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
   {
     id: 10,
@@ -216,7 +226,8 @@ const mockMatches = [
     category: "LOW RISK",
     count: 1,
     ongoing: false,
-    actionRequired: 0,
+    actionRequired: 3,
+    bgColor: "bg-red-50",
   },
   {
     id: 11,
@@ -234,6 +245,7 @@ const mockMatches = [
     count: 2,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
   },
   {
     id: 12,
@@ -251,6 +263,8 @@ const mockMatches = [
     count: 1,
     ongoing: false,
     actionRequired: 0,
+    bgColor: "",
+    aiSummary: "This is a match but the date of birth is incorrect.",
   },
 ];
 
@@ -285,7 +299,6 @@ Recommendation: This subject requires enhanced due diligence. The top matches ar
 
 export function CaseDetails({ caseData, onBack, onBackToManager }) {
   const [activeTab, setActiveTab] = useState("world-check");
-  const [selectedMatches, setSelectedMatches] = useState([]);
   const [selectedMatchIndex, setSelectedMatchIndex] = useState(null);
   const [openMatchDetail, setOpenMatchDetail] = useState(false);
   const [resolutions, setResolutions] = useState({});
@@ -340,11 +353,19 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       green: "bg-emerald-500",
       orange: "bg-orange-500",
       yellow: "bg-amber-400",
+      red: "bg-red-500",
+    };
+    console.log("strength", strength);
+    const getColor = (strength) => {
+      if (strength >= 80) return bgColors.green;
+      if (strength >= 60) return bgColors.orange;
+      if (strength >= 40) return bgColors.yellow;
+      return bgColors.red;
     };
     return (
       <div className="w-20 h-3 bg-slate-200 rounded-sm overflow-hidden">
         <div
-          className={cn("h-full rounded-sm", bgColors[color])}
+          className={cn("h-full rounded-sm", getColor(strength))}
           style={{ width: `${strength}%` }}
         />
       </div>
@@ -429,108 +450,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         </div>
 
         {/* Linked Cases Table */}
-        {/* <div className="flex-1 overflow-auto">
-          <table className="w-full text-sm">
-            <thead className=" sticky top-0 z-10">
-              <tr className="border-b border-slate-200">
-                <th className="px-3 py-2 text-left w-10">
-                  <Checkbox />
-                </th>
-                <th className="px-3 py-2 text-left w-10 text-slate-600 font-medium"></th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[150px]">
-                  Case Name
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[120px]">
-                  Relationship
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium w-28">ID</th>
-                <th className="px-3 py-2 text-center text-slate-600 font-medium w-24">
-                  Mandatory Actions
-                </th>
-                <th className="px-3 py-2 text-center text-slate-600 font-medium" colSpan={2}>
-                  <div className="text-center">World-Check - Summary</div>
-                </th>
-                <th className="px-3 py-2 text-center text-slate-600 font-medium w-24">
-                  Ongoing Screening
-                </th>
-                <th className="px-3 py-2 text-center text-slate-600 font-medium w-20">Archived</th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[100px]">
-                  Assignee
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[120px]">
-                  Last Modified By
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[140px]">
-                  Last Modified Date - User
-                </th>
-                <th className="px-3 py-2 text-left text-slate-600 font-medium min-w-[140px]">
-                  Last Modified Date - OGS
-                </th>
-              </tr>
-              <tr className="border-b border-slate-200 ">
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1 text-center text-slate-500 font-normal text-xs">
-                  Unresolved
-                </th>
-                <th className="px-3 py-1 text-center text-slate-500 font-normal text-xs">
-                  Review Required
-                </th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-                <th className="px-3 py-1"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockLinkedCases.map((linkedCase) => (
-                <tr
-                  key={linkedCase.id}
-                  className="border-b border-slate-100 hover: transition-colors "
-                >
-                  <td className="px-3 py-2">
-                    <span className="text-slate-500">{linkedCase.id}</span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <User className="h-4 w-4 text-slate-400" />
-                  </td>
-                  <td className="px-3 py-2 text-slate-800 font-medium">{linkedCase.caseName}</td>
-                  <td className="px-3 py-2 text-slate-600">{linkedCase.relationship}</td>
-                  <td className="px-3 py-2 text-slate-600">{linkedCase.caseId}</td>
-                  <td className="px-3 py-2 text-center">
-                    <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs">
-                      {linkedCase.mandatoryActions}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-center">
-                    <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs">
-                      {linkedCase.unresolved}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-center text-slate-600">
-                    {linkedCase.reviewRequired}
-                  </td>
-                  <td className="px-3 py-2 text-center">
-                    <Checkbox checked={linkedCase.ongoingScreening} />
-                  </td>
-                  <td className="px-3 py-2 text-center">
-                    <Archive className="h-4 w-4 text-slate-400 mx-auto" />
-                  </td>
-                  <td className="px-3 py-2 text-slate-600">{linkedCase.assignee}</td>
-                  <td className="px-3 py-2 text-blue-600">{linkedCase.lastModifiedBy}</td>
-                  <td className="px-3 py-2 text-slate-600">{linkedCase.lastModifiedDateUser}</td>
-                  <td className="px-3 py-2 text-slate-600">{linkedCase.lastModifiedDateOGS}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div> */}
+
         <CustomResizableTable
           columns={linkedCasesColumns}
           data={mockLinkedCases}
@@ -547,7 +467,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       header: "Name",
       accessorKey: "name",
       cell: ({ row, index }) => (
-        <div onClick={() => handleMatchClick(index)} className="group">
+        <div onClick={() => handleMatchClick(index)} className="group ">
           <p className="text-slate-800 font-semibold group-hover:underline cursor-pointer">
             {row.original.name}
           </p>
@@ -556,22 +476,18 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
           </div>
         </div>
       ),
+      size: 100,
     },
-    // {
-    //   id: "matchedAlias",
-    //   header: "Matched Alias",
-    //   accessorKey: "matchedAlias",
-    // },
-    //action required
     {
       id: "actionRequired",
-      header: "Action Required",
+      header: "Action",
       accessorKey: "actionRequired",
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-center ">
           <span className="text-xs text-muted-foreground">{row.original.actionRequired}</span>
         </div>
       ),
+      size: 60,
     },
     {
       id: "matchStrength",
@@ -637,16 +553,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         </div>
       ),
     },
-    // {
-    //   id: "placeOfBirth",
-    //   header: "Place of Birth",
-    //   accessorKey: "placeOfBirth",
-    //   cell: ({ row }) => (
-    //     <div className="text-center">
-    //       <span className="text-xs text-muted-foreground">{row.original.placeOfBirth}</span>
-    //     </div>
-    //   ),
-    // },
+
     {
       id: "citizenship",
       header: "Citizenship",
@@ -656,17 +563,8 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
           <span className=" text-muted-foreground">{row.original.citizenship}</span>
         </div>
       ),
+      size: 60,
     },
-    // {
-    //   id: "countryLocation",
-    //   header: "Country Location",
-    //   accessorKey: "countryLocation",
-    //   cell: ({ row }) => (
-    //     <div className="text-center">
-    //       <span className="text-xs text-muted-foreground">{row.original.countryLocation}</span>
-    //     </div>
-    //   ),
-    // },
     {
       id: "category",
       header: "Category",
@@ -676,6 +574,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
           <span className="text-xs text-muted-foreground">{row.original.category}</span>
         </div>
       ),
+      size: 20,
     },
     {
       id: "resolution",
@@ -698,12 +597,14 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       },
       size: 120,
     },
-    //add ai summary textbox
     {
       id: "aiSummary",
       header: "AI Summary",
       accessorKey: "aiSummary",
-      cell: ({ row }) => <Textarea className="text-slate-600">{row.original.aiSummary}</Textarea>,
+      cell: ({ row }) => (
+        <Textarea className="text-slate-600" readOnly value={row.original.aiSummary} />
+      ),
+      // size: 300,
     },
   ];
 
@@ -765,11 +666,19 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
   ];
 
   const renderWorldCheckTab = () => (
-    <div className="flex-1 flex overflow-hidden">
+    <div className="flex-1 flex overflow-hidden ">
       {/* AI Summary Panel */}
       {showAiSummary && (
-        <div className="w-80 shrink-0 border-l border-violet-100 bg-white flex flex-col order-last">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-violet-100 bg-violet-50">
+        <div
+          className={cn(
+            "w-80 shrink-0 border-l border-violet-100 bg-white flex flex-col order-last fixed top-1/3 right-0 z-[9999] transition-transform duration-700 ease-in-out ",
+            {
+              "translate-x-80": !showAiSummary,
+              "translate-x-0": showAiSummary,
+            },
+          )}
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-violet-100 ">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-violet-600" />
               <span className="text-sm font-semibold text-violet-800">AI Summary</span>
@@ -781,7 +690,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
               <X className="h-4 w-4" />
             </button>
           </div>
-          <div className="flex-1 overflow-auto p-4">
+          <div className="flex-1 overflow-auto p-4 ">
             {aiSummaryLoading ? (
               <div className="space-y-3">
                 {[100, 80, 90, 70, 85].map((w, i) => (
@@ -806,14 +715,31 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         </div>
       )}
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto">
-          <CustomResizableTable
-            columns={matchedCasesColumns}
-            data={mockMatches}
-            tableId="pep-screening-matched-cases"
-            mainClass="pep-screening-matched-cases"
-          />
+      <div className="">
+        <div className="flex items-center justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 text-slate-600 gap-1">
+                <Download className="h-4 w-4" />
+                EXPORT
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>Export as CSV</DropdownMenuItem>
+              <DropdownMenuItem>Export as PDF</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-auto">
+            <CustomResizableTable
+              columns={matchedCasesColumns}
+              data={mockMatches}
+              tableId="pep-screening-matched-cases"
+              mainClass="pep-screening-matched-cases"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -883,7 +809,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
             variant="outline"
             size="sm"
             onClick={handleGenerateAiSummary}
-            className="gap-2 text-violet-600 border-violet-200 hover:bg-violet-50 hover:text-violet-700"
+            className="gap-2 text-violet-600 border-violet-200 hover: hover:text-violet-700"
           >
             <Sparkles className="h-4 w-4" />
             AI Summary
@@ -893,7 +819,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
 
       {/* AI Controls Bar */}
       {activeTab === "world-check" && (
-        <div className="bg-violet-50 border border-violet-100 rounded-lg px-4 py-2.5 mb-2 flex items-center gap-4 flex-wrap">
+        <div className=" border border-violet-100 rounded-lg px-4 py-2.5 mb-2 flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2">
             <Wand2 className="h-4 w-4 text-violet-500" />
             <span className="text-sm font-medium text-violet-800">

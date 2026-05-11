@@ -164,6 +164,12 @@ body {
   font-family: var(--font-sans);
   /* font-family: "font-sf-pro-regular", sans-serif; */
 }
+input,
+select,
+textarea,
+.react-select__input {
+  font-size: 16px;
+}
 .container {
   width: min(90%, 1280px);
   margin: 0 auto;

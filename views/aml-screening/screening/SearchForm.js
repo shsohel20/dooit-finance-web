@@ -24,7 +24,7 @@ export default function SearchForm({ formData, setFormData, type }) {
   };
   return (
     <div className="">
-      <div className="rounded-2xl  bg-white border-2 border-smoke-200 overflow-hidden">
+      <div className="rounded-2xl  bg-white border-2 border-smoke-200 ">
         {/* Name section */}
         <div className="p-6 space-y-4">
           <div className="space-y-1.5">
@@ -58,7 +58,7 @@ export default function SearchForm({ formData, setFormData, type }) {
             </div>
           </div>
           {isIndividual && (
-            <div className="space-y-4">
+            <div className="space-y-4 grid gap-4 md:grid-cols-3">
               <div className="space-y-1.5">
                 <Label className="">Date of Birth</Label>
                 <Input

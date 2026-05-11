@@ -12,7 +12,7 @@ const fontSans = Geist({
   variable: "--font-sans",
 });
 // const sansFlex = SansFlex({ subsets: ["latin"], variable: "--font-sans-flex" });
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+const jetbrainsMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -22,11 +22,15 @@ const montserrat = Montserrat({
 export const metadata = {
   title: "Dooit Wallet",
   description: "Generate your online wallet",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      {/* <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head> */}
       <body
         // className={`font-sans antialiased ${montserrat.className} text-sm`}
         className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}

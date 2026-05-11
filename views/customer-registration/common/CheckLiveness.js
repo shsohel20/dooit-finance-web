@@ -28,12 +28,10 @@ export default function CheckLiveness() {
   const router = useRouter();
 
   const handleFrontChange = async (src) => {
-    console.log("Front change", src);
     setFrontProfile(src);
   };
 
   const handleRightChange = async (src) => {
-    console.log("Right change", src);
     setRightProfile(src);
   };
 

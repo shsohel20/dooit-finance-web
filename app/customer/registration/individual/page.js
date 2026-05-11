@@ -19,26 +19,26 @@ const personalInfoSchema = z.object({
     surname: z.string().optional(),
   }),
   document_type: z.object({
-    value: z.string().min(1, "Document type is required"),
-    label: z.string().min(1, "Document type is required"),
+    value: z.string().optional(),
+    label: z.string().optional(),
   }),
   contact_details: z.object({
-    email: z.string().email("Invalid email address"),
-    phone: z.string().min(1, "Phone number is required"),
+    email: z.string().optional(),
+    phone: z.string().optional(),
   }),
   employment_details: z.object({
-    occupation: z.string().min(1, "Occupation is required"),
-    industry: z.string().min(1, "Industry is required"),
+    occupation: z.string().optional(),
+    industry: z.string().optional(),
   }),
   residential_address: z.object({
-    address: z.string().min(1, "Address is required"),
+    address: z.string().optional(),
     suburb: z.string().optional(),
-    state: z.string(),
+    state: z.string().optional(),
     postcode: z.string().optional(),
     country: z
       .object({
-        value: z.string(),
-        label: z.string(),
+        value: z.string().optional(),
+        label: z.string().optional(),
       })
       .optional()
       .nullable(),
@@ -106,7 +106,7 @@ const CustomerRegistration = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { customerRegisterData, setCustomerRegisterData, registerType, country } =
     useCustomerRegisterStore();
-  const [verifyingStatus, setVerifyingStatus] = useState("verified");
+  const [verifyingStatus, setVerifyingStatus] = useState("idle");
   const [verifiedMsg, setVerifiedMsg] = useState(null);
 
   const {

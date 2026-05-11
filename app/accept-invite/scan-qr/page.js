@@ -52,8 +52,8 @@ export default function ScanQRPage() {
     };
 
     const response = await sendInviteForScanQR(modifiedData);
-    setLoading(false);
     console.log("response => ", response);
+    setLoading(false);
     if (response.success) {
       router.push(response?.data?.url);
       reset();
@@ -73,7 +73,7 @@ export default function ScanQRPage() {
   }
   return (
     <div className="min-h-screen grid place-items-center">
-      <div className="grid gap-4 max-w-md mx-auto w-full border p-4 rounded-md">
+      <div className="grid gap-4 max-w-md md:w-full mx-auto w-[90%] border p-4 rounded-md">
         <div>
           <h1 className="text-2xl font-bold">Get Onboarding Link</h1>
           <p className="text-sm text-muted-foreground">Fill the form to get a onboarding link</p>
@@ -82,12 +82,16 @@ export default function ScanQRPage() {
           control={control}
           name="email"
           render={({ field }) => (
-            <div className="grid gap-2">
-              <Label htmlFor="send-invite-email">Email</Label>
+            <div className="grid ">
+              <Label htmlFor="send-invite-email" className={"uppercase"}>
+                Email
+              </Label>
               <Input
                 id="send-invite-email"
                 name="email"
+                type="email"
                 placeholder="example@example.com"
+                className={"!py-5 "}
                 error={errors.email?.message}
                 {...field}
               />
@@ -99,19 +103,22 @@ export default function ScanQRPage() {
           control={control}
           name="phone"
           render={({ field }) => (
-            <div className="grid gap-2">
-              <Label htmlFor="send-invite-phone">Phone</Label>
+            <div className="grid ">
+              <Label htmlFor="send-invite-phone" className={"uppercase"}>
+                Phone
+              </Label>
               <Input
                 id="send-invite-phone"
                 name="phone"
                 placeholder="Enter phone"
+                className={"!py-5 "}
                 {...field}
                 error={errors.phone?.message}
               />
             </div>
           )}
         />
-        <Controller
+        {/* <Controller
           control={control}
           name="notes"
           render={({ field }) => (
@@ -128,14 +135,14 @@ export default function ScanQRPage() {
               />
             </div>
           )}
-        />
-        <Button onClick={handleSubmit(onSubmit)} disabled={loading}>
+        /> */}
+        <Button onClick={handleSubmit(onSubmit)} disabled={loading} className="!py-6 text-sm">
           {loading ? (
             <span className="flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" /> Sending...
             </span>
           ) : (
-            "Send Invite"
+            "Send"
           )}
         </Button>
 

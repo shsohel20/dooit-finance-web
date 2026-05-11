@@ -43,7 +43,7 @@ const CustomDropZone = ({
     >
       <div
         className={cn(
-          'border-2 min-h-[180px] py-2 w-full border-dashed rounded-xl flex flex-col items-center justify-center gap-2 relative z-2 overflow-hidden ',
+          'border-2 min-h-[10px] px-4  py-4 w-full justify-between border-dashed rounded-xl flex flex-row items-center  gap-2 relative z-2 overflow-hidden ',
           disabled ? 'opacity-50' : '',
           {
             'bg-green-50/20 border-green-400': url && !error,
@@ -53,9 +53,9 @@ const CustomDropZone = ({
           className
         )}
       >
-        <div className="  flex items-center justify-center ">
+        {/* <div className="  flex items-center justify-center ">
           {renderIcon()}{' '}
-        </div>
+        </div> */}
 
         {children ? (
           children
@@ -71,7 +71,7 @@ const CustomDropZone = ({
         {url ? (
           <div
             className={cn(
-              'h-[250px] aspect-4/3 border rounded-md overflow-hidden',
+              'h-[50px] aspect-4/3 border rounded-md overflow-hidden',
               imageContainerClassName
             )}
           >
