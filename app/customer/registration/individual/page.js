@@ -106,7 +106,7 @@ const CustomerRegistration = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { customerRegisterData, setCustomerRegisterData, registerType, country } =
     useCustomerRegisterStore();
-  const [verifyingStatus, setVerifyingStatus] = useState("verified");
+  const [verifyingStatus, setVerifyingStatus] = useState("idle");
   const [verifiedMsg, setVerifiedMsg] = useState(null);
 
   const {

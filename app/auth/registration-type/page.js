@@ -68,8 +68,9 @@ const RegistrationType = () => {
     if (selectedType && country) {
       setRegisterType(selectedType?.value);
       setCountryStore(country?.value?.toLowerCase());
+      console.log("user => ", user);
 
-      if (user?.kycStatus === "pending" && selectedType?.value === "individual") {
+      if (!user) {
         //TODO:Will add additional logic later.
         router.push(`/customer/registration/individual/liveness-detection`);
       } else {
@@ -80,13 +81,13 @@ const RegistrationType = () => {
     }
   };
   return (
-    <div className="container grid place-items-center min-h-[80vh] py-8 ">
-      <div className="min-w-[500px]">
+    <div className="container grid place-items-center min-h-[80vh] py-8 mx-auto justify-center ">
+      <div className="max-w-[500px] w-[90%] md:w-full  ">
         <h1 className="text-2xl font-bold tracking-tighter text-center">
           Choose Registration Type
         </h1>
         <p className="text-center">Select the option that best describes you to get started.</p>
-        <div className="py-8  grid md:grid-cols-2 grid-cols-1   gap-4 items-center justify-center">
+        <div className="py-8  grid md:grid-cols-2 grid-cols-1   md:gap-4 gap-2 items-center justify-center ">
           {types.map((type, index) => (
             <div
               onClick={() => handleSelectType(type)}
@@ -101,7 +102,7 @@ const RegistrationType = () => {
               }}
               tabIndex={index + 1}
               className={cn(
-                "flex items-center gap-4 py-2.5 px-4 border rounded-lg cursor-pointer transition-all duration-300 w-[400px] focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2",
+                "flex items-center gap-4 py-2.5 px-4 border rounded-lg cursor-pointer transition-all duration-300 w-full md:w-[400px] focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2",
                 {
                   "border-yellow-500   px-6": selectedType?.type === type.type,
                 },

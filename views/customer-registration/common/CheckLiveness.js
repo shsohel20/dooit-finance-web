@@ -4,21 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
 import { useState } from "react";
-import CustomDropZone from "@/components/ui/DropZone";
 import FormTitle from "./FormTitle";
 import { checkImageLiveness } from "@/app/customer/registration/actions";
 import { toast } from "sonner";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import FaceCapture from "./FaceCapture";
 import { useRouter } from "next/navigation";
-
-const getBase64 = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 
 export default function CheckLiveness() {
   const [frontProfile, setFrontProfile] = useState(null); // base64 only
