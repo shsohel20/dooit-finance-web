@@ -24,7 +24,7 @@ export const checkImageLiveness = async (data) => {
 };
 
 export const getDataFromDocuments = async (formData) => {
-  const response = await fetch("http://4.227.188.44:8066/process-card", {
+  const response = await fetch("http://31.97.71.194:8066/process-card", {
     method: "POST",
     // headers: { "Content-Type": "application/json" },
     body: formData,
@@ -34,7 +34,7 @@ export const getDataFromDocuments = async (formData) => {
 };
 
 export const verifyDocument = async (data) => {
-  const response = await fetch("http://4.227.188.44:5005/verify", {
+  const response = await fetch("http://31.97.71.194:5005/verify", {
     method: "POST",
     body: JSON.stringify(data),
     headers: { "Content-Type": "application/json" },

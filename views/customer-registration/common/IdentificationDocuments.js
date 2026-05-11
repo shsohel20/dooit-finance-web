@@ -101,7 +101,7 @@ const IdentificationDocuments = ({
     setFrontLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
-      // console.log("front img response", response);
+      console.log("front img response", JSON.stringify(response, null, 2));
       if (response.success) {
         setFrontError(false);
         const existingFrontIndex = fields.findIndex((item) => item.type === "front");
@@ -267,7 +267,7 @@ const IdentificationDocuments = ({
   };
   const documentsAdded = fields.length === 2;
   return (
-    <div className="mt-4 space-y-4">
+    <div className="mt-4 space-y-4 ">
       <div>
         {livenessVerdict ? (
           <Alert variant="success">
@@ -299,7 +299,7 @@ const IdentificationDocuments = ({
             )}
           />
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 md:flex-row flex-col">
           <div className="w-full">
             <CustomDropZone
               handleChange={handleFrontChange}
@@ -308,10 +308,13 @@ const IdentificationDocuments = ({
               url={fields.find((field) => field.type === "front")?.url}
               error={frontError}
             >
-              <p className="font-bold">Front of document</p>
-              <p className="text-sm text-muted-foreground">
-                Drag and drop your document here or click to upload
-              </p>
+              <div className="flex flex-col ">
+                {" "}
+                <p className="font-bold">Front of document</p>
+                <p className="text-xs text-muted-foreground">
+                  Drag and drop your document here or click to upload
+                </p>
+              </div>
             </CustomDropZone>
           </div>
           <div className="w-full">
@@ -322,10 +325,12 @@ const IdentificationDocuments = ({
               url={fields.find((field) => field.type === "back")?.url}
               error={backError}
             >
-              <p className="font-bold">Back of document</p>
-              <p className="text-sm text-muted-foreground">
-                Drag and drop your document here or click to upload
-              </p>
+              <div className="flex flex-col">
+                <p className="font-bold">Back of document</p>
+                <p className="text-xs text-muted-foreground">
+                  Drag and drop your document here or click to upload
+                </p>
+              </div>
             </CustomDropZone>
           </div>
         </div>
