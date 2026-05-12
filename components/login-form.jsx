@@ -59,7 +59,6 @@ export function LoginForm({ className, token, cid, ...props }) {
       return '/';
     }
   };
-  console.log('session', session);
 
   useEffect(() => {
     if (session.data) {

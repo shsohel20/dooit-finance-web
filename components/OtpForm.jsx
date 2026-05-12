@@ -40,7 +40,6 @@ export function OtpForm({ email, token, cid }) {
     if (email) {
       setResendLoading(true);
       const res = await resendOtp({ email: email });
-      console.log('res', res);
       setResendLoading(false);
       if (res.success) {
         toast.success('OTP resent successfully');
