@@ -16,10 +16,9 @@ export default function RightProfile() {
   };
   return (
     <div>
-      <Question>Front Profile</Question>
+      <Question>Right Profile</Question>
       <p className="text-sm text-gray-500 text-center">
-        Please take a selfie with your face clearly visible and well-lit. No hats, masks, or
-        glasses.
+        Turn your head to the right and hold that position.
       </p>
       <div className="pt-4">
         {/* Right */}
@@ -32,9 +31,11 @@ export default function RightProfile() {
               </CustomDropZone> */}
         <FaceCapture image={rightProfile} onCapture={handleRightChange} />
         {rightProfile && (
-          <Button className="w-full" onClick={handleContinue}>
-            Continue
-          </Button>
+          <div className="px-4">
+            <Button className="w-full" onClick={handleContinue}>
+              Continue
+            </Button>
+          </div>
         )}
       </div>
     </div>

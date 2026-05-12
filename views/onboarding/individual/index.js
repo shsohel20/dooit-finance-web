@@ -23,15 +23,17 @@ export default function IndividualOnboarding() {
     }
   }, []);
   return (
-    <div className="max-w-4xl md:w-full w-[90%] mx-auto grid place-items-center min-h-[80vh] justify-center border mt-10 rounded-lg px-2">
-      <div className=" w-full ">
-        {/* {step === 1 && <RegistrationType setStep={setStep} />} */}
-        {step === 1 && <Country />}
-        {step === 2 && <VerificationProcess />}
-        {step === 3 && <LivenessInstructions />}
-        {step === 4 && <FrontProfile />}
-        {step === 5 && <RightProfile />}
-        {step === 6 && <IdentificationDocuments />}
+    <div className="grid place-items-center h-screen">
+      <div className="max-w-xl md:w-full w-[90%] mx-auto grid place-items-center min-h-[50vh] justify-center border mt-10 rounded-lg px-2 md:px-6">
+        <div className=" w-full ">
+          {/* {step === 1 && <RegistrationType setStep={setStep} />} */}
+          {step === 1 && <Country />}
+          {step === 2 && <VerificationProcess />}
+          {step === 3 && <LivenessInstructions />}
+          {step === 4 && <FrontProfile />}
+          {step === 5 && <RightProfile />}
+          {step === 6 && <IdentificationDocuments />}
+        </div>
       </div>
     </div>
   );

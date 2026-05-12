@@ -32,9 +32,11 @@ export default function FrontProfile() {
               </CustomDropZone> */}
         <FaceCapture image={frontProfile} onCapture={handleFrontChange} />
         {frontProfile && (
-          <Button className="w-full" onClick={handleContinue}>
-            Continue
-          </Button>
+          <div className="px-4">
+            <Button className="w-full" onClick={handleContinue}>
+              Continue
+            </Button>
+          </div>
         )}
       </div>
     </div>
