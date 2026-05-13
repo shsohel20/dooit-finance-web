@@ -207,9 +207,11 @@ const IdentificationDocuments = ({ form }) => {
       //   ("idle");
       //   return;
       // } else {
+      console.log("document type", documentTypeValue?.value);
+      console.log("formData", formData);
       const response = await getDataFromDocuments(formData);
       setIsSaving(false);
-      console.log("response", response);
+      console.log("ocr response", response);
       if (response.success) {
         // const formData = response.data;
         // const full_name = formData.full_name;

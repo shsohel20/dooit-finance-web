@@ -24,6 +24,7 @@ const IdentificationDocuments = dynamic(
 
 export default function IndividualOnboarding() {
   const { step, setStep } = useCustomerRegisterStore();
+  // const [isSuccess, setIsSuccess] = useState(false);
   const form = useForm();
 
   useEffect(() => {
