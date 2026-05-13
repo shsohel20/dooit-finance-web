@@ -69,6 +69,7 @@ export default function RegisterForm({
       ...rest,
       role: 'customer',
       userType: 'customer',
+      userName: data.email,
     };
 
     const res = await registerAction(submittedData);
@@ -116,7 +117,7 @@ export default function RegisterForm({
                     </div>
                   )}
                 />
-                <Controller
+                {/* <Controller
                   control={control}
                   name="userName"
                   render={({ field }) => (
@@ -131,7 +132,7 @@ export default function RegisterForm({
                       />
                     </div>
                   )}
-                />
+                /> */}
                 <Controller
                   control={control}
                   name="email"
