@@ -74,6 +74,10 @@ const personalInfoSchema = z.object({
       date_of_birth: z.string().optional(),
       phone_number: z.string().optional(),
       id_number: z.string().optional(),
+      business_name: z.string().optional(),
+      trading_name: z.string().optional(),
+      business_registration_number: z.string().optional(),
+      nature_of_business: z.string().optional(),
     }),
   }),
   mailing_address: z.object({

@@ -1,11 +1,17 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 // import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import dynamic from "next/dynamic";
 import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import { useForm } from "react-hook-form";
 import Occupation from "./Steps/occupation";
 import SourceOfFunds from "./Steps/source-of-funds";
+import SourceOfWealth from "./Steps/source-of-wealth";
+import ReasonForOpeningAccount from "./Steps/reason-for-opening-account";
+import EstimatedTradingVolume from "./Steps/estimated-trading-volume";
+import SoleTrader from "./Steps/sole-trader";
+import SoleTraderDetails from "./Steps/sole-trader-details";
+import OnboardingComplete from "./Steps/onboarding-complete";
 const Country = dynamic(() => import("./Steps/country"), { ssr: false });
 const VerificationProcess = dynamic(() => import("./Steps/verification-process"), { ssr: false });
 const LivenessInstructions = dynamic(() => import("./Steps/liveness-instructions"), { ssr: false });
@@ -39,6 +45,12 @@ export default function IndividualOnboarding() {
           {step === 6 && <IdentificationDocuments form={form} />}
           {step === 7 && <Occupation form={form} />}
           {step === 8 && <SourceOfFunds form={form} />}
+          {step === 9 && <SourceOfWealth form={form} />}
+          {step === 10 && <ReasonForOpeningAccount form={form} />}
+          {step === 11 && <EstimatedTradingVolume form={form} />}
+          {step === 12 && <SoleTrader form={form} />}
+          {step === 13 && <SoleTraderDetails form={form} />}
+          {step === 14 && <OnboardingComplete form={form} />}
         </div>
       </div>
     </div>
