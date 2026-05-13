@@ -12,6 +12,7 @@ export default function FrontProfile() {
     setFrontProfile(src);
   };
   const handleContinue = () => {
+    localStorage.setItem("live_photo", frontProfile);
     setStep(5);
   };
   return (

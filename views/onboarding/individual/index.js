@@ -18,7 +18,7 @@ const LivenessInstructions = dynamic(() => import("./Steps/liveness-instructions
 const FrontProfile = dynamic(() => import("./Steps/front-profile"), { ssr: false });
 const RightProfile = dynamic(() => import("./Steps/right-profile"), { ssr: false });
 const IdentificationDocuments = dynamic(
-  () => import("@/views/company-registration/IdentificationDocuments"),
+  () => import("@/views/customer-registration/common/IdentificationDocuments"),
   { ssr: false },
 );
 
