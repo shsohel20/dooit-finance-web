@@ -61,7 +61,7 @@ export default function FaceCapture({ image, onCapture }) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4  rounded-md p-4">
+    <div className="flex flex-col items-center gap-4  rounded-md py-4">
       {/* <Button size="sm" variant="outline" onClick={() => setStartCamera(prev => !prev)}>Start Camera</Button> */}
       {startCamera ? (
         <>

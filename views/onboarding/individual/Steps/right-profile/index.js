@@ -2,7 +2,7 @@ import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import { Button } from "@/components/ui/button";
 
 import FaceCapture from "@/views/customer-registration/common/FaceCapture";
-import Question from "@/views/onboarding/Question";
+import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import React, { useState } from "react";
 
 export default function RightProfile() {
@@ -15,11 +15,13 @@ export default function RightProfile() {
     setStep(6);
   };
   return (
-    <div>
-      <Question>Right Profile</Question>
-      <p className="text-sm text-gray-500 text-center">
-        Turn your head to the right and hold that position.
-      </p>
+    <div className="space-y-4 flex flex-col justify-between h-full">
+      <div>
+        <Question>Right Profile</Question>
+        <QuestionDescription className="text-sm text-gray-500 text-center">
+          Turn your head to the right and hold that position.
+        </QuestionDescription>
+      </div>
       <div className="pt-4">
         {/* Right */}
 
@@ -31,7 +33,7 @@ export default function RightProfile() {
               </CustomDropZone> */}
         <FaceCapture image={rightProfile} onCapture={handleRightChange} />
         {rightProfile && (
-          <div className="px-4">
+          <div className="">
             <Button className="w-full" onClick={handleContinue}>
               Continue
             </Button>

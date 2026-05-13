@@ -78,7 +78,7 @@ export const useCustomerRegisterStore = create((set) => ({
   setCustomerRegisterData: (customerRegisterData) => set({ customerRegisterData }),
   setRegisterType: (registerType) => set({ registerType }),
   setCountry: (country) => set({ country }),
-  step: 1,
+  step: 8,
   setStep: (step = 1) => {
     set({ step: +step });
   },

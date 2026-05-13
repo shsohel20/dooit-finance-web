@@ -37,8 +37,7 @@ export default function RootLayout({ children }) {
         suppressHydrationWarning
       >
         {/* <AuthProvider> */}
-        <EncryptDecryptFAB />
-        <ChatBotNissa />
+
         <AuthProvider>
           {" "}
           <ModuleProvider>{children}</ModuleProvider>

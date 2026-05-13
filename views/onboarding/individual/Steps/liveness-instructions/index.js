@@ -16,19 +16,21 @@ export default function LivenessInstructions() {
     setStep(4);
   };
   return (
-    <div>
-      <Question>Quick check before you start</Question>
-      {/* <p className="text-sm text-gray-500 text-center">
+    <div className="space-y-4 flex flex-col justify-between h-full">
+      <div>
+        <Question>Quick check before you start</Question>
+        {/* <p className="text-sm text-gray-500 text-center">
         Please ensure your face is clearly visible and well-lit.
       </p> */}
-      <div className=" rounded-lg mt-4">
-        <ul className="space-y-2 list-disc pl-5">
-          {requirements.map((req, i) => (
-            <li key={i} className="text-sm text-gray-500">
-              {req}
-            </li>
-          ))}
-        </ul>
+        <div className=" rounded-lg mt-4">
+          <ul className="space-y-2 list-disc pl-5">
+            {requirements.map((req, i) => (
+              <li key={i} className="text-sm text-gray-500">
+                {req}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
       <Button onClick={handleNext} className="w-full mt-6">
         Okay, got it!

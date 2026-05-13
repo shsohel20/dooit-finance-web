@@ -3,6 +3,9 @@ import React, { useEffect, useState } from "react";
 // import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import dynamic from "next/dynamic";
 import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
+import { useForm } from "react-hook-form";
+import Occupation from "./Steps/occupation";
+import SourceOfFunds from "./Steps/source-of-funds";
 const Country = dynamic(() => import("./Steps/country"), { ssr: false });
 const VerificationProcess = dynamic(() => import("./Steps/verification-process"), { ssr: false });
 const LivenessInstructions = dynamic(() => import("./Steps/liveness-instructions"), { ssr: false });
@@ -15,6 +18,7 @@ const IdentificationDocuments = dynamic(
 
 export default function IndividualOnboarding() {
   const { step, setStep } = useCustomerRegisterStore();
+  const form = useForm();
 
   useEffect(() => {
     const step = localStorage.getItem("step");
@@ -23,16 +27,18 @@ export default function IndividualOnboarding() {
     }
   }, []);
   return (
-    <div className="grid place-items-center h-screen">
-      <div className="max-w-xl md:w-full w-[90%] mx-auto grid place-items-center min-h-[50vh] justify-center border mt-10 rounded-lg px-2 md:px-6">
-        <div className=" w-full ">
+    <div className="grid place-items-center h-[100svh] justify-center items-center w-full relative">
+      <div className="max-w-xl md:w-full w-[90%] mx-auto grid place-items-center md:min-h-[50vh] justify-center md:border border-0 mt-10 rounded-lg px-0 md:px-6 min-h-[90svh]">
+        <div className=" w-full py-12   h-full">
           {/* {step === 1 && <RegistrationType setStep={setStep} />} */}
-          {step === 1 && <Country />}
+          {step === 1 && <Country form={form} />}
           {step === 2 && <VerificationProcess />}
           {step === 3 && <LivenessInstructions />}
           {step === 4 && <FrontProfile />}
           {step === 5 && <RightProfile />}
-          {step === 6 && <IdentificationDocuments />}
+          {step === 6 && <IdentificationDocuments form={form} />}
+          {step === 7 && <Occupation form={form} />}
+          {step === 8 && <SourceOfFunds form={form} />}
         </div>
       </div>
     </div>

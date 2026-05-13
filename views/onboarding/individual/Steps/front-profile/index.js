@@ -2,7 +2,7 @@ import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import { Button } from "@/components/ui/button";
 
 import FaceCapture from "@/views/customer-registration/common/FaceCapture";
-import Question from "@/views/onboarding/Question";
+import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import React, { useState } from "react";
 
 export default function FrontProfile() {
@@ -15,12 +15,14 @@ export default function FrontProfile() {
     setStep(5);
   };
   return (
-    <div>
-      <Question>Front Profile</Question>
-      <p className="text-sm text-gray-500 text-center">
-        Please take a selfie with your face clearly visible and well-lit. No hats, masks, or
-        glasses.
-      </p>
+    <div className="space-y-4 flex flex-col justify-between h-full">
+      <div>
+        <Question>Front Profile</Question>
+        <QuestionDescription className="text-sm text-gray-500 text-center">
+          Please take a selfie with your face clearly visible and well-lit. No hats, masks, or
+          glasses.
+        </QuestionDescription>
+      </div>
       <div className="pt-4">
         {/* Right */}
 
@@ -32,7 +34,7 @@ export default function FrontProfile() {
               </CustomDropZone> */}
         <FaceCapture image={frontProfile} onCapture={handleFrontChange} />
         {frontProfile && (
-          <div className="px-4">
+          <div className="">
             <Button className="w-full" onClick={handleContinue}>
               Continue
             </Button>
