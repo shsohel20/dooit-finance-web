@@ -527,7 +527,7 @@ export function SMRCaseDialog({ smrCase, open, onOpenChange }) {
                   smrCase.reasonForNotReportable && (
                     <div>
                       <div className="text-sm font-medium text-muted-foreground">
-                        Reason for "Not Reportable" Decision
+                        Reason for &quot;Not Reportable&quot; Decision
                       </div>
                       <div className="mt-1 text-sm bg-muted p-4 rounded-md">
                         {smrCase.reasonForNotReportable}

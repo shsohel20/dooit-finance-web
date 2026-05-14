@@ -92,7 +92,7 @@ export default function AntiMoneyLaunderingPage() {
             </div>
             <div className="p-6">
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                Discover how you're on the front line protecting the financial system. Learn about workplace scenarios
+                Discover how you&apos;re on the front line protecting the financial system. Learn about workplace scenarios
                 and your critical responsibilities.
               </p>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -191,8 +191,8 @@ export default function AntiMoneyLaunderingPage() {
           <div className="p-8">
             <h3 className="text-2xl font-bold text-foreground mb-4">Welcome to the Front Line</h3>
             <p className="text-foreground leading-relaxed mb-6 max-w-3xl">
-              Whether you're in a bank, a crypto firm, or a law office, you are now on the front line protecting the
-              financial system. This training will show you how. Let's begin.
+              Whether you&apos;re in a bank, a crypto firm, or a law office, you are now on the front line protecting the
+              financial system. This training will show you how. Let&apos;s begin.
             </p>
             <div className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors cursor-pointer">
               Start Module
@@ -253,7 +253,7 @@ export default function AntiMoneyLaunderingPage() {
             <div className="p-6">
               <p className="text-foreground leading-relaxed">
                 Criminals need to get their illegally obtained cash into the financial system without raising suspicion.
-                This first stage is where they're most vulnerable to detection.
+                This first stage is where they&apos;re most vulnerable to detection.
               </p>
             </div>
           </Card>
@@ -266,8 +266,8 @@ export default function AntiMoneyLaunderingPage() {
                 </div>
                 <h4 className="text-lg font-semibold text-foreground mb-3">Banks & Financial Institutions</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  "A criminal deposits just under $10,000 in cash across multiple branches to avoid reporting – this is
-                  structuring, a classic placement tactic."
+                  &quot;A criminal deposits just under $10,000 in cash across multiple branches to avoid reporting – this is
+                  structuring, a classic placement tactic.&quot;
                 </p>
               </div>
             </Card>
@@ -279,8 +279,8 @@ export default function AntiMoneyLaunderingPage() {
                 </div>
                 <h4 className="text-lg font-semibold text-foreground mb-3">VASPs (Crypto Exchanges)</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  "A criminal uses a stolen credit card to buy Bitcoin, introducing illicit funds into the digital
-                  ecosystem through seemingly legitimate transactions."
+                  &quot;A criminal uses a stolen credit card to buy Bitcoin, introducing illicit funds into the digital
+                  ecosystem through seemingly legitimate transactions.&quot;
                 </p>
               </div>
             </Card>
@@ -292,8 +292,8 @@ export default function AntiMoneyLaunderingPage() {
                 </div>
                 <h4 className="text-lg font-semibold text-foreground mb-3">Real Estate & Legal Services</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  "At a law firm, a client uses a briefcase of cash to pay for legal services far beyond the normal
-                  cost, placing illicit funds through professional services."
+                  &quot;At a law firm, a client uses a briefcase of cash to pay for legal services far beyond the normal
+                  cost, placing illicit funds through professional services.&quot;
                 </p>
               </div>
             </Card>
@@ -384,7 +384,7 @@ export default function AntiMoneyLaunderingPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-purple-600 mt-1">•</span>
-                      <span>Transactions that don't match stated business activity</span>
+                      <span>Transactions that don&apos;t match stated business activity</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-purple-600 mt-1">•</span>
@@ -405,14 +405,14 @@ export default function AntiMoneyLaunderingPage() {
             </div>
             <div>
               <h3 className="text-2xl font-bold text-foreground">Stage 3: Integration</h3>
-              <p className="text-sm text-muted-foreground">Making "Dirty" Money Appear Legitimate</p>
+              <p className="text-sm text-muted-foreground">Making &quot;Dirty&quot; Money Appear Legitimate</p>
             </div>
           </div>
 
           <Card className="mb-6 bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-900">
             <div className="p-6">
               <p className="text-foreground leading-relaxed">
-                The final stage where 'cleaned' money enters the legitimate economy, appearing to come from legal
+                The final stage where &apos;cleaned&apos; money enters the legitimate economy, appearing to come from legal
                 sources. The criminal now enjoys their illicit profits openly.
               </p>
             </div>
@@ -426,8 +426,8 @@ export default function AntiMoneyLaunderingPage() {
                 </div>
                 <h4 className="text-lg font-semibold text-foreground mb-3">Real Estate Investments</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  "A real estate agent sells a luxury property to a client for cash. The 'purchase' by the crime figure
-                  integrates the laundered funds, generating seemingly legitimate income."
+                  &quot;A real estate agent sells a luxury property to a client for cash. The &apos;purchase&apos; by the crime figure
+                  integrates the laundered funds, generating seemingly legitimate income.&quot;
                 </p>
               </div>
             </Card>
@@ -439,8 +439,8 @@ export default function AntiMoneyLaunderingPage() {
                 </div>
                 <h4 className="text-lg font-semibold text-foreground mb-3">Luxury Goods & Assets</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  "A precious metal dealer sells gold bars to a 'client' with a clean-looking loan documentation. Once
-                  sold again, these become 'earnings' with value and are easily transportable."
+                  &quot;A precious metal dealer sells gold bars to a &apos;client&apos; with a clean-looking loan documentation. Once
+                  sold again, these become &apos;earnings&apos; with value and are easily transportable.&quot;
                 </p>
               </div>
             </Card>
@@ -452,8 +452,8 @@ export default function AntiMoneyLaunderingPage() {
                 </div>
                 <h4 className="text-lg font-semibold text-foreground mb-3">Gambling Establishments</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  "A gaming house sees a customer 'win' a large jackpot with chips that were originally bought with
-                  layered funds. The winnings can now be deposited as seemingly legitimate earnings."
+                  &quot;A gaming house sees a customer &apos;win&apos; a large jackpot with chips that were originally bought with
+                  layered funds. The winnings can now be deposited as seemingly legitimate earnings.&quot;
                 </p>
               </div>
             </Card>
@@ -517,7 +517,7 @@ export default function AntiMoneyLaunderingPage() {
                 </div>
                 <h4 className="text-lg font-bold text-foreground mb-3">Reputational Damage</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Once trust is lost, it's difficult to regain. Customers leave, investors flee, and partnerships
+                  Once trust is lost, it&apos;s difficult to regain. Customers leave, investors flee, and partnerships
                   dissolve. The damage to brand reputation can be irreversible.
                 </p>
               </div>
@@ -550,8 +550,8 @@ export default function AntiMoneyLaunderingPage() {
               <div className="mb-6">
                 <p className="text-base font-semibold text-foreground mb-3">Our Vigilance Has Real Impact</p>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  "The proceeds fund drug trafficking, terrorism, and human exploitation. Our vigilance directly
-                  disrupts this. Every suspicious activity report you file could be stopping:"
+                  &quot;The proceeds fund drug trafficking, terrorism, and human exploitation. Our vigilance directly
+                  disrupts this. Every suspicious activity report you file could be stopping:&quot;
                 </p>
               </div>
 

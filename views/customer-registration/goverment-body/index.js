@@ -19,7 +19,7 @@ import { useState } from 'react'
 export default function GovernmentBodyRegistrationForm() {
   const [formLoading, setFormLoading] = useState(false)
   const router = useRouter()
-  const { control, handleSubmit, formState: { errors }, setValue } = useForm({
+  const form = useForm({
     resolver: zodResolver(kycFormSchema),
     defaultValues: {
       requestedType: '',
@@ -57,6 +57,7 @@ export default function GovernmentBodyRegistrationForm() {
       },
     },
   })
+  const { control, handleSubmit, formState: { errors }, setValue } = form
   const { country } = useCustomerRegisterStore()
   const onSubmit = async (data) => {
     setFormLoading(true)
@@ -100,7 +101,7 @@ export default function GovernmentBodyRegistrationForm() {
         <GovernmentBodySection control={control} errors={errors} />
 
         {/* Documents Section */}
-        <IdentificationDocuments control={control} errors={errors} />
+        <IdentificationDocuments form={form} />
 
         {/* Declaration Section */}
         <Declaration control={control} errors={errors} setValue={setValue} />

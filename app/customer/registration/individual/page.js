@@ -113,16 +113,17 @@ const CustomerRegistration = () => {
   const [verifyingStatus, setVerifyingStatus] = useState("idle");
   const [verifiedMsg, setVerifiedMsg] = useState(null);
 
+  const form = useForm({
+    defaultValues: customerRegisterData,
+    resolver: zodResolver(personalInfoSchema),
+    mode: "onChange",
+  });
   const {
     handleSubmit,
     control,
     formState: { errors },
     setValue,
-  } = useForm({
-    defaultValues: customerRegisterData,
-    resolver: zodResolver(personalInfoSchema),
-    mode: "onChange",
-  });
+  } = form;
   const onSubmit = (data) => {
     setCustomerRegisterData(data);
     router.push("/customer/registration/individual/preview");
@@ -156,9 +157,7 @@ const CustomerRegistration = () => {
       {verifyingStatus === "idle" && (
         <div>
           <IdentificationDocuments
-            control={control}
-            errors={errors}
-            setValue={setValue}
+            form={form}
             setVerifyingStatus={setVerifyingStatus}
             setVerifiedMsg={setVerifiedMsg}
           />

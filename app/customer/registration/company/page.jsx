@@ -114,7 +114,7 @@ const CompanyRegistration = () => {
     <div className="container">
       {verifyingStatus === "idle" && (
         <div>
-          <IdentificationDocuments control={form.control} />
+          <IdentificationDocuments form={form} />
         </div>
       )}
 

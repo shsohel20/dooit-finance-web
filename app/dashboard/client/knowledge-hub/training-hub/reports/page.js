@@ -65,7 +65,7 @@ const statusCfg = {
 // Map a raw progress record from the API to the shape the table expects
 function mapRecord(item) {
   const learner = item.learner || {};
-  const module = item.module || {};
+  const moduleItem = item.module || {};
   const rawStatus = item.status ||
     (item.isPassed ? "passed" : item.completedAt ? "failed" : item.startedAt ? "in-progress" : "not-started");
 
@@ -73,7 +73,7 @@ function mapRecord(item) {
     id: item._id,
     name: learner.name || "Unknown",
     email: learner.email || "",
-    module: typeof module === "string" ? module : module.title || "—",
+    module: typeof moduleItem === "string" ? moduleItem : moduleItem.title || "—",
     progress: item.score ?? 0,
     status: rawStatus,
     attempts: item.attemptRound ?? 0,
