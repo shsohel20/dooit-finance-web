@@ -20,7 +20,15 @@ export const selectThemeColors = (theme) => ({
   },
 });
 
-const CustomSelect = ({ label, error, ...props }) => {
+const CustomSelect = ({ label, error, styles: userStyles, ...props }) => {
+  const mergedStyles = {
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: '9999999',
+    }),
+    ...(userStyles && typeof userStyles === 'object' ? userStyles : {}),
+  };
+
   return (
     <div className="w-full">
       {label && <Label>{label}</Label>}
@@ -35,12 +43,7 @@ const CustomSelect = ({ label, error, ...props }) => {
         )}
         // menuPortalTarget={document?.body}
         menuPlacement="auto"
-        styles={{
-          menuPortal: (base) => ({
-            ...base,
-            zIndex: '9999999',
-          }),
-        }}
+        styles={mergedStyles}
         theme={selectThemeColors}
         {...props}
       />

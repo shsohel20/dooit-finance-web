@@ -71,91 +71,62 @@ export default function CheckLiveness() {
   ];
 
   return (
-    <div className="min-h-screen  mt-4 pb-10">
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="space-y-2">
-          <FormTitle>Profile Image Upload</FormTitle>
-          <p className="text-muted-foreground">
-            Upload clear, high-quality photos for identity verification
-          </p>
-        </div>
+    <div className="space-y-8 ">
+      {/* Header */}
 
-        {/* Requirements */}
-        <Card className="border-2 border-primary/20 bg-card/50 backdrop-blur">
+      <div>
+        {error && (
+          <Alert variant="destructive">
+            <AlertTitle>{error}</AlertTitle>
+          </Alert>
+        )}
+      </div>
+      {/* Upload Section */}
+      <div className="grid lg:grid-cols-2 grid-cols-1 w-full gap-6">
+        {/* Front */}
+        <Card className="border-2 hover:border-primary/50 transition-colors">
           <CardHeader>
-            <div className="flex items-center gap-2">
-              <Info className="w-5 h-5 text-primary" />
-              <CardTitle className="text-xl">Image Requirements</CardTitle>
-            </div>
-            <CardDescription>
-              Ensure your images meet these criteria for verification
-            </CardDescription>
+            <CardTitle className="">Front Profile (Required)</CardTitle>
+            <CardDescription>Clear frontal face view</CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2 list-disc pl-5">
-              {requirements.map((req, i) => (
-                <li key={i} className="text-sm">
-                  {req}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-        <div>
-          {error && (
-            <Alert variant="destructive">
-              <AlertTitle>{error}</AlertTitle>
-            </Alert>
-          )}
-        </div>
-        {/* Upload Section */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Front */}
-          <Card className="border-2 hover:border-primary/50 transition-colors">
-            <CardHeader>
-              <CardTitle className="text-lg">Front Profile (Required)</CardTitle>
-              <CardDescription>Clear frontal face view</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* <CustomDropZone
+            {/* <CustomDropZone
                 handleChange={handleFrontChange}
                 url={frontProfile || ""}
               >
                 <p className="font-medium">Drag & drop or click to upload</p>
               </CustomDropZone> */}
-              <FaceCapture image={frontProfile} onCapture={handleFrontChange} />
-            </CardContent>
-          </Card>
+            <FaceCapture image={frontProfile} onCapture={handleFrontChange} />
+          </CardContent>
+        </Card>
 
-          {/* Right */}
-          <Card className="border-2 hover:border-primary/50 transition-colors">
-            <CardHeader>
-              <CardTitle className="text-lg">Right Profile (Required)</CardTitle>
-              <CardDescription>90° turn to the right</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* <CustomDropZone
+        {/* Right */}
+        <Card className="border-2 hover:border-primary/50 transition-colors">
+          <CardHeader>
+            <CardTitle className="text-lg">Right Profile (Required)</CardTitle>
+            <CardDescription>90° turn to the right</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* <CustomDropZone
                   handleChange={handleRightChange}
                   url={rightProfile || ""}
                 >
                   <p className="font-medium">Drag & drop or click to upload</p>
                 </CustomDropZone> */}
-              <FaceCapture image={rightProfile} onCapture={handleRightChange} />
-            </CardContent>
-          </Card>
-        </div>
+            <FaceCapture image={rightProfile} onCapture={handleRightChange} />
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-center pt-4">
-          <Button
-            onClick={handleSubmit}
-            disabled={!frontProfile || !rightProfile || loading}
-            className=""
-          >
-            {loading ? "Processing..." : "Submit for Verification"}
-          </Button>
-        </div>
+      {/* Submit Button */}
+      <div className="flex justify-center pt-4">
+        <Button
+          onClick={handleSubmit}
+          disabled={!frontProfile || !rightProfile || loading}
+          className=""
+        >
+          {loading ? "Processing..." : "Submit for Verification"}
+        </Button>
       </div>
     </div>
   );
