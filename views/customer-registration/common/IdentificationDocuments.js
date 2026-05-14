@@ -9,6 +9,12 @@ import { getDataFromDocuments, verifyDocument } from "@/app/customer/registratio
 import { toast } from "sonner";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useEffect } from "react";
+import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
+import Question, { QuestionDescription } from "@/views/onboarding/Question";
+import {
+  onboardingPrimaryButtonClass,
+  onboardingSelectControlStyles,
+} from "@/views/onboarding/individual/onboardingStyles";
 
 const documentTypes = [
   { label: "Passport", value: "Passport" },
@@ -55,14 +61,12 @@ const getBase64 = (file) => {
 const Scanner = () => {
   return <div className="scanner-effect absolute top-0 left-0 w-full h-full" />;
 };
-const IdentificationDocuments = ({
-  control,
-  errors,
-  setValue,
-  setVerifyingStatus,
-  setVerifiedMsg,
-}) => {
+const IdentificationDocuments = ({ form, individualPresentation = false }) => {
+  const control = form.control;
+  const errors = form.formState.errors;
+  const setValue = form.setValue;
   const [livenessVerdict, setLivenessVerdict] = useState(null);
+  const { setStep } = useCustomerRegisterStore();
   const [isSaving, setIsSaving] = useState(false);
   //front
   const [frontLoading, setFrontLoading] = useState(false);
@@ -189,87 +193,88 @@ const IdentificationDocuments = ({
     let verifiedMsg = null;
     try {
       setIsSaving(true);
-      // setVerifyingStatus("verifying");
+      // ("verifying");
       const verify_response = await verifyDocument(verify_data);
-      console.log("verify-res", verify_response);
 
       const verification_status = verify_response.data?.result?.verification_status;
       console.log("verification status", verification_status);
-      if (verification_status === 0) {
-        toast.error("Documents are not verified. You can't proceed further.");
-        setVerifyingStatus("idle");
-        setIsSaving(false);
+      // if (verification_status === 0) {
+      //   toast.error("Documents are not verified. You can't proceed further.");
+      //   ("idle");
+      //   setIsSaving(false);
 
-        return;
-      } else {
-        verifiedMsg = `Found ${verify_response.data?.result?.similarity}% similarity with the document`;
+      //   return;
+      // } else {
+      // verifiedMsg = `Found ${verify_response.data?.result?.similarity}% similarity with the document`;
 
-        if (verify_response?.error?.length > 0) {
-          toast.error("Documents are not verified");
-          setVerifyingStatus("idle");
-          return;
-        } else {
-          const response = await getDataFromDocuments(formData);
-          console.log("response", response);
-          if (response.success) {
-            // const formData = response.data;
-            // const full_name = formData.full_name;
-            // const given_name = full_name ? formData.full_name?.split(" ")[0] : formData?.given_name;
-            // const middle_name = full_name ? formData.full_name?.split(" ")[1] : formData?.middle_name;
-            // const surname = full_name ? formData.full_name?.split(" ")[2] : formData?.surname;
+      // if (verify_response?.error?.length > 0) {
+      //   toast.error("Documents are not verified");
+      //   ("idle");
+      //   return;
+      // } else {
+      console.log("document type", documentTypeValue?.value);
+      console.log("formData", formData);
+      const response = await getDataFromDocuments(formData);
+      setIsSaving(false);
+      console.log("ocr response", response);
+      if (response.success) {
+        // const formData = response.data;
+        // const full_name = formData.full_name;
+        // const given_name = full_name ? formData.full_name?.split(" ")[0] : formData?.given_name;
+        // const middle_name = full_name ? formData.full_name?.split(" ")[1] : formData?.middle_name;
+        // const surname = full_name ? formData.full_name?.split(" ")[2] : formData?.surname;
 
-            // //23-dec-1990 to yyyy-mm-dd
-            // const date_of_birth = formatDate(formData.date_of_birth);
-            // setValue("customer_details.given_name", given_name || "");
-            // setValue("customer_details.middle_name", middle_name || "");
-            // setValue("customer_details.surname", surname || "");
-            // setValue("residential_address.address", formData.address || formData?.permanent_address);
-            // setValue("customer_details.date_of_birth", date_of_birth);
-            const formData = response.data ?? {};
+        // //23-dec-1990 to yyyy-mm-dd
+        // const date_of_birth = formatDate(formData.date_of_birth);
+        // setValue("customer_details.given_name", given_name || "");
+        // setValue("customer_details.middle_name", middle_name || "");
+        // setValue("customer_details.surname", surname || "");
+        // setValue("residential_address.address", formData.address || formData?.permanent_address);
+        // setValue("customer_details.date_of_birth", date_of_birth);
+        const formData = response.data ?? {};
 
-            const fullNameParts = formData.full_name?.trim().split(/\s+/) ?? [];
+        const fullNameParts = formData.full_name?.trim().split(/\s+/) ?? [];
 
-            const given_name = fullNameParts[0] || formData.given_name || "";
+        const given_name = fullNameParts[0] || formData.given_name || "";
 
-            const middle_name =
-              fullNameParts.length > 2
-                ? fullNameParts.slice(1, -1).join(" ")
-                : formData.middle_name || "";
+        const middle_name =
+          fullNameParts.length > 2
+            ? fullNameParts.slice(1, -1).join(" ")
+            : formData.middle_name || "";
 
-            const surname =
-              fullNameParts.length > 1
-                ? fullNameParts[fullNameParts.length - 1]
-                : formData.surname || "";
+        const surname =
+          fullNameParts.length > 1
+            ? fullNameParts[fullNameParts.length - 1]
+            : formData.surname || "";
 
-            const date_of_birth = formData.date_of_birth ? formatDate(formData.date_of_birth) : "";
+        const date_of_birth = formData.date_of_birth ? formatDate(formData.date_of_birth) : "";
 
-            setValue("customer_details.given_name", given_name);
-            setValue("customer_details.middle_name", middle_name);
-            setValue("customer_details.surname", surname);
-            setValue(
-              "residential_address.address",
-              formData.address || formData.permanent_address || "",
-            );
-            setValue("customer_details.date_of_birth", date_of_birth);
-            setVerifyingStatus("verified");
-          } else {
-            setVerifyingStatus("verified");
-          }
-        }
+        setValue("customer_details.given_name", given_name);
+        setValue("customer_details.middle_name", middle_name);
+        setValue("customer_details.surname", surname);
+        setValue(
+          "residential_address.address",
+          formData.address || formData.permanent_address || "",
+        );
+        setValue("customer_details.date_of_birth", date_of_birth);
+        setStep(7);
+        // ("verified");
       }
+      // }
+      // }
     } catch (error) {
-      setVerifyingStatus("verified");
+      // ("verified");
       toast.error("Failed to save identification documents");
     } finally {
       setIsSaving(false);
-      setVerifiedMsg(verifiedMsg);
+      verifiedMsg;
     }
   };
   const documentsAdded = fields.length === 2;
   return (
-    <div className="mt-4 space-y-4 ">
+    <div className={individualPresentation ? "flex min-h-[min(70svh,560px)] flex-1 flex-col gap-6" : "mt-4 space-y-4"}>
       <div>
-        {livenessVerdict ? (
+        {/* {livenessVerdict ? (
           <Alert variant="success">
             <AlertTitle>Success</AlertTitle>
             <AlertDescription>Liveness verification successful</AlertDescription>
@@ -279,22 +284,34 @@ const IdentificationDocuments = ({
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>Liveness verification failed</AlertDescription>
           </Alert>
-        )}
+        )} */}
       </div>
-      <div>
-        <FormTitle>Identification Documents</FormTitle>
-        <div className="max-w-56 my-4 relative z-3">
+      <div className="space-y-5">
+        {individualPresentation ? (
+          <>
+            <Question preset="individual">Identification documents</Question>
+            <QuestionDescription preset="individual">
+              Choose your ID type and upload clear photos of the front and back so we can verify
+              your identity.
+            </QuestionDescription>
+          </>
+        ) : (
+          <FormTitle>Identification Documents</FormTitle>
+        )}
+        <div className={individualPresentation ? "my-1 w-full relative z-3" : "max-w-56 my-4 relative z-3"}>
           <Controller
             control={control}
             name="document_type"
             render={({ field }) => (
               <CustomSelect
-                label="Select Document Type"
+                label={individualPresentation ? undefined : "Select Document Type"}
                 options={documentTypes}
                 value={field.value}
-                placeholder="Select Document Type"
+                placeholder="Select document type"
                 error={errors.document_type?.message}
                 onChange={(e) => handleDocumentTypeChange(e, field.onChange)}
+                styles={individualPresentation ? onboardingSelectControlStyles() : undefined}
+                className={individualPresentation ? "!rounded-full" : undefined}
               />
             )}
           />
@@ -355,8 +372,12 @@ const IdentificationDocuments = ({
               />
             </div>
           </div>
-          <div className="py-6 flex justify-center">
-            <Button disabled={isSaving} onClick={handleSave}>
+          <div className={individualPresentation ? "py-4" : "py-6 flex justify-center"}>
+            <Button
+              disabled={isSaving}
+              onClick={handleSave}
+              className={individualPresentation ? onboardingPrimaryButtonClass : undefined}
+            >
               {isSaving ? "Please wait..." : "Verify Documents"}
             </Button>
           </div>

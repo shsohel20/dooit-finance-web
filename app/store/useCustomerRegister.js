@@ -46,7 +46,12 @@ const initialFormData = {
   },
   sole_trader: {
     is_sole_trader: false,
-    business_details: {},
+    business_details: {
+      business_name: "",
+      trading_name: "",
+      business_registration_number: "",
+      nature_of_business: "",
+    },
   },
   documents: [
     // {
@@ -78,4 +83,8 @@ export const useCustomerRegisterStore = create((set) => ({
   setCustomerRegisterData: (customerRegisterData) => set({ customerRegisterData }),
   setRegisterType: (registerType) => set({ registerType }),
   setCountry: (country) => set({ country }),
+  step: 1,
+  setStep: (step = 1) => {
+    set({ step: +step });
+  },
 }));
