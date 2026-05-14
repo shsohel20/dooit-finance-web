@@ -27,7 +27,7 @@ export default function PartScreen({ partId, moduleId }) {
   // ── Data fetching ──────────────────────────────────────────────
   const getPartData = async () => {
     const res = await getPartById(partId);
-    // console.log("partData", res.data);
+    console.log("partData", res.data);
     setPartData(res.data);
   };
 

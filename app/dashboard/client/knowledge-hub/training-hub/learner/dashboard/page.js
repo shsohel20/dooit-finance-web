@@ -31,7 +31,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { getMyAssignments } from "../../actions";
+import { getMyAssignments, startModule } from "../../actions";
 import { cn } from "@/lib/utils";
 
 const dashboardData = [
@@ -107,8 +107,10 @@ export default function LearnerDashboardPage() {
     return Math.round((correctAnswers / totalQuestions) * 100);
   };
 
-  const handleStartModule = (moduleId) => {
+  const handleStartModule = async (moduleId) => {
     console.log("moduleId", moduleId);
+    const res = await startModule(moduleId);
+    console.log("training start res", res);
     router.push(`/dashboard/client/knowledge-hub/training-hub/learner/training/${moduleId}`);
   };
 
@@ -221,16 +223,18 @@ export default function LearnerDashboardPage() {
                 .filter((m) => m && getModuleStatus(m.id) === "not-started")
                 .map((module) => (
                   <Card
-                    key={module?.id}
+                    key={module?._id}
                     className="group overflow-hidden border-border/50 hover:shadow-lg hover:border-primary/20 transition-all duration-300"
                   >
                     <div className="h-1 bg-gradient-to-r from-primary/30 to-accent/30 group-hover:from-primary group-hover:to-accent transition-all duration-300" />
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
-                          <CardTitle className="text-lg leading-snug">{module?.title}</CardTitle>
+                          <CardTitle className="text-lg leading-snug">
+                            {module?.module?.title}
+                          </CardTitle>
                           <CardDescription className="mt-1.5 line-clamp-2">
-                            {module?.description}
+                            {module?.module?.description}
                           </CardDescription>
                         </div>
                         <Badge variant="outline" className="flex-shrink-0 text-xs">
@@ -241,12 +245,13 @@ export default function LearnerDashboardPage() {
                     <CardContent className="pt-0">
                       <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4">
                         <span className="flex items-center gap-1">
-                          <BookOpen className="w-3.5 h-3.5" /> {module?.parts.length} parts
+                          <BookOpen className="w-3.5 h-3.5" /> {module?.parts?.length} parts
                         </span>
                         <span className="text-border">|</span>
                         <span className="flex items-center gap-1">
                           <Target className="w-3.5 h-3.5" />{" "}
-                          {module?.parts.reduce((sum, p) => sum + p.questions.length, 0)} questions
+                          {module?.module?.parts.reduce((sum, p) => sum + p.questions.length, 0)}{" "}
+                          questions
                         </span>
                       </div>
                       <Button
@@ -280,7 +285,7 @@ export default function LearnerDashboardPage() {
               {assignedModules
                 .filter((m) => m && getModuleStatus(m.module?._id) === "in-progress")
                 .map((module) => {
-                  const percentage = getProgressPercentage(module?.id || "");
+                  const percentage = getProgressPercentage(module?.module?._id || "");
                   return (
                     <Card
                       key={module?._id}
@@ -350,9 +355,11 @@ export default function LearnerDashboardPage() {
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1">
-                            <CardTitle className="text-lg leading-snug">{module?.title}</CardTitle>
+                            <CardTitle className="text-lg leading-snug">
+                              {module?.module?.title}
+                            </CardTitle>
                             <CardDescription className="mt-1.5 line-clamp-2">
-                              {module?.description}
+                              {module?.module?.description}
                             </CardDescription>
                           </div>
                           <Badge className="bg-[hsl(142,71%,45%)]/10 text-[hsl(142,71%,45%)] border-0 gap-1.5 flex-shrink-0">

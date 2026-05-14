@@ -236,3 +236,17 @@ export const getModuleAccessData = async (moduleId) => {
   });
   return response.json();
 };
+export const getLearnerProgress = async (moduleId) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}`, {
+    method: "GET",
+  });
+  return response.json();
+};
+
+//start module
+export const startModule = async (moduleId) => {
+  const response = await fetchWithAuth(`training-progress/${moduleId}/start`, {
+    method: "POST",
+  });
+  return response.json();
+};

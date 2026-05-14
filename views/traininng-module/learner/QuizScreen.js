@@ -50,7 +50,9 @@ export default function QuizScreen({
       selectedAnswer: mapAnswers[value] ?? value,
     }));
     const payload = { partId, answers: updatedAnswers };
+    console.log("payload", JSON.stringify(payload));
     const res = await submitQuiz(moduleId, payload);
+    console.log("submit quiz res", res);
     const result = res?.data || null;
     setResultData(result);
 
