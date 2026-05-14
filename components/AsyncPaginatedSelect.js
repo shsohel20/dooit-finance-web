@@ -33,6 +33,7 @@ export default function CustomSelect({
   emptyText = 'No results found.',
   className,
   error,
+  disabled = false,
   isAsync = false,
   onAsyncSearch,
 }) {
@@ -114,6 +115,7 @@ export default function CustomSelect({
           <Button
             variant="outline"
             role="combobox"
+            disabled={disabled}
             aria-expanded={open}
             className={cn(
               'w-full justify-between font-normal bg-white hover:bg-muted',

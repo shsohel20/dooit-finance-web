@@ -41,3 +41,15 @@ export const getCustomerTransactions = async (customerId) => {
   });
   return response.json();
 };
+
+export const getCustomerRelations = async (payload) => {
+  const url = `http://localhost:5055/api/v1/hierarchy/analyze `;
+  const response = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.json();
+};

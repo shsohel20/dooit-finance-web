@@ -77,6 +77,7 @@ export default function LearnerDashboardPage() {
   console.log("assignments", assignments);
   const fetchAssignments = useCallback(async () => {
     const res = await getMyAssignments();
+    console.log("res", res);
     setAssignments(res?.data || []);
   }, []);
   useEffect(() => {

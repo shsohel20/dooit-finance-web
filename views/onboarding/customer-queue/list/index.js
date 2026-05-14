@@ -71,6 +71,7 @@ import CustomSelect from "@/components/ui/CustomSelect";
 import { countriesData } from "@/constants";
 import dynamic from "next/dynamic";
 import { fileUploadOnCloudinary } from "@/app/actions";
+import useGetUser from "@/hooks/useGetUser";
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
 });
@@ -245,19 +246,6 @@ const ListView = () => {
         </div>
       ),
     },
-    // {
-    //   header: ({ column }) => (
-    //     <DataTableColumnHeader
-    //       column={column}
-    //       title="Last Updated"
-    //     />
-    //   ),
-    //   accessorKey: 'updatedAt',
-    //   size: 100,
-    //   cell: ({ row }) => (
-    //     <span>{dateShowFormatWithTime(row.original.updatedAt)}</span>
-    //   ),
-    // },
   ];
   const handleDoubleClick = (item) => {
     setCurrentItem(item);
@@ -590,24 +578,6 @@ export const ReportingModal = ({ open, setOpen, currentItem, setCurrentItem }) =
       setCurrentItem(null);
     }
   };
-
-  // const handleFileUpload = async (file) => {
-  //   setUploading(true);
-  //   try {
-  //     const response = await fileUploadOnCloudinary(file);
-  //     console.log('response', response);
-  //     if (response.success) {
-  //       setFileUrl(response.data.fileUrl);
-  //     } else {
-  //       toast.error('Failed to upload file');
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error('Failed to upload file');
-  //   } finally {
-  //     setUploading(false);
-  //   }
-  // }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

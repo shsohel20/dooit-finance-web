@@ -4,7 +4,7 @@ export const NISA_URL = process.env.NEXT_PUBLIC_NISA_BASE_URL || "http://localho
 export const IMAGE_SERVER_URL = process.env.NEXT_PUBLIC_IMAGE_SERVER_URL;
 
 import { auth } from "@/auth";
-
+console.log("base url", BASE_URL);
 export async function fetchWithAuth(endpoint, options = {}, isAi = false, isNisa = false) {
   const session = await auth(); // ✅ works anywhere on the server
   const token = session?.user?.accessToken;

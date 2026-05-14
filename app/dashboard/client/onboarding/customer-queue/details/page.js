@@ -8,7 +8,7 @@ import { getCustomerById } from "../actions";
 import Documents from "@/views/onboarding/customer-queue/details/Document";
 import { Osiint } from "@/views/onboarding/customer-queue/details/Osiint";
 import { Transactions } from "@/views/onboarding/customer-queue/details/Transactions";
-import TransactionTable from "@/views/onboarding/customer-queue/details/TransactionTable";
+import useGetUser from "@/hooks/useGetUser";
 
 export default function CustomerQueueDetails() {
   const id = useSearchParams().get("id");
@@ -47,7 +47,7 @@ export default function CustomerQueueDetails() {
           <DetailViewModal details={details} fetching={fetching} />
         </TabsContent>
         <TabsContent value="relations">
-          <RelationsTree relations={details?.relations || []} />
+          <RelationsTree relations={details?.relations || []} details={details} />
           {/* <RelatedParty /> */}
         </TabsContent>
         <TabsContent value="documents">

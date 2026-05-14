@@ -1,5 +1,5 @@
 import AuthProvider from "@/providers/SessionProvider";
-import { Geist, Geist_Mono, Montserrat, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat, sansFlex, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { EncryptDecryptFAB } from "@/components/EncryptBtn";
@@ -11,8 +11,8 @@ const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
 });
-
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+// const sansFlex = SansFlex({ subsets: ["latin"], variable: "--font-sans-flex" });
+const jetbrainsMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -22,19 +22,22 @@ const montserrat = Montserrat({
 export const metadata = {
   title: "Dooit Wallet",
   description: "Generate your online wallet",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      {/* <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head> */}
       <body
-        className={`font-sans antialiased ${montserrat.className} text-sm`}
-        // className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}
+        // className={`font-sans antialiased ${montserrat.className} text-sm`}
+        className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}
         suppressHydrationWarning
       >
         {/* <AuthProvider> */}
-        <EncryptDecryptFAB />
-        <ChatBotNissa />
+
         <AuthProvider>
           {" "}
           <ModuleProvider>{children}</ModuleProvider>

@@ -1,29 +1,29 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { Button } from "./ui/button";
-import { resendOtp, verifyOtp } from "@/app/auth/actions";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+} from '@/components/ui/input-otp';
+import { Button } from './ui/button';
+import { resendOtp, verifyOtp } from '@/app/auth/actions';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { useRouter } from "next/navigation";
+} from './ui/card';
+import { useRouter } from 'next/navigation';
 
 export function OtpForm({ email, token, cid }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [resendLoading, setResendLoading] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = React.useState('');
   const router = useRouter();
   const onSubmit = async () => {
     setIsLoading(true);
@@ -32,7 +32,7 @@ export function OtpForm({ email, token, cid }) {
     if (res.success) {
       router.push(`/auth/login?token=${token}&cid=${cid}`);
     } else {
-      toast.error(res.error || "Something went wrong");
+      toast.error(res.error || 'Something went wrong');
     }
   };
 
@@ -40,21 +40,22 @@ export function OtpForm({ email, token, cid }) {
     if (email) {
       setResendLoading(true);
       const res = await resendOtp({ email: email });
-      console.log("res", res);
       setResendLoading(false);
       if (res.success) {
-        toast.success("OTP resent successfully");
+        toast.success('OTP resent successfully');
       } else {
-        toast.error(res.error || "Something went wrong");
+        toast.error(res.error || 'Something went wrong');
       }
     }
   };
   return (
-    <div className="space-y-2 min-w-md">
-      <Card>
+    <div className="space-y-2 max-w-md md:w-full w-[90%] mx-auto">
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle>Confirm OTP</CardTitle>
-          <CardDescription>Enter the OTP sent to your email</CardDescription>
+          <CardTitle className="text-xl">Confirm OTP</CardTitle>
+          <CardDescription className="text-sm">
+            Enter the OTP sent to your email
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -83,7 +84,7 @@ export function OtpForm({ email, token, cid }) {
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  "Confirm OTP"
+                  'Confirm OTP'
                 )}
               </Button>
               <Button
@@ -96,7 +97,7 @@ export function OtpForm({ email, token, cid }) {
                 {resendLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  "Resend OTP"
+                  'Resend OTP'
                 )}
               </Button>
             </div>
