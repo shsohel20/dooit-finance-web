@@ -1,10 +1,12 @@
 "use client";
 
+import { customerOnboarding } from "@/app/customer/registration/actions";
 import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import { Button } from "@/components/ui/button";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { toast } from "sonner";
 
 function selectValue(field) {
   if (field == null) return "";
@@ -76,7 +78,7 @@ export default function OnboardingComplete({ form }) {
       router.push("/customer/dashboard");
       localStorage.removeItem("invite_token");
       localStorage.removeItem("invite_cid");
-      toast.success("Welcome onboard!");
+      toast.success("We hope you enjoy your journey with us!");
       localStorage.removeItem("live_photo");
       localStorage.removeItem("liveness_verdict");
     }
@@ -92,8 +94,8 @@ export default function OnboardingComplete({ form }) {
         </QuestionDescription>
       </div>
       <div className="space-y-4">
-        <Button onClick={handleContinue} className="w-full">
-          Save and Continue
+        <Button disabled={loading} onClick={handleContinue} className="w-full">
+          {loading ? "Saving..." : "Save and Continue"}
         </Button>
       </div>
     </div>
