@@ -45,14 +45,14 @@ export function LoginForm({ className, token, cid, ...props }) {
   });
 
   const getRoute = (session) => {
-    if (session.data.user.userType === 'user' && token) {
+    if (token && cid) {
       return '/auth/registration-type';
-    } else if (session.data.user.userType === 'user') {
+    } else if (session.data?.user?.userType === 'customer') {
       return '/customer/dashboard';
     } else if (
       session.data?.user?.userType === 'client' ||
-      'branch' ||
-      'dooit'
+      session.data?.user?.userType === 'branch' ||
+      session.data?.user?.userType === 'dooit'
     ) {
       return '/dashboard/client';
     } else {
@@ -65,6 +65,7 @@ export function LoginForm({ className, token, cid, ...props }) {
       router.replace(getRoute(session));
     }
   }, [session.data?.user?.userType]);
+
   const onSubmit = async (data) => {
     setIsLoading(true);
     const formData = new FormData();
@@ -77,7 +78,7 @@ export function LoginForm({ className, token, cid, ...props }) {
     });
     console.log('res', res);
     const user = res.user;
-
+    router.replace(getRoute(session));
     if (res.error) {
       toast.error('Something went wrong');
     }
