@@ -3,6 +3,10 @@ import { Button } from "@/components/ui/button";
 import CustomSelect from "@/components/ui/CustomSelect";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import React from "react";
+import {
+  onboardingPrimaryButtonClass,
+  onboardingSelectControlStyles,
+} from "../../onboardingStyles";
 
 const accountPurposeOptions = [
   { label: "Personal investment", value: "personal_investment" },
@@ -20,23 +24,23 @@ export default function ReasonForOpeningAccount({ form }) {
     setStep(11);
   };
   return (
-    <div className="space-y-4 flex flex-col justify-between h-full">
-      <div>
-        <Question>What is your main reason for opening this account?</Question>
-        <QuestionDescription>
+    <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
+      <div className="space-y-5">
+        <Question preset="individual">Why are you opening this account?</Question>
+        <QuestionDescription preset="individual">
           This helps us offer the right services and meet compliance obligations.
         </QuestionDescription>
-      </div>
-      <div className="space-y-4">
         <CustomSelect
           options={accountPurposeOptions}
           value={form.watch("account_purpose")}
           onChange={(value) => form.setValue("account_purpose", value)}
+          styles={onboardingSelectControlStyles()}
+          className="!rounded-full"
         />
-        <Button onClick={handleContinue} className="w-full">
-          Continue
-        </Button>
       </div>
+      <Button onClick={handleContinue} className={onboardingPrimaryButtonClass}>
+        Continue
+      </Button>
     </div>
   );
 }

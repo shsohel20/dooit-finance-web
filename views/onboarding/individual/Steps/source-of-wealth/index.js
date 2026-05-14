@@ -3,6 +3,10 @@ import { Button } from "@/components/ui/button";
 import CustomSelect from "@/components/ui/CustomSelect";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import React from "react";
+import {
+  onboardingPrimaryButtonClass,
+  onboardingSelectControlStyles,
+} from "../../onboardingStyles";
 
 const sourceOfWealthOptions = [
   { label: "Employment income", value: "employment_income" },
@@ -21,23 +25,23 @@ export default function SourceOfWealth({ form }) {
     setStep(10);
   };
   return (
-    <div className="space-y-4 flex flex-col justify-between h-full">
-      <div>
-        <Question>What is your source of wealth?</Question>
-        <QuestionDescription>
+    <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
+      <div className="space-y-5">
+        <Question preset="individual">What is your source of wealth?</Question>
+        <QuestionDescription preset="individual">
           We need to understand how your overall wealth was built to meet regulatory requirements.
         </QuestionDescription>
-      </div>
-      <div className="space-y-4">
         <CustomSelect
           options={sourceOfWealthOptions}
           value={form.watch("source_of_wealth")}
           onChange={(value) => form.setValue("source_of_wealth", value)}
+          styles={onboardingSelectControlStyles()}
+          className="!rounded-full"
         />
-        <Button onClick={handleContinue} className="w-full">
-          Continue
-        </Button>
       </div>
+      <Button onClick={handleContinue} className={onboardingPrimaryButtonClass}>
+        Continue
+      </Button>
     </div>
   );
 }

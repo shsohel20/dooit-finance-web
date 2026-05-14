@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import { Camera, File } from "lucide-react";
 import React from "react";
+import { onboardingPrimaryButtonClass } from "../../onboardingStyles";
 
 export default function VerificationProcess() {
   const { setStep } = useCustomerRegisterStore();
@@ -11,12 +12,12 @@ export default function VerificationProcess() {
     {
       title: "Liveness Check",
       description: "Verify your identity by taking a selfie",
-      icon: <Camera />,
+      icon: <Camera className="size-5 text-[#1B4332]" />,
     },
     {
       title: "Document Verification",
       description: "Verify your identity by uploading your documents",
-      icon: <File />,
+      icon: <File className="size-5 text-[#1B4332]" />,
     },
   ];
 
@@ -24,28 +25,31 @@ export default function VerificationProcess() {
     setStep(3);
   };
   return (
-    <div className="space-y-4 flex flex-col justify-between h-full">
-      <div>
-        <Question>Ready to get verified?</Question>
-        <QuestionDescription className="text-sm text-gray-500 text-center">
-          You&apos;re almost there! Just follow these steps to get verified.
+    <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
+      <div className="space-y-5">
+        <Question preset="individual">Ready to get verified?</Question>
+        <QuestionDescription preset="individual">
+          You&apos;re almost there. Follow these steps to complete verification.
         </QuestionDescription>
-        <div className="grid  gap-2 pt-8">
-          {verificationSteps.map((step) => (
-            <div key={step.title}>
-              <div className="flex items-center gap-2 border p-4 rounded-lg">
-                <span className="text-2xl">{step.icon}</span>
-                <div>
-                  <h5 className=" font-semibold">{step.title}</h5>
-                  <p className="text-xs text-gray-500">{step.description}</p>
-                </div>
+        <div className="grid gap-3 pt-2">
+          {verificationSteps.map((item) => (
+            <div
+              key={item.title}
+              className="flex items-center gap-3 rounded-full border border-neutral-200 bg-neutral-50/80 px-4 py-3.5"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
+                {item.icon}
+              </span>
+              <div className="min-w-0 text-left">
+                <h5 className="text-sm font-semibold text-neutral-900">{item.title}</h5>
+                <p className="text-xs leading-snug text-neutral-500">{item.description}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
-      <Button onClick={handleNext} className="w-full mt-4">
-        Yeah! Let&apos;s do this
+      <Button onClick={handleNext} className={onboardingPrimaryButtonClass}>
+        Continue
       </Button>
     </div>
   );

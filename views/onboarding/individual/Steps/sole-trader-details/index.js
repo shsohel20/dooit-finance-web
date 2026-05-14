@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import React from "react";
+import { onboardingInputClass, onboardingPrimaryButtonClass } from "../../onboardingStyles";
 
 export default function SoleTraderDetails({ form }) {
   const { setStep } = useCustomerRegisterStore();
@@ -18,42 +19,46 @@ export default function SoleTraderDetails({ form }) {
   const nature = form.watch("nature_of_business");
 
   return (
-    <div className="min-w-full space-y-4 flex flex-col justify-between h-full">
-      <div>
-        <Question>Tell us about your sole trader business</Question>
-        <QuestionDescription>
+    <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
+      <div className="space-y-5">
+        <Question preset="individual">Your sole trader business</Question>
+        <QuestionDescription preset="individual">
           We need a few details about your business for verification and compliance.
         </QuestionDescription>
+        <div className="space-y-3">
+          <Input
+            className={onboardingInputClass}
+            placeholder="Registered / legal business name"
+            value={form.watch("business_name") ?? ""}
+            onChange={(e) => form.setValue("business_name", e.target.value)}
+          />
+          <Input
+            className={onboardingInputClass}
+            placeholder="Trading name (if different, optional)"
+            value={form.watch("trading_name") ?? ""}
+            onChange={(e) => form.setValue("trading_name", e.target.value)}
+          />
+          <Input
+            className={onboardingInputClass}
+            placeholder="Business / tax registration number (if applicable)"
+            value={form.watch("business_registration_number") ?? ""}
+            onChange={(e) => form.setValue("business_registration_number", e.target.value)}
+          />
+          <Input
+            className={onboardingInputClass}
+            placeholder="Nature of business (e.g. consulting, retail)"
+            value={form.watch("nature_of_business") ?? ""}
+            onChange={(e) => form.setValue("nature_of_business", e.target.value)}
+          />
+        </div>
       </div>
-      <div className="space-y-4">
-        <Input
-          placeholder="Registered / legal business name"
-          value={form.watch("business_name") ?? ""}
-          onChange={(e) => form.setValue("business_name", e.target.value)}
-        />
-        <Input
-          placeholder="Trading name (if different, optional)"
-          value={form.watch("trading_name") ?? ""}
-          onChange={(e) => form.setValue("trading_name", e.target.value)}
-        />
-        <Input
-          placeholder="Business / tax registration number (if applicable)"
-          value={form.watch("business_registration_number") ?? ""}
-          onChange={(e) => form.setValue("business_registration_number", e.target.value)}
-        />
-        <Input
-          placeholder="Nature of business (e.g. consulting, retail)"
-          value={form.watch("nature_of_business") ?? ""}
-          onChange={(e) => form.setValue("nature_of_business", e.target.value)}
-        />
-        <Button
-          onClick={handleContinue}
-          disabled={!businessName?.trim() || !nature?.trim()}
-          className="w-full mt-4"
-        >
-          Continue
-        </Button>
-      </div>
+      <Button
+        onClick={handleContinue}
+        disabled={!businessName?.trim() || !nature?.trim()}
+        className={onboardingPrimaryButtonClass}
+      >
+        Continue
+      </Button>
     </div>
   );
 }

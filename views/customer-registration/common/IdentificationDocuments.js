@@ -10,6 +10,11 @@ import { toast } from "sonner";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useEffect } from "react";
 import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
+import Question, { QuestionDescription } from "@/views/onboarding/Question";
+import {
+  onboardingPrimaryButtonClass,
+  onboardingSelectControlStyles,
+} from "@/views/onboarding/individual/onboardingStyles";
 
 const documentTypes = [
   { label: "Passport", value: "Passport" },
@@ -56,7 +61,7 @@ const getBase64 = (file) => {
 const Scanner = () => {
   return <div className="scanner-effect absolute top-0 left-0 w-full h-full" />;
 };
-const IdentificationDocuments = ({ form }) => {
+const IdentificationDocuments = ({ form, individualPresentation = false }) => {
   const control = form.control;
   const errors = form.formState.errors;
   const setValue = form.setValue;
@@ -267,7 +272,7 @@ const IdentificationDocuments = ({ form }) => {
   };
   const documentsAdded = fields.length === 2;
   return (
-    <div className="mt-4 space-y-4 ">
+    <div className={individualPresentation ? "flex min-h-[min(70svh,560px)] flex-1 flex-col gap-6" : "mt-4 space-y-4"}>
       <div>
         {/* {livenessVerdict ? (
           <Alert variant="success">
@@ -281,20 +286,32 @@ const IdentificationDocuments = ({ form }) => {
           </Alert>
         )} */}
       </div>
-      <div>
-        <FormTitle>Identification Documents</FormTitle>
-        <div className="max-w-56 my-4 relative z-3">
+      <div className="space-y-5">
+        {individualPresentation ? (
+          <>
+            <Question preset="individual">Identification documents</Question>
+            <QuestionDescription preset="individual">
+              Choose your ID type and upload clear photos of the front and back so we can verify
+              your identity.
+            </QuestionDescription>
+          </>
+        ) : (
+          <FormTitle>Identification Documents</FormTitle>
+        )}
+        <div className={individualPresentation ? "my-1 w-full relative z-3" : "max-w-56 my-4 relative z-3"}>
           <Controller
             control={control}
             name="document_type"
             render={({ field }) => (
               <CustomSelect
-                label="Select Document Type"
+                label={individualPresentation ? undefined : "Select Document Type"}
                 options={documentTypes}
                 value={field.value}
-                placeholder="Select Document Type"
+                placeholder="Select document type"
                 error={errors.document_type?.message}
                 onChange={(e) => handleDocumentTypeChange(e, field.onChange)}
+                styles={individualPresentation ? onboardingSelectControlStyles() : undefined}
+                className={individualPresentation ? "!rounded-full" : undefined}
               />
             )}
           />
@@ -355,8 +372,12 @@ const IdentificationDocuments = ({ form }) => {
               />
             </div>
           </div>
-          <div className="py-6 flex justify-center">
-            <Button disabled={isSaving} onClick={handleSave}>
+          <div className={individualPresentation ? "py-4" : "py-6 flex justify-center"}>
+            <Button
+              disabled={isSaving}
+              onClick={handleSave}
+              className={individualPresentation ? onboardingPrimaryButtonClass : undefined}
+            >
               {isSaving ? "Please wait..." : "Verify Documents"}
             </Button>
           </div>

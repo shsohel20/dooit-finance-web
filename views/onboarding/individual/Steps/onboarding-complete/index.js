@@ -7,6 +7,7 @@ import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { onboardingPrimaryButtonClass } from "../../onboardingStyles";
 
 function selectValue(field) {
   if (field == null) return "";
@@ -81,23 +82,23 @@ export default function OnboardingComplete({ form }) {
       toast.success("We hope you enjoy your journey with us!");
       localStorage.removeItem("live_photo");
       localStorage.removeItem("liveness_verdict");
+    } else {
+      toast.error("Failed to save your application");
     }
     setLoading(false);
   };
 
   return (
-    <div className="space-y-4 flex flex-col justify-between h-full">
-      <div>
-        <Question>You&apos;re all set for this section</Question>
-        <QuestionDescription>
-          Thank you. Continue to complete your registration details and review your application.
+    <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
+      <div className="space-y-5">
+        <Question preset="individual">You&apos;re all set</Question>
+        <QuestionDescription preset="individual">
+          Continue to save your application and head to your dashboard when you are ready.
         </QuestionDescription>
       </div>
-      <div className="space-y-4">
-        <Button disabled={loading} onClick={handleContinue} className="w-full">
-          {loading ? "Saving..." : "Save and Continue"}
-        </Button>
-      </div>
+      <Button disabled={loading} onClick={handleContinue} className={onboardingPrimaryButtonClass}>
+        {loading ? "Saving..." : "Save and continue"}
+      </Button>
     </div>
   );
 }

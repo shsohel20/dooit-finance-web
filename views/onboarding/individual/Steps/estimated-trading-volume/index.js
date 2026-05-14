@@ -3,6 +3,10 @@ import { Button } from "@/components/ui/button";
 import CustomSelect from "@/components/ui/CustomSelect";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import React from "react";
+import {
+  onboardingPrimaryButtonClass,
+  onboardingSelectControlStyles,
+} from "../../onboardingStyles";
 
 const tradingVolumeOptions = [
   { label: "Under $10,000 per year", value: "under_10k" },
@@ -20,23 +24,23 @@ export default function EstimatedTradingVolume({ form }) {
     setStep(12);
   };
   return (
-    <div className="space-y-4 flex flex-col justify-between h-full">
-      <div>
-        <Question>What is your estimated annual trading volume?</Question>
-        <QuestionDescription>
+    <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
+      <div className="space-y-5">
+        <Question preset="individual">What is your estimated annual trading volume?</Question>
+        <QuestionDescription preset="individual">
           An approximate range is fine. We use this for risk assessment only.
         </QuestionDescription>
-      </div>
-      <div className="space-y-4">
         <CustomSelect
           options={tradingVolumeOptions}
           value={form.watch("estimated_trading_volume")}
           onChange={(value) => form.setValue("estimated_trading_volume", value)}
+          styles={onboardingSelectControlStyles()}
+          className="!rounded-full"
         />
-        <Button onClick={handleContinue} className="w-full">
-          Continue
-        </Button>
       </div>
+      <Button onClick={handleContinue} className={onboardingPrimaryButtonClass}>
+        Continue
+      </Button>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import EstimatedTradingVolume from "./Steps/estimated-trading-volume";
 import SoleTrader from "./Steps/sole-trader";
 import SoleTraderDetails from "./Steps/sole-trader-details";
 import OnboardingComplete from "./Steps/onboarding-complete";
+import OnboardingChrome from "./OnboardingChrome";
 const Country = dynamic(() => import("./Steps/country"), { ssr: false });
 const VerificationProcess = dynamic(() => import("./Steps/verification-process"), { ssr: false });
 const LivenessInstructions = dynamic(() => import("./Steps/liveness-instructions"), { ssr: false });
@@ -24,34 +25,42 @@ const IdentificationDocuments = dynamic(
 
 export default function IndividualOnboarding() {
   const { step, setStep } = useCustomerRegisterStore();
-  // const [isSuccess, setIsSuccess] = useState(false);
   const form = useForm();
 
   useEffect(() => {
-    const step = localStorage.getItem("step");
-    if (step) {
-      setStep(Number(step));
+    const saved = localStorage.getItem("step");
+    if (saved) {
+      const n = Number(saved);
+      if (n >= 1 && n <= 14) setStep(n);
     }
-  }, []);
+  }, [setStep]);
+
+  const handleBack = () => {
+    if (Number(step) <= 1) return;
+    setStep(Number(step) - 1);
+  };
+
   return (
-    <div className="grid place-items-center h-[100svh] justify-center items-center w-full relative">
-      <div className="max-w-xl md:w-full w-[90%] mx-auto grid place-items-center md:min-h-[50vh] justify-center md:border border-0 mt-10 rounded-lg px-0 md:px-6 min-h-[90svh]">
-        <div className=" w-full py-12   h-full">
-          {/* {step === 1 && <RegistrationType setStep={setStep} />} */}
-          {step === 1 && <Country form={form} />}
-          {step === 2 && <VerificationProcess />}
-          {step === 3 && <LivenessInstructions />}
-          {step === 4 && <FrontProfile />}
-          {step === 5 && <RightProfile />}
-          {step === 6 && <IdentificationDocuments form={form} />}
-          {step === 7 && <Occupation form={form} />}
-          {step === 8 && <SourceOfFunds form={form} />}
-          {step === 9 && <SourceOfWealth form={form} />}
-          {step === 10 && <ReasonForOpeningAccount form={form} />}
-          {step === 11 && <EstimatedTradingVolume form={form} />}
-          {step === 12 && <SoleTrader form={form} />}
-          {step === 13 && <SoleTraderDetails form={form} />}
-          {step === 14 && <OnboardingComplete form={form} />}
+    <div className="min-h-[100svh] bg-white text-neutral-900">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-lg flex-col px-5 pb-10 pt-4">
+        <OnboardingChrome onBack={handleBack} />
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex w-full flex-1 flex-col">
+            {step === 1 && <Country form={form} />}
+            {step === 2 && <VerificationProcess />}
+            {step === 3 && <LivenessInstructions />}
+            {step === 4 && <FrontProfile />}
+            {step === 5 && <RightProfile />}
+            {step === 6 && <IdentificationDocuments form={form} individualPresentation />}
+            {step === 7 && <Occupation form={form} />}
+            {step === 8 && <SourceOfFunds form={form} />}
+            {step === 9 && <SourceOfWealth form={form} />}
+            {step === 10 && <ReasonForOpeningAccount form={form} />}
+            {step === 11 && <EstimatedTradingVolume form={form} />}
+            {step === 12 && <SoleTrader form={form} />}
+            {step === 13 && <SoleTraderDetails form={form} />}
+            {step === 14 && <OnboardingComplete form={form} />}
+          </div>
         </div>
       </div>
     </div>
