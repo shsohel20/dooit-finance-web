@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
-  getMyProgressForModule,
+  getMyProgressForPart,
   getModuleById,
   getPartById,
   submitQuiz,
@@ -50,9 +50,7 @@ export default function QuizScreen({
       selectedAnswer: mapAnswers[value] ?? value,
     }));
     const payload = { partId, answers: updatedAnswers };
-    console.log("payload", JSON.stringify(payload));
     const res = await submitQuiz(moduleId, payload);
-    console.log("submit quiz res", res);
     const result = res?.data || null;
     setResultData(result);
 
@@ -74,8 +72,8 @@ export default function QuizScreen({
   };
 
   const getProgressData = async () => {
-    const res = await getMyProgressForModule(moduleId);
-    console.log("progressData", res.data);
+    const res = await getMyProgressForPart(partId);
+    console.log("progressData", JSON.stringify(res.data, null, 2));
     setProgressData(res?.data || null);
   };
   useEffect(() => {
