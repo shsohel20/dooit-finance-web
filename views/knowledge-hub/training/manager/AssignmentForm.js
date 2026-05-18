@@ -46,7 +46,7 @@ const AssignmentForm = ({
 
   const fetchAssignmentById = async () => {
     const res = await getAssignmentsByModuleId(id);
-    console.log("res", res);
+    console.log("getbymoduleid res", res);
 
     setSelectedModuleId(res.module.id);
     const learners = res.data.map((a) => a.learner);
@@ -76,17 +76,21 @@ const AssignmentForm = ({
   const handleAssign = async () => {
     if (!selectedModuleId || selectedLearners.length === 0) return;
     setIsAssigning(true);
+    const learnerIds = selectedLearners.map((l) => {
+      if (typeof l === "string") {
+        return l;
+      }
+      return l._id;
+    });
     const payload = {
-      learnerIds: selectedLearners,
+      learnerIds: learnerIds,
       dueDate: dueDate || undefined,
       maxAttempts: maxAttempts === "unlimited" ? 0 : parseInt(maxAttempts),
     };
     try {
-      const res =
-        assignFormMode === "edit"
-          ? await updateAssignment(payload, selectedModuleId)
-          : await assignAssignment(payload, selectedModuleId);
+      const res = await assignAssignment(payload, selectedModuleId);
       console.log("payload", JSON.stringify(payload, null, 2));
+      console.log("res", res);
       if (res.success) {
         if (assignFormMode === "edit") {
           toast.success("Assignment updated successfully");
@@ -207,7 +211,7 @@ const AssignmentForm = ({
               ))}
             </div>
           </div>
-
+          {/*
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="font-semibold">Due Date</Label>
@@ -236,7 +240,7 @@ const AssignmentForm = ({
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          </div> */}
 
           <div className="flex gap-3 justify-end pt-2 border-t border-border">
             <Button variant="outline" onClick={() => handleAssignDialogChange(false)}>

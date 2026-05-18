@@ -97,8 +97,8 @@ export const getAssignmentsByModuleId = async (moduleId) => {
 };
 
 export const updateAssignment = async (data, moduleId) => {
-  const response = await fetchWithAuth(`training-assignments/${moduleId}`, {
-    method: "PUT",
+  const response = await fetchWithAuth(`training-assignments/${moduleId}/assign`, {
+    method: "PATCH",
     body: JSON.stringify(data),
   });
   return response.json();
