@@ -83,6 +83,26 @@ export const assignAssignment = async (data, moduleId) => {
   console.log("response", response);
   return response.json();
 };
+export const getAssignmentById = async (assignmentId) => {
+  const response = await fetchWithAuth(`training-assignments/${assignmentId}`, {
+    method: "GET",
+  });
+  return response.json();
+};
+export const getAssignmentsByModuleId = async (moduleId) => {
+  const response = await fetchWithAuth(`training-assignments/module/${moduleId}`, {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const updateAssignment = async (data, moduleId) => {
+  const response = await fetchWithAuth(`training-assignments/${moduleId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  return response.json();
+};
 export const getAssignmentsforAdmin = async () => {
   const response = await fetchWithAuth("training-assignments", {
     method: "GET",
@@ -91,7 +111,7 @@ export const getAssignmentsforAdmin = async () => {
 };
 
 export const getAssignmentsForManager = async () => {
-  const response = await fetchWithAuth("training-assignments/by-me", {
+  const response = await fetchWithAuth("training-assignments", {
     method: "GET",
   });
   return response.json();
