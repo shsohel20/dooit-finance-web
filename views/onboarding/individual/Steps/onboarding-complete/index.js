@@ -24,7 +24,6 @@ export default function OnboardingComplete({ form }) {
   const handleContinue = async () => {
     setLoading(true);
     const v = form.getValues();
-    console.log("v", v);
     const payload = {
       token,
       cid,

@@ -50,13 +50,9 @@ import {
   Target,
   FileText,
   Loader2,
+  Edit,
 } from "lucide-react";
-import {
-  getAssignmentsForManager,
-  getModules,
-  assignAssignment,
-  grantRetake,
-} from "../actions";
+import { getAssignmentsForManager, getModules, assignAssignment, grantRetake } from "../actions";
 import { getAllUsers } from "@/app/dashboard/client/user-and-role-management/actions";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -296,10 +292,34 @@ export default function ManagerAssignmentsPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: "Learners", value: detailGroup.learnerData.length, icon: Users, bg: "bg-primary/10", color: "text-primary" },
-            { label: "Passed", value: detailGroup.passedCount, icon: CheckCircle2, bg: "bg-[hsl(142_71%_45%)]/10", color: "text-[hsl(142_71%_45%)]" },
-            { label: "Failed", value: detailGroup.failedCount, icon: AlertTriangle, bg: "bg-destructive/10", color: "text-destructive" },
-            { label: "Completion", value: `${detailGroup.completionRate}%`, icon: Target, bg: "bg-[hsl(38_92%_50%)]/10", color: "text-[hsl(38_92%_50%)]" },
+            {
+              label: "Learners",
+              value: detailGroup.learnerData.length,
+              icon: Users,
+              bg: "bg-primary/10",
+              color: "text-primary",
+            },
+            {
+              label: "Passed",
+              value: detailGroup.passedCount,
+              icon: CheckCircle2,
+              bg: "bg-[hsl(142_71%_45%)]/10",
+              color: "text-[hsl(142_71%_45%)]",
+            },
+            {
+              label: "Failed",
+              value: detailGroup.failedCount,
+              icon: AlertTriangle,
+              bg: "bg-destructive/10",
+              color: "text-destructive",
+            },
+            {
+              label: "Completion",
+              value: `${detailGroup.completionRate}%`,
+              icon: Target,
+              bg: "bg-[hsl(38_92%_50%)]/10",
+              color: "text-[hsl(38_92%_50%)]",
+            },
           ].map((s) => (
             <Card key={s.label} className="border-border">
               <CardContent className="pt-5 pb-5">
@@ -328,27 +348,41 @@ export default function ManagerAssignmentsPage() {
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Module</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                  Module
+                </p>
                 <p className="text-sm font-semibold text-foreground">{detailGroup.moduleTitle}</p>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Parts / Questions</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                  Parts / Questions
+                </p>
                 <p className="text-sm font-semibold text-foreground">
                   {detailGroup.moduleParts} parts, {detailGroup.moduleQuestions} questions
                 </p>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Due Date</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                  Due Date
+                </p>
                 <p className="text-sm font-semibold text-foreground">
                   {detailGroup.dueDate
-                    ? new Date(detailGroup.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                    ? new Date(detailGroup.dueDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
                     : "No deadline"}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Max Attempts</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                  Max Attempts
+                </p>
                 <p className="text-sm font-semibold text-foreground">
-                  {detailGroup.maxAttempts === 0 ? "Unlimited" : detailGroup.maxAttempts || "Unlimited"}
+                  {detailGroup.maxAttempts === 0
+                    ? "Unlimited"
+                    : detailGroup.maxAttempts || "Unlimited"}
                 </p>
               </div>
             </div>
@@ -376,12 +410,29 @@ export default function ManagerAssignmentsPage() {
                 <TableBody>
                   {detailGroup.learnerData.map((learner) => {
                     const statusConfig = learner.isPassed
-                      ? { label: "Passed", dotClass: "bg-[hsl(142_71%_45%)]", badgeClass: "bg-[hsl(142_71%_45%)]/10 text-[hsl(142_71%_45%)] border-[hsl(142_71%_45%)]/20" }
+                      ? {
+                          label: "Passed",
+                          dotClass: "bg-[hsl(142_71%_45%)]",
+                          badgeClass:
+                            "bg-[hsl(142_71%_45%)]/10 text-[hsl(142_71%_45%)] border-[hsl(142_71%_45%)]/20",
+                        }
                       : learner.isCompleted
-                        ? { label: "Failed", dotClass: "bg-destructive", badgeClass: "bg-destructive/10 text-destructive border-destructive/20" }
+                        ? {
+                            label: "Failed",
+                            dotClass: "bg-destructive",
+                            badgeClass: "bg-destructive/10 text-destructive border-destructive/20",
+                          }
                         : learner.hasAttempts
-                          ? { label: "In Progress", dotClass: "bg-primary", badgeClass: "bg-primary/10 text-primary border-primary/20" }
-                          : { label: "Not Started", dotClass: "bg-muted-foreground", badgeClass: "bg-muted text-muted-foreground border-border" };
+                          ? {
+                              label: "In Progress",
+                              dotClass: "bg-primary",
+                              badgeClass: "bg-primary/10 text-primary border-primary/20",
+                            }
+                          : {
+                              label: "Not Started",
+                              dotClass: "bg-muted-foreground",
+                              badgeClass: "bg-muted text-muted-foreground border-border",
+                            };
 
                     return (
                       <TableRow key={learner.learnerId} className="group">
@@ -389,7 +440,10 @@ export default function ManagerAssignmentsPage() {
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                               <span className="text-xs font-bold text-primary">
-                                {learner.name.split(" ").map((n) => n[0]).join("")}
+                                {learner.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
                               </span>
                             </div>
                             <div>
@@ -408,14 +462,18 @@ export default function ManagerAssignmentsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className={statusConfig.badgeClass}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotClass} mr-1.5`} />
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotClass} mr-1.5`}
+                            />
                             {statusConfig.label}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 text-muted-foreground">
                             <Clock className="w-3.5 h-3.5" />
-                            <span className="text-sm tabular-nums">{learner.attemptCount || "-"}</span>
+                            <span className="text-sm tabular-nums">
+                              {learner.attemptCount || "-"}
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
@@ -453,7 +511,10 @@ export default function ManagerAssignmentsPage() {
         </Card>
 
         {/* Retake dialog */}
-        <Dialog open={!!retakeConfirm} onOpenChange={(open) => !open && !isRetaking && setRetakeConfirm(null)}>
+        <Dialog
+          open={!!retakeConfirm}
+          onOpenChange={(open) => !open && !isRetaking && setRetakeConfirm(null)}
+        >
           <DialogContent className="sm:max-w-[420px]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -461,7 +522,8 @@ export default function ManagerAssignmentsPage() {
                 Confirm Retake
               </DialogTitle>
               <DialogDescription>
-                This resets the learner&apos;s progress and allows them to retake from the beginning.
+                This resets the learner&apos;s progress and allows them to retake from the
+                beginning.
               </DialogDescription>
             </DialogHeader>
             {retakeConfirm && (
@@ -470,7 +532,9 @@ export default function ManagerAssignmentsPage() {
                   <CardContent className="pt-4 pb-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Learner</span>
-                      <span className="font-medium text-foreground">{retakeConfirm.learnerName}</span>
+                      <span className="font-medium text-foreground">
+                        {retakeConfirm.learnerName}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Module</span>
@@ -479,13 +543,23 @@ export default function ManagerAssignmentsPage() {
                   </CardContent>
                 </Card>
                 <div className="flex gap-3 justify-end">
-                  <Button variant="outline" onClick={() => setRetakeConfirm(null)} disabled={isRetaking}>Cancel</Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setRetakeConfirm(null)}
+                    disabled={isRetaking}
+                  >
+                    Cancel
+                  </Button>
                   <Button
                     className="gap-2 bg-[hsl(38_92%_50%)] hover:bg-[hsl(38_92%_45%)] text-white"
                     onClick={handleRetake}
                     disabled={isRetaking}
                   >
-                    {isRetaking ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
+                    {isRetaking ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <RotateCcw className="w-4 h-4" />
+                    )}
                     Confirm Retake
                   </Button>
                 </div>
@@ -585,7 +659,10 @@ export default function ManagerAssignmentsPage() {
                       />
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <span className="text-xs font-bold text-primary">
-                          {learner.name?.split(" ").map((n) => n[0]).join("")}
+                          {learner.name
+                            ?.split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -635,7 +712,9 @@ export default function ManagerAssignmentsPage() {
 
               {/* Actions */}
               <div className="flex gap-3 justify-end pt-2 border-t border-border">
-                <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>Cancel</Button>
+                <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>
+                  Cancel
+                </Button>
                 <Button
                   onClick={handleAssign}
                   disabled={!selectedModuleId || selectedLearners.length === 0 || isAssigning}
@@ -657,15 +736,41 @@ export default function ManagerAssignmentsPage() {
       {/* Stats Row */}
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full" />
+          ))}
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Modules", value: enrichedGroups.length, icon: BookOpen, bg: "bg-primary/10", color: "text-primary" },
-            { label: "Assignments", value: assignments.length, icon: CheckCircle2, bg: "bg-accent/10", color: "text-accent" },
-            { label: "Passed", value: totalPassed, icon: Users, bg: "bg-[hsl(142_71%_45%)]/10", color: "text-[hsl(142_71%_45%)]" },
-            { label: "Need Retake", value: totalNeedRetake, icon: AlertTriangle, bg: "bg-destructive/10", color: "text-destructive" },
+            {
+              label: "Modules",
+              value: enrichedGroups.length,
+              icon: BookOpen,
+              bg: "bg-primary/10",
+              color: "text-primary",
+            },
+            {
+              label: "Assignments",
+              value: assignments.length,
+              icon: CheckCircle2,
+              bg: "bg-accent/10",
+              color: "text-accent",
+            },
+            {
+              label: "Passed",
+              value: totalPassed,
+              icon: Users,
+              bg: "bg-[hsl(142_71%_45%)]/10",
+              color: "text-[hsl(142_71%_45%)]",
+            },
+            {
+              label: "Need Retake",
+              value: totalNeedRetake,
+              icon: AlertTriangle,
+              bg: "bg-destructive/10",
+              color: "text-destructive",
+            },
           ].map((s) => (
             <Card key={s.label} className="border-border">
               <CardContent className="pt-5 pb-5">
@@ -715,22 +820,44 @@ export default function ManagerAssignmentsPage() {
       {/* List */}
       {loading ? (
         <div className="space-y-4">
-          {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-36 w-full" />)}
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-36 w-full" />
+          ))}
         </div>
       ) : filteredGroups.length > 0 ? (
         <div className="space-y-4">
           {filteredGroups.map((group) => {
             const isOverdue = group.dueDate && new Date(group.dueDate) < new Date();
             const statusConfig = {
-              completed: { label: "All Passed", className: "bg-[hsl(142_71%_45%)]/10 text-[hsl(142_71%_45%)] border-[hsl(142_71%_45%)]/20", dotClass: "bg-[hsl(142_71%_45%)]" },
-              attention: { label: `${group.failedCount} Failed`, className: "bg-destructive/10 text-destructive border-destructive/20", dotClass: "bg-destructive" },
-              "in-progress": { label: "In Progress", className: "bg-primary/10 text-primary border-primary/20", dotClass: "bg-primary" },
-              pending: { label: "Not Started", className: "bg-muted text-muted-foreground border-border", dotClass: "bg-muted-foreground" },
+              completed: {
+                label: "All Passed",
+                className:
+                  "bg-[hsl(142_71%_45%)]/10 text-[hsl(142_71%_45%)] border-[hsl(142_71%_45%)]/20",
+                dotClass: "bg-[hsl(142_71%_45%)]",
+              },
+              attention: {
+                label: `${group.failedCount} Failed`,
+                className: "bg-destructive/10 text-destructive border-destructive/20",
+                dotClass: "bg-destructive",
+              },
+              "in-progress": {
+                label: "In Progress",
+                className: "bg-primary/10 text-primary border-primary/20",
+                dotClass: "bg-primary",
+              },
+              pending: {
+                label: "Not Started",
+                className: "bg-muted text-muted-foreground border-border",
+                dotClass: "bg-muted-foreground",
+              },
             };
             const config = statusConfig[group.overallStatus] || statusConfig.pending;
 
             return (
-              <Card key={group.moduleId} className="border-border hover:border-primary/20 transition-all duration-200 group">
+              <Card
+                key={group.moduleId}
+                className="border-border hover:border-primary/20 transition-all duration-200 group"
+              >
                 <CardContent className="pt-5 pb-5">
                   <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     <div className="flex items-start gap-4 flex-1 min-w-0">
@@ -739,27 +866,42 @@ export default function ManagerAssignmentsPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h3 className="font-semibold text-foreground truncate">{group.moduleTitle}</h3>
+                          <h3 className="font-semibold text-foreground truncate">
+                            {group.moduleTitle}
+                          </h3>
                           <Badge variant="outline" className={config.className}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${config.dotClass} mr-1.5`} />
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${config.dotClass} mr-1.5`}
+                            />
                             {config.label}
                           </Badge>
-                          {isOverdue && <Badge variant="destructive" className="text-xs">Overdue</Badge>}
+                          {isOverdue && (
+                            <Badge variant="destructive" className="text-xs">
+                              Overdue
+                            </Badge>
+                          )}
                         </div>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
                           <span className="flex items-center gap-1.5">
                             <Users className="w-3.5 h-3.5" />
-                            {group.learnerData.length} learner{group.learnerData.length !== 1 ? "s" : ""}
+                            {group.learnerData.length} learner
+                            {group.learnerData.length !== 1 ? "s" : ""}
                           </span>
                           <span className="flex items-center gap-1.5">
                             <Calendar className="w-3.5 h-3.5" />
                             {group.dueDate
-                              ? new Date(group.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                              ? new Date(group.dueDate).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })
                               : "No deadline"}
                           </span>
                           <span className="flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5" />
-                            {group.maxAttempts === 0 ? "Unlimited" : group.maxAttempts || "Unlimited"} attempts
+                            {group.maxAttempts === 0
+                              ? "Unlimited"
+                              : group.maxAttempts || "Unlimited"}{" "}
+                            attempts
                           </span>
                         </div>
                         <div className="flex items-center gap-3 mt-3">
@@ -772,6 +914,15 @@ export default function ManagerAssignmentsPage() {
                     </div>
 
                     {/* Actions */}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 bg-transparent"
+                      onClick={() => setSelectedModuleGroupId(group.moduleId)}
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                      Edit
+                    </Button>
                     <div className="flex items-center gap-2 lg:flex-shrink-0">
                       {group.failedCount > 0 && (
                         <Button
@@ -779,7 +930,9 @@ export default function ManagerAssignmentsPage() {
                           className="gap-1.5 bg-[hsl(38_92%_50%)] hover:bg-[hsl(38_92%_45%)] text-white font-medium"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const failedLearner = group.learnerData.find((l) => l.isCompleted && !l.isPassed);
+                            const failedLearner = group.learnerData.find(
+                              (l) => l.isCompleted && !l.isPassed,
+                            );
                             if (failedLearner) {
                               setRetakeConfirm({
                                 learnerId: failedLearner.learnerId,
@@ -824,7 +977,10 @@ export default function ManagerAssignmentsPage() {
                             title={`${learner.name} - ${learner.isPassed ? "Passed" : learner.isCompleted ? "Failed" : learner.hasAttempts ? "In Progress" : "Not Started"}${learner.score > 0 ? ` (${Math.round(learner.score)}%)` : ""}`}
                           >
                             <span className="text-[10px] font-bold text-primary">
-                              {learner.name.split(" ").map((n) => n[0]).join("")}
+                              {learner.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
                             </span>
                           </div>
                         );
@@ -874,7 +1030,10 @@ export default function ManagerAssignmentsPage() {
       )}
 
       {/* Retake dialog (list view) */}
-      <Dialog open={!!retakeConfirm} onOpenChange={(open) => !open && !isRetaking && setRetakeConfirm(null)}>
+      <Dialog
+        open={!!retakeConfirm}
+        onOpenChange={(open) => !open && !isRetaking && setRetakeConfirm(null)}
+      >
         <DialogContent className="sm:max-w-[420px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -896,13 +1055,23 @@ export default function ManagerAssignmentsPage() {
                 </CardContent>
               </Card>
               <div className="flex gap-3 justify-end">
-                <Button variant="outline" onClick={() => setRetakeConfirm(null)} disabled={isRetaking}>Cancel</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setRetakeConfirm(null)}
+                  disabled={isRetaking}
+                >
+                  Cancel
+                </Button>
                 <Button
                   className="gap-2 bg-[hsl(38_92%_50%)] hover:bg-[hsl(38_92%_45%)] text-white"
                   onClick={handleRetake}
                   disabled={isRetaking}
                 >
-                  {isRetaking ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
+                  {isRetaking ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RotateCcw className="w-4 h-4" />
+                  )}
                   Confirm Retake
                 </Button>
               </div>
