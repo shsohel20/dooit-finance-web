@@ -144,7 +144,7 @@ export default function ReportsPage() {
   const passRate = filteredData.length > 0 ? (passedCount / filteredData.length) * 100 : 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
@@ -166,53 +166,114 @@ export default function ReportsPage() {
       </div>
 
       {/* System-wide KPIs from overview API */}
-      {overview && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div>
+        {overview && (
+          <div className="flex    justify-center">
+            {[
+              {
+                label: "Total Modules",
+                value: overview.totalModules ?? "—",
+                color: "text-primary bg-primary/10",
+              },
+              {
+                label: "Published",
+                value: overview.publishedModules ?? "—",
+                color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10",
+              },
+              {
+                label: "Assignments",
+                value: overview.totalAssignments ?? "—",
+                color: "text-accent bg-accent/10",
+              },
+              {
+                label: "Completion %",
+                value:
+                  overview.completionRate != null ? `${Math.round(overview.completionRate)}%` : "—",
+                color: "text-primary bg-primary/10",
+              },
+              {
+                label: "Pass Rate",
+                value: overview.passRate != null ? `${Math.round(overview.passRate)}%` : "—",
+                color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10",
+              },
+              {
+                label: "Avg Score",
+                value: overview.avgScore != null ? `${Math.round(overview.avgScore)}%` : "—",
+                color: "text-[hsl(38_92%_50%)] bg-[hsl(38_92%_50%)]/10",
+              },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="bg-gray-100 p-4 first:rounded-l-lg last:rounded-r-lg border-r border-border flex-shrink-0 last:border-r-0"
+              >
+                <div className="pt-4 pb-3 flex items-center justify-between gap-2 px-8">
+                  <div className={`inline-flex p-1.5 rounded-lg ${s.color} mb-2`}>
+                    <TrendingUp className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-foreground">{s.value}</p>
+                    <p className="text-xs text-muted-foreground">{s.label}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-wrap justify-center">
           {[
             {
-              label: "Total Modules",
-              value: overview.totalModules ?? "—",
+              label: "Total Learners",
+              value: filteredData.length,
+              icon: Users,
               color: "text-primary bg-primary/10",
+              change: null,
             },
             {
-              label: "Published",
-              value: overview.publishedModules ?? "—",
+              label: "Passed",
+              value: passedCount,
+              icon: CheckCircle2,
               color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10",
+              change: null,
             },
             {
-              label: "Assignments",
-              value: overview.totalAssignments ?? "—",
-              color: "text-accent bg-accent/10",
-            },
-            {
-              label: "Completion %",
-              value:
-                overview.completionRate != null ? `${Math.round(overview.completionRate)}%` : "—",
+              label: "In Progress",
+              value: inProgressCount,
+              icon: Activity,
               color: "text-primary bg-primary/10",
+              change: null,
             },
             {
-              label: "Pass Rate",
-              value: overview.passRate != null ? `${Math.round(overview.passRate)}%` : "—",
-              color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10",
+              label: "Failed",
+              value: failedCount,
+              icon: XCircle,
+              color: "text-destructive bg-destructive/10",
+              change: null,
             },
             {
               label: "Avg Score",
-              value: overview.avgScore != null ? `${Math.round(overview.avgScore)}%` : "—",
-              color: "text-[hsl(38_92%_50%)] bg-[hsl(38_92%_50%)]/10",
+              value: `${Math.round(avgScore)}%`,
+              icon: TrendingUp,
+              color: "text-accent bg-accent/10",
+              change: null,
             },
-          ].map((s) => (
-            <Card key={s.label} className="border-border/60">
-              <CardContent className="pt-4 pb-3">
-                <div className={`inline-flex p-1.5 rounded-lg ${s.color} mb-2`}>
-                  <TrendingUp className="w-3.5 h-3.5" />
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="bg-gray-50 p-4 first:rounded-l-lg last:rounded-r-lg border-r border-border flex-shrink-0 last:border-r-0 mt-2"
+            >
+              <div className="flex items-start justify-between gap-6 px-4">
+                <div className={`p-2 rounded-lg ${stat.color}`}>
+                  <stat.icon className="w-4 h-4" />
                 </div>
-                <p className="text-xl font-bold text-foreground">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-              </CardContent>
-            </Card>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
-      )}
+      </div>
 
       {loading ? (
         <div className="space-y-4">
@@ -223,57 +284,6 @@ export default function ReportsPage() {
       ) : (
         <>
           {/* KPI Cards (filtered data) */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            {[
-              {
-                label: "Total Learners",
-                value: filteredData.length,
-                icon: Users,
-                color: "text-primary bg-primary/10",
-                change: null,
-              },
-              {
-                label: "Passed",
-                value: passedCount,
-                icon: CheckCircle2,
-                color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10",
-                change: null,
-              },
-              {
-                label: "In Progress",
-                value: inProgressCount,
-                icon: Activity,
-                color: "text-primary bg-primary/10",
-                change: null,
-              },
-              {
-                label: "Failed",
-                value: failedCount,
-                icon: XCircle,
-                color: "text-destructive bg-destructive/10",
-                change: null,
-              },
-              {
-                label: "Avg Score",
-                value: `${Math.round(avgScore)}%`,
-                icon: TrendingUp,
-                color: "text-accent bg-accent/10",
-                change: null,
-              },
-            ].map((stat) => (
-              <Card key={stat.label} className="border-border/60 overflow-hidden">
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`p-2 rounded-lg ${stat.color}`}>
-                      <stat.icon className="w-4 h-4" />
-                    </div>
-                  </div>
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
 
           {/* Pass Rate Bar */}
           <Card className="border-border/60">
