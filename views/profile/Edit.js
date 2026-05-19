@@ -130,15 +130,6 @@ export function ClientEditForm() {
     removeContact(index);
   };
 
-  const navItems = [
-    { id: "company", label: "Company Info", icon: Building2 },
-    { id: "contacts", label: "Contacts", icon: User },
-    { id: "address", label: "Address", icon: MapPin },
-    { id: "legal", label: "Legal Representative", icon: Scale },
-    { id: "documents", label: "Documents", icon: FileText },
-    { id: "settings", label: "Settings", icon: Settings },
-  ];
-
   const onSubmit = async (data) => {
     const action = isClient ? updateClientProfile : isBranch ? updateBranchProfile : updateProfile;
     const id = isClient ? formData?.client?._id : formData?.id;

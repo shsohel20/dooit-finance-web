@@ -220,12 +220,16 @@ export default function PartScreen({ partId, moduleId }) {
             onStateChange(e) {
               if (destroyed) return;
               const S = YT.PlayerState;
+              console.log("e", e);
+              console.log("S", S);
+
               if (e.data === S.PLAYING) {
                 setPlaying(true);
                 setIsBuffering(false);
               }
               if (e.data === S.PAUSED) {
                 setPlaying(false);
+                setIsBuffering(false);
                 sendProgress();
               }
               if (e.data === S.BUFFERING) {
@@ -233,7 +237,9 @@ export default function PartScreen({ partId, moduleId }) {
               }
               if (e.data === S.ENDED) {
                 setPlaying(false);
+                setIsBuffering(false);
                 sendProgress(ytPlayer.current?.getDuration?.());
+                // setIsBuffering(false);
               }
             },
           },
@@ -522,7 +528,7 @@ export default function PartScreen({ partId, moduleId }) {
           {!isReady && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none">
               <Loader2 className="w-10 h-10 text-white/30 animate-spin" />
-              <span className="text-white/30 text-xs tracking-wide">Loading video…</span>
+              <span className="text-white text-xs tracking-wide">Loading video…</span>
             </div>
           )}
 
