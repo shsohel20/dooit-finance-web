@@ -105,7 +105,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
     setFrontLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
-      console.log("front img response", JSON.stringify(response, null, 2));
+      // console.log("front img response", JSON.stringify(response, null, 2));
       if (response.success) {
         setFrontError(false);
         const existingFrontIndex = fields.findIndex((item) => item.type === "front");
@@ -272,7 +272,13 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
   };
   const documentsAdded = fields.length === 2;
   return (
-    <div className={individualPresentation ? "flex min-h-[min(70svh,560px)] flex-1 flex-col gap-6" : "mt-4 space-y-4"}>
+    <div
+      className={
+        individualPresentation
+          ? "flex min-h-[min(70svh,560px)] flex-1 flex-col gap-6"
+          : "mt-4 space-y-4"
+      }
+    >
       <div>
         {/* {livenessVerdict ? (
           <Alert variant="success">
@@ -298,7 +304,11 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
         ) : (
           <FormTitle>Identification Documents</FormTitle>
         )}
-        <div className={individualPresentation ? "my-1 w-full relative z-3" : "max-w-56 my-4 relative z-3"}>
+        <div
+          className={
+            individualPresentation ? "my-1 w-full relative z-3" : "max-w-56 my-4 relative z-3"
+          }
+        >
           <Controller
             control={control}
             name="document_type"

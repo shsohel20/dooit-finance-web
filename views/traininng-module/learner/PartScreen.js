@@ -220,9 +220,6 @@ export default function PartScreen({ partId, moduleId }) {
             onStateChange(e) {
               if (destroyed) return;
               const S = YT.PlayerState;
-              console.log("e", e);
-              console.log("S", S);
-
               if (e.data === S.PLAYING) {
                 setPlaying(true);
                 setIsBuffering(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Table,
   TableBody,
@@ -22,8 +21,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Download,
-  ChevronDown,
   BarChart3,
   Users,
   TrendingUp,
@@ -31,8 +28,6 @@ import {
   XCircle,
   Clock,
   Activity,
-  ArrowUp,
-  ArrowDown,
   RefreshCw,
 } from "lucide-react";
 import { getReportsOverview, getReportsLearners } from "../actions";
@@ -45,7 +40,12 @@ const statusCfg = {
     text: "text-[hsl(142_71%_45%)]",
     label: "Passed",
   },
-  "in-progress": { dot: "bg-primary", bg: "bg-primary/10", text: "text-primary", label: "In Progress" },
+  "in-progress": {
+    dot: "bg-primary",
+    bg: "bg-primary/10",
+    text: "text-primary",
+    label: "In Progress",
+  },
   "not-started": {
     dot: "bg-muted-foreground",
     bg: "bg-muted",
@@ -58,7 +58,12 @@ const statusCfg = {
     text: "text-muted-foreground",
     label: "Not Started",
   },
-  failed: { dot: "bg-destructive", bg: "bg-destructive/10", text: "text-destructive", label: "Failed" },
+  failed: {
+    dot: "bg-destructive",
+    bg: "bg-destructive/10",
+    text: "text-destructive",
+    label: "Failed",
+  },
   started: { dot: "bg-primary", bg: "bg-primary/10", text: "text-primary", label: "Started" },
 };
 
@@ -66,8 +71,15 @@ const statusCfg = {
 function mapRecord(item) {
   const learner = item.learner || {};
   const moduleItem = item.module || {};
-  const rawStatus = item.status ||
-    (item.isPassed ? "passed" : item.completedAt ? "failed" : item.startedAt ? "in-progress" : "not-started");
+  const rawStatus =
+    item.status ||
+    (item.isPassed
+      ? "passed"
+      : item.completedAt
+        ? "failed"
+        : item.startedAt
+          ? "in-progress"
+          : "not-started");
 
   return {
     id: item._id,
@@ -142,7 +154,12 @@ export default function ReportsPage() {
             Track learner progress and training performance metrics.
           </p>
         </div>
-        <Button variant="outline" className="gap-2 w-full sm:w-auto" onClick={fetchData} disabled={loading}>
+        <Button
+          variant="outline"
+          className="gap-2 w-full sm:w-auto"
+          onClick={fetchData}
+          disabled={loading}
+        >
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </Button>
@@ -152,12 +169,37 @@ export default function ReportsPage() {
       {overview && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[
-            { label: "Total Modules", value: overview.totalModules ?? "—", color: "text-primary bg-primary/10" },
-            { label: "Published", value: overview.publishedModules ?? "—", color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10" },
-            { label: "Assignments", value: overview.totalAssignments ?? "—", color: "text-accent bg-accent/10" },
-            { label: "Completion %", value: overview.completionRate != null ? `${Math.round(overview.completionRate)}%` : "—", color: "text-primary bg-primary/10" },
-            { label: "Pass Rate", value: overview.passRate != null ? `${Math.round(overview.passRate)}%` : "—", color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10" },
-            { label: "Avg Score", value: overview.avgScore != null ? `${Math.round(overview.avgScore)}%` : "—", color: "text-[hsl(38_92%_50%)] bg-[hsl(38_92%_50%)]/10" },
+            {
+              label: "Total Modules",
+              value: overview.totalModules ?? "—",
+              color: "text-primary bg-primary/10",
+            },
+            {
+              label: "Published",
+              value: overview.publishedModules ?? "—",
+              color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10",
+            },
+            {
+              label: "Assignments",
+              value: overview.totalAssignments ?? "—",
+              color: "text-accent bg-accent/10",
+            },
+            {
+              label: "Completion %",
+              value:
+                overview.completionRate != null ? `${Math.round(overview.completionRate)}%` : "—",
+              color: "text-primary bg-primary/10",
+            },
+            {
+              label: "Pass Rate",
+              value: overview.passRate != null ? `${Math.round(overview.passRate)}%` : "—",
+              color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10",
+            },
+            {
+              label: "Avg Score",
+              value: overview.avgScore != null ? `${Math.round(overview.avgScore)}%` : "—",
+              color: "text-[hsl(38_92%_50%)] bg-[hsl(38_92%_50%)]/10",
+            },
           ].map((s) => (
             <Card key={s.label} className="border-border/60">
               <CardContent className="pt-4 pb-3">
@@ -174,18 +216,50 @@ export default function ReportsPage() {
 
       {loading ? (
         <div className="space-y-4">
-          {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
         </div>
       ) : (
         <>
           {/* KPI Cards (filtered data) */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
             {[
-              { label: "Total Learners", value: filteredData.length, icon: Users, color: "text-primary bg-primary/10", change: null },
-              { label: "Passed", value: passedCount, icon: CheckCircle2, color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10", change: null },
-              { label: "In Progress", value: inProgressCount, icon: Activity, color: "text-primary bg-primary/10", change: null },
-              { label: "Failed", value: failedCount, icon: XCircle, color: "text-destructive bg-destructive/10", change: null },
-              { label: "Avg Score", value: `${Math.round(avgScore)}%`, icon: TrendingUp, color: "text-accent bg-accent/10", change: null },
+              {
+                label: "Total Learners",
+                value: filteredData.length,
+                icon: Users,
+                color: "text-primary bg-primary/10",
+                change: null,
+              },
+              {
+                label: "Passed",
+                value: passedCount,
+                icon: CheckCircle2,
+                color: "text-[hsl(142_71%_45%)] bg-[hsl(142_71%_45%)]/10",
+                change: null,
+              },
+              {
+                label: "In Progress",
+                value: inProgressCount,
+                icon: Activity,
+                color: "text-primary bg-primary/10",
+                change: null,
+              },
+              {
+                label: "Failed",
+                value: failedCount,
+                icon: XCircle,
+                color: "text-destructive bg-destructive/10",
+                change: null,
+              },
+              {
+                label: "Avg Score",
+                value: `${Math.round(avgScore)}%`,
+                icon: TrendingUp,
+                color: "text-accent bg-accent/10",
+                change: null,
+              },
             ].map((stat) => (
               <Card key={stat.label} className="border-border/60 overflow-hidden">
                 <CardContent className="pt-5 pb-4">
@@ -237,7 +311,9 @@ export default function ReportsPage() {
               <SelectContent>
                 <SelectItem value="all">All Modules</SelectItem>
                 {allModules.map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                  <SelectItem key={m} value={m}>
+                    {m}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -276,7 +352,7 @@ export default function ReportsPage() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/30 hover:bg-muted/30">
-                        <TableHead className="w-[40px] font-semibold" />
+                        {/* <TableHead className="w-[40px] font-semibold" /> */}
                         <TableHead className="font-semibold">Learner</TableHead>
                         <TableHead className="font-semibold">Module</TableHead>
                         <TableHead className="font-semibold">Score</TableHead>
@@ -286,85 +362,88 @@ export default function ReportsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredData.map((user) => {
+                      {filteredData.map((user, i) => {
+                        // console.log("user", user);
                         const isExpanded = expandedRows.includes(user.id);
                         const cfg = statusCfg[user.status] || statusCfg["not-started"];
                         return (
-                          <Collapsible
-                            key={user.id}
-                            asChild
-                            open={isExpanded}
-                            onOpenChange={() => toggleRow(user.id)}
+                          // <Collapsible
+                          //   key={`${user.id}-${i}`}
+                          //   asChild
+                          //   open={isExpanded}
+                          //   onOpenChange={() => toggleRow(user.id)}
+                          //   div
+                          // >
+                          <TableRow
+                            key={`${user.id}`}
+                            className="hover:bg-muted/30 transition-colors"
                           >
-                            <>
-                              <TableRow className="hover:bg-muted/30 transition-colors">
-                                <TableCell>
-                                  <CollapsibleTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="p-0 w-8 h-8"
-                                      disabled={!user.attempts_detail?.length}
-                                    >
-                                      <ChevronDown
-                                        className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                                      />
-                                    </Button>
-                                  </CollapsibleTrigger>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                                      {user.name.split(" ").map((n) => n[0]).join("")}
-                                    </div>
-                                    <div>
-                                      <p className="font-medium text-foreground text-sm">{user.name}</p>
-                                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                                    </div>
-                                  </div>
-                                </TableCell>
-                                <TableCell className="text-sm text-foreground">{user.module}</TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <Progress value={user.latestScore} className="w-16 h-1.5" />
-                                    <span
-                                      className={`text-sm font-semibold ${user.latestScore >= 70 ? "text-[hsl(142_71%_45%)]" : user.latestScore > 0 ? "text-destructive" : "text-muted-foreground"}`}
-                                    >
-                                      {user.latestScore > 0 ? `${Math.round(user.latestScore)}%` : "-"}
-                                    </span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Badge
-                                    variant="outline"
-                                    className={`${cfg.bg} ${cfg.text} border-0 text-xs`}
-                                  >
-                                    <div className={`w-1.5 h-1.5 rounded-full ${cfg.dot} mr-1.5`} />
-                                    {cfg.label}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-sm text-foreground">
-                                  {user.attempts || "-"}
-                                </TableCell>
-                                <TableCell>
-                                  <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                                    {user.completionDate ? (
-                                      <><Clock className="w-3 h-3" />{user.completionDate}</>
-                                    ) : "-"}
-                                  </span>
-                                </TableCell>
-                              </TableRow>
-                              <TableRow className={isExpanded ? "" : "hidden"}>
-                                <TableCell colSpan={7} className="bg-muted/20 p-0">
-                                  <CollapsibleContent>
-                                    <div className="px-6 py-4 text-sm text-muted-foreground">
-                                      Detailed attempt history is available in the assignments detail view.
-                                    </div>
-                                  </CollapsibleContent>
-                                </TableCell>
-                              </TableRow>
-                            </>
-                          </Collapsible>
+                            {/* <TableCell>
+                              <CollapsibleTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="p-0 w-8 h-8"
+                                  disabled={!user.attempts_detail?.length}
+                                >
+                                  <ChevronDown
+                                    className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                                  />
+                                </Button>
+                              </CollapsibleTrigger>
+                            </TableCell> */}
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                                  {user.name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-foreground text-sm">{user.name}</p>
+                                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm text-foreground">{user.module}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Progress value={user.latestScore} className="w-16 h-1.5" />
+                                <span
+                                  className={`text-sm font-semibold ${user.latestScore >= 70 ? "text-[hsl(142_71%_45%)]" : user.latestScore > 0 ? "text-destructive" : "text-muted-foreground"}`}
+                                >
+                                  {user.latestScore > 0 ? `${Math.round(user.latestScore)}%` : "-"}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="outline"
+                                className={`${cfg.bg} ${cfg.text} border-0 text-xs`}
+                              >
+                                <div className={`w-1.5 h-1.5 rounded-full ${cfg.dot} mr-1.5`} />
+                                {cfg.label}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-foreground">
+                              {user.attempts || "-"}
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                                {user.completionDate ? (
+                                  <>
+                                    <Clock className="w-3 h-3" />
+                                    {user.completionDate}
+                                  </>
+                                ) : (
+                                  "-"
+                                )}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+
+                          // </Collapsible>
                         );
                       })}
                     </TableBody>
