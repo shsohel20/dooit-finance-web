@@ -478,61 +478,14 @@ export default function PartScreen({ partId, moduleId }) {
     <div className="w-full min-w-0 overflow-x-hidden flex flex-col xl:flex-row gap-6 pb-10 items-start">
       {/* ───────── MAIN CONTENT ───────── */}
       <div className="flex-1 min-w-0 overflow-hidden space-y-5">
-        {/* ───────── TOP BAR ───────── */}
-        <div className="flex items-center justify-between pt-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => goToMain()}
-            className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 h-8 px-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Parts
-          </Button>
-
-          <div
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all duration-300",
-              quizUnlocked
-                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                : watchedPercent > 0
-                  ? "bg-primary/10 text-primary border-primary/20"
-                  : "bg-muted text-muted-foreground border-transparent",
-            )}
-          >
-            {quizUnlocked ? (
-              <CheckCircle className="w-3.5 h-3.5" />
-            ) : (
-              <Lock className="w-3.5 h-3.5" />
-            )}
-            {quizUnlocked
-              ? "Quiz Unlocked"
-              : watchedPercent > 0
-                ? `${watchedPercent}% watched`
-                : "Quiz Locked"}
-          </div>
-        </div>
-
-        {/* ───────── TITLE ───────── */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground leading-snug">
-            {partData?.title || "Loading…"}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Watch at least{" "}
-            <span className="text-foreground font-medium">{QUIZ_UNLOCK_THRESHOLD}%</span> of the
-            video to unlock the quiz
-          </p>
-        </div>
-
         {/* ───────── PLAYER ───────── */}
         <div
           ref={containerRef}
-          className="relative w-full max-w-full bg-black rounded-2xl overflow-hidden select-none"
+          className="relative w-full max-w-full rounded-2xl overflow-hidden select-none"
           style={{
             aspectRatio: "16/9",
-            maxHeight: "calc(100vh - 180px)",
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.06), 0 24px 64px -12px rgba(0,0,0,0.5)",
+            maxHeight: "calc(90vh - 180px)",
+            // boxShadow: "0 0 0 1px rgba(255,255,255,0.06), 0 24px 64px -12px rgba(0,0,0,0.5)",
           }}
           onMouseMove={resetTimer}
           onMouseLeave={() => playing && setShowControls(false)}
@@ -787,6 +740,17 @@ export default function PartScreen({ partId, moduleId }) {
           </div>
         </div>
 
+        {/* Title */}
+        <div className="mb-4">
+          <h1 className="text-xl font-bold tracking-tight text-foreground leading-snug">
+            {partData?.title || "Loading…"}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Watch at least{" "}
+            <span className="text-foreground font-medium">{QUIZ_UNLOCK_THRESHOLD}%</span> of the
+            video to unlock the quiz
+          </p>
+        </div>
         {/* ───────── PROGRESS STRIP ───────── */}
         <div className="rounded-xl border bg-card/60 px-5 py-3">
           <div className="flex items-center justify-between mb-2">
@@ -858,94 +822,46 @@ export default function PartScreen({ partId, moduleId }) {
               </div>
             </div>
           </div>
-
-          {/* Quiz CTA */}
-          <div
-            className={cn(
-              "lg:col-span-2 rounded-2xl border p-5 flex flex-col items-center justify-center gap-4 transition-all duration-500",
-              quizUnlocked
-                ? "bg-gradient-to-br from-emerald-500/5 via-emerald-500/10 to-transparent border-emerald-500/20"
-                : "bg-card border-border",
-            )}
-          >
-            {/* Ring */}
-            <div className="relative">
-              <svg width="100" height="100" viewBox="0 0 100 100" className="-rotate-90">
-                <circle
-                  cx="50"
-                  cy="50"
-                  r={RING_R}
-                  fill="none"
-                  strokeWidth="6"
-                  stroke="currentColor"
-                  className="text-muted/30"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r={RING_R}
-                  fill="none"
-                  strokeWidth="6"
-                  stroke={quizUnlocked ? "#10b981" : "hsl(var(--primary))"}
-                  strokeLinecap="round"
-                  strokeDasharray={RING_CIRC}
-                  strokeDashoffset={ringOffset}
-                  style={{ transition: "stroke-dashoffset 0.5s ease, stroke 0.4s ease" }}
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                {quizUnlocked ? (
-                  <CheckCircle className="w-8 h-8 text-emerald-500" />
-                ) : (
-                  <span className="text-lg font-bold tabular-nums">{watchedPercent}%</span>
-                )}
-              </div>
-            </div>
-
-            <div className="text-center space-y-1">
-              <p
-                className={cn(
-                  "text-base font-bold",
-                  quizUnlocked ? "text-emerald-600" : "text-foreground",
-                )}
-              >
-                {quizUnlocked ? "Quiz Unlocked!" : "Quiz Locked"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {quizUnlocked
-                  ? "You've watched enough to take the quiz"
-                  : `Watch ${QUIZ_UNLOCK_THRESHOLD - watchedPercent}% more to unlock`}
-              </p>
-            </div>
-
-            <Button
-              onClick={goToQuiz}
-              disabled={!quizUnlocked}
-              size="sm"
-              className={cn(
-                "w-full gap-2 font-semibold h-9 transition-all duration-300",
-                quizUnlocked
-                  ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/25"
-                  : "opacity-60 cursor-not-allowed",
-              )}
-            >
-              {quizUnlocked ? (
-                <>
-                  <CheckCircle className="w-4 h-4" /> Take the Quiz
-                </>
-              ) : (
-                <>
-                  <Lock className="w-4 h-4" /> Quiz Locked
-                </>
-              )}
-            </Button>
-          </div>
         </div>
       </div>
       {/* end main content */}
 
       {/* ───────── SIDEBAR ───────── */}
       <aside className="xl:w-72 w-full shrink-0 min-w-0">
+        <div className="flex items-center justify-between pt-1 mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => goToMain()}
+            className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 h-8 px-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Parts
+          </Button>
+
+          <div
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all duration-300",
+              quizUnlocked
+                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                : watchedPercent > 0
+                  ? "bg-primary/10 text-primary border-primary/20"
+                  : "bg-muted text-muted-foreground border-transparent",
+            )}
+          >
+            {quizUnlocked ? (
+              <CheckCircle className="w-3.5 h-3.5" />
+            ) : (
+              <Lock className="w-3.5 h-3.5" />
+            )}
+            {quizUnlocked
+              ? "Quiz Unlocked"
+              : watchedPercent > 0
+                ? `${watchedPercent}% watched`
+                : "Quiz Locked"}
+          </div>
+        </div>
+
         <div
           className="sticky top-4 rounded-2xl border bg-card overflow-hidden shadow-sm flex flex-col"
           style={{ maxHeight: "calc(100vh - 32px)" }}
@@ -1110,6 +1026,105 @@ export default function PartScreen({ partId, moduleId }) {
                 </div>
               );
             })()}
+        </div>
+
+        {/* Quiz CTA */}
+        <div
+          className={cn(
+            "lg:col-span-2 rounded-2xl border p-5 flex flex-col items-center justify-center gap-4 transition-all duration-500 mt-4",
+            quizUnlocked
+              ? "bg-gradient-to-br from-emerald-500/5 via-emerald-500/10 to-transparent border-emerald-500/20"
+              : "bg-card border-border",
+          )}
+        >
+          {/* Ring */}
+          <div className="relative">
+            <svg width="100" height="100" viewBox="0 0 100 100" className="-rotate-90">
+              <circle
+                cx="50"
+                cy="50"
+                r={RING_R}
+                fill="none"
+                strokeWidth="6"
+                stroke="currentColor"
+                className="text-muted/30"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r={RING_R}
+                fill="none"
+                strokeWidth="6"
+                stroke={quizUnlocked ? "#10b981" : "hsl(var(--primary))"}
+                strokeLinecap="round"
+                strokeDasharray={RING_CIRC}
+                strokeDashoffset={ringOffset}
+                style={{ transition: "stroke-dashoffset 0.5s ease, stroke 0.4s ease" }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              {quizUnlocked ? (
+                <CheckCircle className="w-8 h-8 text-emerald-500" />
+              ) : (
+                <span className="text-lg font-bold tabular-nums">{watchedPercent}%</span>
+              )}
+            </div>
+          </div>
+
+          <div className="text-center space-y-1">
+            <p
+              className={cn(
+                "text-base font-bold",
+                quizUnlocked ? "text-emerald-600" : "text-foreground",
+              )}
+            >
+              {quizUnlocked ? "Quiz Unlocked!" : "Quiz Locked"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {quizUnlocked
+                ? "You've watched enough to take the quiz"
+                : `Watch ${QUIZ_UNLOCK_THRESHOLD - watchedPercent}% more to unlock`}
+            </p>
+          </div>
+
+          <Button
+            onClick={goToQuiz}
+            disabled={!quizUnlocked}
+            size="sm"
+            className={cn(
+              "w-full gap-2 font-semibold h-9 transition-all duration-300",
+              quizUnlocked
+                ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/25"
+                : "opacity-60 cursor-not-allowed",
+            )}
+          >
+            {quizUnlocked ? (
+              <>
+                <CheckCircle className="w-4 h-4" /> Take the Quiz
+              </>
+            ) : (
+              <>
+                <Lock className="w-4 h-4" /> Quiz Locked
+              </>
+            )}
+          </Button>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mt-4">
+          {[
+            ["Space / K", "Play/Pause"],
+            ["← →", "Skip 10s"],
+            ["M", "Mute"],
+            ["F", "Fullscreen"],
+          ].map(([k, l]) => (
+            <div
+              key={k}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-muted/60 border border-border/50"
+            >
+              <kbd className="font-mono text-[10px] font-bold text-foreground">{k}</kbd>
+              <span className="text-xs text-muted-foreground">{l}</span>
+            </div>
+          ))}
         </div>
       </aside>
     </div> /* end outer flex */

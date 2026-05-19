@@ -46,7 +46,6 @@ const AssignmentForm = ({
 
   const fetchAssignmentById = async () => {
     const res = await getAssignmentsByModuleId(id);
-    console.log("getbymoduleid res", res);
 
     setSelectedModuleId(res.module.id);
     const learners = res.data.map((a) => a.learner);
