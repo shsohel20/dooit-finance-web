@@ -38,10 +38,7 @@ export default function RootLayout({ children }) {
       >
         {/* <AuthProvider> */}
 
-        <AuthProvider>
-          {" "}
-          <ModuleProvider>{children}</ModuleProvider>
-        </AuthProvider>
+        <AuthProvider> {children}</AuthProvider>
         <Toaster />
         {/* </AuthProvider> */}
       </body>

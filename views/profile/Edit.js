@@ -41,6 +41,7 @@ export function ClientEditForm() {
   const isClient = formData?.userType === "client";
   const isBranch = formData?.userType === "branch";
 
+  console.log("formData", formData);
   const router = useRouter();
   const formDataByUserType = isClient ? formData : { ...formData, client: formData?.branch };
   const form = useForm({
@@ -127,7 +128,8 @@ export function ClientEditForm() {
   const onSubmit = async (data) => {
     const action = isClient ? updateClientProfile : isBranch ? updateBranchProfile : updateProfile;
     const id = isClient ? formData?.client?._id : formData?.id;
-    const dataToSend = isClient || isBranch ? data.client : data;
+
+    const dataToSend = isClient || isBranch ? { ...data.client } : data;
     const response = await action(dataToSend, id);
     if (response.success) {
       toast.success("Profile updated successfully");
