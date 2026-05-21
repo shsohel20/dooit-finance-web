@@ -99,6 +99,8 @@ export function ClientEditForm() {
             .object({
               billingCycle: z.string().optional(),
               currency: z.string().optional(),
+              logo: z.string().optional(),
+              color: z.string().optional(),
             })
             .optional(),
         }),
@@ -130,6 +132,7 @@ export function ClientEditForm() {
     const id = isClient ? formData?.client?._id : formData?.id;
 
     const dataToSend = isClient || isBranch ? { ...data.client } : data;
+    console.log("dataToSend", JSON.stringify(dataToSend, null, 2));
     const response = await action(dataToSend, id);
     if (response.success) {
       toast.success("Profile updated successfully");
@@ -153,6 +156,7 @@ export function ClientEditForm() {
     console.log("res", res);
     if (res.success) {
       setImgUrl(res.file.publicUrl);
+      form.setValue("client.settings.logo", res.file.publicUrl);
     }
     // const imgUrl=await
   };
@@ -168,7 +172,7 @@ export function ClientEditForm() {
               <div className="relative group">
                 <Avatar className="h-14 w-14 border-2 border-border bg-gray-100">
                   <AvatarImage
-                    src={imgUrl || formData?.photoUrl || "/placeholder.svg"}
+                    src={imgUrl || formData?.client?.settings?.logo || "/placeholder.svg"}
                     alt={formData?.client?.name}
                     className="object-contain "
                   />
@@ -245,9 +249,14 @@ export function ClientEditForm() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="">
-                    <FormField name="client.name" label="Company Name" form={form} />
-                  </div>
+                  <FormField name="client.name" label="Company Name" form={form} />
+                  {/* brand color */}
+                  <FormField
+                    name="client.settings.color"
+                    label="Brand Color"
+                    form={form}
+                    type="color"
+                  />
                   <FormField
                     name="client.clientType"
                     label="Client Type"

@@ -5,11 +5,12 @@ import { Label } from "@/components/ui/label";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { sendInviteForScanQR } from "./action";
 import { toast } from "sonner";
+import { getClientById } from "@/app/dashboard/client/list/actions";
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone is required"),
@@ -27,6 +28,16 @@ export default function ScanQRPage() {
 
   const [formData, setFormData] = useState(initialValues);
   const [loading, setLoading] = useState(false);
+  const [clientData, setClientData] = useState(null);
+  console.log("clientData", clientData);
+  useEffect(() => {
+    const fetchClientData = async () => {
+      const response = await getClientById(client);
+      console.log("response", response);
+      setClientData(response.data);
+    };
+    fetchClientData();
+  }, [client]);
   const router = useRouter();
   const {
     control,
