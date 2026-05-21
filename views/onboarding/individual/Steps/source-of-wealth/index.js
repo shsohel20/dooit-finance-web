@@ -39,7 +39,11 @@ export default function SourceOfWealth({ form }) {
           className="!rounded-full"
         />
       </div>
-      <Button onClick={handleContinue} className={onboardingPrimaryButtonClass}>
+      <Button
+        variant="onboarding"
+        onClick={handleContinue}
+        className={onboardingPrimaryButtonClass}
+      >
         Continue
       </Button>
     </div>

@@ -47,7 +47,12 @@ export default function SoleTrader({ form }) {
           className="!rounded-full"
         />
       </div>
-      <Button onClick={handleContinue} disabled={!selection} className={onboardingPrimaryButtonClass}>
+      <Button
+        variant="onboarding"
+        onClick={handleContinue}
+        disabled={!selection}
+        className={onboardingPrimaryButtonClass}
+      >
         Continue
       </Button>
     </div>

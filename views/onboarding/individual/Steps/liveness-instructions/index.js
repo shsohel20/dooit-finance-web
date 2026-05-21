@@ -35,7 +35,7 @@ export default function LivenessInstructions() {
           </ul>
         </div>
       </div>
-      <Button onClick={handleNext} className={onboardingPrimaryButtonClass}>
+      <Button variant="onboarding" onClick={handleNext} className={onboardingPrimaryButtonClass}>
         Continue
       </Button>
     </div>

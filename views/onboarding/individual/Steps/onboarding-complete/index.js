@@ -95,7 +95,12 @@ export default function OnboardingComplete({ form }) {
           Continue to save your application and head to your dashboard when you are ready.
         </QuestionDescription>
       </div>
-      <Button disabled={loading} onClick={handleContinue} className={onboardingPrimaryButtonClass}>
+      <Button
+        variant="onboarding"
+        disabled={loading}
+        onClick={handleContinue}
+        className={onboardingPrimaryButtonClass}
+      >
         {loading ? "Saving..." : "Save and continue"}
       </Button>
     </div>

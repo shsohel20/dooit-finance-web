@@ -38,7 +38,12 @@ export default function Country({ form }) {
           className="!rounded-full"
         />
       </div>
-      <Button disabled={!country} onClick={handleNext} className={onboardingPrimaryButtonClass}>
+      <Button
+        variant="onboarding"
+        disabled={!country}
+        onClick={handleNext}
+        className={onboardingPrimaryButtonClass}
+      >
         Continue
       </Button>
     </div>

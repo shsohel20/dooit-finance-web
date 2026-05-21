@@ -52,7 +52,12 @@ export default function RightProfile() {
           <FaceCapture image={rightProfile} onCapture={handleRightChange} />
         </div>
         {rightProfile && (
-          <Button className={onboardingPrimaryButtonClass} onClick={handleSubmit} disabled={loading}>
+          <Button
+            variant="onboarding"
+            className={onboardingPrimaryButtonClass}
+            onClick={handleSubmit}
+            disabled={loading}
+          >
             {loading ? "Processing..." : "Continue"}
           </Button>
         )}

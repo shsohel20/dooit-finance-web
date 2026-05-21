@@ -25,7 +25,11 @@ export default function Occupation({ form }) {
           onChange={(e) => form.setValue("occupation", e.target.value)}
         />
       </div>
-      <Button onClick={handleContinue} className={onboardingPrimaryButtonClass}>
+      <Button
+        variant="onboarding"
+        onClick={handleContinue}
+        className={onboardingPrimaryButtonClass}
+      >
         Continue
       </Button>
     </div>

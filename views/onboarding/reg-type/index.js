@@ -130,6 +130,7 @@ export default function RegistrationType() {
         <Button
           disabled={!selectedType}
           onClick={handleNext}
+          variant="onboarding"
           className={cn(
             "mt-10 h-12 w-full rounded-full text-base font-semibold text-white shadow-none",
             " disabled:bg-neutral-300 disabled:text-neutral-500",

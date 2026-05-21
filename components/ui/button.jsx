@@ -68,7 +68,7 @@ function Button({
       data-brand-color={brandColor}
       className={cn(buttonVariants({ variant, size, className, brandColor }), {
         'bg-[var(--brand-color)] hover:bg-[var(--brand-color)]/90':
-          brandColor && variant === 'default',
+          brandColor && variant === 'onboarding',
       })}
       style={{ '--brand-color': brandColor }}
       {...props}

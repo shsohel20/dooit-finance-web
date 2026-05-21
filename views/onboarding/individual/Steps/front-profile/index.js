@@ -29,7 +29,11 @@ export default function FrontProfile() {
           <FaceCapture image={frontProfile} onCapture={handleFrontChange} />
         </div>
         {frontProfile && (
-          <Button className={onboardingPrimaryButtonClass} onClick={handleContinue}>
+          <Button
+            variant="onboarding"
+            className={onboardingPrimaryButtonClass}
+            onClick={handleContinue}
+          >
             Continue
           </Button>
         )}
