@@ -11,3 +11,10 @@ export const sendInviteForScanQR = async (inviteData) => {
   });
   return response.json();
 };
+
+export const getClientInfo = async (id) => {
+  const response = await fetch(`${BASE_URL}client/public/${id}`, {
+    method: "GET",
+  });
+  return response.json();
+};

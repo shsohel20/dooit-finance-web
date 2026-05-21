@@ -32,17 +32,19 @@ export default function VerificationProcess() {
           You&apos;re almost there. Follow these steps to complete verification.
         </QuestionDescription>
         <div className="grid gap-3 pt-2">
-          {verificationSteps.map((item) => (
-            <div
-              key={item.title}
-              className="flex items-center gap-3 rounded-full border border-neutral-200 bg-neutral-50/80 px-4 py-3.5"
-            >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
-                {item.icon}
-              </span>
-              <div className="min-w-0 text-left">
-                <h5 className="text-sm font-semibold text-neutral-900">{item.title}</h5>
-                <p className="text-xs leading-snug text-neutral-500">{item.description}</p>
+          {verificationSteps.map((item, index) => (
+            <div key={item.title} className="flex items-center gap-3">
+              <div>
+                <span className="text-2xl font-bold">{index + 1}</span>
+              </div>
+              <div className="flex items-center gap-3 rounded-full   px-4 py-3.5">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white">
+                  {item.icon}
+                </span>
+                <div className="min-w-0 text-left">
+                  <h5 className="text-sm font-semibold text-neutral-900">{item.title}</h5>
+                  <p className="text-xs leading-snug text-neutral-500">{item.description}</p>
+                </div>
               </div>
             </div>
           ))}

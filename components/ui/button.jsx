@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90 ',
         destructive:
           'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
         outline:
@@ -38,19 +38,39 @@ const buttonVariants = cva(
 
 function Button({
   className,
-  variant,
+  variant = 'default',
   size,
   asChild = false,
   lit = false,
   ...props
 }) {
+  const [isClient, setIsClient] = React.useState(false);
+  const [brandColor, setBrandColor] = React.useState(null);
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (isClient) {
+      const brandColor = localStorage.getItem('brandColor');
+      if (brandColor) {
+        setBrandColor(brandColor ?? null);
+      }
+    }
+  }, [isClient]);
+
   const Comp = asChild ? Slot : 'button';
 
   return (
     <Comp
       data-slot="button"
       data-lit={lit}
-      className={cn(buttonVariants({ variant, size, className }))}
+      data-brand-color={brandColor}
+      className={cn(buttonVariants({ variant, size, className, brandColor }), {
+        'bg-[var(--brand-color)] hover:bg-[var(--brand-color)]/90':
+          brandColor && variant === 'default',
+      })}
+      style={{ '--brand-color': brandColor }}
       {...props}
     />
   );
