@@ -34,6 +34,7 @@ export default function CustomerQueueDetails() {
       fetchDetails();
     }
   }, [id]);
+
   return (
     <div>
       <Tabs defaultValue="details">

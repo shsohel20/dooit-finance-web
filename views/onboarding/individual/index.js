@@ -47,19 +47,19 @@ export default function IndividualOnboarding() {
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex w-full flex-1 flex-col">
             {step === 1 && <Country form={form} />}
-            {step === 2 && <VerificationProcess />}
-            {step === 3 && <LivenessInstructions />}
-            {step === 4 && <FrontProfile />}
-            {step === 5 && <RightProfile />}
-            {step === 6 && <IdentificationDocuments form={form} individualPresentation />}
-            {step === 7 && <Occupation form={form} />}
-            {step === 8 && <SourceOfFunds form={form} />}
-            {step === 9 && <SourceOfWealth form={form} />}
-            {step === 10 && <ReasonForOpeningAccount form={form} />}
-            {step === 11 && <EstimatedTradingVolume form={form} />}
-            {step === 12 && <SoleTrader form={form} />}
-            {step === 13 && <SoleTraderDetails form={form} />}
-            {step === 14 && <OnboardingComplete form={form} />}
+            {/* {step === 2 && <VerificationProcess />} */}
+            {step === 2 && <LivenessInstructions />}
+            {step === 3 && <FrontProfile />}
+            {step === 4 && <RightProfile />}
+            {step === 5 && <IdentificationDocuments form={form} individualPresentation />}
+            {step === 6 && <Occupation form={form} />}
+            {step === 7 && <SourceOfFunds form={form} />}
+            {step === 8 && <SourceOfWealth form={form} />}
+            {step === 9 && <ReasonForOpeningAccount form={form} />}
+            {step === 10 && <EstimatedTradingVolume form={form} />}
+            {step === 11 && <SoleTrader form={form} />}
+            {step === 12 && <SoleTraderDetails form={form} />}
+            {step === 13 && <OnboardingComplete form={form} />}
           </div>
         </div>
       </div>

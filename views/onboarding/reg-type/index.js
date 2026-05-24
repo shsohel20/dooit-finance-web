@@ -14,6 +14,7 @@ import {
   UserIcon,
   UsersIcon,
 } from "lucide-react";
+import { customerOnboardingStepTracking } from "@/app/customer/onboarding/action";
 
 const types = [
   {
@@ -69,6 +70,7 @@ const types = [
 
 export default function RegistrationType() {
   const [selectedType, setSelectedType] = useState(null);
+  const [loading, setLoading] = useState(false);
   const { setRegisterType } = useCustomerRegisterStore();
   const router = useRouter();
 
@@ -76,10 +78,30 @@ export default function RegistrationType() {
     setSelectedType(type);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (selectedType) {
       setRegisterType(selectedType?.value);
-      router.push(`/customer/onboarding?type=${selectedType?.value}`);
+      const payload = {
+        token: localStorage.getItem("invite_token"),
+        step: "journey_start",
+        status: "in_progress",
+        data: {
+          requestedType: selectedType?.value,
+        },
+        documents: [],
+        note: "",
+        rejectionReason: "",
+        provider: "internal",
+        providerRef: null,
+      };
+      setLoading(true);
+      console.log("payload", JSON.stringify(payload, null, 2));
+      const response = await customerOnboardingStepTracking(payload);
+      setLoading(false);
+      console.log("response", response);
+      if (response.success) {
+        router.push(`/customer/onboarding?type=${selectedType?.value}`);
+      }
     }
   };
 
@@ -128,7 +150,7 @@ export default function RegistrationType() {
         </div>
 
         <Button
-          disabled={!selectedType}
+          disabled={!selectedType || loading}
           onClick={handleNext}
           variant="onboarding"
           className={cn(
@@ -137,7 +159,7 @@ export default function RegistrationType() {
           )}
           // style={{ backgroundColor: "var(--brand-color)" }}
         >
-          Continue
+          {loading ? "Processing..." : "Continue"}
         </Button>
       </div>
     </div>

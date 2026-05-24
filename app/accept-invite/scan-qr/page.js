@@ -64,6 +64,9 @@ export default function ScanQRPage() {
     const response = await sendInviteForScanQR(modifiedData);
     setLoading(false);
     if (response.success) {
+      // console.log("response", response);
+      // const token = response?.data?.token;
+      // localStorage.setItem("invite_token", token);
       router.push(response?.data?.url);
       reset();
     } else {
@@ -87,15 +90,15 @@ export default function ScanQRPage() {
   return (
     <div className="min-h-screen grid place-items-center">
       <div className="grid gap-4 max-w-md md:w-full mx-auto w-[90%] border p-4 rounded-md">
-        <div className="flex flex-col items-center gap-4 ">
-          <div className="size-16 rounded-full overflow-hidden">
+        <div className="flex  items-center gap-4 ">
+          <div className="size-16 rounded-lg overflow-hidden border-2">
             <img
               src={clientSettings?.logo}
               alt={clientSettings?.name}
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="text-center">
+          <div className="">
             <h5 className="text-lg font-bold">{clientSettings?.name}</h5>
             <p className="text-sm text-muted-foreground">Fill the form to get a onboarding link</p>
           </div>

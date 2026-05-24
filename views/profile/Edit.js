@@ -152,8 +152,9 @@ export function ClientEditForm() {
 
   const handleImgChange = async (e) => {
     // setImgFile(e.target.files[0]);
+    console.log("img file", e.target.files[0]);
     const res = await fileUploadOnCloudinary(e.target.files[0]);
-    console.log("res", res);
+    console.log("img res", res);
     if (res.success) {
       setImgUrl(res.file.publicUrl);
       form.setValue("client.settings.logo", res.file.publicUrl);
