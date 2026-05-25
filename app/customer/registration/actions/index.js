@@ -12,9 +12,8 @@ export const customerOnboarding = async (data) => {
 
 export const checkImageLiveness = async (data) => {
   // console.log('checkImageLiveness data', JSON.stringify(data, null, 2))
-  const response = await fetch("http://31.97.71.194:5030/liveness-detection", {
+  const response = await fetchWithAuth("onboarding-journey/liveness-detection", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
 
@@ -24,7 +23,7 @@ export const checkImageLiveness = async (data) => {
 };
 
 export const getDataFromDocuments = async (formData) => {
-  const response = await fetch("http://31.97.71.194:8066/process-card", {
+  const response = await fetchWithAuth("onboarding-journey/ocr-document", {
     method: "POST",
     // headers: { "Content-Type": "application/json" },
     body: formData,
@@ -34,10 +33,9 @@ export const getDataFromDocuments = async (formData) => {
 };
 
 export const verifyDocument = async (data) => {
-  const response = await fetch("http://31.97.71.194:5005/verify", {
+  const response = await fetchWithAuth("onboarding-journey/verify-doc-face", {
     method: "POST",
     body: JSON.stringify(data),
-    headers: { "Content-Type": "application/json" },
   });
   const json = await response.json();
   return json;

@@ -5,15 +5,24 @@ import FaceCapture from "@/views/customer-registration/common/FaceCapture";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import React, { useState } from "react";
 import { onboardingPrimaryButtonClass } from "../../onboardingStyles";
+import { base64ToFile } from "@/lib/utils";
+import { fileUploadOnCloudinary } from "@/app/actions";
+import { toast } from "sonner";
 
 export default function FrontProfile() {
   const [frontProfile, setFrontProfile] = useState(null);
+  const [frontProfileUrl, setFrontProfileUrl] = useState(null);
   const { setStep } = useCustomerRegisterStore();
   const handleFrontChange = async (src) => {
     setFrontProfile(src);
+    const file = base64ToFile(src);
+    const response = await fileUploadOnCloudinary(file);
+    if (response.success) {
+      setFrontProfile(response.file.publicUrl);
+    }
   };
   const handleContinue = () => {
-    localStorage.setItem("live_photo", frontProfile);
+    localStorage.setItem("live_photo", frontProfileUrl);
     setStep(5);
   };
   return (

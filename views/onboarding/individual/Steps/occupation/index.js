@@ -4,10 +4,31 @@ import { Input } from "@/components/ui/input";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
 import React from "react";
 import { onboardingInputClass, onboardingPrimaryButtonClass } from "../../onboardingStyles";
+import { customerOnboardingStepTracking } from "@/app/customer/onboarding/action";
 
 export default function Occupation({ form }) {
   const { setStep } = useCustomerRegisterStore();
-  const handleContinue = () => {
+  const [loading, setLoading] = useState(false);
+
+  const handleContinue = async () => {
+    const token = localStorage.getItem("invite_token");
+    const occupation = form.watch("occupation");
+    setLoading(true);
+    const payload = {
+      token: token,
+      step: "occupation",
+      status: "submitted",
+      data: {
+        occupation: occupation,
+      },
+      note: "",
+      rejectionReason: "",
+      provider: "",
+      providerRef: null,
+    };
+    const response = await customerOnboardingStepTracking(payload);
+    console.log("response", response);
+    setLoading(false);
     form.setValue("occupation", form.watch("occupation"));
     setStep(8);
   };
@@ -29,8 +50,9 @@ export default function Occupation({ form }) {
         variant="onboarding"
         onClick={handleContinue}
         className={onboardingPrimaryButtonClass}
+        disabled={loading}
       >
-        Continue
+        {loading ? "Processing..." : "Continue"}
       </Button>
     </div>
   );

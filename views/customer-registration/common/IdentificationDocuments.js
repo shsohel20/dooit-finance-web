@@ -193,44 +193,48 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
     let verifiedMsg = null;
     try {
       setIsSaving(true);
+      const token = localStorage.getItem("invite_token");
+      const userFrontImageUrl = localStorage.getItem("live_photo");
+      const payload = {
+        token,
+
+        documents: [
+          {
+            url: userFrontImageUrl,
+            docType: "selfie",
+          },
+          {
+            url: fields.find((field) => field.type === "front")?.url,
+            docType: "id_front",
+          },
+        ],
+        note: "",
+      };
       // ("verifying");
-      const verify_response = await verifyDocument(verify_data);
+      const verify_response = await verifyDocument(payload);
 
-      const verification_status = verify_response.data?.result?.verification_status;
-      console.log("verification status", verification_status);
-      // if (verification_status === 0) {
-      //   toast.error("Documents are not verified. You can't proceed further.");
-      //   ("idle");
-      //   setIsSaving(false);
+      console.log("verify_response", verify_response);
+      const ocr_payload = {
+        token: token,
+        cardType: documentTypeValue?.value,
 
-      //   return;
-      // } else {
-      // verifiedMsg = `Found ${verify_response.data?.result?.similarity}% similarity with the document`;
+        documents: [
+          {
+            url: fields.find((field) => field.type === "front")?.url,
+            docType: "id_front",
+          },
+          {
+            url: fields.find((field) => field.type === "back")?.url,
+            docType: "id_back",
+          },
+        ],
+        note: "",
+      };
 
-      // if (verify_response?.error?.length > 0) {
-      //   toast.error("Documents are not verified");
-      //   ("idle");
-      //   return;
-      // } else {
-      console.log("document type", documentTypeValue?.value);
-      console.log("formData", formData);
       const response = await getDataFromDocuments(formData);
       setIsSaving(false);
       console.log("ocr response", response);
       if (response.success) {
-        // const formData = response.data;
-        // const full_name = formData.full_name;
-        // const given_name = full_name ? formData.full_name?.split(" ")[0] : formData?.given_name;
-        // const middle_name = full_name ? formData.full_name?.split(" ")[1] : formData?.middle_name;
-        // const surname = full_name ? formData.full_name?.split(" ")[2] : formData?.surname;
-
-        // //23-dec-1990 to yyyy-mm-dd
-        // const date_of_birth = formatDate(formData.date_of_birth);
-        // setValue("customer_details.given_name", given_name || "");
-        // setValue("customer_details.middle_name", middle_name || "");
-        // setValue("customer_details.surname", surname || "");
-        // setValue("residential_address.address", formData.address || formData?.permanent_address);
-        // setValue("customer_details.date_of_birth", date_of_birth);
         const formData = response.data ?? {};
 
         const fullNameParts = formData.full_name?.trim().split(/\s+/) ?? [];
