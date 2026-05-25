@@ -261,7 +261,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
           formData.address || formData.permanent_address || "",
         );
         setValue("customer_details.date_of_birth", date_of_birth);
-        setStep(7);
+        setStep((prev) => prev + 1);
         // ("verified");
       }
       // }

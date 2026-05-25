@@ -19,7 +19,7 @@ export default function SourceOfFunds({ form }) {
   const { setStep } = useCustomerRegisterStore();
   const handleContinue = () => {
     form.setValue("source_of_funds", form.watch("source_of_funds"));
-    setStep(9);
+    setStep((prev) => prev + 1);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">

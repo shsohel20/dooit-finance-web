@@ -58,7 +58,7 @@ export default function RightProfile() {
       console.error("Submit error:", err);
     } finally {
       setLoading(false);
-      setStep(6);
+      setStep((prev) => prev + 1);
     }
   };
 

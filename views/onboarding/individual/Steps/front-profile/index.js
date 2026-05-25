@@ -23,7 +23,7 @@ export default function FrontProfile() {
   };
   const handleContinue = () => {
     localStorage.setItem("live_photo", frontProfileUrl);
-    setStep(5);
+    setStep((prev) => prev + 1);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">

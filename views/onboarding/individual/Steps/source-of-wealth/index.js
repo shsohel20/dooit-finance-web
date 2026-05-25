@@ -22,7 +22,7 @@ export default function SourceOfWealth({ form }) {
   const { setStep } = useCustomerRegisterStore();
   const handleContinue = () => {
     form.setValue("source_of_wealth", form.watch("source_of_wealth"));
-    setStep(10);
+    setStep((prev) => prev + 1);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
