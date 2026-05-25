@@ -40,6 +40,7 @@ export default function IndividualOnboarding() {
     setStep(Number(step) - 1);
   };
 
+  console.log({ step });
   return (
     <div className="min-h-[100svh] bg-white text-neutral-900">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-lg flex-col px-5 pb-10 pt-4">

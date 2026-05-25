@@ -13,7 +13,7 @@ export default function RightProfile() {
   const [rightProfile, setRightProfile] = useState(null);
   const [rightProfileUrl, setRightProfileUrl] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { setStep } = useCustomerRegisterStore();
+  const { setStep, step } = useCustomerRegisterStore();
   const handleRightChange = async (src) => {
     setRightProfile(src);
     const file = base64ToFile(src);
@@ -58,7 +58,7 @@ export default function RightProfile() {
       console.error("Submit error:", err);
     } finally {
       setLoading(false);
-      setStep((prev) => prev + 1);
+      setStep(Number(step) + 1);
     }
   };
 

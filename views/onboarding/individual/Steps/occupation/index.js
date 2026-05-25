@@ -7,7 +7,7 @@ import { onboardingInputClass, onboardingPrimaryButtonClass } from "../../onboar
 import { customerOnboardingStepTracking } from "@/app/customer/onboarding/action";
 
 export default function Occupation({ form }) {
-  const { setStep } = useCustomerRegisterStore();
+  const { setStep, step } = useCustomerRegisterStore();
   const [loading, setLoading] = useState(false);
 
   const handleContinue = async () => {
@@ -30,7 +30,7 @@ export default function Occupation({ form }) {
     console.log("response", response);
     setLoading(false);
     form.setValue("occupation", form.watch("occupation"));
-    setStep((prev) => prev + 1);
+    setStep(Number(step) + 1);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">

@@ -12,18 +12,21 @@ import { toast } from "sonner";
 export default function FrontProfile() {
   const [frontProfile, setFrontProfile] = useState(null);
   const [frontProfileUrl, setFrontProfileUrl] = useState(null);
-  const { setStep } = useCustomerRegisterStore();
+  const { setStep, step } = useCustomerRegisterStore();
+  const [uploading, setUploading] = useState(false);
   const handleFrontChange = async (src) => {
+    setUploading(true);
     setFrontProfile(src);
     const file = base64ToFile(src);
     const response = await fileUploadOnCloudinary(file);
     if (response.success) {
-      setFrontProfile(response.file.publicUrl);
+      setFrontProfileUrl(response.file.publicUrl);
+      setUploading(false);
     }
   };
   const handleContinue = () => {
     localStorage.setItem("live_photo", frontProfileUrl);
-    setStep((prev) => prev + 1);
+    setStep(Number(step) + 1);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
@@ -37,6 +40,9 @@ export default function FrontProfile() {
         <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50/50">
           <FaceCapture image={frontProfile} onCapture={handleFrontChange} />
         </div>
+        {/* {true && <div>
+          <div style/>
+          </div>} */}
         {frontProfile && (
           <Button
             variant="onboarding"

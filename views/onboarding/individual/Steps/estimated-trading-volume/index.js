@@ -19,7 +19,7 @@ const tradingVolumeOptions = [
 ];
 
 export default function EstimatedTradingVolume({ form }) {
-  const { setStep } = useCustomerRegisterStore();
+  const { setStep, step } = useCustomerRegisterStore();
   const handleContinue = async () => {
     const payload = {
       token: localStorage.getItem("invite_token"),
@@ -36,7 +36,7 @@ export default function EstimatedTradingVolume({ form }) {
     const response = await customerOnboardingStepTracking(payload);
     console.log("response", response);
     form.setValue("estimated_trading_volume", form.watch("estimated_trading_volume"));
-    setStep(12);
+    setStep(Number(step) + 1);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
