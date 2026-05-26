@@ -14,8 +14,10 @@ export default function FrontProfile() {
   const [frontProfileUrl, setFrontProfileUrl] = useState(null);
   const { setStep, step } = useCustomerRegisterStore();
   const [uploading, setUploading] = useState(false);
+  const [uploadingPercentage, setUploadingPercentage] = useState(0);
   const handleFrontChange = async (src) => {
     setUploading(true);
+    setUploadingPercentage(0);
     setFrontProfile(src);
     const file = base64ToFile(src);
     const response = await fileUploadOnCloudinary(file);
@@ -40,9 +42,7 @@ export default function FrontProfile() {
         <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50/50">
           <FaceCapture image={frontProfile} onCapture={handleFrontChange} />
         </div>
-        {/* {true && <div>
-          <div style/>
-          </div>} */}
+        {true && <div className="w-full h-2 bg--500" />}
         {frontProfile && (
           <Button
             variant="onboarding"
