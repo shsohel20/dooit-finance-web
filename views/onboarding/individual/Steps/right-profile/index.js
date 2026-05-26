@@ -8,6 +8,7 @@ import { checkImageLiveness } from "@/app/customer/registration/actions";
 import { onboardingPrimaryButtonClass } from "../../onboardingStyles";
 import { base64ToFile } from "@/lib/utils";
 import { fileUploadOnCloudinary } from "@/app/actions";
+import { toast } from "sonner";
 
 export default function RightProfile() {
   const [rightProfile, setRightProfile] = useState(null);
@@ -60,13 +61,22 @@ export default function RightProfile() {
       ],
       note: "",
     };
+    console.log("payload", JSON.stringify(payload, null, 2));
     const data = {
       img1_base64: frontProfile.replace("data:image/jpeg;base64,", ""),
       img2_base64: rightProfile.replace("data:image/jpeg;base64,", ""),
     };
     try {
       const res = await checkImageLiveness(payload);
+
       console.log("checkImageLiveness response", JSON.stringify(res, null, 2));
+      if (res.success) {
+        setStep(Number(step) + 1);
+      } else {
+        toast.error(res.message);
+        // TODO: remove this after testing
+        // setStep(Number(step) + 1);
+      }
 
       // if (res.verdict) {
       //   localStorage.setItem("liveness_verdict", true);
@@ -77,7 +87,7 @@ export default function RightProfile() {
       console.error("Submit error:", err);
     } finally {
       setLoading(false);
-      setStep(Number(step) + 1);
+      // setStep(Number(step) + 1);
     }
   };
 

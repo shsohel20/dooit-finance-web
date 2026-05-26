@@ -67,7 +67,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
   const errors = form.formState.errors;
   const setValue = form.setValue;
   const [livenessVerdict, setLivenessVerdict] = useState(null);
-  const { setStep } = useCustomerRegisterStore();
+  const { setStep, step } = useCustomerRegisterStore();
   const [isSaving, setIsSaving] = useState(false);
   //front
   const [frontLoading, setFrontLoading] = useState(false);
@@ -185,12 +185,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
     formData.append("image", frontFile);
     formData.append("card_type", documentTypeValue?.value);
     const live_photo = localStorage.getItem("live_photo")?.replace("data:image/jpeg;base64,", "");
-    const verify_data = {
-      app_id: 1,
-      image_1: frontBase64,
-      image_2: live_photo,
-      hash: "",
-    };
+
     let verifiedMsg = null;
     try {
       setIsSaving(true);
@@ -211,6 +206,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
         ],
         note: "",
       };
+      console.log("payload", JSON.stringify(payload, null, 2));
       // ("verifying");
       const verify_response = await verifyDocument(payload);
 
@@ -231,12 +227,13 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
         ],
         note: "",
       };
-
-      const response = await getDataFromDocuments(formData);
+      console.log("ocr_payload", JSON.stringify(ocr_payload, null, 2));
+      const response = await getDataFromDocuments(ocr_payload);
+      console.log(" ocr response", JSON.stringify(response, null, 2));
       setIsSaving(false);
       console.log("ocr response", response);
       if (response.success) {
-        const formData = response.data ?? {};
+        const formData = response.data?.ocr?.fields ?? {};
 
         const fullNameParts = formData.full_name?.trim().split(/\s+/) ?? [];
 
@@ -253,6 +250,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
             : formData.surname || "";
 
         const date_of_birth = formData.date_of_birth ? formatDate(formData.date_of_birth) : "";
+        const address = formData?.address_breakdown;
 
         setValue("customer_details.given_name", given_name);
         setValue("customer_details.middle_name", middle_name);
@@ -261,8 +259,13 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
           "residential_address.address",
           formData.address || formData.permanent_address || "",
         );
+        setValue("residential_address.street", address?.street || "");
+        setValue("residential_address.state", address?.state || "");
+        setValue("residential_address.postcode", address?.postcode || "");
+        setValue("residential_address.country", address?.country || "");
         setValue("customer_details.date_of_birth", date_of_birth);
-        setStep((prev) => prev + 1);
+        setValue("document_number", formData?.document_number || "");
+        setStep(step + 1);
         // ("verified");
       }
       // }
@@ -276,6 +279,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
     }
   };
   const documentsAdded = fields.length === 2;
+  console.log("form.watch('country_id')", form.watch("country"));
   return (
     <div
       className={
@@ -321,7 +325,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
               <CustomSelect
                 label={individualPresentation ? undefined : "Select Document Type"}
                 // options={documentTypes}
-                options={getCardTypesByCountryId(form.wa) || []}
+                options={getCardTypesByCountryId(form.watch("country")?.id) || []}
                 value={field.value}
                 placeholder="Select document type"
                 error={errors.document_type?.message}
@@ -332,7 +336,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
             )}
           />
         </div>
-        <div className="flex gap-4 md:flex-row flex-col">
+        <div className="flex gap-4  flex-col pt-8">
           <div className="w-full">
             <CustomDropZone
               handleChange={handleFrontChange}
@@ -392,6 +396,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
             <Button
               disabled={isSaving}
               onClick={handleSave}
+              variant="onboarding"
               className={individualPresentation ? onboardingPrimaryButtonClass : undefined}
             >
               {isSaving ? "Please wait..." : "Verify Documents"}

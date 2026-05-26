@@ -22,7 +22,7 @@ const IdentificationDocuments = dynamic(
   () => import("@/views/customer-registration/common/IdentificationDocuments"),
   { ssr: false },
 );
-
+const OcrData = dynamic(() => import("./Steps/ocr-data"), { ssr: false });
 export default function IndividualOnboarding() {
   const { step, setStep } = useCustomerRegisterStore();
   const form = useForm();
@@ -53,14 +53,15 @@ export default function IndividualOnboarding() {
             {step === 3 && <FrontProfile />}
             {step === 4 && <RightProfile />}
             {step === 5 && <IdentificationDocuments form={form} individualPresentation />}
-            {step === 6 && <Occupation form={form} />}
-            {step === 7 && <SourceOfFunds form={form} />}
-            {step === 8 && <SourceOfWealth form={form} />}
-            {step === 9 && <ReasonForOpeningAccount form={form} />}
-            {step === 10 && <EstimatedTradingVolume form={form} />}
-            {step === 11 && <SoleTrader form={form} />}
-            {step === 12 && <SoleTraderDetails form={form} />}
-            {step === 13 && <OnboardingComplete form={form} />}
+            {step === 6 && <OcrData form={form} />}
+            {step === 7 && <Occupation form={form} />}
+            {step === 8 && <SourceOfFunds form={form} />}
+            {step === 9 && <SourceOfWealth form={form} />}
+            {step === 10 && <ReasonForOpeningAccount form={form} />}
+            {step === 11 && <EstimatedTradingVolume form={form} />}
+            {step === 12 && <SoleTrader form={form} />}
+            {step === 13 && <SoleTraderDetails form={form} />}
+            {step === 14 && <OnboardingComplete form={form} />}
           </div>
         </div>
       </div>

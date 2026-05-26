@@ -23,10 +23,11 @@ export const checkImageLiveness = async (data) => {
 };
 
 export const getDataFromDocuments = async (formData) => {
+  console.log("ocr formData", JSON.stringify(formData, null, 2));
   const response = await fetchWithAuth("onboarding-journey/ocr-document", {
     method: "POST",
     // headers: { "Content-Type": "application/json" },
-    body: formData,
+    body: JSON.stringify(formData),
   });
   const json = await response.json();
   return json;

@@ -2,7 +2,7 @@ import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
-import React from "react";
+import React, { useState } from "react";
 import { onboardingInputClass, onboardingPrimaryButtonClass } from "../../onboardingStyles";
 import { customerOnboardingStepTracking } from "@/app/customer/onboarding/action";
 
