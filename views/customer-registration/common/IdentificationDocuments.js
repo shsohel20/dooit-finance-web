@@ -15,6 +15,7 @@ import {
   onboardingPrimaryButtonClass,
   onboardingSelectControlStyles,
 } from "@/views/onboarding/individual/onboardingStyles";
+import { getCardTypesByCountryId } from "@/lib/card-type";
 
 const documentTypes = [
   { label: "Passport", value: "Passport" },
@@ -319,7 +320,8 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
             render={({ field }) => (
               <CustomSelect
                 label={individualPresentation ? undefined : "Select Document Type"}
-                options={documentTypes}
+                // options={documentTypes}
+                options={getCardTypesByCountryId(form.wa) || []}
                 value={field.value}
                 placeholder="Select document type"
                 error={errors.document_type?.message}

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 import FaceCapture from "@/views/customer-registration/common/FaceCapture";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { checkImageLiveness } from "@/app/customer/registration/actions";
 import { onboardingPrimaryButtonClass } from "../../onboardingStyles";
 import { base64ToFile } from "@/lib/utils";
@@ -14,12 +14,31 @@ export default function RightProfile() {
   const [rightProfileUrl, setRightProfileUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const { setStep, step } = useCustomerRegisterStore();
+  const [uploading, setUploading] = useState(false);
+  const [uploadingPercentage, setUploadingPercentage] = useState(0);
+  const intervalRef = useRef(null);
   const handleRightChange = async (src) => {
+    setUploading(true);
+    setUploadingPercentage(0);
     setRightProfile(src);
+
+    intervalRef.current = setInterval(() => {
+      setUploadingPercentage((prev) => {
+        if (prev >= 90) {
+          clearInterval(intervalRef.current);
+          return prev;
+        }
+        return prev + Math.random() * 8;
+      });
+    }, 300);
     const file = base64ToFile(src);
     const response = await fileUploadOnCloudinary(file);
+    clearInterval(intervalRef.current);
+
     if (response.success) {
+      setUploadingPercentage(100);
       setRightProfileUrl(response.file.publicUrl);
+      setTimeout(() => setUploading(false), 400);
     }
   };
   const frontProfile = localStorage.getItem("live_photo");
@@ -74,6 +93,15 @@ export default function RightProfile() {
         <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50/50">
           <FaceCapture image={rightProfile} onCapture={handleRightChange} />
         </div>
+        {uploading && (
+          <div className="w-full h-1.5 rounded-full bg-neutral-200 relative">
+            <span className="absolute right-0 -top-5">{Math.round(uploadingPercentage)}%</span>
+            <div
+              className="h-full bg-black rounded-full absolute inset-0 transition-all duration-300 ease-out"
+              style={{ width: `${uploadingPercentage}%` }}
+            />
+          </div>
+        )}
         {rightProfile && (
           <Button
             variant="onboarding"

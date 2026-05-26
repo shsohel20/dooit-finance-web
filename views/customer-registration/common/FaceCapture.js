@@ -90,7 +90,7 @@ export default function FaceCapture({ image, onCapture }) {
       <Button
         variant={captured ? "outline" : "default"}
         onClick={startCountdown}
-        className="w-full"
+        className="w-full mx-4"
       >
         {image ? "Retake" : "Start your camera"}
       </Button>
