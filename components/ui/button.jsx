@@ -54,7 +54,7 @@ function Button({
     if (isClient) {
       const brandColor = localStorage.getItem('brandColor');
       if (brandColor) {
-        setBrandColor(brandColor ?? null);
+        setBrandColor(brandColor ?? '#000000');
       }
     }
   }, [isClient]);

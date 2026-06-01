@@ -67,7 +67,8 @@ export default function ScanQRPage() {
       // console.log("response", response);
       // const token = response?.data?.token;
       // localStorage.setItem("invite_token", token);
-      router.push(response?.data?.url);
+      console.log("response", JSON.stringify(response?.data?.url, null, 2));
+      // router.push(response?.data?.url);
       reset();
     } else {
       toast.error("Failed to send invite");
