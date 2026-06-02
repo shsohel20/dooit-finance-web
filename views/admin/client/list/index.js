@@ -34,7 +34,7 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
+import { useRouter } from "next/navigation";
 export default function ClientList() {
   const {
     clients,
@@ -49,7 +49,7 @@ export default function ClientList() {
     setTotalItems,
   } = useClientStore();
   const [loading, setLoading] = useState(true);
-
+  const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const handleDelete = (id) => {
@@ -197,6 +197,10 @@ export default function ClientList() {
 
   return (
     <div>
+      {/* add new button */}
+      <div className="flex justify-end">
+        <Button onClick={() => router.push("/dashboard/client/list/form")}>Add New</Button>
+      </div>
       <CustomResizableTable
         columns={columns}
         data={clients}
