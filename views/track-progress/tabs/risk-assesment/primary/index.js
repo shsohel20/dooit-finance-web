@@ -1,64 +1,41 @@
 "use client";
 import React, { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, Circle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ClientTypesStep from "./client-types";
+import DeliveryChannelsStep from "./delivery-channels";
+import DesignatedServicesStep from "./designated-services";
 
-const progressSteps = [
-  { key: "sector", label: "Sector information", done: true },
-  { key: "client_types", label: "Client Types", active: true },
-  { key: "delivery_channels", label: "Delivery channels" },
-  { key: "designated_services", label: "Designated services risk factors" },
-  { key: "client_risk", label: "Client risk factors" },
-  { key: "delivery_risk", label: "Delivery channel risk factors" },
-  { key: "country", label: "Country" },
+const STEPS = [
+  { key: "client_types", label: "Client Types", component: <ClientTypesStep /> },
+  { key: "delivery_channels", label: "Delivery channels", component: <DeliveryChannelsStep /> },
+  { key: "designated_services", label: "Designated services risk factors", component: <DesignatedServicesStep /> },
+  { key: "client_risk", label: "Client risk factors", component: null },
+  { key: "delivery_risk", label: "Delivery channel risk factors", component: null },
+  { key: "country", label: "Country", component: null },
 ];
 
-const clientTypes = [
-  {
-    key: "individuals",
-    label: "Individuals and sole traders",
-    description:
-      "An individual client, other than a sole trader, is a human being with legal capacity to enter into contracts and conduct transactions. A sole trader is an individual client who owns and runs a business alone, with no legal separation between the owner and the business. Like individuals, sole traders have the legal capacity to enter into contracts and conduct transactions.",
-  },
-  {
-    key: "bodies_corporate",
-    label: "Bodies corporate",
-    description:
-      "A body corporate is a type of legal structure with a separate legal identity from their owners or members. A body corporate is recognised by law as having its own rights and obligations. The most common forms of companies are: private companies (Proprietary Limited), public companies (Limited), unlisted public companies (Limited), owner's strata corporations, cooperatives, incorporated partnerships",
-  },
-  {
-    key: "partnerships",
-    label: "Partnerships",
-    description:
-      "A partnership refers to where 2 or more individuals or other legal entities share ownership. A partnership isn't a separate legal entity from its owners. The most common forms of partnerships are: • general partnerships (simpler) • limited partnerships (more complex).",
-  },
-  {
-    key: "trusts",
-    label: "Trusts",
-    description:
-      "A trust refers to a legal arrangement where one or more trustees hold and manage assets for the benefit of one or more beneficiaries. A trustee may be an individual or a legal entity (such as a company). The most common forms of trusts are: discretionary trusts (often used for family trusts), unit trusts (often used by investment firms), testamentary trusts (often created as part of an estate).",
-  },
-];
-
-export default function ClientTypesPrimary() {
-  const [selected, setSelected] = useState({});
-
-  const toggle = (key) =>
-    setSelected((prev) => ({ ...prev, [key]: !prev[key] }));
-
+function ProgressSidebar({ currentStep }) {
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-64 shrink-0 bg-white border-r border-border p-6">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-          Progress
-        </p>
-        <ul className="space-y-3">
-          {progressSteps.map((step) => (
+    <aside className="w-64 shrink-0 bg-white border-r border-border p-6">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+        Progress
+      </p>
+      <ul className="space-y-3">
+        {/* Sector information is always completed before this wizard */}
+        <li className="flex items-center gap-2.5">
+          <CheckCircle2 className="w-5 h-5 text-teal-600 shrink-0" />
+          <span className="text-sm text-foreground">Sector information</span>
+        </li>
+
+        {STEPS.map((step, index) => {
+          const done = index < currentStep;
+          const active = index === currentStep;
+          return (
             <li key={step.key} className="flex items-center gap-2.5">
-              {step.done ? (
+              {done ? (
                 <CheckCircle2 className="w-5 h-5 text-teal-600 shrink-0" />
-              ) : step.active ? (
+              ) : active ? (
                 <div className="w-5 h-5 rounded-full border-2 border-teal-600 bg-teal-600 flex items-center justify-center shrink-0">
                   <div className="w-2 h-2 rounded-full bg-white" />
                 </div>
@@ -67,9 +44,9 @@ export default function ClientTypesPrimary() {
               )}
               <span
                 className={
-                  step.active
+                  active
                     ? "text-sm font-semibold text-foreground"
-                    : step.done
+                    : done
                     ? "text-sm text-foreground"
                     : "text-sm text-muted-foreground"
                 }
@@ -77,45 +54,45 @@ export default function ClientTypesPrimary() {
                 {step.label}
               </span>
             </li>
-          ))}
-        </ul>
-      </aside>
+          );
+        })}
+      </ul>
+    </aside>
+  );
+}
 
-      {/* Main content */}
-      <main className="flex-1 p-8 max-w-4xl">
-        <h1 className="text-2xl font-semibold text-foreground mb-1">
-          Who are your clients?
-        </h1>
-        <p className="text-sm text-muted-foreground mb-6">Select all that apply</p>
+export default function RiskAssessmentPrimary() {
+  const [currentStep, setCurrentStep] = useState(0);
 
-        <div className="space-y-4">
-          {clientTypes.map((type) => (
-            <div
-              key={type.key}
-              className="bg-white border border-border rounded-lg p-5 cursor-pointer hover:border-teal-400 transition-colors"
-              onClick={() => toggle(type.key)}
+  const isFirst = currentStep === 0;
+  const isLast = currentStep === STEPS.length - 1;
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <ProgressSidebar currentStep={currentStep} />
+
+      <main className="flex-1 p-8 max-w-4xl flex flex-col">
+        <div className="flex-1">
+          {STEPS[currentStep].component ?? (
+            <p className="text-muted-foreground text-sm">Coming soon…</p>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3 mt-8">
+          {!isFirst && (
+            <Button
+              variant="outline"
+              onClick={() => setCurrentStep((s) => s - 1)}
             >
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  id={type.key}
-                  checked={!!selected[type.key]}
-                  onCheckedChange={() => toggle(type.key)}
-                  className="mt-0.5 shrink-0"
-                />
-                <div>
-                  <label
-                    htmlFor={type.key}
-                    className="text-sm font-semibold text-foreground cursor-pointer"
-                  >
-                    {type.label}
-                  </label>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    {type.description}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+              Back
+            </Button>
+          )}
+          <Button
+            className="bg-teal-600 hover:bg-teal-700 text-white"
+            onClick={() => !isLast && setCurrentStep((s) => s + 1)}
+          >
+            {isLast ? "Finish" : "Next"}
+          </Button>
         </div>
       </main>
     </div>
