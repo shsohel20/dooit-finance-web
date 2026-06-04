@@ -38,17 +38,17 @@ const formSchema = z.object({
     zipcode: z.string(),
   }),
   legalRepresentative: z.object({
-    name: z.string().min(1, "Name is required"),
-    email: z.string().email("Invalid email address"),
-    phone: z.string().min(1, "Phone is required"),
-    designation: z.string().min(1, "Designation is required"),
+    name: z.string(),
+    email: z.string().email(),
+    phone: z.string(),
+    designation: z.string(),
   }),
 
-  name: z.string().min(1, "Name is required"),
-  registrationNumber: z.string().min(1, "Registration number is required"),
-  taxId: z.string().min(1, "Tax ID is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(1, "Phone is required"),
+  name: z.string(),
+  registrationNumber: z.string(),
+  taxId: z.string(),
+  email: z.string().email(),
+  phone: z.string(),
   website: z.string(),
 
   documents: z.array(
@@ -59,10 +59,10 @@ const formSchema = z.object({
       type: z.string(),
     }),
   ),
-  status: z.string().min(1, "Status is required"),
+  status: z.string(),
   settings: z.object({
-    billingCycle: z.string().min(1, "Billing cycle is required"),
-    currency: z.string().min(1, "Currency is required"),
+    billingCycle: z.string(),
+    currency: z.string(),
   }),
 });
 
@@ -165,6 +165,7 @@ export function ClientForm({ id }) {
       fetchClient();
     }
   }, [id]);
+  console.log("errors", errors);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -232,7 +233,7 @@ export function ClientForm({ id }) {
         onValueChange={handleTabChange}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-6 mb-8">
+        <TabsList className="flex mb-8">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>
               {tab.label}
