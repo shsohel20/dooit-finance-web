@@ -1,9 +1,10 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
+import CompanyProgress from "./company-info";
+// import { Progress } from "@react-three/drei";
+import ProgressTab from "./tabs";
 
 export default function TrackProgress() {
-  return (
-    <div>
-      <h1>Track Progress</h1>
-    </div>
-  );
+  const [initalized, setInitialized] = useState(true);
+  return <div>{initalized ? <ProgressTab /> : <CompanyProgress />}</div>;
 }
