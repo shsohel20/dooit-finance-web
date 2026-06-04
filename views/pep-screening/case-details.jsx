@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import {
   Link2,
@@ -23,10 +24,13 @@ import {
   Sparkles,
   X,
   Wand2,
+  UserCheck,
 } from "lucide-react";
 import { MatchDetail } from "./match-detail";
 import CustomResizableTable from "@/components/ui/CustomResizable";
 import { Textarea } from "@/components/ui/textarea";
+import { IconDotsVertical } from "@tabler/icons-react";
+import { size } from "lodash";
 
 const mockMatches = [
   {
@@ -463,6 +467,39 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
 
   const matchedCasesColumns = [
     {
+      id: "Actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex justify-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                // size="sm"
+                className="!py-2 h-auto "
+              >
+                <IconDotsVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem>
+                <UserCheck className="mr-2 size-3 text-muted-foreground/70" />
+                True Match
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <X className="mr-2 size-3 text-red-500/70" />
+                False Positive
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <AlertTriangle className="mr-2 size-3 text-yellow-500/70" />
+                Potential Match
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      ),
+    },
+    {
       id: "name",
       header: "Name",
       accessorKey: "name",
@@ -487,7 +524,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
           <span className="text-xs text-muted-foreground">{row.original.actionRequired}</span>
         </div>
       ),
-      size: 60,
+      // size: 60,
     },
     {
       id: "matchStrength",
@@ -601,8 +638,11 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
       id: "aiSummary",
       header: "AI Summary",
       accessorKey: "aiSummary",
+      size: 300,
       cell: ({ row }) => (
-        <Textarea className="text-slate-600" readOnly value={row.original.aiSummary} />
+        <div className="w-[300px]">
+          <Textarea className="text-slate-600" readOnly value={row.original.aiSummary} />
+        </div>
       ),
       // size: 300,
     },
@@ -763,7 +803,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
     <div className="h-full flex flex-col ">
       {/* Case Header */}
       <div className="   py-3 flex items-center gap-6">
-        <Button
+        {/* <Button
           variant="ghost"
           size="sm"
           onClick={onBack}
@@ -771,7 +811,7 @@ export function CaseDetails({ caseData, onBack, onBackToManager }) {
         >
           <ArrowLeft className="h-4 w-4" />
           Back
-        </Button>
+        </Button> */}
       </div>
 
       {/* Tabs */}
