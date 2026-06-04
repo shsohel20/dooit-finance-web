@@ -7,6 +7,7 @@ import {
   onboardingPrimaryButtonClass,
   onboardingSelectControlStyles,
 } from "../../onboardingStyles";
+import { customerOnboardingStepTracking } from "@/app/customer/onboarding/action";
 
 const tradingVolumeOptions = [
   { label: "Under $10,000 per year", value: "under_10k" },
@@ -18,10 +19,24 @@ const tradingVolumeOptions = [
 ];
 
 export default function EstimatedTradingVolume({ form }) {
-  const { setStep } = useCustomerRegisterStore();
-  const handleContinue = () => {
+  const { setStep, step } = useCustomerRegisterStore();
+  const handleContinue = async () => {
+    const payload = {
+      token: localStorage.getItem("invite_token"),
+      step: "funds_wealth",
+      status: "in_progress",
+      data: {
+        estimated_trading_volume: form.watch("estimated_trading_volume"),
+      },
+      note: "",
+      rejectionReason: "",
+      provider: "internal",
+      providerRef: null,
+    };
+    const response = await customerOnboardingStepTracking(payload);
+    console.log("response", response);
     form.setValue("estimated_trading_volume", form.watch("estimated_trading_volume"));
-    setStep(12);
+    setStep(Number(step) + 1);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
@@ -38,7 +53,11 @@ export default function EstimatedTradingVolume({ form }) {
           className="!rounded-full"
         />
       </div>
-      <Button onClick={handleContinue} className={onboardingPrimaryButtonClass}>
+      <Button
+        variant="onboarding"
+        onClick={handleContinue}
+        className={onboardingPrimaryButtonClass}
+      >
         Continue
       </Button>
     </div>

@@ -397,16 +397,16 @@ export default function ClientSidebar({ ...props }) {
           url: "/dashboard/client/knowledge-hub/training-hub/admin/modules",
           icon: IconLayoutDashboard,
         },
-        {
-          title: "Assignments",
-          url: "/dashboard/client/knowledge-hub/training-hub/admin/assignments/manage",
-          icon: IconLayoutDashboard,
-        },
-        {
-          title: "Module Access",
-          url: "/dashboard/client/knowledge-hub/training-hub/admin/access",
-          icon: IconLayoutDashboard,
-        },
+        // {
+        //   title: "Assignments",
+        //   url: "/dashboard/client/knowledge-hub/training-hub/admin/assignments/manage",
+        //   icon: IconLayoutDashboard,
+        // },
+        // {
+        //   title: "Module Access",
+        //   url: "/dashboard/client/knowledge-hub/training-hub/admin/access",
+        //   icon: IconLayoutDashboard,
+        // },
         {
           title: "Reports",
           url: "/dashboard/client/knowledge-hub/training-hub/admin/reports",

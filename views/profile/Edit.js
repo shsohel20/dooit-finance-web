@@ -1,16 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,13 +32,16 @@ import {
 } from "@/app/dashboard/client/profile/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { getLoggedInUser } from "@/app/actions";
+import { fileUploadOnCloudinary, getLoggedInUser } from "@/app/actions";
 
 export function ClientEditForm() {
+  const [imgUrl, setImgUrl] = useState(null);
+  const imgInputRef = useRef(null);
   const { loggedInUser: formData, setLoggedInUser } = useLoggedInUser();
   const isClient = formData?.userType === "client";
   const isBranch = formData?.userType === "branch";
 
+  console.log("formData", formData);
   const router = useRouter();
   const formDataByUserType = isClient ? formData : { ...formData, client: formData?.branch };
   const form = useForm({
@@ -104,6 +99,8 @@ export function ClientEditForm() {
             .object({
               billingCycle: z.string().optional(),
               currency: z.string().optional(),
+              logo: z.string().optional(),
+              color: z.string().optional(),
             })
             .optional(),
         }),
@@ -130,19 +127,12 @@ export function ClientEditForm() {
     removeContact(index);
   };
 
-  const navItems = [
-    { id: "company", label: "Company Info", icon: Building2 },
-    { id: "contacts", label: "Contacts", icon: User },
-    { id: "address", label: "Address", icon: MapPin },
-    { id: "legal", label: "Legal Representative", icon: Scale },
-    { id: "documents", label: "Documents", icon: FileText },
-    { id: "settings", label: "Settings", icon: Settings },
-  ];
-
   const onSubmit = async (data) => {
     const action = isClient ? updateClientProfile : isBranch ? updateBranchProfile : updateProfile;
     const id = isClient ? formData?.client?._id : formData?.id;
-    const dataToSend = isClient || isBranch ? data.client : data;
+
+    const dataToSend = isClient || isBranch ? { ...data.client } : data;
+    console.log("dataToSend", JSON.stringify(dataToSend, null, 2));
     const response = await action(dataToSend, id);
     if (response.success) {
       toast.success("Profile updated successfully");
@@ -156,6 +146,22 @@ export function ClientEditForm() {
     }
   };
 
+  const handleImgClick = () => {
+    imgInputRef.current.click();
+  };
+
+  const handleImgChange = async (e) => {
+    // setImgFile(e.target.files[0]);
+    console.log("img file", e.target.files[0]);
+    const res = await fileUploadOnCloudinary(e.target.files[0]);
+    console.log("img res", res);
+    if (res.success) {
+      setImgUrl(res.file.publicUrl);
+      form.setValue("client.settings.logo", res.file.publicUrl);
+    }
+    // const imgUrl=await
+  };
+
   return (
     <div className="flex min-h-screen relative">
       {/* Main Content */}
@@ -165,16 +171,28 @@ export function ClientEditForm() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="relative group">
-                <Avatar className="h-14 w-14 border-2 border-border">
+                <Avatar className="h-14 w-14 border-2 border-border bg-gray-100">
                   <AvatarImage
-                    src={formData?.photoUrl || "/placeholder.svg"}
+                    src={imgUrl || formData?.client?.settings?.logo || "/placeholder.svg"}
                     alt={formData?.client?.name}
+                    className="object-contain "
                   />
                   <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
                     {formData?.client?.name?.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <button className="absolute inset-0 flex items-center justify-center bg-foreground/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  ref={imgInputRef}
+                  onChange={handleImgChange}
+                />
+
+                <button
+                  className="absolute inset-0 flex items-center justify-center bg-foreground/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={handleImgClick}
+                >
                   <Camera className="h-5 w-5 text-background" />
                 </button>
               </div>
@@ -232,9 +250,14 @@ export function ClientEditForm() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="">
-                    <FormField name="client.name" label="Company Name" form={form} />
-                  </div>
+                  <FormField name="client.name" label="Company Name" form={form} />
+                  {/* brand color */}
+                  <FormField
+                    name="client.settings.color"
+                    label="Brand Color"
+                    form={form}
+                    type="color"
+                  />
                   <FormField
                     name="client.clientType"
                     label="Client Type"

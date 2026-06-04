@@ -16,10 +16,10 @@ const sourceOfFundsOptions = [
 ];
 
 export default function SourceOfFunds({ form }) {
-  const { setStep } = useCustomerRegisterStore();
+  const { setStep, step } = useCustomerRegisterStore();
   const handleContinue = () => {
     form.setValue("source_of_funds", form.watch("source_of_funds"));
-    setStep(9);
+    setStep(Number(step) + 1);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
@@ -36,7 +36,11 @@ export default function SourceOfFunds({ form }) {
           className="!rounded-full"
         />
       </div>
-      <Button onClick={handleContinue} className={onboardingPrimaryButtonClass}>
+      <Button
+        variant="onboarding"
+        onClick={handleContinue}
+        className={onboardingPrimaryButtonClass}
+      >
         Continue
       </Button>
     </div>

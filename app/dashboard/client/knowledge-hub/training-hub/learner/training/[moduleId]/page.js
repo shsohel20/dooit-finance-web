@@ -22,27 +22,40 @@ import {
 import { getModuleById } from "../../../actions";
 import PartScreen from "@/views/traininng-module/learner/PartScreen";
 import QuizScreen from "@/views/traininng-module/learner/QuizScreen";
+import { getLearnerProgress } from "../../../actions";
+
+const getPartResult = (part, i) => {};
 
 export default function TrainingPage() {
   const params = useParams();
   const router = useRouter();
   const [partData, setPartData] = useState(null);
   const user = { id: "1", role: "learner", name: "John Doe" };
-  const { getLearnerProgress, recordAttempt, completeModule } = useModules();
+  const [myProgress, setMyProgress] = useState(null);
+  const { recordAttempt, completeModule } = useModules();
 
   const moduleId = params.moduleId;
   const [moduleData, setModuleData] = useState(null);
   // const moduleData = getModuleById(moduleId);
-  const progress = getLearnerProgress(user?.id || "", moduleId);
+  // const progress = getLearnerProgress(user?.id || "", moduleId);
+  const progress = myProgress;
 
   useEffect(() => {
     const fetchModuleData = async () => {
       const res = await getModuleById(moduleId);
+      console.log("moduleData res", res);
       setModuleData(res?.data || null);
     };
     fetchModuleData();
   }, [moduleId]);
-
+  useEffect(() => {
+    const fetchProgress = async () => {
+      const res = await getLearnerProgress(moduleId);
+      console.log("progress res", res);
+      setMyProgress(res?.data || null);
+    };
+    fetchProgress();
+  }, [moduleId]);
   const [phase, setPhase] = useState("overview");
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [watchPercent, setWatchPercent] = useState(0);
@@ -226,9 +239,10 @@ export default function TrainingPage() {
           <h2 className="text-xl font-semibold text-foreground">Training Parts</h2>
 
           {moduleData.parts.map((part, idx) => {
-            const unlocked = isPartUnlocked(idx);
-            const done = completedParts.has(idx);
-
+            const unlocked = true; //isPartUnlocked(idx);
+            const partResult = myProgress?.partResults.find((result) => result.part === part.id);
+            const done = partResult?.passed;
+            console.log("partResult", partResult);
             return (
               <Card
                 key={part.id}
@@ -309,7 +323,9 @@ export default function TrainingPage() {
                             setActivePartIndex(idx);
                             setWatchPercent(0);
                             setVideoReady(false);
-                            setPhase("video");
+                            router.push(
+                              `/dashboard/client/knowledge-hub/training-hub/learner/training/${moduleId}/part/${part.id}`,
+                            );
                           }}
                           className="gap-2 bg-transparent"
                         >
@@ -329,10 +345,11 @@ export default function TrainingPage() {
                           className="gap-2"
                         >
                           <Play className="w-4 h-4" />
-                          {completedParts.size > 0 &&
+                          {/* {completedParts.size > 0 &&
                           idx === [...completedParts].sort((a, b) => b - a)[0] + 1
                             ? "Start"
-                            : "Begin"}
+                            : "Begin"} */}
+                          Begin
                         </Button>
                       ) : (
                         <Lock className="w-5 h-5 text-muted-foreground/50" />

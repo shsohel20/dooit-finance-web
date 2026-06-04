@@ -7,10 +7,8 @@ import Webcam from "react-webcam";
 export default function FaceCapture({ image, onCapture }) {
   const webcamRef = useRef(null);
   const [countdown, setCountdown] = useState(null);
-  const [ready, setReady] = useState(false);
   const [captured, setCaptured] = useState(false);
   const [startCamera, setStartCamera] = useState(false);
-  const [error, setError] = useState("");
 
   // useEffect(() => {
   //   // Ask for permission first
@@ -73,8 +71,8 @@ export default function FaceCapture({ image, onCapture }) {
             width={400}
             height={360}
             onUserMedia={() => {
-              console.log("Camera working");
-              setReady(true);
+              // console.log("Camera working");
+              // setReady(true);
             }}
             onUserMediaError={(err) => {
               console.error("CAMERA ERROR: ", err);
@@ -92,7 +90,7 @@ export default function FaceCapture({ image, onCapture }) {
       <Button
         variant={captured ? "outline" : "default"}
         onClick={startCountdown}
-        className="w-full"
+        className="w-full mx-4"
       >
         {image ? "Retake" : "Start your camera"}
       </Button>

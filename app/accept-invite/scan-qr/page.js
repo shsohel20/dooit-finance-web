@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { sendInviteForScanQR } from "./action";
+import { getClientInfo, sendInviteForScanQR } from "./action";
 import { toast } from "sonner";
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -27,6 +27,16 @@ export default function ScanQRPage() {
 
   const [formData, setFormData] = useState(initialValues);
   const [loading, setLoading] = useState(false);
+  const [clientData, setClientData] = useState(null);
+  useEffect(() => {
+    const fetchClientData = async () => {
+      const response = await getClientInfo(client);
+      const brandColor = response.data?.settings?.color;
+      localStorage.setItem("brandColor", brandColor);
+      setClientData(response.data);
+    };
+    fetchClientData();
+  }, [client]);
   const router = useRouter();
   const {
     control,
@@ -52,10 +62,13 @@ export default function ScanQRPage() {
     };
 
     const response = await sendInviteForScanQR(modifiedData);
-    console.log("response => ", response);
     setLoading(false);
     if (response.success) {
-      router.push(response?.data?.url);
+      // console.log("response", response);
+      // const token = response?.data?.token;
+      // localStorage.setItem("invite_token", token);
+      console.log("response", JSON.stringify(response?.data?.url, null, 2));
+      // router.push(response?.data?.url);
       reset();
     } else {
       toast.error("Failed to send invite");
@@ -71,13 +84,29 @@ export default function ScanQRPage() {
       </div>
     );
   }
+  const clientSettings = {
+    ...clientData?.settings,
+    name: clientData?.name,
+  };
   return (
     <div className="min-h-screen grid place-items-center">
       <div className="grid gap-4 max-w-md md:w-full mx-auto w-[90%] border p-4 rounded-md">
-        <div>
-          <h1 className="text-2xl font-bold">Get Onboarding Link</h1>
-          <p className="text-sm text-muted-foreground">Fill the form to get a onboarding link</p>
+        <div className="flex  items-center gap-4 ">
+          <div className="size-16 rounded-lg overflow-hidden border-2">
+            <img
+              src={clientSettings?.logo}
+              alt={clientSettings?.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="">
+            <h5 className="text-lg font-bold">{clientSettings?.name}</h5>
+            <p className="text-sm text-muted-foreground">Fill the form to get a onboarding link</p>
+          </div>
         </div>
+        {/* <div>
+          <h4 className=" font-bold">Get Onboarding Link</h4>
+        </div> */}
         <Controller
           control={control}
           name="email"
@@ -136,13 +165,21 @@ export default function ScanQRPage() {
             </div>
           )}
         /> */}
-        <Button onClick={handleSubmit(onSubmit)} disabled={loading} className="!py-6 text-sm">
+        <Button
+          style={{ backgroundColor: clientSettings?.color }}
+          onClick={handleSubmit(onSubmit)}
+          disabled={loading}
+          className="!py-6 text-sm hover:opacity-90"
+        >
           {loading ? (
             <span className="flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" /> Sending...
             </span>
           ) : (
-            "Send"
+            <span className="flex items-center gap-2">
+              <ArrowRight className="w-4 h-4" />
+              Get Link
+            </span>
           )}
         </Button>
 

@@ -15,13 +15,20 @@ export const fileUploadOnCloudinary = async (file) => {
   //add headers
   const apiKey = process.env.IMAGE_API_KEY;
   // console.log("apiKey", apiKey);
-  const res = await fetch(`${IMAGE_SERVER_URL}files/upload-api`, {
-    method: "POST",
-    headers: {
-      "x-api-key": apiKey,
+  const res = await fetchWithAuth(
+    `file-vault/upload`,
+    {
+      method: "POST",
+      // headers: {
+      //   "x-api-key": apiKey,
+      // },
+      body: formData,
     },
-    body: formData,
-  });
+    false,
+    false,
+    true,
+  );
+  // console.log("upload res", res);
   return res.json();
 };
 

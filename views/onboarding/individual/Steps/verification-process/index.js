@@ -32,13 +32,13 @@ export default function VerificationProcess() {
           You&apos;re almost there. Follow these steps to complete verification.
         </QuestionDescription>
         <div className="grid gap-3 pt-2">
-          {verificationSteps.map((item) => (
+          {verificationSteps.map((item, index) => (
             <div
               key={item.title}
               className="flex items-center gap-3 rounded-full border border-neutral-200 bg-neutral-50/80 px-4 py-3.5"
             >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
-                {item.icon}
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm tabular-nums font-bold">
+                {index + 1}
               </span>
               <div className="min-w-0 text-left">
                 <h5 className="text-sm font-semibold text-neutral-900">{item.title}</h5>
@@ -48,7 +48,7 @@ export default function VerificationProcess() {
           ))}
         </div>
       </div>
-      <Button onClick={handleNext} className={onboardingPrimaryButtonClass}>
+      <Button variant="onboarding" onClick={handleNext} className={onboardingPrimaryButtonClass}>
         Continue
       </Button>
     </div>

@@ -22,7 +22,7 @@ const IdentificationDocuments = dynamic(
   () => import("@/views/customer-registration/common/IdentificationDocuments"),
   { ssr: false },
 );
-
+const OcrData = dynamic(() => import("./Steps/ocr-data"), { ssr: false });
 export default function IndividualOnboarding() {
   const { step, setStep } = useCustomerRegisterStore();
   const form = useForm();
@@ -40,6 +40,7 @@ export default function IndividualOnboarding() {
     setStep(Number(step) - 1);
   };
 
+  console.log({ step });
   return (
     <div className="min-h-[100svh] bg-white text-neutral-900">
       <div className="mx-auto flex min-h-[100svh] w-full max-w-lg flex-col px-5 pb-10 pt-4">
@@ -47,11 +48,12 @@ export default function IndividualOnboarding() {
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex w-full flex-1 flex-col">
             {step === 1 && <Country form={form} />}
-            {step === 2 && <VerificationProcess />}
-            {step === 3 && <LivenessInstructions />}
-            {step === 4 && <FrontProfile />}
-            {step === 5 && <RightProfile />}
-            {step === 6 && <IdentificationDocuments form={form} individualPresentation />}
+            {/* {step === 2 && <VerificationProcess />} */}
+            {step === 2 && <LivenessInstructions />}
+            {step === 3 && <FrontProfile />}
+            {step === 4 && <RightProfile />}
+            {step === 5 && <IdentificationDocuments form={form} individualPresentation />}
+            {step === 6 && <OcrData form={form} />}
             {step === 7 && <Occupation form={form} />}
             {step === 8 && <SourceOfFunds form={form} />}
             {step === 9 && <SourceOfWealth form={form} />}

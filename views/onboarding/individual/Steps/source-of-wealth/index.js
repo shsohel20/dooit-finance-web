@@ -19,10 +19,10 @@ const sourceOfWealthOptions = [
 ];
 
 export default function SourceOfWealth({ form }) {
-  const { setStep } = useCustomerRegisterStore();
+  const { setStep, step } = useCustomerRegisterStore();
   const handleContinue = () => {
     form.setValue("source_of_wealth", form.watch("source_of_wealth"));
-    setStep(10);
+    setStep(Number(step) + 1);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
@@ -39,7 +39,11 @@ export default function SourceOfWealth({ form }) {
           className="!rounded-full"
         />
       </div>
-      <Button onClick={handleContinue} className={onboardingPrimaryButtonClass}>
+      <Button
+        variant="onboarding"
+        onClick={handleContinue}
+        className={onboardingPrimaryButtonClass}
+      >
         Continue
       </Button>
     </div>

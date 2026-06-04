@@ -940,9 +940,8 @@ export function GFSForm({ id }) {
       </Card>
     </div>
   );
-}
 
-const generateReport = () => {
+  function generateReport() {
   const report = `This report is in relation to suspicion for ${
     formData.suspicionReason
   } related to "${
@@ -1030,4 +1029,5 @@ ${
 }`;
 
   setGeneratedReport(report);
-};
+  }
+}

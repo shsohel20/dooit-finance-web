@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { FileUploader } from "react-drag-drop-files";
+import React, { useState } from 'react';
+import { FileUploader } from 'react-drag-drop-files';
 
 function DragDrop({
   file = null,
   handleChange,
   children,
-  fileTypes = ["JPG", "PNG", "GIF", "JPEG"],
+  fileTypes = ['JPG', 'PNG', 'GIF', 'JPEG', 'WEBP'],
   ...props
 }) {
   return (

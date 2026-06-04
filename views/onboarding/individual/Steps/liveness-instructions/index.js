@@ -16,7 +16,7 @@ const requirements = [
 export default function LivenessInstructions() {
   const { setStep } = useCustomerRegisterStore();
   const handleNext = () => {
-    setStep(4);
+    setStep(3);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
@@ -35,7 +35,7 @@ export default function LivenessInstructions() {
           </ul>
         </div>
       </div>
-      <Button onClick={handleNext} className={onboardingPrimaryButtonClass}>
+      <Button variant="onboarding" onClick={handleNext} className={onboardingPrimaryButtonClass}>
         Continue
       </Button>
     </div>

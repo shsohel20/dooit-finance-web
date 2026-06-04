@@ -53,6 +53,7 @@ export default function SoleTraderDetails({ form }) {
         </div>
       </div>
       <Button
+        variant="onboarding"
         onClick={handleContinue}
         disabled={!businessName?.trim() || !nature?.trim()}
         className={onboardingPrimaryButtonClass}

@@ -221,10 +221,10 @@ export default function DooitEcosystemPage() {
                   <h3 className="text-lg font-semibold text-foreground mb-2">Report Suspicion</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                     If you identify a red flag, click the{" "}
-                    <span className="font-medium text-blue-600">'Report Suspicion'</span> button highlighted.{" "}
+                    <span className="font-medium text-blue-600">&apos;Report Suspicion&apos;</span> button highlighted.{" "}
                     <span className="font-medium">
-                      "This is your most important tool. It's the same whether you're in a bank, a law firm, or a
-                      casino."
+                      &quot;This is your most important tool. It&apos;s the same whether you&apos;re in a bank, a law firm, or a
+                      casino.&quot;
                     </span>
                   </p>
                 </div>
@@ -295,10 +295,10 @@ export default function DooitEcosystemPage() {
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-foreground mb-2 uppercase tracking-wide">
-                    Visual Context: A simulated workflow of the "Report Suspicion" button
+                    Visual Context: A simulated workflow of the &quot;Report Suspicion&quot; button
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Let's walk through a report. Say you're an accountant, and your client can't explain the source of
+                    Let&apos;s walk through a report. Say you&apos;re an accountant, and your client can&apos;t explain the source of
                     funds for a major investment.
                   </p>
                 </div>
@@ -321,7 +321,7 @@ export default function DooitEcosystemPage() {
                     <h4 className="text-lg font-bold text-foreground">Select the Client</h4>
                   </div>
                   <p className="text-sm text-muted-foreground ml-11">
-                    "Select the client's name from your client list or enter new client details if necessary."
+                    &quot;Select the client&apos;s name from your client list or enter new client details if necessary.&quot;
                   </p>
                   <div className="ml-11">
                     <select
@@ -350,8 +350,8 @@ export default function DooitEcosystemPage() {
                     <h4 className="text-lg font-bold text-foreground">Describe the Facts</h4>
                   </div>
                   <p className="text-sm text-muted-foreground ml-11">
-                    "Describe the facts factually: 'On [date], client X could not provide documentation for the origin
-                    of $500,000 used to purchase shares in Company Y'"
+                    &quot;Describe the facts factually: &apos;On [date], client X could not provide documentation for the origin
+                    of $500,000 used to purchase shares in Company Y&apos;&quot;
                   </p>
                   <div className="ml-11 space-y-4">
                     <div>
@@ -402,7 +402,7 @@ export default function DooitEcosystemPage() {
                     <h4 className="text-lg font-bold text-foreground">Submit the Report</h4>
                   </div>
                   <p className="text-sm text-muted-foreground ml-11">
-                    "Submit. The report is now securely with the compliance team."
+                    &quot;Submit. The report is now securely with the compliance team.&quot;
                   </p>
 
                   {!reportSubmitted ? (
@@ -501,7 +501,7 @@ export default function DooitEcosystemPage() {
 
               <Card className="border-2 border-slate-200 dark:border-slate-800 hover:shadow-lg transition-shadow">
                 <div className="p-6">
-                  <h4 className="text-lg font-bold text-foreground mb-3">Don't Delay</h4>
+                  <h4 className="text-lg font-bold text-foreground mb-3">Don&apos;t Delay</h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Report as soon as you identify a red flag. Timely reporting is critical.
                   </p>
@@ -565,15 +565,15 @@ export default function DooitEcosystemPage() {
                   <CheckCircle2 className="size-6 text-green-600 flex-shrink-0 mt-1" />
                   <p className="text-foreground leading-relaxed">
                     <span className="font-semibold">Stay compliant and protected</span> - Your vigilance contributes to
-                    our organization's security and the integrity of the financial system
+                    our organization&apos;s security and the integrity of the financial system
                   </p>
                 </div>
               </div>
               <div className="bg-white/60 dark:bg-black/20 rounded-lg p-6 border border-green-200 dark:border-green-900">
                 <p className="text-foreground italic text-center leading-relaxed">
-                  "The Dooit.ai platform makes compliance simple and accessible. Remember: when you see something
-                  suspicious, you now have the tools and knowledge to report it effectively. You're empowered to protect
-                  our organization and society."
+                  &quot;The Dooit.ai platform makes compliance simple and accessible. Remember: when you see something
+                  suspicious, you now have the tools and knowledge to report it effectively. You&apos;re empowered to protect
+                  our organization and society.&quot;
                 </p>
               </div>
             </div>
@@ -592,8 +592,8 @@ export default function DooitEcosystemPage() {
                   Visual Context: Mixed media. The Dooit Guide stands with key icons.
                 </h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  "You now understand the crime, the red flags, and the tool. You are an essential part of our
-                  collective defense."
+                  &quot;You now understand the crime, the red flags, and the tool. You are an essential part of our
+                  collective defense.&quot;
                 </p>
               </div>
             </div>
@@ -608,7 +608,7 @@ export default function DooitEcosystemPage() {
             </div>
             <h3 className="text-2xl font-bold text-foreground mb-3">Ready to Complete This Module?</h3>
             <p className="text-muted-foreground mb-6 leading-relaxed">
-              You've learned how to navigate the Dooit.ai ecosystem and report suspicious activity. Complete the module
+              You&apos;ve learned how to navigate the Dooit.ai ecosystem and report suspicious activity. Complete the module
               to update your compliance score.
             </p>
             <Link href="/dashboard/client/risk-rule-engine/training-module/our-ecosystem/assessment">

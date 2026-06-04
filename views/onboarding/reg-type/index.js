@@ -5,6 +5,16 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Question, { QuestionDescription } from "../Question";
+import {
+  Building,
+  Building2Icon,
+  HandshakeIcon,
+  KeyIcon,
+  ShieldCheckIcon,
+  UserIcon,
+  UsersIcon,
+} from "lucide-react";
+import { customerOnboardingStepTracking } from "@/app/customer/onboarding/action";
 
 const types = [
   {
@@ -12,47 +22,55 @@ const types = [
     desc: "Register as an individual user",
     value: "individual",
     emoji: "👤",
+    icon: <UserIcon className="w-4 h-4" />,
   },
   {
     type: "Business",
     desc: "Register as a business entity",
     value: "business",
     emoji: "🏢",
+    icon: <Building2Icon className="w-4 h-4" />,
   },
   {
     type: "Trust",
     desc: "Register as a trust",
     value: "trust",
     emoji: "🛡️",
+    icon: <ShieldCheckIcon className="w-4 h-4" />,
   },
   {
     type: "Partnership",
     desc: "Register as a partnership",
     value: "partnership",
     emoji: "🤝",
+    icon: <HandshakeIcon className="w-4 h-4" />,
   },
   {
     type: "Govt. Body",
     desc: "Register as a government body",
     value: "government-body",
     emoji: "🏛️",
+    icon: <Building className="w-4 h-4" />,
   },
   {
     type: "Association",
     desc: "Register as an association",
     value: "association",
     emoji: "👥",
+    icon: <UsersIcon className="w-4 h-4" />,
   },
   {
     type: "Cooperative",
     desc: "Register as a cooperative",
     value: "cooperative",
     emoji: "🔑",
+    icon: <KeyIcon className="w-4 h-4" />,
   },
 ];
 
 export default function RegistrationType() {
   const [selectedType, setSelectedType] = useState(null);
+  const [loading, setLoading] = useState(false);
   const { setRegisterType } = useCustomerRegisterStore();
   const router = useRouter();
 
@@ -60,10 +78,30 @@ export default function RegistrationType() {
     setSelectedType(type);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (selectedType) {
       setRegisterType(selectedType?.value);
-      router.push(`/customer/onboarding?type=${selectedType?.value}`);
+      const payload = {
+        token: localStorage.getItem("invite_token"),
+        step: "journey_start",
+        status: "in_progress",
+        data: {
+          requestedType: selectedType?.value,
+        },
+        documents: [],
+        note: "",
+        rejectionReason: "",
+        provider: "internal",
+        providerRef: null,
+      };
+      setLoading(true);
+      console.log("payload", JSON.stringify(payload, null, 2));
+      const response = await customerOnboardingStepTracking(payload);
+      setLoading(false);
+      console.log("response", response);
+      if (response.success) {
+        router.push(`/customer/onboarding?type=${selectedType?.value}`);
+      }
     }
   };
 
@@ -103,7 +141,7 @@ export default function RegistrationType() {
                 )}
               >
                 <span className="text-lg leading-none" aria-hidden>
-                  {type.emoji}
+                  {type.icon}
                 </span>
                 <span>{type.type}</span>
               </button>
@@ -112,14 +150,16 @@ export default function RegistrationType() {
         </div>
 
         <Button
-          disabled={!selectedType}
+          disabled={!selectedType || loading}
           onClick={handleNext}
+          variant="onboarding"
           className={cn(
             "mt-10 h-12 w-full rounded-full text-base font-semibold text-white shadow-none",
-            "bg-[#1B4301] hover:bg-[#153601] disabled:bg-neutral-300 disabled:text-neutral-500",
+            " disabled:bg-neutral-300 disabled:text-neutral-500",
           )}
+          // style={{ backgroundColor: "var(--brand-color)" }}
         >
-          Continue
+          {loading ? "Processing..." : "Continue"}
         </Button>
       </div>
     </div>

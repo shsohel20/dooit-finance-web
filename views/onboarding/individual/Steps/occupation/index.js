@@ -2,14 +2,35 @@ import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Question, { QuestionDescription } from "@/views/onboarding/Question";
-import React from "react";
+import React, { useState } from "react";
 import { onboardingInputClass, onboardingPrimaryButtonClass } from "../../onboardingStyles";
+import { customerOnboardingStepTracking } from "@/app/customer/onboarding/action";
 
 export default function Occupation({ form }) {
-  const { setStep } = useCustomerRegisterStore();
-  const handleContinue = () => {
+  const { setStep, step } = useCustomerRegisterStore();
+  const [loading, setLoading] = useState(false);
+
+  const handleContinue = async () => {
+    const token = localStorage.getItem("invite_token");
+    const occupation = form.watch("occupation");
+    setLoading(true);
+    const payload = {
+      token: token,
+      step: "occupation",
+      status: "submitted",
+      data: {
+        occupation: occupation,
+      },
+      note: "",
+      rejectionReason: "",
+      provider: "",
+      providerRef: null,
+    };
+    const response = await customerOnboardingStepTracking(payload);
+    console.log("response", response);
+    setLoading(false);
     form.setValue("occupation", form.watch("occupation"));
-    setStep(8);
+    setStep(Number(step) + 1);
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
@@ -25,8 +46,13 @@ export default function Occupation({ form }) {
           onChange={(e) => form.setValue("occupation", e.target.value)}
         />
       </div>
-      <Button onClick={handleContinue} className={onboardingPrimaryButtonClass}>
-        Continue
+      <Button
+        variant="onboarding"
+        onClick={handleContinue}
+        className={onboardingPrimaryButtonClass}
+        disabled={loading}
+      >
+        {loading ? "Processing..." : "Continue"}
       </Button>
     </div>
   );
