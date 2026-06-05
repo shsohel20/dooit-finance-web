@@ -74,10 +74,8 @@ export default function LearnerDashboardPage() {
   const user = { id: "1", role: "learner", name: "John Doe" };
   const { getModuleAssignments, getModuleById, getLearnerProgress, retakeModule } = useModules();
   const [assignments, setAssignments] = useState([]);
-  console.log("assignments", assignments);
   const fetchAssignments = useCallback(async () => {
     const res = await getMyAssignments();
-    console.log("res", res);
     setAssignments(res?.data || []);
   }, []);
   useEffect(() => {
