@@ -13,12 +13,14 @@ import { PageDescription, PageHeader, PageTitle } from "@/components/common";
 import { generatePolicy } from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import DocumentTypeSelect from "@/components/ui/DocumentTypeSelect";
 const EditorForm = dynamic(() => import("./Editor"), { ssr: false });
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
   address: z.string().min(1, "Address is required"),
   compliance_officer: z.string().min(1, "Compliance Officer is required"),
   industry: z.string().min(1, "Industry is required"),
+  document_type: z.string().min(1, "Document type is required"),
   registration_date: z.string().min(1, "Registration Date is required"),
   services: z.array(z.string()).min(1, "Services is required"),
   phone: z.string().min(1, "Phone is required"),
@@ -33,6 +35,7 @@ export default function PolicyForm() {
     address: "",
     compliance_officer: "",
     industry: "",
+    document_type: "",
     registration_date: "",
     services: ["Payment Processing"],
     phone: "",
@@ -161,6 +164,24 @@ export default function PolicyForm() {
             type="select"
             options={llmModelOptions}
             label="LLM Model"
+          />
+        </div>
+        <div className="space-y-1">
+          <Label>Document Type</Label>
+          <Controller
+            control={form.control}
+            name="document_type"
+            render={({ field, fieldState }) => (
+              <>
+                <DocumentTypeSelect
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+                {fieldState.error && (
+                  <p className="text-xs text-destructive mt-1">{fieldState.error.message}</p>
+                )}
+              </>
+            )}
           />
         </div>
         <Button disabled={loading} type="submit" className={"w-full"} onClick={form.handleSubmit(onSubmit)}>

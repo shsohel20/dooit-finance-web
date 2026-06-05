@@ -53,7 +53,7 @@ import { Separator } from "@/components/ui/separator";
       </Tooltip>
     </TooltipProvider>
   );
-export default function Editor({ data, onSubmit, isSaving = false, setData }) {
+export default function Editor({ data, onSubmit, isSaving = false, setData, toolbarTop = "top-0" }) {
   const holderRef = useRef(null);   // DOM node
   const editorRef = useRef(null);   // EditorJS instance
   const initialDataRef = useRef(data); // freeze initial data
@@ -202,10 +202,10 @@ export default function Editor({ data, onSubmit, isSaving = false, setData }) {
 
 
   return (
-    <div className="min-h-screen w-full overflow-auto">
+    <div className="min-h-screen w-full">
 
   {/* MS Word-style Toolbar */}
-      <div className="sticky top-0 z-10 bg-background border border-border rounded-lg mb-4 p-2">
+      <div className={`sticky ${toolbarTop} z-10 bg-background border border-border rounded-lg mb-4 p-2`}>
         <div className="flex items-center gap-1 flex-wrap">
           {/* Undo/Redo */}
           <ToolbarButton onClick={handleUndo} icon={Undo} tooltip="Undo (Ctrl+Z)" />
