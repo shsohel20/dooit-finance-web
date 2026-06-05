@@ -6,6 +6,7 @@ import { Banknote } from "lucide-react";
 import RiskAssessmentTab from "./risk-assesment";
 import PolicyForm from "@/views/knowledge-hub/policy-hub/policy-form";
 import StaffOnboardingTab from "./staff-onboarding";
+import TrainingTab from "./training";
 
 const allTabs = [
   {
@@ -31,7 +32,7 @@ const allTabs = [
   {
     name: "Training",
     icon: <Banknote className="mr-2 h-4 w-4" />,
-    component: <div>Coming soon</div>,
+    component: <TrainingTab />,
   },
 ];
 

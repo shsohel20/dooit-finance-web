@@ -83,7 +83,6 @@ export default function LearnerDashboardPage() {
   }, [fetchAssignments]);
   // const assignments = getModuleAssignments(user?.id || "");
   const assignedModules = assignments;
-  console.log("assignedModules", assignedModules);
 
   const getModuleStatus = (moduleId) => {
     const progress = getLearnerProgress(user?.id || "", moduleId);
