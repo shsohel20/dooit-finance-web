@@ -28,6 +28,7 @@ export default function ScanQRPage() {
   const [formData, setFormData] = useState(initialValues);
   const [loading, setLoading] = useState(false);
   const [clientData, setClientData] = useState(null);
+  
   useEffect(() => {
     const fetchClientData = async () => {
       const response = await getClientInfo(client);
@@ -178,7 +179,7 @@ export default function ScanQRPage() {
           ) : (
             <span className="flex items-center gap-2">
               <ArrowRight className="w-4 h-4" />
-              Get Link
+              Start Onboarding
             </span>
           )}
         </Button>
