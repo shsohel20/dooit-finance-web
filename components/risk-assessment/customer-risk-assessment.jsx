@@ -90,10 +90,20 @@ export function CustomerRiskAssessment() {
   });
 
   const [data, setData] = useState([]);
+  const [isLoadingAssessments, setIsLoadingAssessments] = useState(false);
   const [customerOptions, setCustomerOptions] = useState([]);
   const form = useForm({
     defaultValues: initialValues,
   });
+
+  const fetchAssessments = async () => {
+    setIsLoadingAssessments(true);
+    const response = await getAllAssessments();
+    if (response.success) {
+      setData(response.data);
+    }
+    setIsLoadingAssessments(false);
+  };
 
   const fetchRiskFactors = async () => {
     const response = await getRiskFactors();
@@ -103,7 +113,7 @@ export function CustomerRiskAssessment() {
       value: item.country,
     }));
     setCountriesOptions(countries);
-    const customerTypes = response.data?.customertype?.map((item) => ({
+    const customerTypes = response.data?.customerType?.map((item) => ({
       label: `${item.value.split('_').join(' ')} (score: ${item.score})`,
       value: item.value,
     }));
@@ -113,7 +123,7 @@ export function CustomerRiskAssessment() {
       value: item.value,
     }));
     setJurisdictionsOptions(jurisdictions);
-    const customerRetentions = response.data?.customerretention?.map(
+    const customerRetentions = response.data?.customerRetention?.map(
       (item) => ({
         label: `${item.value} (score: ${item.score})`,
         value: item.value,
@@ -144,6 +154,7 @@ export function CustomerRiskAssessment() {
 
   useEffect(() => {
     fetchRiskFactors();
+    fetchAssessments();
   }, []);
 
   const calculateTotalScore = () => {
@@ -271,69 +282,66 @@ Generated: ${new Date().toISOString()}
   };
   const columns = [
     {
+      id: 'customerName',
       header: 'Customer Name',
       accessorKey: 'customerName',
     },
     {
+      id: 'assessedAt',
+      header: 'Assessment Date',
+      cell: ({ row }) => (
+        <div>{new Date(row.original.assessedAt).toLocaleDateString()}</div>
+      ),
+    },
+    {
+      id: 'riskScore',
       header: 'Total Risk Score',
-      accessorKey: 'totalScore',
-      cell: ({ row }) => {
-        const data = row.original.assessment;
-        return (
-          <div>
-            {data.channel.score +
-              data.jurisdiction.score +
-              data.customerRetention.score +
-              data.product.score +
-              data.occupation.score +
-              data.industry.score}
-          </div>
-        );
-      },
+      accessorKey: 'riskScore',
     },
     {
+      id: 'riskLabel',
       header: 'Risk Level',
-      accessorKey: 'riskLevel',
-      cell: ({ row }) => {
-        return (
-          <Badge variant={riskLevelVariants[row.original.riskLevel]}>
-            <IconPennant />
-            {row.original.riskLevel} Risk
-          </Badge>
-        );
-      },
+      cell: ({ row }) => (
+        <Badge variant={riskLevelVariants[row.original.riskLabel]}>
+          <IconPennant />
+          {row.original.riskLabel} Risk
+        </Badge>
+      ),
     },
-    // {
-    //   header: 'Assessment Date',
-    //   accessorKey: 'assessmentDate',
-    // },
     {
+      id: 'customerType',
       header: 'Customer Type',
-      accessorKey: 'assessment.customerType.value',
+      cell: ({ row }) => row.original.assessment?.customerType?.value,
     },
     {
+      id: 'jurisdiction',
       header: 'Jurisdiction',
-      accessorKey: 'assessment.jurisdiction.value',
+      cell: ({ row }) => row.original.assessment?.jurisdiction?.value,
     },
     {
+      id: 'customerRetention',
       header: 'Customer Retention',
-      accessorKey: 'assessment.customerRetention.value',
+      cell: ({ row }) => row.original.assessment?.customerRetention?.value,
     },
     {
+      id: 'product',
       header: 'Product/Service',
-      accessorKey: 'assessment.product.value',
+      cell: ({ row }) => row.original.assessment?.product?.value,
     },
     {
+      id: 'channel',
       header: 'Channel',
-      accessorKey: 'assessment.channel.value',
+      cell: ({ row }) => row.original.assessment?.channel?.value,
     },
     {
+      id: 'occupation',
       header: 'Occupation',
-      accessorKey: 'assessment.occupation.value',
+      cell: ({ row }) => row.original.assessment?.occupation?.value,
     },
     {
+      id: 'industry',
       header: 'Industry',
-      accessorKey: 'assessment.industry.value',
+      cell: ({ row }) => row.original.assessment?.industry?.value,
     },
   ];
 
@@ -389,9 +397,7 @@ Generated: ${new Date().toISOString()}
     if (response.success) {
       form.reset();
       setCalculationResult(null);
-      const response = await getAllAssessments();
-      console.log('response all assessments', response);
-      setData(response.data);
+      await fetchAssessments();
       toast.success('Result saved successfully');
     } else {
       toast.error('Failed to save result');
@@ -541,14 +547,13 @@ Generated: ${new Date().toISOString()}
             </Button>
           </div>
 
-          {data.length > 0 && (
-            <CustomResizableTable
-              mainClass="risk-assessment-table"
-              tableId="1111"
-              data={data}
-              columns={columns}
-            />
-          )}
+          <CustomResizableTable
+            mainClass="risk-assessment-table"
+            tableId="1111"
+            data={data}
+            columns={columns}
+            loading={isLoadingAssessments}
+          />
         </CardContent>
       </Card>
       {calculationResult && (
