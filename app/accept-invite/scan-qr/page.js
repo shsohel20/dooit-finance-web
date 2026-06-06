@@ -10,6 +10,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { getClientInfo, sendInviteForScanQR } from "./action";
 import { toast } from "sonner";
+import { logout } from "@/app/actions";
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone is required"),
@@ -28,7 +29,7 @@ export default function ScanQRPage() {
   const [formData, setFormData] = useState(initialValues);
   const [loading, setLoading] = useState(false);
   const [clientData, setClientData] = useState(null);
-  
+
   useEffect(() => {
     const fetchClientData = async () => {
       const response = await getClientInfo(client);
@@ -68,8 +69,9 @@ export default function ScanQRPage() {
       // console.log("response", response);
       // const token = response?.data?.token;
       // localStorage.setItem("invite_token", token);
+      await logout();
       console.log("response", JSON.stringify(response?.data?.url, null, 2));
-      // router.push(response?.data?.url);
+      router.push(response?.data?.url);
       reset();
     } else {
       toast.error("Failed to send invite");
