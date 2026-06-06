@@ -28,7 +28,6 @@ function AcceptInviteLayout({ children }) {
   useEffect(() => {
     const fetchClientData = async () => {
       const response = await getClientInfo(client);
-      console.log("layoutresponse", response);
       const brandColor = response.data?.settings?.color;
       localStorage.setItem("brandColor", brandColor);
     };

@@ -10,6 +10,8 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { getClientInfo, sendInviteForScanQR } from "./action";
 import { toast } from "sonner";
+import { signOut } from "next-auth/react";
+import useGetUser from "@/hooks/useGetUser";
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone is required"),
@@ -28,6 +30,8 @@ export default function ScanQRPage() {
   const [formData, setFormData] = useState(initialValues);
   const [loading, setLoading] = useState(false);
   const [clientData, setClientData] = useState(null);
+  const { loggedInUser } = useGetUser();
+
   useEffect(() => {
     const fetchClientData = async () => {
       const response = await getClientInfo(client);
@@ -67,8 +71,11 @@ export default function ScanQRPage() {
       // console.log("response", response);
       // const token = response?.data?.token;
       // localStorage.setItem("invite_token", token);
+      if (loggedInUser) {
+        await signOut();
+      }
       console.log("response", JSON.stringify(response?.data?.url, null, 2));
-      // router.push(response?.data?.url);
+      router.push(response?.data?.url);
       reset();
     } else {
       toast.error("Failed to send invite");
@@ -178,7 +185,7 @@ export default function ScanQRPage() {
           ) : (
             <span className="flex items-center gap-2">
               <ArrowRight className="w-4 h-4" />
-              Get Link
+              Start Onboarding
             </span>
           )}
         </Button>
