@@ -10,7 +10,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { getClientInfo, sendInviteForScanQR } from "./action";
 import { toast } from "sonner";
-import { logout } from "@/app/actions";
+import { signOut } from "next-auth/react";
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone is required"),
@@ -69,7 +69,7 @@ export default function ScanQRPage() {
       // console.log("response", response);
       // const token = response?.data?.token;
       // localStorage.setItem("invite_token", token);
-      await logout();
+      await signOut();
       console.log("response", JSON.stringify(response?.data?.url, null, 2));
       router.push(response?.data?.url);
       reset();
