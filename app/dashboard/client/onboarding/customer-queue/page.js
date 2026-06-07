@@ -15,7 +15,7 @@ export default function Page() {
       <div>
         <CustomerQueueHeader />
         <CustomerDashboard />
-        <Tabs defaultValue="pending-collection">
+        <Tabs defaultValue="all-applications">
           <TabsList>
             <TabsTrigger value="all-applications">
               All

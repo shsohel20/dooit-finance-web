@@ -20,6 +20,7 @@ export default function CustomerQueueDetails() {
     setFetching(true);
     try {
       const response = await getCustomerById(id);
+      console.log("response", response);
       if (response.success) {
         setDetails(response.data);
       }

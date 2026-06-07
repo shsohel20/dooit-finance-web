@@ -25,6 +25,7 @@ import {
   ImageIcon,
   Download,
   GitPullRequest,
+  Mail,
 } from "lucide-react";
 import { getCustomerById } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 import { cn, dateShowFormat } from "@/lib/utils";
@@ -32,7 +33,6 @@ import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
 import RiskScoreCard from "@/components/RiskScoreCard";
 
 export const DetailViewModal = ({ details, fetching }) => {
-  console.log("details", details);
   const [openRelatedParties, setOpenRelatedParties] = useState(false);
 
   const riskAssessment = details?.riskAssessment || {};
@@ -42,12 +42,6 @@ export const DetailViewModal = ({ details, fetching }) => {
     if (score <= 20) return "text-success";
     if (score <= 30) return "text-warning-foreground";
     return "text-danger";
-  };
-  const getRiskBadgeColor = (score) => {
-    if (score === 0) return "bg-muted text-muted-foreground border-border";
-    if (score <= 20) return "bg-success/15 text-success border-success/30";
-    if (score <= 30) return "bg-warning/15 text-warning-foreground border-warning/30";
-    return "bg-danger/15 text-danger border-danger/30";
   };
 
   const isPep = details?.isPEP;
@@ -71,59 +65,107 @@ export const DetailViewModal = ({ details, fetching }) => {
       <div className="col-span-9">
         <div className=" mx-auto ">
           {/* User Profile Section */}
-          <Card className="mb-6 overflow-hidden border-0 bg-muted/50">
-            <div className="p-4">
+          <Card className="mb-6 overflow-hidden border-0">
+            <div className="">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
-                  <Avatar className="size-16 border-2 border-primary/20">
+                  <Avatar className="size-12  rounded ">
                     <AvatarImage src="/images/image.png" />
-                    <AvatarFallback className="bg-primary/10 text-primary">
+                    <AvatarFallback className="bg-primary/10 text-primary rounded">
                       <User className="size-8" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">
-                      <h2 className=" font-semibold capitalize">
+                      <h4 className=" font-semibold capitalize">
                         {details?.personalKyc?.personal_form?.customer_details?.given_name +
                           " " +
                           details?.personalKyc?.personal_form?.customer_details?.middle_name +
                           " " +
                           details?.personalKyc?.personal_form?.customer_details?.surname}
-                      </h2>
-                      <Badge
+                      </h4>
+                      {/* <Badge
                         variant="outline"
                         className="bg-warning/10 text-warning-foreground border-warning/30"
                       >
                         <Clock className="size-3 mr-1" />
                         Pending Review
-                      </Badge>
+                      </Badge> */}
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {details?.personalKyc?.personal_form?.contact_details?.email}
                     </p>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="size-3" />
-                        Created: {dateShowFormat(details?.createdAt)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="size-3" />
-                        Updated: {dateShowFormat(details?.updatedAt)}
-                      </span>
+                    <div
+                      className="text-xs gap-1.5"
+                      style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}
+                    >
+                      <div className="full-span-subgrid">
+                        <span className="flex items-center gap-1">
+                          <Clock className="size-3 mr-1" /> Status{" "}
+                        </span>
+                        <span className="font-semibold capitalize">
+                          {" "}
+                          {details?.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                      <div className="full-span-subgrid">
+                        <span className="flex items-center gap-1">
+                          <AlertTriangle className="size-3 mr-1" /> PEP{" "}
+                        </span>
+                        <span className="font-semibold capitalize">
+                          {" "}
+                          {details?.isPep ? "Yes" : "No"}
+                        </span>
+                      </div>
+                      <div className="full-span-subgrid">
+                        <span className="flex items-center gap-1">
+                          <ShieldAlert className="size-3 mr-1" /> Sanctions{" "}
+                        </span>
+                        <span className="font-semibold capitalize">
+                          {" "}
+                          {details?.sanction ? "Yes" : "No"}
+                        </span>
+                      </div>
+                      <div className="full-span-subgrid">
+                        <span className="flex items-center gap-1">
+                          <FileText className="size-3 mr-1" /> ID
+                        </span>
+                        <span className="font-semibold capitalize"> {details?.id}</span>
+                      </div>
+                      {/* contact info */}
+                      <div className="full-span-subgrid">
+                        <span className="flex items-center gap-1">
+                          <Phone className="size-3 mr-1" /> Phone
+                        </span>
+                        <span className="font-semibold capitalize"> {details?.user?.phone}</span>
+                      </div>
+                      <div className="full-span-subgrid">
+                        <span className="flex items-center gap-1">
+                          <Mail className="size-3 mr-1" /> Email
+                        </span>
+                        <span className="font-semibold capitalize"> {details?.user?.email}</span>
+                      </div>
+                      <div className="full-span-subgrid">
+                        <span className="flex items-center gap-1">
+                          <Globe className="size-3 mr-1" /> Country
+                        </span>
+                        <span className="font-semibold capitalize"> {details?.country}</span>
+                      </div>
+                      <div className="full-span-subgrid">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="size-3 mr-1" /> Address
+                        </span>
+                        <span className="font-semibold capitalize"> {getAddress()}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs text-muted-foreground mb-1">Review Timeline</div>
-                  <div className="text-2xl font-bold text-primary">27 days</div>
                 </div>
               </div>
             </div>
           </Card>
 
           {/* Status Cards Grid */}
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4  mb-6">
-            {/* Current Status Card */}
+          {/* <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4  mb-6">
             <Card className="border-0 bg-muted/20">
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
@@ -151,7 +193,6 @@ export const DetailViewModal = ({ details, fetching }) => {
               </div>
             </Card>
 
-            {/* Risk Assessment Card */}
             <Card className="border-0">
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
@@ -238,13 +279,12 @@ export const DetailViewModal = ({ details, fetching }) => {
                 </p>
               </div>
             </Card>
-          </div>
+          </div> */}
 
           {/* Main Content Grid */}
           <div className="grid gap-12 lg:grid-cols-2">
             {/* Left Column - Personal Information */}
-            <div className="">
-              {/* Personal Information */}
+            {/* <div className="">
               <Card className="border-0">
                 <div className="">
                   <h3 className="text-sm font-semibold mb-6 flex items-center gap-2">
@@ -292,11 +332,10 @@ export const DetailViewModal = ({ details, fetching }) => {
                   </div>
                 </div>
               </Card>
-            </div>
+            </div> */}
 
             {/* Right Column - Timeline & Activity */}
-            <div className="space-y-6">
-              {/* Onboarding Timeline */}
+            {/* <div className="space-y-6">
               <Card className="border-0">
                 <div className="">
                   <h3 className="text-sm font-semibold mb-6 flex items-center gap-2">
@@ -325,7 +364,7 @@ export const DetailViewModal = ({ details, fetching }) => {
                   </div>
                 </div>
               </Card>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
