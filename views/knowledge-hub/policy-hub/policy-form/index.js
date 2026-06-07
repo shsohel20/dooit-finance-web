@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import DocumentTypeSelect from "@/components/ui/DocumentTypeSelect";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 const EditorForm = dynamic(() => import("./Editor"), { ssr: false });
 const schema = z.object({
@@ -36,11 +37,16 @@ export default function PolicyForm() {
   const router = useRouter();
   const [allTemplates, setAllTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
   useEffect(() => {
     const fetchAllTemplates = async () => {
-      const response = await getAllTemplates();
-      console.log("tempresponse", response);
-      setAllTemplates(response.data);
+      try {
+        const response = await getAllTemplates();
+        console.log("tempresponse", response);
+        setAllTemplates(response.data);
+      } finally {
+        setTemplatesLoading(false);
+      }
     };
     fetchAllTemplates();
   }, []);
@@ -149,7 +155,7 @@ export default function PolicyForm() {
 
       <div className="space-y-8 max-w-5xl">
         {/* Template Selection */}
-        {allTemplates.length > 0 && (
+        {(templatesLoading || allTemplates.length > 0) && (
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <div>
@@ -168,50 +174,56 @@ export default function PolicyForm() {
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3  gap-4">
-              {allTemplates.map((template) => {
-                const isSelected = selectedTemplate?.id === template.id;
-                return (
-                  <div
-                    key={template.id}
-                    onClick={() => handleSelectTemplate(template)}
-                    className={cn(
-                      "relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-300 group flex  gap-2 px-4",
-                      "hover:-translate-y-1.5 hover:shadow-lg",
-                      isSelected ? "border-primary shadow-md -translate-y-1.5" : "border-border",
-                    )}
-                  >
-                    {/* Icon header */}
-                    <div className="h-[88px] flex pt-4 justify-center  transition-colors duration-300 ">
-                      <FileText
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {templatesLoading
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="rounded-xl overflow-hidden border border-border">
+                      <div className="h-[88px] bg-muted/50 flex items-center justify-center">
+                        <Skeleton className="w-9 h-9 rounded-lg" />
+                      </div>
+                      <div className="p-3 space-y-2">
+                        <Skeleton className="h-3.5 w-3/4 rounded" />
+                        <Skeleton className="h-3 w-full rounded" />
+                        <Skeleton className="h-3 w-2/3 rounded" />
+                      </div>
+                    </div>
+                  ))
+                : allTemplates.map((template) => {
+                    const isSelected = selectedTemplate?.id === template.id;
+                    return (
+                      <div
+                        key={template.id}
+                        onClick={() => handleSelectTemplate(template)}
                         className={cn(
-                          "size-6 transition-colors duration-300",
-                          isSelected ? "text-primary" : "text-muted-foreground",
+                          "relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-300 group flex gap-2 px-4",
+                          "hover:-translate-y-1.5 hover:shadow-lg",
+                          isSelected ? "border-primary shadow-md -translate-y-1.5" : "border-border",
                         )}
-                      />
-                      {isSelected && (
-                        <div className="absolute top-2 right-2">
-                          <CheckCircle2 className="w-4 h-4 text-primary" />
+                      >
+                        <div className="h-[88px] flex pt-4 justify-center transition-colors duration-300">
+                          <FileText
+                            className={cn(
+                              "size-6 transition-colors duration-300",
+                              isSelected ? "text-primary" : "text-muted-foreground",
+                            )}
+                          />
+                          {isSelected && (
+                            <div className="absolute top-2 right-2">
+                              <CheckCircle2 className="w-4 h-4 text-primary" />
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    {/* Card body */}
-                    <div
-                      className={cn(
-                        "p-3 transition-colors duration-300",
-                        // isSelected ? "bg-primary/5" : " group-hover:bg-muted/20",
-                      )}
-                    >
-                      <p className="font-semibold text-sm leading-snug truncate">{template.name}</p>
-                      {template.description && (
-                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
-                          {template.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                        <div className="p-3 transition-colors duration-300">
+                          <p className="font-semibold text-sm leading-snug truncate">{template.name}</p>
+                          {template.description && (
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                              {template.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
             </div>
           </div>
         )}
