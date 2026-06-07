@@ -6,9 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FormField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/button";
-import { Circle, Loader2, Plus, Trash } from "lucide-react";
+import { CheckCircle2, FileText, Loader2, Plus, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { PageDescription, PageHeader, PageTitle } from "@/components/common";
 import {
   createPolicyHub,
@@ -140,137 +139,218 @@ export default function PolicyForm() {
   const handleSelectTemplate = (template) => {
     setSelectedTemplate(selectedTemplate?.id === template.id ? null : template);
   };
+
   return (
-    <div className="pb-8">
+    <div className="pb-10">
       <PageHeader>
         <PageTitle>Policy Form</PageTitle>
         <PageDescription>Create a new policy using AI</PageDescription>
       </PageHeader>
-      <div className="space-y-4 max-w-xl">
-        <FormField form={form} name="name" label="Name" placeholder="Enter Policy Name" />
-        <FormField
-          form={form}
-          name="address"
-          label="Address"
-          type="textarea"
-          placeholder="Enter Address"
-        />
-        <FormField
-          form={form}
-          name="compliance_officer"
-          label="Compliance Officer"
-          placeholder="Enter Compliance Officer"
-        />
-        <FormField
-          form={form}
-          name="registration_date"
-          label="Registration Date"
-          type="date"
-          placeholder="Enter Registration Date"
-        />
-        <div className="flex flex-col items-start gap-2">
-          {services.fields.map((service, index) => {
-            return (
-              <div key={index} className="w-full">
-                {index === 0 && <Label>Services</Label>}
-                <div className="flex items-end gap-2 w-full ">
-                  <Controller
-                    control={form.control}
-                    name={`services.${index}`}
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        label="Service"
-                        className="w-full"
-                        placeholder="Enter Service"
-                      />
-                    )}
-                  />
-                  {index !== 0 && (
-                    <Button size="icon" variant={"ghost"} onClick={() => services.remove(index)}>
-                      <Trash />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-          <Button variant="outline" size="sm" onClick={() => services.append("")}>
-            <Plus size={14} />
-          </Button>
-        </div>
+
+      <div className="space-y-8 max-w-5xl">
+        {/* Template Selection */}
         {allTemplates.length > 0 && (
-          <div className="grid grid-cols-2 gap-4">
-            {allTemplates.map((template) => (
-              <div
-                key={template.id}
-                className={cn(
-                  "cursor-pointer  border-border rounded-lg p-4 flex  gap-2 items-center hover:border-primary hover:bg-primary/10 transition-all duration-300 border",
-                  {
-                    "bg-primary/5": selectedTemplate?.id === template.id,
-                  },
-                )}
-                onClick={() => handleSelectTemplate(template)}
-              >
-                <div>
-                  <Circle
-                    className={cn("w-4 h-4", {
-                      "text-primary": selectedTemplate?.id === template.id,
-                    })}
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-bold">{template.name}</p>
-                  <p>{template.description}</p>
-                </div>
+          <div className="space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-base font-semibold">Choose a Template</h3>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Select a template or leave blank to generate from scratch
+                </p>
               </div>
-            ))}
+              {selectedTemplate && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedTemplate(null)}
+                  className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 mt-1 shrink-0"
+                >
+                  Clear selection
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3  gap-4">
+              {allTemplates.map((template) => {
+                const isSelected = selectedTemplate?.id === template.id;
+                return (
+                  <div
+                    key={template.id}
+                    onClick={() => handleSelectTemplate(template)}
+                    className={cn(
+                      "relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all duration-300 group flex  gap-2 px-4",
+                      "hover:-translate-y-1.5 hover:shadow-lg",
+                      isSelected ? "border-primary shadow-md -translate-y-1.5" : "border-border",
+                    )}
+                  >
+                    {/* Icon header */}
+                    <div className="h-[88px] flex pt-4 justify-center  transition-colors duration-300 ">
+                      <FileText
+                        className={cn(
+                          "size-6 transition-colors duration-300",
+                          isSelected ? "text-primary" : "text-muted-foreground",
+                        )}
+                      />
+                      {isSelected && (
+                        <div className="absolute top-2 right-2">
+                          <CheckCircle2 className="w-4 h-4 text-primary" />
+                        </div>
+                      )}
+                    </div>
+                    {/* Card body */}
+                    <div
+                      className={cn(
+                        "p-3 transition-colors duration-300",
+                        // isSelected ? "bg-primary/5" : " group-hover:bg-muted/20",
+                      )}
+                    >
+                      <p className="font-semibold text-sm leading-snug truncate">{template.name}</p>
+                      {template.description && (
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                          {template.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField form={form} name="phone" label="Phone" />
-          <FormField form={form} name="email" label="Email" />
-          <FormField
-            form={form}
-            name="industry"
-            type="select"
-            options={industryOptions}
-            label="Industry"
-          />
-          <FormField
-            form={form}
-            name="llm_model"
-            type="select"
-            options={llmModelOptions}
-            label="LLM Model"
-          />
-        </div>
-        <div className="space-y-1">
-          <Label>Document Type</Label>
-          <Controller
-            control={form.control}
-            name="document_type"
-            render={({ field, fieldState }) => (
-              <>
-                <DocumentTypeSelect
-                  value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
+
+        {/* Two-column form layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+          {/* Left column — 3/5 */}
+          <div className="lg:col-span-3 space-y-5">
+            {/* Company Info */}
+            <div className="rounded-xl border bg-card p-5 space-y-4">
+              <p className="text-sm font-semibold">Company Information</p>
+              <FormField
+                form={form}
+                name="name"
+                label="Company Name"
+                placeholder="Enter company name"
+              />
+              <FormField
+                form={form}
+                name="address"
+                label="Address"
+                type="textarea"
+                placeholder="Enter full address"
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  form={form}
+                  name="compliance_officer"
+                  label="Compliance Officer"
+                  placeholder="Full name"
                 />
-                {fieldState.error && (
-                  <p className="text-xs text-destructive mt-1">{fieldState.error.message}</p>
+                <FormField
+                  form={form}
+                  name="registration_date"
+                  label="Registration Date"
+                  type="date"
+                />
+              </div>
+            </div>
+
+            {/* Services */}
+            <div className="rounded-xl border bg-card p-5 space-y-3">
+              <p className="text-sm font-semibold">Services</p>
+              <div className="space-y-2">
+                {services.fields.map((service, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Controller
+                      control={form.control}
+                      name={`services.${index}`}
+                      render={({ field }) => (
+                        <Input {...field} className="flex-1" placeholder={`Service ${index + 1}`} />
+                      )}
+                    />
+                    {index !== 0 && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-muted-foreground hover:text-destructive shrink-0"
+                        onClick={() => services.remove(index)}
+                      >
+                        <Trash className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => services.append("")}
+              >
+                <Plus size={14} />
+                Add Service
+              </Button>
+            </div>
+          </div>
+
+          {/* Right column — 2/5 */}
+          <div className="lg:col-span-2 space-y-5">
+            {/* Contact & Config */}
+            <div className="rounded-xl border bg-card p-5 space-y-4">
+              <p className="text-sm font-semibold">Contact & Configuration</p>
+              <FormField form={form} name="phone" label="Phone" placeholder="+1 (555) 000-0000" />
+              <FormField form={form} name="email" label="Email" placeholder="contact@example.com" />
+              <FormField
+                form={form}
+                name="industry"
+                type="select"
+                options={industryOptions}
+                label="Industry"
+              />
+              <FormField
+                form={form}
+                name="llm_model"
+                type="select"
+                options={llmModelOptions}
+                label="LLM Model"
+              />
+            </div>
+
+            {/* Document Type */}
+            <div className="rounded-xl border bg-card p-5 space-y-3">
+              <p className="text-sm font-semibold">Document Type</p>
+              <Controller
+                control={form.control}
+                name="document_type"
+                render={({ field, fieldState }) => (
+                  <>
+                    <DocumentTypeSelect
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
+                    {fieldState.error && (
+                      <p className="text-xs text-destructive mt-1">{fieldState.error.message}</p>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          />
+              />
+            </div>
+
+            {/* Submit */}
+            <Button
+              disabled={loading}
+              type="submit"
+              className="w-full gap-2"
+              onClick={form.handleSubmit(onSubmit)}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating…
+                </>
+              ) : (
+                "Save"
+              )}
+            </Button>
+          </div>
         </div>
-        <Button
-          disabled={loading}
-          type="submit"
-          className={"w-full"}
-          onClick={form.handleSubmit(onSubmit)}
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
-        </Button>
       </div>
     </div>
   );
