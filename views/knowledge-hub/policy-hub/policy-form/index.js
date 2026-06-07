@@ -1,19 +1,24 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FormField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, Trash } from "lucide-react";
+import { Circle, Loader2, Plus, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageDescription, PageHeader, PageTitle } from "@/components/common";
-import { generatePolicy } from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
+import {
+  createPolicyHub,
+  generatePolicy,
+  getAllTemplates,
+} from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import DocumentTypeSelect from "@/components/ui/DocumentTypeSelect";
+import { cn } from "@/lib/utils";
 const EditorForm = dynamic(() => import("./Editor"), { ssr: false });
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -30,6 +35,16 @@ const schema = z.object({
 export default function PolicyForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [allTemplates, setAllTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  useEffect(() => {
+    const fetchAllTemplates = async () => {
+      const response = await getAllTemplates();
+      console.log("tempresponse", response);
+      setAllTemplates(response.data);
+    };
+    fetchAllTemplates();
+  }, []);
   const initialData = {
     name: "",
     address: "",
@@ -47,7 +62,6 @@ export default function PolicyForm() {
     mode: "onChange",
     resolver: zodResolver(schema),
   });
-  const [content, setContent] = useState(null);
 
   const llmModelOptions = [
     {
@@ -95,15 +109,24 @@ export default function PolicyForm() {
   });
 
   const onSubmit = async (data) => {
-    console.log('data', JSON.stringify(data, null, 2))
     try {
       setLoading(true);
-      const response = await generatePolicy(data);
-      if(response.success) {
-        toast.success('Policy generated successfully!');
-        router.push('/dashboard/client/knowledge-hub/policy-hub');
+      const templatePayload = {
+        docs: selectedTemplate?.docs,
+        metadata: {
+          ...data,
+        },
+        is_active: true,
+      };
+      console.log("templatePayload", JSON.stringify(templatePayload, null, 2));
+      const action = selectedTemplate ? createPolicyHub(templatePayload) : generatePolicy(data);
+
+      const response = await action;
+      if (response.success) {
+        toast.success("Policy generated successfully!");
+        router.push("/dashboard/client/knowledge-hub/policy-hub");
       } else {
-        toast.error('Failed to generate policy!');
+        toast.error("Failed to generate policy!");
       }
       console.log("response", response);
     } catch (error) {
@@ -113,6 +136,10 @@ export default function PolicyForm() {
     }
   };
   console.log("errors", form.formState.errors);
+
+  const handleSelectTemplate = (template) => {
+    setSelectedTemplate(selectedTemplate?.id === template.id ? null : template);
+  };
   return (
     <div className="pb-8">
       <PageHeader>
@@ -120,10 +147,27 @@ export default function PolicyForm() {
         <PageDescription>Create a new policy using AI</PageDescription>
       </PageHeader>
       <div className="space-y-4 max-w-xl">
-        <FormField form={form} name="name" label="Name" />
-        <FormField form={form} name="address" label="Address" type="textarea" />
-        <FormField form={form} name="compliance_officer" label="Compliance Officer" />
-        <FormField form={form} name="registration_date" label="Registration Date" type="date" />
+        <FormField form={form} name="name" label="Name" placeholder="Enter Policy Name" />
+        <FormField
+          form={form}
+          name="address"
+          label="Address"
+          type="textarea"
+          placeholder="Enter Address"
+        />
+        <FormField
+          form={form}
+          name="compliance_officer"
+          label="Compliance Officer"
+          placeholder="Enter Compliance Officer"
+        />
+        <FormField
+          form={form}
+          name="registration_date"
+          label="Registration Date"
+          type="date"
+          placeholder="Enter Registration Date"
+        />
         <div className="flex flex-col items-start gap-2">
           {services.fields.map((service, index) => {
             return (
@@ -133,7 +177,14 @@ export default function PolicyForm() {
                   <Controller
                     control={form.control}
                     name={`services.${index}`}
-                    render={({ field }) => <Input {...field} label="Service" className="w-full" />}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        label="Service"
+                        className="w-full"
+                        placeholder="Enter Service"
+                      />
+                    )}
                   />
                   {index !== 0 && (
                     <Button size="icon" variant={"ghost"} onClick={() => services.remove(index)}>
@@ -148,6 +199,34 @@ export default function PolicyForm() {
             <Plus size={14} />
           </Button>
         </div>
+        {allTemplates.length > 0 && (
+          <div className="grid grid-cols-2 gap-4">
+            {allTemplates.map((template) => (
+              <div
+                key={template.id}
+                className={cn(
+                  "cursor-pointer  border-border rounded-lg p-4 flex  gap-2 items-center hover:border-primary hover:bg-primary/10 transition-all duration-300 border",
+                  {
+                    "bg-primary/5": selectedTemplate?.id === template.id,
+                  },
+                )}
+                onClick={() => handleSelectTemplate(template)}
+              >
+                <div>
+                  <Circle
+                    className={cn("w-4 h-4", {
+                      "text-primary": selectedTemplate?.id === template.id,
+                    })}
+                  />
+                </div>
+                <div>
+                  <p className="text-sm font-bold">{template.name}</p>
+                  <p>{template.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4">
           <FormField form={form} name="phone" label="Phone" />
           <FormField form={form} name="email" label="Email" />
@@ -184,8 +263,13 @@ export default function PolicyForm() {
             )}
           />
         </div>
-        <Button disabled={loading} type="submit" className={"w-full"} onClick={form.handleSubmit(onSubmit)}>
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+        <Button
+          disabled={loading}
+          type="submit"
+          className={"w-full"}
+          onClick={form.handleSubmit(onSubmit)}
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
         </Button>
       </div>
     </div>
