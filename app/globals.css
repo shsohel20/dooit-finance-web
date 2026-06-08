@@ -178,6 +178,11 @@ textarea,
   border-color: var(--danger);
   border-width: 5px;
 }
+.full-span-subgrid {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
