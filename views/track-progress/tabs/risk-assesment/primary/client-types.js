@@ -1,8 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const clientTypes = [
+export const CLIENT_TYPES = [
   {
     key: "Lawyers&Conveyancers",
     label: "Lawyers & Conveyancers",
@@ -35,10 +35,8 @@ const clientTypes = [
   },
 ];
 
-export default function ClientTypesStep() {
-  const [selected, setSelected] = useState({});
-
-  const toggle = (key) => setSelected((prev) => ({ ...prev, [key]: !prev[key] }));
+export default function ClientTypesStep({ selected = {}, onChange }) {
+  const toggle = (key) => onChange({ ...selected, [key]: !selected[key] });
 
   return (
     <div>
@@ -46,7 +44,7 @@ export default function ClientTypesStep() {
       <p className="text-sm text-muted-foreground mb-6">Select all that apply</p>
 
       <div className="space-y-4">
-        {clientTypes.map((type) => (
+        {CLIENT_TYPES.map((type) => (
           <div
             key={type.key}
             className={`border rounded-lg p-5 cursor-pointer transition-colors ${

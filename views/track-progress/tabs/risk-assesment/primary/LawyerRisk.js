@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -65,10 +65,8 @@ const questions = [
   },
 ];
 
-export default function LawyerRisk() {
-  const [answers, setAnswers] = useState({});
-
-  const setAnswer = (key, value) => setAnswers((prev) => ({ ...prev, [key]: value }));
+export default function LawyerRisk({ answers = {}, onChange }) {
+  const setAnswer = (key, value) => onChange({ ...answers, [key]: value });
 
   return (
     <div>

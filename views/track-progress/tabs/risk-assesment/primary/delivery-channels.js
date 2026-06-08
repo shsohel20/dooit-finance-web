@@ -12,14 +12,13 @@ const channels = [
   {
     key: "email",
     label: "Email",
-    description:
-      "The client is engaged or provided access to a service through emails.",
+    description: "The client is engaged or provided access to a service through emails.",
   },
   {
-    key: "telephone",
-    label: "Telephone",
+    key: "Mobile",
+    label: "Mobile",
     description:
-      "The client is engaged or provided access to a service through the telephone (including calls and text messages).",
+      "The client is engaged or provided access to a service through mobile (including calls and text messages).",
   },
   {
     key: "video_conferencing",
@@ -38,8 +37,7 @@ const channels = [
 export default function DeliveryChannelsStep() {
   const [selected, setSelected] = useState({});
 
-  const toggle = (key) =>
-    setSelected((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggle = (key) => setSelected((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
     <div>
@@ -47,8 +45,7 @@ export default function DeliveryChannelsStep() {
         Which of the following ways do your clients interact with you?
       </h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Select{" "}
-        <span className="text-teal-600 font-medium">all that apply</span>
+        Select <span className="text-teal-600 font-medium">all that apply</span>
       </p>
 
       <div className="space-y-4">
