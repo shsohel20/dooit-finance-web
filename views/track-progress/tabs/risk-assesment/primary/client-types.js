@@ -3,12 +3,12 @@ import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export const CLIENT_TYPES = [
-  {
-    key: "Lawyers&Conveyancers",
-    label: "Lawyers & Conveyancers",
-    description:
-      "A lawyer is a professional who provides legal advice and representation to clients. A conveyancer is a professional who provides legal advice and representation to clients on property matters.",
-  },
+  // {
+  //   key: "Lawyers&Conveyancers",
+  //   label: "Lawyers & Conveyancers",
+  //   description:
+  //     "A lawyer is a professional who provides legal advice and representation to clients. A conveyancer is a professional who provides legal advice and representation to clients on property matters.",
+  // },
   {
     key: "individuals",
     label: "Individuals and sole traders",

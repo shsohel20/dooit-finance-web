@@ -5,6 +5,8 @@ import CompanyProgress from "./company-info";
 import ProgressTab from "./tabs";
 
 export default function TrackProgress() {
-  const [initalized, setInitialized] = useState(true);
-  return <div>{initalized ? <ProgressTab /> : <CompanyProgress />}</div>;
+  const [initalized, setInitialized] = useState(false);
+  return (
+    <div>{initalized ? <ProgressTab /> : <CompanyProgress setInitialized={setInitialized} />}</div>
+  );
 }

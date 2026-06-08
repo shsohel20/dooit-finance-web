@@ -47,6 +47,12 @@ function buildRiskAssessmentSteps(clientTypes = {}) {
       Component: ClientTypesStep,
       answersKey: "client_types",
     },
+    {
+      key: "lawyer_risk",
+      label: "Lawyer risk factors",
+      Component: LawyerRisk,
+      answersKey: "lawyer_risk",
+    },
   ];
 
   getSelectedClientTypes(clientTypes).forEach((clientTypeKey) => {

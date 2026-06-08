@@ -744,7 +744,7 @@ const VerificationJourneyPanel = ({ journey, journeyIndex, clientLabel }) => {
   const displayStatus = getJourneyDisplayStatus(journey);
   const statusCfg = JOURNEY_STATUS_CONFIG[displayStatus] ?? STEP_STATUS_CONFIG.pending;
   const meta = journey?.metadata || {};
-
+  const [openEventLog, setOpenEventLog] = useState(false);
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50/50 overflow-hidden">
       <div className="bg-white px-5 py-4 border-b border-slate-100">
@@ -813,7 +813,7 @@ const VerificationJourneyPanel = ({ journey, journeyIndex, clientLabel }) => {
             Event Log
           </p>
           <div className="divide-y divide-slate-100">
-            {journey.events.map((event, i) => (
+            {journey.events.slice(0, openEventLog ? journey.events.length : 3).map((event, i) => (
               <div
                 key={event._id ?? i}
                 className="grid items-start gap-3 py-2.5 text-xs"
@@ -840,6 +840,15 @@ const VerificationJourneyPanel = ({ journey, journeyIndex, clientLabel }) => {
                 {event.status && <StepBadge status={event.status} />}
               </div>
             ))}
+            <div className="flex justify-end">
+              {journey.events.length > 3 && (
+                <Button variant="link" className="" onClick={() => setOpenEventLog(!openEventLog)}>
+                  <span className="font-mono  tabular-nums">
+                    Show {openEventLog ? "less" : "more"} events
+                  </span>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -932,7 +941,7 @@ export const DetailViewModal = ({ details, fetching }) => {
           </div>
         </Card>
       )}
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-12 gap-8">
         {/* Related parties trigger */}
         <div className="fixed top-1/2 right-0 transform -translate-y-1/2 z-10">
           <Button variant="outline" size="icon" onClick={() => setOpenRelatedParties(true)}>
@@ -941,18 +950,20 @@ export const DetailViewModal = ({ details, fetching }) => {
         </div>
 
         {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────────── */}
-        <div className="col-span-3 space-y-4">
+        <div className="col-span-3 ">
           {/* Customer Profile */}
-          <Card className="border-0 p-4">
-            <div className="flex flex-col items-center text-center mb-4">
-              <Avatar className="size-14 rounded-lg mb-2">
+          <Card className="border-0 ">
+            <div className="flex gap-4 items-center ">
+              <Avatar className="size-14 rounded-lg mb-2 border">
                 <AvatarImage src={details?.user?.photoUrl} />
                 <AvatarFallback className="bg-primary/10 text-primary rounded-lg">
                   <User className="size-7" />
                 </AvatarFallback>
               </Avatar>
-              <h4 className="font-semibold text-sm leading-tight">{details?.user?.name}</h4>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{details?.user?.email}</p>
+              <div>
+                <h4 className="font-semibold text-sm leading-tight">{details?.user?.name}</h4>
+                <p className="text-[11px] text-muted-foreground ">{details?.user?.email}</p>
+              </div>
             </div>
 
             <div>
@@ -1003,8 +1014,8 @@ export const DetailViewModal = ({ details, fetching }) => {
           </Card>
 
           {/* Risk Score */}
-          <Card className="border-0 p-4">
-            <SectionLabel>Risk Score</SectionLabel>
+          <Card className="border-0 ">
+            {/* <SectionLabel>Risk Score</SectionLabel>
             <div className="text-center mb-4">
               <div
                 className={cn("text-5xl font-bold tracking-tight", getRiskLabelColor(riskLabel))}
@@ -1017,8 +1028,8 @@ export const DetailViewModal = ({ details, fetching }) => {
                   {riskLabel || "—"}
                 </span>
               </p>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden mb-3">
+            </div> */}
+            {/* <div className="h-2 bg-muted rounded-full overflow-hidden mb-3">
               <div
                 className={cn(
                   "h-full rounded-full transition-all duration-500",
@@ -1026,19 +1037,30 @@ export const DetailViewModal = ({ details, fetching }) => {
                 )}
                 style={{ width: `${riskPercent}%` }}
               />
-            </div>
-            <div className="grid grid-cols-3 gap-1 text-center">
-              {[
-                { label: "Min", value: details?.riskSummary?.maxScore ?? "—" },
-                { label: "Avg", value: details?.riskSummary?.averageScore ?? "—" },
-                { label: "Highest", value: details?.riskSummary?.highestLabel ?? "—" },
-              ].map(({ label, value }) => (
-                <div key={label} className="bg-muted/50 rounded px-2 py-1.5">
-                  <p className="text-[9px] text-muted-foreground">{label}</p>
-                  <p className="text-[11px] font-medium">{value}</p>
+            </div> */}
+            <Card className="border-0 ">
+              <div className="flex items-start justify-between mb-4">
+                <SectionLabel>Risk Assessment Breakdown</SectionLabel>
+                <div className="text-right -mt-1">
+                  <p className="text-[10px] text-muted-foreground">Total Score</p>
+                  <p className={cn("text-xl font-bold", getRiskLabelColor(riskLabel))}>
+                    {riskScore}
+                    <span className="text-xs font-normal text-muted-foreground ml-1">
+                      • {riskLabel}
+                    </span>
+                  </p>
                 </div>
-              ))}
-            </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                <RiskScoreCard name="Customer Type" item={riskAssessment?.customerType} />
+                <RiskScoreCard name="Jurisdiction" item={riskAssessment?.jurisdiction} />
+                <RiskScoreCard name="Customer Retention" item={riskAssessment?.customerRetention} />
+                <RiskScoreCard name="Channel" item={riskAssessment?.channel} />
+                <RiskScoreCard name="Occupation" item={riskAssessment?.occupation} />
+                <RiskScoreCard name="Product / Industry" item={riskAssessment?.product} />
+              </div>
+            </Card>
           </Card>
         </div>
 
@@ -1046,7 +1068,7 @@ export const DetailViewModal = ({ details, fetching }) => {
         <div className="col-span-9 space-y-5">
           {/* KYC Rejection Reason */}
           {/* Personal KYC Data */}{" "}
-          <Card className="border-0 p-4">
+          <Card className="border-0 ">
             <SectionLabel>Personal KYC Data</SectionLabel>
 
             <div className="grid lg:grid-cols-5 grid-cols-2 md:grid-cols-3 gap-2.5 mb-4">
@@ -1195,29 +1217,6 @@ export const DetailViewModal = ({ details, fetching }) => {
             )}
           </div>
           {/* Risk Assessment Breakdown */}
-          <Card className="border-0 p-4">
-            <div className="flex items-start justify-between mb-4">
-              <SectionLabel>Risk Assessment Breakdown</SectionLabel>
-              <div className="text-right -mt-1">
-                <p className="text-[10px] text-muted-foreground">Total Score</p>
-                <p className={cn("text-xl font-bold", getRiskLabelColor(riskLabel))}>
-                  {riskScore}
-                  <span className="text-xs font-normal text-muted-foreground ml-1">
-                    • {riskLabel}
-                  </span>
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <RiskScoreCard name="Customer Type" item={riskAssessment?.customerType} />
-              <RiskScoreCard name="Jurisdiction" item={riskAssessment?.jurisdiction} />
-              <RiskScoreCard name="Customer Retention" item={riskAssessment?.customerRetention} />
-              <RiskScoreCard name="Channel" item={riskAssessment?.channel} />
-              <RiskScoreCard name="Occupation" item={riskAssessment?.occupation} />
-              <RiskScoreCard name="Product / Industry" item={riskAssessment?.product} />
-            </div>
-          </Card>
         </div>
 
         {openRelatedParties && (
