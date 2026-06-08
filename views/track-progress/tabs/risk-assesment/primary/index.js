@@ -5,11 +5,16 @@ import { Button } from "@/components/ui/button";
 import ClientTypesStep from "./client-types";
 import DeliveryChannelsStep from "./delivery-channels";
 import DesignatedServicesStep from "./designated-services";
+import LawyerRisk from "./LawyerRisk";
 
 const STEPS = [
   { key: "client_types", label: "Client Types", component: <ClientTypesStep /> },
-  { key: "delivery_channels", label: "Delivery channels", component: <DeliveryChannelsStep /> },
-  { key: "designated_services", label: "Designated services risk factors", component: <DesignatedServicesStep /> },
+  { key: "delivery_channels", label: "Delivery channels", component: <LawyerRisk /> },
+  {
+    key: "designated_services",
+    label: "Designated services risk factors",
+    component: <DesignatedServicesStep />,
+  },
   { key: "client_risk", label: "Client risk factors", component: null },
   { key: "delivery_risk", label: "Delivery channel risk factors", component: null },
   { key: "country", label: "Country", component: null },
@@ -47,8 +52,8 @@ function ProgressSidebar({ currentStep }) {
                   active
                     ? "text-sm font-semibold text-foreground"
                     : done
-                    ? "text-sm text-foreground"
-                    : "text-sm text-muted-foreground"
+                      ? "text-sm text-foreground"
+                      : "text-sm text-muted-foreground"
                 }
               >
                 {step.label}
@@ -61,7 +66,7 @@ function ProgressSidebar({ currentStep }) {
   );
 }
 
-export default function RiskAssessmentPrimary() {
+export default function RiskAssessmentPrimary({ allAnswers, setAllAnswers }) {
   const [currentStep, setCurrentStep] = useState(0);
 
   const isFirst = currentStep === 0;
@@ -80,10 +85,7 @@ export default function RiskAssessmentPrimary() {
 
         <div className="flex items-center gap-3 mt-8">
           {!isFirst && (
-            <Button
-              variant="outline"
-              onClick={() => setCurrentStep((s) => s - 1)}
-            >
+            <Button variant="outline" onClick={() => setCurrentStep((s) => s - 1)}>
               Back
             </Button>
           )}

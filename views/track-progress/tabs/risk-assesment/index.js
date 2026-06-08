@@ -5,6 +5,7 @@ import PrimarySelection from "./primary";
 
 const RiskAssessmentTab = () => {
   const [started, setStarted] = useState(false);
+  const [allAnswers, setAllAnswers] = useState({});
 
   const handleStart = () => {
     setStarted(true);
@@ -12,7 +13,7 @@ const RiskAssessmentTab = () => {
   return (
     <div>
       {started ? (
-        <PrimarySelection />
+        <PrimarySelection allAnswers={allAnswers} setAllAnswers={setAllAnswers} />
       ) : (
         <div className="h-[50vh] grid place-items-center">
           <div className="flex flex-col items-center">

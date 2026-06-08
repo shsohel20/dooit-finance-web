@@ -4,6 +4,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const clientTypes = [
   {
+    key: "Lawyers&Conveyancers",
+    label: "Lawyers & Conveyancers",
+    description:
+      "A lawyer is a professional who provides legal advice and representation to clients. A conveyancer is a professional who provides legal advice and representation to clients on property matters.",
+  },
+  {
     key: "individuals",
     label: "Individuals and sole traders",
     description:
@@ -32,14 +38,11 @@ const clientTypes = [
 export default function ClientTypesStep() {
   const [selected, setSelected] = useState({});
 
-  const toggle = (key) =>
-    setSelected((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggle = (key) => setSelected((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-foreground mb-1">
-        Who are your clients?
-      </h1>
+      <h1 className="text-2xl font-semibold text-foreground mb-1">Who are your clients?</h1>
       <p className="text-sm text-muted-foreground mb-6">Select all that apply</p>
 
       <div className="space-y-4">
