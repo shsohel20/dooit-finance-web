@@ -22,7 +22,7 @@ export default function CustomerQueueDetails() {
       const response = await getCustomerById(id);
       console.log("response", response);
       if (response.success) {
-        setDetails(response.data);
+        setDetails({ ...response.data, journeys: response.journeys });
       }
     } catch (error) {
     } finally {
