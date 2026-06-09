@@ -28,7 +28,7 @@ export const fileUploadOnCloudinary = async (file) => {
     false,
     true,
   );
-  // console.log("upload res", res);
+  console.log("upload res", res);
   return res.json();
 };
 

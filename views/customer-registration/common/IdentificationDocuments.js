@@ -54,8 +54,13 @@ function formatDate(dateString) {
 const getBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
+    console.log("reader", reader);
+
+    reader.onload = () => resolve(reader.result);
+
+    reader.onerror = () => reject(reader.error);
+    reader.onabort = () => reject(new Error("File reading was aborted"));
+
     reader.readAsDataURL(file);
   });
 };
@@ -101,12 +106,15 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
   }, []);
   const handleFrontChange = async (file) => {
     setFrontFile(file);
+    console.log("front file", file);
     const base64 = await getBase64(file);
+    console.log("base64", base64);
     setFrontBase64(base64.replace("data:image/jpeg;base64,", ""));
     setFrontLoading(true);
     try {
+      console.log("front upload start");
       const response = await fileUploadOnCloudinary(file);
-      // console.log("front img response", JSON.stringify(response, null, 2));
+      console.log("front img response", JSON.stringify(response, null, 2));
       if (response.success) {
         setFrontError(false);
         const existingFrontIndex = fields.findIndex((item) => item.type === "front");
