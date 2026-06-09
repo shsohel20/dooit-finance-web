@@ -3,8 +3,8 @@
 import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import { ChevronLeft } from "lucide-react";
 import React from "react";
-import { getOnboardingPhase } from "./onboardingPhase";
-import { ONBOARDING_GREEN } from "./onboardingStyles";
+import { ONBOARDING_GREEN, onboardingBackButtonClass } from "./onboardingStyles";
+import { Button } from "@/components/ui/button";
 
 const SEGMENTS = 14;
 
@@ -14,19 +14,28 @@ export default function OnboardingChrome({ onBack, showBack = true }) {
 
   return (
     <header className="shrink-0 pt-2 pb-6">
-      <div className="flex h-10 items-center">
-        {/* {showBack && Number(step) > 1 ? (
-          <button
+      <div className="flex h-12 items-center justify-between gap-3">
+        {showBack && Number(step) > 1 ? (
+          <Button
             type="button"
             onClick={onBack}
-            className="inline-flex size-10 items-center justify-center rounded-full text-neutral-800 transition-colors hover:bg-neutral-100"
-            aria-label="Go back"
+            // className={''}
+            size="sm"
+            variant="outline"
+            // className="gap-2 bg-transparent"
+            aria-label="Go back to previous step"
           >
-            <ChevronLeft className="size-6" strokeWidth={2} />
-          </button>
+            <ChevronLeft className="size-5 shrink-0" strokeWidth={2.5} />
+            Back
+          </Button>
         ) : (
-          <div className="size-10" aria-hidden />
-        )} */}
+          <div className="h-11" aria-hidden />
+        )}
+        {Number(step) > 1 && (
+          <span className="text-sm font-medium tabular-nums text-neutral-400">
+            Step {step} of {SEGMENTS}
+          </span>
+        )}
       </div>
       <div
         className="mt-1 flex gap-1.5"

@@ -7,6 +7,9 @@ export const onboardingPrimaryButtonClass =
 export const onboardingSecondaryButtonClass =
   "w-full h-12 rounded-full text-base font-semibold bg-neutral-100 text-neutral-900 hover:bg-neutral-200/90 border-0 shadow-none";
 
+export const onboardingBackButtonClass =
+  "inline-flex h-11 items-center gap-1 rounded-full border border-[#1B4332]/20 bg-[#1B4332]/[0.06] px-4 text-sm font-semibold text-[#1B4332] shadow-sm transition-all hover:border-[#1B4332]/35 hover:bg-[#1B4332]/10 active:scale-[0.98]";
+
 export const onboardingInputClass =
   "h-12 rounded-full border-neutral-200 px-5 text-base placeholder:text-neutral-400 md:text-base";
 
