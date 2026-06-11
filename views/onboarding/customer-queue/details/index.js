@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   User,
   Clock,
@@ -23,82 +22,12 @@ import {
 import { cn, dateShowFormat } from "@/lib/utils";
 import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
 import RiskScoreCard from "@/components/RiskScoreCard";
-
-// ─── KYC history helpers ────────────────────────────────────────────────────
-
-const KYC_STATUS_CONFIG = {
-  in_review: {
-    label: "In Review",
-    dotClass: "bg-primary",
-    badgeClass: "bg-primary/10 text-primary border-primary/20",
-    Icon: Clock,
-  },
-  pending: {
-    label: "Pending Action",
-    dotClass: "bg-warning",
-    badgeClass: "bg-warning/15 text-warning-foreground border-warning/30",
-    Icon: AlertCircle,
-  },
-  rejected: {
-    label: "Rejected",
-    dotClass: "bg-danger",
-    badgeClass: "bg-danger/15 text-danger border-danger/30",
-    Icon: AlertCircle,
-  },
-  verified: {
-    label: "Verified",
-    dotClass: "bg-success",
-    badgeClass: "bg-success/15 text-success border-success/30",
-    Icon: CheckCircle2,
-  },
-};
-
-const REJECTION_CODE_LABELS = {
-  DB_DATA_MISMATCH: "Data doesn't match government database",
-  COMPROMISED_PERSONS: "Identity compromise detected",
-  ADVERSE_MEDIA: "Adverse media found on record",
-  SANCTIONS: "Found on sanctions watchlist",
-  PEP: "Politically exposed person identified",
-};
-
-const parseKycNote = (note) => {
-  if (!note) return null;
-  const parts = note
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (parts.length > 0 && parts.every((p) => REJECTION_CODE_LABELS[p] !== undefined)) {
-    return { type: "flags", flags: parts };
-  }
-  if (note.includes("\n")) {
-    return {
-      type: "bullets",
-      items: note
-        .split("\n")
-        .filter(Boolean)
-        .map((l) => l.replace(/^-\s*/, "").trim()),
-    };
-  }
-  return { type: "text", text: note };
-};
-
-const buildGroupedHistory = (history) =>
-  (history || []).reduce((acc, item) => {
-    const prev = acc[acc.length - 1];
-    if (prev && prev.status === item.status && prev.note === item.note) {
-      prev.count += 1;
-      prev.lastChangedAt = item.changedAt;
-    } else {
-      acc.push({ ...item, count: 1 });
-    }
-    return acc;
-  }, []);
+import { SmoothZoomImageWrapper } from "@/components/CustomZoomImage";
 
 // ─── Formatting helpers ──────────────────────────────────────────────────────
 
 const formatLabel = (str) => {
   if (!str) return "—";
-  console.log("str", str);
   return str?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
@@ -113,20 +42,6 @@ const getRiskLabelColor = (label) => {
       return "text-danger";
     default:
       return "text-muted-foreground";
-  }
-};
-
-const getRiskProgressColor = (label) => {
-  switch (label?.toLowerCase()) {
-    case "low":
-      return "bg-success";
-    case "medium":
-      return "bg-warning";
-    case "high":
-    case "very high":
-      return "bg-danger";
-    default:
-      return "bg-muted-foreground";
   }
 };
 
@@ -361,12 +276,21 @@ const DocImage = ({ label, url, doc }) => {
           className={cn(
             "rounded-lg border overflow-hidden border-slate-200 object-cover bg-white shadow-sm",
             {
-              "w-[200px] aspect-video": isVerificationDocument,
+              "w-[400px] aspect-video": isVerificationDocument,
               "h-52 aspect-auto": !isVerificationDocument,
             },
           )}
         >
-          <img src={imageUrl} alt={imageLabel} className="w-full h-full object-cover" />
+          <SmoothZoomImageWrapper
+            zoomScale={1.2}
+            duration={600}
+            easing="cubic-bezier(0.22, 1, 0.36, 1)"
+            enableParallax={true}
+            hoverOnly={true}
+            // style={{ maxWidth: 400, aspectRatio: "16/9" }}
+          >
+            <img src={imageUrl} alt={imageLabel} className="w-full h-full object-cover" />
+          </SmoothZoomImageWrapper>
         </div>
       ) : (
         <div className="h-20 w-28 rounded-lg border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-1">
@@ -379,9 +303,9 @@ const DocImage = ({ label, url, doc }) => {
   );
 };
 
-const DocumentsGallery = ({ documents }) =>
+const DocumentsGallery = ({ documents, className = "" }) =>
   documents?.length > 0 ? (
-    <div className="flex gap-4 flex-wrap pt-1">
+    <div className={cn("flex gap-4 flex-wrap pt-1", className)}>
       {documents.map((doc, i) => (
         <DocImage key={`${doc.docType ?? doc.name}-${i}`} doc={doc} />
       ))}
@@ -484,22 +408,30 @@ const LivenessContent = ({ step }) => {
     <div className="space-y-4">
       {(data.result || data.poses?.length > 0) && (
         <div className="grid grid-cols-3 gap-2.5">
-          {data.result && (
+          {/* {data.result && (
             <DocField
               label="Verdict"
               value={data.result.detected ? "Liveness Detected" : "Not Detected"}
             />
-          )}
-          {data.poses?.map((pose) => (
+          )} */}
+          {/* {data.poses?.map((pose) => (
             <DocField
               key={pose.index ?? pose.name}
               label={`Pose ${pose.index ?? ""}`.trim()}
               value={pose.name}
             />
-          ))}
+          ))} */}
         </div>
       )}
-      <DataFieldsGrid data={data} />
+      <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "0.5rem" }}>
+        <div className="full-span-subgrid">
+          Result:{" "}
+          <span className="font-bold text-slate-700">{data?.providerResponse?.verdict}</span>
+        </div>
+        <div className="full-span-subgrid">
+          timestamp: <span className="font-bold text-slate-700">{data?.checkedAt}</span>
+        </div>
+      </div>
       <DocumentsGallery documents={step.documents} />
       {!data.result && !data.poses?.length && !step.documents?.length && (
         <EmptyStepState step={step} />
@@ -515,6 +447,7 @@ const IdDocumentContent = ({ step }) => {
   const addressValue = addressKey ? fields[addressKey] : null;
   const gridFields = Object.entries(fields).filter(([key]) => key !== addressKey);
   const warnings = data.warnings;
+  console.log("data", JSON.stringify(data, null, 2));
 
   return (
     <div className="space-y-4">
@@ -535,97 +468,59 @@ const IdDocumentContent = ({ step }) => {
 
       <WarnBox warnings={warnings} />
 
-      {data.faceSimilarity && (
-        <div className="rounded-lg border border-slate-100 bg-white p-3.5">
-          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-3">
-            Face Similarity ({data.faceSimilarity.method ?? "FaceNet"})
-          </p>
-          <div className="flex items-center gap-3">
-            <span className="text-xl font-bold text-red-600 w-12 flex-shrink-0 tabular-nums">
-              {data.faceSimilarity.score}%
-            </span>
-            <div className="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-red-500 rounded-full transition-all"
-                style={{ width: `${data.faceSimilarity.score}%` }}
-              />
-            </div>
-            <Badge
-              variant="outline"
-              className={cn(
-                "text-[10px] shrink-0 gap-1",
-                data.faceSimilarity.matched
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  : "bg-red-50 text-red-700 border-red-200",
-              )}
-            >
-              <span
-                className={cn(
-                  "size-1.5 rounded-full",
-                  data.faceSimilarity.matched ? "bg-emerald-500" : "bg-red-500",
+      {!data.ocr && Object.keys(fields).length > 0 && <DataFieldsGrid data={fields} />}
+
+      {/* <DataFieldsGrid data={data} excludeKeys={["ocr", "fields"]} /> */}
+      <div className="grid grid-cols-12 gap-4">
+        <div className="col-span-4 bg-gray-50 p-4 rounded-lg">
+          <h3 className="text-sm font-semibold text-slate-900 mb-4">OCR Data</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "0.5rem" }}>
+            {/* OCR Data Display */}
+            {data.ocr && data.ocr.fields && (
+              <div className="space-y-2">
+                {Object.entries(data.ocr.fields)
+                  .filter(([key, value]) => value && typeof value !== "object")
+                  .map(([key, value]) => (
+                    <div key={key} className="text-xs full-span-subgrid">
+                      <span className=" text-slate-500 capitalize">
+                        {key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                      </span>
+                      {/* {": "} */}
+                      <span className=" font-semibold">
+                        {typeof value === "string" ? `${value}` : value}
+                      </span>
+                    </div>
+                  ))}
+                {/* Optional: Show address_breakdown if present */}
+                {data.ocr.fields.address_breakdown && (
+                  <div className="mt-2">
+                    <div className="font-light text-xs">Address Breakdown:</div>
+                    {Object.entries(data.ocr.fields.address_breakdown)
+                      .filter(([k, v]) => v)
+                      .map(([k, v]) => (
+                        <div key={k} className="text-xs pl-3">
+                          <span className="font-light">
+                            {k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}:
+                          </span>{" "}
+                          <span className="font-semibold">{v}</span>
+                        </div>
+                      ))}
+                  </div>
                 )}
-              />
-              {data.faceSimilarity.matched ? "Match" : "No Match"}
-            </Badge>
-          </div>
-        </div>
-      )}
-
-      {data.ocrResult && (
-        <div>
-          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-2.5">
-            OCR Result — {data.ocrResult.documentType}
-            {data.ocrResult.country && (
-              <span className="font-mono ml-1 normal-case">
-                ({data.ocrResult.country}
-                {data.ocrResult.state ? `/${data.ocrResult.state}` : ""})
-              </span>
-            )}
-          </p>
-          <div className="grid grid-cols-2 gap-2.5">
-            {gridFields.map(([key, val]) => (
-              <DocField key={key} label={formatFieldLabel(key)} value={formatFieldValue(val)} />
-            ))}
-            {addressValue && (
-              <DocField label="Address" value={formatFieldValue(addressValue)} fullWidth />
+              </div>
             )}
           </div>
         </div>
-      )}
-
-      {!data.ocrResult && Object.keys(fields).length > 0 && <DataFieldsGrid data={fields} />}
-
-      {/* <DataFieldsGrid data={data} excludeKeys={["ocrResult", "fields"]} /> */}
-      <div>
-        <DocumentsGallery documents={step.documents} />
+        <div className="col-span-8">
+          <DocumentsGallery documents={step.documents} className={"flex-col"} />
+        </div>
       </div>
 
       {!warnings?.length &&
         !data.faceSimilarity &&
-        !data.ocrResult &&
+        !data.ocr &&
         !Object.keys(fields).length &&
         !step.documents?.length && <EmptyStepState step={step} />}
-    </div>
-  );
-};
-
-const SelfieContent = ({ step }) => {
-  const data = step.data || {};
-
-  return (
-    <div className="space-y-3">
-      {data.cascaded && (
-        <p className="text-xs text-slate-500">
-          Cascaded from {(data.cascadeSource ?? "id document").replace(/_/g, " ")} rejection
-        </p>
-      )}
-      <WarnBox warnings={data.warnings} />
-      <DataFieldsGrid data={data} />
-      <DocumentsGallery documents={step.documents} />
-      {!data.cascaded &&
-        !data.warnings?.length &&
-        !step.documents?.length &&
-        !Object.keys(data).length && <EmptyStepState step={step} />}
     </div>
   );
 };
@@ -641,8 +536,13 @@ const FundsWealthContent = ({ step }) => {
           Submitted: <span className="font-mono text-slate-700">{data.submittedAt}</span>
         </p>
       )}
-      <DataFieldsGrid data={fields} />
-      <DocumentsGallery documents={step.documents} />
+      {/* <DataFieldsGrid data={fields} /> */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs uppercase text-slate-500">Estimated Trading Volume:</span>
+        <span className="font-semibold text-slate-700">
+          {data?.estimated_trading_volume?.label ?? "N/A"}
+        </span>
+      </div>
       {!data.submittedAt && !Object.keys(fields).length && !step.documents?.length && (
         <EmptyStepState step={step} />
       )}
