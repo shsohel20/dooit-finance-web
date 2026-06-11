@@ -40,6 +40,36 @@ const getObjectFitMetrics = (img, container, objectFit = 'cover') => {
   };
 };
 
+const getPopupBackgroundStyle = (
+  imageSrc,
+  metrics,
+  cursor,
+  popupSize,
+  zoomScale
+) => {
+  const minScale = Math.max(
+    popupSize / metrics.renderedWidth,
+    popupSize / metrics.renderedHeight
+  );
+  const effectiveScale = Math.max(zoomScale, minScale);
+
+  const scaledW = metrics.renderedWidth * effectiveScale;
+  const scaledH = metrics.renderedHeight * effectiveScale;
+
+  let posX = popupSize / 2 - (cursor.x - metrics.offsetX) * effectiveScale;
+  let posY = popupSize / 2 - (cursor.y - metrics.offsetY) * effectiveScale;
+
+  posX = Math.min(0, Math.max(popupSize - scaledW, posX));
+  posY = Math.min(0, Math.max(popupSize - scaledH, posY));
+
+  return {
+    backgroundImage: `url(${imageSrc})`,
+    backgroundSize: `${scaledW}px ${scaledH}px`,
+    backgroundPosition: `${posX}px ${posY}px`,
+    backgroundRepeat: 'no-repeat',
+  };
+};
+
 export const SmoothZoomImageWrapper = ({
   children,
   zoomScale = 2.5,
@@ -186,6 +216,7 @@ export const SmoothZoomImageWrapper = ({
     dimensions.width > 0 ? (
       <div
         role="presentation"
+        aria-hidden
         className="smooth-zoom-image-popup"
         style={{
           position: 'fixed',
@@ -197,34 +228,17 @@ export const SmoothZoomImageWrapper = ({
           borderRadius: 8,
           border: '2px solid #fff',
           boxShadow: '0 10px 30px rgba(15, 23, 42, 0.22)',
-          backgroundColor: '#ff',
           zIndex: 9999,
           pointerEvents: 'none',
+          ...getPopupBackgroundStyle(
+            imageSrc,
+            metrics,
+            cursor,
+            popupSize,
+            zoomScale
+          ),
         }}
-      >
-        <img
-          src={imageSrc}
-          alt=""
-          aria-hidden
-          draggable={false}
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            width: metrics.renderedWidth * zoomScale,
-            height: metrics.renderedHeight * zoomScale,
-            transform: `translate(${-(
-              (cursor.x - metrics.offsetX) * zoomScale -
-              popupSize / 2
-            )}px, ${-(
-              (cursor.y - metrics.offsetY) * zoomScale -
-              popupSize / 2
-            )}px)`,
-            maxWidth: 'none',
-            objectFit: 'cover',
-          }}
-        />
-      </div>
+      />
     ) : null;
 
   return (
