@@ -1536,8 +1536,8 @@ export default function CompanyRegistrationForm() {
                   />
                   <span className="ml-2 text-sm text-gray-700">
                     3. I acknowledge that all the information provided by
-                    CloudTechX Pty Ltd does not take into account my financial
-                    situation, objectives or needs.，CloudTechX Pty Ltd
+                    Dooit Pty Ltd does not take into account my financial
+                    situation, objectives or needs.
                   </span>
                 </label>
 

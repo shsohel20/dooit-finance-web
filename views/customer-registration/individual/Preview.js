@@ -216,7 +216,7 @@ const Preview = () => {
                             and/or terrorist financing activities.
                         </p>
                         <p>3. I acknowledge that all the information provided by
-                            CloudTechX Pty Ltd does not take into account my financial
+                            Dooit Pty Ltd does not take into account my financial
                             situation, objectives or needs.
                         </p>
                         <p>4. I have been advised to seek independent advice before

@@ -960,7 +960,7 @@ export default function CompanyRegistrationForm() {
                 {[
                   "1. I declare that the information I have provided is TRUE and CORRECT.",
                   "2. I declare that all BOs and myself are not politically exposed person (PEP), our funds are not sourced from any kinds of corrupt, criminal, money laundering and/or terrorist financing activities.",
-                  "3. I acknowledge that all the information provided by CloudTechX Pty Ltd does not take into account my financial situation, objectives or needs.",
+                  "3. I acknowledge that all the information provided by Dooit Pty Ltd does not take into account my financial situation, objectives or needs.",
                   "4. I have been advised to seek independent advice before making any decisions.",
                   "5. I have read, understood, and accept the Terms and Conditions; and Privacy Policy on CobWeb Pay website: https://www.cobwebpay.com/.",
                   "6. I confirm that I have the authority to commit and act on behalf of the entity for the purposes of account registration and operations.",
