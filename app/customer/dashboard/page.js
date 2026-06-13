@@ -61,6 +61,7 @@ export const ProfileCard = ({ loggedInUser }) => {
 
 const Dashboard = () => {
   const { loggedInUser } = useGetUser();
+  console.log("loggedInUser", JSON.stringify(loggedInUser?.customer, null, 2));
   const [activeTab, setActiveTab] = useState("personal");
   const personalKyc = loggedInUser?.customer?.personalKyc;
   const personalForm = personalKyc?.personal_form;

@@ -5,6 +5,7 @@ import ClientDashboardPage from "@/views/client-dashboard/dashboard";
 import CryptoCurrencyDashboard from "@/views/crypto-currency/dashboard";
 import PreciousMetalDashboard from "@/views/precious-metal/dashboard";
 import RealEstateDashboard from "@/views/real-estate/dashboard";
+import { useSession } from "next-auth/react";
 import React from "react";
 
 export default function DashboardClientPage() {
@@ -15,6 +16,8 @@ export default function DashboardClientPage() {
   console.log("clientType", clientType);
   const isPreciousMetal = clientType === "Precious Metal";
   const isCrypto = clientType === "Crypto";
+  const session = useSession();
+  console.log("session", session);
 
   return (
     <div>

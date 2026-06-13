@@ -47,7 +47,7 @@ export function LoginForm({ className, token, cid, ...props }) {
   const getRoute = (session) => {
     if (token && cid) {
       return '/auth/registration-type';
-    } else if (session.data?.user?.userType === 'customer') {
+    } else if (session.data?.user?.role === 'customer') {
       return '/customer/dashboard';
     } else if (
       session.data?.user?.userType === 'client' ||

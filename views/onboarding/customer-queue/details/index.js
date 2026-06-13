@@ -7,8 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   User,
-  Clock,
-  AlertCircle,
   AlertTriangle,
   CheckCircle2,
   GitPullRequest,
