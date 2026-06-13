@@ -50,11 +50,11 @@ export default function FrontProfile() {
   };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
-      <div>
+      {/* <div>
         <Button variant="outline" onClick={handleSkip}>
           Skip
         </Button>
-      </div>
+      </div> */}
       <div className="space-y-5">
         <Question preset="individual">Front profile</Question>
         <QuestionDescription preset="individual">
