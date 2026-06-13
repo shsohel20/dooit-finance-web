@@ -220,6 +220,8 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
       const verify_response = await verifyDocument(payload);
 
       console.log("verify_response", verify_response);
+      const backDocument =
+        documentTypeValue?.sides === 2 ? fields.find((field) => field.type === "back")?.url : null;
       const ocr_payload = {
         token: token,
         cardType: documentTypeValue?.value,
@@ -229,10 +231,12 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
             url: fields.find((field) => field.type === "front")?.url,
             docType: "id_front",
           },
-          {
-            url: fields.find((field) => field.type === "back")?.url,
-            docType: "id_back",
-          },
+          ...(backDocument && [
+            {
+              url: backDocument,
+              docType: "id_back",
+            },
+          ]),
         ],
         note: "",
       };
