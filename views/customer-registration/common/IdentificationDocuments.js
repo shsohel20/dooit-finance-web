@@ -149,7 +149,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
     setBackLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
-      // console.log("response", response);
+      console.log("response", response);
       if (response.success) {
         setBackError(false);
         const existingBackIndex = fields.findIndex((item) => item.type === "back");

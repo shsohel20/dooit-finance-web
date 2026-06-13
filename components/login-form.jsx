@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { IconLoaderQuarter } from '@tabler/icons-react';
+import Link from 'next/link';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -85,6 +86,10 @@ export function LoginForm({ className, token, cid, ...props }) {
 
     setIsLoading(false);
   };
+  const urlParams = new URLSearchParams({
+    token,
+    cid,
+  });
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
@@ -151,12 +156,12 @@ export function LoginForm({ className, token, cid, ...props }) {
               </div>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{' '}
-                <a
-                  href="/auth/register"
+                <Link
+                  href={`/auth/register?${urlParams.toString()}`}
                   className="underline underline-offset-4"
                 >
                   Sign up
-                </a>
+                </Link>
               </div>
             </div>
           </form>

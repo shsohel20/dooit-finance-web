@@ -45,8 +45,16 @@ export default function FrontProfile() {
     localStorage.setItem("live_photo", frontProfileUrl);
     setStep(Number(step) + 1);
   };
+  const handleSkip = () => {
+    setStep(5);
+  };
   return (
     <div className="flex min-h-[min(70svh,560px)] flex-1 flex-col justify-between gap-8">
+      {/* <div>
+        <Button variant="outline" onClick={handleSkip}>
+          Skip
+        </Button>
+      </div> */}
       <div className="space-y-5">
         <Question preset="individual">Front profile</Question>
         <QuestionDescription preset="individual">
