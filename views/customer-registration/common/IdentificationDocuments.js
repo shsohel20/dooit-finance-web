@@ -104,6 +104,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
       setLivenessVerdict(livenessVerdict);
     }
   }, []);
+  console.log("documentTypeValue", documentTypeValue);
   const handleFrontChange = async (file) => {
     setFrontFile(file);
     console.log("front file", file);
@@ -204,12 +205,12 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
 
         documents: [
           {
-            url: userFrontImageUrl,
-            docType: "selfie",
-          },
-          {
             url: fields.find((field) => field.type === "front")?.url,
             docType: "id_front",
+          },
+          {
+            url: userFrontImageUrl,
+            docType: "selfie",
           },
         ],
         note: "",
@@ -286,8 +287,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
       verifiedMsg;
     }
   };
-  const documentsAdded = fields.length === 2;
-  console.log("form.watch('country_id')", form.watch("country"));
+  const documentsAdded = documentTypeValue?.sides === 2 ? fields.length === 2 : fields.length === 1;
   return (
     <div
       className={
@@ -362,22 +362,24 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
               </div>
             </CustomDropZone>
           </div>
-          <div className="w-full">
-            <CustomDropZone
-              disabled={!documentTypeValue}
-              handleChange={handleBackChange}
-              loading={backLoading}
-              url={fields.find((field) => field.type === "back")?.url}
-              error={backError}
-            >
-              <div className="flex flex-col">
-                <p className="font-bold">Back of document</p>
-                <p className="text-xs text-muted-foreground">
-                  Drag and drop your document here or click to upload
-                </p>
-              </div>
-            </CustomDropZone>
-          </div>
+          {documentTypeValue?.sides === 2 && (
+            <div className="w-full">
+              <CustomDropZone
+                disabled={!documentTypeValue}
+                handleChange={handleBackChange}
+                loading={backLoading}
+                url={fields.find((field) => field.type === "back")?.url}
+                error={backError}
+              >
+                <div className="flex flex-col">
+                  <p className="font-bold">Back of document</p>
+                  <p className="text-xs text-muted-foreground">
+                    Drag and drop your document here or click to upload
+                  </p>
+                </div>
+              </CustomDropZone>
+            </div>
+          )}
         </div>
       </div>
       {documentsAdded && (
