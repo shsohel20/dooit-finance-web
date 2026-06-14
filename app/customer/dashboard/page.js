@@ -2,24 +2,16 @@
 import { Button } from "@/components/ui/button";
 import useGetUser from "@/hooks/useGetUser";
 import React, { useState } from "react";
-import { cn, dateShowFormat } from "@/lib/utils";
-
-const fmt = (str) => {
-  if (!str) return "—";
-  return str.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-};
-
-const KYC_HISTORY_STATUS = {
-  verified: { badge: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" },
-  rejected: { badge: "bg-red-50 text-red-700 border-red-200", dot: "bg-red-500" },
-  pending: { badge: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" },
-  in_review: { badge: "bg-blue-50 text-blue-700 border-blue-200", dot: "bg-blue-500" },
-};
+import { cn, dateShowFormat, fmt, KYC_HISTORY_STATUS } from "@/lib/utils";
 
 const VerificationSuccess = () => (
   <div className="flex flex-col gap-4 items-center justify-center">
     <div className="size-20">
-      <img src="/VerificationSuccess.svg" alt="verification" className="w-full h-full object-cover" />
+      <img
+        src="/VerificationSuccess.svg"
+        alt="verification"
+        className="w-full h-full object-cover"
+      />
     </div>
     <p className="text-2xl font-bold tracking-tighter">You are Verified!</p>
     <p className="text-success">You got three points</p>
@@ -61,7 +53,11 @@ const StatusPill = ({ label, value, positive, negative }) => {
 export const ProfileCard = ({ loggedInUser }) => (
   <div className="flex items-center gap-4 bg-brown flex-shrink-0 max-w-[400px] py-8 px-8 rounded-md">
     <div className="size-20 rounded-full bg-white text-white">
-      <img src={loggedInUser?.photoUrl} alt="profile" className="w-full h-full object-cover rounded-full" />
+      <img
+        src={loggedInUser?.photoUrl}
+        alt="profile"
+        className="w-full h-full object-cover rounded-full"
+      />
     </div>
     <div>
       <h4 className="text-2xl font-bold tracking-tighter">{loggedInUser?.name}</h4>
@@ -324,7 +320,10 @@ const Dashboard = () => {
           <DashboardDetailSection title="Compliance">
             <DetailItem label="PEP" value={customer?.isPep ? "Yes" : "No"} />
             <DetailItem label="Sanction" value={customer?.sanction ? "Yes" : "No"} />
-            <DetailItem label="Consent to Screen" value={customer?.consentToScreen ? "Yes" : "No"} />
+            <DetailItem
+              label="Consent to Screen"
+              value={customer?.consentToScreen ? "Yes" : "No"}
+            />
             <DetailItem
               label="Declarations Accepted"
               value={customer?.declaration?.declarations_accepted ? "Yes" : "No"}
@@ -358,7 +357,7 @@ const Dashboard = () => {
               label="Updated"
               value={customer?.updatedAt ? dateShowFormat(customer.updatedAt) : null}
             />
-            <div className="pt-2 space-y-2">
+            {/* <div className="pt-2 space-y-2">
               <div>
                 <p className="text-[11px] text-gray-500 mb-0.5">Sumsub Applicant ID</p>
                 <p className="font-mono text-xs text-gray-700 break-all">
@@ -371,7 +370,7 @@ const Dashboard = () => {
                   {customer?.sumsubInspectionId ?? "—"}
                 </p>
               </div>
-            </div>
+            </div> */}
           </DashboardDetailSection>
         );
 
