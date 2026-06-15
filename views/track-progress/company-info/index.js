@@ -21,13 +21,12 @@ const SECTOR_OPTIONS = [
 ];
 
 const DOCUMENT_TYPES = [
-  { label: "Passport", value: "Passport" },
-  { label: "Driving License", value: "Driving License" },
-  { label: "National ID", value: "National ID" },
+  { label: "Passport", value: "Passport", sides: 1 },
+  { label: "Driving License", value: "Driving License", sides: 2 },
+  { label: "National ID", value: "National ID", sides: 2 },
 ];
 
 const emptyPerson = () => ({
-  role: "",
   name: "",
   email: "",
   phone: "",
@@ -35,14 +34,19 @@ const emptyPerson = () => ({
   documents: [],
 });
 
-function IdentityDocumentsSection({ form, personIndex }) {
+const emptyRoleAssignment = () => ({
+  roleId: "",
+  people: [],
+});
+
+function IdentityDocumentsSection({ form, basePath }) {
   const [frontLoading, setFrontLoading] = useState(false);
   const [frontError, setFrontError] = useState(false);
   const [backLoading, setBackLoading] = useState(false);
   const [backError, setBackError] = useState(false);
 
-  const documentsPath = `people.${personIndex}.documents`;
-  const documentTypePath = `people.${personIndex}.document_type`;
+  const documentsPath = `${basePath}.documents`;
+  const documentTypePath = `${basePath}.document_type`;
 
   const { fields, append, update } = useFieldArray({
     control: form.control,
@@ -119,39 +123,108 @@ function IdentityDocumentsSection({ form, personIndex }) {
             </p>
           </div>
         </CustomDropZone>
-        <CustomDropZone
-          handleChange={(file) => uploadDocument(file, "back", setBackLoading, setBackError)}
-          disabled={!documentType}
-          loading={backLoading}
-          url={fields.find((field) => field.type === "back")?.url}
-          error={backError}
-        >
-          <div className="text-center">
-            <p className="font-medium text-sm">Back of document</p>
-            <p className="text-xs text-muted-foreground">
-              Drag and drop your document here or click to upload
-            </p>
-          </div>
-        </CustomDropZone>
+        {documentType?.sides === 2 && (
+          <CustomDropZone
+            handleChange={(file) => uploadDocument(file, "back", setBackLoading, setBackError)}
+            disabled={!documentType}
+            loading={backLoading}
+            url={fields.find((field) => field.type === "back")?.url}
+            error={backError}
+          >
+            <div className="text-center">
+              <p className="font-medium text-sm">Back of document</p>
+              <p className="text-xs text-muted-foreground">
+                Drag and drop your document here or click to upload
+              </p>
+            </div>
+          </CustomDropZone>
+        )}
       </div>
     </div>
   );
 }
 
-function PersonCard({ form, index, roleOptions, rolesLoading, onRemove }) {
-  const selectedRole = useWatch({
+function PersonEntry({ form, roleIndex, personIndex, onRemove }) {
+  const basePath = `roleAssignments.${roleIndex}.people.${personIndex}`;
+
+  return (
+    <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-medium text-foreground">Person {personIndex + 1}</p>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive"
+          onClick={onRemove}
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+      <FormField
+        form={form}
+        name={`${basePath}.name`}
+        label="Full name"
+        type="text"
+        placeholder="Enter full name"
+        required
+      />
+      <FormField
+        form={form}
+        name={`${basePath}.email`}
+        label="Email"
+        type="email"
+        placeholder="name@company.com"
+        required
+      />
+      <FormField
+        form={form}
+        name={`${basePath}.phone`}
+        label="Phone"
+        type="text"
+        placeholder="Enter phone number"
+        required
+      />
+      <IdentityDocumentsSection form={form} basePath={basePath} />
+    </div>
+  );
+}
+
+function RoleSection({ form, roleIndex, roleOptions, rolesLoading, onRemove }) {
+  const peoplePath = `roleAssignments.${roleIndex}.people`;
+  const roleIdPath = `roleAssignments.${roleIndex}.roleId`;
+
+  const selectedRoleId = useWatch({
     control: form.control,
-    name: `people.${index}.role`,
+    name: roleIdPath,
   });
 
-  const roleLabel =
-    roleOptions.find((option) => option.value === selectedRole)?.label || `Person ${index + 1}`;
+  const allAssignments = useWatch({
+    control: form.control,
+    name: "roleAssignments",
+  });
+
+  const selectedRoleIds = (allAssignments || [])
+    .map((assignment, index) => (index !== roleIndex ? assignment?.roleId : null))
+    .filter(Boolean);
+
+  const availableRoleOptions = roleOptions.filter(
+    (option) => !selectedRoleIds.includes(option.value) || option.value === selectedRoleId,
+  );
+
+  const selectedRoleLabel =
+    roleOptions.find((option) => option.value === selectedRoleId)?.label || "Role assignment";
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: peoplePath,
+  });
 
   return (
     <Card className="border border-border">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base font-semibold">{roleLabel}</CardTitle>
+          <CardTitle className="text-base font-semibold">{selectedRoleLabel}</CardTitle>
           <Button
             type="button"
             variant="outline"
@@ -166,43 +239,39 @@ function PersonCard({ form, index, roleOptions, rolesLoading, onRemove }) {
       <CardContent className="space-y-4">
         <FormField
           form={form}
-          name={`people.${index}.role`}
+          name={roleIdPath}
           label="Role"
           type="select"
           placeholder="Select a role"
           required
           loading={rolesLoading}
-          options={roleOptions}
+          options={availableRoleOptions}
         />
 
-        {selectedRole && (
-          <>
-            <FormField
-              form={form}
-              name={`people.${index}.name`}
-              label="Full name"
-              type="text"
-              placeholder="Enter full name"
-              required
-            />
-            <FormField
-              form={form}
-              name={`people.${index}.email`}
-              label="Email"
-              type="email"
-              placeholder="name@company.com"
-              required
-            />
-            <FormField
-              form={form}
-              name={`people.${index}.phone`}
-              label="Phone"
-              type="text"
-              placeholder="Enter phone number"
-              required
-            />
-            <IdentityDocumentsSection form={form} personIndex={index} />
-          </>
+        {selectedRoleId && (
+          <div className="space-y-3">
+            {fields.length === 0 && (
+              <p className="text-sm text-muted-foreground">No people added for this role yet.</p>
+            )}
+            {fields.map((field, personIndex) => (
+              <PersonEntry
+                key={field.id}
+                form={form}
+                roleIndex={roleIndex}
+                personIndex={personIndex}
+                onRemove={() => remove(personIndex)}
+              />
+            ))}
+            <Button
+              type="button"
+              variant="link"
+              className="p-0 h-auto text-teal-600 hover:text-teal-700 font-medium"
+              onClick={() => append(emptyPerson())}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add person
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -216,13 +285,17 @@ export default function CompanyInfo({ setInitialized }) {
   const form = useForm({
     defaultValues: {
       sector: "",
-      people: [],
+      roleAssignments: [],
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const {
+    fields: roleFields,
+    append,
+    remove,
+  } = useFieldArray({
     control: form.control,
-    name: "people",
+    name: "roleAssignments",
   });
 
   const fetchRoles = useCallback(async () => {
@@ -250,6 +323,8 @@ export default function CompanyInfo({ setInitialized }) {
     console.log(data);
     setInitialized(true);
   };
+
+  const canAddRole = !rolesLoading && roleFields.length < roleOptions.length;
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-3xl mx-auto space-y-8 py-6">
@@ -291,42 +366,41 @@ export default function CompanyInfo({ setInitialized }) {
           <div>
             <h2 className="text-base font-semibold text-foreground">Assign roles</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Record the AML/CTF roles within your business. Select a role, then add each
-              person&apos;s details and identity documents.
+              Choose a role, then add one or more people with their details and identity documents.
             </p>
           </div>
 
-          {rolesLoading && fields.length === 0 ? (
+          {rolesLoading && roleFields.length === 0 ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
               <Loader2 className="w-4 h-4 animate-spin" />
               Loading roles...
             </div>
           ) : (
             <>
-              {fields.length === 0 && (
+              {roleFields.length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  No people added yet. Add a person and assign them to a role.
+                  No roles assigned yet. Add a role to get started.
                 </p>
               )}
-              {fields.map((field, index) => (
-                <PersonCard
+              {roleFields.map((field, roleIndex) => (
+                <RoleSection
                   key={field.id}
                   form={form}
-                  index={index}
+                  roleIndex={roleIndex}
                   roleOptions={roleOptions}
                   rolesLoading={rolesLoading}
-                  onRemove={() => remove(index)}
+                  onRemove={() => remove(roleIndex)}
                 />
               ))}
               <Button
                 type="button"
                 variant="link"
                 className="p-0 h-auto text-teal-600 hover:text-teal-700 font-medium"
-                onClick={() => append(emptyPerson())}
-                disabled={rolesLoading}
+                onClick={() => append(emptyRoleAssignment())}
+                disabled={!canAddRole}
               >
                 <Plus className="w-4 h-4 mr-1" />
-                Add person
+                Add role
               </Button>
             </>
           )}

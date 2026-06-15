@@ -1,21 +1,19 @@
 import AuthProvider from "@/providers/SessionProvider";
-import { Geist, Geist_Mono, Montserrat, sansFlex, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { EncryptDecryptFAB } from "@/components/EncryptBtn";
-import ChatBotNissa from "@/components/nisa-ai";
-import { ModuleProvider } from "@/contexts/module-context";
+
 import { cn } from "@/lib/utils";
 
-const fontSans = Geist({
+const fontSans = Inter_Tight({
   subsets: ["latin"],
   variable: "--font-sans",
 });
 // const sansFlex = SansFlex({ subsets: ["latin"], variable: "--font-sans-flex" });
 const jetbrainsMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
-
-const montserrat = Montserrat({
+const interTight = Inter_Tight({
   subsets: ["latin"],
+  variable: "--font-sans",
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
@@ -37,7 +35,7 @@ export default function RootLayout({ children }) {
       </head> */}
       <body
         // className={`font-sans antialiased ${montserrat.className} text-sm`}
-        className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}
+        className={cn("antialiased", interTight.variable)}
         suppressHydrationWarning
       >
         {/* <AuthProvider> */}
