@@ -21,6 +21,7 @@ export const DEPARTMENT_OPTIONS = [
   { value: "legal", label: "Legal" },
   { value: "hr", label: "Human Resources" },
   { value: "it", label: "IT" },
+  { value: "other", label: "Other" },
 ];
 
 export const JOB_TITLE_OPTIONS = [

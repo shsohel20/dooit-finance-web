@@ -84,14 +84,14 @@ export default function EmployeeFormFields({ form }) {
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField
+          {/* <FormField
             form={form}
             name="employment.jobTitle"
             label="Job title"
             type="select"
             placeholder="Select job title"
             options={JOB_TITLE_OPTIONS}
-          />
+          /> */}
           <FormField
             form={form}
             name="employment.employmentType"

@@ -10,4 +10,9 @@ const createEmployee = async (employeeData) => {
   return response.json();
 };
 
-export { createEmployee };
+const getStuffsByRole = async (roleid) => {
+  const response = await fetchWithAuth(`staff/role/${roleid}`);
+  return response.json();
+};
+
+export { createEmployee, getStuffsByRole };

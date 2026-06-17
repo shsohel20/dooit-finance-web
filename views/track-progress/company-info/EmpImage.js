@@ -1,31 +1,40 @@
 import { fileUploadOnCloudinary } from "@/app/actions";
 import CustomDropZone from "@/components/ui/DropZone";
 import React, { useState } from "react";
+import { useFieldArray } from "react-hook-form";
 
 export default function EmpImage({ form }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [file, setFile] = useState(null);
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "documents",
+  });
 
   const uploadDocument = async (file) => {
     try {
       setLoading(true);
       setError(false);
       const response = await fileUploadOnCloudinary(file);
-      console.log("response", response);
       if (response.success) {
-        setFile({
+        const imageDoc = {
           name: file.name,
           url: response.file.publicUrl,
           mimeType: file.type,
           type: "image",
           docType: "employee_image",
-        });
+        };
+        setFile(imageDoc);
+        const isAlreadyExists = fields.find((doc) => doc.type === "image");
+        if (isAlreadyExists) {
+          remove(isAlreadyExists.id);
+        }
+        append(imageDoc);
       } else {
         setError(true);
       }
     } catch (error) {
-      console.error("Error uploading document", error);
       setError(true);
     } finally {
       setLoading(false);

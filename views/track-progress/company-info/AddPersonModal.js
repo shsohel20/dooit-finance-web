@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,22 +22,22 @@ import { toast } from "sonner";
 
 const personSchema = z.object({
   personal: z.object({
-    role: z.string().min(1),
+    role: z.string(),
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     dateOfBirth: z.string().min(1, "Date of birth is required"),
-    nationality: z.string().min(1, "Nationality is required"),
+    nationality: z.string(),
   }),
   contact: z.object({
-    workEmail: z.string().email("Invalid email address"),
-    phone: z.string().min(1, "Phone is required"),
-    residentialAddress: z.string().min(1, "Residential address is required"),
+    workEmail: z.string(),
+    phone: z.string(),
+    residentialAddress: z.string(),
   }),
   employment: z.object({
-    startDate: z.string().min(1, "Start date is required"),
-    department: z.string().min(1, "Department is required"),
-    jobTitle: z.string().min(1, "Job title is required"),
-    employmentType: z.string().min(1, "Employment type is required"),
+    startDate: z.string(),
+    department: z.string(),
+    jobTitle: z.string(),
+    employmentType: z.string(),
   }),
   document_type: z.any().optional(),
   documents: z.array(z.any()).optional(),
@@ -52,6 +52,7 @@ export default function AddPersonModal({
   onSave,
 }) {
   const isEditing = Boolean(initialData);
+  const [loading, setLoading] = useState(false);
 
   const form = useForm({
     defaultValues: emptyPerson(roleSlug),
@@ -85,20 +86,23 @@ export default function AddPersonModal({
       employment: {
         ...data.employment,
         department: normalizeSelectValue(data.employment.department),
-        jobTitle: normalizeSelectValue(data.employment.jobTitle),
+        jobTitle: roleSlug ?? "",
         employmentType: normalizeSelectValue(data.employment.employmentType),
       },
+      document_type: data.document_type?.value ?? {},
+      documents: data.documents ?? [],
     };
+    console.log("payload", JSON.stringify(payload, null, 2));
+    setLoading(true);
     const response = await createEmployee(payload);
+    setLoading(false);
+    console.log("response", response);
     if (response.success) {
-      toast.error(response.error || "Failed to create employee");
-    } else {
       toast.success("Employee created successfully");
       handleOpenChange(false);
+    } else {
+      toast.error(response.error || "Failed to create employee");
     }
-    console.log("employee response", response);
-    // onSave(payload);
-    // handleOpenChange(false);
   };
 
   return (
@@ -113,7 +117,7 @@ export default function AddPersonModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form className="space-y-4">
           <EmployeeFormFields form={form} />
 
           <DialogFooter>
@@ -125,9 +129,10 @@ export default function AddPersonModal({
             <Button
               type="submit"
               className="bg-teal-600 hover:bg-teal-700 text-white"
-              disabled={form.formState.isSubmitting}
+              disabled={loading}
+              onClick={form.handleSubmit(onSubmit)}
             >
-              {form.formState.isSubmitting ? (
+              {loading ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Saving...

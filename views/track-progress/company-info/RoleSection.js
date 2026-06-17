@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useWatch } from "react-hook-form";
 import { Plus, Trash2 } from "lucide-react";
 import { FormField } from "@/components/ui/FormField";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddPersonModal from "./AddPersonModal";
 import PersonCard from "./PersonCard";
 import { toRoleSlug } from "./constants";
+import { getStuffsByRole } from "../actions";
 
 export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading, onRemove }) {
   const peoplePath = `roleAssignments.${roleIndex}.people`;
@@ -16,16 +17,27 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [stuffs, setStuffs] = useState([]);
 
   const selectedRoleId = useWatch({
     control: form.control,
     name: roleIdPath,
   });
+  console.log("currentRoleId", selectedRoleId);
 
   const allAssignments = useWatch({
     control: form.control,
     name: "roleAssignments",
   });
+
+  useEffect(() => {
+    if (selectedRoleId) {
+      getStuffsByRole(selectedRoleId).then((res) => {
+        console.log("res", res);
+        setStuffs(res.data);
+      });
+    }
+  }, [selectedRoleId]);
 
   const selectedRoleIds = (allAssignments || [])
     .map((assignment, index) => (index !== roleIndex ? assignment?.roleId : null))
@@ -37,7 +49,7 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
 
   const selectedRole = roleOptions.find((option) => option.value === selectedRoleId);
   const selectedRoleLabel = selectedRole?.label || "Role assignment";
-  const roleSlug = toRoleSlug(selectedRole?.label);
+  // const roleSlug = toRoleSlug(selectedRole?.label);
 
   const { fields, append, update, remove } = useFieldArray({
     control: form.control,
@@ -96,10 +108,10 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
 
           {selectedRoleId && (
             <div className="space-y-3">
-              {fields.length === 0 && (
+              {stuffs.length === 0 && (
                 <p className="text-sm text-muted-foreground">No people added for this role yet.</p>
               )}
-              {fields.map((field, personIndex) => (
+              {stuffs.map((field, personIndex) => (
                 <PersonCard
                   key={field.id}
                   person={field}
@@ -125,7 +137,7 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
       <AddPersonModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        roleSlug={roleSlug}
+        roleSlug={selectedRoleLabel}
         roleLabel={selectedRoleLabel}
         initialData={editingPerson}
         onSave={handleSavePerson}

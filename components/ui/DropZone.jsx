@@ -1,14 +1,14 @@
-import {
-  IconFolder,
-  IconFolderOpen,
-  IconPhotoPlus,
-  IconPhotoSpark,
-} from '@tabler/icons-react';
 import DragDrop from '../DragDop';
 import { Button } from './button';
-
-const { cn } = require('@/lib/utils');
-const { XCircle, Loader2, CheckCircle, Upload, X } = require('lucide-react');
+import { cn } from '@/lib/utils';
+import {
+  CheckCircle2,
+  FileText,
+  Loader2,
+  Upload,
+  X,
+  XCircle,
+} from 'lucide-react';
 
 const CustomDropZone = ({
   file,
@@ -23,20 +23,115 @@ const CustomDropZone = ({
   handleChange = () => {},
   ...props
 }) => {
+  const hasUploadedFile = typeof url === 'string' && url.length > 0;
+  const hasLocalFile = Boolean(file);
+
   const renderIcon = () => {
-    if (loading === true) {
-      return <Loader2 className="w-4 h-4 animate-spin" />;
+    if (loading) {
+      return <Loader2 className="size-5 animate-spin" />;
     }
 
-    if (error === true) {
-      return <XCircle className="w-4 h-4 text-red-500" />;
+    if (error) {
+      return <XCircle className="size-5" />;
     }
 
-    if (typeof url === 'string' && url.length > 0) {
-      return <CheckCircle className="w-4 h-4 text-green-500" />;
+    if (hasUploadedFile) {
+      return <CheckCircle2 className="size-5" />;
     }
 
-    return <IconPhotoPlus className="size-8 text-primary" />;
+    return <Upload className="size-5" />;
+  };
+
+  const iconBadgeClassName = cn(
+    'flex shrink-0 items-center justify-center rounded-full p-3 transition-colors',
+    loading && 'bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
+    error && 'bg-destructive/10 text-destructive',
+    hasUploadedFile &&
+      !error &&
+      'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400',
+    !loading &&
+      !error &&
+      !hasUploadedFile &&
+      'bg-primary/10 text-primary'
+  );
+
+  const containerClassName = cn(
+    'group relative z-2 w-full overflow-hidden rounded-xl border-2 border-dashed px-5 py-5 transition-all duration-200',
+    disabled && 'cursor-not-allowed opacity-50',
+    !disabled &&
+      !hasUploadedFile &&
+      !loading &&
+      !error &&
+      'cursor-pointer hover:border-primary/50 hover:bg-muted/30',
+    hasUploadedFile &&
+      !error &&
+      'border-solid border-emerald-500/40 bg-emerald-50/40 dark:bg-emerald-950/20',
+    error && 'border-solid border-destructive/50 bg-destructive/5',
+    loading && 'border-solid border-amber-500/50 bg-amber-50/40 dark:bg-amber-950/20',
+    hasUploadedFile
+      ? 'flex flex-row items-center justify-between gap-4'
+      : 'flex flex-col items-center justify-center gap-3 min-h-[120px]',
+    className
+  );
+
+  const renderStatusHint = () => {
+    if (loading) {
+      return (
+        <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+          Uploading...
+        </p>
+      );
+    }
+
+    if (error) {
+      return (
+        <p className="text-xs font-medium text-destructive">
+          Upload failed. Please try again.
+        </p>
+      );
+    }
+
+    if (hasUploadedFile) {
+      return (
+        <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          Upload complete
+        </p>
+      );
+    }
+
+    return null;
+  };
+
+  const renderContent = () => {
+    if (children) {
+      return (
+        <div
+          className={cn(
+            'flex min-w-0 flex-1 items-center gap-3',
+            hasUploadedFile ? 'flex-row' : 'flex-col text-center'
+          )}
+        >
+          <div className={iconBadgeClassName}>{renderIcon()}</div>
+          <div className="min-w-0 space-y-1">
+            <div>{children}</div>
+            {renderStatusHint()}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col items-center gap-3 text-center">
+        <div className={iconBadgeClassName}>{renderIcon()}</div>
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-foreground">
+            Drop your file here or click to upload
+          </p>
+          <p className="text-xs text-muted-foreground">Or click to browse</p>
+          {renderStatusHint()}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -46,60 +141,37 @@ const CustomDropZone = ({
       handleChange={handleChange}
       {...props}
     >
-      <div
-        className={cn(
-          'border-2 min-h-[10px] px-4  py-4 w-full  border-dashed rounded-xl  items-center  gap-2 relative z-2 overflow-hidden ',
-          disabled ? 'opacity-50' : '',
-          {
-            'flex-row justify-between flex': url,
-            'bg-green-50/20 border-green-400': url && !error,
-            'bg-red-50/20 border-red-500': error,
-            'bg-yellow-100/20 border-yellow-500': loading,
-          },
-          className
-        )}
-      >
-        {/* <div className="  flex items-center justify-center ">
-          {renderIcon()}{' '}
-        </div> */}
+      <div className={containerClassName}>
+        {renderContent()}
 
-        {children ? (
-          <div className="flex flex-col items-center gap-2">
-            <div>{renderIcon()}</div>
-            <div>{children}</div>
-          </div>
-        ) : (
-          <div className="text-center">
-            <p className="font-semibold">
-              Drop your file here or click to upload
-            </p>
-            <p className="text-xs  text-muted-foreground">Or click to browse</p>
-          </div>
-        )}
-        <div />
-        {url ? (
+        {hasUploadedFile ? (
           <div
             className={cn(
-              'h-[50px] aspect-4/3 border rounded-md overflow-hidden',
+              'relative shrink-0 overflow-hidden rounded-lg border border-border bg-background shadow-sm ring-1 ring-border/60',
+              'h-[50px] aspect-4/3',
               imageContainerClassName
             )}
           >
             <img
               src={url}
-              alt="document"
-              className="w-full h-full object-contain"
+              alt="Uploaded document preview"
+              className="size-full object-contain"
             />
           </div>
-        ) : file ? (
-          <div className=" border rounded-md overflow-hidden bg-accent py-1 px-3 flex items-center gap-2">
-            {file?.name}
+        ) : hasLocalFile ? (
+          <div className="mt-1 flex max-w-full items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
+            <FileText className="size-4 shrink-0 text-muted-foreground" />
+            <span className="truncate text-sm font-medium text-foreground">
+              {file?.name}
+            </span>
             <Button
               variant="outline"
               size="icon-sm"
               onClick={() => setFile(null)}
-              className={'!p-0 size-5 rounded'}
+              className="!size-6 shrink-0 rounded-md !p-0"
+              aria-label="Remove file"
             >
-              <X className="size-3" />
+              <X className="size-3.5" />
             </Button>
           </div>
         ) : null}

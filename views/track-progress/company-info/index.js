@@ -9,7 +9,7 @@ import { getAllRoles } from "@/app/dashboard/client/user-and-role-management/act
 import RoleSection from "./RoleSection";
 import { SECTOR_OPTIONS, emptyRoleAssignment } from "./constants";
 
-export default function CompanyInfo({ setInitialized }) {
+export default function CompanyInfo({ setCurrentStep }) {
   const [roles, setRoles] = useState([]);
   const [rolesLoading, setRolesLoading] = useState(true);
 
@@ -59,14 +59,14 @@ export default function CompanyInfo({ setInitialized }) {
       })),
     );
     console.log({ sector: data.sector, roleAssignments: data.roleAssignments, employees });
-    setInitialized(true);
+    setCurrentStep(2);
   };
 
   const canAddRole = !rolesLoading && roleFields.length < roleOptions.length;
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-3xl mx-auto space-y-8 py-6">
-      <div className="flex gap-4">
+      {/* <div className="flex gap-4">
         <div className="flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-semibold">
             01
@@ -92,12 +92,12 @@ export default function CompanyInfo({ setInitialized }) {
             />
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex gap-4">
         <div className="flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-semibold">
-            02
+            01
           </div>
         </div>
         <div className="flex-1 space-y-4 pt-0.5">
