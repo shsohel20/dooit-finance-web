@@ -12,6 +12,7 @@ export default function EmpImage({ form }) {
       setLoading(true);
       setError(false);
       const response = await fileUploadOnCloudinary(file);
+
       if (response.success) {
         setFile(response.file.publicUrl);
       } else {
