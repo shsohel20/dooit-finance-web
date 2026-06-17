@@ -137,10 +137,11 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
       <AddPersonModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        roleSlug={selectedRoleLabel}
+        role={selectedRole}
         roleLabel={selectedRoleLabel}
         initialData={editingPerson}
         onSave={handleSavePerson}
+        setStuffs={setStuffs}
       />
     </>
   );

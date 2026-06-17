@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import EmployeeFormFields from "./EmployeeFormFields";
 import { emptyPerson } from "./constants";
-import { createEmployee } from "../actions";
+import { createEmployee, getStuffsByRole } from "../actions";
 import { toast } from "sonner";
 
 const personSchema = z.object({
@@ -46,14 +46,15 @@ const personSchema = z.object({
 export default function AddPersonModal({
   open,
   onOpenChange,
-  roleSlug,
+  role,
   roleLabel,
   initialData,
-  onSave,
+  setStuffs,
 }) {
   const isEditing = Boolean(initialData);
   const [loading, setLoading] = useState(false);
 
+  const roleSlug = role?.label;
   const form = useForm({
     defaultValues: emptyPerson(roleSlug),
     resolver: zodResolver(personSchema),
@@ -95,10 +96,13 @@ export default function AddPersonModal({
     console.log("payload", JSON.stringify(payload, null, 2));
     setLoading(true);
     const response = await createEmployee(payload);
+
     setLoading(false);
     console.log("response", response);
     if (response.success) {
       toast.success("Employee created successfully");
+      const response = await getStuffsByRole(role.value);
+      setStuffs(response.data);
       handleOpenChange(false);
     } else {
       toast.error(response.error || "Failed to create employee");
