@@ -1,4 +1,9 @@
-import { IconFolder, IconFolderOpen } from '@tabler/icons-react';
+import {
+  IconFolder,
+  IconFolderOpen,
+  IconPhotoPlus,
+  IconPhotoSpark,
+} from '@tabler/icons-react';
 import DragDrop from '../DragDop';
 import { Button } from './button';
 
