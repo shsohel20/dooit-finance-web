@@ -14,7 +14,15 @@ export default function EmpImage({ form }) {
       const response = await fileUploadOnCloudinary(file);
 
       if (response.success) {
-        setFile(response.file.publicUrl);
+        const imageDoc = {
+          name: file.name,
+          url: response.file.publicUrl,
+          mimeType: file.type,
+          type: "employee_image",
+          docType: "employee_image",
+          side: "front",
+        };
+        setFile(imageDoc);
       } else {
         setError(true);
       }
