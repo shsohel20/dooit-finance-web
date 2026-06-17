@@ -13,6 +13,9 @@ import EmpImage from "./EmpImage";
 export default function EmployeeFormFields({ form }) {
   return (
     <div className="space-y-6">
+      <div>
+        <EmpImage form={form} />
+      </div>
       <section className="space-y-4 bg-gray-50 p-4 rounded-lg">
         <EmpImage form={form} />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

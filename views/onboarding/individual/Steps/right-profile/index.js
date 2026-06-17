@@ -75,7 +75,7 @@ export default function RightProfile() {
       } else {
         toast.error(res.message);
         // TODO: remove this after testing
-        // setStep(Number(step) + 1);
+        setStep(Number(step) + 1);
       }
 
       // if (res.verdict) {

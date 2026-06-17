@@ -12,17 +12,15 @@ export default function EmpImage({ form }) {
       setLoading(true);
       setError(false);
       const response = await fileUploadOnCloudinary(file);
-
+      console.log("response", response);
       if (response.success) {
-        const imageDoc = {
+        setFile({
           name: file.name,
           url: response.file.publicUrl,
           mimeType: file.type,
-          type: "employee_image",
+          type: "image",
           docType: "employee_image",
-          side: "front",
-        };
-        setFile(imageDoc);
+        });
       } else {
         setError(true);
       }
@@ -37,7 +35,7 @@ export default function EmpImage({ form }) {
     <div>
       <CustomDropZone handleChange={uploadDocument} loading={loading} url={file?.url} error={error}>
         <div className="text-center">
-          <p className="font-medium text-sm">Employee Image</p>
+          <p className="font-medium text-xs ">Employee Image</p>
           <p className="text-xs text-muted-foreground">
             Drag and drop your employee image here or click to upload
           </p>
