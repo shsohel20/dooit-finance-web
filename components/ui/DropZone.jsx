@@ -36,7 +36,7 @@ const CustomDropZone = ({
       return <CheckCircle className="w-4 h-4 text-green-500" />;
     }
 
-    return <IconFolderOpen className="size-8 fill-primary stroke-white" />;
+    return <IconPhotoPlus className="size-8 text-primary" />;
   };
 
   return (
@@ -48,9 +48,10 @@ const CustomDropZone = ({
     >
       <div
         className={cn(
-          'border-2 min-h-[10px] px-4  py-4 w-full justify-between border-dashed rounded-xl flex flex-row items-center  gap-2 relative z-2 overflow-hidden ',
+          'border-2 min-h-[10px] px-4  py-4 w-full  border-dashed rounded-xl  items-center  gap-2 relative z-2 overflow-hidden ',
           disabled ? 'opacity-50' : '',
           {
+            'flex-row justify-between flex': url,
             'bg-green-50/20 border-green-400': url && !error,
             'bg-red-50/20 border-red-500': error,
             'bg-yellow-100/20 border-yellow-500': loading,
@@ -63,7 +64,10 @@ const CustomDropZone = ({
         </div> */}
 
         {children ? (
-          children
+          <div className="flex flex-col items-center gap-2">
+            <div>{renderIcon()}</div>
+            <div>{children}</div>
+          </div>
         ) : (
           <div className="text-center">
             <p className="font-semibold">
