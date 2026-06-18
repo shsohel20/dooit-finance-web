@@ -1,646 +1,240 @@
-'use client';
+"use client";
 
-import React from 'react';
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
-  Upload,
-  Download,
-  Calculator,
-  FileText,
-  Save,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Plus,
+  Search,
   Loader2,
-} from 'lucide-react';
-import { cn, riskLevelVariants } from '@/lib/utils';
-import { IconPennant } from '@tabler/icons-react';
-import { Badge } from '../ui/badge';
-import { FormField } from '../ui/FormField';
-import { useForm } from 'react-hook-form';
-import {
-  calculateRiskScore,
-  getAllAssessments,
-  getCustomers,
-  getRiskFactors,
-  saveResult,
-} from '@/app/dashboard/client/risk-assessment/actions';
-import { toast } from 'sonner';
-import { Cell, Legend, Pie, PieChart, Tooltip } from 'recharts';
-import CustomResizableTable from '../ui/CustomResizable';
-import RiskScoreCard from '../RiskScoreCard';
+  UserCheck,
+  ChevronLeft,
+  Lock,
+} from "lucide-react";
+import { getAllAssessments } from "@/app/dashboard/client/risk-assessment/actions";
+import { CraWizard } from "./cra/cra-wizard";
+import { CraDetailDialog } from "./cra/cra-detail-dialog";
+import { RISK_BADGE_VARIANT } from "./cra/constants";
 
-const initialValues = {
-  customerId: '',
-  name: '',
-  type: '',
-  country: '',
-  metadata: {
-    product: '',
-    channel: '',
-    occupation: '',
-    industry: '',
-  },
-  retention: '',
-  // "createdAt": "2021-05-01T00:00:00.000Z" //
-};
-const COLORS = [
-  '#0088FE',
-  '#00C49F',
-  '#FFBB28',
-  '#FF8042',
-  '#A28BFE',
-  '#FE6F91',
-  '#6BCB77',
-];
+function fmtDate(d) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("en-AU", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 export function CustomerRiskAssessment() {
-  const [countriesOptions, setCountriesOptions] = useState([]);
-  const [customerTypesOptions, setCustomerTypesOptions] = useState([]);
-  const [jurisdictionsOptions, setJurisdictionsOptions] = useState([]);
-  const [customerRetentionsOptions, setCustomerRetentionsOptions] = useState(
-    []
-  );
-  const [productsOptions, setProductsOptions] = useState([]);
-  const [channelsOptions, setChannelsOptions] = useState([]);
-  const [occupationsOptions, setOccupationsOptions] = useState([]);
-  const [industriesOptions, setIndustriesOptions] = useState([]);
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [calculationResult, setCalculationResult] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [customerData, setCustomerData] = useState({
-    customerName: '',
-    customerId: '',
-    assessmentDate: new Date().toISOString().split('T')[0],
-    customerType: { value: '', score: 0 },
-    jurisdiction: { value: '', score: 0 },
-    customerRetention: { value: '', score: 0 },
-    product: { value: '', score: 0 },
-    channel: { value: '', score: 0 },
-    occupation: { value: '', score: 0 },
-    industry: { value: '', score: 0 },
-    totalScore: 0,
-    riskLevel: 'Low',
-  });
+  const [view, setView] = useState("list"); // 'list' | 'new'
+  const [assessments, setAssessments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [riskFilter, setRiskFilter] = useState("");
+  const [detailId, setDetailId] = useState(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
-  const [data, setData] = useState([]);
-  const [isLoadingAssessments, setIsLoadingAssessments] = useState(false);
-  const [customerOptions, setCustomerOptions] = useState([]);
-  const form = useForm({
-    defaultValues: initialValues,
-  });
-
-  const fetchAssessments = async () => {
-    setIsLoadingAssessments(true);
-    const response = await getAllAssessments();
-    if (response.success) {
-      setData(response.data);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await getAllAssessments();
+      // advancedResults → { success, data: [...] } ; tolerate either shape
+      setAssessments(r?.data || []);
+    } finally {
+      setLoading(false);
     }
-    setIsLoadingAssessments(false);
-  };
-
-  const fetchRiskFactors = async () => {
-    const response = await getRiskFactors();
-    // console.log('response risk factors', response?.data);
-    const countries = response.data.countries.map((item) => ({
-      label: `${item.country} (score: ${item.score})`,
-      value: item.country,
-    }));
-    setCountriesOptions(countries);
-    const customerTypes = response.data?.customerType?.map((item) => ({
-      label: `${item.value.split('_').join(' ')} (score: ${item.score})`,
-      value: item.value,
-    }));
-    setCustomerTypesOptions(customerTypes);
-    const jurisdictions = response.data?.jurisdiction?.map((item) => ({
-      label: `${item.value} (score: ${item.score})`,
-      value: item.value,
-    }));
-    setJurisdictionsOptions(jurisdictions);
-    const customerRetentions = response.data?.customerRetention?.map(
-      (item) => ({
-        label: `${item.value} (score: ${item.score})`,
-        value: item.value,
-      })
-    );
-    setCustomerRetentionsOptions(customerRetentions);
-    const products = response.data?.product?.map((item) => ({
-      label: `${item.value} (score: ${item.score})`,
-      value: item.value,
-    }));
-    setProductsOptions(products);
-    const channels = response.data?.channel?.map((item) => ({
-      label: `${item.value} (score: ${item.score})`,
-      value: item.value,
-    }));
-    setChannelsOptions(channels);
-    const occupations = response.data?.occupation?.map((item) => ({
-      label: `${item.value} (score: ${item.score})`,
-      value: item.value,
-    }));
-    setOccupationsOptions(occupations);
-    const industries = response.data?.industry?.map((item) => ({
-      label: `${item.value.split('_').join(' ')} (score: ${item.score})`,
-      value: item.value,
-    }));
-    setIndustriesOptions(industries);
-  };
-
-  useEffect(() => {
-    fetchRiskFactors();
-    fetchAssessments();
   }, []);
 
-  const calculateTotalScore = () => {
-    const total =
-      customerData.customerType.score +
-      customerData.jurisdiction.score +
-      customerData.customerRetention.score +
-      customerData.product.score +
-      customerData.channel.score +
-      customerData.occupation.score +
-      customerData.industry.score;
+  useEffect(() => {
+    load();
+  }, [load]);
 
-    let riskLevel = 'Low';
-    if (total >= 1000) riskLevel = 'Unacceptable';
-    else if (total >= 21) riskLevel = 'High';
-    else if (total >= 18) riskLevel = 'Medium';
-    else riskLevel = 'Low';
-
-    const newData = { ...customerData, totalScore: total, riskLevel };
-
-    setData([...data, newData]);
+  const openDetail = (id) => {
+    setDetailId(id);
+    setDetailOpen(true);
   };
 
-  const handleFactorChange = (factor, value, score) => {
-    setCustomerData({
-      ...customerData,
-      [factor]: { value, score },
-    });
+  const handleSaved = (saved) => {
+    setView("list");
+    load();
+    if (saved?._id) openDetail(saved._id);
   };
 
-  const getRiskLevelColor = (level) => {
-    switch (level.toLowerCase()) {
-      case 'low':
-        return 'text-green-600';
-      case 'medium':
-        return 'text-yellow-600';
-      case 'high':
-        return 'text-orange-600';
-      case 'unacceptable':
-        return 'text-red-600';
-      default:
-        return 'text-gray-600';
-    }
-  };
+  const filtered = assessments.filter((a) => {
+    const matchesRisk = !riskFilter || a.riskLabel === riskFilter;
+    const q = search.toLowerCase();
+    const matchesSearch =
+      !q ||
+      a.customerName?.toLowerCase().includes(q) ||
+      a.uid?.toLowerCase().includes(q) ||
+      a.inputSnapshot?.country?.toLowerCase().includes(q);
+    return matchesRisk && matchesSearch;
+  });
 
-  const handleExport = () => {
-    const dataStr = JSON.stringify(customerData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `CRA_${customerData.customerId || 'assessment'}_${
-      new Date().toISOString().split('T')[0]
-    }.json`;
-    link.click();
-  };
-
-  const handleImport = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target?.result);
-          setCustomerData(data);
-        } catch (error) {
-          console.error('[v0] Error parsing JSON:', error);
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
-
-  const generateReport = () => {
-    const report = `
-CUSTOMER RISK ASSESSMENT REPORT
-================================
-
-// Assessment Date: ${customerData.assessmentDate}
-Customer Name: ${customerData.customerName}
-Customer ID: ${customerData.customerId}
-
-RISK FACTORS
-------------
-Customer Type: ${customerData.customerType.value} (Score: ${
-      customerData.customerType.score
-    })
-Jurisdiction: ${customerData.jurisdiction.value} (Score: ${
-      customerData.jurisdiction.score
-    })
-Customer Retention: ${customerData.customerRetention.value} (Score: ${
-      customerData.customerRetention.score
-    })
-Product/Service: ${customerData.product.value} (Score: ${
-      customerData.product.score
-    })
-Channel: ${customerData.channel.value} (Score: ${customerData.channel.score})
-Occupation: ${customerData.occupation.value} (Score: ${
-      customerData.occupation.score
-    })
-Industry: ${customerData.industry.value} (Score: ${customerData.industry.score})
-
-ASSESSMENT RESULT
------------------
-Total Risk Score: ${customerData.totalScore}
-Risk Level: ${customerData.riskLevel}
-
-Risk Classification:
-- Low Risk: < 18 (Standard due diligence)
-- Medium Risk: 18-20 (Enhanced monitoring)
-- High Risk: 21+ (Enhanced due diligence)
-- Unacceptable: 1000+ (Decline or exit)
-
-Generated: ${new Date().toISOString()}
-    `.trim();
-
-    const blob = new Blob([report], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `CRA_Report_${customerData.customerId || 'assessment'}_${
-      new Date().toISOString().split('T')[0]
-    }.txt`;
-    link.click();
-  };
-  const columns = [
-    {
-      id: 'customerName',
-      header: 'Customer Name',
-      accessorKey: 'customerName',
-    },
-    {
-      id: 'assessedAt',
-      header: 'Assessment Date',
-      cell: ({ row }) => (
-        <div>{new Date(row.original.assessedAt).toLocaleDateString()}</div>
-      ),
-    },
-    {
-      id: 'riskScore',
-      header: 'Total Risk Score',
-      accessorKey: 'riskScore',
-    },
-    {
-      id: 'riskLabel',
-      header: 'Risk Level',
-      cell: ({ row }) => (
-        <Badge variant={riskLevelVariants[row.original.riskLabel]}>
-          <IconPennant />
-          {row.original.riskLabel} Risk
-        </Badge>
-      ),
-    },
-    {
-      id: 'customerType',
-      header: 'Customer Type',
-      cell: ({ row }) => row.original.assessment?.customerType?.value,
-    },
-    {
-      id: 'jurisdiction',
-      header: 'Jurisdiction',
-      cell: ({ row }) => row.original.assessment?.jurisdiction?.value,
-    },
-    {
-      id: 'customerRetention',
-      header: 'Customer Retention',
-      cell: ({ row }) => row.original.assessment?.customerRetention?.value,
-    },
-    {
-      id: 'product',
-      header: 'Product/Service',
-      cell: ({ row }) => row.original.assessment?.product?.value,
-    },
-    {
-      id: 'channel',
-      header: 'Channel',
-      cell: ({ row }) => row.original.assessment?.channel?.value,
-    },
-    {
-      id: 'occupation',
-      header: 'Occupation',
-      cell: ({ row }) => row.original.assessment?.occupation?.value,
-    },
-    {
-      id: 'industry',
-      header: 'Industry',
-      cell: ({ row }) => row.original.assessment?.industry?.value,
-    },
-  ];
-
-  const fetchCustomers = async (query) => {
-    const response = await getCustomers(query);
-    const options = response.data.map((item) => ({
-      label: item.name,
-      value: item.id,
-    }));
-    setCustomerOptions(options);
-    return options;
-  };
-
-  const handleCalculateRiskScore = async (data) => {
-    setIsCalculating(true);
-    const selectedCustomer = customerOptions.find(
-      (option) => option.value === data.customerId
+  if (view === "new") {
+    return (
+      <div className="space-y-4">
+        <Button variant="ghost" size="sm" onClick={() => setView("list")}>
+          <ChevronLeft className="w-4 h-4 mr-1" /> Back to Assessments
+        </Button>
+        <CraWizard onSaved={handleSaved} onCancel={() => setView("list")} />
+      </div>
     );
-    const payload = {
-      ...data,
-      name: selectedCustomer.label,
-    };
-    const response = await calculateRiskScore(payload);
-    console.log(
-      'response',
-      JSON.stringify(response.data?.riskAssessment, null, 2)
-    );
-    if (response.success) {
-      setCalculationResult(response.data?.riskAssessment);
-      // calculateTotalScore();
-    } else {
-      toast.error('Failed to calculate risk score');
-    }
-    setIsCalculating(false);
-  };
-  const pieData = Object.entries(calculationResult || {}).map(
-    ([key, item]) => ({
-      name: key,
-      value: item.score,
-    })
-  );
-  const handleSaveResult = async (data) => {
-    setIsSaving(true);
-    const selectedCustomer = customerOptions.find(
-      (option) => option.value === data.customerId
-    );
-    const payload = {
-      ...data,
-      name: selectedCustomer.label,
-    };
-    const response = await saveResult(payload);
-    console.log('response save result', response);
-    if (response.success) {
-      form.reset();
-      setCalculationResult(null);
-      await fetchAssessments();
-      toast.success('Result saved successfully');
-    } else {
-      toast.error('Failed to save result');
-    }
-    setIsSaving(false);
-  };
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <CardTitle>Customer Risk Assessment</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <UserCheck className="w-5 h-5" /> Customer Risk Assessments
+              </CardTitle>
               <CardDescription>
-                Evaluate customer risk based on Basel AML Index, AUSTRAC
-                guidelines, and ANZSCO/ANZSIC classifications
+                CRA V2 — entity-scoped products, PEP/SOF/SOW/adverse-media scoring, automatic ECDD
+                gate and audit trail.
               </CardDescription>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => document.getElementById('import-file')?.click()}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Import
-              </Button>
-              <input
-                id="import-file"
-                type="file"
-                accept=".json"
-                className="hidden"
-                onChange={handleImport}
-              />
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              {customerData.totalScore > 0 && (
-                <Button variant="outline" size="sm" onClick={generateReport}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Generate Report
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
-            <FormField
-              form={form}
-              name="customerId"
-              label="Customer Name"
-              type="select"
-              placeholder="Enter customer name"
-              onAsyncSearch={fetchCustomers}
-              isAsync={true}
-            />
-
-            {/* <div className="space-y-2">
-              <Label>Customer ID</Label>
-              <Input
-                value={customerData.customerId}
-                onChange={(e) =>
-                  setCustomerData({
-                    ...customerData,
-                    customerId: e.target.value,
-                  })
-                }
-                placeholder="Enter customer ID"
-              />
-            </div> */}
-
-            <FormField
-              form={form}
-              name="metadata.product"
-              type="select"
-              placeholder="Select product"
-              options={productsOptions}
-              label="Product/Service"
-            />
-            <FormField
-              form={form}
-              name="metadata.channel"
-              type="select"
-              placeholder="Select channel"
-              options={channelsOptions}
-              label="Channel"
-            />
-            <FormField
-              form={form}
-              name="metadata.occupation"
-              type="select"
-              placeholder="Select occupation"
-              options={occupationsOptions}
-              label="Occupation"
-            />
-            <FormField
-              form={form}
-              name="metadata.industry"
-              type="select"
-              placeholder="Select industry"
-              options={industriesOptions}
-              label="Industry"
-            />
-            <FormField
-              form={form}
-              name="country"
-              type="select"
-              placeholder="Select country"
-              options={countriesOptions}
-              label="Country"
-            />
-            <FormField
-              form={form}
-              name="type"
-              type="select"
-              placeholder="Select customer type"
-              options={customerTypesOptions}
-              label="Customer Type"
-            />
-
-            <FormField
-              form={form}
-              name="retention"
-              type="select"
-              placeholder="Select customer retention"
-              options={customerRetentionsOptions}
-              label="Customer Retention"
-            />
-          </div>
-
-          <div className="flex items-center justify-center">
-            <Button
-              onClick={form.handleSubmit(handleCalculateRiskScore)}
-              size="sm"
-              disabled={isCalculating}
-            >
-              {isCalculating ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <>
-                  <Calculator className="h-4 w-4 mr-2" />
-                  Calculate Risk Score
-                </>
-              )}
+            <Button onClick={() => setView("new")}>
+              <Plus className="w-4 h-4 mr-2" /> New Assessment
             </Button>
           </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative flex-1 min-w-[220px] max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search customer, UID, jurisdiction…"
+                className="pl-10"
+              />
+            </div>
+            <div className="flex gap-1.5">
+              {["", "Low", "Medium", "High", "Unacceptable"].map((r) => (
+                <Button
+                  key={r || "all"}
+                  variant={riskFilter === r ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setRiskFilter(r)}
+                >
+                  {r || "All"}
+                </Button>
+              ))}
+            </div>
+          </div>
 
-          <CustomResizableTable
-            mainClass="risk-assessment-table"
-            tableId="1111"
-            data={data}
-            columns={columns}
-            loading={isLoadingAssessments}
-          />
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-16">
+              <UserCheck className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground mb-4">No assessments found.</p>
+              <Button variant="outline" onClick={() => setView("new")}>
+                Create your first assessment
+              </Button>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>UID</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Jurisdiction</TableHead>
+                  <TableHead className="text-center">Score</TableHead>
+                  <TableHead>Risk</TableHead>
+                  <TableHead>ECDD</TableHead>
+                  <TableHead>Assessed</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((a) => (
+                  <TableRow
+                    key={a._id}
+                    className="cursor-pointer"
+                    onClick={() => openDetail(a._id)}
+                  >
+                    <TableCell className="font-mono text-[11px] text-muted-foreground">
+                      {a.uid}
+                    </TableCell>
+                    <TableCell className="font-medium">{a.customerName || "—"}</TableCell>
+                    <TableCell className="capitalize text-muted-foreground">
+                      {a.inputSnapshot?.type || "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {a.inputSnapshot?.country || "—"}
+                    </TableCell>
+                    <TableCell className="text-center font-bold">{a.riskScore ?? "—"}</TableCell>
+                    <TableCell>
+                      {a.riskLabel ? (
+                        <Badge variant={RISK_BADGE_VARIANT[a.riskLabel]}>{a.riskLabel}</Badge>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {a.cddGate && a.ecddStatus !== "Approved" ? (
+                        <span className="flex items-center gap-1 text-[11px] text-danger font-medium">
+                          <Lock className="w-3 h-3" /> {a.ecddStatus || "Pending"}
+                        </span>
+                      ) : a.ecddStatus === "Approved" ? (
+                        <span className="text-[11px] text-success">Approved</span>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-[11px]">
+                      {fmtDate(a.createdAt)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDetail(a._id);
+                        }}
+                      >
+                        View →
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
-      {calculationResult && (
-        <div className="flex gap-4">
-          <Card className={'w-1/2'}>
-            <CardHeader>
-              <CardTitle>Risk Assessment Result</CardTitle>
-            </CardHeader>
-            <CardContent className={'relative'}>
-              <Button
-                variant={'outline '}
-                size={'sm'}
-                onClick={form.handleSubmit(handleSaveResult)}
-                disabled={isSaving}
-                className={'absolute -top-10 right-4 border'}
-              >
-                {isSaving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <>
-                    <Save /> Save Result
-                  </>
-                )}
-              </Button>
-              <div className=" ">
-                <div className="space-y-2 flex-shrink-0 ">
-                  <RiskScoreCard
-                    name="Customer Type"
-                    item={calculationResult.customerType}
-                  />
-                  <RiskScoreCard
-                    name="Jurisdiction"
-                    item={calculationResult.jurisdiction}
-                  />
-                  <RiskScoreCard
-                    name="Customer Retention"
-                    item={calculationResult.customerRetention}
-                  />
-                  <RiskScoreCard
-                    name="Product/Service"
-                    item={calculationResult.product}
-                  />
-                  <RiskScoreCard
-                    name="Channel"
-                    item={calculationResult.channel}
-                  />
-                  <RiskScoreCard
-                    name="Occupation"
-                    item={calculationResult.occupation}
-                  />
-                  <RiskScoreCard
-                    name="Industry"
-                    item={calculationResult.industry}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className={'w-1/2'}>
-            <CardContent>
-              <div className="flex items-center justify-center">
-                <PieChart width={400} height={400}>
-                  <Pie
-                    data={pieData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={130}
-                    label
-                  >
-                    {pieData.map((_, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
 
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <CraDetailDialog
+        assessmentId={detailId}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onChanged={load}
+      />
     </div>
   );
 }
