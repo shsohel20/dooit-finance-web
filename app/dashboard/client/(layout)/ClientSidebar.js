@@ -90,6 +90,11 @@ export default function ClientSidebar({ ...props }) {
       icon: IconBuilding,
       url: "/dashboard/client/companies",
     },
+    {
+      title: "Staffs",
+      icon: IconUser,
+      url: "/dashboard/client/staffs",
+    },
     // {
     //   title: "Case manager",
     //   icon: IconObjectScan,

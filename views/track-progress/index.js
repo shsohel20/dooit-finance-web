@@ -1,8 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import CompanyProgress from "./company-info";
-// import { Progress } from "@react-three/drei";
-import ProgressTab from "./tabs";
 import Stepper from "@/components/ui/Stepper";
 import RiskAssessmentTab from "./tabs/risk-assesment";
 import TrainingTab from "./tabs/training";
@@ -15,7 +13,7 @@ export default function TrackProgress() {
     setCurrentStep(step);
   };
   return (
-    <div>
+    <div className="max-w-3xl mx-auto">
       {/* {initalized ? <ProgressTab /> : <CompanyProgress setInitialized={setInitialized} />} */}
 
       <Stepper currentStep={currentStep} totalSteps={totalSteps} handleStep={handleStep} />

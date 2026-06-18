@@ -65,7 +65,7 @@ export default function CompanyInfo({ setCurrentStep }) {
   const canAddRole = !rolesLoading && roleFields.length < roleOptions.length;
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-3xl mx-auto space-y-8 py-6">
+    <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-8 py-6">
       {/* <div className="flex gap-4">
         <div className="flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-semibold">
