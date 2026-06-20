@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import StepIndicator from "./StepIndicator";
 import SectionStep from "./SectionStep";
+import { useLoggedInUser } from "@/app/store/useLoggedInUser";
+import { submitRiskAssessmentAnswers } from "@/views/track-progress/actions";
 
 function isSectionValid(section, formValues) {
   return (section?.fields ?? [])
@@ -17,6 +19,8 @@ function isSectionValid(section, formValues) {
 
 export default function RiskAssessmentSteps({ questions, form }) {
   const [currentStep, setCurrentStep] = useState(0);
+  const loggedInUser = useLoggedInUser();
+  const clientId = loggedInUser.loggedInUser?.client?._id;
 
   const sections = Array.isArray(questions) ? questions : (questions?.sections ?? []);
 
@@ -38,8 +42,10 @@ export default function RiskAssessmentSteps({ questions, form }) {
   };
 
   const handleFinish = () => {
-    form.handleSubmit((data) => {
-      console.log("Form submitted with data:", data);
+    form.handleSubmit(async (data) => {
+      console.log("answers", JSON.stringify(data, null, 2));
+      const res = await submitRiskAssessmentAnswers(clientId, data);
+      console.log("res", res);
       // TODO: dispatch submit action with form.getValues()
     })();
   };

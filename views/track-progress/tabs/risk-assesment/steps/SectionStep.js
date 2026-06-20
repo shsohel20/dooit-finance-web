@@ -13,9 +13,7 @@ function RatingRow({ field, control }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground">{field.label}</p>
         {field.hint && (
-          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-            {field.hint}
-          </p>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{field.hint}</p>
         )}
       </div>
       <div className="shrink-0">
@@ -37,7 +35,8 @@ function RatingRow({ field, control }) {
   );
 }
 
-function renderFields(fields, control) {
+function renderFields(fields, form) {
+  const control = form.control;
   const elements = [];
   const seen = new Set();
 
@@ -46,9 +45,7 @@ function renderFields(fields, control) {
 
     if (field.type === "rating") {
       seen.add(field.key);
-      elements.push(
-        <RatingRow key={field.key} field={field} control={control} />
-      );
+      elements.push(<RatingRow key={field.key} field={field} control={control} form={form} />);
       return;
     }
 
@@ -65,7 +62,7 @@ function renderFields(fields, control) {
               <FieldRenderer key={f.key} field={f} control={control} />
             ))}
           </div>
-        </div>
+        </div>,
       );
       return;
     }
@@ -80,18 +77,16 @@ function renderFields(fields, control) {
           </p>
           <div className="grid grid-cols-2 gap-4">
             {smFields.map((f) => (
-              <FieldRenderer key={f.key} field={f} control={control} />
+              <FieldRenderer key={f.key} field={f} control={control} form={form} />
             ))}
           </div>
-        </div>
+        </div>,
       );
       return;
     }
 
     seen.add(field.key);
-    elements.push(
-      <FieldRenderer key={field.key} field={field} control={control} />
-    );
+    elements.push(<FieldRenderer key={field.key} field={field} control={control} form={form} />);
   });
 
   return elements;
@@ -104,7 +99,7 @@ export default function SectionStep({ section, form }) {
     <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
       <h2 className="text-2xl font-semibold text-foreground mb-1">{label}</h2>
       <p className="text-sm text-muted-foreground mb-6">{desc}</p>
-      <div className="flex flex-col gap-5">{renderFields(fields, form.control)}</div>
+      <div className="flex flex-col gap-5">{renderFields(fields, form)}</div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import SingleSelectField from "./SingleSelectField";
@@ -13,39 +13,19 @@ function FieldInput({ field, rhfField }) {
   switch (type) {
     case "text":
     case "email":
-      return (
-        <Input
-          {...rhfField}
-          type={type}
-          placeholder={placeholder}
-        />
-      );
+      return <Input {...rhfField} type={type} placeholder={placeholder} />;
     case "date":
       return <Input {...rhfField} type="date" />;
     case "single-select":
       return (
-        <SingleSelectField
-          value={rhfField.value}
-          onChange={rhfField.onChange}
-          options={options}
-        />
+        <SingleSelectField value={rhfField.value} onChange={rhfField.onChange} options={options} />
       );
     case "multi-select":
       return (
-        <MultiSelectField
-          value={rhfField.value}
-          onChange={rhfField.onChange}
-          options={options}
-        />
+        <MultiSelectField value={rhfField.value} onChange={rhfField.onChange} options={options} />
       );
     case "yes-no":
-      return (
-        <YesNoField
-          value={rhfField.value}
-          onChange={rhfField.onChange}
-          options={options}
-        />
-      );
+      return <YesNoField value={rhfField.value} onChange={rhfField.onChange} options={options} />;
     case "rating":
       return (
         <RatingField
@@ -61,8 +41,15 @@ function FieldInput({ field, rhfField }) {
   }
 }
 
-export default function FieldRenderer({ field, control }) {
-  const { key, label, required, hint } = field;
+export default function FieldRenderer({ field, control, form }) {
+  const formControl = form?.control ?? control;
+  const { key, label, required, hint, value } = field;
+
+  useEffect(() => {
+    if (form) {
+      form.setValue(key, value ?? "");
+    }
+  }, [value]);
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -70,15 +57,11 @@ export default function FieldRenderer({ field, control }) {
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
-      {hint && (
-        <p className="text-xs text-muted-foreground leading-relaxed">{hint}</p>
-      )}
+      {hint && <p className="text-xs text-muted-foreground leading-relaxed">{hint}</p>}
       <Controller
         name={key}
-        control={control}
-        render={({ field: rhfField }) => (
-          <FieldInput field={field} rhfField={rhfField} />
-        )}
+        control={formControl}
+        render={({ field: rhfField }) => <FieldInput field={field} rhfField={rhfField} />}
       />
     </div>
   );
