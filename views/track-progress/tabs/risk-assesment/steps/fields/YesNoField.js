@@ -13,7 +13,7 @@ export default function YesNoField({ value, onChange, options = ["Yes", "No"] })
             onClick={() => onChange(selected ? "" : option)}
             className={`px-6 py-2 rounded-full border text-sm transition-colors ${
               selected
-                ? "bg-teal-700 border-teal-700 text-white font-medium"
+                ? "bg-primary border-primary text-white font-medium"
                 : "bg-white border-gray-300 text-gray-700 hover:border-teal-500"
             }`}
           >

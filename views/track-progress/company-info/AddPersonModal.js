@@ -130,12 +130,7 @@ export default function AddPersonModal({
                 Cancel
               </Button>
             </DialogClose>
-            <Button
-              type="submit"
-              className="bg-teal-600 hover:bg-teal-700 text-white"
-              disabled={loading}
-              onClick={form.handleSubmit(onSubmit)}
-            >
+            <Button type="submit" disabled={loading} onClick={form.handleSubmit(onSubmit)}>
               {loading ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />

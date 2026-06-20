@@ -58,7 +58,7 @@ export default function RiskAssessmentSteps({ questions, form }) {
         <Button
           onClick={isLast ? handleFinish : goNext}
           disabled={!canProceed}
-          className="bg-teal-700 hover:bg-teal-800 text-white px-8 gap-1"
+          // className="bg-primary hover:bg-teal-80 text-white px-8 gap-1"
         >
           {isLast ? "Finish" : "Continue ›"}
         </Button>

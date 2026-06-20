@@ -118,12 +118,7 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
                   onRemove={() => remove(personIndex)}
                 />
               ))}
-              <Button
-                type="button"
-                variant="link"
-                className="p-0 h-auto text-teal-600 hover:text-teal-700 font-medium"
-                onClick={handleAddClick}
-              >
+              <Button type="button" onClick={handleAddClick}>
                 <Plus className="w-4 h-4 mr-1" />
                 Add person
               </Button>

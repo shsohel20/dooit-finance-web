@@ -133,8 +133,8 @@ export default function CompanyInfo({ setCurrentStep }) {
               ))}
               <Button
                 type="button"
-                variant="link"
-                className="p-0 h-auto text-teal-600 hover:text-teal-700 font-medium"
+                // variant="link"
+                size="sm"
                 onClick={() => append(emptyRoleAssignment())}
                 disabled={!canAddRole}
               >
@@ -147,7 +147,7 @@ export default function CompanyInfo({ setCurrentStep }) {
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white">
+        <Button type="submit" size="sm">
           Save &amp; Continue
         </Button>
       </div>
