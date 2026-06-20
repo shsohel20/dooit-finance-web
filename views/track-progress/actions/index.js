@@ -15,4 +15,12 @@ const getStuffsByRole = async (roleid) => {
   return response.json();
 };
 
-export { createEmployee, getStuffsByRole };
+const getOcrData = async (payload) => {
+  const response = await fetchWithAuth(`ocr/document`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return response.json();
+};
+
+export { createEmployee, getStuffsByRole, getOcrData };

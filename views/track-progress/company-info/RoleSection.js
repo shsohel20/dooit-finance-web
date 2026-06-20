@@ -23,7 +23,6 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
     control: form.control,
     name: roleIdPath,
   });
-  console.log("currentRoleId", selectedRoleId);
 
   const allAssignments = useWatch({
     control: form.control,
@@ -33,7 +32,6 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
   useEffect(() => {
     if (selectedRoleId) {
       getStuffsByRole(selectedRoleId).then((res) => {
-        console.log("res", res);
         setStuffs(res.data);
       });
     }

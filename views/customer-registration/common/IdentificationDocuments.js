@@ -16,12 +16,7 @@ import {
   onboardingSelectControlStyles,
 } from "@/views/onboarding/individual/onboardingStyles";
 import { getCardTypesByCountryId } from "@/lib/card-type";
-
-const documentTypes = [
-  { label: "Passport", value: "Passport" },
-  { label: "Driving License", value: "Driving License" },
-  { label: "Medical Card", value: "Medical Card" },
-];
+import { getBase64 } from "@/lib/utils";
 
 function formatDate(dateString) {
   if (!dateString) return "";
@@ -51,19 +46,6 @@ function formatDate(dateString) {
   return formattedDate;
 }
 
-const getBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    console.log("reader", reader);
-
-    reader.onload = () => resolve(reader.result);
-
-    reader.onerror = () => reject(reader.error);
-    reader.onabort = () => reject(new Error("File reading was aborted"));
-
-    reader.readAsDataURL(file);
-  });
-};
 const Scanner = () => {
   return <div className="scanner-effect absolute top-0 left-0 w-full h-full" />;
 };
