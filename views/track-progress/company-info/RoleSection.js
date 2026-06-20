@@ -118,7 +118,7 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
                   onRemove={() => remove(personIndex)}
                 />
               ))}
-              <Button type="button" onClick={handleAddClick}>
+              <Button type="button" size="sm" onClick={handleAddClick}>
                 <Plus className="w-4 h-4 mr-1" />
                 Add person
               </Button>

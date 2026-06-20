@@ -80,7 +80,6 @@ const RiskAssessmentTab = () => {
       setLoading(true);
       try {
         const response = await getRiskAssessmentQuestions();
-        console.log("response", JSON.stringify(response, null, 2));
         setRiskAssessmentQuestions(response.data);
       } finally {
         setLoading(false);

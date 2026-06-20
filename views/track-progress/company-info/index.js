@@ -2,16 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { FormField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import { getAllRoles } from "@/app/dashboard/client/user-and-role-management/actions";
 import RoleSection from "./RoleSection";
-import { SECTOR_OPTIONS, emptyRoleAssignment } from "./constants";
+import { emptyRoleAssignment } from "./constants";
+import { clientOnboardingInit, trackOnboardingStep } from "../actions";
+import { getStaffs } from "@/app/dashboard/client/staffs/actions";
 
 export default function CompanyInfo({ setCurrentStep }) {
   const [roles, setRoles] = useState([]);
   const [rolesLoading, setRolesLoading] = useState(true);
+  const [alreadyAddedStuffs, setAlreadyAddedStuffs] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -40,17 +43,35 @@ export default function CompanyInfo({ setCurrentStep }) {
       setRolesLoading(false);
     }
   }, []);
+  const getAlreadyAddedStuffs = async (roleId) => {
+    try {
+      const response = await getStaffs(roleId);
+      console.log("alreadyAddedStuffs", response?.data);
+
+      setAlreadyAddedStuffs(response?.data || []);
+    } catch (error) {
+      console.error("Error fetching stuffs for role:", error);
+    }
+  };
+  const initializeOnboarding = async () => {
+    const res = await clientOnboardingInit();
+  };
 
   useEffect(() => {
     fetchRoles();
-  }, [fetchRoles]);
+    initializeOnboarding();
+  }, []);
+
+  useEffect(() => {
+    getAlreadyAddedStuffs();
+  }, [roles]);
 
   const roleOptions = roles.map((role) => ({
     label: role.name,
     value: role._id,
   }));
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     const employees = data.roleAssignments.flatMap((assignment) =>
       assignment.people.map((person) => ({
         personal: person.personal,
@@ -58,42 +79,25 @@ export default function CompanyInfo({ setCurrentStep }) {
         employment: person.employment,
       })),
     );
-    console.log({ sector: data.sector, roleAssignments: data.roleAssignments, employees });
-    setCurrentStep(2);
+    const payload = {
+      step: "stuffs_added",
+      order: 1,
+      status: "pending",
+      required: true,
+    };
+    setSaving(true);
+    const res = await trackOnboardingStep(payload);
+    console.log("trackOnboardingStep response", res);
+    if (res.success) {
+      setCurrentStep(2);
+    }
+    setSaving(false);
   };
 
   const canAddRole = !rolesLoading && roleFields.length < roleOptions.length;
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-8 py-6">
-      {/* <div className="flex gap-4">
-        <div className="flex-shrink-0">
-          <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-semibold">
-            01
-          </div>
-        </div>
-        <div className="flex-1 space-y-3 pt-0.5">
-          <div>
-            <h2 className="text-base font-semibold text-foreground">Select your sector</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Get a tailored experience to help you meet your AML/CTF obligations throughout the
-              client onboarding process.
-            </p>
-          </div>
-          <div className="max-w-xs">
-            <FormField
-              form={form}
-              name="sector"
-              label="Your sector"
-              type="select"
-              placeholder="Select a sector"
-              required
-              options={SECTOR_OPTIONS}
-            />
-          </div>
-        </div>
-      </div> */}
-
       <div className="flex gap-4">
         <div className="flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-semibold">
@@ -116,7 +120,7 @@ export default function CompanyInfo({ setCurrentStep }) {
             </div>
           ) : (
             <>
-              {roleFields.length === 0 && (
+              {alreadyAddedStuffs.length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   No roles assigned yet. Add a role to get started.
                 </p>
@@ -147,8 +151,8 @@ export default function CompanyInfo({ setCurrentStep }) {
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" size="sm">
-          Save &amp; Continue
+        <Button type="submit" size="sm" disabled={alreadyAddedStuffs?.length === 0 || saving}>
+          {saving ? "Saving..." : "Save & Continue"}
         </Button>
       </div>
     </form>

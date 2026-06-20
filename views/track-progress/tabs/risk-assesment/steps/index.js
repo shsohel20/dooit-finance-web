@@ -16,7 +16,6 @@ function isSectionValid(section, formValues) {
 }
 
 export default function RiskAssessmentSteps({ questions, form }) {
-  console.log("questions", questions);
   const [currentStep, setCurrentStep] = useState(0);
 
   const sections = Array.isArray(questions) ? questions : (questions?.sections ?? []);

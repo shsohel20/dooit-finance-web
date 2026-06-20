@@ -28,4 +28,36 @@ const getRiskAssessmentQuestions = async () => {
   return response.json();
 };
 
-export { createEmployee, getStuffsByRole, getOcrData, getRiskAssessmentQuestions };
+const clientOnboardingInit = async (data) => {
+  const response = await fetchWithAuth(`onboarding-step/init`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+  return response.json();
+};
+
+const trackOnboardingStep = async (payload) => {
+  const response = await fetchWithAuth(`onboarding-step/step`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+  return response.json();
+};
+
+const submitRiskAssessmentAnswers = async (clientId, answers) => {
+  const response = await fetchWithAuth(`clients/${clientId}/risk-questions`, {
+    method: "PUT",
+    body: JSON.stringify(answers),
+  });
+  return response.json();
+};
+
+export {
+  createEmployee,
+  getStuffsByRole,
+  getOcrData,
+  getRiskAssessmentQuestions,
+  clientOnboardingInit,
+  submitRiskAssessmentAnswers,
+  trackOnboardingStep,
+};
