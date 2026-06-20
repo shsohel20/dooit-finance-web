@@ -21,7 +21,7 @@ export default function IdentityDocumentsSection({ form, basePath = "" }) {
   const documentsPath = basePath ? `${basePath}.documents` : "documents";
   const documentTypePath = basePath ? `${basePath}.document_type` : "document_type";
 
-  const { fields, append, update } = useFieldArray({
+  const { fields, append, update, remove } = useFieldArray({
     control: form.control,
     name: documentsPath,
   });
@@ -103,6 +103,17 @@ export default function IdentityDocumentsSection({ form, basePath = "" }) {
   };
 
   const enableProcessBtn = documentType?.sides === fields.length;
+
+  const handleDocumentTypeChange = (data) => {
+    form.setValue(documentTypePath, data);
+    fields.forEach((field) => {
+      remove(field.id);
+    });
+    setFrontError(false);
+    setBackError(false);
+    setFrontLoading(false);
+    setBackLoading(false);
+  };
   return (
     <div className="space-y-3 pt-2 border-t border-border">
       {/* <p className="text-sm font-medium text-foreground">Identity documents</p> */}
@@ -118,7 +129,7 @@ export default function IdentityDocumentsSection({ form, basePath = "" }) {
             <CustomSelect
               options={DOCUMENT_TYPES}
               value={field.value}
-              onChange={field.onChange}
+              onChange={handleDocumentTypeChange}
               placeholder="Select document type"
             />
           </div>

@@ -23,4 +23,9 @@ const getOcrData = async (payload) => {
   return response.json();
 };
 
-export { createEmployee, getStuffsByRole, getOcrData };
+const getRiskAssessmentQuestions = async () => {
+  const response = await fetchWithAuth(`client/risk-questions/schema`);
+  return response.json();
+};
+
+export { createEmployee, getStuffsByRole, getOcrData, getRiskAssessmentQuestions };
