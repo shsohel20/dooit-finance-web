@@ -11,6 +11,7 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 // ─── Risk level config ───────────────────────────────────────────────────────
 
@@ -118,7 +119,9 @@ function InfoCell({ label, value, sub }) {
   if (!value) return null;
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+        {label}
+      </p>
       <p className="text-sm font-medium text-foreground leading-tight">{value}</p>
       {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
     </div>
@@ -182,7 +185,12 @@ function EntityHeader({ data }) {
 
 // ─── Overall residual risk profile ───────────────────────────────────────────
 
-function OverallRiskProfile({ residualCounts = {}, overallResidual, overallResidualLabel, actionCount }) {
+function OverallRiskProfile({
+  residualCounts = {},
+  overallResidual,
+  overallResidualLabel,
+  actionCount,
+}) {
   return (
     <div className="border rounded-xl bg-white p-4 space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -359,7 +367,9 @@ function ActionItemCard({ row }) {
               L{row.L} × C{row.C}
             </span>
           </div>
-          <p className={cn("text-sm font-semibold mt-1.5 leading-snug", cfg.text)}>{row.riskName}</p>
+          <p className={cn("text-sm font-semibold mt-1.5 leading-snug", cfg.text)}>
+            {row.riskName}
+          </p>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{row.description}</p>
           {row.pfSanctionsNote && (
             <p className={cn("text-xs font-medium mt-1 italic", cfg.text)}>
@@ -415,7 +425,7 @@ function ActionItems({ rows }) {
 
 // ─── Root component ───────────────────────────────────────────────────────────
 
-export default function RiskRegisters({ riskRegisters = [] }) {
+export default function RiskRegisters({ riskRegisters = [], setCurrentStep }) {
   const register = Array.isArray(riskRegisters) ? riskRegisters[0] : riskRegisters;
   if (!register) return null;
 
@@ -447,6 +457,13 @@ export default function RiskRegisters({ riskRegisters = [] }) {
       />
       <RiskTable sections={sections} />
       {actionRows.length > 0 && <ActionItems rows={actionRows} />}
+
+      <div className="flex justify-between gap-2">
+        <Button variant="outline" onClick={() => setCurrentStep((prev) => prev - 1)}>
+          Previous
+        </Button>
+        <Button onClick={() => setCurrentStep((prev) => prev + 1)}>Next</Button>
+      </div>
     </div>
   );
 }

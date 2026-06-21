@@ -113,7 +113,7 @@ const RiskAssessmentTab = ({ setCurrentStep }) => {
           ))}
         </div>
       ) : riskRegisters ? (
-        <RiskRegisters riskRegisters={riskRegisters} />
+        <RiskRegisters riskRegisters={riskRegisters} setCurrentStep={setCurrentStep} />
       ) : (
         <div className="px-6 py-10 rounded bg-gray-50 mt-4">
           <RiskAssessmentSteps

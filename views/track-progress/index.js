@@ -6,6 +6,7 @@ import RiskAssessmentTab from "./tabs/risk-assesment";
 import TrainingTab from "./tabs/training";
 import TemplatesList from "../knowledge-hub/policy-hub/list/TemplatesList";
 import PolicyStep from "./tabs/policy";
+import StaffOnboardingTab from "./tabs/staff-onboarding";
 
 export default function TrackProgress() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -30,6 +31,11 @@ export default function TrackProgress() {
       key: "training",
       label: "Training",
       component: <TrainingTab setCurrentStep={setCurrentStep} />,
+    },
+    {
+      key: "staff_onboarding",
+      label: "Staff Onboarding",
+      component: <StaffOnboardingTab setCurrentStep={setCurrentStep} />,
     },
   ];
 
