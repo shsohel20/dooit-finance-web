@@ -27,7 +27,7 @@ function StepCircle({ isCompleted, isActive }) {
 export default function Stepper({ steps = [], currentStep = 1, onStepChange }) {
   return (
     <div className="w-full rounded-xl bg-gray-50 px-4 py-6">
-      <div className="flex w-full">
+      <div className="flex w-full ">
         {steps.map((step, index) => {
           const stepNumber = index + 1;
           const isCompleted = stepNumber < currentStep;
@@ -35,7 +35,7 @@ export default function Stepper({ steps = [], currentStep = 1, onStepChange }) {
           const isClickable = Boolean(onStepChange) && isCompleted;
 
           return (
-            <div key={step.key} className="flex flex-1 flex-col items-center relative">
+            <div key={step.key} className="flex flex-1 flex-col items-center relative ">
               {index > 0 && (
                 <div
                   className={cn(

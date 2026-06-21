@@ -6,9 +6,11 @@ import ClientTypesStep, { CLIENT_TYPES } from "./primary/client-types";
 import DeliveryChannelsStep from "./primary/delivery-channels";
 import DesignatedServicesStep from "./primary/designated-services";
 import LawyerRisk from "./primary/LawyerRisk";
-import { getRiskAssessmentQuestions } from "../../actions";
+import { getRiskAssessmentQuestions, getRiskRegisters } from "../../actions";
 import { useForm } from "react-hook-form";
 import RiskAssessmentSteps from "./steps";
+import { useLoggedInUser } from "@/app/store/useLoggedInUser";
+import RiskRegisters from "./RiskRegisters";
 
 const CLIENT_TYPE_RISK_STEPS = {
   "Lawyers&Conveyancers": {
@@ -68,12 +70,13 @@ function buildRiskAssessmentSteps(clientTypes = {}) {
   return [...steps, ...COMMON_STEPS];
 }
 
-const RiskAssessmentTab = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [allAnswers, setAllAnswers] = useState({});
+const RiskAssessmentTab = ({ setCurrentStep }) => {
   const [riskAssessmentQuestions, setRiskAssessmentQuestions] = useState([]);
+  const [riskRegisters, setRiskRegisters] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { loggedInUser } = useLoggedInUser();
   const form = useForm();
+  console.log("loggedInUser", loggedInUser);
 
   useEffect(() => {
     const fetchRiskAssessmentQuestions = async () => {
@@ -88,19 +91,18 @@ const RiskAssessmentTab = () => {
     fetchRiskAssessmentQuestions();
   }, []);
 
-  const steps = useMemo(
-    () => buildRiskAssessmentSteps(allAnswers.client_types),
-    [allAnswers.client_types],
-  );
-
   useEffect(() => {
-    if (currentStep >= steps.length) {
-      setCurrentStep(Math.max(steps.length - 1, 0));
-    }
-  }, [currentStep, steps.length]);
+    const fetchRiskRegisters = async () => {
+      const response = await getRiskRegisters(loggedInUser?.name);
+      console.log("risk registers", JSON.stringify(response.data, null, 2));
+      setRiskRegisters(response.data);
+    };
+    fetchRiskRegisters();
+  }, []);
 
   return (
     <div>
+      <RiskRegisters riskRegisters={riskRegisters} />
       {loading ? (
         <div className="flex flex-col gap-2">
           {Array.from({ length: 10 }).map((_, index) => (
@@ -113,7 +115,11 @@ const RiskAssessmentTab = () => {
         </div>
       ) : (
         <div className="px-6 py-10 rounded bg-gray-50 mt-4">
-          <RiskAssessmentSteps questions={riskAssessmentQuestions} form={form} />
+          <RiskAssessmentSteps
+            questions={riskAssessmentQuestions}
+            form={form}
+            setTrackingStep={setCurrentStep}
+          />
         </div>
       )}
     </div>

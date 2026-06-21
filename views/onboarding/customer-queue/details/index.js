@@ -786,13 +786,12 @@ export const DetailViewModal = ({ details, fetching }) => {
 
   const riskScore = details?.riskScore ?? 0;
   const riskLabel = details?.riskLabel ?? "";
-  const riskMax = 200;
 
   const rejectionReason = details?.kycRejectReason;
   const kycHistory = details?.kycHistory || [];
   const relations = details?.relations || [];
   const journeys = details?.journeys || [];
-  console.log("kyc history", kycHistory);
+  console.log("details", details);
 
   // Parse kycRejectReason into segments for display
   const parsedRejection = rejectionReason

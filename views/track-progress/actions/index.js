@@ -45,10 +45,16 @@ const trackOnboardingStep = async (payload) => {
 };
 
 const submitRiskAssessmentAnswers = async (clientId, answers) => {
-  const response = await fetchWithAuth(`clients/${clientId}/risk-questions`, {
+  const url = `client/${clientId}/risk-questions`;
+  const response = await fetchWithAuth(url, {
     method: "PUT",
     body: JSON.stringify(answers),
   });
+  return response.json();
+};
+
+const getRiskRegisters = async (entityName) => {
+  const response = await fetchWithAuth(`risk-register/by-entity/${entityName}`);
   return response.json();
 };
 
@@ -60,4 +66,5 @@ export {
   clientOnboardingInit,
   submitRiskAssessmentAnswers,
   trackOnboardingStep,
+  getRiskRegisters,
 };

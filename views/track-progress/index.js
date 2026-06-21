@@ -4,6 +4,8 @@ import CompanyProgress from "./company-info";
 import Stepper from "./tabs/stepper";
 import RiskAssessmentTab from "./tabs/risk-assesment";
 import TrainingTab from "./tabs/training";
+import TemplatesList from "../knowledge-hub/policy-hub/list/TemplatesList";
+import PolicyStep from "./tabs/policy";
 
 export default function TrackProgress() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -20,6 +22,11 @@ export default function TrackProgress() {
       component: <RiskAssessmentTab setCurrentStep={setCurrentStep} />,
     },
     {
+      key: "policy_review",
+      label: "Policy Review",
+      component: <PolicyStep setCurrentStep={setCurrentStep} />,
+    },
+    {
       key: "training",
       label: "Training",
       component: <TrainingTab setCurrentStep={setCurrentStep} />,
@@ -27,7 +34,7 @@ export default function TrackProgress() {
   ];
 
   const activeStep = steps[currentStep - 1];
-
+  console.log("currentStep", currentStep);
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <Stepper steps={steps} currentStep={currentStep} onStepChange={setCurrentStep} />

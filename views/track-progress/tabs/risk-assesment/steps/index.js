@@ -5,6 +5,8 @@ import StepIndicator from "./StepIndicator";
 import SectionStep from "./SectionStep";
 import { useLoggedInUser } from "@/app/store/useLoggedInUser";
 import { submitRiskAssessmentAnswers } from "@/views/track-progress/actions";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 function isSectionValid(section, formValues) {
   return (section?.fields ?? [])
@@ -17,8 +19,9 @@ function isSectionValid(section, formValues) {
     });
 }
 
-export default function RiskAssessmentSteps({ questions, form }) {
+export default function RiskAssessmentSteps({ questions, form, setTrackingStep }) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const loggedInUser = useLoggedInUser();
   const clientId = loggedInUser.loggedInUser?.client?._id;
 
@@ -41,13 +44,18 @@ export default function RiskAssessmentSteps({ questions, form }) {
     if (!isFirst) setCurrentStep((s) => s - 1);
   };
 
-  const handleFinish = () => {
-    form.handleSubmit(async (data) => {
-      console.log("answers", JSON.stringify(data, null, 2));
-      const res = await submitRiskAssessmentAnswers(clientId, data);
-      console.log("res", res);
-      // TODO: dispatch submit action with form.getValues()
-    })();
+  const handleFinish = async (data) => {
+    setIsSubmitting(true);
+    const res = await submitRiskAssessmentAnswers(clientId, data);
+    if (res.success) {
+      toast.success("Risk assessment completed!");
+      setTrackingStep((prev) => {
+        return prev + 1;
+      });
+    } else {
+      toast.error(res?.error || "Failed to submit risk assessment answers");
+    }
+    setIsSubmitting(false);
   };
 
   return (
@@ -61,11 +69,17 @@ export default function RiskAssessmentSteps({ questions, form }) {
           ‹ Back
         </Button>
         <Button
-          onClick={isLast ? handleFinish : goNext}
-          disabled={!canProceed}
+          onClick={isLast ? form.handleSubmit(handleFinish) : goNext}
+          disabled={!canProceed || isSubmitting}
           // className="bg-primary hover:bg-teal-80 text-white px-8 gap-1"
         >
-          {isLast ? "Finish" : "Continue ›"}
+          {isSubmitting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : isLast ? (
+            "Finish"
+          ) : (
+            "Continue ›"
+          )}
         </Button>
       </div>
     </div>

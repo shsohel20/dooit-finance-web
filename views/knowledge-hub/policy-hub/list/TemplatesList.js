@@ -28,10 +28,9 @@ import {
 import { editorToText, parseToEditorJS } from "@/lib/utils";
 import DocumentTypeSelect from "@/components/ui/DocumentTypeSelect";
 
-const EditorForm = dynamic(
-  () => import("@/views/knowledge-hub/policy-hub/policy-form/Editor"),
-  { ssr: false },
-);
+const EditorForm = dynamic(() => import("@/views/knowledge-hub/policy-hub/policy-form/Editor"), {
+  ssr: false,
+});
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -102,13 +101,19 @@ function TemplateModal({ initial, onClose, onSaved }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) { setError("Name is required."); return; }
+    if (!form.name.trim()) {
+      setError("Name is required.");
+      return;
+    }
     setSaving(true);
     setError("");
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
-      tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+      tags: form.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean),
       isGlobal: form.isGlobal,
       metadata: {
         industry: form.industry.trim(),
@@ -168,10 +173,7 @@ function TemplateModal({ initial, onClose, onSaved }) {
               />
             </Field>
             <Field label="Document Type">
-              <DocumentTypeSelect
-                value={form.document_type}
-                onChange={set("document_type")}
-              />
+              <DocumentTypeSelect value={form.document_type} onChange={set("document_type")} />
             </Field>
           </div>
 
@@ -222,9 +224,7 @@ function TemplateModal({ initial, onClose, onSaved }) {
 // ── editable preview modal ────────────────────────────────────────────────────
 
 function PreviewModal({ template, onClose, onSaved }) {
-  const [editorContent, setEditorContent] = useState(() =>
-    parseToEditorJS(template.docs || ""),
-  );
+  const [editorContent, setEditorContent] = useState(() => parseToEditorJS(template.docs || ""));
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async (editorData) => {
@@ -285,21 +285,33 @@ function ImportModal({ file, onClose, onImported }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) { setError("Name is required."); return; }
+    if (!form.name.trim()) {
+      setError("Name is required.");
+      return;
+    }
     setImporting(true);
     setError("");
     const formData = new FormData();
     formData.append("file", file);
     formData.append("name", form.name.trim());
     formData.append("description", form.description.trim());
-    formData.append("tags", JSON.stringify(
-      form.tags.split(",").map((t) => t.trim()).filter(Boolean),
-    ));
-    formData.append("metadata", JSON.stringify({
-      industry: form.industry.trim(),
-      document_type: form.document_type.trim(),
-      jurisdiction: form.jurisdiction.trim(),
-    }));
+    formData.append(
+      "tags",
+      JSON.stringify(
+        form.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
+      ),
+    );
+    formData.append(
+      "metadata",
+      JSON.stringify({
+        industry: form.industry.trim(),
+        document_type: form.document_type.trim(),
+        jurisdiction: form.jurisdiction.trim(),
+      }),
+    );
     formData.append("isGlobal", String(form.isGlobal));
     try {
       const res = await importTemplateFromDocx(formData);
@@ -358,10 +370,7 @@ function ImportModal({ file, onClose, onImported }) {
               />
             </Field>
             <Field label="Document Type">
-              <DocumentTypeSelect
-                value={form.document_type}
-                onChange={set("document_type")}
-              />
+              <DocumentTypeSelect value={form.document_type} onChange={set("document_type")} />
             </Field>
           </div>
 
@@ -426,7 +435,7 @@ const inputCls =
 
 // ── main component ────────────────────────────────────────────────────────────
 
-export default function TemplatesList() {
+export default function TemplatesList({ hideHeader = false }) {
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -454,7 +463,9 @@ export default function TemplatesList() {
     }
   };
 
-  useEffect(() => { fetchTemplates(page); }, [page]);
+  useEffect(() => {
+    fetchTemplates(page);
+  }, [page]);
 
   const setLoading = (id, key, val) =>
     setActionLoading((prev) => ({ ...prev, [`${id}_${key}`]: val }));
@@ -546,7 +557,10 @@ export default function TemplatesList() {
       {(showCreate || editTarget) && (
         <TemplateModal
           initial={editTarget}
-          onClose={() => { setShowCreate(false); setEditTarget(null); }}
+          onClose={() => {
+            setShowCreate(false);
+            setEditTarget(null);
+          }}
           onSaved={handleSaved}
         />
       )}
@@ -555,9 +569,7 @@ export default function TemplatesList() {
           template={previewTarget}
           onClose={() => setPreviewTarget(null)}
           onSaved={(updated) => {
-            setTemplates((prev) =>
-              prev.map((t) => (getId(t) === getId(updated) ? updated : t)),
-            );
+            setTemplates((prev) => prev.map((t) => (getId(t) === getId(updated) ? updated : t)));
             setPreviewTarget(null);
           }}
         />
@@ -565,42 +577,46 @@ export default function TemplatesList() {
 
       <div className="space-y-6">
         {/* Toolbar */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <p className="text-sm text-muted-foreground">
-            Reusable policy templates — preview, export, or apply to create a new policy.
-          </p>
-          <div className="flex gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".docx"
-              className="hidden"
-              onChange={handleImport}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2"
-            >
-              <FileUp className="h-4 w-4" />
-              Import DOCX
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              New Template
-            </Button>
+        {hideHeader ? null : (
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <p className="text-sm text-muted-foreground">
+              Reusable policy templates — preview, export, or apply to create a new policy.
+            </p>
+            <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".docx"
+                className="hidden"
+                onChange={handleImport}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2"
+              >
+                <FileUp className="h-4 w-4" />
+                Import DOCX
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setShowCreate(true)}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                New Template
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Cards */}
         {isLoading ? (
           <div className="grid md:grid-cols-2 gap-5">
-            {Array.from({ length: 6 }).map((_, i) => <TemplateSkeleton key={i} />)}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <TemplateSkeleton key={i} />
+            ))}
           </div>
         ) : templates.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground gap-3">
@@ -647,13 +663,22 @@ export default function TemplatesList() {
                   {/* Meta */}
                   <div className="text-xs text-muted-foreground space-y-0.5">
                     {tmpl.metadata?.industry && (
-                      <p><span className="font-medium text-foreground">Industry:</span> {tmpl.metadata.industry}</p>
+                      <p>
+                        <span className="font-medium text-foreground">Industry:</span>{" "}
+                        {tmpl.metadata.industry}
+                      </p>
                     )}
                     {tmpl.metadata?.document_type && (
-                      <p><span className="font-medium text-foreground">Type:</span> {tmpl.metadata.document_type}</p>
+                      <p>
+                        <span className="font-medium text-foreground">Type:</span>{" "}
+                        {tmpl.metadata.document_type}
+                      </p>
                     )}
                     {tmpl.metadata?.jurisdiction && (
-                      <p><span className="font-medium text-foreground">Jurisdiction:</span> {tmpl.metadata.jurisdiction}</p>
+                      <p>
+                        <span className="font-medium text-foreground">Jurisdiction:</span>{" "}
+                        {tmpl.metadata.jurisdiction}
+                      </p>
                     )}
                   </div>
 
