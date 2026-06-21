@@ -72,7 +72,7 @@ function buildRiskAssessmentSteps(clientTypes = {}) {
 
 const RiskAssessmentTab = ({ setCurrentStep }) => {
   const [riskAssessmentQuestions, setRiskAssessmentQuestions] = useState([]);
-  const [riskRegisters, setRiskRegisters] = useState([]);
+  const [riskRegisters, setRiskRegisters] = useState(null);
   const [loading, setLoading] = useState(false);
   const { loggedInUser } = useLoggedInUser();
   const form = useForm();
@@ -102,7 +102,6 @@ const RiskAssessmentTab = ({ setCurrentStep }) => {
 
   return (
     <div>
-      <RiskRegisters riskRegisters={riskRegisters} />
       {loading ? (
         <div className="flex flex-col gap-2">
           {Array.from({ length: 10 }).map((_, index) => (
@@ -113,6 +112,8 @@ const RiskAssessmentTab = ({ setCurrentStep }) => {
             ></div>
           ))}
         </div>
+      ) : riskRegisters ? (
+        <RiskRegisters riskRegisters={riskRegisters} />
       ) : (
         <div className="px-6 py-10 rounded bg-gray-50 mt-4">
           <RiskAssessmentSteps
