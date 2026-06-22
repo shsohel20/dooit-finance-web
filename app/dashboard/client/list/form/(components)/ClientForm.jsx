@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   clientType: z.string().min(1, "Client type is required"),
+  clientTypeId: z.string().optional(),
   contacts: z.array(
     z.object({
       name: z.string(),
@@ -97,6 +98,7 @@ export function ClientForm({ id }) {
   const [formData, setFormData] = useState({
     name: "",
     clientType: "",
+    clientTypeId: "",
     registrationNumber: "",
     taxId: "",
     email: "",
@@ -166,6 +168,7 @@ export function ClientForm({ id }) {
   const FIELD_TAB = {
     name: 1,
     clientType: 1,
+    clientTypeId: 1,
     registrationNumber: 1,
     taxId: 1,
     email: 1,
@@ -187,6 +190,7 @@ export function ClientForm({ id }) {
     const payload = {
       name: data.name,
       clientType: data.clientType,
+      clientTypeId: data.clientTypeId,
       registrationNumber: data.registrationNumber,
       taxId: data.taxId,
       email: data.email,
@@ -229,7 +233,7 @@ export function ClientForm({ id }) {
   };
 
   const tabComponents = {
-    1: <CompanyInfoSection control={control} errors={errors} id={id} />,
+    1: <CompanyInfoSection control={control} errors={errors} setValue={setValue} id={id} />,
     2: <ContactsSection control={control} errors={errors} />,
     3: <AddressSection control={control} errors={errors} />,
     4: <LegalSection control={control} errors={errors} />,
@@ -258,6 +262,8 @@ export function ClientForm({ id }) {
   const handleTabChange = (value) => {
     setCurrentStep(value);
   };
+
+ 
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onInvalid)}>

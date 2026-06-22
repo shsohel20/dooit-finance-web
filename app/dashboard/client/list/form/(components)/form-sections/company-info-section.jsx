@@ -12,9 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 
-export function CompanyInfoSection({ control, errors, formData, setFormData, id }) {
+export function CompanyInfoSection({ control, errors, setValue, id }) {
   const [entityTypes, setEntityTypes] = useState([]);
   useEffect(() => {
     const fetchEntityTypes = async () => {
@@ -23,10 +23,22 @@ export function CompanyInfoSection({ control, errors, formData, setFormData, id 
     };
     fetchEntityTypes();
   }, []);
-  const handleChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
-  };
 
+  // The Client Type select stores the entity type *name* (label). Keep the
+  // companion `clientTypeId` in sync with the matching EntityType _id so the
+  // form submits both. Runs on user selection and on edit-mode hydration once
+  // the entity types have loaded. Also tolerates a value that is already an id.
+  const clientTypeValue = useWatch({ control, name: "clientType" });
+  useEffect(() => {
+    if (!setValue || !entityTypes?.length || !clientTypeValue) return;
+    const match = entityTypes.find(
+      (t) =>
+        t.label === clientTypeValue ||
+        String(t.value) === String(clientTypeValue) ||
+        String(t._id) === String(clientTypeValue),
+    );
+    if (match) setValue("clientTypeId", String(match._id ?? match.value ?? ""));
+  }, [entityTypes, clientTypeValue, setValue]);
   //client Types
   //   Bank / Financial Institution
   // VASPs / Crypto Exchanges / Wallets
@@ -101,7 +113,7 @@ export function CompanyInfoSection({ control, errors, formData, setFormData, id 
                     </SelectTrigger>
                     <SelectContent>
                       {entityTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
+                        <SelectItem key={type.label} value={type.label}>
                           {type.label}
                         </SelectItem>
                       ))}

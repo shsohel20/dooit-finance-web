@@ -5,44 +5,73 @@ import ClientDashboardPage from "@/views/client-dashboard/dashboard";
 import CryptoCurrencyDashboard from "@/views/crypto-currency/dashboard";
 import PreciousMetalDashboard from "@/views/precious-metal/dashboard";
 import RealEstateDashboard from "@/views/real-estate/dashboard";
-import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { getAllEntityTypes } from "../actions";
 
 export default function DashboardClientPage() {
   const { loggedInUser } = useGetUser();
   const [entityTypes, setEntityTypes] = useState([]);
-  //entity types
-  const financialEntity = entityTypes.find((entity) => entity.name === "Banks & ADIs");
-  const realStateEntity = entityTypes.find((entity) => entity.name === "Real Estate");
-  const preciousMetalEntity = entityTypes.find(
-    (entity) => entity.name === "Precious Metal Dealers",
-  );
-  const cryptoEntity = entityTypes.find((entity) => entity.name === "VASP/DCEP");
-  const clientType = loggedInUser?.client?.clientType;
-
-  //is financial
-  const isFinancial = financialEntity?.matchKeywords?.includes(clientType?.toLowerCase());
-  //is real state
-  const isRealState = realStateEntity?.matchKeywords.includes(clientType?.toLowerCase());
-  //is precious metal
-  const isPreciousMetal = preciousMetalEntity?.matchKeywords.includes(clientType?.toLowerCase());
-  //is crypto
-  const isCrypto = cryptoEntity?.matchKeywords.includes(clientType?.toLowerCase());
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     const fetchEntityTypes = async () => {
-      const response = await getAllEntityTypes();
-      setEntityTypes(response.data);
+      try {
+        const response = await getAllEntityTypes();
+        if (active) setEntityTypes(Array.isArray(response?.data) ? response.data : []);
+      } catch (err) {
+        console.error("Failed to load entity types:", err);
+        if (active) setEntityTypes([]);
+      } finally {
+        if (active) setLoading(false);
+      }
     };
     fetchEntityTypes();
+    return () => {
+      active = false;
+    };
   }, []);
+
+  const clientType = loggedInUser?.client?.clientType;
+
+  // A client maps to an entity-type dashboard when its clientType matches that
+  // entity by name, id, or one of the entity's matchKeywords (case-insensitive).
+  const matchesEntity = (name) => {
+    const entity = entityTypes.find((e) => e.name === name);
+    if (!entity || !clientType) return false;
+    const ct = String(clientType).toLowerCase();
+    return (
+      entity.name?.toLowerCase() === ct ||
+      String(entity._id) === String(clientType) ||
+      entity.matchKeywords?.includes(ct) ||
+      false
+    );
+  };
+
+  const isFinancial = matchesEntity("Banks & ADIs");
+  const isRealState = matchesEntity("Real Estate");
+  const isPreciousMetal = matchesEntity("Precious Metal Dealers");
+  const isCrypto = matchesEntity("VASP/DCEP");
+  const hasMatchedDashboard = isFinancial || isRealState || isPreciousMetal || isCrypto;
+
+ 
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
   return (
     <div>
       {isRealState && <RealEstateDashboard />}
       {isFinancial && <ClientDashboardPage />}
       {isPreciousMetal && <PreciousMetalDashboard />}
       {isCrypto && <CryptoCurrencyDashboard />}
+      {/* Fallback so the page is never blank when no specific entity type matches */}
+      {!hasMatchedDashboard && <ClientDashboardPage />}
     </div>
   );
 }
