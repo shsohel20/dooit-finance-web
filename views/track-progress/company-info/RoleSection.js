@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useFieldArray, useWatch } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { FormField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,7 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
   const [modalOpen, setModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [stuffs, setStuffs] = useState([]);
+  const [stuffsLoading, setStuffsLoading] = useState(false);
 
   const selectedRoleId = useWatch({
     control: form.control,
@@ -31,9 +32,14 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
 
   useEffect(() => {
     if (selectedRoleId) {
-      getStuffsByRole(selectedRoleId).then((res) => {
-        setStuffs(res.data);
-      });
+      setStuffsLoading(true);
+      getStuffsByRole(selectedRoleId)
+        .then((res) => {
+          setStuffs(res.data);
+        })
+        .finally(() => {
+          setStuffsLoading(false);
+        });
     }
   }, [selectedRoleId]);
 
@@ -106,18 +112,25 @@ export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading
 
           {selectedRoleId && (
             <div className="space-y-3">
-              {stuffs.length === 0 && (
+              {stuffs.length === 0 && !stuffsLoading && (
                 <p className="text-sm text-muted-foreground">No people added for this role yet.</p>
               )}
-              {stuffs.map((field, personIndex) => (
-                <PersonCard
-                  key={field.id}
-                  person={field}
-                  index={personIndex}
-                  onEdit={() => handleEditClick(personIndex)}
-                  onRemove={() => remove(personIndex)}
-                />
-              ))}
+              {stuffsLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading people...
+                </div>
+              ) : (
+                stuffs.map((field, personIndex) => (
+                  <PersonCard
+                    key={field.id}
+                    person={field}
+                    index={personIndex}
+                    onEdit={() => handleEditClick(personIndex)}
+                    onRemove={() => remove(personIndex)}
+                  />
+                ))
+              )}
               <Button type="button" size="sm" onClick={handleAddClick}>
                 <Plus className="w-4 h-4 mr-1" />
                 Add person

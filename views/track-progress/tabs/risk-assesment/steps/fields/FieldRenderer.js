@@ -44,6 +44,7 @@ function FieldInput({ field, rhfField }) {
 export default function FieldRenderer({ field, control, form }) {
   const formControl = form?.control ?? control;
   const { key, label, required, hint, value } = field;
+  console.log("key", field);
 
   useEffect(() => {
     if (form) {

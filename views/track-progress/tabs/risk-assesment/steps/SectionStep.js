@@ -35,7 +35,7 @@ function RatingRow({ field, control }) {
   );
 }
 
-function renderFields(fields, form) {
+function renderFields(fields, form, entityTypes) {
   const control = form.control;
   const elements = [];
   const seen = new Set();
@@ -59,7 +59,7 @@ function renderFields(fields, form) {
           </p>
           <div className="grid grid-cols-3 gap-4">
             {coFields.map((f) => (
-              <FieldRenderer key={f.key} field={f} control={control} />
+              <FieldRenderer key={f.key} field={f} control={control} entityTypes={entityTypes} />
             ))}
           </div>
         </div>,
@@ -77,7 +77,13 @@ function renderFields(fields, form) {
           </p>
           <div className="grid grid-cols-2 gap-4">
             {smFields.map((f) => (
-              <FieldRenderer key={f.key} field={f} control={control} form={form} />
+              <FieldRenderer
+                key={f.key}
+                field={f}
+                control={control}
+                form={form}
+                entityTypes={entityTypes}
+              />
             ))}
           </div>
         </div>,
@@ -86,20 +92,28 @@ function renderFields(fields, form) {
     }
 
     seen.add(field.key);
-    elements.push(<FieldRenderer key={field.key} field={field} control={control} form={form} />);
+    elements.push(
+      <FieldRenderer
+        key={field.key}
+        field={field}
+        control={control}
+        form={form}
+        entityTypes={entityTypes}
+      />,
+    );
   });
 
   return elements;
 }
 
-export default function SectionStep({ section, form }) {
+export default function SectionStep({ section, form, entityTypes }) {
   const { label, desc, fields = [] } = section;
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
       <h2 className="text-2xl font-semibold text-foreground mb-1">{label}</h2>
       <p className="text-sm text-muted-foreground mb-6">{desc}</p>
-      <div className="flex flex-col gap-5">{renderFields(fields, form)}</div>
+      <div className="flex flex-col gap-5">{renderFields(fields, form, entityTypes)}</div>
     </div>
   );
 }

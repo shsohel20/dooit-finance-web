@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import StepIndicator from "./StepIndicator";
 import SectionStep from "./SectionStep";
@@ -7,6 +7,7 @@ import { useLoggedInUser } from "@/app/store/useLoggedInUser";
 import { submitRiskAssessmentAnswers } from "@/views/track-progress/actions";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { getAllEntityTypes } from "@/app/dashboard/actions";
 
 function isSectionValid(section, formValues) {
   return (section?.fields ?? [])
@@ -23,9 +24,18 @@ export default function RiskAssessmentSteps({ questions, form, setTrackingStep }
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const loggedInUser = useLoggedInUser();
+  const [entityTypes, setEntityTypes] = useState(null);
+
   const clientId = loggedInUser.loggedInUser?.client?._id;
 
   const sections = Array.isArray(questions) ? questions : (questions?.sections ?? []);
+  useEffect(() => {
+    const fetchEntityType = async () => {
+      const res = await getAllEntityTypes();
+      setEntityTypes(res.data);
+    };
+    fetchEntityType();
+  }, []);
 
   if (!sections.length) return null;
 
@@ -62,7 +72,7 @@ export default function RiskAssessmentSteps({ questions, form, setTrackingStep }
     <div className="flex flex-col gap-6">
       <StepIndicator totalSteps={totalSteps} currentStep={currentStep} />
 
-      <SectionStep section={sections[currentStep]} form={form} />
+      <SectionStep section={sections[currentStep]} form={form} entityTypes={entityTypes} />
 
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={goBack} disabled={isFirst} className="text-gray-600 gap-1">
