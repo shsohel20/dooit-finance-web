@@ -22,13 +22,13 @@ export default function DashboardClientPage() {
   const clientType = loggedInUser?.client?.clientType;
 
   //is financial
-  const isFinancial = financialEntity.matchKeywords.includes(clientType?.toLowerCase());
+  const isFinancial = financialEntity?.matchKeywords?.includes(clientType?.toLowerCase());
   //is real state
-  const isRealState = realStateEntity.matchKeywords.includes(clientType?.toLowerCase());
+  const isRealState = realStateEntity?.matchKeywords.includes(clientType?.toLowerCase());
   //is precious metal
-  const isPreciousMetal = preciousMetalEntity.matchKeywords.includes(clientType?.toLowerCase());
+  const isPreciousMetal = preciousMetalEntity?.matchKeywords.includes(clientType?.toLowerCase());
   //is crypto
-  const isCrypto = cryptoEntity.matchKeywords.includes(clientType?.toLowerCase());
+  const isCrypto = cryptoEntity?.matchKeywords.includes(clientType?.toLowerCase());
 
   useEffect(() => {
     const fetchEntityTypes = async () => {
