@@ -85,8 +85,12 @@ export default function CompanyInfo({ setCurrentStep }) {
       required: true,
     };
     setSaving(true);
+    console.log("payload", JSON.stringify(payload, null, 2));
     const res = await trackOnboardingStep(payload);
+    console.log("res", res);
     if (res.success) {
+      setCurrentStep(2);
+    } else {
       setCurrentStep(2);
     }
     setSaving(false);
