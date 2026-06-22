@@ -372,6 +372,21 @@ export const useTemplate = async (id, metadata = {}) => {
   }
 };
 
+// Regenerate ALL AML/CTF documents for the caller's client (or an explicit
+// clientId), refreshing the generated PolicyHubTemplate records in place.
+export const regenerateAMLDocuments = async (clientId) => {
+  try {
+    const response = await fetchWithAuth(`aml-document/regenerate`, {
+      method: "POST",
+      body: JSON.stringify(clientId ? { client: clientId } : {}),
+    });
+    return response.json();
+  } catch (error) {
+    console.error("Error regenerating AML documents:", error);
+    return { success: false, error: "Network error while regenerating" };
+  }
+};
+
 export const savePolicyAsTemplate = async (policyHubId, data) => {
   try {
     const response = await fetchWithAuth(`policy-hub/${policyHubId}/save-as-template`, {

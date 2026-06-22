@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   ChevronDown,
@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   Loader2,
   X,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   Table,
@@ -21,12 +22,34 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
   submitRiskRegister,
   recalculateRiskRegister,
+  overrideRiskRegisterScenario,
   exportRiskRegisterExcel,
 } from "../../actions";
+
+// Control-effectiveness buckets (mirrors EWRA-UI override panel)
+const CTRL_EFF_LABELS = {
+  cdd: "Customer Due Diligence",
+  tm: "Transaction Monitoring",
+  scr: "Sanctions Screening",
+  geo: "Geographic Controls",
+  gov: "Governance & Training",
+};
+
+// Per-row status enum (RiskRegister row schema: Draft | Reviewed | Approved)
+const ROW_STATUS_OPTIONS = ["Draft", "Reviewed", "Approved"];
 
 // ─── Status chip config ────────────────────────────────────────────────────────
 
@@ -107,7 +130,10 @@ const TABLE_HEADERS = [
   { label: "Action Req.", className: "w-20 text-center" },
   { label: "Owner", className: "w-28" },
   { label: "Status", className: "w-20" },
+  { label: "", className: "w-12 text-center" },
 ];
+
+const TABLE_COL_SPAN = TABLE_HEADERS.length;
 
 // ─── Atomic components ───────────────────────────────────────────────────────
 
@@ -250,7 +276,7 @@ function OverallRiskProfile({
 
 // ─── Risk table ───────────────────────────────────────────────────────────────
 
-function RiskTableRow({ row }) {
+function RiskTableRow({ row, onEdit }) {
   return (
     <TableRow className={cn(row.actionRequired && "bg-red-50/40")}>
       <TableCell className="text-center text-muted-foreground text-xs">{row.rowNum}</TableCell>
@@ -313,11 +339,21 @@ function RiskTableRow({ row }) {
           {row.status}
         </span>
       </TableCell>
+      <TableCell className="text-center">
+        <button
+          type="button"
+          onClick={() => onEdit?.(row)}
+          title="Override row"
+          className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:bg-gray-100 hover:text-foreground transition-colors"
+        >
+          <SlidersHorizontal className="size-3.5" />
+        </button>
+      </TableCell>
     </TableRow>
   );
 }
 
-function RiskSection({ secKey, secName, rows }) {
+function RiskSection({ secKey, secName, rows, onEdit }) {
   const [open, setOpen] = useState(true);
   return (
     <>
@@ -325,7 +361,7 @@ function RiskSection({ secKey, secName, rows }) {
         className="bg-gray-50 hover:bg-gray-100 cursor-pointer select-none transition-colors border-b"
         onClick={() => setOpen((o) => !o)}
       >
-        <td colSpan={13} className="px-3 py-2">
+        <td colSpan={TABLE_COL_SPAN} className="px-3 py-2">
           <div className="flex items-center gap-2">
             {open ? (
               <ChevronDown className="size-4 text-gray-500 flex-shrink-0" />
@@ -340,12 +376,15 @@ function RiskSection({ secKey, secName, rows }) {
           </div>
         </td>
       </tr>
-      {open && rows.map((row) => <RiskTableRow key={row.ref} row={row} />)}
+      {open &&
+        rows.map((row) => (
+          <RiskTableRow key={row.ref} row={row} onEdit={onEdit} />
+        ))}
     </>
   );
 }
 
-function RiskTable({ sections }) {
+function RiskTable({ sections, onEdit }) {
   const totalItems = Object.values(sections).reduce((n, s) => n + s.rows.length, 0);
   return (
     <div className="border rounded-xl bg-white overflow-hidden">
@@ -365,7 +404,13 @@ function RiskTable({ sections }) {
         </TableHeader>
         <TableBody>
           {Object.entries(sections).map(([key, sec]) => (
-            <RiskSection key={key} secKey={key} secName={sec.name} rows={sec.rows} />
+            <RiskSection
+              key={key}
+              secKey={key}
+              secName={sec.name}
+              rows={sec.rows}
+              onEdit={onEdit}
+            />
           ))}
         </TableBody>
       </Table>
@@ -488,6 +533,216 @@ function RegisterActions({ status, busy, onSubmit, onRecalculate, onExport }) {
   );
 }
 
+// ─── Override row slide-over ──────────────────────────────────────────────────
+
+function OverrideRowSheet({ row, ctrlEff = {}, onClose, onSave }) {
+  const open = !!row;
+
+  // Initialise from the doc-level control effectiveness, overlaying the row's
+  // own category bucket with its current per-row value when present.
+  const baseCtrl = { cdd: 3, tm: 3, scr: 3, geo: 3, gov: 3, ...ctrlEff };
+  const rowCat = row?.category;
+  if (row && rowCat && CTRL_EFF_LABELS[rowCat] && row.controlEffectiveness != null) {
+    baseCtrl[rowCat] = row.controlEffectiveness;
+  }
+
+  const [form, setForm] = useState({
+    L: 3,
+    C: 3,
+    ctrlEff: baseCtrl,
+    reviewerNotes: "",
+    status: "Draft",
+  });
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState(null);
+
+  // Reset the form whenever a different row is opened.
+  useEffect(() => {
+    if (!row) return;
+    const ce = { cdd: 3, tm: 3, scr: 3, geo: 3, gov: 3, ...ctrlEff };
+    if (rowCat && CTRL_EFF_LABELS[rowCat] && row.controlEffectiveness != null) {
+      ce[rowCat] = row.controlEffectiveness;
+    }
+    setForm({
+      L: row.L ?? 3,
+      C: row.C ?? 3,
+      ctrlEff: ce,
+      reviewerNotes: row.reviewerNotes ?? "",
+      status: ROW_STATUS_OPTIONS.includes(row.status) ? row.status : "Draft",
+    });
+    setErr(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [row?.ref]);
+
+  const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
+  const setCtrl = (key, val) =>
+    setForm((f) => ({ ...f, ctrlEff: { ...f.ctrlEff, [key]: Number(val) } }));
+
+  const handleSave = async () => {
+    setSaving(true);
+    setErr(null);
+    try {
+      await onSave(row.ref, form);
+      onClose();
+    } catch (e) {
+      setErr(e?.message || "Save failed.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
+      <SheetContent side="right" className="sm:max-w-md w-full overflow-y-auto">
+        <SheetHeader className="border-b">
+          <SheetTitle>Override Row</SheetTitle>
+          <SheetDescription>
+            {row ? `${row.ref} · ${row.riskName}` : ""}
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="px-4 space-y-5">
+          {/* Likelihood & Consequence */}
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+              Risk Score
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                ["L", "Likelihood"],
+                ["C", "Consequence"],
+              ].map(([k, lbl]) => (
+                <div key={k}>
+                  <label className="text-xs font-medium text-foreground mb-1.5 block">
+                    {lbl}
+                  </label>
+                  <select
+                    value={form[k]}
+                    onChange={(e) => set(k, Number(e.target.value))}
+                    className="w-full text-sm border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  >
+                    {[1, 2, 3, 4, 5].map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Control Effectiveness */}
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+              Control Effectiveness (1–5)
+            </p>
+            <div className="space-y-4">
+              {Object.entries(CTRL_EFF_LABELS).map(([k, label]) => {
+                const isRowCat = k === rowCat;
+                return (
+                  <div key={k}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label
+                        className={cn(
+                          "text-xs",
+                          isRowCat
+                            ? "font-semibold text-foreground"
+                            : "text-muted-foreground",
+                        )}
+                      >
+                        {label}
+                        {isRowCat && (
+                          <span className="ml-1 text-[10px] text-primary">
+                            (this row)
+                          </span>
+                        )}
+                      </label>
+                      <span className="text-xs font-bold text-primary tabular-nums">
+                        {form.ctrlEff[k]}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={1}
+                      max={5}
+                      step={1}
+                      value={form.ctrlEff[k]}
+                      onChange={(e) => setCtrl(k, e.target.value)}
+                      className="w-full h-1.5 accent-primary cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+                      <span>Low</span>
+                      <span>High</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Status */}
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+              Status
+            </p>
+            <select
+              value={form.status}
+              onChange={(e) => set("status", e.target.value)}
+              className="w-full text-sm border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              {ROW_STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Reviewer Notes */}
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+              Reviewer Notes
+            </p>
+            <Textarea
+              value={form.reviewerNotes}
+              onChange={(e) => set("reviewerNotes", e.target.value)}
+              rows={4}
+              placeholder="Optional notes…"
+              className="resize-none"
+            />
+          </div>
+
+          {err && (
+            <div className="flex items-start gap-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+              <AlertTriangle className="size-3.5 mt-0.5 flex-shrink-0" />
+              {err}
+            </div>
+          )}
+        </div>
+
+        <SheetFooter className="border-t">
+          <div className="flex gap-3 w-full">
+            <Button onClick={handleSave} disabled={saving} className="flex-1">
+              {saving ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                "Save Override"
+              )}
+            </Button>
+            <Button variant="outline" onClick={onClose} disabled={saving}>
+              Cancel
+            </Button>
+          </div>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 // ─── Root component ───────────────────────────────────────────────────────────
 
 export default function RiskRegisters({ riskRegisters = [], setCurrentStep }) {
@@ -495,6 +750,7 @@ export default function RiskRegisters({ riskRegisters = [], setCurrentStep }) {
   const [register, setRegister] = useState(initial);
   const [busy, setBusy] = useState(null); // "submit" | "recalc" | "export" | null
   const [message, setMessage] = useState(null); // { type: "success" | "error", text }
+  const [editRow, setEditRow] = useState(null); // row currently being overridden
 
   if (!register) return null;
 
@@ -538,6 +794,23 @@ export default function RiskRegisters({ riskRegisters = [], setCurrentStep }) {
     } finally {
       setBusy(null);
     }
+  };
+
+  // Persist a single-row override, then merge the returned row + summary back
+  // into local state (patchScenario returns { row, summary }, not the full doc).
+  const handleOverrideSave = async (ref, form) => {
+    if (!_id) throw new Error("Register has not been saved yet.");
+    const res = await overrideRiskRegisterScenario(_id, ref, form);
+    if (!res?.success || !res.data?.row) {
+      throw new Error(res?.error || "Override failed.");
+    }
+    const { row: updatedRow, summary = {} } = res.data;
+    setRegister((prev) => ({
+      ...prev,
+      rows: prev.rows.map((r) => (r.ref === ref ? updatedRow : r)),
+      ...summary,
+    }));
+    setMessage({ type: "success", text: `Row ${ref} overridden.` });
   };
 
   const handleSubmit = () =>
@@ -623,8 +896,15 @@ export default function RiskRegisters({ riskRegisters = [], setCurrentStep }) {
         overallResidualLabel={overallResidualLabel}
         actionCount={actionCount}
       />
-      <RiskTable sections={sections} />
+      <RiskTable sections={sections} onEdit={setEditRow} />
       {actionRows.length > 0 && <ActionItems rows={actionRows} />}
+
+      <OverrideRowSheet
+        row={editRow}
+        ctrlEff={register.ctrlEff}
+        onClose={() => setEditRow(null)}
+        onSave={handleOverrideSave}
+      />
 
       <div className="flex justify-between gap-2">
         <Button variant="outline" onClick={() => setCurrentStep((prev) => prev - 1)}>

@@ -10,6 +10,52 @@ import { DOCUMENT_TYPES } from "./constants";
 import { getOcrData } from "../actions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { countriesData } from "@/constants";
+
+const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Resolve free-text OCR output to a country record. OCR rarely returns the bare
+// name the select expects — it can be an official long form
+// ("People's Republic of Bangladesh"), a demonym ("BANGLADESHI"), or padded /
+// mixed-case. Strategy:
+//   1) exact (case-insensitive) match on country name or demonym
+//   2) whole-word match of a country name / demonym *inside* the text — handles
+//      "People's Republic of Bangladesh" → Bangladesh. Word boundaries (\b)
+//      avoid false hits like "Mali" inside "Somalia"; the longest country name
+//      wins so a short name nested in a longer one ("Niger" vs "Nigeria") loses.
+// Returns the matched record or null.
+const resolveCountry = (raw) => {
+  if (!raw) return null;
+  const needle = String(raw).trim().toLowerCase();
+  if (!needle) return null;
+
+  const exact = countriesData.find(
+    (c) =>
+      c.value?.toLowerCase() === needle ||
+      c.label?.toLowerCase() === needle ||
+      c.nationality?.toLowerCase() === needle,
+  );
+  if (exact) return exact;
+
+  const candidates = countriesData
+    .filter((c) =>
+      [c.value, c.nationality]
+        .filter(Boolean)
+        .some((token) =>
+          new RegExp(`\\b${escapeRegExp(token.toLowerCase())}\\b`).test(needle),
+        ),
+    )
+    .sort((a, b) => (b.value?.length || 0) - (a.value?.length || 0));
+
+  return candidates[0] || null;
+};
+
+// The country select stores the option `value` (the country name); return it on
+// a match, otherwise "" so the field stays empty rather than unselectable.
+const matchCountryFromList = (raw) => resolveCountry(raw)?.value ?? "";
+
+// The nationality select stores the demonym; return the canonical demonym.
+const matchNationalityFromList = (raw) => resolveCountry(raw)?.nationality ?? "";
 
 export default function IdentityDocumentsSection({ form, basePath = "" }) {
   const [frontLoading, setFrontLoading] = useState(false);
@@ -61,16 +107,23 @@ export default function IdentityDocumentsSection({ form, basePath = "" }) {
       const ocr_data = ocrResponse.data?.ocr?.fields;
 
       console.log("ocr_data", ocr_data);
+
       form.setValue("personal.firstName", ocr_data?.full_name?.split(" ")[0] ?? "");
       form.setValue("personal.lastName", ocr_data?.full_name?.split(" ")[1] ?? "");
       form.setValue("personal.dateOfBirth", ocr_data?.date_of_birth ?? "");
+
       form.setValue(
         "personal.nationality",
-        ocr_data?.nationality ?? ocr_data?.issuing_country ?? "",
+        matchNationalityFromList(ocr_data?.nationality),
       );
       form.setValue("contact.residentialAddress", ocr_data?.address ?? "");
-      form.setValue("personal.country", ocr_data?.issuing_country ?? "");
-      form.setValue("metaData", ocr_data ?? "");
+
+      form.setValue(
+        "personal.country",
+        matchCountryFromList(ocr_data?.issuing_country),
+      );
+
+      form.setValue("metadata", ocr_data ?? "");
     } else {
       toast.error(ocrResponse.message || "Failed to process OCR data");
     }

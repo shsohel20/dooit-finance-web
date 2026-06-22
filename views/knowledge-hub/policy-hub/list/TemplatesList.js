@@ -7,14 +7,19 @@ import {
   ChevronRight,
   Download,
   Eye,
+  FileText,
   FileUp,
   Globe,
   Pencil,
   Plus,
+  RefreshCw,
+  RotateCw,
   Send,
   Trash2,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -24,6 +29,7 @@ import {
   importTemplateFromDocx,
   updateTemplate,
   useTemplate as applyTemplate,
+  regenerateAMLDocuments,
 } from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
 import DocumentTypeSelect from "@/components/ui/DocumentTypeSelect";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -495,6 +501,8 @@ const inputCls =
 export default function TemplatesList({ hideHeader = false }) {
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [actionLoading, setActionLoading] = useState({});
@@ -508,15 +516,19 @@ export default function TemplatesList({ hideHeader = false }) {
   const fileInputRef = useRef(null);
   const LIMIT = 20;
 
-  const fetchTemplates = async (p = 1) => {
-    setIsLoading(true);
+  // `silent` keeps the current view (e.g. the empty state) on screen and shows a
+  // lightweight spinner instead of swapping to the skeleton — used by Refresh.
+  const fetchTemplates = async (p = 1, { silent = false } = {}) => {
+    if (silent) setIsRefreshing(true);
+    else setIsLoading(true);
     try {
       const res = await getAllTemplates(p, LIMIT);
       const list = res?.data ?? [];
       setTemplates(list);
       setHasMore(list.length === LIMIT);
     } finally {
-      setIsLoading(false);
+      if (silent) setIsRefreshing(false);
+      else setIsLoading(false);
     }
   };
 
@@ -598,6 +610,40 @@ export default function TemplatesList({ hideHeader = false }) {
     fetchTemplates(page);
   };
 
+  // ── regenerate AML documents from the latest client data ──────────────────────
+  const handleRegenerate = async () => {
+    setIsRegenerating(true);
+    try {
+      const res = await regenerateAMLDocuments();
+      if (res?.success) {
+        if (res.generated > 0) toast.success(res.message || "Documents regenerated.");
+        else toast.info(res.message || "No documents were generated.");
+        await fetchTemplates(1, { silent: true });
+        setPage(1);
+      } else {
+        toast.error(res?.error || res?.message || "Regeneration failed.");
+      }
+    } catch {
+      toast.error("Regeneration failed.");
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
+  // Plain render helper (not a nested component) so it doesn't remount each render.
+  const renderRegenerateButton = () => (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleRegenerate}
+      disabled={isRegenerating}
+      className="flex items-center gap-2"
+    >
+      <RotateCw className={cn("h-4 w-4", isRegenerating && "animate-spin")} />
+      {isRegenerating ? "Regenerating…" : "Regenerate documents"}
+    </Button>
+  );
+
   return (
     <>
       {/* Modals */}
@@ -634,7 +680,12 @@ export default function TemplatesList({ hideHeader = false }) {
 
       <div className="space-y-6">
         {/* Toolbar */}
-        {hideHeader ? null : (
+        {hideHeader ? (
+          // Policy Review tab: just a regenerate control above the list.
+          (templates.length > 0 || page > 1) && (
+            <div className="flex justify-end">{renderRegenerateButton()}</div>
+          )
+        ) : (
           <div className="flex items-center justify-between flex-wrap gap-3">
             <p className="text-sm text-muted-foreground">
               Reusable policy templates — preview, export, or apply to create a new policy.
@@ -647,6 +698,7 @@ export default function TemplatesList({ hideHeader = false }) {
                 className="hidden"
                 onChange={handleImport}
               />
+              {renderRegenerateButton()}
               <Button
                 variant="outline"
                 size="sm"
@@ -676,8 +728,33 @@ export default function TemplatesList({ hideHeader = false }) {
             ))}
           </div>
         ) : templates.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground gap-3">
-            <p className="text-sm">No templates found. Create one or import a DOCX.</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <FileText className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-foreground">
+                {hideHeader ? "No policies available yet" : "No templates found"}
+              </p>
+              <p className="mx-auto max-w-sm text-xs text-muted-foreground">
+                {hideHeader
+                  ? "Your policy documents may still be generating — this can take a moment after onboarding. Refresh to check again, or regenerate them now."
+                  : "Create a template or import a DOCX to get started, or refresh to check again."}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchTemplates(page, { silent: true })}
+                disabled={isRefreshing}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
+                {isRefreshing ? "Refreshing…" : "Refresh"}
+              </Button>
+              {renderRegenerateButton()}
+            </div>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-5">

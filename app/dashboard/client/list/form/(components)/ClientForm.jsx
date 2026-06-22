@@ -143,6 +143,7 @@ export function ClientForm({ id }) {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(formSchema),
@@ -232,7 +233,7 @@ export function ClientForm({ id }) {
     2: <ContactsSection control={control} errors={errors} />,
     3: <AddressSection control={control} errors={errors} />,
     4: <LegalSection control={control} errors={errors} />,
-    5: <DocumentsSection control={control} errors={errors} />,
+    5: <DocumentsSection control={control} errors={errors} setValue={setValue} />,
     6: (
       <>
         {" "}

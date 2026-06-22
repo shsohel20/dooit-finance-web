@@ -76,6 +76,19 @@ const recalculateRiskRegister = async (id) => {
   return response.json();
 };
 
+// Reviewer override of a single scenario row (L, C, control effectiveness,
+// reviewer notes, status). Returns { row, summary } on success.
+const overrideRiskRegisterScenario = async (id, ref, payload) => {
+  const response = await fetchWithAuth(
+    `risk-register/${id}/scenarios/${encodeURIComponent(ref)}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+  );
+  return response.json();
+};
+
 // Streams a styled .xls workbook — returns the raw HTML string so the
 // client can build a Blob and trigger the download.
 const exportRiskRegisterExcel = async (id) => {
@@ -106,5 +119,6 @@ export {
   getRiskRegisters,
   submitRiskRegister,
   recalculateRiskRegister,
+  overrideRiskRegisterScenario,
   exportRiskRegisterExcel,
 };

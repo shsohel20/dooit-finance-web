@@ -1,4 +1,4 @@
-import { countriesData } from "@/constants";
+import { nationalitiesData } from "@/constants";
 
 export const SECTOR_OPTIONS = [
   { value: "conveyancing", label: "Conveyancing" },
@@ -39,7 +39,7 @@ export const EMPLOYMENT_TYPE_OPTIONS = [
   { value: "casual", label: "Casual" },
 ];
 
-export const NATIONALITY_OPTIONS = countriesData.map(({ label, value }) => ({
+export const NATIONALITY_OPTIONS = nationalitiesData.map(({ label, value }) => ({
   label,
   value,
 }));
