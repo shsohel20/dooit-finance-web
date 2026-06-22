@@ -33,13 +33,25 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { fileUploadOnCloudinary, getLoggedInUser } from "@/app/actions";
+import { getAllEntityTypes } from "@/app/dashboard/actions";
 
 export function ClientEditForm() {
   const [imgUrl, setImgUrl] = useState(null);
   const imgInputRef = useRef(null);
   const { loggedInUser: formData, setLoggedInUser } = useLoggedInUser();
+  const [entityTypes, setEntityTypes] = useState([]);
+
   const isClient = formData?.userType === "client";
   const isBranch = formData?.userType === "branch";
+
+  useEffect(() => {
+    const fetchEntityTypes = async () => {
+      const response = await getAllEntityTypes();
+      console.log("response", response);
+      setEntityTypes(response.data);
+    };
+    fetchEntityTypes();
+  }, []);
 
   console.log("formData", formData);
   const router = useRouter();
@@ -140,7 +152,7 @@ export function ClientEditForm() {
       if (response.success) {
         setLoggedInUser(response.data);
       }
-      router.push("/dashboard/client/profile");
+      router.push("/dashboard/client/list");
     } else {
       toast.error("Failed to update profile");
     }
@@ -264,13 +276,7 @@ export function ClientEditForm() {
                     form={form}
                     disabled={true}
                     type="select"
-                    options={[
-                      { label: "Financial", value: "Financial" },
-                      { label: "Technology", value: "Technology" },
-                      { label: "Healthcare", value: "Healthcare" },
-                      { label: "Retail", value: "Retail" },
-                      { label: "Manufacturing", value: "Manufacturing" },
-                    ]}
+                    options={entityTypes}
                   />
                 </div>
 

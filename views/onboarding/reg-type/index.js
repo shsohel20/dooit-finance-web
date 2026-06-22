@@ -128,8 +128,8 @@ export default function RegistrationType() {
         </QuestionDescription>
 
         <div className="mt-8 flex flex-wrap gap-2">
-          {entityTypes?.map((type, index) => {
-            const isSelected = selectedType?._id === type._id;
+          {types?.map((type, index) => {
+            const isSelected = selectedType?.value === type.value;
             return (
               <button
                 type="button"
@@ -155,7 +155,7 @@ export default function RegistrationType() {
                 <span className="text-lg leading-none" aria-hidden>
                   {type.icon}
                 </span>
-                <span>{type.name}</span>
+                <span>{type.type}</span>
               </button>
             );
           })}

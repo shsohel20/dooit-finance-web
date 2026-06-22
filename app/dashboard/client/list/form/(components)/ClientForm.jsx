@@ -165,7 +165,6 @@ export function ClientForm({ id }) {
       fetchClient();
     }
   }, [id]);
-  console.log("errors", errors);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -182,7 +181,7 @@ export function ClientForm({ id }) {
       if (!id) {
         localStorage.setItem("newId", res.id);
       }
-      router.push(`/dashboard/admin/client`);
+      router.push(`/dashboard/client/list`);
     } else {
       toast.error(res.error || "Something went wrong");
     }
