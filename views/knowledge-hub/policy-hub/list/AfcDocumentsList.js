@@ -1,15 +1,62 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, FileText, FileUp, Send, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Download, Eye, FileText, FileUp, Send, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   deleteAfcDocument,
+  getAfcDocumentById,
   getAllAfcDocuments,
   importAfcDocumentFromDocx,
   pushAfcDocumentToPolicyHub,
 } from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
+
+// Generated / imported document preview uses TinyMCE (read-only WYSIWYG).
+const TinyEditor = dynamic(() => import("@/components/ui/TinyEditor"), {
+  ssr: false,
+});
+
+// ── Generated / imported document preview modal ───────────────────────────────
+function AfcPreviewModal({ docId, title, onClose }) {
+  const [html, setHtml] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const res = await getAfcDocumentById(docId);
+      if (active) {
+        setHtml(res?.success ? res.data?.contentMd ?? "" : "");
+        setLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [docId]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-4xl rounded-xl border border-border bg-card shadow-xl flex flex-col max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-border bg-card">
+          <h2 className="font-semibold text-foreground">{title}</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex-1 p-2">
+          {loading ? (
+            <div className="p-6 space-y-3">
+              {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-5 w-full" />)}
+            </div>
+          ) : (
+            <TinyEditor value={html} readOnly showSave={false} height={620} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const STATUS_COLORS = {
   completed: "bg-green-100 text-green-700",
@@ -20,7 +67,6 @@ const STATUS_COLORS = {
 
 // Handles _id (ObjectId or string) and the Mongoose id virtual
 const getDocId = (doc) => {
-  console.log(doc);
   const raw = doc._id ?? doc.id;
   return raw ? String(raw) : null;
 };
@@ -56,6 +102,7 @@ export default function AfcDocumentsList() {
   const [hasMore, setHasMore] = useState(false);
   const [actionLoading, setActionLoading] = useState({});
   const [pushResult, setPushResult] = useState({});
+  const [previewDoc, setPreviewDoc] = useState(null);
   const fileInputRef = useRef(null);
   const LIMIT = 20;
 
@@ -170,6 +217,13 @@ export default function AfcDocumentsList() {
 
   return (
     <div className="space-y-6">
+      {previewDoc && (
+        <AfcPreviewModal
+          docId={previewDoc.id}
+          title={previewDoc.title}
+          onClose={() => setPreviewDoc(null)}
+        />
+      )}
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
@@ -273,6 +327,23 @@ export default function AfcDocumentsList() {
 
                 {/* Actions */}
                 <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setPreviewDoc({
+                        id,
+                        title: meta.documentType
+                          ? meta.documentType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+                          : "AFC Document",
+                      })
+                    }
+                    className="flex items-center gap-1.5"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    Preview
+                  </Button>
+
                   <Button
                     variant="outline"
                     size="sm"

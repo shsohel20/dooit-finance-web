@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack --port 8001",
     "build": "next build --turbopack",
     "start": "next start --port 5000",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node -e \"require('fs').cpSync('node_modules/tinymce','public/tinymce',{recursive:true})\""
   },
   "dependencies": {
     "@dagrejs/dagre": "^3.0.0",
@@ -44,6 +45,7 @@
     "@react-three/fiber": "^9.5.0",
     "@tabler/icons-react": "^3.35.0",
     "@tanstack/react-table": "^8.21.3",
+    "@tinymce/tinymce-react": "^6.3.0",
     "@xyflow/react": "^12.10.2",
     "axios": "^1.12.2",
     "class-variance-authority": "^0.7.1",
@@ -82,6 +84,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animated": "^2.0.0",
     "three-stdlib": "^2.36.1",
+    "tinymce": "^7.9.3",
     "vaul": "^1.1.2",
     "zod": "^4.1.12",
     "zustand": "^5.0.8"

@@ -203,6 +203,17 @@ export default function Editor({ data, onSubmit, isSaving = false, setData, tool
 
   return (
     <div className="min-h-screen w-full">
+      {/* AML color scheme for the editor display — navy headings, styled tables */}
+      <style>{`
+        .aml-editor .ce-header h1{color:#1B3A5C;font-size:18px;font-weight:700;border-bottom:2px solid #1B3A5C;padding-bottom:4px;margin:0}
+        .aml-editor .ce-header h2{color:#1B3A5C;font-size:15px;font-weight:700;margin:0}
+        .aml-editor .ce-header h3{color:#2B5496;font-size:13px;font-weight:600;margin:0}
+        .aml-editor b,.aml-editor strong{color:#1B3A5C}
+        .aml-editor .tc-cell{border:1px solid #D1D5DB;padding:6px 8px;vertical-align:top}
+        .aml-editor .tc-row:first-child .tc-cell{background:#1B3A5C;color:#fff;font-weight:600;border-color:#1B3A5C}
+        .aml-editor .tc-row:nth-child(even) .tc-cell{background:#F3F6FA}
+        .aml-editor .tc-row:first-child.tc-row:nth-child(even) .tc-cell{background:#1B3A5C}
+      `}</style>
 
   {/* MS Word-style Toolbar */}
       <div className={`sticky ${toolbarTop} z-10 bg-background border border-border rounded-lg mb-4 p-2`}>
@@ -304,7 +315,7 @@ export default function Editor({ data, onSubmit, isSaving = false, setData, tool
         </div>
       </div>
 
-      <div ref={holderRef} className=""/>
+      <div ref={holderRef} className="aml-editor"/>
     </div>
   );
 }

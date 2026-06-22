@@ -12,17 +12,14 @@ import {
   GitCompare,
   X,
   ChevronLeft,
-  ChevronRight,
-  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { editorToText, parseToEditorJS } from "@/lib/utils";
+import { editorToHtml, parseToEditorJS } from "@/lib/utils";
 import {
   getPolicyById,
   updatePolicy,
   listPolicyVersions,
-  getPolicyVersion,
   restorePolicyVersion,
   diffPolicyVersions,
   savePolicyAsTemplate,
@@ -34,11 +31,6 @@ const EditorForm = dynamic(
 );
 
 // ── helpers ───────────────────────────────────────────────────────────────────
-
-const getId = (doc) => {
-  const raw = doc?._id ?? doc?.id;
-  return raw ? String(raw) : null;
-};
 
 const triggerBlobDownload = (blob, filename) => {
   const url = URL.createObjectURL(blob);
@@ -349,7 +341,7 @@ export default function PolicyDetails() {
   const onSubmit = async (editorData) => {
     try {
       setIsSaving(true);
-      const docs = editorToText(editorData);
+      const docs = editorToHtml(editorData);
       const payload = {
         docs,
         generatedBy: data?.generatedBy?._id,

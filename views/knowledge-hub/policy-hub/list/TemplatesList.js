@@ -23,15 +23,16 @@ import {
   getAllTemplates,
   importTemplateFromDocx,
   updateTemplate,
-  useTemplate,
+  useTemplate as applyTemplate,
 } from "@/app/dashboard/client/knowledge-hub/policy-hub/actions";
-import { editorToText, parseToEditorJS } from "@/lib/utils";
 import DocumentTypeSelect from "@/components/ui/DocumentTypeSelect";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-const EditorForm = dynamic(
-  () => import("@/views/knowledge-hub/policy-hub/policy-form/Editor"),
-  { ssr: false },
-);
+// Template management uses TinyMCE (rich HTML, full WYSIWYG, DOCX fidelity).
+// The Policy Hub keeps Editor.js — see policy-form/Editor.js.
+const TinyEditor = dynamic(() => import("@/components/ui/TinyEditor"), {
+  ssr: false,
+});
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -221,21 +222,50 @@ function TemplateModal({ initial, onClose, onSaved }) {
 
 // ── editable preview modal ────────────────────────────────────────────────────
 
-function PreviewModal({ template, onClose, onSaved }) {
-  const [editorContent, setEditorContent] = useState(() =>
-    parseToEditorJS(template.docs || ""),
-  );
-  const [isSaving, setIsSaving] = useState(false);
+const REGION_TABS = [
+  { key: "body",   label: "Body",        height: 540, hint: "Main document content." },
+  { key: "header", label: "Page header", height: 320, hint: "Appears at the top of every page." },
+  { key: "footer", label: "Page footer", height: 320, hint: "Appears at the bottom of every page. Use [Page] / [Pages] for page numbers." },
+];
 
-  const handleSave = async (editorData) => {
+function PreviewModal({ template, onClose, onSaved }) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [tab, setTab] = useState("body");
+
+  // One TinyMCE instance per active tab (keyed → clean remount on switch). Content
+  // is lifted to state on edit, so all three regions are captured even though only
+  // the active one is mounted (avoids the TinyMCE-in-hidden-tab rendering bug).
+  const [regions, setRegions] = useState({
+    body:   template.docs || "",
+    header: template.headerHtml || "",
+    footer: template.footerHtml || "",
+  });
+  const activeApi = useRef(null);
+
+  const setRegion = (key) => (html) =>
+    setRegions((r) => (r[key] === html ? r : { ...r, [key]: html }));
+
+  // Pull the freshest content from the live editor for the current tab.
+  const flushActive = () => {
+    const html = activeApi.current?.getContent();
+    if (html == null) return regions;
+    const next = { ...regions, [tab]: html };
+    setRegions(next);
+    return next;
+  };
+
+  const switchTab = (next) => { flushActive(); setTab(next); };
+
+  const handleSave = async () => {
     const id = getId(template);
     if (!id) return;
     setIsSaving(true);
     try {
-      const docs = editorToText(editorData);
-      const res = await updateTemplate(id, { docs });
+      const r = flushActive();
+      const payload = { docs: r.body, headerHtml: r.header, footerHtml: r.footer };
+      const res = await updateTemplate(id, payload);
       if (res?.success) {
-        onSaved({ ...template, docs });
+        onSaved({ ...template, ...payload });
         onClose();
       }
     } finally {
@@ -243,24 +273,48 @@ function PreviewModal({ template, onClose, onSaved }) {
     }
   };
 
+  const active = REGION_TABS.find((t) => t.key === tab);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-4xl rounded-xl border border-border bg-card shadow-xl flex flex-col max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-4xl rounded-xl border border-border bg-card shadow-xl flex flex-col max-h-[90vh]">
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-border bg-card">
-          <h2 className="font-semibold text-foreground">{template.name}</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-5 w-5" />
-          </button>
+          <h2 className="font-semibold text-foreground truncate">{template.name}</h2>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button size="sm" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving…" : "Save all"}
+            </Button>
+            <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
-        <div className="flex-1">
-          <EditorForm
-            data={editorContent}
-            onSubmit={handleSave}
-            isSaving={isSaving}
-            setData={setEditorContent}
-            toolbarTop="top-[57px]"
-          />
-        </div>
+
+        <Tabs value={tab} onValueChange={switchTab} className="flex-1 min-h-0 px-6 pt-4 overflow-y-auto">
+          <TabsList>
+            {REGION_TABS.map((t) => (
+              <TabsTrigger key={t.key} value={t.key}>{t.label}</TabsTrigger>
+            ))}
+          </TabsList>
+
+          <p className="text-xs text-muted-foreground mt-2">{active?.hint}</p>
+
+          {REGION_TABS.map((t) => (
+            <TabsContent key={t.key} value={t.key} className="mt-2">
+              {/* Only the active editor mounts; key forces a clean instance per region */}
+              {tab === t.key && (
+                <TinyEditor
+                  key={t.key}
+                  value={regions[t.key]}
+                  onChange={setRegion(t.key)}
+                  onReady={(api) => { activeApi.current = api; }}
+                  showSave={false}
+                  height={t.height}
+                />
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
     </div>
   );
@@ -491,7 +545,7 @@ export default function TemplatesList() {
     if (!id) return;
     setLoading(id, "use", true);
     try {
-      const res = await useTemplate(id);
+      const res = await applyTemplate(id);
       setUseResult((prev) => ({
         ...prev,
         [id]: res?.success ? "used" : "error",
@@ -524,7 +578,7 @@ export default function TemplatesList() {
   };
 
   // ── after create / edit ─────────────────────────────────────────────────────
-  const handleSaved = (saved) => {
+  const handleSaved = () => {
     setShowCreate(false);
     setEditTarget(null);
     fetchTemplates(page);
