@@ -61,3 +61,11 @@ export const getCustomerRelationsGraph = async (id) => {
   });
   return response.json();
 };
+
+export const getOSINTdata = async (entityType, entityId) => {
+  const url = `https://osint.dooit.ai/api/v1/osint/${entityType}/${entityId}`;
+  const response = await fetch(url, {
+    method: "GET",
+  });
+  return response.json();
+};

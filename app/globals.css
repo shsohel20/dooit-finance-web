@@ -168,7 +168,7 @@ input,
 select,
 textarea,
 .react-select__input {
-  font-size: 16px;
+  font-size: 14px;
 }
 .container {
   width: min(90%, 1280px);

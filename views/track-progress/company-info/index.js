@@ -1,178 +1,157 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { FormField } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trash2, Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
+import { getAllRoles } from "@/app/dashboard/client/user-and-role-management/actions";
+import RoleSection from "./RoleSection";
+import { emptyRoleAssignment } from "./constants";
+import { clientOnboardingInit, trackOnboardingStep } from "../actions";
+import { getStaffs } from "@/app/dashboard/client/staffs/actions";
 
-const SECTOR_OPTIONS = [
-  { value: "conveyancing", label: "Conveyancing" },
-  { value: "accounting", label: "Accounting" },
-  { value: "legal", label: "Legal" },
-  { value: "financial_services", label: "Financial Services" },
-  { value: "real_estate", label: "Real Estate" },
-];
+export default function CompanyInfo({ setCurrentStep }) {
+  const [roles, setRoles] = useState([]);
+  const [rolesLoading, setRolesLoading] = useState(true);
+  const [alreadyAddedStuffs, setAlreadyAddedStuffs] = useState([]);
+  const [saving, setSaving] = useState(false);
 
-const PERSON_OPTIONS = [
-  { value: "steve_short", label: "Steve Short" },
-  { value: "jack_guthrie", label: "Jack Guthrie" },
-  { value: "michael_manager", label: "Michael Manager" },
-  { value: "sarah_jones", label: "Sarah Jones" },
-];
-
-const ROLES = [
-  {
-    key: "governing_body",
-    title: "Governing body",
-    description:
-      "Typically the practice owner, they appoint key roles, and provide the compliance officer with necessary authority and resources.",
-    required: true,
-  },
-  {
-    key: "compliance_officer",
-    title: "Compliance officer",
-    description:
-      "Usually an influential team member, they manage daily compliance, enforce policies, and resolve complex matters escalated by staff.",
-    required: true,
-  },
-  {
-    key: "senior_managers",
-    title: "Senior managers",
-    description:
-      "Often a senior leader, they approve the policy and process, and decide whether to engage with high-risk clients.",
-    required: false,
-  },
-];
-
-function RoleSection({ form, roleKey, title, description, required }) {
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: roleKey,
-  });
-
-  return (
-    <Card className="border border-border">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold">{title}</CardTitle>
-        <CardDescription className="text-sm text-muted-foreground">{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {fields.map((field, index) => (
-          <div key={field.id} className="flex items-end gap-2">
-            <div className="flex-1">
-              <FormField
-                form={form}
-                name={`${roleKey}.${index}.person`}
-                label="Person in role"
-                type="select"
-                placeholder="Select a person"
-                required={required && index === 0}
-                options={PERSON_OPTIONS}
-              />
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="mb-0.5 shrink-0 text-muted-foreground hover:text-destructive"
-              onClick={() => remove(index)}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        ))}
-        <Button
-          type="button"
-          variant="link"
-          className="p-0 h-auto text-teal-600 hover:text-teal-700 font-medium"
-          onClick={() => append({ person: "" })}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add person
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-export default function CompanyInfo({ setInitialized }) {
   const form = useForm({
     defaultValues: {
       sector: "",
-      governing_body: [{ person: "" }],
-      compliance_officer: [{ person: "" }],
-      senior_managers: [{ person: "" }],
+      roleAssignments: [],
     },
   });
 
-  const onSubmit = (data) => {
-    console.log(data);
-    setInitialized(true);
+  const {
+    fields: roleFields,
+    append,
+    remove,
+    replace,
+  } = useFieldArray({
+    control: form.control,
+    name: "roleAssignments",
+  });
+
+  const fetchRoles = useCallback(async () => {
+    try {
+      setRolesLoading(true);
+      const response = await getAllRoles();
+      setRoles(response?.data || []);
+    } catch (error) {
+    } finally {
+      setRolesLoading(false);
+    }
+  }, []);
+  const getAlreadyAddedStuffs = async (roleId) => {
+    try {
+      const response = await getStaffs(roleId);
+      const assignedRoles = response?.data?.map((item) => item.user?.roleId);
+
+      replace(
+        assignedRoles.map((role) => ({
+          roleId: role,
+          people: [],
+        })),
+      );
+      setAlreadyAddedStuffs(response?.data || []);
+    } catch (error) {
+      console.error("Error fetching stuffs for role:", error);
+    }
+  };
+  const initializeOnboarding = async () => {
+    const res = await clientOnboardingInit();
   };
 
+  useEffect(() => {
+    fetchRoles();
+    initializeOnboarding();
+  }, []);
+
+  useEffect(() => {
+    getAlreadyAddedStuffs();
+  }, [roles]);
+
+  const roleOptions = roles.map((role) => ({
+    label: role.name,
+    value: role._id,
+  }));
+
+  const onSubmit = async (data) => {
+    const payload = {
+      step: "stuffs_added",
+      order: 1,
+      status: "pending",
+      required: true,
+    };
+    setSaving(true);
+    const res = await trackOnboardingStep(payload);
+    if (res.success) {
+      setCurrentStep(2);
+    }
+    setSaving(false);
+  };
+
+  const canAddRole = !rolesLoading && roleFields.length < roleOptions.length;
+
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-3xl mx-auto space-y-8 py-6">
-      {/* Step 01 - Select your sector */}
+    <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-8 py-6">
       <div className="flex gap-4">
         <div className="flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-semibold">
             01
           </div>
         </div>
-        <div className="flex-1 space-y-3 pt-0.5">
-          <div>
-            <h2 className="text-base font-semibold text-foreground">Select your sector</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Get a tailored experience to help you meet your AML/CTF obligations throughout the
-              client onboarding process.
-            </p>
-          </div>
-          <div className="max-w-xs">
-            <FormField
-              form={form}
-              name="sector"
-              label="Your sector"
-              type="select"
-              placeholder="Select a sector"
-              required
-              options={SECTOR_OPTIONS}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Step 02 - Assign roles */}
-      <div className="flex gap-4">
-        <div className="flex-shrink-0">
-          <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-semibold">
-            02
-          </div>
-        </div>
         <div className="flex-1 space-y-4 pt-0.5">
           <div>
             <h2 className="text-base font-semibold text-foreground">Assign roles</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Record the AML/CTF roles within your business. Select from profiles within your
-              account.
+              Choose a role, then add one or more people with their personal, contact, and
+              employment details.
             </p>
           </div>
-          {ROLES.map((role) => (
-            <RoleSection
-              key={role.key}
-              form={form}
-              roleKey={role.key}
-              title={role.title}
-              description={role.description}
-              required={role.required}
-            />
-          ))}
+
+          {rolesLoading && roleFields.length === 0 ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Loading roles...
+            </div>
+          ) : (
+            <>
+              {alreadyAddedStuffs.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No roles assigned yet. Add a role to get started.
+                </p>
+              )}
+              {roleFields.map((field, roleIndex) => (
+                <RoleSection
+                  key={field.id}
+                  form={form}
+                  roleIndex={roleIndex}
+                  roleOptions={roleOptions}
+                  rolesLoading={rolesLoading}
+                  onRemove={() => remove(roleIndex)}
+                />
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                // variant="link"
+                size="sm"
+                onClick={() => append(emptyRoleAssignment())}
+                disabled={!canAddRole}
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add role
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white">
-          Save &amp; Continue
+        <Button type="submit" size="sm" disabled={alreadyAddedStuffs?.length === 0 || saving}>
+          {saving ? "Saving..." : "Save & Continue"}
         </Button>
       </div>
     </form>

@@ -17,7 +17,7 @@ import {
   Timer,
   Wallet,
 } from "lucide-react";
-import { cn, dateShowFormat } from "@/lib/utils";
+import { cn, dateShowFormat, fmt, KYC_HISTORY_STATUS } from "@/lib/utils";
 import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
 import RiskScoreCard from "@/components/RiskScoreCard";
 import { SmoothZoomImageWrapper } from "@/components/CustomZoomImage";
@@ -786,13 +786,12 @@ export const DetailViewModal = ({ details, fetching }) => {
 
   const riskScore = details?.riskScore ?? 0;
   const riskLabel = details?.riskLabel ?? "";
-  const riskMax = 200;
-  const riskPercent = Math.min(100, (riskScore / riskMax) * 100);
 
   const rejectionReason = details?.kycRejectReason;
   const kycHistory = details?.kycHistory || [];
   const relations = details?.relations || [];
   const journeys = details?.journeys || [];
+  console.log("details", details);
 
   // Parse kycRejectReason into segments for display
   const parsedRejection = rejectionReason
@@ -1113,6 +1112,37 @@ export const DetailViewModal = ({ details, fetching }) => {
                 )}
               </div>
             )}
+          </div>
+          <div className="space-y-0 -mt-1">
+            <h3>KYC history</h3>
+            {kycHistory.map((entry, i) => {
+              const s = KYC_HISTORY_STATUS[entry.status] ?? {
+                badge: "bg-slate-50 text-slate-600 border-slate-200",
+                dot: "bg-slate-400",
+              };
+              return (
+                <div
+                  key={entry._id ?? i}
+                  className="flex items-start gap-3 py-2.5 border-b border-dashed border-gray-200 last:border-none"
+                >
+                  <span
+                    className={cn(
+                      "mt-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold border flex-shrink-0 flex items-center gap-1",
+                      s.badge,
+                    )}
+                  >
+                    <span className={cn("size-1.5 rounded-full", s.dot)} />
+                    {fmt(entry.status)}
+                  </span>
+                  <p className="flex-1 text-xs text-gray-600 leading-relaxed">
+                    {entry.note || "—"}
+                  </p>
+                  <span className="text-[10px] font-mono text-gray-400 flex-shrink-0">
+                    {entry.changedAt ? dateShowFormat(entry.changedAt) : "—"}
+                  </span>
+                </div>
+              );
+            })}
           </div>
           {/* Risk Assessment Breakdown */}
         </div>

@@ -53,7 +53,7 @@ const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizab
   ssr: false,
 });
 
-const TransactionListView = () => {
+const TransactionListView = ({ showDashboard = true }) => {
   const [openDetailView, setOpenDetailView] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [viewReport, setViewReport] = useState(false);
@@ -297,7 +297,7 @@ const TransactionListView = () => {
         <PageTitle>Transaction History</PageTitle>
         <PageDescription>View and manage transaction history for your clients.</PageDescription>
       </PageHeader> */}
-      <TransactionDashboard transactions={transactions?.data || []} />
+      {showDashboard && <TransactionDashboard transactions={transactions?.data || []} />}
 
       <div className="flex items-center justify-between bg-sidebar-bg border border-border/50 rounded-md p-4">
         <div className="flex items-center gap-2   ">

@@ -13,18 +13,18 @@ import {
   IconAlertTriangle,
   IconBook,
   IconBuildingBank,
-  IconChartBar,
   IconCirclesRelation,
   IconDatabase,
   IconLayoutDashboard,
   IconListDetails,
-  IconPentagonX,
-  IconProgress,
   IconUserOff,
   IconUsers,
   IconWorld,
   IconBuilding,
   IconObjectScan,
+  IconUrgent,
+  IconUser,
+  IconFilePlus,
 } from "@tabler/icons-react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -35,7 +35,6 @@ import {
   PieChart,
   FileInput,
   FileText,
-  Newspaper,
   Search,
   ShieldHalf,
   ShieldUser,
@@ -57,7 +56,6 @@ export default function ClientSidebar({ ...props }) {
   const isCrypto = clientType === "Crypto";
   const isBranch = loggedInUser?.role === "branch";
   const isDooit = loggedInUser?.userType === "dooit";
-  console.log("isDooit", isDooit);
 
   const dooitMenuItems = [
     {
@@ -92,6 +90,11 @@ export default function ClientSidebar({ ...props }) {
       icon: IconBuilding,
       url: "/dashboard/client/companies",
     },
+    {
+      title: "Staffs",
+      icon: IconUser,
+      url: "/dashboard/client/staffs",
+    },
     // {
     //   title: "Case manager",
     //   icon: IconObjectScan,
@@ -100,37 +103,33 @@ export default function ClientSidebar({ ...props }) {
     {
       title: "Customers",
       icon: IconUsers,
-      children: [
-        {
-          title: "Overview",
-          icon: IconListDetails,
-          url: "/dashboard/client/onboarding/customer-queue",
-        },
-        {
-          title: "Pending",
-          url: "/dashboard/client/onboarding/customer-queue/pending",
-          icon: IconDatabase,
-          current: true,
-        },
-        {
-          title: "Rejected",
-          url: "/dashboard/client/onboarding/customer-queue/rejected",
-          icon: IconPentagonX,
-          current: true,
-        },
-        // {
-        //   title: 'Verified',
-        //   url: '/dashboard/client/onboarding/customer-queue/verified',
-        //   icon: IconCircleDashedCheck,
-        //   current: true,
-        // },
-        {
-          title: "In Review",
-          url: "/dashboard/client/onboarding/customer-queue/in-review",
-          icon: IconProgress,
-          current: true,
-        },
-      ],
+      url: "/dashboard/client/onboarding/customer-queue",
+      // children: [
+      //   {
+      //     title: "Overview",
+      //     icon: IconListDetails,
+      //     url: "/dashboard/client/onboarding/customer-queue",
+      //   },
+      //   {
+      //     title: "Pending",
+      //     url: "/dashboard/client/onboarding/customer-queue/pending",
+      //     icon: IconDatabase,
+      //     current: true,
+      //   },
+      //   {
+      //     title: "Rejected",
+      //     url: "/dashboard/client/onboarding/customer-queue/rejected",
+      //     icon: IconPentagonX,
+      //     current: true,
+      //   },
+
+      //   {
+      //     title: "In Review",
+      //     url: "/dashboard/client/onboarding/customer-queue/in-review",
+      //     icon: IconProgress,
+      //     current: true,
+      //   },
+      // ],
     },
     ...(isBranch
       ? []
@@ -149,7 +148,7 @@ export default function ClientSidebar({ ...props }) {
         {
           title: "Customer Risk Assessment",
           url: "/dashboard/client/risk-assessment",
-          icon: IconListDetails,
+          icon: IconUrgent,
         },
       ],
     },
@@ -157,7 +156,7 @@ export default function ClientSidebar({ ...props }) {
 
   const STRMenu = {
     title: "UAR Filing",
-    icon: IconChartBar,
+    icon: IconFilePlus,
     children: [
       {
         title: "UAR Review",
@@ -493,7 +492,7 @@ export default function ClientSidebar({ ...props }) {
     // },
     {
       title: "Personnel (PDD)",
-      icon: IconListDetails,
+      icon: IconUser,
       url: "/dashboard/client/due-diligence/personnel",
     },
     // {
@@ -547,7 +546,7 @@ export default function ClientSidebar({ ...props }) {
   ];
 
   return (
-    <Sidebar collapsible="offcanvas" {...props} className={"border-0"}>
+    <Sidebar collapsible="offcanvas" {...props} className={"border-0 overflow-x-hidden"}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -561,8 +560,8 @@ export default function ClientSidebar({ ...props }) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        {!isDooit && <NavMain items={onBoardingMenuItems} label="Onboarding" />}
+      <SidebarContent className="overflow-x-hidden client-sidebar-content">
+        {!isDooit && <NavMain items={onBoardingMenuItems} />}
         {isDooit && <NavMain items={dooitMenuItems} label="Dooit" />}
         <NavMain items={monitoringMenuItems} label="Monitoring & Cases" />
 
@@ -590,8 +589,8 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={dueDiligenceMenu} label="Due Diligence" />
         <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
+        <NavMain items={TrainingModule} label="Training" />
         <NavMain items={configurationMenuItems} label="Configuration" />
-        <NavMain items={TrainingModule} label="Training Module" />
         <NavMain items={grcModule} label="Testing & Governance" />
         <NavMain items={knowledgeHubMenuItems} label="Knowledge Hub" />
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />

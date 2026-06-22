@@ -12,7 +12,7 @@ const allTabs = [
   {
     name: "Transactions",
     icon: <Banknote className="mr-2 h-4 w-4" />,
-    component: <TransactionListView />,
+    component: <TransactionListView showDashboard={false} />,
   },
   {
     name: "Risk Assessments",

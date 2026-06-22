@@ -16,12 +16,7 @@ import {
   onboardingSelectControlStyles,
 } from "@/views/onboarding/individual/onboardingStyles";
 import { getCardTypesByCountryId } from "@/lib/card-type";
-
-const documentTypes = [
-  { label: "Passport", value: "Passport" },
-  { label: "Driving License", value: "Driving License" },
-  { label: "Medical Card", value: "Medical Card" },
-];
+import { getBase64 } from "@/lib/utils";
 
 function formatDate(dateString) {
   if (!dateString) return "";
@@ -51,19 +46,6 @@ function formatDate(dateString) {
   return formattedDate;
 }
 
-const getBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    console.log("reader", reader);
-
-    reader.onload = () => resolve(reader.result);
-
-    reader.onerror = () => reject(reader.error);
-    reader.onabort = () => reject(new Error("File reading was aborted"));
-
-    reader.readAsDataURL(file);
-  });
-};
 const Scanner = () => {
   return <div className="scanner-effect absolute top-0 left-0 w-full h-full" />;
 };
@@ -104,6 +86,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
       setLivenessVerdict(livenessVerdict);
     }
   }, []);
+  console.log("documentTypeValue", documentTypeValue);
   const handleFrontChange = async (file) => {
     setFrontFile(file);
     console.log("front file", file);
@@ -204,12 +187,12 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
 
         documents: [
           {
-            url: userFrontImageUrl,
-            docType: "selfie",
-          },
-          {
             url: fields.find((field) => field.type === "front")?.url,
             docType: "id_front",
+          },
+          {
+            url: userFrontImageUrl,
+            docType: "selfie",
           },
         ],
         note: "",
@@ -219,6 +202,8 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
       const verify_response = await verifyDocument(payload);
 
       console.log("verify_response", verify_response);
+      const backDocument =
+        documentTypeValue?.sides === 2 ? fields.find((field) => field.type === "back")?.url : null;
       const ocr_payload = {
         token: token,
         cardType: documentTypeValue?.value,
@@ -228,10 +213,12 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
             url: fields.find((field) => field.type === "front")?.url,
             docType: "id_front",
           },
-          {
-            url: fields.find((field) => field.type === "back")?.url,
-            docType: "id_back",
-          },
+          ...(backDocument && [
+            {
+              url: backDocument,
+              docType: "id_back",
+            },
+          ]),
         ],
         note: "",
       };
@@ -286,8 +273,7 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
       verifiedMsg;
     }
   };
-  const documentsAdded = fields.length === 2;
-  console.log("form.watch('country_id')", form.watch("country"));
+  const documentsAdded = documentTypeValue?.sides === 2 ? fields.length === 2 : fields.length === 1;
   return (
     <div
       className={
@@ -362,22 +348,24 @@ const IdentificationDocuments = ({ form, individualPresentation = false }) => {
               </div>
             </CustomDropZone>
           </div>
-          <div className="w-full">
-            <CustomDropZone
-              disabled={!documentTypeValue}
-              handleChange={handleBackChange}
-              loading={backLoading}
-              url={fields.find((field) => field.type === "back")?.url}
-              error={backError}
-            >
-              <div className="flex flex-col">
-                <p className="font-bold">Back of document</p>
-                <p className="text-xs text-muted-foreground">
-                  Drag and drop your document here or click to upload
-                </p>
-              </div>
-            </CustomDropZone>
-          </div>
+          {documentTypeValue?.sides === 2 && (
+            <div className="w-full">
+              <CustomDropZone
+                disabled={!documentTypeValue}
+                handleChange={handleBackChange}
+                loading={backLoading}
+                url={fields.find((field) => field.type === "back")?.url}
+                error={backError}
+              >
+                <div className="flex flex-col">
+                  <p className="font-bold">Back of document</p>
+                  <p className="text-xs text-muted-foreground">
+                    Drag and drop your document here or click to upload
+                  </p>
+                </div>
+              </CustomDropZone>
+            </div>
+          )}
         </div>
       </div>
       {documentsAdded && (

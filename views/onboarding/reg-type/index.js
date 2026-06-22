@@ -3,7 +3,7 @@ import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Question, { QuestionDescription } from "../Question";
 import {
   Building,
@@ -15,6 +15,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { customerOnboardingStepTracking } from "@/app/customer/onboarding/action";
+import { getAllEntityTypes } from "@/app/dashboard/actions";
 
 const types = [
   {
@@ -69,10 +70,21 @@ const types = [
 ];
 
 export default function RegistrationType() {
+  const [entityTypes, setEntityTypes] = useState([]);
+
   const [selectedType, setSelectedType] = useState(null);
   const [loading, setLoading] = useState(false);
   const { setRegisterType } = useCustomerRegisterStore();
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchEntityTypes = async () => {
+      const response = await getAllEntityTypes();
+      console.log("response", response);
+      setEntityTypes(response.data);
+    };
+    fetchEntityTypes();
+  }, []);
 
   const handleSelectType = (type) => {
     setSelectedType(type);
@@ -116,12 +128,12 @@ export default function RegistrationType() {
         </QuestionDescription>
 
         <div className="mt-8 flex flex-wrap gap-2">
-          {types.map((type, index) => {
-            const isSelected = selectedType?.value === type.value;
+          {entityTypes?.map((type, index) => {
+            const isSelected = selectedType?._id === type._id;
             return (
               <button
                 type="button"
-                key={type.value}
+                key={type._id}
                 onClick={() => handleSelectType(type)}
                 aria-label={type.type}
                 aria-pressed={isSelected}
@@ -136,14 +148,14 @@ export default function RegistrationType() {
                   "inline-flex min-h-11 items-center gap-2 rounded-full border bg-white px-4 py-2 text-left text-[0.9375rem] font-medium text-neutral-900 transition-colors",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B4301] focus-visible:ring-offset-2",
                   isSelected
-                    ? "border-[#1B4301] bg-[#1B4301]/[0.06] shadow-sm"
+                    ? "border-primary bg-primary text-white shadow-sm"
                     : "border-neutral-200 hover:border-neutral-300",
                 )}
               >
                 <span className="text-lg leading-none" aria-hidden>
                   {type.icon}
                 </span>
-                <span>{type.type}</span>
+                <span>{type.name}</span>
               </button>
             );
           })}

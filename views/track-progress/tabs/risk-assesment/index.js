@@ -6,6 +6,11 @@ import ClientTypesStep, { CLIENT_TYPES } from "./primary/client-types";
 import DeliveryChannelsStep from "./primary/delivery-channels";
 import DesignatedServicesStep from "./primary/designated-services";
 import LawyerRisk from "./primary/LawyerRisk";
+import { getRiskAssessmentQuestions, getRiskRegisters } from "../../actions";
+import { useForm } from "react-hook-form";
+import RiskAssessmentSteps from "./steps";
+import { useLoggedInUser } from "@/app/store/useLoggedInUser";
+import RiskRegisters from "./RiskRegisters";
 
 const CLIENT_TYPE_RISK_STEPS = {
   "Lawyers&Conveyancers": {
@@ -65,85 +70,57 @@ function buildRiskAssessmentSteps(clientTypes = {}) {
   return [...steps, ...COMMON_STEPS];
 }
 
-const RiskAssessmentTab = () => {
-  const [started, setStarted] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [allAnswers, setAllAnswers] = useState({});
-
-  const steps = useMemo(
-    () => buildRiskAssessmentSteps(allAnswers.client_types),
-    [allAnswers.client_types],
-  );
+const RiskAssessmentTab = ({ setCurrentStep }) => {
+  const [riskAssessmentQuestions, setRiskAssessmentQuestions] = useState([]);
+  const [riskRegisters, setRiskRegisters] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { loggedInUser } = useLoggedInUser();
+  const form = useForm();
+  console.log("loggedInUser", loggedInUser);
 
   useEffect(() => {
-    if (currentStep >= steps.length) {
-      setCurrentStep(Math.max(steps.length - 1, 0));
-    }
-  }, [currentStep, steps.length]);
+    const fetchRiskAssessmentQuestions = async () => {
+      setLoading(true);
+      try {
+        const response = await getRiskAssessmentQuestions();
+        setRiskAssessmentQuestions(response.data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRiskAssessmentQuestions();
+  }, []);
 
-  const updateAnswers = (answersKey, value) => {
-    setAllAnswers((prev) => ({ ...prev, [answersKey]: value }));
-  };
-
-  const renderCurrentStep = () => {
-    const step = steps[currentStep];
-    if (!step?.Component) {
-      return <p className="text-muted-foreground text-sm">Coming soon…</p>;
-    }
-
-    const { Component, answersKey } = step;
-    const stepAnswers = allAnswers[answersKey] ?? {};
-
-    if (answersKey === "client_types") {
-      return (
-        <Component selected={stepAnswers} onChange={(value) => updateAnswers(answersKey, value)} />
-      );
-    }
-
-    if (answersKey?.endsWith("_risk")) {
-      return (
-        <Component answers={stepAnswers} onChange={(value) => updateAnswers(answersKey, value)} />
-      );
-    }
-
-    return <Component />;
-  };
-
-  const handleStart = () => {
-    setStarted(true);
-  };
-
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep((step) => step + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep((step) => step - 1);
-    }
-  };
+  useEffect(() => {
+    const fetchRiskRegisters = async () => {
+      const response = await getRiskRegisters(loggedInUser?.name);
+      console.log("risk registers", JSON.stringify(response.data, null, 2));
+      setRiskRegisters(response.data);
+    };
+    fetchRiskRegisters();
+  }, []);
 
   return (
     <div>
-      {started ? (
-        <PrimarySelection
-          steps={steps}
-          currentStep={currentStep}
-          onNext={handleNext}
-          onBack={handleBack}
-          renderStep={renderCurrentStep}
-        />
+      {loading ? (
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <div
+              key={index}
+              style={{ width: `${Math.random() * 100}%` }}
+              className=" h-10 bg-gray-200 animate-pulse"
+            ></div>
+          ))}
+        </div>
+      ) : riskRegisters ? (
+        <RiskRegisters riskRegisters={riskRegisters} setCurrentStep={setCurrentStep} />
       ) : (
-        <div className="h-[50vh] grid place-items-center">
-          <div className="flex flex-col items-center">
-            <h1 className="text-2xl font-bold mb-2">Start Your Risk Assessment</h1>
-            <p className="text-gray-600 mb-6">
-              Evaluate and manage risks associated with your financial activities.
-            </p>
-            <Button onClick={handleStart}>Let&apos;s Begin</Button>
-          </div>
+        <div className="px-6 py-10 rounded bg-gray-50 mt-4">
+          <RiskAssessmentSteps
+            questions={riskAssessmentQuestions}
+            form={form}
+            setTrackingStep={setCurrentStep}
+          />
         </div>
       )}
     </div>
