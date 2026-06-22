@@ -41,16 +41,23 @@ function FieldInput({ field, rhfField }) {
   }
 }
 
-export default function FieldRenderer({ field, control, form }) {
+export default function FieldRenderer({ field, control, form, entityTypes }) {
   const formControl = form?.control ?? control;
   const { key, label, required, hint, value } = field;
-  console.log("key", field);
-
   useEffect(() => {
     if (form) {
       form.setValue(key, value ?? "");
     }
   }, [value]);
+
+  useEffect(() => {
+    if (entityTypes && key === "entity_type") {
+      const chosenEntityType = entityTypes?.find((entity) =>
+        entity.matchKeywords?.some((keyword) => keyword === value.toLowerCase()),
+      );
+      form.setValue("entity_type", chosenEntityType?.label);
+    }
+  }, [entityTypes]);
 
   return (
     <div className="flex flex-col gap-1.5">
