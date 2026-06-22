@@ -152,7 +152,7 @@ export function ClientEditForm() {
       if (response.success) {
         setLoggedInUser(response.data);
       }
-      router.push("/dashboard/client/profile");
+      router.push("/dashboard/client/list");
     } else {
       toast.error("Failed to update profile");
     }
