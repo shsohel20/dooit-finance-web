@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { getAllEntityTypes } from "@/app/dashboard/actions";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,15 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 
-export function CompanyInfoSection({
-  control,
-  errors,
-  formData,
-  setFormData,
-  id,
-}) {
+export function CompanyInfoSection({ control, errors, formData, setFormData, id }) {
+  const [entityTypes, setEntityTypes] = useState([]);
+  useEffect(() => {
+    const fetchEntityTypes = async () => {
+      const response = await getAllEntityTypes();
+      setEntityTypes(response.data);
+    };
+    fetchEntityTypes();
+  }, []);
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
@@ -91,12 +89,7 @@ export function CompanyInfoSection({
             render={({ field }) => (
               <div className="space-y-2">
                 <Label htmlFor="userName">Username</Label>
-                <Input
-                  id="userName"
-                  {...field}
-                  placeholder="Enter username"
-                  disabled={!!id}
-                />
+                <Input id="userName" {...field} placeholder="Enter username" disabled={!!id} />
               </div>
             )}
           />
@@ -115,7 +108,7 @@ export function CompanyInfoSection({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {clientTypes.map((type) => (
+                      {entityTypes.map((type) => (
                         <SelectItem key={type.value} value={type.value}>
                           {type.label}
                         </SelectItem>
@@ -132,11 +125,7 @@ export function CompanyInfoSection({
             render={({ field }) => (
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select
-                  id="status"
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
+                <Select id="status" value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>
@@ -158,11 +147,7 @@ export function CompanyInfoSection({
             render={({ field }) => (
               <div className="space-y-2">
                 <Label htmlFor="registrationNumber">Registration Number</Label>
-                <Input
-                  id="registrationNumber"
-                  {...field}
-                  placeholder="e.g., REG-2025-001"
-                />
+                <Input id="registrationNumber" {...field} placeholder="e.g., REG-2025-001" />
               </div>
             )}
           />
