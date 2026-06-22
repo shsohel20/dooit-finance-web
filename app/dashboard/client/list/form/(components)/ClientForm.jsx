@@ -13,13 +13,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createClient, getClientById, updateClient } from "../../actions";
-import api from "@/services";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  userName: z.string().min(1, "Username is required"),
   clientType: z.string().min(1, "Client type is required"),
   contacts: z.array(
     z.object({
@@ -44,7 +42,7 @@ const formSchema = z.object({
     designation: z.string(),
   }),
 
-  name: z.string(),
+  name: z.string().min(1, "Company name is required"),
   registrationNumber: z.string(),
   taxId: z.string(),
   email: z.string().email(),
@@ -97,7 +95,6 @@ export function ClientForm({ id }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    userName: "",
     name: "",
     clientType: "",
     registrationNumber: "",
@@ -145,7 +142,6 @@ export function ClientForm({ id }) {
   const {
     control,
     handleSubmit,
-    watch,
     reset,
     formState: { errors },
   } = useForm({
@@ -156,24 +152,53 @@ export function ClientForm({ id }) {
     if (id) {
       const fetchClient = async () => {
         const response = await getClientById(id);
-        const modifiedData = {
-          ...response.data,
-          userName: response.data?.user?.userName,
-        };
-        reset(modifiedData);
+        if (response?.data) {
+          // Merge over defaults so nested controlled inputs never go undefined.
+          reset({ ...formData, ...response.data });
+        }
       };
       fetchClient();
     }
   }, [id]);
 
+  // Map a form field to the tab it lives on, so validation errors can jump there.
+  const FIELD_TAB = {
+    name: 1,
+    clientType: 1,
+    registrationNumber: 1,
+    taxId: 1,
+    email: 1,
+    phone: 1,
+    website: 1,
+    status: 1,
+    contacts: 2,
+    address: 3,
+    legalRepresentative: 4,
+    documents: 5,
+    settings: 6,
+  };
+
   const onSubmit = async (data) => {
     setLoading(true);
-    // const submittedData = {
-    //   ...data,
-    //   contacts: data.contacts.length > 0 ? data.contacts : [],
-    //   documents: data.documents.length > 0 ? data.documents : [],
-    // }
-    const action = id ? updateClient(id, data) : createClient(data);
+    // Send only the schema fields — strips populated `user`, `_id`, timestamps
+    // etc. that come back from the API in edit mode (sending `user` back would
+    // fail the ObjectId cast on the backend).
+    const payload = {
+      name: data.name,
+      clientType: data.clientType,
+      registrationNumber: data.registrationNumber,
+      taxId: data.taxId,
+      email: data.email,
+      phone: data.phone,
+      website: data.website,
+      contacts: data.contacts,
+      address: data.address,
+      legalRepresentative: data.legalRepresentative,
+      documents: data.documents,
+      status: data.status,
+      settings: data.settings,
+    };
+    const action = id ? updateClient(id, payload) : createClient(payload);
     const res = await action;
     setLoading(false);
     if (res.success || res.succeed) {
@@ -185,6 +210,15 @@ export function ClientForm({ id }) {
     } else {
       toast.error(res.error || "Something went wrong");
     }
+  };
+
+  // Validation can fail on a tab that isn't currently visible — surface it and
+  // jump to the first offending tab instead of silently doing nothing.
+  const onInvalid = (formErrors) => {
+    const firstField = Object.keys(formErrors)[0];
+    const tab = FIELD_TAB[firstField];
+    if (tab) setCurrentStep(tab);
+    toast.error("Please fix the highlighted fields before saving.");
   };
   const handleBack = () => {
     setCurrentStep((prev) => (prev > 1 ? prev - 1 : prev));
@@ -225,7 +259,7 @@ export function ClientForm({ id }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
       <Tabs
         defaultValue={currentStep}
         value={currentStep}
@@ -247,10 +281,15 @@ export function ClientForm({ id }) {
       </Tabs>
       {currentStep == tabs.length ? null : (
         <div className="flex gap-4 mt-4 justify-end">
-          <Button variant="outline" onClick={handleBack} disabled={currentStep === 1}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleBack}
+            disabled={currentStep === 1}
+          >
             Back
           </Button>
-          <Button onClick={handleNext} disabled={currentStep === tabs.length}>
+          <Button type="button" onClick={handleNext} disabled={currentStep === tabs.length}>
             Next
           </Button>
         </div>

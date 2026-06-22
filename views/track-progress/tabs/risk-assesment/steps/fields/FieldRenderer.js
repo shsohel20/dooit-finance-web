@@ -41,23 +41,17 @@ function FieldInput({ field, rhfField }) {
   }
 }
 
-export default function FieldRenderer({ field, control, form, entityTypes }) {
+export default function FieldRenderer({ field, control, form }) {
   const formControl = form?.control ?? control;
   const { key, label, required, hint, value } = field;
+  // Seed the form from the schema's resolved value. For entity_type the API now
+  // returns the canonical EntityType name (which matches the field options), so
+  // it can be set directly — no client-side id→label remapping needed.
   useEffect(() => {
     if (form) {
       form.setValue(key, value ?? "");
     }
   }, [value]);
-
-  useEffect(() => {
-    if (entityTypes && key === "entity_type") {
-      const chosenEntityType = entityTypes?.find((entity) =>
-        entity.matchKeywords?.some((keyword) => keyword === value.toLowerCase()),
-      );
-      form.setValue("entity_type", chosenEntityType?.label);
-    }
-  }, [entityTypes]);
 
   return (
     <div className="flex flex-col gap-1.5">

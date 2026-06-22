@@ -6,6 +6,7 @@ import { IconEye } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import StaffDetailDrawer from "@/views/staffs/StaffDetailDrawer";
 export default function StaffsList({ onboarding = false }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,6 +16,7 @@ export default function StaffsList({ onboarding = false }) {
   const [totalPages, setTotalPages] = useState(0);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("createdAt:desc");
+  const [drawerStaffId, setDrawerStaffId] = useState(null);
   const router = useRouter();
   const fetchData = async () => {
     setLoading(true);
@@ -40,30 +42,29 @@ export default function StaffsList({ onboarding = false }) {
     }
   };
   const columns = [
-    ...(!onboarding
-      ? [
-          {
-            id: "actions",
-            header: "Actions",
-            accessorKey: "actions",
-            cell: ({ row }) => {
-              return (
-                <div className="text-sm text-muted-foreground">
-                  <Button
-                    onClick={() =>
-                      router.push(`/dashboard/client/staffs/details?id=${row.original._id}`)
-                    }
-                    variant="outline"
-                    size="icon"
-                  >
-                    <IconEye />
-                  </Button>
-                </div>
-              );
-            },
-          },
-        ]
-      : []),
+    {
+      id: "actions",
+      header: "Actions",
+      accessorKey: "actions",
+      cell: ({ row }) => {
+        return (
+          <div className="text-sm text-muted-foreground">
+            <Button
+              onClick={() =>
+                onboarding
+                  ? setDrawerStaffId(row.original._id)
+                  : router.push(`/dashboard/client/staffs/details?id=${row.original._id}`)
+              }
+              variant="outline"
+              size="icon"
+              title="View staff details"
+            >
+              <IconEye />
+            </Button>
+          </div>
+        );
+      },
+    },
     {
       id: "name",
       header: "Name",
@@ -149,6 +150,13 @@ export default function StaffsList({ onboarding = false }) {
         mainClass="staffs-table"
         tableId="staffs-table"
         loading={loading}
+      />
+      <StaffDetailDrawer
+        staffId={drawerStaffId}
+        open={!!drawerStaffId}
+        onOpenChange={(open) => {
+          if (!open) setDrawerStaffId(null);
+        }}
       />
     </div>
   );

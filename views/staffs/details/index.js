@@ -67,11 +67,12 @@ function ErrorState({ message, onRetry }) {
   );
 }
 
-export default function StaffDetails() {
+export default function StaffDetails({ staffId }) {
   const [staff, setStaff] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const id = useSearchParams().get("id");
+  const searchId = useSearchParams().get("id");
+  const id = staffId || searchId;
 
   const fetchStaff = useCallback(async () => {
     if (!id) return;

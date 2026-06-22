@@ -60,7 +60,9 @@ export function LegalSection({ control, errors }) {
             name="legalRepresentative.email"
             render={({ field }) => (
               <div className="space-y-2">
-                <Label htmlFor="legal-email">Email</Label>
+                <Label htmlFor="legal-email">
+                  Email <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="legal-email"
                   type="email"

@@ -58,6 +58,43 @@ const getRiskRegisters = async (entityName) => {
   return response.json();
 };
 
+// Draft → In Review
+const submitRiskRegister = async (id) => {
+  const response = await fetchWithAuth(`risk-register/${id}/submit`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+  return response.json();
+};
+
+// Re-run the scoring engine with stored answers/ctrlEff
+const recalculateRiskRegister = async (id) => {
+  const response = await fetchWithAuth(`risk-register/${id}/recalculate`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+  return response.json();
+};
+
+// Streams a styled .xls workbook — returns the raw HTML string so the
+// client can build a Blob and trigger the download.
+const exportRiskRegisterExcel = async (id) => {
+  const response = await fetchWithAuth(`risk-register/${id}/export`);
+  if (!response || typeof response.text !== "function") {
+    return { success: false, error: "Network error while exporting" };
+  }
+  if (!response.ok) {
+    try {
+      const errJson = await response.json();
+      return { success: false, error: errJson.error || "Export failed" };
+    } catch {
+      return { success: false, error: "Export failed" };
+    }
+  }
+  const html = await response.text();
+  return { success: true, data: html };
+};
+
 export {
   createEmployee,
   getStuffsByRole,
@@ -67,4 +104,7 @@ export {
   submitRiskAssessmentAnswers,
   trackOnboardingStep,
   getRiskRegisters,
+  submitRiskRegister,
+  recalculateRiskRegister,
+  exportRiskRegisterExcel,
 };

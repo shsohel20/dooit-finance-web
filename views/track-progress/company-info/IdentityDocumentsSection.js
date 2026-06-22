@@ -107,8 +107,11 @@ export default function IdentityDocumentsSection({ form, basePath = "" }) {
     }
   };
 
-  const enableProcessBtn = documentType?.sides === fields.length;
+  const enableProcessBtn = documentType?.sides === fields.filter(dc=> dc.docType!=="employee_image").length;
   console.log({ enableProcessBtn });
+
+  console.log(documentType?.sides)
+  console.log(fields)
 
   const handleDocumentTypeChange = (data) => {
     form.setValue(documentTypePath, data);

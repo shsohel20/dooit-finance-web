@@ -72,6 +72,8 @@ export default function CompanyInfo({ setCurrentStep }) {
     getAlreadyAddedStuffs();
   }, [roles]);
 
+  console.log(...roles)
+
   const roleOptions = roles.map((role) => ({
     label: role.name,
     value: role._id,
@@ -94,6 +96,7 @@ export default function CompanyInfo({ setCurrentStep }) {
     setSaving(false);
   };
 
+  console.log(alreadyAddedStuffs)
   const canAddRole = !rolesLoading && roleFields.length < roleOptions.length;
 
   return (
@@ -152,7 +155,10 @@ export default function CompanyInfo({ setCurrentStep }) {
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" size="sm" disabled={alreadyAddedStuffs?.length === 0 || saving}>
+        {/* <Button type="submit" size="sm" disabled={alreadyAddedStuffs?.length === 0 || saving}>
+          {saving ? "Saving..." : "Save & Continue"}
+        </Button> */}
+         <Button type="submit" size="sm" disabled={saving}>
           {saving ? "Saving..." : "Save & Continue"}
         </Button>
       </div>

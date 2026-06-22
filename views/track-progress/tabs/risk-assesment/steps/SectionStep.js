@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Controller } from "react-hook-form";
 import FieldRenderer from "./fields/FieldRenderer";
 import RatingField from "./fields/RatingField";
@@ -7,7 +7,19 @@ import RatingField from "./fields/RatingField";
 const CO_KEYS = new Set(["co_name", "co_email", "co_phone"]);
 const SM_KEYS = new Set(["sm_name", "sm_email"]);
 
-function RatingRow({ field, control }) {
+function RatingRow({ field, control, form }) {
+  // Seed the rating from the schema's value (e.g. ctrlEff.* = 3). Unlike the
+  // other field types, rating fields don't go through FieldRenderer, so without
+  // this they stay unset and never get submitted. Only seed when unset so we
+  // don't clobber a rating the user already picked when revisiting the step.
+  useEffect(() => {
+    if (!form) return;
+    const current = form.getValues(field.key);
+    if (current == null) {
+      form.setValue(field.key, field.value ?? field.default ?? null);
+    }
+  }, [field.value]);
+
   return (
     <div className="flex items-start justify-between gap-6 py-4 border-b last:border-b-0">
       <div className="flex-1 min-w-0">
@@ -59,7 +71,13 @@ function renderFields(fields, form, entityTypes) {
           </p>
           <div className="grid grid-cols-3 gap-4">
             {coFields.map((f) => (
-              <FieldRenderer key={f.key} field={f} control={control} entityTypes={entityTypes} />
+              <FieldRenderer
+                key={f.key}
+                field={f}
+                control={control}
+                form={form}
+                entityTypes={entityTypes}
+              />
             ))}
           </div>
         </div>,

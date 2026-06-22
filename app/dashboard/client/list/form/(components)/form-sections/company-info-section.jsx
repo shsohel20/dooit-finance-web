@@ -67,42 +67,34 @@ export function CompanyInfoSection({ control, errors, formData, setFormData, id 
         <CardDescription>Basic details about your company</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Identity */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Controller
             control={control}
             name="name"
             render={({ field }) => (
               <div className="space-y-2">
-                <Label htmlFor="name">Company Name</Label>
+                <Label htmlFor="name">
+                  Company Name <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="name"
-                  value={formData?.name}
                   {...field}
                   placeholder="Enter company name"
+                  error={errors.name?.message}
                 />
               </div>
             )}
           />
           <Controller
             control={control}
-            name="userName"
-            render={({ field }) => (
-              <div className="space-y-2">
-                <Label htmlFor="userName">Username</Label>
-                <Input id="userName" {...field} placeholder="Enter username" disabled={!!id} />
-              </div>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Controller
-            control={control}
             name="clientType"
             render={({ field }) => {
               return (
                 <div className="space-y-2">
-                  <Label htmlFor="clientType">Client Type</Label>
+                  <Label htmlFor="clientType">
+                    Client Type <span className="text-destructive">*</span>
+                  </Label>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger id="clientType">
                       <SelectValue />
@@ -119,27 +111,9 @@ export function CompanyInfoSection({ control, errors, formData, setFormData, id 
               );
             }}
           />
-          <Controller
-            control={control}
-            name="status"
-            render={({ field }) => (
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select id="status" value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="status">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Inactive">Inactive</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          />
         </div>
 
+        {/* Identifiers */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Controller
             control={control}
@@ -168,13 +142,16 @@ export function CompanyInfoSection({ control, errors, formData, setFormData, id 
           />
         </div>
 
+        {/* Contact */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Controller
             control={control}
             name="email"
             render={({ field }) => (
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">
+                  Email <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -202,22 +179,44 @@ export function CompanyInfoSection({ control, errors, formData, setFormData, id 
           />
         </div>
 
-        <Controller
-          control={control}
-          name="website"
-          render={({ field }) => (
-            <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                type="url"
-                {...field}
-                error={errors.website?.message}
-                placeholder="https://example.com"
-              />
-            </div>
-          )}
-        />
+        {/* Web & Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Controller
+            control={control}
+            name="website"
+            render={({ field }) => (
+              <div className="space-y-2">
+                <Label htmlFor="website">Website</Label>
+                <Input
+                  id="website"
+                  type="url"
+                  {...field}
+                  error={errors.website?.message}
+                  placeholder="https://example.com"
+                />
+              </div>
+            )}
+          />
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select id="status" value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          />
+        </div>
       </CardContent>
     </Card>
   );

@@ -2,7 +2,17 @@
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight, AlertTriangle } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  AlertTriangle,
+  Send,
+  RefreshCw,
+  FileSpreadsheet,
+  CheckCircle2,
+  Loader2,
+  X,
+} from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -12,6 +22,19 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import {
+  submitRiskRegister,
+  recalculateRiskRegister,
+  exportRiskRegisterExcel,
+} from "../../actions";
+
+// ─── Status chip config ────────────────────────────────────────────────────────
+
+const STATUS_STYLE = {
+  Draft: "bg-gray-100 text-gray-600 border-gray-200",
+  "In Review": "bg-amber-100 text-amber-700 border-amber-200",
+  Approved: "bg-green-100 text-green-700 border-green-200",
+};
 
 // ─── Risk level config ───────────────────────────────────────────────────────
 
@@ -130,7 +153,7 @@ function InfoCell({ label, value, sub }) {
 
 // ─── Entity header ───────────────────────────────────────────────────────────
 
-function EntityHeader({ data }) {
+function EntityHeader({ data, actions }) {
   const formatDate = (iso) =>
     iso
       ? new Date(iso).toLocaleDateString("en-AU", {
@@ -155,22 +178,23 @@ function EntityHeader({ data }) {
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <RiskBadge
-            level={data.overallResidual}
-            label={`Overall: ${data.overallResidualLabel}`}
-            size="lg"
-          />
-          <span
-            className={cn(
-              "px-2 py-1 rounded text-xs font-medium border",
-              data.status === "Draft"
-                ? "bg-gray-100 text-gray-600 border-gray-200"
-                : "bg-green-100 text-green-700 border-green-200",
-            )}
-          >
-            {data.status}
-          </span>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <RiskBadge
+              level={data.overallResidual}
+              label={`Overall: ${data.overallResidualLabel}`}
+              size="lg"
+            />
+            <span
+              className={cn(
+                "px-2 py-1 rounded text-xs font-medium border",
+                STATUS_STYLE[data.status] || STATUS_STYLE.Draft,
+              )}
+            >
+              {data.status}
+            </span>
+          </div>
+          {actions}
         </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-2 border-t pt-3">
@@ -423,19 +447,67 @@ function ActionItems({ rows }) {
   );
 }
 
+// ─── Register action toolbar ────────────────────────────────────────────────────
+
+function RegisterActions({ status, busy, onSubmit, onRecalculate, onExport }) {
+  const isDraft = status === "Draft";
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={!isDraft || !!busy}
+        onClick={onSubmit}
+        className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:text-amber-800"
+        title={isDraft ? "Submit register for review" : `Register is already ${status}`}
+      >
+        {busy === "submit" ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <Send className="size-4" />
+        )}
+        Submit for Review
+      </Button>
+      <Button size="sm" variant="outline" disabled={!!busy} onClick={onRecalculate}>
+        {busy === "recalc" ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <RefreshCw className="size-4" />
+        )}
+        Recalculate
+      </Button>
+      <Button size="sm" variant="outline" disabled={!!busy} onClick={onExport}>
+        {busy === "export" ? (
+          <Loader2 className="size-4 animate-spin" />
+        ) : (
+          <FileSpreadsheet className="size-4" />
+        )}
+        Export Excel
+      </Button>
+    </div>
+  );
+}
+
 // ─── Root component ───────────────────────────────────────────────────────────
 
 export default function RiskRegisters({ riskRegisters = [], setCurrentStep }) {
-  const register = Array.isArray(riskRegisters) ? riskRegisters[0] : riskRegisters;
+  const initial = Array.isArray(riskRegisters) ? riskRegisters[0] : riskRegisters;
+  const [register, setRegister] = useState(initial);
+  const [busy, setBusy] = useState(null); // "submit" | "recalc" | "export" | null
+  const [message, setMessage] = useState(null); // { type: "success" | "error", text }
+
   if (!register) return null;
 
   const {
+    _id,
     rows = [],
     residualCounts = {},
     overallResidual,
     overallResidualLabel,
     actionCount = 0,
     version = 1,
+    status = "Draft",
+    entityName = "ENTITY",
   } = register;
 
   const sections = rows.reduce((acc, row) => {
@@ -446,9 +518,105 @@ export default function RiskRegisters({ riskRegisters = [], setCurrentStep }) {
 
   const actionRows = rows.filter((r) => r.actionRequired);
 
+  const runAction = async (key, fn, successText) => {
+    if (!_id) {
+      setMessage({ type: "error", text: "Register has not been saved yet." });
+      return;
+    }
+    setBusy(key);
+    setMessage(null);
+    try {
+      const res = await fn(_id);
+      if (res?.success && res.data) {
+        setRegister(res.data);
+        setMessage({ type: "success", text: successText });
+      } else {
+        setMessage({ type: "error", text: res?.error || "Action failed." });
+      }
+    } catch (e) {
+      setMessage({ type: "error", text: e?.message || "Action failed." });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleSubmit = () =>
+    runAction("submit", submitRiskRegister, "Submitted for review.");
+
+  const handleRecalculate = () =>
+    runAction("recalc", recalculateRiskRegister, "Risk register recalculated.");
+
+  const handleExport = async () => {
+    if (!_id) {
+      setMessage({ type: "error", text: "Register has not been saved yet." });
+      return;
+    }
+    setBusy("export");
+    setMessage(null);
+    try {
+      const res = await exportRiskRegisterExcel(_id);
+      if (res?.success && res.data) {
+        const blob = new Blob([res.data], {
+          type: "application/vnd.ms-excel;charset=utf-8",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${entityName.replace(/[^a-z0-9]/gi, "_")}_EWRA_Risk_Register.xls`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setMessage({ type: "success", text: "Excel export downloaded." });
+      } else {
+        setMessage({ type: "error", text: res?.error || "Export failed." });
+      }
+    } catch (e) {
+      setMessage({ type: "error", text: e?.message || "Export failed." });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <EntityHeader data={{ ...register, version, overallResidual, overallResidualLabel }} />
+      {message && (
+        <div
+          className={cn(
+            "flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm",
+            message.type === "success"
+              ? "bg-green-50 border-green-200 text-green-700"
+              : "bg-red-50 border-red-200 text-red-700",
+          )}
+        >
+          {message.type === "success" ? (
+            <CheckCircle2 className="size-4 flex-shrink-0" />
+          ) : (
+            <AlertTriangle className="size-4 flex-shrink-0" />
+          )}
+          <span className="flex-1">{message.text}</span>
+          <button
+            onClick={() => setMessage(null)}
+            className="text-current/60 hover:text-current"
+            aria-label="Dismiss"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
+
+      <EntityHeader
+        data={{ ...register, version, overallResidual, overallResidualLabel, status }}
+        actions={
+          <RegisterActions
+            status={status}
+            busy={busy}
+            onSubmit={handleSubmit}
+            onRecalculate={handleRecalculate}
+            onExport={handleExport}
+          />
+        }
+      />
       <OverallRiskProfile
         residualCounts={residualCounts}
         overallResidual={overallResidual}
