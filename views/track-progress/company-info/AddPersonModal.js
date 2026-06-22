@@ -27,6 +27,7 @@ const personSchema = z.object({
     lastName: z.string().min(1, "Last name is required"),
     dateOfBirth: z.string().min(1, "Date of birth is required"),
     nationality: z.string(),
+    country: z.string(),
   }),
   contact: z.object({
     workEmail: z.string(),
@@ -41,6 +42,7 @@ const personSchema = z.object({
   }),
   document_type: z.any().optional(),
   documents: z.array(z.any()).optional(),
+  metaData: z.any().optional(),
 });
 
 export default function AddPersonModal({

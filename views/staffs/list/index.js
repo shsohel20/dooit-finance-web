@@ -79,6 +79,16 @@ export default function StaffsList({ onboarding = false }) {
         );
       },
     },
+    {
+      id: "nationality",
+      header: "Nationality",
+      accessorKey: "nationality",
+      cell: ({ row }) => {
+        return (
+          <div className="text-sm text-muted-foreground">{row.original?.personal?.nationality}</div>
+        );
+      },
+    },
 
     {
       id: "phone",
@@ -87,7 +97,7 @@ export default function StaffsList({ onboarding = false }) {
       cell: ({ row }) => {
         return (
           <div className="text-sm text-muted-foreground tabular-nums">
-            {row.original?.personal?.nationality} {row.original?.contact?.phone}
+            {row.original?.contact?.phone}
           </div>
         );
       },

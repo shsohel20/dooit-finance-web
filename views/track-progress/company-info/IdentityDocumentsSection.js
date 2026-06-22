@@ -64,8 +64,13 @@ export default function IdentityDocumentsSection({ form, basePath = "" }) {
       form.setValue("personal.firstName", ocr_data?.full_name?.split(" ")[0] ?? "");
       form.setValue("personal.lastName", ocr_data?.full_name?.split(" ")[1] ?? "");
       form.setValue("personal.dateOfBirth", ocr_data?.date_of_birth ?? "");
-      form.setValue("personal.nationality", ocr_data?.nationality ?? "");
+      form.setValue(
+        "personal.nationality",
+        ocr_data?.nationality ?? ocr_data?.issuing_country ?? "",
+      );
       form.setValue("contact.residentialAddress", ocr_data?.address ?? "");
+      form.setValue("personal.country", ocr_data?.issuing_country ?? "");
+      form.setValue("metaData", ocr_data ?? "");
     } else {
       toast.error(ocrResponse.message || "Failed to process OCR data");
     }
@@ -103,6 +108,7 @@ export default function IdentityDocumentsSection({ form, basePath = "" }) {
   };
 
   const enableProcessBtn = documentType?.sides === fields.length;
+  console.log({ enableProcessBtn });
 
   const handleDocumentTypeChange = (data) => {
     form.setValue(documentTypePath, data);

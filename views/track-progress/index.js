@@ -15,7 +15,11 @@ export default function TrackProgress() {
     {
       key: "stuffs_add",
       label: "Team Setup",
-      component: <CompanyProgress setCurrentStep={setCurrentStep} />,
+      component: (
+        <div className="max-w-3xl mx-auto">
+          <CompanyProgress setCurrentStep={setCurrentStep} />
+        </div>
+      ),
     },
     {
       key: "risk_assessment",
@@ -40,10 +44,11 @@ export default function TrackProgress() {
   ];
 
   const activeStep = steps[currentStep - 1];
-  console.log("currentStep", currentStep);
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <Stepper steps={steps} currentStep={currentStep} onStepChange={setCurrentStep} />
+    <div className=" space-y-6">
+      <div className="max-w-3xl mx-auto">
+        <Stepper steps={steps} currentStep={currentStep} onStepChange={setCurrentStep} />
+      </div>
       {activeStep?.component}
     </div>
   );

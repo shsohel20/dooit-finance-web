@@ -9,6 +9,7 @@ import {
 } from "./constants";
 import IdentityDocumentsSection from "./IdentityDocumentsSection";
 import EmpImage from "./EmpImage";
+import { countriesData } from "@/constants";
 
 export default function EmployeeFormFields({ form }) {
   return (
@@ -43,6 +44,14 @@ export default function EmployeeFormFields({ form }) {
             type="select"
             placeholder="Select nationality"
             options={NATIONALITY_OPTIONS}
+          />
+          <FormField
+            form={form}
+            name="personal.country"
+            label="Country"
+            type="select"
+            placeholder="Select country"
+            options={countriesData}
           />
         </div>
       </section>

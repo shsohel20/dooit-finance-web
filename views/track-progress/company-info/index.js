@@ -27,6 +27,7 @@ export default function CompanyInfo({ setCurrentStep }) {
     fields: roleFields,
     append,
     remove,
+    replace,
   } = useFieldArray({
     control: form.control,
     name: "roleAssignments",
@@ -38,7 +39,6 @@ export default function CompanyInfo({ setCurrentStep }) {
       const response = await getAllRoles();
       setRoles(response?.data || []);
     } catch (error) {
-      console.error("Error fetching roles:", error);
     } finally {
       setRolesLoading(false);
     }
@@ -46,8 +46,14 @@ export default function CompanyInfo({ setCurrentStep }) {
   const getAlreadyAddedStuffs = async (roleId) => {
     try {
       const response = await getStaffs(roleId);
-      console.log("alreadyAddedStuffs", response?.data);
+      const assignedRoles = response?.data?.map((item) => item.user?.roleId);
 
+      replace(
+        assignedRoles.map((role) => ({
+          roleId: role,
+          people: [],
+        })),
+      );
       setAlreadyAddedStuffs(response?.data || []);
     } catch (error) {
       console.error("Error fetching stuffs for role:", error);
@@ -72,13 +78,6 @@ export default function CompanyInfo({ setCurrentStep }) {
   }));
 
   const onSubmit = async (data) => {
-    const employees = data.roleAssignments.flatMap((assignment) =>
-      assignment.people.map((person) => ({
-        personal: person.personal,
-        contact: person.contact,
-        employment: person.employment,
-      })),
-    );
     const payload = {
       step: "stuffs_added",
       order: 1,
@@ -87,7 +86,6 @@ export default function CompanyInfo({ setCurrentStep }) {
     };
     setSaving(true);
     const res = await trackOnboardingStep(payload);
-    console.log("trackOnboardingStep response", res);
     if (res.success) {
       setCurrentStep(2);
     }
@@ -137,6 +135,7 @@ export default function CompanyInfo({ setCurrentStep }) {
               ))}
               <Button
                 type="button"
+                variant="outline"
                 // variant="link"
                 size="sm"
                 onClick={() => append(emptyRoleAssignment())}
