@@ -90,8 +90,6 @@ export default function CompanyInfo({ setCurrentStep }) {
     console.log("res", res);
     if (res.success) {
       setCurrentStep(2);
-    } else {
-      setCurrentStep(2);
     }
     setSaving(false);
   };
