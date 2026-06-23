@@ -46,7 +46,9 @@ export default function CompanyInfo({ setCurrentStep }) {
   const getAlreadyAddedStuffs = async (roleId) => {
     try {
       const response = await getStaffs(roleId);
+      console.log("response", response);
       const assignedRoles = response?.data?.map((item) => item.user?.roleId);
+      console.log("assignedRoles", assignedRoles);
 
       replace(
         assignedRoles.map((role) => ({
@@ -72,7 +74,7 @@ export default function CompanyInfo({ setCurrentStep }) {
     getAlreadyAddedStuffs();
   }, [roles]);
 
-  console.log(...roles)
+  console.log(...roles);
 
   const roleOptions = roles.map((role) => ({
     label: role.name,
@@ -96,7 +98,7 @@ export default function CompanyInfo({ setCurrentStep }) {
     setSaving(false);
   };
 
-  console.log(alreadyAddedStuffs)
+  console.log(alreadyAddedStuffs);
   const canAddRole = !rolesLoading && roleFields.length < roleOptions.length;
 
   return (
@@ -158,7 +160,7 @@ export default function CompanyInfo({ setCurrentStep }) {
         {/* <Button type="submit" size="sm" disabled={alreadyAddedStuffs?.length === 0 || saving}>
           {saving ? "Saving..." : "Save & Continue"}
         </Button> */}
-         <Button type="submit" size="sm" disabled={saving}>
+        <Button type="submit" size="sm" disabled={saving}>
           {saving ? "Saving..." : "Save & Continue"}
         </Button>
       </div>
