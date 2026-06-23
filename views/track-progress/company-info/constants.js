@@ -10,7 +10,7 @@ export const SECTOR_OPTIONS = [
 
 export const DOCUMENT_TYPES = [
   { label: "Passport", value: "Passport", sides: 1 },
-  { label: "Driving License", value: "Driving License", sides: 2 },
+  { label: "Driving License", value: "driving_license", sides: 2 },
   { label: "National ID", value: "nid", sides: 2 },
 ];
 
