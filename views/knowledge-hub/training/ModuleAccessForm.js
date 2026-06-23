@@ -107,10 +107,10 @@ export default function ModuleAccessForm({ addOpen, setAddOpen, selectedModule }
     >
       {bulkAccessFormOpen ? (
         <BulkAccessForm
-          bulkOpen={bulkAccessFormOpen}
-          setBulkOpen={setBulkAccessFormOpen}
+          open={bulkAccessFormOpen}
+          setOpen={setBulkAccessFormOpen}
           selectedModule={selectedModule}
-          setAddOpen={setAddOpen}
+          onSuccess={() => setAddOpen(false)}
         />
       ) : (
         <DialogContent className="sm:max-w-[520px]">

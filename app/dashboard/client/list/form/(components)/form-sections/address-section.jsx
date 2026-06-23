@@ -9,6 +9,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { countriesData } from "@/constants";
 import { Controller } from "react-hook-form";
 
 export function AddressSection({ control, errors }) {
@@ -74,13 +82,26 @@ export function AddressSection({ control, errors }) {
             name="address.country"
             render={({ field }) => (
               <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
-                <Input
-                  id="country"
-                  {...field}
-                  placeholder="Country"
-                  error={errors.address?.country?.message}
-                />
+                <Label htmlFor="country">
+                  Country <span className="text-destructive">*</span>
+                </Label>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="country" className="w-full">
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countriesData.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.address?.country?.message && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.address.country.message}
+                  </p>
+                )}
               </div>
             )}
           />

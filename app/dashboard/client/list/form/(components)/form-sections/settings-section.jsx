@@ -31,14 +31,12 @@ export function SettingsSection({ control, errors }) {
             name="settings.billingCycle"
             render={({ field }) => (
               <div className="space-y-2">
-                <Label htmlFor="billingCycle">Billing Cycle</Label>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  error={errors.settings?.billingCycle?.message}
-                >
+                <Label htmlFor="billingCycle">
+                  Billing Cycle <span className="text-destructive">*</span>
+                </Label>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger id="billingCycle">
-                    <SelectValue />
+                    <SelectValue placeholder="Select billing cycle" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="monthly">Monthly</SelectItem>
@@ -46,6 +44,11 @@ export function SettingsSection({ control, errors }) {
                     <SelectItem value="annual">Annual</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.settings?.billingCycle?.message && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.settings.billingCycle.message}
+                  </p>
+                )}
               </div>
             )}
           />
@@ -54,22 +57,26 @@ export function SettingsSection({ control, errors }) {
             name="settings.currency"
             render={({ field }) => (
               <div className="space-y-2">
-                <Label htmlFor="currency">Currency</Label>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  error={errors.settings?.currency?.message}
-                >
+                <Label htmlFor="currency">
+                  Currency <span className="text-destructive">*</span>
+                </Label>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger id="currency">
-                    <SelectValue />
+                    <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="AUD">AUD (A$)</SelectItem>
                     <SelectItem value="USD">USD ($)</SelectItem>
                     <SelectItem value="EUR">EUR (€)</SelectItem>
                     <SelectItem value="GBP">GBP (£)</SelectItem>
                     <SelectItem value="BDT">BDT (৳)</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.settings?.currency?.message && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.settings.currency.message}
+                  </p>
+                )}
               </div>
             )}
           />

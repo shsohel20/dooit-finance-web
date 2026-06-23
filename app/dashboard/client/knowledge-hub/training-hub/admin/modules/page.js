@@ -81,7 +81,7 @@ export default function ModulesPage() {
   const canEdit = user?.role === "admin";
 
   const filtered = modules.filter((module) => {
-    const matchesSearch = module.title.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = (module.title || "").toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || module.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -89,7 +89,7 @@ export default function ModulesPage() {
   const fetchModules = useCallback(async () => {
     setFetching(true);
     const res = await getModules();
-    setModules(res.data);
+    setModules(Array.isArray(res?.data) ? res.data : []);
     setFetching(false);
   }, []);
 
@@ -97,9 +97,9 @@ export default function ModulesPage() {
     fetchModules();
   }, []);
   const publishedCount = modules.filter((m) => m.status === "published").length;
-  const totalParts = modules.reduce((a, m) => a + m.parts.length, 0);
+  const totalParts = modules.reduce((a, m) => a + (m.parts?.length ?? 0), 0);
   const totalQuestions = modules.reduce(
-    (a, m) => a + m.parts.reduce((b, p) => b + p.questions.length, 0),
+    (a, m) => a + (m.parts ?? []).reduce((b, p) => b + (p.questions?.length ?? 0), 0),
     0,
   );
 
@@ -314,7 +314,7 @@ export default function ModulesPage() {
                     </TableHeader>
                     <TableBody>
                       {filtered.map((module) => {
-                        const qCount = module.parts.reduce((a, p) => a + p.questions.length, 0);
+                        const qCount = (module.parts ?? []).reduce((a, p) => a + (p.questions?.length ?? 0), 0);
                         return (
                           <TableRow
                             key={module.id}
@@ -340,7 +340,7 @@ export default function ModulesPage() {
                             </TableCell>
                             <TableCell>
                               <span className="font-medium text-foreground">
-                                {module.parts.length}
+                                {module.parts?.length ?? 0}
                               </span>
                             </TableCell>
                             <TableCell>
@@ -408,7 +408,7 @@ export default function ModulesPage() {
             {view === "card" && filtered.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                 {filtered.map((module) => {
-                  const qCount = module.parts.reduce((a, p) => a + p.questions.length, 0);
+                  const qCount = (module.parts ?? []).reduce((a, p) => a + (p.questions?.length ?? 0), 0);
                   return (
                     <Card
                       key={module.id}
@@ -489,7 +489,7 @@ export default function ModulesPage() {
                         <div className="grid grid-cols-3 gap-3">
                           <div className="text-center p-2 rounded-lg bg-muted/40">
                             <p className="text-lg font-bold text-foreground">
-                              {module.parts.length}
+                              {module.parts?.length ?? 0}
                             </p>
                             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                               Parts
@@ -503,7 +503,7 @@ export default function ModulesPage() {
                           </div>
                           <div className="text-center p-2 rounded-lg bg-muted/40">
                             <p className="text-lg font-bold text-foreground">
-                              {module.parts.length > 0
+                              {(module.parts?.length ?? 0) > 0
                                 ? Math.round(qCount / module.parts.length)
                                 : 0}
                             </p>
