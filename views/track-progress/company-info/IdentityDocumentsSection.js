@@ -41,9 +41,7 @@ const resolveCountry = (raw) => {
     .filter((c) =>
       [c.value, c.nationality]
         .filter(Boolean)
-        .some((token) =>
-          new RegExp(`\\b${escapeRegExp(token.toLowerCase())}\\b`).test(needle),
-        ),
+        .some((token) => new RegExp(`\\b${escapeRegExp(token.toLowerCase())}\\b`).test(needle)),
     )
     .sort((a, b) => (b.value?.length || 0) - (a.value?.length || 0));
 
@@ -76,7 +74,6 @@ export default function IdentityDocumentsSection({ form, basePath = "" }) {
     control: form.control,
     name: documentTypePath,
   });
-  console.log("documentType", documentType);
 
   const processOcrData = async () => {
     setIsProcessing(true);
@@ -112,16 +109,10 @@ export default function IdentityDocumentsSection({ form, basePath = "" }) {
       form.setValue("personal.lastName", ocr_data?.full_name?.split(" ")[1] ?? "");
       form.setValue("personal.dateOfBirth", ocr_data?.date_of_birth ?? "");
 
-      form.setValue(
-        "personal.nationality",
-        matchNationalityFromList(ocr_data?.nationality),
-      );
+      form.setValue("personal.nationality", matchNationalityFromList(ocr_data?.nationality));
       form.setValue("contact.residentialAddress", ocr_data?.address ?? "");
 
-      form.setValue(
-        "personal.country",
-        matchCountryFromList(ocr_data?.issuing_country),
-      );
+      form.setValue("personal.country", matchCountryFromList(ocr_data?.issuing_country));
 
       form.setValue("metadata", ocr_data ?? "");
     } else {
@@ -160,16 +151,17 @@ export default function IdentityDocumentsSection({ form, basePath = "" }) {
     }
   };
 
-  const enableProcessBtn = documentType?.sides === fields.filter(dc=> dc.docType!=="employee_image").length;
-  console.log({ enableProcessBtn });
+  console.log("documents", fields);
 
-  console.log(documentType?.sides)
-  console.log(fields)
+  const enableProcessBtn =
+    documentType?.sides === fields.filter((dc) => dc.docType !== "employee_image").length;
 
   const handleDocumentTypeChange = (data) => {
     form.setValue(documentTypePath, data);
     fields.forEach((field) => {
-      remove(field.id);
+      if (field.docType !== "employee_image") {
+        remove(field.id);
+      }
     });
     setFrontError(false);
     setBackError(false);

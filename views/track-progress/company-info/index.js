@@ -43,9 +43,9 @@ export default function CompanyInfo({ setCurrentStep }) {
       setRolesLoading(false);
     }
   }, []);
-  const getAlreadyAddedStuffs = async (roleId) => {
+  const getAlreadyAddedStuffs = async () => {
     try {
-      const response = await getStaffs(roleId);
+      const response = await getStaffs();
       console.log("response", response);
       const assignedRoles = response?.data?.map((item) => item.user?.roleId);
       console.log("assignedRoles", assignedRoles);
