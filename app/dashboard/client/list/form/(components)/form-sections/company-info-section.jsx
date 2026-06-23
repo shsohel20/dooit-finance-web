@@ -119,6 +119,11 @@ export function CompanyInfoSection({ control, errors, setValue, id }) {
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.clientType?.message && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.clientType.message}
+                    </p>
+                  )}
                 </div>
               );
             }}
@@ -179,7 +184,9 @@ export function CompanyInfoSection({ control, errors, setValue, id }) {
             name="phone"
             render={({ field }) => (
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">
+                  Phone <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="phone"
                   {...field}
@@ -217,12 +224,13 @@ export function CompanyInfoSection({ control, errors, setValue, id }) {
                 <Label htmlFor="status">Status</Label>
                 <Select id="status" value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger id="status">
-                    <SelectValue />
+                    <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Inactive">Inactive</SelectItem>
                     <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
+                    <SelectItem value="Blocked">Blocked</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

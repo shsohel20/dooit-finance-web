@@ -27,7 +27,9 @@ export function LegalSection({ control, errors }) {
             name="legalRepresentative.name"
             render={({ field }) => (
               <div className="space-y-2">
-                <Label htmlFor="legal-name">Name</Label>
+                <Label htmlFor="legal-name">
+                  Name <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="legal-name"
                   {...field}

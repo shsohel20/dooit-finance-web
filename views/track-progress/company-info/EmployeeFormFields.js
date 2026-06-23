@@ -26,6 +26,7 @@ export default function EmployeeFormFields({ form }) {
             label="First name"
             type="text"
             placeholder="Enter first name"
+            required
           />
           <FormField
             form={form}
@@ -33,10 +34,11 @@ export default function EmployeeFormFields({ form }) {
             label="Last name"
             type="text"
             placeholder="Enter last name"
+            required
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField form={form} name="personal.dateOfBirth" label="Date of birth" type="date" />
+          <FormField form={form} name="personal.dateOfBirth" label="Date of birth" type="date" required />
           <FormField
             form={form}
             name="personal.nationality"
@@ -63,6 +65,7 @@ export default function EmployeeFormFields({ form }) {
           label="Work email"
           type="email"
           placeholder="name@company.com"
+          required
         />
         <FormField
           form={form}
@@ -70,6 +73,7 @@ export default function EmployeeFormFields({ form }) {
           label="Phone"
           type="text"
           placeholder="Enter phone number"
+          required
         />
         <FormField
           form={form}
@@ -83,7 +87,8 @@ export default function EmployeeFormFields({ form }) {
       <section className="space-y-4">
         <h3 className="text-sm font-semibold text-foreground">Employment details</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField form={form} name="employment.startDate" label="Start date" type="date" />
+          
+          <FormField form={form} name="employment.startDate" label="Start date" type="date" required/>
           <FormField
             form={form}
             name="employment.department"
@@ -91,6 +96,8 @@ export default function EmployeeFormFields({ form }) {
             type="select"
             placeholder="Select department"
             options={DEPARTMENT_OPTIONS}
+          required
+
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -109,6 +116,7 @@ export default function EmployeeFormFields({ form }) {
             type="select"
             placeholder="Select employment type"
             options={EMPLOYMENT_TYPE_OPTIONS}
+            required
           />
         </div>
       </section>

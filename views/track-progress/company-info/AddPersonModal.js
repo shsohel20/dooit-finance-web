@@ -30,8 +30,8 @@ const personSchema = z.object({
     country: z.string(),
   }),
   contact: z.object({
-    workEmail: z.string(),
-    phone: z.string(),
+    workEmail: z.string().min(1, "Work email is required").email("Enter a valid email address"),
+    phone: z.string().min(1, "First name is required"),
     residentialAddress: z.string(),
   }),
   employment: z.object({
@@ -60,6 +60,8 @@ export default function AddPersonModal({
   const form = useForm({
     defaultValues: emptyPerson(roleSlug),
     resolver: zodResolver(personSchema),
+    // Validate as the user types so email format / required errors show instantly.
+    mode: "onChange",
   });
 
   useEffect(() => {
@@ -113,7 +115,11 @@ export default function AddPersonModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[660px] max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        overlayClassName="bg-black/20 backdrop-blur-sm"
+        onInteractOutside={(e) => e.preventDefault()}
+        className="sm:max-w-[660px] max-h-[90vh] overflow-y-auto"
+      >
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit person" : "Add person"}</DialogTitle>
           <DialogDescription>

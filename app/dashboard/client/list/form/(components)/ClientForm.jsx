@@ -24,7 +24,8 @@ const formSchema = z.object({
     z.object({
       name: z.string(),
       title: z.string(),
-      email: z.string(),
+      // Optional, but must be a valid email when provided.
+      email: z.string().email("Enter a valid email address").or(z.literal("")),
       phone: z.string(),
       primary: z.boolean(),
     }),
@@ -33,12 +34,12 @@ const formSchema = z.object({
     street: z.string(),
     city: z.string(),
     state: z.string(),
-    country: z.string(),
+    country: z.string().min(1, "Country is required"),
     zipcode: z.string(),
   }),
   legalRepresentative: z.object({
-    name: z.string(),
-    email: z.string().email(),
+    name: z.string().min(1, "Name is required"),
+    email: z.string().min(1, "Email is required").email("Enter a valid email address"),
     phone: z.string(),
     designation: z.string(),
   }),
@@ -46,8 +47,8 @@ const formSchema = z.object({
   name: z.string().min(1, "Company name is required"),
   registrationNumber: z.string(),
   taxId: z.string(),
-  email: z.string().email(),
-  phone: z.string(),
+  email: z.string().min(1, "Email is required").email("Enter a valid email address"),
+  phone: z.string().min(1, "Phone is required"),
   website: z.string(),
 
   documents: z.array(
@@ -60,8 +61,8 @@ const formSchema = z.object({
   ),
   status: z.string(),
   settings: z.object({
-    billingCycle: z.string(),
-    currency: z.string(),
+    billingCycle: z.string().min(1, "Billing cycle is required"),
+    currency: z.string().min(1, "Currency is required"),
   }),
 });
 
@@ -134,7 +135,7 @@ export function ClientForm({ id }) {
         type: "",
       },
     ],
-    status: "",
+    status: "Active",
     settings: {
       billingCycle: "",
       currency: "",
@@ -150,6 +151,8 @@ export function ClientForm({ id }) {
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: formData,
+    // Validate as the user types/blurs so email (and other) errors show instantly.
+    mode: "onChange",
   });
   useEffect(() => {
     if (id) {
