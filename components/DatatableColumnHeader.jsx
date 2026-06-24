@@ -1,89 +1,43 @@
-// import {
-//   ArrowDownIcon,
-//   ArrowUpIcon,
-//   CaretSortIcon,
-//   EyeNoneIcon,
-// } from "@radix-ui/react-icons";
-
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  IconArrowDown,
-  IconArrowUp,
-  IconCaretUpDown,
-  IconEyeOff,
-} from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp } from '@tabler/icons-react';
 import { ChevronsUpDown } from 'lucide-react';
-import { useState } from 'react';
 
-export function DataTableColumnHeader({ column, title, className }) {
-  const [currentDirection, setCurrentDirection] = useState('asc');
-  // if (!column?.getCanSort()) {
-  //   return <div className={cn(className)}>{title}</div>;
-  // }
-
-  // Get the current sort direction for this column
-  // const currentDirection = column.getIsSorted();
-
-  // Use direct method to set sort with an explicit direction
-  const setSorting = (direction) => {
-    // If we're clearing sort, use an empty array
-    // if (direction === false) {
-    //   column.toggleSorting(undefined, false);
-    //   return;
-    // }
-    // Set explicit sort with the direction
-    // The second param (false) prevents multi-sort
-    // column.toggleSorting(direction === 'desc', false);
-  };
-
-  const handleDirectionChange = (direction) => {
-    setCurrentDirection(direction);
-    setSorting(direction);
+/**
+ * Server-side sortable column header.
+ *
+ * Props:
+ *   title         — header label
+ *   className     — optional extra classes
+ *   onSort        — (direction: 'asc' | 'desc') => void
+ *   sortDirection — 'asc' | 'desc' | null  (null = this column is not the active sort)
+ *
+ * Click behaviour: unsorted → asc → desc → asc → ...
+ * Uses a plain <button> (no Radix dropdown) so dnd-kit drag sensors don't
+ * interfere with the click event inside the DndContext column headers.
+ */
+export function DataTableColumnHeader({ column, title, className, onSort, sortDirection }) {
+  const handleClick = () => {
+    if (!onSort) return;
+    // cycle: null/desc → asc,  asc → desc
+    onSort(sortDirection === 'asc' ? 'desc' : 'asc');
   };
 
   return (
-    <div className={cn('flex items-center  ', className)}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className=" h-8 hover:bg-transparent hover:text-primary uppercase font-bold"
-          >
-            <span className="text-xs">{title}</span>
-            {currentDirection === 'desc' ? (
-              <IconArrowDown className="ml-2 size-3" />
-            ) : currentDirection === 'asc' ? (
-              <IconArrowUp className="ml-2 size-3" />
-            ) : (
-              <ChevronsUpDown className="ml-2 size-3" />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => handleDirectionChange('asc')}>
-            <IconArrowUp className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Asc
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleDirectionChange('desc')}>
-            <IconArrowDown className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Desc
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {/* <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-            <IconEyeOff className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Hide
-          </DropdownMenuItem> */}
-        </DropdownMenuContent>
-      </DropdownMenu>
+    <div className={cn('flex items-center', className)}>
+      <button
+        type="button"
+        onClick={handleClick}
+        className="flex items-center gap-1 h-8 px-2 rounded hover:bg-accent hover:text-primary transition-colors uppercase font-bold text-xs"
+      >
+        {title}
+        {sortDirection === 'desc' ? (
+          <IconArrowDown className="size-3 text-primary" />
+        ) : sortDirection === 'asc' ? (
+          <IconArrowUp className="size-3 text-primary" />
+        ) : (
+          <ChevronsUpDown className="size-3 text-muted-foreground" />
+        )}
+      </button>
     </div>
   );
 }

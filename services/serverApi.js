@@ -31,7 +31,11 @@ export async function fetchWithAuth(endpoint, options = {}, isAi = false, isNisa
 
     return res;
   } catch (error) {
-    console.error("Error fetching data:", error);
-    return { success: false, error: error.message };
+    const isConnRefused = error?.cause?.code === "ECONNREFUSED";
+    if (!isConnRefused) console.error("[fetchWithAuth] Unexpected fetch error:", error);
+    return new Response(
+      JSON.stringify({ success: false, message: "Service unavailable", error: error.message }),
+      { status: 503, headers: { "Content-Type": "application/json" } }
+    );
   }
 }

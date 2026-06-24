@@ -24,12 +24,15 @@ const ResizableTableHead = ({ id, className, children, style: tableHeadStyle }) 
 
   return (
     <TableHead ref={setNodeRef} style={style} className={cn("font-bold bg-primary/10 text-primary pt-1", className)}>
-      <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing"
-        style={{ width: "100%", height: "100%" }}
-      >
+      <div className="flex items-center w-full h-full gap-1">
+        {/* Drag handle — only this element triggers column reorder */}
+        <span
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing shrink-0 opacity-30 hover:opacity-70 px-0.5 select-none"
+        >
+          ⠿
+        </span>
         {children}
       </div>
     </TableHead>
