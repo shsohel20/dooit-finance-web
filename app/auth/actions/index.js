@@ -63,3 +63,29 @@ export const resendOtp = async (data) => {
   });
   return res.json();
 };
+
+export const forgetPassword = async (data) => {
+  const res = await fetch(`${BASE_URL}auth/forgot-password`, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return res.json();
+};
+
+export const resetPassword = async (data, token) => {
+  const url = `${BASE_URL}auth/reset-password/${token}`;
+  const res = await fetch(url, {
+    method: "PUT",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  console.log("reset password url", url);
+  console.log("reset password data", data);
+  console.log("reset password response", res);
+  return res.json();
+};

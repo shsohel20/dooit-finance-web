@@ -37,9 +37,13 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { signOut } from 'next-auth/react';
+import { useLoggedInUser } from '@/app/store/useLoggedInUser';
 export function SiteHeader() {
+  const { loggedInUser } = useLoggedInUser();
   const pathname = usePathname();
   const router = useRouter();
+  const userType = loggedInUser?.userType;
+  const isDooit = userType === 'dooit';
   const routes = [
     {
       name: 'Customers',
@@ -95,26 +99,28 @@ export function SiteHeader() {
           </ul>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <Link href="/dashboard/client/track-progress" className="relative">
-            <span className="absolute -top-1.5 -right-1.5 z-10 flex h-4 w-4 items-center justify-center">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span className="relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-white leading-none">
-                5
+          {isDooit ? null : (
+            <Link href="/dashboard/client/track-progress" className="relative">
+              <span className="absolute -top-1.5 -right-1.5 z-10 flex h-4 w-4 items-center justify-center">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-white leading-none">
+                  5
+                </span>
               </span>
-            </span>
-            <span
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-white text-[0.75rem] font-bold transition-all duration-200 hover:scale-105 hover:brightness-110 cursor-pointer select-none"
-              style={{
-                background:
-                  'linear-gradient(135deg, #7c3aed 0%, #2563eb 50%, #0891b2 100%)',
-                boxShadow:
-                  '0 0 16px rgba(124,58,237,0.55), 0 2px 8px rgba(37,99,235,0.3)',
-                animation: 'progressGlow 2.5s ease-in-out infinite',
-              }}
-            >
-              <CircleDashed size={14} />
-            </span>
-          </Link>
+              <span
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-white text-[0.75rem] font-bold transition-all duration-200 hover:scale-105 hover:brightness-110 cursor-pointer select-none"
+                style={{
+                  background:
+                    'linear-gradient(135deg, #7c3aed 0%, #2563eb 50%, #0891b2 100%)',
+                  boxShadow:
+                    '0 0 16px rgba(124,58,237,0.55), 0 2px 8px rgba(37,99,235,0.3)',
+                  animation: 'progressGlow 2.5s ease-in-out infinite',
+                }}
+              >
+                <CircleDashed size={14} />
+              </span>
+            </Link>
+          )}
           <style>{`
             @keyframes progressGlow {
               0%, 100% { box-shadow: 0 0 16px rgba(124,58,237,0.55), 0 2px 8px rgba(37,99,235,0.3); }
