@@ -11,8 +11,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         email: {},
         password: {},
+        // userType: {},
       },
       authorize: async (credentials) => {
+        console.log("auth credentials", credentials);
         try {
           const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}auth/login`;
           const res = await fetch(url, {
@@ -22,7 +24,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
 
           const data = await res.json();
-          const decodedToken = jwtDecode(data.token);
+          const decodedToken = jwtDecode(data?.token);
           const user = {
             ...decodedToken,
             token: data.token,

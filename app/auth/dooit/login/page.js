@@ -9,7 +9,7 @@ export default async function LoginPage({ searchParams }) {
 
   return (
     <AuthLayout>
-      <LoginForm token={token} cid={cid} />
+      <LoginForm token={token} cid={cid} type="dooit" />
     </AuthLayout>
   );
 }

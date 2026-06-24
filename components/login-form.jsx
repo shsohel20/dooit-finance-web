@@ -9,14 +9,13 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+import { cn, createSearchParams } from '@/lib/utils';
 import SocialLogin from './SocialLogin';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -28,10 +27,17 @@ const loginSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
 
-export function LoginForm({ className, token, cid, ...props }) {
+export default function LoginForm({
+  className,
+  token,
+  cid,
+  type = 'client',
+  ...props
+}) {
   const router = useRouter();
   const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const isDooit = type === 'dooit';
   const {
     register,
     handleSubmit,
@@ -72,10 +78,13 @@ export function LoginForm({ className, token, cid, ...props }) {
     const formData = new FormData();
     formData.append('email', data.email);
     formData.append('password', data.password);
+
     const res = await signIn('credentials', {
       ...data,
+      userType: type,
       redirect: false,
     });
+    console.log('res', res);
     const user = res.user;
     router.replace(getRoute(session));
     if (res.error) {
@@ -84,7 +93,7 @@ export function LoginForm({ className, token, cid, ...props }) {
 
     setIsLoading(false);
   };
-  const urlParams = new URLSearchParams({
+  const urlParams = createSearchParams({
     token,
     cid,
   });
@@ -100,7 +109,7 @@ export function LoginForm({ className, token, cid, ...props }) {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid gap-6">
-              <SocialLogin />
+              {/* <SocialLogin /> */}
 
               <div className="grid gap-6">
                 <Controller
@@ -135,12 +144,14 @@ export function LoginForm({ className, token, cid, ...props }) {
                     </div>
                   )}
                 />
-                <a
-                  href="#"
-                  className="ml-auto text-sm underline-offset-4 hover:underline"
-                >
-                  Forgot your password?
-                </a>
+                {isDooit ? null : (
+                  <Link
+                    href={`/auth/forget-password?${urlParams.toString()}`}
+                    className="ml-auto text-sm underline-offset-4 hover:underline"
+                  >
+                    Forgot your password?
+                  </Link>
+                )}
                 <Button className="w-full" type="submit" disabled={isLoading}>
                   {isLoading ? (
                     <span className="flex items-center gap-2">
@@ -152,7 +163,7 @@ export function LoginForm({ className, token, cid, ...props }) {
                   )}
                 </Button>
               </div>
-              <div className="text-center text-sm">
+              {/* <div className="text-center text-sm">
                 Don&apos;t have an account?{' '}
                 <Link
                   href={`/auth/register?${urlParams.toString()}`}
@@ -160,7 +171,7 @@ export function LoginForm({ className, token, cid, ...props }) {
                 >
                   Sign up
                 </Link>
-              </div>
+              </div> */}
             </div>
           </form>
         </CardContent>
