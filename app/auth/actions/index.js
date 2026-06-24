@@ -7,13 +7,14 @@ import { cookies } from "next/headers";
 // const { default: api } = require("@/services")
 
 export const login = async (credentials) => {
-  const res = await serverApi("auth/login", {
+  const res = await fetchWithAuth("auth/login", {
     method: "POST",
     body: JSON.stringify(credentials),
   });
   if (res.status === 200) {
-    cookies().set("token", res.data.token);
-    return res.data;
+    const data = await res.json();
+    cookies().set("token", data.token);
+    return data;
   } else {
     return { success: false, message: "Login failed" };
   }

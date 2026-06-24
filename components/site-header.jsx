@@ -16,6 +16,7 @@ import {
   IconCreditCard,
   IconNotification,
   IconLogout,
+  IconChartLine,
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import {
@@ -25,7 +26,7 @@ import {
   SelectContent,
   SelectItem,
 } from './ui/select';
-import { CreditCard } from 'lucide-react';
+import { CircleDashed, CreditCard } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,7 +65,7 @@ export function SiteHeader() {
     });
   };
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 bg-sidebar-bg  transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)  py-8 sticky top-0 z-10">
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2  transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)  py-8 sticky top-0 z-10 bg-[#fefefe]">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator
@@ -94,6 +95,32 @@ export function SiteHeader() {
           </ul>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          <Link href="/dashboard/client/track-progress" className="relative">
+            <span className="absolute -top-1.5 -right-1.5 z-10 flex h-4 w-4 items-center justify-center">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-white leading-none">
+                5
+              </span>
+            </span>
+            <span
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-white text-[0.75rem] font-bold transition-all duration-200 hover:scale-105 hover:brightness-110 cursor-pointer select-none"
+              style={{
+                background:
+                  'linear-gradient(135deg, #7c3aed 0%, #2563eb 50%, #0891b2 100%)',
+                boxShadow:
+                  '0 0 16px rgba(124,58,237,0.55), 0 2px 8px rgba(37,99,235,0.3)',
+                animation: 'progressGlow 2.5s ease-in-out infinite',
+              }}
+            >
+              <CircleDashed size={14} />
+            </span>
+          </Link>
+          <style>{`
+            @keyframes progressGlow {
+              0%, 100% { box-shadow: 0 0 16px rgba(124,58,237,0.55), 0 2px 8px rgba(37,99,235,0.3); }
+              50% { box-shadow: 0 0 26px rgba(124,58,237,0.85), 0 2px 14px rgba(8,145,178,0.5); }
+            }
+          `}</style>
           <Button variant="secondary" size="sm">
             Help <IconHelpCircle />
           </Button>

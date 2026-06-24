@@ -12,13 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   IconSearch,
   IconFilter,
@@ -51,13 +45,21 @@ const STATUS_LABELS = {
 export default function CaseManagerDashboard() {
   const router = useRouter();
   const {
-    cases, setCases,
-    fetching, setFetching,
-    currentPage, setCurrentPage,
-    limit, setLimit,
-    totalItems, setTotalItems, setTotalPages,
-    searchQuery, setSearchQuery,
-    filters, setFilter,
+    cases,
+    setCases,
+    fetching,
+    setFetching,
+    currentPage,
+    setCurrentPage,
+    limit,
+    setLimit,
+    totalItems,
+    setTotalItems,
+    setTotalPages,
+    searchQuery,
+    setSearchQuery,
+    filters,
+    setFilter,
   } = useCaseManagerStore();
 
   const [rawSearch, setRawSearch] = useState(searchQuery);
@@ -108,19 +110,20 @@ export default function CaseManagerDashboard() {
   const displayedCases = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return cases;
-    return cases.filter((c) =>
-      c.title?.toLowerCase().includes(q) ||
-      c.type?.toLowerCase().includes(q) ||
-      c.createdBy?.name?.toLowerCase().includes(q) ||
-      (c.assignedTo || []).some((u) => u.name?.toLowerCase().includes(q))
+    return cases.filter(
+      (c) =>
+        c.title?.toLowerCase().includes(q) ||
+        c.type?.toLowerCase().includes(q) ||
+        c.createdBy?.name?.toLowerCase().includes(q) ||
+        (c.assignedTo || []).some((u) => u.name?.toLowerCase().includes(q)),
     );
   }, [cases, searchQuery]);
 
   const activeFilterCount = useMemo(
-    () => Object.entries(filters)
-      .filter(([k, v]) => !["sortBy", "sortOrder"].includes(k) && v !== "")
-      .length,
-    [filters]
+    () =>
+      Object.entries(filters).filter(([k, v]) => !["sortBy", "sortOrder"].includes(k) && v !== "")
+        .length,
+    [filters],
   );
 
   const handleExport = useCallback(() => {
@@ -134,7 +137,7 @@ export default function CaseManagerDashboard() {
           c.status,
           `"${(c.assignedTo || []).map((u) => u.name).join("; ")}"`,
           c.createdAt,
-        ].join(",")
+        ].join(","),
       ),
     ].join("\n");
 
@@ -162,11 +165,7 @@ export default function CaseManagerDashboard() {
             <IconDownload className="size-3.5" />
             Export
           </Button>
-          <Button
-            size="sm"
-            className="gap-1.5 text-xs"
-            onClick={() => setCreateSheetOpen(true)}
-          >
+          <Button size="sm" className="gap-1.5 text-xs" onClick={() => setCreateSheetOpen(true)}>
             <IconPlus className="size-3.5" />
             New Case
           </Button>
@@ -179,7 +178,11 @@ export default function CaseManagerDashboard() {
           onClick={() => setShowAnalytics((v) => !v)}
           className="mb-3 flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-heading transition-colors"
         >
-          {showAnalytics ? <IconChevronUp className="size-4" /> : <IconChevronDown className="size-4" />}
+          {showAnalytics ? (
+            <IconChevronUp className="size-4" />
+          ) : (
+            <IconChevronDown className="size-4" />
+          )}
           {showAnalytics ? "Hide" : "Show"} Analytics
         </button>
         {showAnalytics && (
@@ -191,7 +194,7 @@ export default function CaseManagerDashboard() {
       </div>
 
       {/* Table Section */}
-      <Card className="border border-border shadow-sm overflow-hidden">
+      <Card className="overflow-hidden border-0 bg-gray-50 shadow-none">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-2 border-b p-4">
           {/* Search */}
@@ -216,7 +219,9 @@ export default function CaseManagerDashboard() {
             <SelectContent>
               <SelectItem value="all">All Priorities</SelectItem>
               {PRIORITY_OPTIONS.map((p) => (
-                <SelectItem key={p} value={p} className="capitalize">{p}</SelectItem>
+                <SelectItem key={p} value={p} className="capitalize">
+                  {p}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -232,7 +237,9 @@ export default function CaseManagerDashboard() {
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               {STATUS_OPTIONS.map((s) => (
-                <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+                <SelectItem key={s} value={s}>
+                  {STATUS_LABELS[s]}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -248,7 +255,9 @@ export default function CaseManagerDashboard() {
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
               {TYPE_OPTIONS.map((t) => (
-                <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>
+                <SelectItem key={t} value={t}>
+                  {t.replace("_", " ")}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -293,10 +302,7 @@ export default function CaseManagerDashboard() {
         </CardContent>
       </Card>
 
-      <CreateCaseSheet
-        open={createSheetOpen}
-        onOpenChange={setCreateSheetOpen}
-      />
+      <CreateCaseSheet open={createSheetOpen} onOpenChange={setCreateSheetOpen} />
     </div>
   );
 }

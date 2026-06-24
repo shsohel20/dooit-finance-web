@@ -41,3 +41,31 @@ export const getCustomerTransactions = async (customerId) => {
   });
   return response.json();
 };
+
+export const getCustomerRelations = async (payload) => {
+  const url = `http://31.97.71.194:5055/api/v1/hierarchy/analyze `;
+  const response = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.json();
+};
+
+export const getCustomerRelationsGraph = async (id) => {
+  const url = `http://31.97.71.194:5055/api/v1/relationships/${id} `;
+  const response = await fetch(url, {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const getOSINTdata = async (entityType, entityId) => {
+  const url = `https://osint.dooit.ai/api/v1/osint/${entityType}/${entityId}`;
+  const response = await fetch(url, {
+    method: "GET",
+  });
+  return response.json();
+};

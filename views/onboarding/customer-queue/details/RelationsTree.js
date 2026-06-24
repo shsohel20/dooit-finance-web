@@ -38,7 +38,7 @@ const _flat = [];
 flatten(partyEntities, null, _flat);
 const entities = _flat;
 
-export function RelationsTree() {
+export function RelationsTree({ relations, details }) {
   const [filterMode, setFilterMode] = useState("relations");
   const [osintOpen, setOsintOpen] = useState(false);
   const expandAllRef = useRef(null);
@@ -130,6 +130,8 @@ export function RelationsTree() {
                     filterMode={filterMode}
                     expandAllRef={expandAllRef}
                     collapseAllRef={collapseAllRef}
+                    // relations={relations}
+                    details={details}
                   />
                 </div>
               </div>

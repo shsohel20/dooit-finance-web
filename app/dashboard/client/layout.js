@@ -2,13 +2,10 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import ClientSidebar from "./(layout)/ClientSidebar";
 import { SiteHeader } from "@/components/site-header";
-import useGetUser from "@/hooks/useGetUser";
+import { EncryptDecryptFAB } from "@/components/EncryptBtn";
+import ChatBotNissa from "@/components/nisa-ai";
 
 export default function ClientLayout({ children }) {
-  const { loggedInUser } = useGetUser();
-
-  const clientType = loggedInUser?.client?.clientType;
-
   return (
     <SidebarProvider
       style={{
@@ -17,12 +14,14 @@ export default function ClientLayout({ children }) {
       }}
     >
       <ClientSidebar variant="inset" />
-      <SidebarInset>
+      <SidebarInset className="rounded-xl bg-[#fefefe]">
         {/* {isRealState && <RealEstateDashboardHeader />} */}
         <SiteHeader />
         <div className="flex flex-1 flex-col ">
+          <EncryptDecryptFAB />
+          <ChatBotNissa />
           <div className="@container/main flex flex-1 flex-col gap-2  ">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-8 px-8 bg-[#fefefe] rounded-xl  mr-4 ">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-8 px-8 bg-[#fefefe]   mr-4 ">
               {children}
             </div>
           </div>

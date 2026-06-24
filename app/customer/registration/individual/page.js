@@ -19,26 +19,26 @@ const personalInfoSchema = z.object({
     surname: z.string().optional(),
   }),
   document_type: z.object({
-    value: z.string().min(1, "Document type is required"),
-    label: z.string().min(1, "Document type is required"),
+    value: z.string().optional(),
+    label: z.string().optional(),
   }),
   contact_details: z.object({
-    email: z.string().email("Invalid email address"),
-    phone: z.string().min(1, "Phone number is required"),
+    email: z.string().optional(),
+    phone: z.string().optional(),
   }),
   employment_details: z.object({
-    occupation: z.string().min(1, "Occupation is required"),
-    industry: z.string().min(1, "Industry is required"),
+    occupation: z.string().optional(),
+    industry: z.string().optional(),
   }),
   residential_address: z.object({
-    address: z.string().min(1, "Address is required"),
+    address: z.string().optional(),
     suburb: z.string().optional(),
-    state: z.string(),
+    state: z.string().optional(),
     postcode: z.string().optional(),
     country: z
       .object({
-        value: z.string(),
-        label: z.string(),
+        value: z.string().optional(),
+        label: z.string().optional(),
       })
       .optional()
       .nullable(),
@@ -74,6 +74,10 @@ const personalInfoSchema = z.object({
       date_of_birth: z.string().optional(),
       phone_number: z.string().optional(),
       id_number: z.string().optional(),
+      business_name: z.string().optional(),
+      trading_name: z.string().optional(),
+      business_registration_number: z.string().optional(),
+      nature_of_business: z.string().optional(),
     }),
   }),
   mailing_address: z.object({
@@ -109,17 +113,17 @@ const CustomerRegistration = () => {
   const [verifyingStatus, setVerifyingStatus] = useState("idle");
   const [verifiedMsg, setVerifiedMsg] = useState(null);
 
+  const form = useForm({
+    defaultValues: customerRegisterData,
+    resolver: zodResolver(personalInfoSchema),
+    mode: "onChange",
+  });
   const {
     handleSubmit,
     control,
     formState: { errors },
     setValue,
-  } = useForm({
-    defaultValues: customerRegisterData,
-    resolver: zodResolver(personalInfoSchema),
-    mode: "onChange",
-  });
-  console.log("errors", errors);
+  } = form;
   const onSubmit = (data) => {
     setCustomerRegisterData(data);
     router.push("/customer/registration/individual/preview");
@@ -153,9 +157,7 @@ const CustomerRegistration = () => {
       {verifyingStatus === "idle" && (
         <div>
           <IdentificationDocuments
-            control={control}
-            errors={errors}
-            setValue={setValue}
+            form={form}
             setVerifyingStatus={setVerifyingStatus}
             setVerifiedMsg={setVerifiedMsg}
           />
@@ -188,7 +190,7 @@ const CustomerRegistration = () => {
                     <>
                       {Object.keys(errors[key]).map((subKey) => {
                         return (
-                          <div key={subKey + key}>
+                          <div key={`${key}/${subKey}`}>
                             <Alert variant="destructive">
                               {" "}
                               <AlertTitle className={"capitalize"}>

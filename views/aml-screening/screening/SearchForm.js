@@ -1,18 +1,18 @@
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import CustomSelect from '@/components/ui/CustomSelect'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { cardTypes, getCardTypesByCountryId } from '@/lib/card-type'
-import { countries } from '@/lib/country'
-import { cn } from '@/lib/utils'
-import { SelectContent } from '@radix-ui/react-select'
-import { ChevronDown, Globe, Hash, Link2, Search, Settings2, Sparkles } from 'lucide-react'
-import React, { useState } from 'react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import CustomSelect from "@/components/ui/CustomSelect";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { cardTypes, getCardTypesByCountryId } from "@/lib/card-type";
+import { countries } from "@/lib/country";
+import { cn } from "@/lib/utils";
+import { SelectContent } from "@radix-ui/react-select";
+import { ChevronDown, Globe, Hash, Link2, Search, Settings2, Sparkles } from "lucide-react";
+import React, { useState } from "react";
 
 export default function SearchForm({ formData, setFormData, type }) {
-  const [identificationOpen, setIdentificationOpen] = useState(true)
+  const [identificationOpen, setIdentificationOpen] = useState(true);
   const [linkToCaseOpen, setLinkToCaseOpen] = useState(false);
   const isIndividual = type === "individual";
   const isOrganization = type === "organisation";
@@ -21,56 +21,74 @@ export default function SearchForm({ formData, setFormData, type }) {
     individual: "Full Name",
     organisation: "Entity Name",
     vessel: "Vessel Name",
-  }
+  };
   return (
     <div className="">
-      <div className="rounded-2xl  bg-white border-2 border-smoke-200 overflow-hidden">
+      <div className="rounded-2xl  bg-white border-2 border-smoke-200 ">
         {/* Name section */}
         <div className="p-6 space-y-4">
           <div className="space-y-1.5">
-            <Label >
+            <Label>
               {nameBasedOnType[type]}
               <span className="text-destructive ml-1">*</span>
             </Label>
             <Input
               placeholder="Enter full name"
-              className=" "
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
-              <Label >Case ID</Label>
-              <Input placeholder="Optional" className="" />
+              <Label>Case ID</Label>
+              <Input
+                placeholder="Optional"
+                value={formData.caseId}
+                onChange={(e) => setFormData({ ...formData, caseId: e.target.value })}
+              />
             </div>
             <div className="space-y-1.5">
-              <Label >Group</Label>
-              <Input placeholder="Optional" className="" />
+              <Label>Affiliation</Label>
+              <Input
+                placeholder="Optional"
+                value={formData.group}
+                onChange={(e) => setFormData({ ...formData, group: e.target.value })}
+              />
             </div>
           </div>
-          {isIndividual && <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="">Date of Birth</Label>
-              <Input type="date" placeholder="Optional" className="" />
+          {isIndividual && (
+            <div className="space-y-4 grid gap-4 md:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label className="">Date of Birth</Label>
+                <Input
+                  type="date"
+                  value={formData.dateOfBirth || ""}
+                  onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                {/* <Label className="text-sm font-medium">Nationality</Label> */}
+                <CustomSelect
+                  label="Nationality"
+                  options={countries}
+                  value={formData.nationality}
+                  onChange={(value) => setFormData({ ...formData, nationality: value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <CustomSelect
+                  label="Gender"
+                  options={[
+                    { label: "Male", value: "male" },
+                    { label: "Female", value: "female" },
+                  ]}
+                  value={formData.gender}
+                  onChange={(value) => setFormData({ ...formData, gender: value })}
+                />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              {/* <Label className="text-sm font-medium">Nationality</Label> */}
-              <CustomSelect
-                label="Nationality"
-                options={countries}
-                value={formData.nationality}
-                onChange={(value) => setFormData({ ...formData, nationality: value })}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <CustomSelect
-                label="Gender"
-                options={[{ label: "Male", value: "male" }, { label: "Female", value: "female" }]}
-                value={formData.gender}
-                onChange={(value) => setFormData({ ...formData, gender: value })}
-              />
-            </div>
-          </div>}
+          )}
 
           <div className="space-y-1.5">
             {/* <Label className="text-sm font-medium">
@@ -91,22 +109,31 @@ export default function SearchForm({ formData, setFormData, type }) {
                 <SelectItem value="sg">Singapore</SelectItem>
               </SelectContent>
             </Select> */}
-            {isOrganization && <CustomSelect
-              label="Registered country/jurisdiction"
-              options={countries}
-              value={formData.countryOfResidence}
-              onChange={(value) => setFormData({ ...formData, countryOfResidence: value })}
-            />}
-            {isVessel && <>
-              <div className="space-y-1.5">
-                <Label className="">IMO Number</Label>
-                <Input placeholder="Optional" className=" bg-background" />
-              </div>
-              {/* <div className="space-y-1.5">
+            {isOrganization && (
+              <CustomSelect
+                label="Registered country/jurisdiction"
+                options={countries}
+                value={formData.countryOfResidence}
+                onChange={(value) => setFormData({ ...formData, countryOfResidence: value })}
+              />
+            )}
+            {isVessel && (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="">IMO Number</Label>
+                  <Input
+                    placeholder="Optional"
+                    className="bg-background"
+                    value={formData.imoNumber || ""}
+                    onChange={(e) => setFormData({ ...formData, imoNumber: e.target.value })}
+                  />
+                </div>
+                {/* <div className="space-y-1.5">
               <Label className="">Flag State</Label>
               <Input placeholder="Optional" className=" bg-background" />
             </div> */}
-            </>}
+              </>
+            )}
           </div>
         </div>
 
@@ -129,7 +156,12 @@ export default function SearchForm({ formData, setFormData, type }) {
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="space-y-1.5">
                     <Label className="text-sm font-medium">ID Number</Label>
-                    <Input placeholder="Enter ID" className="h-10 bg-background" />
+                    <Input
+                      placeholder="Enter ID"
+                      className="h-10 bg-background"
+                      value={formData.idNumber || ""}
+                      onChange={(e) => setFormData({ ...formData, idNumber: e.target.value })}
+                    />
                   </div>
                   <div className="space-y-1.5">
                     {/* <Label className="text-sm font-medium">Issuer Country</Label>
@@ -151,7 +183,6 @@ export default function SearchForm({ formData, setFormData, type }) {
                     />
                   </div>
                   <div className="space-y-1.5">
-
                     <CustomSelect
                       label="ID Type"
                       options={getCardTypesByCountryId(formData.issuerCountry?.id) || []}
@@ -174,22 +205,28 @@ export default function SearchForm({ formData, setFormData, type }) {
                 <span className="text-sm font-medium">Link to Existing Case</span>
               </div>
               <ChevronDown
-                className={cn("w-4 h-4 text-muted-foreground transition-transform", linkToCaseOpen && "rotate-180")}
+                className={cn(
+                  "w-4 h-4 text-muted-foreground transition-transform",
+                  linkToCaseOpen && "rotate-180",
+                )}
               />
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="px-6 pb-4 pt-0">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-                  <Input placeholder="Search by Case ID or Name" className="h-10 pl-10 " />
+                  <Input
+                    placeholder="Search by Case ID or Name"
+                    className="h-10 pl-10"
+                    value={formData.linkedCase || ""}
+                    onChange={(e) => setFormData({ ...formData, linkedCase: e.target.value })}
+                  />
                 </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
         </div>
       </div>
-
-
     </div>
-  )
+  );
 }

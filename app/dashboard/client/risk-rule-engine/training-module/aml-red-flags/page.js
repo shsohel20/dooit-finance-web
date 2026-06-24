@@ -155,8 +155,8 @@ export default function RedFlagsPage() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3">Structuring Activity</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                  "A customer makes multiple transactions just below the $10,000/$1,000 threshold in a single day—a
-                  deliberate attempt to evade reporting requirements."
+                  &quot;A customer makes multiple transactions just below the $10,000/$1,000 threshold in a single day—a
+                  deliberate attempt to evade reporting requirements.&quot;
                 </p>
               </div>
             </Card>
@@ -174,8 +174,8 @@ export default function RedFlagsPage() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3">Unusual Payment Methods</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                  "A client uses a large amount of cash for a property deposit or legal fee when paying for high-value
-                  transactions without clear legitimate source and a significant red flag."
+                  &quot;A client uses a large amount of cash for a property deposit or legal fee when paying for high-value
+                  transactions without clear legitimate source and a significant red flag.&quot;
                 </p>
               </div>
             </Card>
@@ -193,8 +193,8 @@ export default function RedFlagsPage() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3">Financial Discrepancies</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                  "A company's financial statements don't match its actual business activity—for example, a small
-                  consulting firm showing millions in revenue with no corresponding client base or services rendered."
+                  &quot;A company&apos;s financial statements don&apos;t match its actual business activity—for example, a small
+                  consulting firm showing millions in revenue with no corresponding client base or services rendered.&quot;
                 </p>
               </div>
             </Card>
@@ -212,8 +212,8 @@ export default function RedFlagsPage() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3">Minimal Gambling Activity</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                  "A customer buys a large number of chips with cash, gambles minimally, and then asks for a check or
-                  wire transfer. This converts illicit cash into seemingly legitimate winnings."
+                  &quot;A customer buys a large number of chips with cash, gambles minimally, and then asks for a check or
+                  wire transfer. This converts illicit cash into seemingly legitimate winnings.&quot;
                 </p>
               </div>
             </Card>
@@ -227,8 +227,8 @@ export default function RedFlagsPage() {
                 <div>
                   <h3 className="text-xl font-bold text-foreground mb-2">Customer Behavior Red Flags</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    "Any customer who is unusually secretive, uses multiple or false IDs, provides inconsistent
-                    information, or whose story doesn't add up should be treated with enhanced due diligence."
+                    &quot;Any customer who is unusually secretive, uses multiple or false IDs, provides inconsistent
+                    information, or whose story doesn&apos;t add up should be treated with enhanced due diligence.&quot;
                   </p>
                   <p className="text-xs font-medium text-orange-700 dark:text-orange-400 mt-2">
                     Applicable to: All Industries
@@ -313,8 +313,8 @@ export default function RedFlagsPage() {
                 </div>
                 <h3 className="text-lg font-bold text-foreground mb-3">Report Suspicious Matters</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  You must report any suspicious matters immediately. If you're a precious metal dealer and a customer
-                  wants to pay for a gold bar with a duffel bag of cash, that's a reportable suspicion.
+                  You must report any suspicious matters immediately. If you&apos;re a precious metal dealer and a customer
+                  wants to pay for a gold bar with a duffel bag of cash, that&apos;s a reportable suspicion.
                 </p>
               </div>
             </Card>
@@ -326,7 +326,7 @@ export default function RedFlagsPage() {
                 </div>
                 <h3 className="text-lg font-bold text-foreground mb-3">No Tipping Off</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  You must not "tip off" a customer. If you're a banker investigating them, you must NOT tell the
+                  You must not &quot;tip off&quot; a customer. If you&apos;re a banker investigating them, you must NOT tell the
                   client. Tipping off is itself a crime.
                 </p>
               </div>
@@ -362,7 +362,7 @@ export default function RedFlagsPage() {
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Our organization values and protects those who demonstrate compliance vigilance. Reporting
-                    suspicious activity is not just a duty—it's a protected act that contributes to our collective
+                    suspicious activity is not just a duty—it&apos;s a protected act that contributes to our collective
                     security.
                   </p>
                 </div>
@@ -375,8 +375,8 @@ export default function RedFlagsPage() {
             <div className="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-950/40 dark:to-emerald-950/40 p-6 border-b border-green-200 dark:border-green-900">
               <h3 className="text-2xl font-bold text-foreground mb-2">Protected Reporting</h3>
               <p className="text-sm text-muted-foreground italic">
-                "If you're a real estate agent and you report a suspicious buyer, you are doing your job. We have a
-                culture that rewards this vigilance."
+                &quot;If you&apos;re a real estate agent and you report a suspicious buyer, you are doing your job. We have a
+                culture that rewards this vigilance.&quot;
               </p>
             </div>
             <div className="p-6">
@@ -414,7 +414,7 @@ export default function RedFlagsPage() {
                     <span className="text-xs font-bold text-green-600">✓</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Industry Reputation:</span> We're known for our strong
+                    <span className="font-medium text-foreground">Industry Reputation:</span> We&apos;re known for our strong
                     ethical standards
                   </p>
                 </li>

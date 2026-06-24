@@ -46,7 +46,7 @@ export default function PersonalOnboardingForm() {
         declarations: [
           "Information provided is true and correct",
           "Not a politically exposed person (PEP); funds not from corrupt/criminal activities",
-          "Acknowledges that information from CloudTechX Pty Ltd doesn't consider personal financial situation",
+          "Acknowledges that information from Dooit Pty Ltd doesn't consider personal financial situation",
           "Advised to seek independent advice before decisions",
           "Read and accepted Terms & Conditions and Privacy Policy of CobWeb Pay",
           "Not a U.S resident for tax purposes",

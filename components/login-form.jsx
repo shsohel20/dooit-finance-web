@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { IconLoaderQuarter } from '@tabler/icons-react';
+import Link from 'next/link';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -45,50 +46,48 @@ export function LoginForm({ className, token, cid, ...props }) {
   });
 
   const getRoute = (session) => {
-    if (session.data.user.userType === 'user' && token) {
+    if (token && cid) {
       return '/auth/registration-type';
-    } else if (session.data.user.userType === 'user') {
+    } else if (session.data?.user?.role === 'customer') {
       return '/customer/dashboard';
     } else if (
       session.data?.user?.userType === 'client' ||
-      'branch' ||
-      'dooit'
+      session.data?.user?.userType === 'branch' ||
+      session.data?.user?.userType === 'dooit'
     ) {
       return '/dashboard/client';
     } else {
       return '/';
     }
   };
-  console.log('session', session);
 
   useEffect(() => {
     if (session.data) {
       router.replace(getRoute(session));
     }
   }, [session.data?.user?.userType]);
+
   const onSubmit = async (data) => {
     setIsLoading(true);
     const formData = new FormData();
     formData.append('email', data.email);
     formData.append('password', data.password);
-    console.log('data', data);
     const res = await signIn('credentials', {
       ...data,
       redirect: false,
     });
-    console.log('res', res);
     const user = res.user;
-
-    if (res?.error) {
-      if (res.error === 'CredentialsSignin') {
-        toast.error('Invalid email or password. Please try again.');
-      } else {
-        toast.error('Login failed. Please try again later.');
-      }
+    router.replace(getRoute(session));
+    if (res.error) {
+      toast.error('Something went wrong');
     }
 
     setIsLoading(false);
   };
+  const urlParams = new URLSearchParams({
+    token,
+    cid,
+  });
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
@@ -155,12 +154,12 @@ export function LoginForm({ className, token, cid, ...props }) {
               </div>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{' '}
-                <a
-                  href="/auth/register"
+                <Link
+                  href={`/auth/register?${urlParams.toString()}`}
                   className="underline underline-offset-4"
                 >
                   Sign up
-                </a>
+                </Link>
               </div>
             </div>
           </form>

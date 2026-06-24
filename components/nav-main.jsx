@@ -28,9 +28,13 @@ export function NavMain({ items, label }) {
     router.push(url);
   };
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>{label}</SidebarGroupLabel>
-      <SidebarGroupContent className="flex flex-col gap-2">
+    <>
+      {/* <SidebarGroup>
+        // */}
+      {label && (
+        <SidebarGroupLabel className={'text-xs'}>{label}</SidebarGroupLabel>
+      )}
+      <SidebarGroupContent className="flex flex-col gap-2 ">
         <SidebarMenu>
           {items.map((item, itmIndex) => {
             return (
@@ -97,6 +101,7 @@ export function NavMain({ items, label }) {
           })}
         </SidebarMenu>
       </SidebarGroupContent>
-    </SidebarGroup>
+      {/* </SidebarGroup> */}
+    </>
   );
 }

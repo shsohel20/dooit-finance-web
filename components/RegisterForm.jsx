@@ -23,7 +23,7 @@ import { toast } from 'sonner';
 const registerSchema = z
   .object({
     name: z.string().min(1, 'Name is required'),
-    userName: z.string().min(1, 'Username is required'),
+    // userName: z.string().min(1, 'Username is required'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters long'),
     confirmPassword: z
@@ -69,6 +69,7 @@ export default function RegisterForm({
       ...rest,
       role: 'customer',
       userType: 'customer',
+      userName: data.email,
     };
 
     const res = await registerAction(submittedData);
@@ -116,7 +117,7 @@ export default function RegisterForm({
                     </div>
                   )}
                 />
-                <Controller
+                {/* <Controller
                   control={control}
                   name="userName"
                   render={({ field }) => (
@@ -131,7 +132,7 @@ export default function RegisterForm({
                       />
                     </div>
                   )}
-                />
+                /> */}
                 <Controller
                   control={control}
                   name="email"

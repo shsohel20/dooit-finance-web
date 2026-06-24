@@ -1,0 +1,154 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useFieldArray, useWatch } from "react-hook-form";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+import { FormField } from "@/components/ui/FormField";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AddPersonModal from "./AddPersonModal";
+import PersonCard from "./PersonCard";
+import { toRoleSlug } from "./constants";
+import { getStuffsByRole } from "../actions";
+
+export default function RoleSection({ form, roleIndex, roleOptions, rolesLoading, onRemove }) {
+  const peoplePath = `roleAssignments.${roleIndex}.people`;
+  const roleIdPath = `roleAssignments.${roleIndex}.roleId`;
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [stuffs, setStuffs] = useState([]);
+  const [stuffsLoading, setStuffsLoading] = useState(false);
+
+  const selectedRoleId = useWatch({
+    control: form.control,
+    name: roleIdPath,
+  });
+
+  const allAssignments = useWatch({
+    control: form.control,
+    name: "roleAssignments",
+  });
+
+  useEffect(() => {
+    if (selectedRoleId) {
+      setStuffsLoading(true);
+      getStuffsByRole(selectedRoleId)
+        .then((res) => {
+          setStuffs(res.data);
+        })
+        .finally(() => {
+          setStuffsLoading(false);
+        });
+    }
+  }, [selectedRoleId]);
+
+  const selectedRoleIds = (allAssignments || [])
+    .map((assignment, index) => (index !== roleIndex ? assignment?.roleId : null))
+    .filter(Boolean);
+
+  const availableRoleOptions = roleOptions.filter(
+    (option) => !selectedRoleIds.includes(option.value) || option.value === selectedRoleId,
+  );
+
+  const selectedRole = roleOptions.find((option) => option.value === selectedRoleId);
+  const selectedRoleLabel = selectedRole?.label || "Role assignment";
+  // const roleSlug = toRoleSlug(selectedRole?.label);
+
+  const { fields, append, update, remove } = useFieldArray({
+    control: form.control,
+    name: peoplePath,
+  });
+
+  const handleAddClick = () => {
+    setEditingIndex(null);
+    setModalOpen(true);
+  };
+
+  const handleEditClick = (personIndex) => {
+    setEditingIndex(personIndex);
+    setModalOpen(true);
+  };
+
+  const handleSavePerson = (personData) => {
+    if (editingIndex !== null) {
+      update(editingIndex, personData);
+    } else {
+      append(personData);
+    }
+    setEditingIndex(null);
+  };
+
+  const editingPerson = editingIndex !== null ? fields[editingIndex] : null;
+
+  return (
+    <>
+      <Card className="border border-border">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="text-base font-semibold">{selectedRoleLabel}</CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="shrink-0 text-muted-foreground hover:text-destructive"
+              onClick={onRemove}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <FormField
+            form={form}
+            name={roleIdPath}
+            label="Role"
+            type="select"
+            placeholder="Select a role"
+            required
+            loading={rolesLoading}
+            options={availableRoleOptions}
+          />
+
+          {selectedRoleId && (
+            <div className="space-y-3">
+              {stuffs.length === 0 && !stuffsLoading && (
+                <p className="text-sm text-muted-foreground">No people added for this role yet.</p>
+              )}
+              {stuffsLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading people...
+                </div>
+              ) : (
+                stuffs.map((field, personIndex) => (
+                  <PersonCard
+                    key={field.id}
+                    person={field}
+                    index={personIndex}
+                    onEdit={() => handleEditClick(personIndex)}
+                    onRemove={() => remove(personIndex)}
+                  />
+                ))
+              )}
+              <Button type="button" size="sm" onClick={handleAddClick}>
+                <Plus className="w-4 h-4 mr-1" />
+                Add person
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AddPersonModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        role={selectedRole}
+        roleLabel={selectedRoleLabel}
+        initialData={editingPerson}
+        onSave={handleSavePerson}
+        setStuffs={setStuffs}
+      />
+    </>
+  );
+}

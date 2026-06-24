@@ -1,25 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import {
-  User,
-  FileText,
-  Globe,
-  Link2,
-  FileSearch,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  StickyNote,
-  Activity,
-  Check,
-} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Check, X, UserCheck, Link2 } from "lucide-react";
 import { AlertTriangle } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import LabelDetails from "@/components/LabelDetails";
+
+const caseManagers = [
+  { label: "Sarah Mitchell", value: "sarah.mitchell" },
+  { label: "David Chen", value: "david.chen" },
+  { label: "Fatima Al-Hassan", value: "fatima.alhassan" },
+  { label: "Robert Jameson", value: "robert.jameson" },
+  { label: "Priya Sharma", value: "priya.sharma" },
+];
+
+const availableLinkedCases = [
+  { id: "AML2026003", name: "SHEIKH REHANA", relationship: "Sibling" },
+  { id: "AML2026004", name: "SAJEEB WAZED JOY", relationship: "Child" },
+  { id: "AML2026007", name: "WAJED MIAH", relationship: "Spouse (Deceased)" },
+  { id: "AML2026008", name: "SHIRIN SHARMIN CHAUDHURY", relationship: "Political Associate" },
+];
 
 export function MatchDetail({
   matchData,
@@ -31,10 +37,45 @@ export function MatchDetail({
   onNavigate,
   open,
   onOpenChange,
+  resolution,
+  onResolve,
 }) {
   const [activeTab, setActiveTab] = useState("world-check");
   const [activeDetailTab, setActiveDetailTab] = useState("key-data");
   const [showAllUpdatedDates, setShowAllUpdatedDates] = useState(false);
+  const [localResolution, setLocalResolution] = useState(null);
+  const [falsePositiveReason, setFalsePositiveReason] = useState("");
+  const [assignee, setAssignee] = useState("");
+  const [linkedCaseIds, setLinkedCaseIds] = useState([]);
+
+  useEffect(() => {
+    if (resolution) {
+      setLocalResolution(resolution.type);
+      setFalsePositiveReason(resolution.reason || "");
+      setAssignee(resolution.assignee || "");
+      setLinkedCaseIds(resolution.linkedCases || []);
+    } else {
+      setLocalResolution(null);
+      setFalsePositiveReason("");
+      setAssignee("");
+      setLinkedCaseIds([]);
+    }
+  }, [resolution, open]);
+
+  const handleSave = () => {
+    if (localResolution === "false_positive") {
+      onResolve?.("false_positive", { reason: falsePositiveReason });
+    } else if (localResolution === "confirmed") {
+      onResolve?.("confirmed", { assignee, linkedCases: linkedCaseIds });
+    }
+    onOpenChange?.(false);
+  };
+
+  const toggleLinkedCase = (id) => {
+    setLinkedCaseIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
 
   const getRatingBadge = (rating) => {
     const colors = {
@@ -263,6 +304,125 @@ export function MatchDetail({
                             value={"https://www.prothomalo.com/bangladesh/district/2ulbxsr9q2"}
                           />
                         </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Disposition */}
+                <div className="mt-4 border rounded-lg p-4 space-y-4">
+                  <h3 className="text-xs font-semibold text-slate-500 uppercase">Disposition</h3>
+
+                  {!localResolution && (
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        className="border-amber-400 text-amber-600 hover:bg-amber-50"
+                        onClick={() => setLocalResolution("false_positive")}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Mark as False Positive
+                      </Button>
+                      <Button
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        onClick={() => setLocalResolution("confirmed")}
+                      >
+                        <Check className="h-4 w-4 mr-2" />
+                        Confirm as True Match
+                      </Button>
+                    </div>
+                  )}
+
+                  {localResolution === "false_positive" && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-amber-600 font-medium">
+                        <X className="h-4 w-4" />
+                        Marked as False Positive
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs text-slate-500">Reason</Label>
+                        <Input
+                          value={falsePositiveReason}
+                          onChange={(e) => setFalsePositiveReason(e.target.value)}
+                          placeholder="Explain why this is a false positive..."
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleSave}>
+                          Save Resolution
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setLocalResolution(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {localResolution === "confirmed" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-emerald-600 font-medium">
+                        <UserCheck className="h-4 w-4" />
+                        Confirmed as True Match
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-xs text-slate-500">Assign to Case Manager</Label>
+                        <select
+                          value={assignee}
+                          onChange={(e) => setAssignee(e.target.value)}
+                          className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          <option value="">Select case manager...</option>
+                          {caseManagers.map((cm) => (
+                            <option key={cm.value} value={cm.value}>
+                              {cm.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Link2 className="h-3.5 w-3.5 text-slate-500" />
+                          <Label className="text-xs text-slate-500">
+                            Add Linked Cases / Related Parties
+                          </Label>
+                        </div>
+                        <div className="space-y-2 rounded-md border border-border p-3">
+                          {availableLinkedCases.map((lc) => (
+                            <div key={lc.id} className="flex items-center gap-3">
+                              <Checkbox
+                                id={lc.id}
+                                checked={linkedCaseIds.includes(lc.id)}
+                                onCheckedChange={() => toggleLinkedCase(lc.id)}
+                              />
+                              <label htmlFor={lc.id} className="flex-1 cursor-pointer text-sm">
+                                <span className="font-medium">{lc.name}</span>
+                                <span className="ml-2 text-xs text-muted-foreground">
+                                  {lc.relationship}
+                                </span>
+                                <span className="ml-2 text-xs text-slate-400">{lc.id}</span>
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleSave}>
+                          Save &amp; Assign
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setLocalResolution(null)}
+                        >
+                          Cancel
+                        </Button>
                       </div>
                     </div>
                   )}

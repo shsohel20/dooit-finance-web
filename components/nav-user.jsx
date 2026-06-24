@@ -28,6 +28,8 @@ import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export function NavUser({ user }) {
+
+  console.log(user)
   const { isMobile } = useSidebar();
   const router = useRouter();
   const logout = async () => {

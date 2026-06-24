@@ -41,7 +41,7 @@ export default function CustomerProfile() {
           <div className="flex-shrink-0">
             <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-border bg-muted">
               <img
-                src={userData?.photoUrl || "/placeholder.svg"}
+                src={userData?.client?.settings?.logo || "/placeholder.svg"}
                 alt={userData?.name}
                 className="h-full w-full object-contain"
               />

@@ -62,9 +62,9 @@ export function RiskOverview() {
               </div>
               <p className="text-muted-foreground leading-relaxed">
                 Informed by the <strong>Basel AML Index</strong> and aligned
-                with <strong>AUSTRAC's</strong> risk-based approach guidance.
+                with <strong>AUSTRAC&apos;s</strong> risk-based approach guidance.
                 Jurisdiction risk is classified using the Basel AML Index,
-                FATF's lists of High-Risk and Monitored Jurisdictions, and major
+                FATF&apos;s lists of High-Risk and Monitored Jurisdictions, and major
                 international sanctions lists.
               </p>
             </div>
@@ -85,7 +85,7 @@ export function RiskOverview() {
               <p className="text-muted-foreground leading-relaxed">
                 Classified using the <strong>ANZSIC</strong> (Australian and New
                 Zealand Standard Industrial Classification) industry standards,
-                calibrated for ML/TF exposure levels as identified in AUSTRAC's
+                calibrated for ML/TF exposure levels as identified in AUSTRAC&apos;s
                 typologies and national risk assessments.
               </p>
             </div>

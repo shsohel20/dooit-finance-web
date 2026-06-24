@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//f/Fintech/dooit-api/models/**)",
+      "Read(//f/Fintech/dooit-api/middleware/**)",
+      "Read(//f/Fintech/dooit-api/controllers/**)"
+    ]
+  }
+}

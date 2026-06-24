@@ -99,6 +99,7 @@ const CustomResizableTable = ({
   loading = false,
   onDoubleClick,
   actions,
+  trBgColor,
   ...props
 }) => {
   const [highlightedId, setHighlightedId] = useState(null);
@@ -270,7 +271,7 @@ const CustomResizableTable = ({
         >
           <Table
             id={tableId}
-            className={cn(mainClass, className, 'w-full  border ')}
+            className={cn(mainClass, className, 'w-full  border table-auto ')}
             {...props}
           >
             <TableHeader>
@@ -279,6 +280,7 @@ const CustomResizableTable = ({
                   <ResizableTableHead
                     key={column.id}
                     id={column.id}
+                    className="border-r border-gray-300 bg-gray-100 text-gray-800"
                     style={{ width: column.size ?? 'auto' }}
                   >
                     {typeof column.header === 'function'
@@ -292,14 +294,12 @@ const CustomResizableTable = ({
               <>
                 <TableBody>
                   {Array.from({ length: 10 }).map((_, index) => (
-                    <TableRow key={`skeleton-row-${index}`} className="">
+                    <TableRow key={`skeleton-row-${index}`} className="my-3">
                       {orderedColumns.map((header) => {
                         return (
                           <TableCell
                             key={header.id}
-                            className={
-                              ' border-r   first:border-l  font-bold  '
-                            }
+                            className={'    first:border-l  font-bold  '}
                           >
                             <Skeleton className="w-full h-10 animate-pulse" />
                           </TableCell>
@@ -320,11 +320,12 @@ const CustomResizableTable = ({
                         data-highlighted={highlightedId === row?.original?.id}
                         className={cn(' hover:bg-neutral-100  font-medium ', {
                           'bg-blue-50 ': highlightedId === row?.original?.id,
+                          [row.bgColor]: row.bgColor,
                         })}
                       >
                         {orderedColumns.map((column) => {
                           return (
-                            <TableCell key={column.id}>
+                            <TableCell key={column.id} className="border-r-0">
                               {column.cell
                                 ? column.cell({
                                     row: {

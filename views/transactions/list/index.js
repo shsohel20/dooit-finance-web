@@ -76,10 +76,10 @@ const parseUrlParams = (searchParams) => {
 
   return {
     filters,
-    page:  Math.max(parseInt(searchParams.get("page")  || "1",  10), 1),
+    page: Math.max(parseInt(searchParams.get("page") || "1", 10), 1),
     limit: Math.min(parseInt(searchParams.get("limit") || "10", 10), 100),
     sort: {
-      field: searchParams.get("sort")  || DEFAULT_SORT.field,
+      field: searchParams.get("sort") || DEFAULT_SORT.field,
       order: searchParams.get("order") || DEFAULT_SORT.order,
     },
   };
@@ -88,9 +88,9 @@ const parseUrlParams = (searchParams) => {
 /** Build URL query string from store state — used for router.replace */
 const buildUrl = (filters, page, limit, sort) => {
   const params = new URLSearchParams();
-  params.set("page",  String(page));
+  params.set("page", String(page));
   params.set("limit", String(limit));
-  params.set("sort",  sort.field);
+  params.set("sort", sort.field);
   params.set("order", sort.order);
   Object.entries(filters).forEach(([k, v]) => {
     if (v !== "" && v != null) params.set(k, v);
@@ -103,9 +103,9 @@ const buildUrl = (filters, page, limit, sort) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const statusVariants = {
-  pending:   "info",
+  pending: "info",
   completed: "success",
-  failed:    "danger",
+  failed: "danger",
   cancelled: "warning",
 };
 
@@ -114,7 +114,7 @@ const statusVariants = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TransactionListView = () => {
-  const router     = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const {
@@ -124,12 +124,12 @@ const TransactionListView = () => {
   } = useTransactionStore();
 
   // ── Modal state ───────────────────────────────────────────────────────────
-  const [openDetailView,    setOpenDetailView]    = useState(false);
-  const [currentItem,       setCurrentItem]       = useState(null);
-  const [viewReport,        setViewReport]        = useState(false);
+  const [openDetailView, setOpenDetailView] = useState(false);
+  const [currentItem, setCurrentItem] = useState(null);
+  const [viewReport, setViewReport] = useState(false);
   const [currentItemReport, setCurrentItemReport] = useState(null);
-  const [openImport,        setOpenImport]        = useState(false);
-  const [exporting,         setExporting]         = useState(false);
+  const [openImport, setOpenImport] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   // ─── 1. Hydrate store from URL on first mount ─────────────────────────────
   const hydratedRef = useRef(false);
@@ -159,11 +159,11 @@ const TransactionListView = () => {
   }, [filters, page, limit, sort]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const handleViewClick       = useCallback((item) => { setCurrentItem(item); setOpenDetailView(true); }, []);
-  const handleEditClick       = useCallback((item) => router.push(`/dashboard/client/transactions/edit?id=${item?._id}`), [router]);
+  const handleViewClick = useCallback((item) => { setCurrentItem(item); setOpenDetailView(true); }, []);
+  const handleEditClick = useCallback((item) => router.push(`/dashboard/client/transactions/edit?id=${item?._id}`), [router]);
   const handleViewReportClick = (item) => { setCurrentItemReport(item); setViewReport(true); };
-  const handlePageChange      = (p)    => setPage(p.selected + 1);
-  const handleLimitChange     = (l)    => setLimit(l);
+  const handlePageChange = (p) => setPage(p.selected + 1);
+  const handleLimitChange = (l) => setLimit(l);
 
   // ── CSV Export ────────────────────────────────────────────────────────────
   const handleExportCsv = useCallback(async () => {
@@ -173,12 +173,12 @@ const TransactionListView = () => {
       const result = await exportTransactionsCsv(params);
       if (!result.success) { toast.error(result.message || "Export failed"); return; }
 
-      const bytes    = Uint8Array.from(atob(result.data), (c) => c.charCodeAt(0));
-      const blob     = new Blob([bytes], { type: "text/csv" });
-      const url      = URL.createObjectURL(blob);
-      const a        = document.createElement("a");
-      a.href         = url;
-      a.download     = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+      const bytes = Uint8Array.from(atob(result.data), (c) => c.charCodeAt(0));
+      const blob = new Blob([bytes], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `transactions-${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success("CSV exported successfully");
@@ -196,11 +196,11 @@ const TransactionListView = () => {
       const result = await downloadTransactionPdf(item._id);
       if (!result.success) { toast.error(result.message || "PDF failed", { id: tid }); return; }
       const bytes = Uint8Array.from(atob(result.data), (c) => c.charCodeAt(0));
-      const blob  = new Blob([bytes], { type: "application/pdf" });
-      const url   = URL.createObjectURL(blob);
-      const a     = document.createElement("a");
-      a.href      = url;
-      a.download  = `transaction-${item.uid || item._id}.pdf`;
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `transaction-${item.uid || item._id}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success("PDF downloaded", { id: tid });

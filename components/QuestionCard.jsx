@@ -3,19 +3,23 @@ const QuestionCard = ({
   options,
   correct,
   explanation,
-  questions,
+  questionNumber,
+  totalQuestions,
+  selectedAnswer,
+  submitted,
+  onAnswerSelect,
 }) => {
-  const isCorrect = selectedAnswers[q.id] === q.correct;
+  const isCorrect = selectedAnswer === correct;
+
   return (
-    <Card
-      key={q.id}
-      className="p-6 border-2 hover:border-primary/30 transition-colors"
-    >
+    <div className="p-6 border-2 rounded-lg hover:border-primary/30 transition-colors">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
-            Question {q.id} of {questions.length}
-          </span>
+          {totalQuestions != null && (
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
+              Question {questionNumber} of {totalQuestions}
+            </span>
+          )}
           {submitted && (
             <span
               className={`text-xs font-semibold px-2 py-1 rounded flex items-center gap-1 ${
@@ -24,27 +28,17 @@ const QuestionCard = ({
                   : "bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400"
               }`}
             >
-              {isCorrect ? (
-                <>
-                  <CheckCircle2 className="size-3" />
-                  Correct
-                </>
-              ) : (
-                <>
-                  <XCircle className="size-3" />
-                  Incorrect
-                </>
-              )}
+              {isCorrect ? "Correct" : "Incorrect"}
             </span>
           )}
         </div>
-        <p className="font-medium text-foreground">{q.question}</p>
+        <p className="font-medium text-foreground">{question}</p>
       </div>
 
       <div className="space-y-3">
-        {q.options.map((option, index) => {
-          const isSelected = selectedAnswers[q.id] === option;
-          const isCorrectAnswer = option === q.correct;
+        {options.map((option, index) => {
+          const isSelected = selectedAnswer === option;
+          const isCorrectAnswer = option === correct;
           const showAsCorrect = submitted && isCorrectAnswer;
           const showAsIncorrect = submitted && isSelected && !isCorrect;
 
@@ -65,37 +59,30 @@ const QuestionCard = ({
             >
               <input
                 type="radio"
-                name={`question-${q.id}`}
+                name={`question-${questionNumber}`}
                 value={option}
                 checked={isSelected}
-                onChange={() => handleAnswerSelect(q.id, option)}
+                onChange={() => onAnswerSelect && onAnswerSelect(option)}
                 disabled={submitted}
                 className="mt-1 size-4 text-primary focus:ring-primary"
               />
               <span className="text-sm text-foreground flex-1">{option}</span>
-              {showAsCorrect && (
-                <CheckCircle2 className="size-5 text-green-600 flex-shrink-0" />
-              )}
-              {showAsIncorrect && (
-                <XCircle className="size-5 text-red-600 flex-shrink-0" />
-              )}
             </label>
           );
         })}
       </div>
 
-      {submitted && (
+      {submitted && explanation && (
         <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
-          <h5 className="font-semibold text-sm text-foreground mb-2 flex items-center gap-2">
-            <AlertCircle className="size-4 text-blue-600" />
+          <h5 className="font-semibold text-sm text-foreground mb-2">
             Answer Explanation
           </h5>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            {q.explanation}
+            {explanation}
           </p>
         </div>
       )}
-    </Card>
+    </div>
   );
 };
 export default QuestionCard;

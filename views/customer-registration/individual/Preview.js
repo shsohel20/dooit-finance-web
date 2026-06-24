@@ -142,6 +142,10 @@ const Preview = () => {
           <h4 className="text-md font-bold tracking-tighter">Funds/Wealth Information</h4>
           <div className="grid grid-cols-6 gap-2 py-6">
             <LabelDetails
+              label="Source of Funds"
+              value={customerRegisterData?.funds_wealth?.source_of_funds}
+            />
+            <LabelDetails
               label="Source of Wealth"
               value={customerRegisterData?.funds_wealth?.source_of_wealth}
             />
@@ -177,6 +181,29 @@ const Preview = () => {
                 {customerRegisterData?.sole_trader?.is_sole_trader ? "Yes" : "No"}
               </span>
             </div>
+            {customerRegisterData?.sole_trader?.is_sole_trader && (
+              <div className="grid grid-cols-6 gap-2 py-4">
+                <LabelDetails
+                  label="Business name"
+                  value={customerRegisterData?.sole_trader?.business_details?.business_name}
+                />
+                <LabelDetails
+                  label="Trading name"
+                  value={customerRegisterData?.sole_trader?.business_details?.trading_name}
+                />
+                <LabelDetails
+                  label="Business registration number"
+                  value={
+                    customerRegisterData?.sole_trader?.business_details
+                      ?.business_registration_number
+                  }
+                />
+                <LabelDetails
+                  label="Nature of business"
+                  value={customerRegisterData?.sole_trader?.business_details?.nature_of_business}
+                />
+              </div>
+            )}
           </div>
         </div>
         <div>
@@ -189,7 +216,7 @@ const Preview = () => {
                             and/or terrorist financing activities.
                         </p>
                         <p>3. I acknowledge that all the information provided by
-                            CloudTechX Pty Ltd does not take into account my financial
+                            Dooit Pty Ltd does not take into account my financial
                             situation, objectives or needs.
                         </p>
                         <p>4. I have been advised to seek independent advice before

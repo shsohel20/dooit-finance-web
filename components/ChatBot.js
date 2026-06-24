@@ -28,7 +28,7 @@ export default function ChatBot() {
       {/* header */}
       {isOpen ? (
         <div className="flex items-center justify-between p-2 border-b">
-          <h2 className="text-zinc-700 font-semibold">Hi, I'm David</h2>
+          <h2 className="text-zinc-700 font-semibold">Hi, I&apos;m David</h2>
           <Button
             variant="outline"
             size="sm"

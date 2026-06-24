@@ -9,12 +9,14 @@ import { getDataFromDocuments, verifyDocument } from "@/app/customer/registratio
 import { toast } from "sonner";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useEffect } from "react";
-
-const documentTypes = [
-  { label: "Passport", value: "Passport" },
-  { label: "Driving License", value: "Driving License" },
-  { label: "Medical Card", value: "Medical Card" },
-];
+import { useCustomerRegisterStore } from "@/app/store/useCustomerRegister";
+import Question, { QuestionDescription } from "@/views/onboarding/Question";
+import {
+  onboardingPrimaryButtonClass,
+  onboardingSelectControlStyles,
+} from "@/views/onboarding/individual/onboardingStyles";
+import { getCardTypesByCountryId } from "@/lib/card-type";
+import { getBase64 } from "@/lib/utils";
 
 function formatDate(dateString) {
   if (!dateString) return "";
@@ -44,25 +46,15 @@ function formatDate(dateString) {
   return formattedDate;
 }
 
-const getBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-};
 const Scanner = () => {
   return <div className="scanner-effect absolute top-0 left-0 w-full h-full" />;
 };
-const IdentificationDocuments = ({
-  control,
-  errors,
-  setValue,
-  setVerifyingStatus,
-  setVerifiedMsg,
-}) => {
+const IdentificationDocuments = ({ form, individualPresentation = false }) => {
+  const control = form.control;
+  const errors = form.formState.errors;
+  const setValue = form.setValue;
   const [livenessVerdict, setLivenessVerdict] = useState(null);
+  const { setStep, step } = useCustomerRegisterStore();
   const [isSaving, setIsSaving] = useState(false);
   //front
   const [frontLoading, setFrontLoading] = useState(false);
@@ -94,14 +86,18 @@ const IdentificationDocuments = ({
       setLivenessVerdict(livenessVerdict);
     }
   }, []);
+  console.log("documentTypeValue", documentTypeValue);
   const handleFrontChange = async (file) => {
     setFrontFile(file);
+    console.log("front file", file);
     const base64 = await getBase64(file);
+    console.log("base64", base64);
     setFrontBase64(base64.replace("data:image/jpeg;base64,", ""));
     setFrontLoading(true);
     try {
+      console.log("front upload start");
       const response = await fileUploadOnCloudinary(file);
-      // console.log("front img response", response);
+      console.log("front img response", JSON.stringify(response, null, 2));
       if (response.success) {
         setFrontError(false);
         const existingFrontIndex = fields.findIndex((item) => item.type === "front");
@@ -136,7 +132,7 @@ const IdentificationDocuments = ({
     setBackLoading(true);
     try {
       const response = await fileUploadOnCloudinary(file);
-      // console.log("response", response);
+      console.log("response", response);
       if (response.success) {
         setBackError(false);
         const existingBackIndex = fields.findIndex((item) => item.type === "back");
@@ -180,96 +176,114 @@ const IdentificationDocuments = ({
     formData.append("image", frontFile);
     formData.append("card_type", documentTypeValue?.value);
     const live_photo = localStorage.getItem("live_photo")?.replace("data:image/jpeg;base64,", "");
-    const verify_data = {
-      app_id: 1,
-      image_1: frontBase64,
-      image_2: live_photo,
-      hash: "",
-    };
+
     let verifiedMsg = null;
     try {
       setIsSaving(true);
-      // setVerifyingStatus("verifying");
-      const verify_response = await verifyDocument(verify_data);
-      console.log("verify-res", verify_response);
+      const token = localStorage.getItem("invite_token");
+      const userFrontImageUrl = localStorage.getItem("live_photo");
+      const payload = {
+        token,
 
-      const verification_status = verify_response.data?.result?.verification_status;
-      console.log("verification status", verification_status);
-      if (verification_status === 0) {
-        toast.error("Documents are not verified. You can't proceed further.");
-        setVerifyingStatus("idle");
-        setIsSaving(false);
+        documents: [
+          {
+            url: fields.find((field) => field.type === "front")?.url,
+            docType: "id_front",
+          },
+          {
+            url: userFrontImageUrl,
+            docType: "selfie",
+          },
+        ],
+        note: "",
+      };
+      console.log("payload", JSON.stringify(payload, null, 2));
+      // ("verifying");
+      const verify_response = await verifyDocument(payload);
 
-        return;
-      } else {
-        verifiedMsg = `Found ${verify_response.data?.result?.similarity}% similarity with the document`;
+      console.log("verify_response", verify_response);
+      const backDocument =
+        documentTypeValue?.sides === 2 ? fields.find((field) => field.type === "back")?.url : null;
+      const ocr_payload = {
+        token: token,
+        cardType: documentTypeValue?.value,
 
-        if (verify_response?.error?.length > 0) {
-          toast.error("Documents are not verified");
-          setVerifyingStatus("idle");
-          return;
-        } else {
-          const response = await getDataFromDocuments(formData);
-          console.log("response", response);
-          if (response.success) {
-            // const formData = response.data;
-            // const full_name = formData.full_name;
-            // const given_name = full_name ? formData.full_name?.split(" ")[0] : formData?.given_name;
-            // const middle_name = full_name ? formData.full_name?.split(" ")[1] : formData?.middle_name;
-            // const surname = full_name ? formData.full_name?.split(" ")[2] : formData?.surname;
+        documents: [
+          {
+            url: fields.find((field) => field.type === "front")?.url,
+            docType: "id_front",
+          },
+          ...(backDocument && [
+            {
+              url: backDocument,
+              docType: "id_back",
+            },
+          ]),
+        ],
+        note: "",
+      };
+      console.log("ocr_payload", JSON.stringify(ocr_payload, null, 2));
+      const response = await getDataFromDocuments(ocr_payload);
+      console.log(" ocr response", JSON.stringify(response, null, 2));
+      setIsSaving(false);
+      console.log("ocr response", response);
+      if (response.success) {
+        const formData = response.data?.ocr?.fields ?? {};
 
-            // //23-dec-1990 to yyyy-mm-dd
-            // const date_of_birth = formatDate(formData.date_of_birth);
-            // setValue("customer_details.given_name", given_name || "");
-            // setValue("customer_details.middle_name", middle_name || "");
-            // setValue("customer_details.surname", surname || "");
-            // setValue("residential_address.address", formData.address || formData?.permanent_address);
-            // setValue("customer_details.date_of_birth", date_of_birth);
-            const formData = response.data ?? {};
+        const fullNameParts = formData.full_name?.trim().split(/\s+/) ?? [];
 
-            const fullNameParts = formData.full_name?.trim().split(/\s+/) ?? [];
+        const given_name = fullNameParts[0] || formData.given_name || "";
 
-            const given_name = fullNameParts[0] || formData.given_name || "";
+        const middle_name =
+          fullNameParts.length > 2
+            ? fullNameParts.slice(1, -1).join(" ")
+            : formData.middle_name || "";
 
-            const middle_name =
-              fullNameParts.length > 2
-                ? fullNameParts.slice(1, -1).join(" ")
-                : formData.middle_name || "";
+        const surname =
+          fullNameParts.length > 1
+            ? fullNameParts[fullNameParts.length - 1]
+            : formData.surname || "";
 
-            const surname =
-              fullNameParts.length > 1
-                ? fullNameParts[fullNameParts.length - 1]
-                : formData.surname || "";
+        const date_of_birth = formData.date_of_birth ? formatDate(formData.date_of_birth) : "";
+        const address = formData?.address_breakdown;
 
-            const date_of_birth = formData.date_of_birth ? formatDate(formData.date_of_birth) : "";
-
-            setValue("customer_details.given_name", given_name);
-            setValue("customer_details.middle_name", middle_name);
-            setValue("customer_details.surname", surname);
-            setValue(
-              "residential_address.address",
-              formData.address || formData.permanent_address || "",
-            );
-            setValue("customer_details.date_of_birth", date_of_birth);
-            setVerifyingStatus("verified");
-          } else {
-            setVerifyingStatus("verified");
-          }
-        }
+        setValue("customer_details.given_name", given_name);
+        setValue("customer_details.middle_name", middle_name);
+        setValue("customer_details.surname", surname);
+        setValue(
+          "residential_address.address",
+          formData.address || formData.permanent_address || "",
+        );
+        setValue("residential_address.street", address?.street || "");
+        setValue("residential_address.state", address?.state || "");
+        setValue("residential_address.postcode", address?.postcode || "");
+        setValue("residential_address.country", address?.country || "");
+        setValue("customer_details.date_of_birth", date_of_birth);
+        setValue("document_number", formData?.document_number || "");
+        setStep(step + 1);
+        // ("verified");
       }
+      // }
+      // }
     } catch (error) {
-      setVerifyingStatus("verified");
+      // ("verified");
       toast.error("Failed to save identification documents");
     } finally {
       setIsSaving(false);
-      setVerifiedMsg(verifiedMsg);
+      verifiedMsg;
     }
   };
-  const documentsAdded = fields.length === 2;
+  const documentsAdded = documentTypeValue?.sides === 2 ? fields.length === 2 : fields.length === 1;
   return (
-    <div className="mt-4 space-y-4">
+    <div
+      className={
+        individualPresentation
+          ? "flex min-h-[min(70svh,560px)] flex-1 flex-col gap-6"
+          : "mt-4 space-y-4"
+      }
+    >
       <div>
-        {livenessVerdict ? (
+        {/* {livenessVerdict ? (
           <Alert variant="success">
             <AlertTitle>Success</AlertTitle>
             <AlertDescription>Liveness verification successful</AlertDescription>
@@ -279,27 +293,44 @@ const IdentificationDocuments = ({
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>Liveness verification failed</AlertDescription>
           </Alert>
-        )}
+        )} */}
       </div>
-      <div>
-        <FormTitle>Identification Documents</FormTitle>
-        <div className="max-w-56 my-4 relative z-3">
+      <div className="space-y-5">
+        {individualPresentation ? (
+          <>
+            <Question preset="individual">Identification documents</Question>
+            <QuestionDescription preset="individual">
+              Choose your ID type and upload clear photos of the front and back so we can verify
+              your identity.
+            </QuestionDescription>
+          </>
+        ) : (
+          <FormTitle>Identification Documents</FormTitle>
+        )}
+        <div
+          className={
+            individualPresentation ? "my-1 w-full relative z-3" : "max-w-56 my-4 relative z-3"
+          }
+        >
           <Controller
             control={control}
             name="document_type"
             render={({ field }) => (
               <CustomSelect
-                label="Select Document Type"
-                options={documentTypes}
+                label={individualPresentation ? undefined : "Select Document Type"}
+                // options={documentTypes}
+                options={getCardTypesByCountryId(form.watch("country")?.id) || []}
                 value={field.value}
-                placeholder="Select Document Type"
+                placeholder="Select document type"
                 error={errors.document_type?.message}
                 onChange={(e) => handleDocumentTypeChange(e, field.onChange)}
+                styles={individualPresentation ? onboardingSelectControlStyles() : undefined}
+                className={individualPresentation ? "!rounded-full" : undefined}
               />
             )}
           />
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4  flex-col pt-8">
           <div className="w-full">
             <CustomDropZone
               handleChange={handleFrontChange}
@@ -308,26 +339,33 @@ const IdentificationDocuments = ({
               url={fields.find((field) => field.type === "front")?.url}
               error={frontError}
             >
-              <p className="font-bold">Front of document</p>
-              <p className="text-sm text-muted-foreground">
-                Drag and drop your document here or click to upload
-              </p>
+              <div className="flex flex-col ">
+                {" "}
+                <p className="font-bold">Front of document</p>
+                <p className="text-xs text-muted-foreground">
+                  Drag and drop your document here or click to upload
+                </p>
+              </div>
             </CustomDropZone>
           </div>
-          <div className="w-full">
-            <CustomDropZone
-              disabled={!documentTypeValue}
-              handleChange={handleBackChange}
-              loading={backLoading}
-              url={fields.find((field) => field.type === "back")?.url}
-              error={backError}
-            >
-              <p className="font-bold">Back of document</p>
-              <p className="text-sm text-muted-foreground">
-                Drag and drop your document here or click to upload
-              </p>
-            </CustomDropZone>
-          </div>
+          {documentTypeValue?.sides === 2 && (
+            <div className="w-full">
+              <CustomDropZone
+                disabled={!documentTypeValue}
+                handleChange={handleBackChange}
+                loading={backLoading}
+                url={fields.find((field) => field.type === "back")?.url}
+                error={backError}
+              >
+                <div className="flex flex-col">
+                  <p className="font-bold">Back of document</p>
+                  <p className="text-xs text-muted-foreground">
+                    Drag and drop your document here or click to upload
+                  </p>
+                </div>
+              </CustomDropZone>
+            </div>
+          )}
         </div>
       </div>
       {documentsAdded && (
@@ -350,8 +388,13 @@ const IdentificationDocuments = ({
               />
             </div>
           </div>
-          <div className="py-6 flex justify-center">
-            <Button disabled={isSaving} onClick={handleSave}>
+          <div className={individualPresentation ? "py-4" : "py-6 flex justify-center"}>
+            <Button
+              disabled={isSaving}
+              onClick={handleSave}
+              variant="onboarding"
+              className={individualPresentation ? onboardingPrimaryButtonClass : undefined}
+            >
               {isSaving ? "Please wait..." : "Verify Documents"}
             </Button>
           </div>

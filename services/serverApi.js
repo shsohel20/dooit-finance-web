@@ -4,8 +4,13 @@ export const NISA_URL = process.env.NEXT_PUBLIC_NISA_BASE_URL || "http://localho
 export const IMAGE_SERVER_URL = process.env.NEXT_PUBLIC_IMAGE_SERVER_URL;
 
 import { auth } from "@/auth";
-
-export async function fetchWithAuth(endpoint, options = {}, isAi = false, isNisa = false) {
+export async function fetchWithAuth(
+  endpoint,
+  options = {},
+  isAi = false,
+  isNisa = false,
+  isFile = false,
+) {
   const session = await auth(); // ✅ works anywhere on the server
   const token = session?.user?.accessToken;
   if (!token) {
@@ -22,6 +27,9 @@ export async function fetchWithAuth(endpoint, options = {}, isAi = false, isNisa
     },
     ...options,
   };
+  if (isFile) {
+    delete allOptions.headers["Content-Type"];
+  }
 
   try {
     const endpointUrl = `${isAi ? AI_URL : isNisa ? NISA_URL : BASE_URL}${endpoint}`;

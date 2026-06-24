@@ -86,13 +86,13 @@ export default function CaseHeader({ caseData, onCaseUpdate }) {
   const doTransition = async (toStatus) => {
     setTransitioning(true);
     try {
-      const res = await updateCaseStatus(
-        caseData._id,
-        toStatus,
-        closureReason.trim() || undefined
-      );
+      const res = await updateCaseStatus(caseData._id, toStatus, closureReason.trim() || undefined);
       if (res?.succeed) {
-        onCaseUpdate?.({ ...caseData, status: toStatus, closureReason: closureReason.trim() || caseData.closureReason });
+        onCaseUpdate?.({
+          ...caseData,
+          status: toStatus,
+          closureReason: closureReason.trim() || caseData.closureReason,
+        });
       }
     } finally {
       setTransitioning(false);
@@ -177,7 +177,8 @@ export default function CaseHeader({ caseData, onCaseUpdate }) {
               {/* Alert source count */}
               {caseData.linkedAlerts?.length > 0 && (
                 <Badge variant="outline" className="text-xs gap-1">
-                  {caseData.linkedAlerts.length} linked alert{caseData.linkedAlerts.length !== 1 ? "s" : ""}
+                  {caseData.linkedAlerts.length} linked alert
+                  {caseData.linkedAlerts.length !== 1 ? "s" : ""}
                 </Badge>
               )}
             </div>
@@ -190,7 +191,8 @@ export default function CaseHeader({ caseData, onCaseUpdate }) {
               )}
               {caseData.riskScore != null && (
                 <span className="text-xs text-muted-foreground">
-                  Risk score: <span className="font-semibold text-heading">{caseData.riskScore}</span>
+                  Risk score:{" "}
+                  <span className="font-semibold text-heading">{caseData.riskScore}</span>
                 </span>
               )}
               {caseData.description && (
@@ -237,7 +239,8 @@ export default function CaseHeader({ caseData, onCaseUpdate }) {
               </span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
-              By: <span className="font-semibold text-heading">{caseData.createdBy?.name || "—"}</span>
+              By:{" "}
+              <span className="font-semibold text-heading">{caseData.createdBy?.name || "—"}</span>
             </div>
           </div>
         </div>
