@@ -150,6 +150,11 @@ export default function ClientSidebar({ ...props }) {
           url: "/dashboard/client/risk-assessment",
           icon: IconUrgent,
         },
+        {
+          title: "Risk Registers",
+          url: "/dashboard/client/risk-assessment/risk-registers",
+          icon: IconListDetails,
+        },
       ],
     },
   ];
