@@ -83,6 +83,20 @@ const statusVariants = {
   closed: "muted",
 };
 
+// A Customer's relations[] can mix the person's own individual relation with
+// linked entity relations (company/trust). Display the individual relation's
+// type when present, else fall back to the first relation / risk virtual.
+const getDisplayType = (customer) => {
+  const relations = Array.isArray(customer?.relations) ? customer.relations : [];
+  const individual = relations.find((r) => r?.type === "individual");
+  return (
+    individual?.type ||
+    relations[0]?.type ||
+    customer?.riskAssessment?.customerType?.value ||
+    "—"
+  );
+};
+
 const GridView = () => {
   const { customers } = useCustomerStore();
   const [openReporting, setOpenReporting] = useState(false);
@@ -212,12 +226,12 @@ const ListView = () => {
       ),
     },
     {
-      id: "riskAssessment?.customerType?.value",
+      id: "type",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
-      accessorKey: "riskAssessment?.customerType?.value",
+      accessorKey: "type",
       cell: ({ row }) => (
         <span className="capitalize text-muted-foreground">
-          {row.original.riskAssessment?.customerType?.value}
+          {getDisplayType(row.original)}
         </span>
       ),
     },
