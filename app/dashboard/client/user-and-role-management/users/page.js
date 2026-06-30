@@ -30,6 +30,7 @@ export default function UserManagementDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [allRoles, setAllRoles] = useState([]);
   const [allUsers, setAllUsers] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [openUserForm, setOpenUserForm] = useState(false);
@@ -49,11 +50,14 @@ export default function UserManagementDashboard() {
       limit: limit,
     };
 
+    setLoading(true);
     try {
       const users = await getAllUsers(queryParams);
       setAllUsers(users);
     } catch (error) {
       console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
     }
   }, [currentPage, limit]);
   useEffect(() => {
@@ -266,6 +270,7 @@ export default function UserManagementDashboard() {
                 <CustomResizableTable
                   columns={usersColumns}
                   data={allUsers?.data}
+                  loading={loading}
                   tableId="users-table"
                   mainClass="users-table"
                 />

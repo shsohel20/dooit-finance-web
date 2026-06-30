@@ -12,6 +12,15 @@ export async function getCustomers(queryParams) {
   return response.json();
 }
 
+export async function getCustomerStats(queryParams = {}) {
+  const queryString = getQueryString(queryParams);
+  const url = `customer/stats${queryString ? `?${queryString}` : ""}`;
+  const response = await fetchWithAuth(url, {
+    method: "GET",
+  });
+  return response.json();
+}
+
 export const sendInvite = async (inviteData) => {
   const response = await fetchWithAuth("customer/invite", {
     method: "POST",
