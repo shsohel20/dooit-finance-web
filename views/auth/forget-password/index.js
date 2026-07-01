@@ -27,7 +27,9 @@ export default function ForgetPassword() {
     setIsLoading(true);
     const payload = {
       email: email,
-      url: process.env.NEXT_PUBLIC_CLIENT_URL,
+      // url: process.env.NEXT_PUBLIC_CLIENT_URL,
+      token: "",
+      cid: "",
     };
     console.log("payload", JSON.stringify(payload, null, 2));
     const res = await forgetPassword(payload);

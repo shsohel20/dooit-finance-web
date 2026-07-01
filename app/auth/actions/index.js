@@ -65,9 +65,14 @@ export const resendOtp = async (data) => {
 };
 
 export const forgetPassword = async (data) => {
+  const payload = {
+    ...data,
+    url: process.env.NEXT_PUBLIC_CLIENT_URL,
+    clientUrl: process.env.NEXT_PUBLIC_CLIENT_URL,
+  };
   const res = await fetch(`${BASE_URL}auth/forgot-password`, {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
     headers: {
       "Content-Type": "application/json",
     },
