@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { cn, dateShowFormat, fmt, KYC_HISTORY_STATUS } from "@/lib/utils";
 import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
-import { AmlHitsPanel } from "./AmlHitsPanel";
+import { AmlMatchesTable } from "./AmlMatchesTable";
 import RiskScoreCard from "@/components/RiskScoreCard";
 import { SmoothZoomImageWrapper } from "@/components/CustomZoomImage";
 
@@ -1047,15 +1047,9 @@ export const DetailViewModal = ({ details, fetching }) => {
               ))}
             </div> */}
           </Card>
-          {/* AML Screening */}
-          {(details?.amlHits?.length > 0 || details?.amlStatus || details?.amlCheckedAt) && (
-            <AmlHitsPanel
-              hits={details?.amlHits}
-              riskLabels={details?.amlRiskLabels}
-              status={details?.amlStatus}
-              vendor={details?.amlVendor}
-              checkedAt={details?.amlCheckedAt}
-            />
+          {/* AML Screening — per-match compliance review */}
+          {details?._id && (details?.amlHits?.length > 0 || details?.amlStatus || details?.amlCheckedAt) && (
+            <AmlMatchesTable customerId={details._id} />
           )}
           {/* Verification Journey */}
           <div className="rounded-xl  bg-white ">

@@ -60,6 +60,22 @@ export const getCustomerById = async (id) => {
   return response.json();
 };
 
+// ── AML matches (per-hit compliance review) ──────────────────────────────────
+export const getAmlMatches = async (customerId) => {
+  const response = await fetchWithAuth(`sumsub/aml-matches/${customerId}`, {
+    method: "GET",
+  });
+  return response.json();
+};
+
+export const updateAmlMatch = async (id, body) => {
+  const response = await fetchWithAuth(`sumsub/aml-matches/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+  return response.json();
+};
+
 export const createInstantReport = async (reportData) => {
   const response = await fetchWithAuth("report-notify/new", {
     method: "POST",
