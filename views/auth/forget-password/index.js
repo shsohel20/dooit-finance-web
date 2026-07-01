@@ -13,6 +13,7 @@ export default function ForgetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
   const handleSubmit = async (e) => {
     //regex to check if the email is valid
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
