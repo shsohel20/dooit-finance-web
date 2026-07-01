@@ -906,12 +906,17 @@ export default function RiskRegisters({ riskRegisters = [], setCurrentStep }) {
         onSave={handleOverrideSave}
       />
 
-      <div className="flex justify-between gap-2">
-        <Button variant="outline" onClick={() => setCurrentStep((prev) => prev - 1)}>
-          Previous
-        </Button>
-        <Button onClick={() => setCurrentStep((prev) => prev + 1)}>Next</Button>
-      </div>
+      {/* Wizard navigation — only rendered when embedded in the onboarding
+          stepper. Standalone consumers (e.g. the Risk Assessment menu page)
+          omit setCurrentStep and get no Previous/Next controls. */}
+      {typeof setCurrentStep === "function" && (
+        <div className="flex justify-between gap-2">
+          <Button variant="outline" onClick={() => setCurrentStep((prev) => prev - 1)}>
+            Previous
+          </Button>
+          <Button onClick={() => setCurrentStep((prev) => prev + 1)}>Next</Button>
+        </div>
+      )}
     </div>
   );
 }
