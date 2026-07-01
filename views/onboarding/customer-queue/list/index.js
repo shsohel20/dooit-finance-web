@@ -2,6 +2,7 @@
 
 import {
   createInstantReport,
+  exportCustomersExcel,
   getCustomerById,
   getCustomers,
 } from "@/app/dashboard/client/onboarding/customer-queue/actions";
@@ -97,6 +98,23 @@ const getDisplayType = (customer) => {
   );
 };
 
+// Decode a base64 payload (returned by the export server action) into a file
+// download in the browser.
+const downloadBase64File = (base64, filename, mime) => {
+  const byteChars = atob(base64);
+  const bytes = new Uint8Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
+  const blob = new Blob([bytes], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
 const GridView = () => {
   const { customers } = useCustomerStore();
   const [openReporting, setOpenReporting] = useState(false);
@@ -155,17 +173,34 @@ const GridView = () => {
   );
 };
 
-const ListView = () => {
-  const { customers, fetching, currentPage, limit, totalItems, setCurrentPage, setLimit } =
-    useCustomerStore();
+const ListView = ({ onExport, exporting }) => {
+  const {
+    customers,
+    fetching,
+    currentPage,
+    limit,
+    totalItems,
+    sort,
+    setSort,
+    setCurrentPage,
+    setLimit,
+  } = useCustomerStore();
   const [openReporting, setOpenReporting] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const router = useRouter();
 
+  // Server-side sort — flips the store's sort string and resets to page 1.
+  const handleSort = (key, direction) => {
+    setSort(direction === "desc" ? `-${key}` : key);
+    setCurrentPage(1);
+  };
+
   const columns = [
     {
       id: "actions",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Actions" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Actions" sortable={false} />
+      ),
       accessorKey: "actions",
       size: 20,
       cell: ({ row }) => (
@@ -178,7 +213,15 @@ const ListView = () => {
     },
     {
       id: "uid",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Customer ID" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Customer ID"
+          sortKey="uid"
+          sortValue={sort}
+          onSort={handleSort}
+        />
+      ),
       cell: ({ row }) => (
         <div>
           <p className=" text-muted-foreground font-mono">#{row.original?.uid}</p>
@@ -188,7 +231,9 @@ const ListView = () => {
     },
     {
       id: "user.name",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Customer" sortable={false} />
+      ),
       size: 100,
       accessorKey: "user.name",
       cell: ({ row }) => (
@@ -207,7 +252,15 @@ const ListView = () => {
 
     {
       id: "country",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Country" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Country"
+          sortKey="country"
+          sortValue={sort}
+          onSort={handleSort}
+        />
+      ),
       accessorKey: "country",
       size: 100,
       cell: ({ row }) => (
@@ -216,7 +269,15 @@ const ListView = () => {
     },
     {
       id: "kycStatus",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="KYC Status" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="KYC Status"
+          sortKey="kycStatus"
+          sortValue={sort}
+          onSort={handleSort}
+        />
+      ),
       accessorKey: "kycStatus",
       size: 100,
       cell: ({ row }) => (
@@ -227,7 +288,9 @@ const ListView = () => {
     },
     {
       id: "type",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Type" sortable={false} />
+      ),
       accessorKey: "type",
       cell: ({ row }) => (
         <span className="capitalize text-muted-foreground">
@@ -237,7 +300,9 @@ const ListView = () => {
     },
     {
       id: "riskLabel",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Risk Level" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Risk Level" sortable={false} />
+      ),
       accessorKey: "riskLabel",
       size: 100,
       cell: ({ row }) => (
@@ -248,7 +313,15 @@ const ListView = () => {
     },
     {
       id: "createdAt",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Created On" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Created On"
+          sortKey="createdAt"
+          sortValue={sort}
+          onSort={handleSort}
+        />
+      ),
       accessorKey: "createdAt",
       size: 100,
       cell: ({ row }) => (
@@ -281,8 +354,14 @@ const ListView = () => {
   const Actions = () => {
     return (
       <div className="flex items-center gap-2 ">
-        <Button className="text-xs" size="sm" variant="outline">
-          Export CSV <IconDownload className="size-4" />
+        <Button
+          className="text-xs"
+          size="sm"
+          variant="outline"
+          onClick={onExport}
+          disabled={exporting}
+        >
+          {exporting ? "Exporting..." : "Export Excel"} <IconDownload className="size-4" />
         </Button>
         <Button className="text-xs" size="sm" variant="outline">
           Import CSV <IconUpload className="size-4" />
@@ -327,6 +406,8 @@ const ListView = () => {
 
 const getFilterLabel = (key) => {
   switch (key) {
+    case "q":
+      return "Search";
     case "uid":
       return "Customer ID";
     case "email":
@@ -335,6 +416,8 @@ const getFilterLabel = (key) => {
       return "Type";
     case "riskLabel":
       return "Risk Level";
+    case "country":
+      return "Country";
     default:
       return key;
   }
@@ -342,71 +425,118 @@ const getFilterLabel = (key) => {
 
 export default function CustomerQueueList({ data, kycStatus }) {
   const [view, setView] = useState("list");
-  const { currentPage, limit, customers, setCustomers, setFetching, setTotalItems } =
-    useCustomerStore();
+  const {
+    currentPage,
+    limit,
+    sort,
+    customers,
+    setCustomers,
+    setFetching,
+    setTotalItems,
+    setCurrentPage,
+  } = useCustomerStore();
   const initialState = {
+    q: "",
     uid: "",
     type: "",
     email: "",
     riskLabel: "",
     country: null,
-    // riskLevel: '',
-    // dateRange: '',
-    // country: '',
   };
   const [filters, setFilters] = useState(initialState);
-  const debouncedFetchRef = useRef(null);
+  const [exporting, setExporting] = useState(false);
 
-  const fetchData = useCallback(async (params = null) => {
-    setFetching(true);
+  // Reset to the first page (used by every filter change).
+  const resetPage = () => {
+    if (currentPage !== 1) setCurrentPage(1);
+  };
 
-    const queryParams = objWithValidValues({
-      page: currentPage,
-      limit: limit,
-      kycStatus: kycStatus,
-      ...filters,
-      ...params,
-    });
-
+  // Normalize current filters + kycStatus into API query params (mirrors fetchData).
+  const buildQueryParams = (extra = {}) => {
+    const queryParams = objWithValidValues({ kycStatus, ...filters, ...extra });
     for (const [key, value] of Object.entries(queryParams)) {
-      if (value && isObject(value)) {
-        queryParams[key] = value?.value;
-      }
+      if (value && isObject(value)) queryParams[key] = value?.value;
     }
-    const response = await getCustomers(queryParams);
-    setFetching(false);
-    setCustomers(response.data);
-    setTotalItems(response.totalRecords);
-  }, []);
+    return queryParams;
+  };
 
+  // Server-side professional Excel export of all records matching current
+  // filters (the API streams a fully-populated .xlsx).
+  const handleExport = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const res = await exportCustomersExcel(buildQueryParams());
+      if (res?.success && res.base64) {
+        downloadBase64File(
+          res.base64,
+          res.filename || `customers-${new Date().toISOString().slice(0, 10)}.xlsx`,
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        );
+        toast.success("Export downloaded");
+      } else {
+        toast.error(res?.error || "Export failed");
+      }
+    } catch (error) {
+      console.error("Customer export failed", error);
+      toast.error("Export failed");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // Single source of truth for the fetch. Reads current page/limit/sort/filters
+  // (proper deps — no stale closure) so pagination + sorting actually work.
+  const fetchData = useCallback(async () => {
+    setFetching(true);
+    try {
+      const queryParams = objWithValidValues({
+        page: currentPage,
+        limit,
+        kycStatus,
+        sort,
+        ...filters,
+      });
+      for (const [key, value] of Object.entries(queryParams)) {
+        if (value && isObject(value)) queryParams[key] = value?.value;
+      }
+      const response = await getCustomers(queryParams);
+      setCustomers(response?.data ?? []);
+      setTotalItems(response?.totalRecords ?? 0);
+    } catch (error) {
+      console.error("Failed to fetch customers", error);
+      setCustomers([]);
+      setTotalItems(0);
+    } finally {
+      setFetching(false);
+    }
+  }, [currentPage, limit, kycStatus, sort, filters, setCustomers, setFetching, setTotalItems]);
+
+  // Debounce all query changes (filter typing, page, limit, sort, tab) through
+  // one effect — fires once per settled change.
   useEffect(() => {
-    debouncedFetchRef.current = _.debounce(fetchData, 500);
-
-    return () => {
-      debouncedFetchRef.current.cancel(); // cleanup
-    };
+    const timer = setTimeout(fetchData, 300);
+    return () => clearTimeout(timer);
   }, [fetchData]);
 
+  // currentPage/limit/sort live in a shared store across tabs — start each tab
+  // on page 1 so a stale page number can't land on an empty result set.
   useEffect(() => {
-    fetchData();
-  }, [currentPage, limit, kycStatus]);
+    setCurrentPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kycStatus]);
 
   const handleFilterChange = (name, value) => {
-    const updatedFilters = { ...filters, [name]: value };
-    setFilters(updatedFilters);
-    debouncedFetchRef.current(updatedFilters);
+    setFilters((prev) => ({ ...prev, [name]: value }));
+    resetPage();
   };
-  // const handleSearch = () => {
-  //   fetchData();
-  // }
   const handleReset = () => {
     setFilters(initialState);
-    debouncedFetchRef.current(initialState);
+    resetPage();
   };
   const handleRemoveFilter = (key) => {
-    const initialState = { ...filters, [key]: "" };
-    setFilters(initialState);
-    fetchData(initialState);
+    setFilters((prev) => ({ ...prev, [key]: key === "country" ? null : "" }));
+    resetPage();
   };
   return (
     <div className="my-2">
@@ -415,7 +545,11 @@ export default function CustomerQueueList({ data, kycStatus }) {
         {/* Search and Filter */}
         <div className="flex items-center gap-2 flex-shrink-0 flex-grow  flex-wrap">
           <InputGroup className={"w-64 flex-shrink-0"}>
-            <InputGroupInput placeholder="Search..." />
+            <InputGroupInput
+              placeholder="Search name / ID..."
+              value={filters.q}
+              onChange={(e) => handleFilterChange("q", e.target.value)}
+            />
             <InputGroupAddon>
               <IconSearch />
             </InputGroupAddon>
@@ -446,11 +580,12 @@ export default function CustomerQueueList({ data, kycStatus }) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="individual">Individual</SelectItem>
-              <SelectItem value="business">Business</SelectItem>
-              <SelectItem value="corporate">Corporate</SelectItem>
-              <SelectItem value="government">Government</SelectItem>
-              <SelectItem value="non-profit">Non-Profit</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
+              <SelectItem value="company">Company</SelectItem>
+              <SelectItem value="partnership">Partnership</SelectItem>
+              <SelectItem value="government_body">Government Body</SelectItem>
+              <SelectItem value="association">Association</SelectItem>
+              <SelectItem value="cooperative">Cooperative</SelectItem>
+              <SelectItem value="trust">Trust</SelectItem>
             </SelectContent>
           </Select>
           <Select
@@ -462,9 +597,9 @@ export default function CustomerQueueList({ data, kycStatus }) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Unacceptable">Unacceptable</SelectItem>
-              <SelectItem value="Low">Low</SelectItem>
+              <SelectItem value="High">High</SelectItem>
               <SelectItem value="Medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="Low">Low</SelectItem>
             </SelectContent>
           </Select>
 
@@ -534,7 +669,11 @@ export default function CustomerQueueList({ data, kycStatus }) {
         )}
       </div>
       <div className="">
-        {view === "grid" ? <GridView data={data} /> : <ListView data={data} />}
+        {view === "grid" ? (
+          <GridView data={data} />
+        ) : (
+          <ListView data={data} onExport={handleExport} exporting={exporting} />
+        )}
       </div>
     </div>
   );

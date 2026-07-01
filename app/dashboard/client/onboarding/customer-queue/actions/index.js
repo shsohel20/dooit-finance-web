@@ -12,6 +12,30 @@ export async function getCustomers(queryParams) {
   return response.json();
 }
 
+export async function exportCustomersExcel(queryParams = {}) {
+  const queryString = getQueryString(queryParams);
+  const url = `customer/export${queryString ? `?${queryString}` : ""}`;
+  const response = await fetchWithAuth(url, { method: "GET" });
+
+  if (!response || typeof response.arrayBuffer !== "function") {
+    return { success: false, error: "Network error while exporting" };
+  }
+  if (!response.ok) {
+    return { success: false, error: `Export failed (${response.status})` };
+  }
+
+  const buffer = await response.arrayBuffer();
+  const base64 = Buffer.from(buffer).toString("base64");
+
+  const cd = response.headers?.get?.("content-disposition") || "";
+  const match = /filename="?([^"]+)"?/.exec(cd);
+  const filename = match
+    ? match[1]
+    : `customers-${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+  return { success: true, base64, filename };
+}
+
 export async function getCustomerStats(queryParams = {}) {
   const queryString = getQueryString(queryParams);
   const url = `customer/stats${queryString ? `?${queryString}` : ""}`;
