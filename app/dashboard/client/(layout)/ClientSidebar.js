@@ -601,7 +601,22 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={session.data?.user} />
+        <NavUser
+          user={{
+            name:
+              loggedInUser?.client?.name ||
+              loggedInUser?.name ||
+              session.data?.user?.name,
+            email:
+              loggedInUser?.client?.email ||
+              loggedInUser?.email ||
+              session.data?.user?.email,
+            avatar:
+              loggedInUser?.client?.settings?.logo ||
+              loggedInUser?.photoUrl ||
+              session.data?.user?.image,
+          }}
+        />
       </SidebarFooter>
     </Sidebar>
   );

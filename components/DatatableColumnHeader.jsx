@@ -23,30 +23,74 @@ import {
 import { ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
 
-export function DataTableColumnHeader({ column, title, className }) {
+export function DataTableColumnHeader({
+  column,
+  title,
+  className,
+  // Server-side sorting (opt-in). When `sortKey` + `onSort` are provided the
+  // dropdown drives the parent's sort state. `sortValue` is the active sort
+  // string (e.g. "-createdAt"). Pass `sortable={false}` to render a plain,
+  // non-interactive header.
+  sortKey,
+  sortValue,
+  onSort,
+  sortable,
+}) {
   const [currentDirection, setCurrentDirection] = useState('asc');
-  // if (!column?.getCanSort()) {
-  //   return <div className={cn(className)}>{title}</div>;
-  // }
 
-  // Get the current sort direction for this column
-  // const currentDirection = column.getIsSorted();
+  const isServerSortable = !!(sortKey && onSort);
 
-  // Use direct method to set sort with an explicit direction
-  const setSorting = (direction) => {
-    // If we're clearing sort, use an empty array
-    // if (direction === false) {
-    //   column.toggleSorting(undefined, false);
-    //   return;
-    // }
-    // Set explicit sort with the direction
-    // The second param (false) prevents multi-sort
-    // column.toggleSorting(direction === 'desc', false);
-  };
+  // Explicit plain header (no dropdown)
+  if (sortable === false && !isServerSortable) {
+    return (
+      <div className={cn('text-xs uppercase font-bold px-2', className)}>{title}</div>
+    );
+  }
 
+  // ── Functional server-side sorting ──────────────────────────────────────────
+  if (isServerSortable) {
+    const activeDir =
+      sortValue === `-${sortKey}` ? 'desc' : sortValue === sortKey ? 'asc' : null;
+    return (
+      <div className={cn('flex items-center  ', className)}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'h-8 hover:bg-transparent hover:text-primary uppercase font-bold',
+                activeDir && 'text-primary',
+              )}
+            >
+              <span className="text-xs">{title}</span>
+              {activeDir === 'desc' ? (
+                <IconArrowDown className="ml-2 size-3" />
+              ) : activeDir === 'asc' ? (
+                <IconArrowUp className="ml-2 size-3" />
+              ) : (
+                <ChevronsUpDown className="ml-2 size-3" />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => onSort(sortKey, 'asc')}>
+              <IconArrowUp className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+              Asc
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onSort(sortKey, 'desc')}>
+              <IconArrowDown className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+              Desc
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
+  }
+
+  // ── Backward-compatible local-only dropdown (other tables) ──────────────────
   const handleDirectionChange = (direction) => {
     setCurrentDirection(direction);
-    setSorting(direction);
   };
 
   return (
@@ -78,10 +122,6 @@ export function DataTableColumnHeader({ column, title, className }) {
             Desc
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          {/* <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-            <IconEyeOff className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Hide
-          </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
