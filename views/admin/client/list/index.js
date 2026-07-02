@@ -1,5 +1,10 @@
 "use client";
-import { deleteClient, getAllClients } from "@/app/dashboard/client/list/actions";
+import {
+  deleteClient,
+  getAllClients,
+  sendClientPasswordReset,
+  sendClientWelcomeEmail,
+} from "@/app/dashboard/client/list/actions";
 import useClientStore from "@/app/store/useClient";
 import CustomPagination from "@/components/CustomPagination";
 
@@ -28,6 +33,8 @@ import {
   IconEdit,
   IconExternalLink,
   IconEye,
+  IconKey,
+  IconMail,
   IconTrash,
 } from "@tabler/icons-react";
 import { Loader2 } from "lucide-react";
@@ -57,6 +64,36 @@ export default function ClientList() {
     setDeleteDialogOpen(true);
   };
 
+  const handleSendWelcome = async (id) => {
+    const t = toast.loading("Sending welcome email...");
+    try {
+      const res = await sendClientWelcomeEmail(id);
+      if (res?.success) {
+        toast.success(res.message || "Welcome email sent", { id: t });
+      } else {
+        toast.error(res?.message || res?.error || "Failed to send welcome email", { id: t });
+      }
+    } catch (e) {
+      toast.error("Failed to send welcome email", { id: t });
+    }
+  };
+
+  const handleSendPasswordReset = async (id) => {
+    const t = toast.loading("Sending password reset email...");
+    try {
+      const res = await sendClientPasswordReset(id);
+      if (res?.success) {
+        toast.success(res.message || "Password reset email sent", { id: t });
+      } else {
+        toast.error(res?.message || res?.error || "Failed to send password reset email", {
+          id: t,
+        });
+      }
+    } catch (e) {
+      toast.error("Failed to send password reset email", { id: t });
+    }
+  };
+
   const columns = [
     {
       id: "actions",
@@ -84,6 +121,14 @@ export default function ClientList() {
                   <IconEdit className="size-3 " />
                   Edit
                 </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSendWelcome(row?.original?.id)}>
+                <IconMail className="size-3 text-muted-foreground/70" />
+                Send welcome email
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSendPasswordReset(row?.original?.id)}>
+                <IconKey className="size-3 text-muted-foreground/70" />
+                Send password reset
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
