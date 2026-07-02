@@ -58,6 +58,44 @@ export async function exportCustomerKycPdf(id) {
   return { success: true, base64, filename };
 }
 
+// Manual KYC decision (approve / reject / status change) with audit note.
+export async function updateCustomerKycStatus(id, body) {
+  const response = await fetchWithAuth(`customer/${id}/kyc-status`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+  return response.json();
+}
+
+// Manual approve/reject of a single verification journey step (e.g. ID Document).
+export async function reviewJourneyStep(customerId, journeyId, stepType, body) {
+  const response = await fetchWithAuth(
+    `customer/${customerId}/journeys/${journeyId}/steps/${stepType}/review`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    },
+  );
+  return response.json();
+}
+
+// Reviewer-side customer documents (Documents tab).
+export async function addCustomerDocuments(id, documents) {
+  const response = await fetchWithAuth(`customer/${id}/documents`, {
+    method: "POST",
+    body: JSON.stringify({ documents }),
+  });
+  return response.json();
+}
+
+export async function removeCustomerDocument(id, url) {
+  const response = await fetchWithAuth(
+    `customer/${id}/documents?url=${encodeURIComponent(url)}`,
+    { method: "DELETE" },
+  );
+  return response.json();
+}
+
 export async function getCustomerStats(queryParams = {}) {
   const queryString = getQueryString(queryParams);
   const url = `customer/stats${queryString ? `?${queryString}` : ""}`;

@@ -70,6 +70,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import _, { isObject } from "lodash";
 import CustomSelect from "@/components/ui/CustomSelect";
 import KycExportButton from "@/components/KycExportButton";
+import KycStatusButton from "@/components/KycStatusButton";
 import { countriesData } from "@/constants";
 import dynamic from "next/dynamic";
 import { fileUploadOnCloudinary } from "@/app/actions";
@@ -174,7 +175,7 @@ const GridView = () => {
   );
 };
 
-const ListView = ({ onExport, exporting }) => {
+const ListView = ({ onExport, exporting, onRefresh }) => {
   const {
     customers,
     fetching,
@@ -209,6 +210,12 @@ const ListView = ({ onExport, exporting }) => {
           <Button variant="outline" size="icon" onClick={() => handleViewClick(row.original.id)}>
             <IconEye />
           </Button>
+          <KycStatusButton
+            customerId={row.original.id}
+            currentStatus={row.original.kycStatus}
+            onUpdated={onRefresh}
+            iconOnly
+          />
           <KycExportButton customerId={row.original.id} iconOnly />
         </div>
       ),
@@ -674,7 +681,12 @@ export default function CustomerQueueList({ data, kycStatus }) {
         {view === "grid" ? (
           <GridView data={data} />
         ) : (
-          <ListView data={data} onExport={handleExport} exporting={exporting} />
+          <ListView
+            data={data}
+            onExport={handleExport}
+            exporting={exporting}
+            onRefresh={fetchData}
+          />
         )}
       </div>
     </div>

@@ -22,6 +22,10 @@ import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
 import { AmlMatchesTable } from "./AmlMatchesTable";
 import RiskScoreCard from "@/components/RiskScoreCard";
 import { SmoothZoomImageWrapper } from "@/components/CustomZoomImage";
+import StepReviewButtons from "@/components/StepReviewButtons";
+
+// Journey steps that expose manual Approve/Reject reviewer buttons.
+const REVIEWABLE_STEPS = new Set(["id_document"]);
 
 // ─── Formatting helpers ──────────────────────────────────────────────────────
 
@@ -586,7 +590,7 @@ const stepHasContent = (step) => {
   );
 };
 
-const TimelineStep = ({ step, journey, isLast }) => {
+const TimelineStep = ({ step, journey, isLast, customerId, onUpdated }) => {
   const StepContent = STEP_CONTENT_MAP[step.type] ?? GenericStepContent;
   const isCompact = step.type === "journey_start";
   const label = getStepLabel(step);
@@ -622,6 +626,18 @@ const TimelineStep = ({ step, journey, isLast }) => {
           {!step.required && (
             <span className="text-[10px] text-slate-400 uppercase tracking-wide">Optional</span>
           )}
+          {REVIEWABLE_STEPS.has(step.type) && customerId && journey?._id && (
+            <div className="ml-auto">
+              <StepReviewButtons
+                customerId={customerId}
+                journeyId={journey._id}
+                stepType={step.type}
+                stepLabel={label}
+                currentStatus={step.status}
+                onUpdated={onUpdated}
+              />
+            </div>
+          )}
         </div>
 
         {isCompact ? (
@@ -638,7 +654,7 @@ const TimelineStep = ({ step, journey, isLast }) => {
   );
 };
 
-const VerificationJourneyPanel = ({ journey, journeyIndex, clientLabel }) => {
+const VerificationJourneyPanel = ({ journey, journeyIndex, clientLabel, customerId, onUpdated }) => {
   const steps = [...(journey?.steps || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const displayStatus = getJourneyDisplayStatus(journey);
   const statusCfg = JOURNEY_STATUS_CONFIG[displayStatus] ?? STEP_STATUS_CONFIG.pending;
@@ -697,6 +713,8 @@ const VerificationJourneyPanel = ({ journey, journeyIndex, clientLabel }) => {
               step={step}
               journey={journey}
               isLast={stepIdx === steps.length - 1}
+              customerId={customerId}
+              onUpdated={onUpdated}
             />
           ))
         ) : (
@@ -773,7 +791,7 @@ const resolveJourneyClientLabel = (journey, relations) => {
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export const DetailViewModal = ({ details, fetching }) => {
+export const DetailViewModal = ({ details, fetching, onUpdated }) => {
   const [openRelatedParties, setOpenRelatedParties] = useState(false);
   const [selectedJourneyIndex, setSelectedJourneyIndex] = useState(0);
 
@@ -841,11 +859,11 @@ export const DetailViewModal = ({ details, fetching }) => {
       )}
       <div className="grid grid-cols-12 gap-8">
         {/* Related parties trigger */}
-        <div className="fixed top-1/2 right-0 transform -translate-y-1/2 z-10">
+        {/* <div className="fixed top-1/2 right-0 transform -translate-y-1/2 z-10">
           <Button variant="outline" size="icon" onClick={() => setOpenRelatedParties(true)}>
             <GitPullRequest className="size-4" />
           </Button>
-        </div>
+        </div> */}
 
         {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────────── */}
         <div className="col-span-3 ">
@@ -1112,6 +1130,8 @@ export const DetailViewModal = ({ details, fetching }) => {
                       journey={journey}
                       journeyIndex={idx}
                       clientLabel={resolveJourneyClientLabel(journey, relations)}
+                      customerId={details?._id}
+                      onUpdated={onUpdated}
                     />
                   ) : null,
                 )}
