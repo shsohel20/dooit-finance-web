@@ -36,6 +36,28 @@ export async function exportCustomersExcel(queryParams = {}) {
   return { success: true, base64, filename };
 }
 
+// Sumsub-style per-customer KYC applicant report (PDF) — returns base64 for
+// client-side download (same contract as exportCustomersExcel).
+export async function exportCustomerKycPdf(id) {
+  const response = await fetchWithAuth(`customer/${id}/kyc-export`, { method: "GET" });
+
+  if (!response || typeof response.arrayBuffer !== "function") {
+    return { success: false, error: "Network error while exporting" };
+  }
+  if (!response.ok) {
+    return { success: false, error: `Export failed (${response.status})` };
+  }
+
+  const buffer = await response.arrayBuffer();
+  const base64 = Buffer.from(buffer).toString("base64");
+
+  const cd = response.headers?.get?.("content-disposition") || "";
+  const match = /filename="?([^"]+)"?/.exec(cd);
+  const filename = match ? match[1] : `KYC_Report_${id}.pdf`;
+
+  return { success: true, base64, filename };
+}
+
 export async function getCustomerStats(queryParams = {}) {
   const queryString = getQueryString(queryParams);
   const url = `customer/stats${queryString ? `?${queryString}` : ""}`;

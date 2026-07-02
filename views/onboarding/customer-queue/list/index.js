@@ -69,6 +69,7 @@ import { Input } from "@/components/ui/input";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import _, { isObject } from "lodash";
 import CustomSelect from "@/components/ui/CustomSelect";
+import KycExportButton from "@/components/KycExportButton";
 import { countriesData } from "@/constants";
 import dynamic from "next/dynamic";
 import { fileUploadOnCloudinary } from "@/app/actions";
@@ -204,10 +205,11 @@ const ListView = ({ onExport, exporting }) => {
       accessorKey: "actions",
       size: 20,
       cell: ({ row }) => (
-        <div className="flex items-center justify-center ">
+        <div className="flex items-center justify-center gap-1.5">
           <Button variant="outline" size="icon" onClick={() => handleViewClick(row.original.id)}>
             <IconEye />
           </Button>
+          <KycExportButton customerId={row.original.id} iconOnly />
         </div>
       ),
     },
