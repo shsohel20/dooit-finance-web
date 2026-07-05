@@ -16,6 +16,7 @@ import {
   X,
   Timer,
   Wallet,
+  ScanFace,
 } from "lucide-react";
 import { cn, dateShowFormat, fmt, KYC_HISTORY_STATUS } from "@/lib/utils";
 import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
@@ -25,7 +26,7 @@ import { SmoothZoomImageWrapper } from "@/components/CustomZoomImage";
 import StepReviewButtons from "@/components/StepReviewButtons";
 
 // Journey steps that expose manual Approve/Reject reviewer buttons.
-const REVIEWABLE_STEPS = new Set(["id_document"]);
+const REVIEWABLE_STEPS = new Set(["id_document", "selfie"]);
 
 // ─── Formatting helpers ──────────────────────────────────────────────────────
 
@@ -122,7 +123,7 @@ const STEP_TYPE_LABELS = {
   journey_start: "Journey Start",
   personal_form: "Personal Form",
   id_document: "ID Document",
-  // selfie: "Selfie",
+  selfie: "Selfie",
   liveness: "Liveness Check",
   proof_of_address: "Proof of Address",
   questionnaire: "Questionnaire",
@@ -136,11 +137,17 @@ const STEP_TYPE_LABELS = {
 const getStepLabel = (step) => step.label || STEP_TYPE_LABELS[step.type] || formatLabel(step.type);
 
 const getJourneyDisplayStatus = (journey) => {
-  if (journey?.status && JOURNEY_STATUS_CONFIG[journey.status]) return journey.status;
   const steps = journey?.steps || [];
-  if (steps.some((s) => s.status === "rejected")) return "rejected";
+  const anyRejected = steps.some((s) => s.status === "rejected");
+  // Trust the persisted status, except a stale "rejected" left on a journey
+  // whose steps are no longer rejected (e.g. a reviewer approved the rejected
+  // step) — recompute from the steps in that case instead of showing "rejected".
+  const stale = journey?.status === "rejected" && !anyRejected;
+  if (journey?.status && JOURNEY_STATUS_CONFIG[journey.status] && !stale) return journey.status;
+  if (anyRejected) return "rejected";
   if (steps.length > 0 && steps.every((s) => s.status === "approved")) return "completed";
-  if (steps.some((s) => s.status === "in_progress")) return "in_progress";
+  if (steps.some((s) => ["in_progress", "submitted", "approved"].includes(s.status)))
+    return "in_progress";
   return "not_started";
 };
 
@@ -443,14 +450,168 @@ const LivenessContent = ({ step }) => {
   );
 };
 
-const IdDocumentContent = ({ step }) => {
+// Compact side-by-side thumbnail used by the Face Verification card.
+const FaceThumb = ({ url, label }) => (
+  <div className="flex flex-col items-center gap-1.5">
+    {url ? (
+      <div className="size-28 rounded-lg overflow-hidden border border-slate-200 bg-white shadow-sm">
+        <SmoothZoomImageWrapper
+          zoomScale={1.4}
+          duration={600}
+          easing="cubic-bezier(0.22, 1, 0.36, 1)"
+          hoverOnly={true}
+        >
+          <img src={url} alt={label} className="w-full h-full object-cover" />
+        </SmoothZoomImageWrapper>
+      </div>
+    ) : (
+      <div className="size-28 rounded-lg border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-1">
+        <ImageIcon className="size-4 text-slate-300" />
+        <span className="text-[9px] text-slate-400">No image</span>
+      </div>
+    )}
+    <span className="text-[10px] font-medium text-slate-500">{label}</span>
+  </div>
+);
+
+// Matched / No-Match pill for the face verification result.
+const FaceMatchBadge = ({ matched }) => (
+  <Badge
+    variant="outline"
+    className={cn(
+      "text-[10px] font-semibold gap-1",
+      matched
+        ? "text-emerald-700 border-emerald-200 bg-emerald-50"
+        : "text-red-700 border-red-200 bg-red-50",
+    )}
+  >
+    <span className={cn("size-1.5 rounded-full", matched ? "bg-emerald-500" : "bg-red-500")} />
+    {matched ? "Face Matched" : "No Match"}
+  </Badge>
+);
+
+// Similarity percentage + progress bar.
+const SimilarityBar = ({ similarity, matched }) => (
+  <div className="space-y-1">
+    <div className="flex items-center justify-between text-[11px]">
+      <span className="text-slate-500">Similarity</span>
+      <span className="font-semibold text-slate-800">{similarity.toFixed(1)}%</span>
+    </div>
+    <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+      <div
+        className={cn("h-full rounded-full", matched ? "bg-emerald-500" : "bg-red-400")}
+        style={{ width: `${Math.min(Math.max(similarity, 0), 100)}%` }}
+      />
+    </div>
+  </div>
+);
+
+const FaceMetaRow = ({ data }) => (
+  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500">
+    {data.model && (
+      <span>
+        model: <span className="font-mono text-slate-700">{data.model}</span>
+      </span>
+    )}
+    {data.checkedAt && (
+      <span>
+        checked: <span className="text-slate-700">{dateShowFormat(data.checkedAt)}</span>
+      </span>
+    )}
+  </div>
+);
+
+// Face match result (from the doc_face_verified event) — document photo vs
+// selfie similarity. Rendered inside the ID Document journey step, where the
+// verdict lands. Manual Approve/Reject lives in the step header (StepReviewButtons).
+const FaceMatchResult = ({ data, docUrl, selfieUrl }) => {
+  const matched = data.verificationStatus === 1;
+  const similarity = Number(data.similarity);
+  const hasSimilarity = Number.isFinite(similarity);
+  const errors = Array.isArray(data.apiErrors) ? data.apiErrors : null;
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3.5 space-y-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <ScanFace className="size-4 text-slate-500" />
+          <span className="text-xs font-semibold text-slate-800">Face Verification</span>
+          <span className="text-[10px] text-slate-400">document photo vs selfie</span>
+        </div>
+        <FaceMatchBadge matched={matched} />
+      </div>
+
+      {(docUrl || selfieUrl) && (
+        <div className="flex items-center gap-4">
+          <FaceThumb url={docUrl} label="Document photo" />
+          <span className="text-slate-300 text-lg">↔</span>
+          <FaceThumb url={selfieUrl} label="Selfie" />
+        </div>
+      )}
+
+      {hasSimilarity && <SimilarityBar similarity={similarity} matched={matched} />}
+
+      <FaceMetaRow data={data} />
+
+      {errors?.length > 0 && <WarnBox warnings={errors} />}
+    </div>
+  );
+};
+
+// Selfie journey step — the live selfie plus the same face-match verdict, shown
+// on its own so the reviewer can Approve/Reject the selfie/liveness independently
+// of the ID document (e.g. a blur/liveness failure that isn't a document problem).
+const SelfieContent = ({ step }) => {
+  const data = step.data || {};
+  const hasFaceMatch = data.verificationStatus !== undefined || data.similarity !== undefined;
+  const matched = data.verificationStatus === 1;
+  const similarity = Number(data.similarity);
+  const hasSimilarity = Number.isFinite(similarity);
+  const errors = Array.isArray(data.apiErrors) ? data.apiErrors : null;
+  const selfieUrl = (step.documents || []).find((d) => d?.url)?.url ?? null;
+
+  return (
+    <div className="flex flex-wrap items-start gap-4">
+      <FaceThumb url={selfieUrl} label="Selfie" />
+      <div className="flex-1 min-w-[180px] space-y-3">
+        {hasFaceMatch && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <ScanFace className="size-4 text-slate-500" />
+            <span className="text-xs font-semibold text-slate-800">Face Verification</span>
+            <FaceMatchBadge matched={matched} />
+          </div>
+        )}
+        {hasSimilarity && <SimilarityBar similarity={similarity} matched={matched} />}
+        {hasFaceMatch && <FaceMetaRow data={data} />}
+        {errors?.length > 0 && <WarnBox warnings={errors} />}
+        {!hasFaceMatch && !selfieUrl && <EmptyStepState step={step} />}
+      </div>
+    </div>
+  );
+};
+
+const IdDocumentContent = ({ step, journey }) => {
   const data = step.data || {};
   const fields = data.ocrResult?.fields || data.fields || {};
   const addressKey = Object.keys(fields).find((k) => k.toLowerCase() === "address");
   const addressValue = addressKey ? fields[addressKey] : null;
   const gridFields = Object.entries(fields).filter(([key]) => key !== addressKey);
   const warnings = data.warnings;
-  console.log("data", JSON.stringify(data, null, 2));
+  const hasFaceMatch = data.verificationStatus !== undefined || data.similarity !== undefined;
+
+  // The face match compares the ID document photo (front side, on this step)
+  // against the selfie (on the hidden selfie step). Pull both for the card.
+  const isSelfieDoc = (d) =>
+    ["selfie", "face", "live_photo"].includes((d?.docType || d?.type || "").toLowerCase());
+  const docPhotoUrl = (step.documents || []).find(
+    (d) => String(d?.type).toLowerCase() === "front",
+  )?.url ?? step.documents?.[0]?.url ?? null;
+  const selfieUrl =
+    (journey?.steps || [])
+      .find((s) => s.type === "selfie")
+      ?.documents?.find((d) => d?.url)?.url ??
+    (step.documents || []).find(isSelfieDoc)?.url ??
+    null;
 
   return (
     <div className="space-y-4">
@@ -458,7 +619,7 @@ const IdDocumentContent = ({ step }) => {
         <div className="flex items-center gap-3 flex-wrap text-xs">
           {data.sumsubStatuses?.length > 0 && (
             <span className="font-mono text-slate-500">
-              Sumsub: {data.sumsubStatuses.join(" → ")}
+              Verification: {data.sumsubStatuses.join(" → ")}
             </span>
           )}
           {data.lastChecked && (
@@ -467,6 +628,10 @@ const IdDocumentContent = ({ step }) => {
             </span>
           )}
         </div>
+      )}
+
+      {hasFaceMatch && (
+        <FaceMatchResult data={data} docUrl={docPhotoUrl} selfieUrl={selfieUrl} />
       )}
 
       <WarnBox warnings={warnings} />
@@ -520,7 +685,7 @@ const IdDocumentContent = ({ step }) => {
       </div>
 
       {!warnings?.length &&
-        !data.faceSimilarity &&
+        !hasFaceMatch &&
         !data.ocr &&
         !Object.keys(fields).length &&
         !step.documents?.length && <EmptyStepState step={step} />}
@@ -573,7 +738,7 @@ const STEP_CONTENT_MAP = {
   personal_form: GenericStepContent,
   liveness: LivenessContent,
   id_document: IdDocumentContent,
-  // selfie: SelfieContent,
+  selfie: SelfieContent,
   proof_of_address: GenericStepContent,
   questionnaire: GenericStepContent,
   funds_wealth: FundsWealthContent,
@@ -595,9 +760,6 @@ const TimelineStep = ({ step, journey, isLast, customerId, onUpdated }) => {
   const isCompact = step.type === "journey_start";
   const label = getStepLabel(step);
   const data = step.data || {};
-  const isSelfie = step.type === "selfie";
-
-  if (isSelfie) return null;
 
   return (
     <div className="flex gap-4">

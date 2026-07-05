@@ -1,12 +1,19 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import CustomInput from '@/components/ui/CustomInput';
+import SelectWithOther from '@/components/ui/SelectWithOther';
 import { Label } from '@/components/ui/label';
 import React, { useEffect } from 'react';
 import FormTitle from '../common/FormTitle';
 import { Controller, useWatch } from 'react-hook-form';
 import Declaration from '../common/Declaration';
+import {
+    sourceOfFundsOptions,
+    sourceOfWealthOptions,
+    accountPurposeOptions,
+    tradingVolumeOptions,
+} from '@/constants/kyc-options';
 
-const OtherInfo = ({ control, errors, setValue }) => {
+const OtherInfo = ({ control, errors, setValue, showDeclaration = true }) => {
     const isSoleTrader = useWatch({ control, name: 'sole_trader.is_sole_trader' });
 
     useEffect(() => {
@@ -26,28 +33,52 @@ const OtherInfo = ({ control, errors, setValue }) => {
                     control={control}
                     name='funds_wealth.source_of_funds'
                     render={({ field }) => (
-                        <CustomInput label='Source of Funds' {...field} error={errors.funds_wealth?.source_of_funds?.message} />
+                        <SelectWithOther
+                            label='Source of Funds'
+                            options={sourceOfFundsOptions}
+                            value={field.value}
+                            onChange={field.onChange}
+                            error={errors.funds_wealth?.source_of_funds?.message}
+                        />
                     )}
                 />
                 <Controller
                     control={control}
                     name='funds_wealth.source_of_wealth'
                     render={({ field }) => (
-                        <CustomInput label='Source of Wealth' {...field} error={errors.funds_wealth?.source_of_wealth?.message} />
+                        <SelectWithOther
+                            label='Source of Wealth'
+                            options={sourceOfWealthOptions}
+                            value={field.value}
+                            onChange={field.onChange}
+                            error={errors.funds_wealth?.source_of_wealth?.message}
+                        />
                     )}
                 />
                 <Controller
                     control={control}
                     name='funds_wealth.account_purpose'
                     render={({ field }) => (
-                        <CustomInput label='Reason Of Opening Account' {...field} error={errors.funds_wealth?.account_purpose?.message} />
+                        <SelectWithOther
+                            label='Reason Of Opening Account'
+                            options={accountPurposeOptions}
+                            value={field.value}
+                            onChange={field.onChange}
+                            error={errors.funds_wealth?.account_purpose?.message}
+                        />
                     )}
                 />
                 <Controller
                     control={control}
                     name='funds_wealth.estimated_trading_volume'
                     render={({ field }) => (
-                        <CustomInput label='Estimated Trading Volume' {...field} error={errors.funds_wealth?.estimated_trading_volume?.message} />
+                        <SelectWithOther
+                            label='Estimated Trading Volume'
+                            options={tradingVolumeOptions}
+                            value={field.value}
+                            onChange={field.onChange}
+                            error={errors.funds_wealth?.estimated_trading_volume?.message}
+                        />
                     )}
                 />
                 {/* <Controller
@@ -139,9 +170,11 @@ const OtherInfo = ({ control, errors, setValue }) => {
                 </div>}
 
             </div>
-            <div className='mt-4 border p-4 rounded-lg'>
-                <Declaration control={control} errors={errors} setValue={setValue} />
-            </div>
+            {showDeclaration && (
+                <div className='mt-4 border p-4 rounded-lg'>
+                    <Declaration control={control} errors={errors} setValue={setValue} />
+                </div>
+            )}
         </div>
 
     );

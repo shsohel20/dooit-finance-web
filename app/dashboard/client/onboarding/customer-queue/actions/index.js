@@ -105,6 +105,26 @@ export async function getCustomerStats(queryParams = {}) {
   return response.json();
 }
 
+// Staff-side standalone document OCR — session auth, no invite token needed
+// (unlike onboarding-journey/ocr-document). Payload: { cardType?, documents: [{ url, docType }] }.
+export const ocrStaffDocument = async (payload) => {
+  const response = await fetchWithAuth("ocr/document", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return response.json();
+};
+
+// Manual import of an individual customer (doc 59) — creates the customer,
+// links/creates the portal user and queues the background Sumsub chain.
+export const manualImportCustomer = async (payload) => {
+  const response = await fetchWithAuth("customer/manual-import", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return response.json();
+};
+
 export const sendInvite = async (inviteData) => {
   const response = await fetchWithAuth("customer/invite", {
     method: "POST",

@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IconBrandTelegram } from "@tabler/icons-react";
+import { IconBrandTelegram, IconUserPlus } from "@tabler/icons-react";
+import Link from "next/link";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,9 +33,16 @@ export default function CustomerQueueHeader() {
           <PageTitle>Customer Queue</PageTitle>
           <PageDescription>Manage and track all your customers</PageDescription>
         </PageHeader>
-        <Button size={"sm"} className={"text-xs"} onClick={() => setOpen(true)}>
-          <IconBrandTelegram /> Send Invite
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size={"sm"} variant={"outline"} className={"text-xs"} asChild>
+            <Link href="/dashboard/client/onboarding/customer-queue/manual-import">
+              <IconUserPlus /> Add Customer
+            </Link>
+          </Button>
+          <Button size={"sm"} className={"text-xs"} onClick={() => setOpen(true)}>
+            <IconBrandTelegram /> Send Invite
+          </Button>
+        </div>
       </div>
       <InvitationForm open={open} setOpen={setOpen} />
     </>
