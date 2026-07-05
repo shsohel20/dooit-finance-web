@@ -37,6 +37,7 @@ export default function LoginForm({
   const router = useRouter();
   const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  console.log('session', session);
   const isDooit = type === 'dooit';
   const {
     register,
@@ -84,11 +85,10 @@ export default function LoginForm({
       userType: type,
       redirect: false,
     });
-    console.log('res', res);
-    const user = res.user;
-    router.replace(getRoute(session));
     if (res.error) {
-      toast.error('Something went wrong');
+      toast.error(res.code || 'Something went wrong');
+    } else {
+      router.replace(getRoute(session));
     }
 
     setIsLoading(false);
