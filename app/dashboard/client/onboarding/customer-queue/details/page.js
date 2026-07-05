@@ -44,7 +44,7 @@ export default function CustomerQueueDetails() {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <TabsList>
             <TabsTrigger value="details">Details</TabsTrigger>
-            {/* <TabsTrigger value="relations">Relations</TabsTrigger> */}
+            <TabsTrigger value="relations">Relations</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             {/* <TabsTrigger value="osint">OSINT</TabsTrigger> */}
@@ -63,8 +63,6 @@ export default function CustomerQueueDetails() {
         </TabsContent>
         <TabsContent value="relations">
           <RelationsTree relations={details?.relations || []} details={details} />
-          {/* <RelationGraph details={details} /> */}
-          {/* <RelatedParty /> */}
         </TabsContent>
         <TabsContent value="documents">
           <Documents details={details} onUpdated={fetchDetails} />

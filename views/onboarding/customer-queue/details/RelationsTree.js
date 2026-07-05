@@ -1,6 +1,6 @@
 import { PartyTreeGraph } from "./party-tree.graph";
 import { GraphLegend } from "./graph-legend";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import { Users, ArrowLeftRight, Radar } from "lucide-react";
 import partyEntities from "./demo.json";
@@ -9,6 +9,7 @@ import { AlertsTable } from "./AlertsTable";
 import { Osiint } from "./Osiint";
 import TransactionTable from "./TransactionTable";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { getCustomerRelationsGraph } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 const FILTERS = [
   // { mode: "all", label: "All", icon: Network },
   { mode: "relations", label: "Relations", icon: Users },
@@ -38,11 +39,19 @@ const _flat = [];
 flatten(partyEntities, null, _flat);
 const entities = _flat;
 
-export function RelationsTree({ relations, details }) {
+export function RelationsTree({ details }) {
+  const [relations, setRelations] = useState([]);
   const [filterMode, setFilterMode] = useState("relations");
   const [osintOpen, setOsintOpen] = useState(false);
   const expandAllRef = useRef(null);
   const collapseAllRef = useRef(null);
+
+  useEffect(() => {
+    getCustomerRelationsGraph(details._id).then((res) => {
+      console.log("relations graph res", res);
+      setRelations(res);
+    });
+  }, [details.id]);
   return (
     <main className="min-h-screen relative ">
       <Sheet open={osintOpen} onOpenChange={setOsintOpen}>
