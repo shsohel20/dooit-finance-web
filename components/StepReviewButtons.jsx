@@ -27,6 +27,9 @@ export default function StepReviewButtons({
   stepLabel = "Step",
   currentStatus,
   onUpdated,
+  // Sibling step types the decision cascades to in the same API call
+  // (e.g. the combined "ID Document & Selfie" section passes ["selfie"]).
+  cascadeStepTypes = [],
 }) {
   const [rejectOpen, setRejectOpen] = useState(false);
   const [note, setNote] = useState("");
@@ -39,6 +42,7 @@ export default function StepReviewButtons({
       const res = await reviewJourneyStep(customerId, journeyId, stepType, {
         status,
         note: decisionNote?.trim() || "",
+        ...(cascadeStepTypes.length ? { cascadeSteps: cascadeStepTypes } : {}),
       });
       if (res?.success) {
         toast.success(res.message || `${stepLabel} ${status}`);

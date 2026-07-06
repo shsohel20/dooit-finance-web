@@ -62,6 +62,9 @@ const manualImportSchema = z.object({
     })
     .nullable()
     .optional(),
+  // Raw OCR result kept from the extract step — submitted with the import so
+  // it shows on the customer details page (zod would otherwise strip it).
+  ocr: z.any().optional(),
   identificationNo: z.string().optional(),
   customer_details: z.object({
     given_name: z.string().min(1, "First name is required"),
@@ -127,6 +130,7 @@ const defaultValues = {
   document_type: null,
   documents: [],
   selfie: null,
+  ocr: null,
   identificationNo: "",
   customer_details: { given_name: "", middle_name: "", surname: "", date_of_birth: "" },
   contact_details: { email: "", phone: "" },
@@ -245,6 +249,7 @@ const buildPayload = (data) => {
       sole_trader: data.sole_trader,
     },
     documents,
+    ocr: data.ocr || undefined,
     authorized: { ...data.authorized, agent_date: new Date().toISOString() },
     country:
       cleanCountryName(data.doc_country?.label) || data.residential_address?.country?.value || "",
