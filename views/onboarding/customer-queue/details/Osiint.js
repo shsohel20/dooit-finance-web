@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn, dateShowFormatWithTime } from "@/lib/utils";
 import dummyOsiintReport from "./dummyOsiintReport.json";
 import { ExternalLink, Globe2, Newspaper, Users, Activity, Radar, Search } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { getOSINTdata } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 
 function scoreTone(score) {
   if (score <= 30) return "text-success";
@@ -25,9 +27,19 @@ function confidenceBadge(confidence) {
   return "bg-muted text-muted-foreground border-border";
 }
 
-export function Osiint({ data }) {
+export function Osiint({ data, details }) {
   const [query, setQuery] = useState("");
+  const id = useSearchParams().get("id");
   const report = data && typeof data === "object" ? data : dummyOsiintReport;
+
+  const getOsiintReport = async () => {
+    const response = await getOSINTdata("customers", id);
+    console.log("response", response);
+  };
+
+  useEffect(() => {
+    getOsiintReport();
+  }, [id]);
 
   const q = query.toLowerCase();
   const profiles = (report.profiles ?? []).filter(

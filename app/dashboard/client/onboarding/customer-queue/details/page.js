@@ -47,7 +47,7 @@ export default function CustomerQueueDetails() {
             <TabsTrigger value="relations">Relations</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            {/* <TabsTrigger value="osint">OSINT</TabsTrigger> */}
+            <TabsTrigger value="osint">OSINT</TabsTrigger>
           </TabsList>
           <div className="flex items-center gap-2">
             <KycStatusButton
@@ -68,7 +68,7 @@ export default function CustomerQueueDetails() {
           <Documents details={details} onUpdated={fetchDetails} />
         </TabsContent>
         <TabsContent value="osint">
-          <Osiint data={details?.osintReport} />
+          <Osiint data={details?.osintReport} details={details} />
         </TabsContent>
         <TabsContent value="transactions">
           <Transactions customerId={id} />
