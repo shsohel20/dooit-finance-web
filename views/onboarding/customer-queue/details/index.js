@@ -18,8 +18,12 @@ import {
   Wallet,
   ScanFace,
   FileText,
+  Database,
+  ShieldCheck,
+  ChevronDown,
 } from "lucide-react";
-import { cn, dateShowFormat, fmt, KYC_HISTORY_STATUS } from "@/lib/utils";
+import { cn, dateShowFormat, dateShowFormatWithTime, fmt, KYC_HISTORY_STATUS } from "@/lib/utils";
+import { resolveCountry } from "@/lib/country";
 import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
 import { AmlMatchesTable } from "./AmlMatchesTable";
 import RiskScoreCard from "@/components/RiskScoreCard";
@@ -1099,6 +1103,187 @@ const resolveJourneyClientLabel = (journey, relations) => {
   );
 };
 
+// ─── Identity Check (Sumsub DVS / PERSON check) ──────────────────────────────
+// Renders customer.checks (persisted from the Sumsub webhook) as a DVS-style
+// "Identity check" card: Input data (what we sent) + Retrieved data (verdict).
+
+const ID_DOC_TYPE_LABELS = {
+  DRIVERS: "Driver's Licence",
+  PASSPORT: "Passport",
+  ID_CARD: "ID Card",
+  RESIDENCE_PERMIT: "Residence Permit",
+  UTILITY_BILL: "Utility Bill",
+};
+
+// Country resolution (alpha-2/alpha-3 → name + flag) lives in @/lib/country,
+// backed by countries-alpha3.json.
+
+const isGreen = (answer) => String(answer ?? "").toUpperCase() === "GREEN";
+
+// One label/value row inside the Input data / Retrieved data lists.
+const CheckDataRow = ({ label, children }) => (
+  <div className="flex items-start justify-between gap-3 py-2">
+    <span className="text-[11px] text-slate-500 whitespace-nowrap">{label}</span>
+    <span className="text-[11px] font-semibold text-slate-800 text-right break-words min-w-0">
+      {children}
+    </span>
+  </div>
+);
+
+const IdentityCheckCard = ({ check }) => {
+  const input = check?.inputDoc || {};
+  const bg = check?.personBackgroundInfo || {};
+  const country = resolveCountry(input.country);
+  const docLabel =
+    ID_DOC_TYPE_LABELS[input.idDocType] || formatLabel(input.idDocType || "Document");
+
+  const answerGreen = isGreen(check?.answer);
+  const idValid = isGreen(bg.identityAnswer ?? check?.answer);
+
+  // Retrieved-data descriptors. Prefer explicit fields from the payload; fall
+  // back to DVS defaults for Australian checks (DVS is the AU govt ID source).
+  const isDvs = country.name === "Australia";
+  const productName =
+    bg.productName ??
+    (isDvs ? `Document Verification Service (DVS) Validation in ${country.name}` : null);
+  const dataSources = bg.dataSources ?? (isDvs ? "Document Verification Service (DVS)" : null);
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      {/* Header */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/60">
+        {answerGreen ? (
+          <CheckCircle2 className="size-4 text-emerald-500" />
+        ) : (
+          <AlertTriangle className="size-4 text-red-500" />
+        )}
+        <span className="text-sm font-semibold text-slate-800">Identity check</span>
+        {check?.createdAt && (
+          <>
+            <span className="text-slate-300">|</span>
+            <span className="text-xs text-slate-500">
+              {dateShowFormatWithTime(check.createdAt)}
+            </span>
+          </>
+        )}
+        <Badge
+          variant="outline"
+          className={cn(
+            "ml-auto text-[10px] font-semibold gap-1",
+            answerGreen
+              ? "text-emerald-700 border-emerald-200 bg-emerald-50"
+              : "text-red-700 border-red-200 bg-red-50",
+          )}
+        >
+          <span className={cn("size-1.5 rounded-full", answerGreen ? "bg-emerald-500" : "bg-red-500")} />
+          {check?.answer || (answerGreen ? "GREEN" : "RED")}
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+        {/* Input data */}
+        <div className="px-4 py-3">
+          <div className="flex items-center gap-2 mb-1">
+            <User className="size-3.5 text-slate-500" />
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+              Input data
+            </p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            <CheckDataRow label="Country">
+              {country.flag ? `${country.flag} ` : ""}
+              {country.name}
+            </CheckDataRow>
+            <CheckDataRow label="First name">{input.firstName || "—"}</CheckDataRow>
+            <CheckDataRow label="Last name">{input.lastName || "—"}</CheckDataRow>
+            <CheckDataRow label={docLabel}>{input.number || "—"}</CheckDataRow>
+            {input.additionalNumber && (
+              <CheckDataRow label="Additional number">{input.additionalNumber}</CheckDataRow>
+            )}
+            <CheckDataRow label="Date of birth">{input.dob || "—"}</CheckDataRow>
+          </div>
+        </div>
+
+        {/* Retrieved data */}
+        <div className="px-4 py-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Database className="size-3.5 text-slate-500" />
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+              Retrieved data
+            </p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {productName && <CheckDataRow label="Product name">{productName}</CheckDataRow>}
+            {dataSources && <CheckDataRow label="Data sources">{dataSources}</CheckDataRow>}
+            <CheckDataRow label="Identity document validation">
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1",
+                  idValid ? "text-emerald-600" : "text-red-600",
+                )}
+              >
+                {idValid ? (
+                  <CheckCircle2 className="size-3.5" />
+                ) : (
+                  <AlertTriangle className="size-3.5" />
+                )}
+                {idValid ? "Identity document is valid" : "Identity document is not valid"}
+              </span>
+            </CheckDataRow>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Collapsible section wrapper ─────────────────────────────────────────────
+// Uniform card with a clickable header (chevron + title + optional right slot).
+// Default open — collapsing is an option, nothing is hidden on load.
+const CollapsibleSection = ({
+  title,
+  icon: Icon,
+  right,
+  defaultOpen = true,
+  children,
+  className,
+}) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className={cn("rounded-xl border border-slate-200 bg-white overflow-hidden", className)}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-slate-50/70"
+      >
+        <ChevronDown
+          className={cn("size-4 text-slate-400 transition-transform", !open && "-rotate-90")}
+        />
+        {Icon && <Icon className="size-4 text-slate-500" />}
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-700">{title}</span>
+        {right && <span className="ml-auto flex items-center gap-2">{right}</span>}
+      </button>
+      {open && <div className="px-4 pb-4">{children}</div>}
+    </div>
+  );
+};
+
+const IdentityChecksSection = ({ checks }) => {
+  const list = Array.isArray(checks) ? checks.filter(Boolean) : [];
+  if (list.length === 0) return null;
+
+  return (
+    <CollapsibleSection title="Identity Checks" icon={ShieldCheck}>
+      <div className="space-y-3">
+        {list.map((check, i) => (
+          <IdentityCheckCard key={check?.id ?? i} check={check} />
+        ))}
+      </div>
+    </CollapsibleSection>
+  );
+};
+
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export const DetailViewModal = ({ details, fetching, onUpdated }) => {
@@ -1181,7 +1366,7 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
         {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────────── */}
         <div className="col-span-3 ">
           {/* Customer Profile */}
-          <Card className="border-0 ">
+          <CollapsibleSection title="Customer Profile" icon={User} className="mb-5">
             <div className="flex gap-4 items-center ">
               <Avatar className="size-14 rounded-lg mb-2 border">
                 <AvatarImage src={details?.user?.photoUrl} />
@@ -1240,7 +1425,7 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                 positive
               />
             </div>
-          </Card>
+          </CollapsibleSection>
 
           {/* Risk Score */}
           <Card className="border-0 ">
@@ -1267,20 +1452,17 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                 style={{ width: `${riskPercent}%` }}
               />
             </div> */}
-            <Card className="border-0 ">
-              <div className="flex items-start justify-between mb-4">
-                <SectionLabel>Risk Assessment Breakdown</SectionLabel>
-                <div className="text-right -mt-1">
-                  <p className="text-[10px] text-muted-foreground">Total Score</p>
-                  <p className={cn("text-xl font-bold", getRiskLabelColor(riskLabel))}>
-                    {riskScore}
-                    <span className="text-xs font-normal text-muted-foreground ml-1">
-                      • {riskLabel}
-                    </span>
-                  </p>
-                </div>
-              </div>
-
+            <CollapsibleSection
+              title="Risk Assessment Breakdown"
+              right={
+                <span className={cn("text-sm font-bold", getRiskLabelColor(riskLabel))}>
+                  {riskScore}
+                  <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                    • {riskLabel}
+                  </span>
+                </span>
+              }
+            >
               <div className="grid grid-cols-1 gap-3">
                 <RiskScoreCard name="Customer Type" item={riskAssessment?.customerType} />
                 <RiskScoreCard name="Jurisdiction" item={riskAssessment?.jurisdiction} />
@@ -1289,18 +1471,16 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                 <RiskScoreCard name="Occupation" item={riskAssessment?.occupation} />
                 <RiskScoreCard name="Product / Industry" item={riskAssessment?.product} />
               </div>
-            </Card>
+            </CollapsibleSection>
           </Card>
         </div>
 
         {/* ── RIGHT MAIN CONTENT ────────────────────────────────────────────────── */}
         <div className="col-span-9 space-y-5">
           {/* KYC Rejection Reason */}
-          {/* Personal KYC Data */}{" "}
-          <Card className="border-0 ">
-            <SectionLabel>Personal KYC Data</SectionLabel>
-
-            <div className="grid lg:grid-cols-5 grid-cols-2 md:grid-cols-3 gap-2.5 mb-4">
+          {/* Personal KYC Data */}
+          <CollapsibleSection title="Personal KYC Data" icon={User}>
+            <div className="grid lg:grid-cols-5 grid-cols-2 md:grid-cols-3 gap-2.5">
               <KycField
                 label="Given Name"
                 value={customerDetails.given_name}
@@ -1377,17 +1557,15 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                 </div>
               ))}
             </div> */}
-          </Card>
+          </CollapsibleSection>
           {/* AML Screening — per-match compliance review */}
           {details?._id && (details?.amlHits?.length > 0 || details?.amlStatus || details?.amlCheckedAt) && (
             <AmlMatchesTable customerId={details._id} />
           )}
+          {/* Identity Checks (Sumsub DVS) — before verification journeys */}
+          <IdentityChecksSection checks={details?.checks} />
           {/* Verification Journey */}
-          <div className="rounded-xl  bg-white ">
-            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-4">
-              Verification Journeys
-            </p>
-
+          <CollapsibleSection title="Verification Journeys" icon={Building2}>
             {fetching ? (
               <div className="space-y-6 py-4">
                 {[1, 2, 3].map((i) => (
@@ -1450,10 +1628,11 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                 )}
               </div>
             )}
-          </div>
-          <div className="space-y-0 -mt-1">
-            <h3>KYC history</h3>
-            {kycHistory.map((entry, i) => {
+          </CollapsibleSection>
+          {kycHistory.length > 0 && (
+            <CollapsibleSection title="KYC History">
+              <div className="space-y-0">
+                {kycHistory.map((entry, i) => {
               const s = KYC_HISTORY_STATUS[entry.status] ?? {
                 badge: "bg-slate-50 text-slate-600 border-slate-200",
                 dot: "bg-slate-400",
@@ -1480,8 +1659,10 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                   </span>
                 </div>
               );
-            })}
-          </div>
+                })}
+              </div>
+            </CollapsibleSection>
+          )}
           {/* Risk Assessment Breakdown */}
         </div>
 
