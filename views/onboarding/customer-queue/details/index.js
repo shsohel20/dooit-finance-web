@@ -41,6 +41,24 @@ const formatLabel = (str) => {
   return str?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
+// Customer avatar prefers the live selfie captured during onboarding (latest
+// journey's selfie step, else a selfie-typed customer document) over the
+// portal user's photoUrl, so reviewers see the verified face.
+const SELFIE_DOC_TYPES = new Set(["selfie", "face", "live_photo"]);
+
+const resolveSelfieUrl = (details) => {
+  for (const journey of details?.journeys || []) {
+    const step = (journey?.steps || []).find((s) => s.type === "selfie");
+    const url = (step?.documents || []).find((d) => d?.url)?.url;
+    if (url) return url;
+  }
+  return (
+    (details?.documents || []).find(
+      (d) => d?.url && SELFIE_DOC_TYPES.has(String(d.docType || d.type).toLowerCase()),
+    )?.url ?? null
+  );
+};
+
 const getRiskLabelColor = (label) => {
   switch (label?.toLowerCase()) {
     case "low":
@@ -304,7 +322,7 @@ const DocImage = ({ label, url, doc }) => {
       {imageUrl ? (
         <div
           className={cn(
-            "rounded-lg border overflow-hidden border-slate-200 object-cover bg-white shadow-sm",
+            "rounded-lg border overflow-hidden border-slate-200 object-cover bg-white shadow-sm max-w-full",
             {
               "w-[400px] aspect-video": isVerificationDocument,
               "h-52 aspect-auto": !isVerificationDocument,
@@ -1355,7 +1373,7 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
           </div>
         </Card>
       )}
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-5 lg:gap-8">
         {/* Related parties trigger */}
         {/* <div className="fixed top-1/2 right-0 transform -translate-y-1/2 z-10">
           <Button variant="outline" size="icon" onClick={() => setOpenRelatedParties(true)}>
@@ -1364,12 +1382,15 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
         </div> */}
 
         {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────────── */}
-        <div className="col-span-3 ">
+        <div className="col-span-12 lg:col-span-3">
           {/* Customer Profile */}
           <CollapsibleSection title="Customer Profile" icon={User} className="mb-5">
             <div className="flex gap-4 items-center ">
               <Avatar className="size-14 rounded-lg mb-2 border">
-                <AvatarImage src={details?.user?.photoUrl} />
+                <AvatarImage
+                  src={resolveSelfieUrl(details) || details?.user?.photoUrl}
+                  className="object-cover"
+                />
                 <AvatarFallback className="bg-primary/10 text-primary rounded-lg">
                   <User className="size-7" />
                 </AvatarFallback>
@@ -1381,11 +1402,7 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
             </div>
 
             <div>
-              <StatRow
-                label="User Type"
-                value={`${details?.user?.userType ?? "—"} / ${details?.user?.role ?? "—"}`}
-                positive
-              />
+              <StatRow label="UID" value={details?.uid ?? "—"} positive />
               <StatRow label="Country" value={details?.country ?? "—"} positive />
               <StatRow label="Phone" value={details?.metadata?.phone ?? "—"} positive />
               <StatRow
@@ -1476,7 +1493,7 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
         </div>
 
         {/* ── RIGHT MAIN CONTENT ────────────────────────────────────────────────── */}
-        <div className="col-span-9 space-y-5">
+        <div className="col-span-12 lg:col-span-9 space-y-5">
           {/* KYC Rejection Reason */}
           {/* Personal KYC Data */}
           <CollapsibleSection title="Personal KYC Data" icon={User}>
