@@ -5,6 +5,9 @@ import { getCompanies } from "@/app/dashboard/client/companies/actions";
 import CustomResizableTable from "@/components/ui/CustomResizable";
 import { companiesColumns } from "./column";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { PageDescription, PageHeader, PageTitle } from "@/components/common";
 export default function CompaniesList() {
   const [data, setData] = useState([]);
@@ -26,9 +29,16 @@ export default function CompaniesList() {
   const columns = companiesColumns(handleView);
   return (
     <div>
-      <PageHeader>
-        <PageTitle>All Companies</PageTitle>
-        <PageDescription>Manage and track all companies</PageDescription>
+      <PageHeader className="flex-row items-start justify-between">
+        <div>
+          <PageTitle>All Companies</PageTitle>
+          <PageDescription>Manage and track all companies</PageDescription>
+        </div>
+        <Button asChild>
+          <Link href="/dashboard/client/companies/add">
+            <Plus /> Add New Company
+          </Link>
+        </Button>
       </PageHeader>
       <CustomResizableTable
         columns={columns}
