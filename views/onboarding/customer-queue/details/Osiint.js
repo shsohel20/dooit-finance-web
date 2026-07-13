@@ -4,7 +4,16 @@ import React, { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn, dateShowFormatWithTime } from "@/lib/utils";
 import dummyOsiintReport from "./dummyOsiintReport.json";
-import { ExternalLink, Globe2, Newspaper, Users, Activity, Radar, Search } from "lucide-react";
+import {
+  ExternalLink,
+  Globe2,
+  Newspaper,
+  Users,
+  Activity,
+  Radar,
+  Search,
+  SearchCheck,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { getOSINTdata } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 
@@ -29,12 +38,14 @@ function confidenceBadge(confidence) {
 
 export function Osiint({ data, details }) {
   const [query, setQuery] = useState("");
+  const [reportData, setReportData] = useState(null);
   const id = useSearchParams().get("id");
   const report = data && typeof data === "object" ? data : dummyOsiintReport;
 
   const getOsiintReport = async () => {
     const response = await getOSINTdata("customers", id);
-    console.log("response", response);
+    setReportData(response);
+    console.log(" osiint response", response);
   };
 
   useEffect(() => {
@@ -56,7 +67,7 @@ export function Osiint({ data, details }) {
   );
 
   return (
-    <div className="space-y-4  px-6">
+    <div className="space-y-4  ">
       <div className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2">
         <Search className="size-4 text-muted-foreground shrink-0" />
         <input
@@ -73,38 +84,44 @@ export function Osiint({ data, details }) {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-lg font-semibold tracking-tight">{report.entityName}</h2>
+                <h2 className="text-lg font-semibold tracking-tight">{reportData?.entity_name}</h2>
                 <Badge variant="outline" className="font-normal">
-                  {report.entityType}
+                  individual
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">{report.riskCategory}</p>
-            </div>
-            <div className="flex items-center gap-3 rounded-lg border bg-muted/30 px-4 py-3">
-              <div className="rounded-md bg-primary/10 p-2 text-primary shrink-0">
-                <Radar className="size-5" />
-              </div>
-              <div className="min-w-0 text-left sm:text-right sm:ml-auto">
-                <p className="text-xs text-muted-foreground">Score</p>
-                <p
-                  className={cn(
-                    "text-3xl font-bold tabular-nums",
-                    scoreTone(report.overallRiskScore ?? 0),
-                  )}
-                >
-                  {report.overallRiskScore ?? "—"}
-                </p>
-              </div>
+              {reportData?.report?.key_findings.map((itm, i) => {
+                return (
+                  <p key={itm?.split(" ")[0] + i} className="text-sm text-muted-foreground">
+                    {itm}
+                  </p>
+                );
+              })}
             </div>
           </div>
           {report.lastUpdated && (
             <p className="mt-4 text-xs text-muted-foreground">
-              Last updated: {dateShowFormatWithTime(report.lastUpdated)}
+              Last updated: {dateShowFormatWithTime(reportData?.generated_at)}
             </p>
           )}
         </div>
       </div>
 
+      <div>
+        <h6 className="text-sm font-semibold mb-4 flex items-center gap-2">
+          <Globe2 className="size-4 text-primary" />
+          Queries run
+        </h6>
+        <div className="flex flex-wrap gap-2">
+          {reportData?.queries_run?.map((query) => (
+            <div key={query.query} className="rounded-md border border-border/80 p-3 flex-shrink-0">
+              <p className="text-sm font-mono  flex items-center gap-2">
+                <SearchCheck className="size-4 text-primary" />
+                {query.query}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
       <div className="grid ">
         <div>
           <div className="">

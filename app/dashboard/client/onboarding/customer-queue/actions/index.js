@@ -29,9 +29,7 @@ export async function exportCustomersExcel(queryParams = {}) {
 
   const cd = response.headers?.get?.("content-disposition") || "";
   const match = /filename="?([^"]+)"?/.exec(cd);
-  const filename = match
-    ? match[1]
-    : `customers-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  const filename = match ? match[1] : `customers-${new Date().toISOString().slice(0, 10)}.xlsx`;
 
   return { success: true, base64, filename };
 }
@@ -89,10 +87,9 @@ export async function addCustomerDocuments(id, documents) {
 }
 
 export async function removeCustomerDocument(id, url) {
-  const response = await fetchWithAuth(
-    `customer/${id}/documents?url=${encodeURIComponent(url)}`,
-    { method: "DELETE" },
-  );
+  const response = await fetchWithAuth(`customer/${id}/documents?url=${encodeURIComponent(url)}`, {
+    method: "DELETE",
+  });
   return response.json();
 }
 
@@ -184,7 +181,7 @@ export const getCustomerRelations = async (payload) => {
 };
 
 export const getCustomerRelationsGraph = async (id) => {
-  const url = `http://31.97.71.194:5055/api/v1/relationships/${id} `;
+  const url = `http://31.97.71.194:5055/api/v1/relationships/${id}`;
   const response = await fetch(url, {
     method: "GET",
   });
