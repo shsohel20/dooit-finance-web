@@ -2,318 +2,415 @@
 
 import React, { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { cn, dateShowFormatWithTime } from "@/lib/utils";
-import dummyOsiintReport from "./dummyOsiintReport.json";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
-  ExternalLink,
-  Globe2,
-  Newspaper,
-  Users,
-  Activity,
+  AlertTriangle,
+  BookOpen,
+  CheckCircle2,
+  ClipboardList,
+  Crosshair,
+  Database,
+  FileSearch,
+  Fingerprint,
+  Flag,
+  Lightbulb,
+  ListChecks,
+  Loader2,
+  MapPin,
   Radar,
-  Search,
-  SearchCheck,
+  Scale,
+  SearchX,
+  ShieldAlert,
+  ShieldCheck,
+  Target,
+  UserRound,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { getOSINTdata } from "@/app/dashboard/client/onboarding/customer-queue/actions";
+import {
+  getOSINTdata,
+  getOSINTScreenshots,
+} from "@/app/dashboard/client/onboarding/customer-queue/actions";
 
-function scoreTone(score) {
-  if (score <= 30) return "text-success";
-  if (score <= 60) return "text-warning-foreground";
-  return "text-danger";
+function parseRiskLevel(riskAssessment) {
+  if (!riskAssessment) return null;
+  const match = String(riskAssessment).match(/^\s*(critical|high|medium|low|info)\b/i);
+  return match ? match[1].toUpperCase() : null;
 }
 
-function scoreBadgeClass(score) {
-  if (score <= 30) return "bg-success/15 text-success border-success/30";
-  if (score <= 60) return "bg-warning/15 text-warning-foreground border-warning/30";
-  return "bg-danger/15 text-danger border-danger/30";
+function riskStyles(level) {
+  const l = (level || "").toLowerCase();
+  if (l === "critical" || l === "high") {
+    return {
+      badge: "bg-red-50 text-red-700 border-red-200",
+      bar: "bg-red-500",
+      icon: "text-red-600",
+      panel: "border-red-200 bg-red-50/60",
+    };
+  }
+  if (l === "medium") {
+    return {
+      badge: "bg-amber-50 text-amber-700 border-amber-200",
+      bar: "bg-amber-500",
+      icon: "text-amber-600",
+      panel: "border-amber-200 bg-amber-50/60",
+    };
+  }
+  if (l === "low") {
+    return {
+      badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      bar: "bg-emerald-500",
+      icon: "text-emerald-600",
+      panel: "border-emerald-200 bg-emerald-50/60",
+    };
+  }
+  return {
+    badge: "bg-slate-50 text-slate-600 border-slate-200",
+    bar: "bg-slate-400",
+    icon: "text-slate-500",
+    panel: "border-slate-200 bg-slate-50/60",
+  };
 }
 
-function confidenceBadge(confidence) {
-  const c = (confidence || "").toLowerCase();
-  if (c === "high") return "bg-success/15 text-success border-success/30";
-  if (c === "medium") return "bg-warning/15 text-warning-foreground border-warning/30";
-  return "bg-muted text-muted-foreground border-border";
+function statusStyles(status) {
+  const s = (status || "").toLowerCase();
+  if (s === "completed" || s === "complete") {
+    return {
+      badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      Icon: CheckCircle2,
+    };
+  }
+  if (s === "failed" || s === "error") {
+    return {
+      badge: "bg-red-50 text-red-700 border-red-200",
+      Icon: AlertTriangle,
+    };
+  }
+  if (s === "pending" || s === "processing" || s === "running") {
+    return {
+      badge: "bg-sky-50 text-sky-700 border-sky-200",
+      Icon: Loader2,
+    };
+  }
+  return {
+    badge: "bg-slate-50 text-slate-600 border-slate-200",
+    Icon: Radar,
+  };
+}
+
+function formatEntityType(type) {
+  if (!type) return "—";
+  return String(type)
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function SectionCard({ icon: Icon, title, children, iconClassName, accent }) {
+  return (
+    <Card className="border border-border shadow-sm gap-0 py-0 overflow-hidden">
+      <CardHeader className={cn("px-4 py-3 border-b border-border/70", accent || "bg-slate-50/80")}>
+        <CardTitle className="text-sm font-semibold flex items-center gap-2 text-slate-800">
+          <span className="inline-flex size-7 items-center justify-center rounded-md bg-white border border-border shadow-sm">
+            <Icon className={cn("size-3.5", iconClassName || "text-primary")} />
+          </span>
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="px-4 py-4">{children}</CardContent>
+    </Card>
+  );
+}
+
+function BodyText({ children }) {
+  return <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-wrap">{children}</p>;
 }
 
 export function Osiint({ data, details }) {
-  const [query, setQuery] = useState("");
   const [reportData, setReportData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [screenshots, setScreenshots] = useState(null);
+  console.log(" screenshots", screenshots);
   const id = useSearchParams().get("id");
-  const report = data && typeof data === "object" ? data : dummyOsiintReport;
-
-  const getOsiintReport = async () => {
-    const response = await getOSINTdata("customers", id);
-    setReportData(response);
-    console.log(" osiint response", JSON.stringify(response, null, 2));
-  };
 
   useEffect(() => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const getOsiintReport = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const entityType = "customers";
+        const response = await getOSINTdata(entityType, id);
+        const screenshots = await getOSINTScreenshots(entityType, id);
+        if (!cancelled) {
+          setReportData(response);
+          setScreenshots(screenshots);
+        }
+      } catch (err) {
+        if (!cancelled) setError(err?.message || "Failed to load OSINT report");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
     getOsiintReport();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
-  const q = query.toLowerCase();
-  const profiles = (report.profiles ?? []).filter(
-    (p) => !q || p.source?.toLowerCase().includes(q) || p.url?.toLowerCase().includes(q),
-  );
-  const adverseMedia = (report.adverseMedia ?? []).filter(
-    (m) => !q || m.headline?.toLowerCase().includes(q) || m.source?.toLowerCase().includes(q),
-  );
-  const associates = (report.associates ?? []).filter(
-    (a) => !q || a.name?.toLowerCase().includes(q) || a.relation?.toLowerCase().includes(q),
-  );
-  const activitySignals = (report.activitySignals ?? []).filter(
-    (s) => !q || s.type?.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q),
-  );
+  const payload = reportData || (data && typeof data === "object" ? data : null);
+  const report = payload?.report || null;
+  const riskLevel = parseRiskLevel(report?.risk_assessment);
+  const styles = riskStyles(riskLevel);
+  const status = statusStyles(payload?.status);
+  const StatusIcon = status.Icon;
+  const findings = Array.isArray(report?.key_findings) ? report.key_findings : [];
 
-  return (
-    <div className="space-y-4  ">
-      <div className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2">
-        <Search className="size-4 text-muted-foreground shrink-0" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search profiles, media, associates…"
-          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-        />
-      </div>
-
-      <div className="">
-        <div className="">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-lg font-semibold tracking-tight">{reportData?.entity_name}</h2>
-                <Badge variant="outline" className="font-normal">
-                  individual
-                </Badge>
-              </div>
-              {reportData?.report?.key_findings.map((itm, i) => {
-                return (
-                  <p key={itm?.split(" ")[0] + i} className="text-sm text-muted-foreground">
-                    {itm}
-                  </p>
-                );
-              })}
-            </div>
-          </div>
-          {report.lastUpdated && (
-            <p className="mt-4 text-xs text-muted-foreground">
-              Last updated: {dateShowFormatWithTime(reportData?.generated_at)}
-            </p>
-          )}
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-500">
+        <Loader2 className="size-8 animate-spin text-primary" />
+        <div className="flex items-center gap-2 text-sm">
+          <Radar className="size-4" />
+          Gathering open-source intelligence…
         </div>
       </div>
+    );
+  }
 
-      <div>
-        <h6 className="text-sm font-semibold mb-4 flex items-center gap-2">
-          <Globe2 className="size-4 text-primary" />
-          Queries run
-        </h6>
-        <div className="flex flex-wrap gap-2">
-          {reportData?.queries_run?.map((query) => (
-            <div key={query.query} className="rounded-md border border-border/80 p-3 flex-shrink-0">
-              <p className="text-sm font-mono  flex items-center gap-2">
-                <SearchCheck className="size-4 text-primary" />
-                {query.query}
-              </p>
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+        <div className="inline-flex size-12 items-center justify-center rounded-full bg-red-50 border border-red-100">
+          <AlertTriangle className="size-5 text-red-600" />
+        </div>
+        <p className="text-sm font-medium text-slate-800">Unable to load OSINT report</p>
+        <p className="text-xs text-slate-500 max-w-sm">{error}</p>
+      </div>
+    );
+  }
+
+  if (!payload || !report) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+        <div className="inline-flex size-12 items-center justify-center rounded-full bg-slate-50 border border-slate-200">
+          <SearchX className="size-5 text-slate-400" />
+        </div>
+        <p className="text-sm font-medium text-slate-800">No OSINT report available</p>
+        <p className="text-xs text-slate-500">
+          Run an OSINT scan to generate intelligence for this entity.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <Card className="border border-border shadow-sm gap-0 py-0 overflow-hidden">
+        <div className={cn("h-1.5 w-full", styles.bar)} />
+        <CardContent className="px-5 py-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-3 min-w-0">
+              <div className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/15">
+                <Fingerprint className="size-5 text-primary" />
+              </div>
+              <div className="min-w-0 space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-lg font-semibold text-slate-900 truncate">
+                    {payload.entity_name || details?.fullName || "Unknown Entity"}
+                  </h2>
+                  {riskLevel && (
+                    <Badge className={cn("border font-semibold", styles.badge)}>
+                      <ShieldAlert className="size-3" />
+                      {riskLevel} RISK
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500">
+                  <span className="inline-flex items-center gap-1.5">
+                    <UserRound className="size-3.5 text-slate-400" />
+                    {formatEntityType(payload.entity_type)}
+                  </span>
+                  {payload.entity_id && (
+                    <span className="inline-flex items-center gap-1.5 font-mono text-[11px]">
+                      <FileSearch className="size-3.5 text-slate-400" />
+                      {payload.entity_id}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <Badge className={cn("border", status.badge)}>
+                <StatusIcon
+                  className={cn(
+                    "size-3",
+                    (payload.status || "").toLowerCase().includes("process") && "animate-spin",
+                  )}
+                />
+                {formatEntityType(payload.status || "Unknown")}
+              </Badge>
+              <Badge className="border bg-slate-50 text-slate-600 border-slate-200">
+                <Radar className="size-3" />
+                OSINT Assessment
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Risk Assessment — prominent */}
+      {report.risk_assessment && (
+        <Card className={cn("border shadow-sm gap-0 py-0 overflow-hidden", styles.panel)}>
+          <CardContent className="px-5 py-4">
+            <div className="flex items-start gap-3">
+              <div className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-white border border-border shadow-sm">
+                <Scale className={cn("size-4", styles.icon)} />
+              </div>
+              <div className="min-w-0 space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Risk Assessment
+                  </p>
+                  {riskLevel && (
+                    <Badge className={cn("border font-semibold", styles.badge)}>
+                      <Flag className="size-3" />
+                      {riskLevel}
+                    </Badge>
+                  )}
+                </div>
+                <BodyText>{report.risk_assessment}</BodyText>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Narrative sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {report.introduction && (
+          <SectionCard
+            icon={BookOpen}
+            title="Introduction"
+            iconClassName="text-sky-600"
+            accent="bg-sky-50/50"
+          >
+            <BodyText>{report.introduction}</BodyText>
+          </SectionCard>
+        )}
+
+        {report.area_of_interest && (
+          <SectionCard
+            icon={Crosshair}
+            title="Area of Interest"
+            iconClassName="text-violet-600"
+            accent="bg-violet-50/50"
+          >
+            <BodyText>{report.area_of_interest}</BodyText>
+          </SectionCard>
+        )}
+
+        {report.data_collection && (
+          <SectionCard
+            icon={Database}
+            title="Data Collection"
+            iconClassName="text-cyan-600"
+            accent="bg-cyan-50/50"
+          >
+            <BodyText>{report.data_collection}</BodyText>
+          </SectionCard>
+        )}
+
+        {report.analysis_and_interpretation && (
+          <SectionCard
+            icon={Lightbulb}
+            title="Analysis & Interpretation"
+            iconClassName="text-amber-600"
+            accent="bg-amber-50/50"
+          >
+            <BodyText>{report.analysis_and_interpretation}</BodyText>
+          </SectionCard>
+        )}
+      </div>
+
+      {/* Key Findings */}
+      {findings.length > 0 && (
+        <SectionCard
+          icon={ListChecks}
+          title="Key Findings"
+          iconClassName="text-orange-600"
+          accent="bg-orange-50/50"
+        >
+          <ul className="space-y-2.5">
+            {findings.map((finding, idx) => (
+              <li
+                key={idx}
+                className="flex items-start gap-3 rounded-lg border border-border/70 bg-slate-50/60 px-3 py-2.5"
+              >
+                <span className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md bg-white border border-border text-[11px] font-semibold text-slate-500">
+                  {idx + 1}
+                </span>
+                <div className="flex items-start gap-2 min-w-0">
+                  <Target className="size-3.5 mt-0.5 shrink-0 text-orange-500" />
+                  <p className="text-sm leading-relaxed text-slate-700">{finding}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
+      )}
+
+      {/* Conclusion */}
+      {report.conclusion && (
+        <SectionCard
+          icon={ShieldCheck}
+          title="Conclusion & Recommendation"
+          iconClassName="text-emerald-600"
+          accent="bg-emerald-50/50"
+        >
+          <div className="flex items-start gap-3">
+            <ClipboardList className="size-4 mt-0.5 shrink-0 text-emerald-600" />
+            <BodyText>{report.conclusion}</BodyText>
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Meta footer */}
+      <div className="flex flex-wrap items-center gap-3 px-1 pb-2 text-[11px] text-slate-400">
+        <span className="inline-flex items-center gap-1.5">
+          <MapPin className="size-3" />
+          Open-source intelligence assessment
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <ShieldAlert className="size-3" />
+          For compliance & AML screening support
+        </span>
+      </div>
+      {screenshots && screenshots.length > 0 && (
+        <div className="flex gap-4 flex-wrap">
+          {screenshots.map((screenshot, idx) => (
+            <div
+              key={idx}
+              className="border border-border shadow-sm gap-0 py-0 overflow-hidden w-40 flex-shrink-0 rounded"
+            >
+              <img
+                src={`data:image/png;base64,${screenshot.base64}`}
+                alt={screenshot.query_text}
+                className="w-full h-full object-cover"
+              />
             </div>
           ))}
         </div>
-      </div>
-      <div className="grid ">
-        <div>
-          <div className="">
-            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-              <Globe2 className="size-4 text-primary" />
-              Open-source profiles
-            </h3>
-            {profiles.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No profile links recorded.</p>
-            ) : (
-              <ul className="space-y-3">
-                {profiles.map((p, i) => (
-                  <li
-                    key={`${p.url}-${i}`}
-                    className="flex flex-col gap-2 rounded-md border border-border/80 p-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium">{p.source}</p>
-                      {p.url && (
-                        <a
-                          href={p.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline break-all"
-                        >
-                          {p.url}
-                          <ExternalLink className="size-3 shrink-0" />
-                        </a>
-                      )}
-                    </div>
-                    {p.confidence != null && (
-                      <Badge
-                        variant="outline"
-                        className={cn("w-fit shrink-0", confidenceBadge(p.confidence))}
-                      >
-                        {String(p.confidence)} confidence
-                      </Badge>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div className="">
-          <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-            <Newspaper className="size-4 text-primary" />
-            Adverse media
-          </h3>
-          {adverseMedia.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No adverse media items.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted text-left text-xs font-medium text-neutral-800">
-                    <th className="p-2 font-medium">Headline</th>
-                    {/* <th className="p-2 font-medium">Source</th> */}
-                    <th className="p-2 font-medium whitespace-nowrap">Published</th>
-                    {/* <th className="p-2 font-medium text-right whitespace-nowrap">Score</th> */}
-                    {/* <th className="p-2 font-medium whitespace-nowrap">Sentiment</th> */}
-                  </tr>
-                </thead>
-                <tbody>
-                  {adverseMedia.map((m) => (
-                    <tr
-                      key={m.id}
-                      className="border-b border-border/50 last:border-0 hover:bg-muted/30"
-                    >
-                      <td className="p-2 align-top font-medium w-full max-w-md text-xs">
-                        {m.headline}
-                        <p className="text-xs text-muted-foreground">{m.source}</p>
-                      </td>
-                      {/* <td className="p-2 align-top text-muted-foreground">{m.source}</td> */}
-                      <td className="p-2 align-top whitespace-nowrap text-muted-foreground">
-                        {m.publishedDate}
-                      </td>
-                      {/* <td className="p-2 align-top text-right">
-                        <span
-                          className={cn("font-semibold tabular-nums", scoreTone(m.riskScore ?? 0))}
-                        >
-                          {m.riskScore ?? "—"}
-                        </span>
-                      </td> */}
-                      {/* <td className="p-2 align-top">
-                        {m.sentiment != null && (
-                          <Badge variant="outline" className={sentimentBadge(m.sentiment)}>
-                            {m.sentiment}
-                          </Badge>
-                        )}
-                      </td> */}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="grid gap-6 ">
-        <div>
-          <div className="">
-            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-              <Users className="size-4 text-primary" />
-              Associates
-            </h3>
-            {associates.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No associates listed.</p>
-            ) : (
-              <ul className="space-y-3">
-                {associates.map((a, i) => (
-                  <li key={`${a.name}-${i}`} className="rounded-md border border-border/80 p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-medium">{a.name}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{a.relation}</p>
-                      </div>
-                      {a.riskScore != null && (
-                        <Badge variant="outline" className={scoreBadgeClass(a.riskScore)}>
-                          {a.riskScore}
-                        </Badge>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-
-        {/* <Card>
-          <div className="p-6">
-            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-              <MapPin className="size-4 text-primary" />
-              Geographic exposure
-            </h3>
-            {geographicExposure.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No geographic exposure data.</p>
-            ) : (
-              <ul className="space-y-2">
-                {geographicExposure.map((g, i) => (
-                  <li
-                    key={`${g.country}-${i}`}
-                    className="flex items-center justify-between gap-2 rounded-md border border-border/80 px-3 py-2"
-                  >
-                    <span className="text-sm font-medium">{g.country}</span>
-                    {g.riskLevel != null && (
-                      <Badge variant="outline" className={geoRiskBadge(g.riskLevel)}>
-                        {g.riskLevel}
-                      </Badge>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </Card> */}
-      </div>
-
-      <div>
-        <div className="">
-          <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-            <Activity className="size-4 text-primary" />
-            Activity signals
-          </h3>
-          {activitySignals.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No activity signals.</p>
-          ) : (
-            <ul className="divide-y divide-border">
-              {activitySignals.map((sig, i) => (
-                <li key={`${sig.type}-${sig.date}-${i}`} className="py-4 first:pt-0 last:pb-0">
-                  <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-                    <p className="text-sm font-medium">{sig.type}</p>
-                    {sig.date && (
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {sig.date}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    {sig.description}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

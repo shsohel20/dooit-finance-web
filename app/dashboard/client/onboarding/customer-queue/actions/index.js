@@ -195,3 +195,11 @@ export const getOSINTdata = async (entityType, entityId) => {
   });
   return response.json();
 };
+
+export const getOSINTScreenshots = async (entityType, entityId) => {
+  const url = `https://osint.dooit.ai/api/v1/osint/${entityType}/${entityId}/screenshots`;
+  const response = await fetch(url, {
+    method: "GET",
+  });
+  return response.json();
+};
