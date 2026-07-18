@@ -15,7 +15,7 @@ export default function CaseDetails({ caseId }) {
       <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
         <IconFolderOff className="mb-3 size-12 opacity-40" />
         <p className="text-sm font-medium">Case not found</p>
-        <p className="mt-1 text-xs">The case ID "{caseId}" does not exist.</p>
+        <p className="mt-1 text-xs">The case ID &quot;{caseId}&quot; does not exist.</p>
       </div>
     );
   }

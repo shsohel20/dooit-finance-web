@@ -45,7 +45,7 @@ export function Osiint({ data, details }) {
   const getOsiintReport = async () => {
     const response = await getOSINTdata("customers", id);
     setReportData(response);
-    console.log(" osiint response", response);
+    console.log(" osiint response", JSON.stringify(response, null, 2));
   };
 
   useEffect(() => {
