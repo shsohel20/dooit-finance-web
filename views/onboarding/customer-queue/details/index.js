@@ -17,13 +17,19 @@ import {
   Timer,
   Wallet,
   ScanFace,
+  FileText,
+  Database,
+  ShieldCheck,
+  ChevronDown,
 } from "lucide-react";
-import { cn, dateShowFormat, fmt, KYC_HISTORY_STATUS } from "@/lib/utils";
+import { cn, dateShowFormat, dateShowFormatWithTime, fmt, KYC_HISTORY_STATUS } from "@/lib/utils";
+import { resolveCountry } from "@/lib/country";
 import { RelatedPartyDrawer } from "./RelatedPartyDrawer";
 import { AmlMatchesTable } from "./AmlMatchesTable";
 import RiskScoreCard from "@/components/RiskScoreCard";
 import { SmoothZoomImageWrapper } from "@/components/CustomZoomImage";
 import StepReviewButtons from "@/components/StepReviewButtons";
+import Image from "next/image";
 
 // Journey steps that expose manual Approve/Reject reviewer buttons.
 const REVIEWABLE_STEPS = new Set(["id_document", "selfie"]);
@@ -33,6 +39,24 @@ const REVIEWABLE_STEPS = new Set(["id_document", "selfie"]);
 const formatLabel = (str) => {
   if (!str) return "—";
   return str?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+// Customer avatar prefers the live selfie captured during onboarding (latest
+// journey's selfie step, else a selfie-typed customer document) over the
+// portal user's photoUrl, so reviewers see the verified face.
+const SELFIE_DOC_TYPES = new Set(["selfie", "face", "live_photo"]);
+
+const resolveSelfieUrl = (details) => {
+  for (const journey of details?.journeys || []) {
+    const step = (journey?.steps || []).find((s) => s.type === "selfie");
+    const url = (step?.documents || []).find((d) => d?.url)?.url;
+    if (url) return url;
+  }
+  return (
+    (details?.documents || []).find(
+      (d) => d?.url && SELFIE_DOC_TYPES.has(String(d.docType || d.type).toLowerCase()),
+    )?.url ?? null
+  );
 };
 
 const getRiskLabelColor = (label) => {
@@ -149,6 +173,20 @@ const getJourneyDisplayStatus = (journey) => {
   if (steps.some((s) => ["in_progress", "submitted", "approved"].includes(s.status)))
     return "in_progress";
   return "not_started";
+};
+
+// Combined status for the merged "ID Document & Selfie" section — a rejection
+// on either step rejects the pair, approval requires both, otherwise show the
+// least-progressed of the two.
+const combineStepStatus = (a, b) => {
+  if (!b) return a;
+  if (a === b) return a;
+  const set = new Set([a, b]);
+  if (set.has("rejected")) return "rejected";
+  for (const s of ["pending", "not_started", "in_progress", "submitted"]) {
+    if (set.has(s)) return s;
+  }
+  return a;
 };
 
 const formatFieldLabel = (key) =>
@@ -284,7 +322,7 @@ const DocImage = ({ label, url, doc }) => {
       {imageUrl ? (
         <div
           className={cn(
-            "rounded-lg border overflow-hidden border-slate-200 object-cover bg-white shadow-sm",
+            "rounded-lg border overflow-hidden border-slate-200 object-cover bg-white shadow-sm max-w-full",
             {
               "w-[400px] aspect-video": isVerificationDocument,
               "h-52 aspect-auto": !isVerificationDocument,
@@ -297,7 +335,7 @@ const DocImage = ({ label, url, doc }) => {
             easing="cubic-bezier(0.22, 1, 0.36, 1)"
             enableParallax={true}
             hoverOnly={true}
-            // style={{ maxWidth: 400, aspectRatio: "16/9" }}
+          // style={{ maxWidth: 400, aspectRatio: "16/9" }}
           >
             <img src={imageUrl} alt={imageLabel} className="w-full h-full object-cover" />
           </SmoothZoomImageWrapper>
@@ -321,6 +359,60 @@ const DocumentsGallery = ({ documents, className = "" }) =>
       ))}
     </div>
   ) : null;
+
+// Document photos for the ID Document step — sized to fill the panel column
+// (two+ docs side-by-side, a single doc as one wide card) instead of the small
+// fixed thumbnails of the generic gallery. object-contain keeps the whole
+// document (incl. MRZ lines) visible without cropping.
+const IdDocumentsGallery = ({ documents }) => {
+  const docs = (documents || []).filter((d) => d?.url);
+  if (!docs.length) return null;
+
+  return (
+    <div
+      className={cn(
+        "grid gap-4",
+        docs.length > 1 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 max-w-[560px]",
+      )}
+    >
+      {docs.map((doc, i) => {
+        const side = doc.type && !["both", ""].includes(String(doc.type).toLowerCase());
+        const label = side
+          ? `${formatLabel(doc.docType || "Document")} — ${formatLabel(doc.type)}`
+          : formatLabel(doc.docType || doc.name || "Document");
+        return (
+          <figure
+            key={`${doc.url}-${i}`}
+            className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden"
+          >
+            <div className=" bg-slate-50">
+              <SmoothZoomImageWrapper
+                zoomScale={1.35}
+                duration={600}
+                easing="cubic-bezier(0.22, 1, 0.36, 1)"
+                hoverOnly={true}
+              >
+                <Image
+                  height={200}
+                  width={500}
+                  src={doc.url}
+                  alt={label}
+                  className="w-full h-full "
+                />
+              </SmoothZoomImageWrapper>
+            </div>
+            <figcaption className="flex items-center justify-between gap-2 px-3 py-2 border-t border-slate-100 bg-slate-50/60">
+              <span className="text-[11px] font-medium text-slate-700">{label}</span>
+              {doc.name && (
+                <span className="text-[10px] text-slate-400 truncate max-w-[50%]">{doc.name}</span>
+              )}
+            </figcaption>
+          </figure>
+        );
+      })}
+    </div>
+  );
+};
 
 const DataFieldsGrid = ({ data, excludeKeys = [] }) => {
   const entries = Object.entries(data || {}).filter(
@@ -522,13 +614,18 @@ const FaceMetaRow = ({ data }) => (
 );
 
 // Face match result (from the doc_face_verified event) — document photo vs
-// selfie similarity. Rendered inside the ID Document journey step, where the
-// verdict lands. Manual Approve/Reject lives in the step header (StepReviewButtons).
+// selfie similarity. Rendered inside the combined "ID Document & Selfie"
+// section (and on a standalone Selfie step only when a journey has no ID
+// document). Manual Approve/Reject lives in the step header (StepReviewButtons).
 const FaceMatchResult = ({ data, docUrl, selfieUrl }) => {
   const matched = data.verificationStatus === 1;
   const similarity = Number(data.similarity);
   const hasSimilarity = Number.isFinite(similarity);
   const errors = Array.isArray(data.apiErrors) ? data.apiErrors : null;
+
+  console.log({ matched })
+  console.log({ data })
+  console.log(data.verificationStatus)
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3.5 space-y-3">
@@ -558,60 +655,73 @@ const FaceMatchResult = ({ data, docUrl, selfieUrl }) => {
   );
 };
 
-// Selfie journey step — the live selfie plus the same face-match verdict, shown
-// on its own so the reviewer can Approve/Reject the selfie/liveness independently
-// of the ID document (e.g. a blur/liveness failure that isn't a document problem).
-const SelfieContent = ({ step }) => {
-  const data = step.data || {};
-  const hasFaceMatch = data.verificationStatus !== undefined || data.similarity !== undefined;
-  const matched = data.verificationStatus === 1;
-  const similarity = Number(data.similarity);
-  const hasSimilarity = Number.isFinite(similarity);
-  const errors = Array.isArray(data.apiErrors) ? data.apiErrors : null;
-  const selfieUrl = (step.documents || []).find((d) => d?.url)?.url ?? null;
+// Standalone Selfie step — only rendered when a journey has a selfie step but
+// no id_document step; otherwise VerificationJourneyPanel merges the selfie
+// into the combined "ID Document & Selfie" section.
+const SelfieContent = ({ step, journey }) => {
+  const hasVerdict = (d) => d?.verificationStatus !== undefined || d?.similarity !== undefined;
 
-  return (
-    <div className="flex flex-wrap items-start gap-4">
-      <FaceThumb url={selfieUrl} label="Selfie" />
-      <div className="flex-1 min-w-[180px] space-y-3">
-        {hasFaceMatch && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <ScanFace className="size-4 text-slate-500" />
-            <span className="text-xs font-semibold text-slate-800">Face Verification</span>
-            <FaceMatchBadge matched={matched} />
-          </div>
-        )}
-        {hasSimilarity && <SimilarityBar similarity={similarity} matched={matched} />}
-        {hasFaceMatch && <FaceMetaRow data={data} />}
-        {errors?.length > 0 && <WarnBox warnings={errors} />}
-        {!hasFaceMatch && !selfieUrl && <EmptyStepState step={step} />}
+  // The face verdict is written to both the selfie and id_document steps; fall
+  // back to the ID document step for older records where it only landed there.
+  const idDocStep = (journey?.steps || []).find((s) => s.type === "id_document");
+  const ownData = step.data || {};
+  const data = hasVerdict(ownData) ? ownData : hasVerdict(idDocStep?.data) ? idDocStep.data : ownData;
+  const hasFaceMatch = hasVerdict(data);
+
+  const selfieUrl = (step.documents || []).find((d) => d?.url)?.url ?? null;
+  const docUrl =
+    (idDocStep?.documents || []).find((d) => String(d?.type).toLowerCase() === "front")?.url ??
+    (idDocStep?.documents || []).find((d) => d?.url)?.url ??
+    null;
+
+  if (hasFaceMatch) {
+    return <FaceMatchResult data={data} docUrl={docUrl} selfieUrl={selfieUrl} />;
+  }
+  if (selfieUrl) {
+    return (
+      <div className="flex flex-wrap items-start gap-4">
+        <FaceThumb url={selfieUrl} label="Selfie" />
+        <p className="text-xs text-slate-400 pt-2">Face verification has not run yet.</p>
       </div>
-    </div>
-  );
+    );
+  }
+  return <EmptyStepState step={step} />;
 };
 
+// Combined "ID Document & Selfie" section — document images, the data
+// extracted off the document (OCR) and the face verification card (document
+// photo vs selfie) in one place. The selfie step is merged into this section
+// by VerificationJourneyPanel; Approve/Reject cascades to both steps.
 const IdDocumentContent = ({ step, journey }) => {
   const data = step.data || {};
-  const fields = data.ocrResult?.fields || data.fields || {};
-  const addressKey = Object.keys(fields).find((k) => k.toLowerCase() === "address");
-  const addressValue = addressKey ? fields[addressKey] : null;
-  const gridFields = Object.entries(fields).filter(([key]) => key !== addressKey);
+  const legacyFields = data.ocrResult?.fields || data.fields || {};
   const warnings = data.warnings;
-  const hasFaceMatch = data.verificationStatus !== undefined || data.similarity !== undefined;
 
-  // The face match compares the ID document photo (front side, on this step)
-  // against the selfie (on the hidden selfie step). Pull both for the card.
-  const isSelfieDoc = (d) =>
-    ["selfie", "face", "live_photo"].includes((d?.docType || d?.type || "").toLowerCase());
-  const docPhotoUrl = (step.documents || []).find(
-    (d) => String(d?.type).toLowerCase() === "front",
-  )?.url ?? step.documents?.[0]?.url ?? null;
-  const selfieUrl =
-    (journey?.steps || [])
-      .find((s) => s.type === "selfie")
-      ?.documents?.find((d) => d?.url)?.url ??
-    (step.documents || []).find(isSelfieDoc)?.url ??
+  console.log('step data', step)
+
+  // Face verdict — written to both steps; read ours, fall back to the selfie
+  // step (older records). Journey-step documents carry no front/back `type`
+  // (sanitizeDocuments drops it), so the first ID doc is the front side.
+  const selfieStep = (journey?.steps || []).find((s) => s.type === "selfie");
+
+  const hasVerdict = (d) => d?.verificationStatus !== undefined || d?.similarity !== undefined;
+
+
+  const faceData = hasVerdict(data) ? data : hasVerdict(selfieStep?.data) ? selfieStep.data : null;
+  const faceDocUrl =
+    (step.documents || []).find((d) => String(d?.type).toLowerCase() === "front")?.url ??
+    (step.documents || []).find((d) => d?.url)?.url ??
     null;
+  const faceSelfieUrl = (selfieStep?.documents || []).find((d) => d?.url)?.url ?? null;
+
+  const ocrEntries = Object.entries(data.ocr?.fields || {}).filter(
+    ([, value]) => value && typeof value !== "object",
+  );
+  const addressBreakdown = Object.entries(data.ocr?.fields?.address_breakdown || {}).filter(
+    ([, value]) => value,
+  );
+  const hasOcr = ocrEntries.length > 0 || addressBreakdown.length > 0;
+  const documentLabel = data.ocr?.cardType || data.ocr?.detectedType || null;
 
   return (
     <div className="space-y-4">
@@ -630,64 +740,81 @@ const IdDocumentContent = ({ step, journey }) => {
         </div>
       )}
 
-      {hasFaceMatch && (
-        <FaceMatchResult data={data} docUrl={docPhotoUrl} selfieUrl={selfieUrl} />
-      )}
-
       <WarnBox warnings={warnings} />
 
-      {!data.ocr && Object.keys(fields).length > 0 && <DataFieldsGrid data={fields} />}
+      {!data.ocr && Object.keys(legacyFields).length > 0 && <DataFieldsGrid data={legacyFields} />}
 
-      {/* <DataFieldsGrid data={data} excludeKeys={["ocr", "fields"]} /> */}
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-4 bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-sm font-semibold text-slate-900 mb-4">OCR Data</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "0.5rem" }}>
-            {/* OCR Data Display */}
-            {data.ocr && data.ocr.fields && (
-              <div className="space-y-2">
-                {Object.entries(data.ocr.fields)
-                  .filter(([key, value]) => value && typeof value !== "object")
-                  .map(([key, value]) => (
-                    <div key={key} className="text-xs full-span-subgrid">
-                      <span className=" text-slate-500 capitalize">
-                        {key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                      </span>
-                      {/* {": "} */}
-                      <span className=" font-semibold">
-                        {typeof value === "string" ? `${value}` : value}
-                      </span>
-                    </div>
-                  ))}
-                {/* Optional: Show address_breakdown if present */}
-                {data.ocr.fields.address_breakdown && (
-                  <div className="mt-2">
-                    <div className="font-light text-xs">Address Breakdown:</div>
-                    {Object.entries(data.ocr.fields.address_breakdown)
-                      .filter(([k, v]) => v)
-                      .map(([k, v]) => (
-                        <div key={k} className="text-xs pl-3">
-                          <span className="font-light">
-                            {k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}:
-                          </span>{" "}
-                          <span className="font-semibold">{v}</span>
-                        </div>
-                      ))}
-                  </div>
+      {hasOcr ? (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="lg:col-span-6 xl:col-span-5">
+            <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+              <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/60">
+                <div className="flex items-center gap-2">
+                  <FileText className="size-4 text-slate-500" />
+                  <span className="text-xs font-semibold text-slate-800">
+                    Extracted Document Data
+                  </span>
+                </div>
+                {documentLabel && (
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] font-medium text-slate-600 border-slate-200 bg-white"
+                  >
+                    {documentLabel}
+                  </Badge>
                 )}
               </div>
-            )}
+
+              <div className="px-4 divide-y divide-slate-100">
+                {ocrEntries.map(([key, value]) => (
+                  <div key={key} className="flex items-start justify-between gap-3 py-2">
+                    <span className="text-[11px] text-slate-500 whitespace-nowrap">
+                      {formatFieldLabel(key)}
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-800 text-right break-words min-w-0">
+                      {String(value)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {addressBreakdown.length > 0 && (
+                <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/40">
+                  <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                    Address Breakdown
+                  </p>
+                  <div className="space-y-1">
+                    {addressBreakdown.map(([key, value]) => (
+                      <div key={key} className="flex items-start justify-between gap-3">
+                        <span className="text-[11px] text-slate-500 whitespace-nowrap">
+                          {formatFieldLabel(key)}
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-700 text-right break-words min-w-0">
+                          {String(value)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="lg:col-span-6 xl:col-span-7">
+            <IdDocumentsGallery documents={step.documents} />
           </div>
         </div>
-        <div className="col-span-8">
-          <DocumentsGallery documents={step.documents} className={"flex-col"} />
-        </div>
-      </div>
+      ) : (
+        step.documents?.length > 0 && <IdDocumentsGallery documents={step.documents} />
+      )}
+
+      {faceData && (
+        <FaceMatchResult data={faceData} docUrl={faceDocUrl} selfieUrl={faceSelfieUrl} />
+      )}
 
       {!warnings?.length &&
-        !hasFaceMatch &&
-        !data.ocr &&
-        !Object.keys(fields).length &&
+        !faceData &&
+        !hasOcr &&
+        !Object.keys(legacyFields).length &&
         !step.documents?.length && <EmptyStepState step={step} />}
     </div>
   );
@@ -797,10 +924,25 @@ const TimelineStep = ({ step, journey, isLast, customerId, onUpdated }) => {
                 stepLabel={label}
                 currentStatus={step.status}
                 onUpdated={onUpdated}
+                cascadeStepTypes={step._cascadeStepTypes || []}
               />
             </div>
           )}
         </div>
+
+        {step.status === "rejected" && step.rejectionReason && (
+          <div className="mb-2.5 flex gap-2.5 items-start rounded-lg bg-red-50 border border-red-200 px-3 py-2.5">
+            <AlertTriangle className="size-3.5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold text-red-700 uppercase tracking-wide">
+                Rejection Reason
+              </p>
+              <p className="text-xs text-red-700 whitespace-pre-line break-words">
+                {step.rejectionReason}
+              </p>
+            </div>
+          </div>
+        )}
 
         {isCompact ? (
           <StepContent step={step} journey={journey} />
@@ -817,7 +959,35 @@ const TimelineStep = ({ step, journey, isLast, customerId, onUpdated }) => {
 };
 
 const VerificationJourneyPanel = ({ journey, journeyIndex, clientLabel, customerId, onUpdated }) => {
-  const steps = [...(journey?.steps || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const rawSteps = [...(journey?.steps || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  // Present ID Document + Selfie as ONE reviewable section: the face-match
+  // verdict applies to the pair, so a single Approve/Reject cascades to both
+  // steps (StepReviewButtons → cascadeSteps). Selfie stays standalone only
+  // when the journey has no id_document step.
+  const idDocStep = rawSteps.find((s) => s.type === "id_document");
+  const selfieStep = rawSteps.find((s) => s.type === "selfie");
+  const steps =
+    idDocStep && selfieStep
+      ? rawSteps
+        .filter((s) => s.type !== "selfie")
+        .map((s) =>
+          s.type === "id_document"
+            ? {
+              ...s,
+              label: "ID Document & Selfie",
+              status: combineStepStatus(s.status, selfieStep.status),
+              rejectionReason:
+                [
+                  ...new Set(
+                    [s.rejectionReason, selfieStep.rejectionReason].filter(Boolean),
+                  ),
+                ].join("\n") || undefined,
+              _cascadeStepTypes: ["selfie"],
+            }
+            : s,
+        )
+      : rawSteps;
   const displayStatus = getJourneyDisplayStatus(journey);
   const statusCfg = JOURNEY_STATUS_CONFIG[displayStatus] ?? STEP_STATUS_CONFIG.pending;
   const meta = journey?.metadata || {};
@@ -857,13 +1027,13 @@ const VerificationJourneyPanel = ({ journey, journeyIndex, clientLabel, customer
               )}
             </p>
           </div>
-          <Badge
+          {/* <Badge
             variant="outline"
             className={cn("text-xs px-2.5 py-1 shrink-0 gap-1.5", statusCfg.cls)}
           >
             <span className={cn("size-1.5 rounded-full", statusCfg.dot)} />
             {statusCfg.label}
-          </Badge>
+          </Badge> */}
         </div>
       </div>
 
@@ -951,11 +1121,193 @@ const resolveJourneyClientLabel = (journey, relations) => {
   );
 };
 
+// ─── Identity Check (Sumsub DVS / PERSON check) ──────────────────────────────
+// Renders customer.checks (persisted from the Sumsub webhook) as a DVS-style
+// "Identity check" card: Input data (what we sent) + Retrieved data (verdict).
+
+const ID_DOC_TYPE_LABELS = {
+  DRIVERS: "Driver's Licence",
+  PASSPORT: "Passport",
+  ID_CARD: "ID Card",
+  RESIDENCE_PERMIT: "Residence Permit",
+  UTILITY_BILL: "Utility Bill",
+};
+
+// Country resolution (alpha-2/alpha-3 → name + flag) lives in @/lib/country,
+// backed by countries-alpha3.json.
+
+const isGreen = (answer) => String(answer ?? "").toUpperCase() === "GREEN";
+
+// One label/value row inside the Input data / Retrieved data lists.
+const CheckDataRow = ({ label, children }) => (
+  <div className="flex items-start justify-between gap-3 py-2">
+    <span className="text-[11px] text-slate-500 whitespace-nowrap">{label}</span>
+    <span className="text-[11px] font-semibold text-slate-800 text-right break-words min-w-0">
+      {children}
+    </span>
+  </div>
+);
+
+const IdentityCheckCard = ({ check }) => {
+  const input = check?.inputDoc || {};
+  const bg = check?.personBackgroundInfo || {};
+  const country = resolveCountry(input.country);
+  const docLabel =
+    ID_DOC_TYPE_LABELS[input.idDocType] || formatLabel(input.idDocType || "Document");
+
+  const answerGreen = isGreen(check?.answer);
+  const idValid = isGreen(bg.identityAnswer ?? check?.answer);
+
+  // Retrieved-data descriptors. Prefer explicit fields from the payload; fall
+  // back to DVS defaults for Australian checks (DVS is the AU govt ID source).
+  const isDvs = country.name === "Australia";
+  const productName =
+    bg.productName ??
+    (isDvs ? `Document Verification Service (DVS) Validation in ${country.name}` : null);
+  const dataSources = bg.dataSources ?? (isDvs ? "Document Verification Service (DVS)" : null);
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      {/* Header */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/60">
+        {answerGreen ? (
+          <CheckCircle2 className="size-4 text-emerald-500" />
+        ) : (
+          <AlertTriangle className="size-4 text-red-500" />
+        )}
+        <span className="text-sm font-semibold text-slate-800">Identity check</span>
+        {check?.createdAt && (
+          <>
+            <span className="text-slate-300">|</span>
+            <span className="text-xs text-slate-500">
+              {dateShowFormatWithTime(check.createdAt)}
+            </span>
+          </>
+        )}
+        <Badge
+          variant="outline"
+          className={cn(
+            "ml-auto text-[10px] font-semibold gap-1",
+            answerGreen
+              ? "text-emerald-700 border-emerald-200 bg-emerald-50"
+              : "text-red-700 border-red-200 bg-red-50",
+          )}
+        >
+          <span className={cn("size-1.5 rounded-full", answerGreen ? "bg-emerald-500" : "bg-red-500")} />
+          {check?.answer || (answerGreen ? "GREEN" : "RED")}
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+        {/* Input data */}
+        <div className="px-4 py-3">
+          <div className="flex items-center gap-2 mb-1">
+            <User className="size-3.5 text-slate-500" />
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+              Input data
+            </p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            <CheckDataRow label="Country">
+              {country.flag ? `${country.flag} ` : ""}
+              {country.name}
+            </CheckDataRow>
+            <CheckDataRow label="First name">{input.firstName || "—"}</CheckDataRow>
+            <CheckDataRow label="Last name">{input.lastName || "—"}</CheckDataRow>
+            <CheckDataRow label={docLabel}>{input.number || "—"}</CheckDataRow>
+            {input.additionalNumber && (
+              <CheckDataRow label="Additional number">{input.additionalNumber}</CheckDataRow>
+            )}
+            <CheckDataRow label="Date of birth">{input.dob || "—"}</CheckDataRow>
+          </div>
+        </div>
+
+        {/* Retrieved data */}
+        <div className="px-4 py-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Database className="size-3.5 text-slate-500" />
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+              Retrieved data
+            </p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {productName && <CheckDataRow label="Product name">{productName}</CheckDataRow>}
+            {dataSources && <CheckDataRow label="Data sources">{dataSources}</CheckDataRow>}
+            <CheckDataRow label="Identity document validation">
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1",
+                  idValid ? "text-emerald-600" : "text-red-600",
+                )}
+              >
+                {idValid ? (
+                  <CheckCircle2 className="size-3.5" />
+                ) : (
+                  <AlertTriangle className="size-3.5" />
+                )}
+                {idValid ? "Identity document is valid" : "Identity document is not valid"}
+              </span>
+            </CheckDataRow>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Collapsible section wrapper ─────────────────────────────────────────────
+// Uniform card with a clickable header (chevron + title + optional right slot).
+// Default open — collapsing is an option, nothing is hidden on load.
+const CollapsibleSection = ({
+  title,
+  icon: Icon,
+  right,
+  defaultOpen = true,
+  children,
+  className,
+}) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className={cn("rounded-xl border border-slate-200 bg-white overflow-hidden", className)}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-slate-50/70"
+      >
+        <ChevronDown
+          className={cn("size-4 text-slate-400 transition-transform", !open && "-rotate-90")}
+        />
+        {Icon && <Icon className="size-4 text-slate-500" />}
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-700">{title}</span>
+        {right && <span className="ml-auto flex items-center gap-2">{right}</span>}
+      </button>
+      {open && <div className="px-4 pb-4">{children}</div>}
+    </div>
+  );
+};
+
+const IdentityChecksSection = ({ checks }) => {
+  const list = Array.isArray(checks) ? checks.filter(Boolean) : [];
+  if (list.length === 0) return null;
+
+  return (
+    <CollapsibleSection title="Identity Checks" icon={ShieldCheck}>
+      <div className="space-y-3">
+        {list.map((check, i) => (
+          <IdentityCheckCard key={check?.id ?? i} check={check} />
+        ))}
+      </div>
+    </CollapsibleSection>
+  );
+};
+
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export const DetailViewModal = ({ details, fetching, onUpdated }) => {
   const [openRelatedParties, setOpenRelatedParties] = useState(false);
   const [selectedJourneyIndex, setSelectedJourneyIndex] = useState(0);
+
 
   const riskAssessment = details?.riskAssessment || {};
   const kyc = details?.personalKyc || {};
@@ -972,19 +1324,21 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
   const kycHistory = details?.kycHistory || [];
   const relations = details?.relations || [];
   const journeys = details?.journeys || [];
-  console.log("details", details);
+  // console.log("details", details);
+
+  console.log({ details })
 
   // Parse kycRejectReason into segments for display
   const parsedRejection = rejectionReason
     ? rejectionReason.split("\n").reduce((acc, line) => {
-        if (!line.trim()) return acc;
-        if (line.startsWith("- ")) {
-          acc.push({ type: "bullet", text: line.slice(2) });
-        } else {
-          acc.push({ type: "line", text: line });
-        }
-        return acc;
-      }, [])
+      if (!line.trim()) return acc;
+      if (line.startsWith("- ")) {
+        acc.push({ type: "bullet", text: line.slice(2) });
+      } else {
+        acc.push({ type: "line", text: line });
+      }
+      return acc;
+    }, [])
     : [];
 
   return (
@@ -1019,7 +1373,7 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
           </div>
         </Card>
       )}
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-5 lg:gap-8">
         {/* Related parties trigger */}
         {/* <div className="fixed top-1/2 right-0 transform -translate-y-1/2 z-10">
           <Button variant="outline" size="icon" onClick={() => setOpenRelatedParties(true)}>
@@ -1028,12 +1382,15 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
         </div> */}
 
         {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────────── */}
-        <div className="col-span-3 ">
+        <div className="col-span-12 lg:col-span-3">
           {/* Customer Profile */}
-          <Card className="border-0 ">
+          <CollapsibleSection title="Customer Profile" icon={User} className="mb-5">
             <div className="flex gap-4 items-center ">
               <Avatar className="size-14 rounded-lg mb-2 border">
-                <AvatarImage src={details?.user?.photoUrl} />
+                <AvatarImage
+                  src={resolveSelfieUrl(details) || details?.user?.photoUrl}
+                  className="object-cover"
+                />
                 <AvatarFallback className="bg-primary/10 text-primary rounded-lg">
                   <User className="size-7" />
                 </AvatarFallback>
@@ -1045,11 +1402,7 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
             </div>
 
             <div>
-              <StatRow
-                label="User Type"
-                value={`${details?.user?.userType ?? "—"} / ${details?.user?.role ?? "—"}`}
-                positive
-              />
+              <StatRow label="UID" value={details?.uid ?? "—"} positive />
               <StatRow label="Country" value={details?.country ?? "—"} positive />
               <StatRow label="Phone" value={details?.metadata?.phone ?? "—"} positive />
               <StatRow
@@ -1089,7 +1442,7 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                 positive
               />
             </div>
-          </Card>
+          </CollapsibleSection>
 
           {/* Risk Score */}
           <Card className="border-0 ">
@@ -1116,20 +1469,17 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                 style={{ width: `${riskPercent}%` }}
               />
             </div> */}
-            <Card className="border-0 ">
-              <div className="flex items-start justify-between mb-4">
-                <SectionLabel>Risk Assessment Breakdown</SectionLabel>
-                <div className="text-right -mt-1">
-                  <p className="text-[10px] text-muted-foreground">Total Score</p>
-                  <p className={cn("text-xl font-bold", getRiskLabelColor(riskLabel))}>
-                    {riskScore}
-                    <span className="text-xs font-normal text-muted-foreground ml-1">
-                      • {riskLabel}
-                    </span>
-                  </p>
-                </div>
-              </div>
-
+            <CollapsibleSection
+              title="Risk Assessment Breakdown"
+              right={
+                <span className={cn("text-sm font-bold", getRiskLabelColor(riskLabel))}>
+                  {riskScore}
+                  <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                    • {riskLabel}
+                  </span>
+                </span>
+              }
+            >
               <div className="grid grid-cols-1 gap-3">
                 <RiskScoreCard name="Customer Type" item={riskAssessment?.customerType} />
                 <RiskScoreCard name="Jurisdiction" item={riskAssessment?.jurisdiction} />
@@ -1138,18 +1488,16 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                 <RiskScoreCard name="Occupation" item={riskAssessment?.occupation} />
                 <RiskScoreCard name="Product / Industry" item={riskAssessment?.product} />
               </div>
-            </Card>
+            </CollapsibleSection>
           </Card>
         </div>
 
         {/* ── RIGHT MAIN CONTENT ────────────────────────────────────────────────── */}
-        <div className="col-span-9 space-y-5">
+        <div className="col-span-12 lg:col-span-9 space-y-5">
           {/* KYC Rejection Reason */}
-          {/* Personal KYC Data */}{" "}
-          <Card className="border-0 ">
-            <SectionLabel>Personal KYC Data</SectionLabel>
-
-            <div className="grid lg:grid-cols-5 grid-cols-2 md:grid-cols-3 gap-2.5 mb-4">
+          {/* Personal KYC Data */}
+          <CollapsibleSection title="Personal KYC Data" icon={User}>
+            <div className="grid lg:grid-cols-5 grid-cols-2 md:grid-cols-3 gap-2.5">
               <KycField
                 label="Given Name"
                 value={customerDetails.given_name}
@@ -1226,17 +1574,15 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                 </div>
               ))}
             </div> */}
-          </Card>
+          </CollapsibleSection>
           {/* AML Screening — per-match compliance review */}
           {details?._id && (details?.amlHits?.length > 0 || details?.amlStatus || details?.amlCheckedAt) && (
             <AmlMatchesTable customerId={details._id} />
           )}
+          {/* Identity Checks (Sumsub DVS) — before verification journeys */}
+          <IdentityChecksSection checks={details?.checks} />
           {/* Verification Journey */}
-          <div className="rounded-xl  bg-white ">
-            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-4">
-              Verification Journeys
-            </p>
-
+          <CollapsibleSection title="Verification Journeys" icon={Building2}>
             {fetching ? (
               <div className="space-y-6 py-4">
                 {[1, 2, 3].map((i) => (
@@ -1299,10 +1645,11 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                 )}
               </div>
             )}
-          </div>
-          <div className="space-y-0 -mt-1">
-            <h3>KYC history</h3>
-            {kycHistory.map((entry, i) => {
+          </CollapsibleSection>
+          {kycHistory.length > 0 && (
+            <CollapsibleSection title="KYC History">
+              <div className="space-y-0">
+                {kycHistory.map((entry, i) => {
               const s = KYC_HISTORY_STATUS[entry.status] ?? {
                 badge: "bg-slate-50 text-slate-600 border-slate-200",
                 dot: "bg-slate-400",
@@ -1329,8 +1676,10 @@ export const DetailViewModal = ({ details, fetching, onUpdated }) => {
                   </span>
                 </div>
               );
-            })}
-          </div>
+                })}
+              </div>
+            </CollapsibleSection>
+          )}
           {/* Risk Assessment Breakdown */}
         </div>
 

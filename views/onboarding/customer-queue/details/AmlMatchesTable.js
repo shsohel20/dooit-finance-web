@@ -16,12 +16,18 @@ import {
   ListChecks,
   ExternalLink,
   ChevronRight,
+  ChevronDown,
   User,
   Building2,
   Loader2,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn, dateShowFormat, dateShowFormatWithTime } from "@/lib/utils";
-import { getAmlMatches, updateAmlMatch } from "@/app/dashboard/client/onboarding/customer-queue/actions";
+import {
+  getAmlMatches,
+  updateAmlMatch,
+  bulkUpdateAmlMatches,
+} from "@/app/dashboard/client/onboarding/customer-queue/actions";
 
 // ─── Option config ───────────────────────────────────────────────────────────
 
@@ -50,6 +56,12 @@ const WHITELIST_OPTIONS = [
   { value: "no", label: "No" },
   { value: "yes", label: "Yes" },
 ];
+
+// Bulk-apply sentinel: "keep" = leave this field unchanged for the selection.
+const KEEP = "__keep__";
+const BULK_MATCH_STATUS_OPTIONS = [{ value: KEEP, label: "Match status —" }, ...MATCH_STATUS_OPTIONS];
+const BULK_RISK_LEVEL_OPTIONS = [{ value: KEEP, label: "Risk level —" }, ...RISK_LEVEL_OPTIONS];
+const BULK_WHITELIST_OPTIONS = [{ value: KEEP, label: "Whitelist —" }, ...WHITELIST_OPTIONS];
 
 const AML_STATUS_STYLES = {
   clear: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -82,7 +94,7 @@ const formatSourceDate = (raw) => {
   return isNaN(d.getTime()) ? String(raw).split(" ")[0] : dateShowFormat(d);
 };
 
-const GRID = "grid grid-cols-[28px_minmax(170px,1.5fr)_minmax(150px,1.3fr)_96px_150px_110px_140px] gap-3";
+const GRID = "grid grid-cols-[28px_28px_minmax(170px,1.5fr)_minmax(150px,1.3fr)_96px_150px_110px_140px] gap-3";
 
 // ─── Expanded detail ─────────────────────────────────────────────────────────
 
@@ -173,13 +185,22 @@ const MatchDetail = ({ match }) => {
 
 // ─── Row ─────────────────────────────────────────────────────────────────────
 
-const MatchRow = ({ match, onChange, saving }) => {
+const MatchRow = ({ match, onChange, saving, selected, onToggleSelect }) => {
   const [open, setOpen] = useState(false);
   const EntityIcon = match.entityType === "company" ? Building2 : User;
 
   return (
-    <div className="border-b border-slate-100 last:border-0">
+    <div className={cn("border-b border-slate-100 last:border-0", selected && "bg-primary/5")}>
       <div className={cn(GRID, "items-center px-5 py-3")}>
+        {/* Select */}
+        <span className="flex items-center justify-center">
+          <Checkbox
+            checked={selected}
+            onCheckedChange={() => onToggleSelect(match._id)}
+            aria-label={`Select ${match.name || "match"}`}
+          />
+        </span>
+
         {/* Expand */}
         <button
           type="button"
@@ -314,6 +335,15 @@ export const AmlMatchesTable = ({ customerId }) => {
   const [summary, setSummary] = useState(null);
   const [savingId, setSavingId] = useState(null);
 
+  const [open, setOpen] = useState(true);
+
+  // ── Bulk selection / disposition ──────────────────────────────────────────
+  const [selected, setSelected] = useState(() => new Set());
+  const [bulkMatchStatus, setBulkMatchStatus] = useState(KEEP);
+  const [bulkRiskLevel, setBulkRiskLevel] = useState(KEEP);
+  const [bulkWhitelist, setBulkWhitelist] = useState(KEEP);
+  const [bulkSaving, setBulkSaving] = useState(false);
+
   const load = useCallback(async () => {
     if (!customerId) return;
     setLoading(true);
@@ -327,6 +357,7 @@ export const AmlMatchesTable = ({ customerId }) => {
       // surfaced via empty state
     } finally {
       setLoading(false);
+      setSelected(new Set()); // drop any stale selection after a (re)load
     }
   }, [customerId]);
 
@@ -353,13 +384,90 @@ export const AmlMatchesTable = ({ customerId }) => {
     }
   };
 
+  // ── Selection helpers ──────────────────────────────────────────────────────
+  const allIds = matches.map((m) => m._id);
+  const allSelected = allIds.length > 0 && allIds.every((id) => selected.has(id));
+  const partiallySelected = !allSelected && allIds.some((id) => selected.has(id));
+
+  const toggleOne = (id) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(allIds));
+
+  const bulkDirty =
+    bulkMatchStatus !== KEEP || bulkRiskLevel !== KEEP || bulkWhitelist !== KEEP;
+
+  const buildBulkPatch = () => {
+    const patch = {};
+    if (bulkMatchStatus !== KEEP) patch.matchStatus = bulkMatchStatus;
+    if (bulkRiskLevel !== KEEP) patch.riskLevel = bulkRiskLevel === "none" ? "" : bulkRiskLevel;
+    if (bulkWhitelist !== KEEP) patch.whitelisted = bulkWhitelist === "yes";
+    return patch;
+  };
+
+  const resetBulkFields = () => {
+    setBulkMatchStatus(KEEP);
+    setBulkRiskLevel(KEEP);
+    setBulkWhitelist(KEEP);
+  };
+
+  const handleBulkApply = async () => {
+    const ids = [...selected];
+    const patch = buildBulkPatch();
+    if (ids.length === 0 || Object.keys(patch).length === 0) return;
+
+    const idSet = new Set(ids);
+    setBulkSaving(true);
+    // optimistic — apply the patch + mark reviewed for the selected rows
+    setMatches((prev) =>
+      prev.map((m) => (idSet.has(m._id) ? { ...m, ...patch, reviewStatus: "reviewed" } : m)),
+    );
+    try {
+      const res = await bulkUpdateAmlMatches(ids, patch);
+      if (res?.success) {
+        const byId = new Map((res.data || []).map((m) => [m._id, m]));
+        setMatches((prev) => prev.map((m) => byId.get(m._id) || m));
+        if (res.amlStatus) setSummary((s) => (s ? { ...s, amlStatus: res.amlStatus } : s));
+        setSelected(new Set());
+        resetBulkFields();
+      } else {
+        load(); // reconcile on failure
+      }
+    } catch (_) {
+      load();
+    } finally {
+      setBulkSaving(false);
+    }
+  };
+
   const hasMatches = matches.length > 0;
+  const reviewedCount = matches.filter((m) => m.reviewStatus === "reviewed").length;
   const statusCls = AML_STATUS_STYLES[(summary?.amlStatus || "").toLowerCase()] ?? AML_STATUS_STYLES.pending;
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-      {/* Header */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-5 py-4">
+      {/* Header — click to collapse/expand */}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen((v) => !v);
+          }
+        }}
+        className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-5 py-4 cursor-pointer transition-colors hover:bg-slate-50/70"
+      >
+        <ChevronDown
+          className={cn("size-4 text-slate-400 transition-transform", !open && "-rotate-90")}
+        />
         <span
           className={cn(
             "flex size-9 items-center justify-center rounded-lg flex-shrink-0",
@@ -374,7 +482,7 @@ export const AmlMatchesTable = ({ customerId }) => {
             {loading
               ? "Loading matches…"
               : hasMatches
-                ? `${summary?.total ?? matches.length} match${matches.length > 1 ? "es" : ""} · ${summary?.reviewed ?? 0} reviewed`
+                ? `${summary?.total ?? matches.length} match${matches.length > 1 ? "es" : ""} · ${reviewedCount} reviewed`
                 : "No matches found"}
             {summary?.vendor && <span className="text-slate-400"> · {summary.vendor}</span>}
             {summary?.checkedAt && <span className="text-slate-400"> · Checked {dateShowFormat(summary.checkedAt)}</span>}
@@ -386,6 +494,79 @@ export const AmlMatchesTable = ({ customerId }) => {
           </Badge>
         )}
       </div>
+
+      {open && (
+        <>
+      {/* Bulk disposition bar — shown once one or more matches are selected */}
+      {selected.size > 0 && (
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 bg-primary/5 px-5 py-2.5">
+          <span className="text-xs font-semibold text-slate-700">
+            {selected.size} selected
+          </span>
+          <span className="mx-1 h-5 w-px bg-slate-200" />
+
+          <Select value={bulkMatchStatus} onValueChange={setBulkMatchStatus} disabled={bulkSaving}>
+            <SelectTrigger className={cn("h-8 w-[150px] text-xs font-medium", MATCH_STATUS_STYLES[bulkMatchStatus])}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {BULK_MATCH_STATUS_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value} className={cn("text-xs", MATCH_STATUS_STYLES[o.value])}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={bulkRiskLevel} onValueChange={setBulkRiskLevel} disabled={bulkSaving}>
+            <SelectTrigger className="h-8 w-[130px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {BULK_RISK_LEVEL_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value} className="text-xs">
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={bulkWhitelist} onValueChange={setBulkWhitelist} disabled={bulkSaving}>
+            <SelectTrigger className="h-8 w-[120px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {BULK_WHITELIST_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value} className="text-xs">
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <button
+            type="button"
+            onClick={handleBulkApply}
+            disabled={bulkSaving || !bulkDirty}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {bulkSaving ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <CheckCircle2 className="size-3.5" />
+            )}
+            Apply to selected
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelected(new Set())}
+            disabled={bulkSaving}
+            className="inline-flex h-8 items-center rounded-md px-2 text-xs text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+          >
+            Clear
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-10 text-slate-400 gap-2">
@@ -399,9 +580,16 @@ export const AmlMatchesTable = ({ customerId }) => {
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <div className="min-w-[900px]">
+          <div className="min-w-[940px]">
             {/* Column header */}
             <div className={cn(GRID, "items-center px-5 py-2.5 border-b border-slate-100 bg-slate-50/70")}>
+              <span className="flex items-center justify-center">
+                <Checkbox
+                  checked={allSelected ? true : partiallySelected ? "indeterminate" : false}
+                  onCheckedChange={toggleAll}
+                  aria-label="Select all matches"
+                />
+              </span>
               <span />
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Name</span>
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Categories</span>
@@ -411,10 +599,19 @@ export const AmlMatchesTable = ({ customerId }) => {
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Status</span>
             </div>
             {matches.map((m) => (
-              <MatchRow key={m._id} match={m} onChange={handleChange} saving={savingId === m._id} />
+              <MatchRow
+                key={m._id}
+                match={m}
+                onChange={handleChange}
+                saving={savingId === m._id}
+                selected={selected.has(m._id)}
+                onToggleSelect={toggleOne}
+              />
             ))}
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

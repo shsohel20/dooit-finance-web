@@ -153,6 +153,16 @@ export const updateAmlMatch = async (id, body) => {
   return response.json();
 };
 
+// Apply one disposition to many matches at once.
+// patch: { matchStatus?, riskLevel?, whitelisted?, reviewStatus?, reviewNote? }
+export const bulkUpdateAmlMatches = async (ids, patch) => {
+  const response = await fetchWithAuth("sumsub/aml-matches/bulk", {
+    method: "PATCH",
+    body: JSON.stringify({ ids, ...patch }),
+  });
+  return response.json();
+};
+
 export const createInstantReport = async (reportData) => {
   const response = await fetchWithAuth("report-notify/new", {
     method: "POST",

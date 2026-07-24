@@ -139,7 +139,11 @@ const GridView = () => {
           className={"p-6 border border-neutral-100 "}
         >
           <ItemMedia className="size-20 rounded-full overflow-hidden">
-            <img src={item.user?.photoUrl} alt="" className="w-full h-full object-cover" />
+            <img
+              src={item.selfieUrl || item.user?.photoUrl}
+              alt=""
+              className="w-full h-full object-cover"
+            />
           </ItemMedia>
           <ItemContent className="text-xs gap-2 ">
             <div className="flex items-center justify-between w-full">
@@ -248,7 +252,11 @@ const ListView = ({ onExport, exporting, onRefresh }) => {
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <div className="size-10 rounded-full overflow-hidden">
-            <img src={row.original?.user?.photoUrl} alt="" className="w-full h-full object-cover" />
+            <img
+              src={row.original?.selfieUrl || row.original?.user?.photoUrl}
+              alt=""
+              className="w-full h-full object-cover"
+            />
           </div>
           <div>
             <p className="font-bold">{row.original?.user?.name}</p>

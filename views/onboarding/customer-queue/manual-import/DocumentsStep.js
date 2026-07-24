@@ -163,6 +163,8 @@ const DocumentsStep = ({ form, onExtracted }) => {
         applyOcrFields(response.data.ocr.fields);
         // Keep the raw OCR result so it's submitted with the import and shown
         // on the customer details page (not just used to pre-fill the form).
+
+        console.log(response.data.ocr);
         setValue("ocr", response.data.ocr);
         toast.success("Document data extracted — review the pre-filled fields");
         onExtracted?.();

@@ -4,7 +4,7 @@
 import { Environment } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import dynamic from 'next/dynamic';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 const Nissa = dynamic(() => import('./model'), { ssr: false });
 
 const NissaModel = () => {
@@ -22,8 +22,35 @@ const NissaModel = () => {
   //   );
   // }
 
+  // WebGL only auto-restores a lost context if the `webglcontextlost`
+  // handler calls preventDefault(). react-three-fiber doesn't do this for
+  // us, so without it the avatar goes blank forever after a context loss.
+  // On restore, remount the canvas so three.js/drei re-upload all GPU
+  // resources (textures, geometries) from a clean slate.
+  const [canvasKey, setCanvasKey] = useState(0);
+
+  const handleCreated = useCallback(({ gl }) => {
+    const canvasEl = gl.domElement;
+
+    const handleContextLost = (event) => {
+      event.preventDefault();
+      console.warn('Nisa 3D avatar: WebGL context lost, recovering...');
+    };
+    const handleContextRestored = () => {
+      setCanvasKey((prev) => prev + 1);
+    };
+
+    canvasEl.addEventListener('webglcontextlost', handleContextLost, false);
+    canvasEl.addEventListener(
+      'webglcontextrestored',
+      handleContextRestored,
+      false
+    );
+  }, []);
+
   return (
     <Canvas
+      key={canvasKey}
       id="storeCanvas"
       style={{
         width: '100%',
@@ -34,7 +61,7 @@ const NissaModel = () => {
         position: [0, 0, 6],
       }}
       dpr={[1, 2]}
-      gl={{ preserveDrawingBuffer: true }}
+      onCreated={handleCreated}
     >
       <Environment
         files={'models/metro_noord_2k.hdr'}

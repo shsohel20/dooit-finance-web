@@ -1,6 +1,5 @@
 'use client';
 import { cn, getFileKind, randomIdGenerator } from '@/lib/utils';
-import dynamic from 'next/dynamic';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
@@ -8,9 +7,6 @@ import { Forward, Maximize2, Mic, Minimize, Paperclip, X } from 'lucide-react';
 import useOutsideClick from '@/hooks/useOutsideClick';
 import { chatWithNissa } from '@/app/actions';
 import Convos from './Convos';
-const NissaModel = dynamic(
-  () => import('@/components/nisa-ai/Nisa', { ssr: false })
-);
 
 const NisaIntro = () => {
   return (
