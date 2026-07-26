@@ -1,7 +1,11 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import AddCompany from '@/views/companies/add'
 export default function AddCompanyPage() {
   return (
-    <div><AddCompany /></div>
+    <div>
+      <Suspense>
+        <AddCompany />
+      </Suspense>
+    </div>
   )
 }

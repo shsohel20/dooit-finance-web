@@ -24,7 +24,7 @@ export default function CompaniesList() {
     getCompaniesData();
   }, []);
   const handleView = (id) => {
-    router.push(`/dashboard/client/companies/details?id=${id}`);
+    router.push(`/dashboard/client/companies/review?id=${id}`);
   };
   const columns = companiesColumns(handleView);
   return (

@@ -20,14 +20,6 @@ export const localAgentSchema = z.object({
   address: localAddressSchema.optional(),
 });
 
-export const companyTypeSchema = z.object({
-  type: z.object({
-    label: z.string().optional(),
-    value: z.string().optional(),
-  }).optional(),
-  is_listed: z.boolean().optional(),
-});
-
 export const accountPurposeSchema = z.object({
   digital_currency_exchange: z.boolean().optional(),
   peer_to_peer: z.boolean().optional(),
@@ -46,18 +38,13 @@ export const generalInformationSchema = z.object({
   industry: z.string().min(1, { message: "Industry is required" }),
   nature_of_business: z.string().min(1, { message: "Nature of business is required" }),
   annual_income: z.string().min(1, { message: "Annual income is required" }),
-  local_agent: localAgentSchema.optional(),
-  registered_address: localAddressSchema.optional(),
-  business_address: z
-    .object({
-      different_from_registered: z.boolean().optional(),
-      street: z.string().min(1, { message: "Street is required" }),
-      suburb: z.string().min(1, { message: "Suburb is required" }),
-      state: z.string().min(1, { message: "State is required" }),
-      postcode: z.string().min(1, { message: "Postcode is required" }),
-      country: country,
-    }).optional(),
-  company_type: companyTypeSchema.optional(),
+  // Arrays hold concurrently-active entries, not a history (docs/65 Step 26).
+  // No different_from_registered flag on business_addresses — an empty array
+  // already means "same as registered".
+  local_agents: z.array(localAgentSchema).optional(),
+  registered_addresses: z.array(localAddressSchema).optional(),
+  business_addresses: z.array(localAddressSchema).optional(),
+  entity_type: z.string().optional(),
   account_purpose: accountPurposeSchema.optional(),
   estimated_trading_volume: z.string().optional(),
 });

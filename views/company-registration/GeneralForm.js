@@ -133,23 +133,16 @@ export default function GeneralForm({ form }) {
           <div className="xl:col-span-2 flex gap-4">
             <FormField
               form={form}
-              name="general_information.company_type.type"
+              name="general_information.entity_type"
               label="Company Type"
               type="select"
               options={[
-                { label: "Private Company", value: "private_company" },
+                { label: "Private Company", value: "proprietary_limited" },
                 { label: "Public Company", value: "public_company" },
-                { label: "Regulated / Licensed Company", value: "regulated_company" },
+                { label: "Regulated / Licensed Company", value: "other" },
                 { label: "Other", value: "other" },
               ]}
               placeholder="Select Company Type"
-            />
-            <FormField
-              form={form}
-              name="general_information.company_type.is_listed"
-              label="Is Listed?"
-              type="checkbox"
-              placeholder="Is Listed"
             />
           </div>
         </div>
