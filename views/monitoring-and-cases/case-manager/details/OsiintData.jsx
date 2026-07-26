@@ -4,8 +4,9 @@ import {
   getOSINTScreenshots,
 } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 import { Button } from "@/components/ui/button";
+import { ScreenshotLightbox } from "@/views/onboarding/customer-queue/details/Osiint";
 import { FileIcon, ImageIcon } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 const DataCard = ({ title, description }) => {
   const [showMore, setShowMore] = useState(false);
@@ -30,13 +31,36 @@ const DataCard = ({ title, description }) => {
   );
 };
 
-const ScreenshotCard = ({ screenshot }) => {
+const ScreenshotCard = ({ screenshot, index, screenshots }) => {
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const navigate = useCallback(
+    (direction) => {
+      setActiveIndex((current) => {
+        if (current < 0) return current;
+        return (current + direction + screenshots.length) % screenshots.length;
+      });
+    },
+    [screenshots.length],
+  );
   return (
-    <div className="w-full border rounded-lg overflow-hidden">
-      <img
-        src={`data:image/png;base64,${screenshot.base64}`}
-        alt={screenshot.query_text}
-        className="w-full h-full object-cover"
+    <div>
+      <div
+        className="w-full border rounded-lg overflow-hidden cursor-pointer"
+        onClick={() => setActiveIndex(index)}
+      >
+        <img
+          src={`data:image/png;base64,${screenshot.base64}`}
+          alt={screenshot.query_text}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <ScreenshotLightbox
+        screenshots={screenshots}
+        activeIndex={activeIndex}
+        onClose={() => setActiveIndex(-1)}
+        onNavigate={navigate}
       />
     </div>
   );
@@ -106,7 +130,12 @@ export default function OsiintData() {
           </h5>
           <div className="grid grid-cols-3 gap-2 items-center justify-center">
             {screenshots.map((screenshot, idx) => (
-              <ScreenshotCard key={idx} screenshot={screenshot} />
+              <ScreenshotCard
+                key={idx}
+                screenshot={screenshot}
+                index={idx}
+                screenshots={screenshots}
+              />
             ))}
           </div>
         </div>

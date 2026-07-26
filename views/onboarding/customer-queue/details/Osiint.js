@@ -193,7 +193,7 @@ function SummaryItem({ label, value, mono }) {
   );
 }
 
-function ScreenshotLightbox({ screenshots, activeIndex, onClose, onNavigate }) {
+export function ScreenshotLightbox({ screenshots, activeIndex, onClose, onNavigate }) {
   const screenshot = screenshots[activeIndex];
   const src = `data:image/png;base64,${screenshot?.base64}`;
   const total = screenshots.length;
@@ -217,11 +217,11 @@ function ScreenshotLightbox({ screenshots, activeIndex, onClose, onNavigate }) {
   return (
     <Dialog open={activeIndex >= 0} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="flex max-h-[92vh] w-[min(96vw,1100px)] max-w-none flex-col gap-0 overflow-hidden border-0 bg-slate-950 p-0 sm:max-w-none"
+        className="flex max-h-[92vh] w-[min(96vw,1100px)] max-w-none flex-col gap-0 overflow-hidden border-0  p-0 sm:max-w-none"
         showCloseButton
       >
         <DialogHeader className="border-b border-white/10 px-5 py-4 text-left">
-          <DialogTitle className="text-base font-semibold text-white">
+          <DialogTitle className="text-base font-semibold ">
             Screenshot {activeIndex + 1} of {total}
           </DialogTitle>
           <DialogDescription className="text-slate-400">
@@ -229,7 +229,7 @@ function ScreenshotLightbox({ screenshots, activeIndex, onClose, onNavigate }) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative flex min-h-0 flex-1 items-center justify-center bg-slate-950/95 p-4 sm:p-6">
+        <div className="relative flex min-h-0 flex-1 items-center justify-center  p-4 sm:p-6">
           {total > 1 && (
             <>
               <Button
@@ -262,7 +262,7 @@ function ScreenshotLightbox({ screenshots, activeIndex, onClose, onNavigate }) {
           />
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-white/10 bg-slate-900/80 px-5 py-3">
+        <div className="flex items-center justify-between gap-3 border-t border-white/10  px-5 py-3">
           <p className="truncate text-xs text-slate-400">
             {screenshot?.query_text || "No query label available"}
           </p>
@@ -329,7 +329,10 @@ function ScreenshotGallery({ screenshots }) {
             </div>
             {screenshot.query_text && (
               <div className="border-t border-border/60 px-3 py-2.5">
-                <p className="line-clamp-2 text-xs leading-relaxed text-slate-600" title={screenshot.query_text}>
+                <p
+                  className="line-clamp-2 text-xs leading-relaxed text-slate-600"
+                  title={screenshot.query_text}
+                >
                   {screenshot.query_text}
                 </p>
               </div>
