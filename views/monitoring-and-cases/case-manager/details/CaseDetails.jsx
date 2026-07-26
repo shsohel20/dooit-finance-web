@@ -18,6 +18,7 @@ import AuditLog from "./sections/AuditLog";
 import RelatedCasesSection from "./sections/RelatedCasesSection";
 import CreateRFIModal from "./modals/CreateRFIModal";
 import ReassignCaseModal from "./modals/ReassignCaseModal";
+import OsiintData from "./OsiintData";
 
 const ATMInfoTab = lazy(() => import("./tabs/ATMInfoTab"));
 const DeviceInfoTab = lazy(() => import("./tabs/DeviceInfoTab"));
@@ -57,7 +58,13 @@ export default function CaseDetails({ caseId }) {
     sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const logAction = ({ user = "You", action, previousValue = "—", newValue = "—", description }) => {
+  const logAction = ({
+    user = "You",
+    action,
+    previousValue = "—",
+    newValue = "—",
+    description,
+  }) => {
     const now = new Date().toISOString();
     setAuditLog((prev) => [
       ...prev,
@@ -74,7 +81,13 @@ export default function CaseDetails({ caseId }) {
     ]);
     setActivities((prev) => [
       ...prev,
-      { id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, type: "comment", date: now, user, description: description || action },
+      {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        type: "comment",
+        date: now,
+        user,
+        description: description || action,
+      },
     ]);
   };
 
@@ -144,7 +157,10 @@ export default function CaseDetails({ caseId }) {
       setAssignment((prevAssignment) => ({
         ...prevAssignment,
         assignedAnalyst: analyst,
-        history: [...(prevAssignment?.history || []), { analyst, date: new Date().toISOString(), action: "Reassigned" }],
+        history: [
+          ...(prevAssignment?.history || []),
+          { analyst, date: new Date().toISOString(), action: "Reassigned" },
+        ],
       }));
       return analyst;
     });
@@ -195,11 +211,20 @@ export default function CaseDetails({ caseId }) {
           onReopenCase={handleReopenCase}
         />
 
-        <InvestigationSummary caseData={caseData} sectionRef={setSectionRef("investigation-summary")} />
+        <InvestigationSummary
+          caseData={caseData}
+          sectionRef={setSectionRef("investigation-summary")}
+        />
 
-        <CustomerProfileSection caseData={caseData} sectionRef={setSectionRef("customer-profile")} />
+        <CustomerProfileSection
+          caseData={caseData}
+          sectionRef={setSectionRef("customer-profile")}
+        />
 
-        <TransactionAnalysisSection caseData={caseData} sectionRef={setSectionRef("transactions")} />
+        <TransactionAnalysisSection
+          caseData={caseData}
+          sectionRef={setSectionRef("transactions")}
+        />
 
         <InvestigationTimelineSection
           caseData={caseData}
@@ -214,7 +239,11 @@ export default function CaseDetails({ caseId }) {
           sectionRef={setSectionRef("notes")}
         />
 
-        <RFISection rfis={rfis} onOpenCreateRFI={() => setRfiOpen(true)} sectionRef={setSectionRef("rfi")} />
+        <RFISection
+          rfis={rfis}
+          onOpenCreateRFI={() => setRfiOpen(true)}
+          sectionRef={setSectionRef("rfi")}
+        />
 
         <CaseAssignmentSection
           assignedAnalyst={assignedAnalyst}
@@ -246,15 +275,16 @@ export default function CaseDetails({ caseId }) {
       </div>
 
       <div className="xl:col-span-3 col-span-12">
-        <RightActionPanel
-          isClosed={isClosed}
-          onOpenAssign={() => setAssignOpen(true)}
-          onOpenRFI={() => setRfiOpen(true)}
-          onFocusNotes={() => scrollToSection("notes")}
-          onEscalate={handleEscalate}
-          onGenerateSTR={handleGenerateSTR}
-          onCloseCase={handleCloseCase}
-        />
+        {/* <RightActionPanel
+            isClosed={isClosed}
+            onOpenAssign={() => setAssignOpen(true)}
+            onOpenRFI={() => setRfiOpen(true)}
+            onFocusNotes={() => scrollToSection("notes")}
+            onEscalate={handleEscalate}
+            onGenerateSTR={handleGenerateSTR}
+            onCloseCase={handleCloseCase}
+          /> */}
+        <OsiintData />
       </div>
 
       <CreateRFIModal open={rfiOpen} onOpenChange={setRfiOpen} onSubmit={handleCreateRFI} />
