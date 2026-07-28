@@ -24,9 +24,20 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { createCompany, updateCompany, getCompanyById } from "@/app/dashboard/client/companies/actions";
+import {
+  createCompany,
+  updateCompany,
+  getCompanyById,
+  ocrExtractCompany,
+  ocrExtractTrust,
+  getTrusts,
+  getTrustById,
+  createTrust,
+  updateTrust,
+} from "@/app/dashboard/client/companies/actions";
 import { fileUploadOnCloudinary } from "@/app/actions";
 import { countriesData } from "@/constants";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import SearchableSelect from "@/components/AsyncPaginatedSelect";
 
 /* ------------------------------------------------------------------ */
@@ -86,6 +97,8 @@ const labelCss = {
   color: C.body,
   marginBottom: 6,
 };
+// Inline validation message under a field (docs/65 Step 62).
+const errCss = { fontSize: 11.5, color: C.red, marginTop: 5, lineHeight: 1.35 };
 const card = {
   background: "#fff",
   border: `1px solid ${C.line}`,
@@ -117,14 +130,342 @@ const STEP_TITLES = [
   "Review & submit",
 ];
 
+// Company legal structures only (docs/65 Step 65). "Trust" and "Partnership"
+// were offered here until Step 65 and are gone for three reasons:
+//  1. Neither is a company. A Trust is onboarded through the separate
+//     TrustKyc flow (the Step 45 decision that removed "trust" from the
+//     entity_type enum — leaving the label in the dropdown contradicted it),
+//     and a Partnership has its own capture in the non-individual customer
+//     form, including partnership type and partnership-agreement documents.
+//  2. Choosing either was already lossy: both stored the same "other" enum
+//     value as Limited Liability Company, and labelFor() resolves a value to
+//     its FIRST label — so a company saved as "Trust" reopened as "Limited
+//     Liability Company". The option promised a distinction the schema
+//     cannot hold.
+//  3. Nothing downstream ever showed them: the Review page, list dashboard
+//     and details page all map the stored enum value, so these two only ever
+//     existed as entry-side labels.
+// Removing them changes no stored data and no edit-mode display — "other"
+// already resolved to Limited Liability Company.
 const ENTITY_TYPES = [
   ["Proprietary Limited", "proprietary_limited"],
   ["Public Limited", "public_company"],
   ["Foreign Company", "foreign_company"],
   ["Limited Liability Company", "other"],
-  ["Partnership", "other"],
-  ["Trust", "other"],
 ];
+// TrustKyc's trust_type.selected_type vocabulary (api/models/TrustKyc.js) —
+// reused as-is rather than inventing a parallel list for a shareholder's
+// beneficial-trust details (docs/65 Step 43), which creates/updates a real
+// TrustKyc document via TrustFields below.
+const TRUST_TYPES = [
+  ["Unregulated Trust", "unregulated_trust"],
+  ["Self-Managed Super Fund", "self_managed_super_fund"],
+  ["Managed Investment Scheme (Registered)", "managed_investment_scheme_registered"],
+  ["Managed Investment Scheme (Unregistered)", "managed_investment_scheme_unregistered"],
+  ["Government Superannuation Fund", "government_superannuation_fund"],
+  ["Other Superannuation Trust", "other_superannuation_trust"],
+];
+// Each trust_type variant's own primary identifying field on TrustKyc,
+// shown next to the Trust type dropdown. unregulated_trust and
+// other_superannuation_trust have additional variant-specific fields beyond
+// this one (captured separately below, docs/65 Step 46).
+const TRUST_TYPE_ID_FIELD = {
+  unregulated_trust: { key: "registration_number", label: "Registration number" },
+  self_managed_super_fund: { key: "abn", label: "ABN" },
+  managed_investment_scheme_registered: { key: "asrn", label: "ASRN" },
+  managed_investment_scheme_unregistered: { key: "abn", label: "ABN" },
+  government_superannuation_fund: { key: "legislation_name", label: "Legislation name" },
+  other_superannuation_trust: { key: "registration_number", label: "Registration number" },
+};
+// Variant identifier keys that the generic "Trust identification" section
+// already captures. TrustKyc reconciles these two paths server-side
+// (docs/65 Step 59), so the form must ask once, not twice. `asrn` and
+// `legislation_name` aren't here — they have no generic counterpart, so
+// their variant field is the only place to enter them.
+const GENERIC_TRUST_ID_FIELDS = ["abn", "registration_number"];
+// "Who this holder holds on behalf of" when Beneficially held = No (docs/65
+// Step 43) — Trust/Nominee/Minor per the requirement; Other is the escape
+// hatch. Only Trust is TrustKyc-shaped and gets a linked TrustKyc record;
+// Nominee/Minor just capture who the real beneficiary is.
+const BENEFICIAL_ARRANGEMENT_TYPES = [
+  ["Trust", "trust"],
+  ["Nominee", "nominee"],
+  ["Minor", "minor"],
+  ["Other", "other"],
+];
+// Screening-status vocabularies (docs/65 Step 55) — labels for TrustKyc's
+// SCREENING_STATUSES enum; sanctions omits the PEP label (it's a PEP-only
+// outcome even though the schema shares one vocabulary).
+const PEP_STATUS_OPTIONS = [
+  ["Pending", "pending"],
+  ["Cleared", "cleared"],
+  ["PEP", "pep"],
+  ["Flagged", "flagged"],
+];
+const SANCTIONS_STATUS_OPTIONS = [
+  ["Pending", "pending"],
+  ["Cleared", "cleared"],
+  ["Flagged", "flagged"],
+];
+const BENEFICIARY_TYPES = [
+  ["Individual", "individual"],
+  ["Class", "class"],
+  ["Company", "company"],
+  ["Other", "other"],
+];
+// principal_address/postal_address both use the schema's "address" key;
+// a trustee's own residential_address uses "street" instead (docs/65 Step
+// 46) — two distinct empty shapes rather than one reused across both.
+const emptyTrustAddress = () => ({ address: "", suburb: "", state: "", postcode: "", country: "" });
+const emptyTrustee = () => ({ full_name: "", dob: "", street: "", suburb: "", state: "", postcode: "", country: "" });
+const emptyCompanyTrustee = () => ({
+  company_name: "",
+  registration_number: "",
+  abn: "",
+  street: "",
+  suburb: "",
+  state: "",
+  postcode: "",
+  country: "",
+  directors: "", // comma-separated names — a list-inside-a-list stays flat in the UI
+});
+const emptyAuthorisedRep = () => ({ full_name: "", role: "" });
+const emptyControllingPerson = () => ({ full_name: "", role: "", pep: "Pending", sanctions: "Pending" });
+const emptyTrustBeneficiary = () => ({
+  named_beneficiaries: "",
+  beneficiary_classes: "",
+  beneficiary_type: "",
+  interest_percent: "",
+  dob: "",
+});
+const emptyTrust = () => ({
+  id: "",
+  full_trust_name: "",
+  country: "",
+  // Trust identification (docs/65 Step 55)
+  abn: "",
+  acn: "",
+  registration_number: "",
+  tfn: "",
+  tax_residency: "",
+  date_established: "",
+  date_of_deed: "",
+  governing_law: "",
+  appointors: "", // comma-separated names
+  // Local form-state key only — it serialises to `settlor.full_name`, which
+  // since docs/65 Step 60 is the schema's sole home for the settlor's name.
+  settlor_name: "",
+  settled_sum_amount: "",
+  settled_sum_currency: "",
+  settlor_dob: "",
+  settlor_is_company: "No",
+  settlor_company_name: "",
+  settlor_company_reg: "",
+  settlor_street: "",
+  settlor_suburb: "",
+  settlor_state: "",
+  settlor_postcode: "",
+  settlor_country: "",
+  industry: "",
+  nature_of_business: "",
+  annual_income: "",
+  estimated_trading_volume: "",
+  source_of_funds: "",
+  source_of_wealth: "",
+  principal_address: emptyTrustAddress(),
+  postal_same_as_principal: "Same as principal",
+  postal_address: emptyTrustAddress(),
+  contact_email: "",
+  contact_phone: "",
+  contact_website: "",
+  trust_type: "Unregulated Trust",
+  trust_type_id: "",
+  unregulated_type_description: "",
+  unregulated_is_registered: "No",
+  unregulated_regulatory_body: "",
+  other_super_regulator_name: "",
+  account_purpose: { digital_currency_exchange: false, peer_to_peer: false, fx: false, other: false },
+  has_company_trustees: "No",
+  company_trustees: [emptyCompanyTrustee()],
+  trustees: [emptyTrustee()],
+  has_additional_trustees: "No",
+  authorised_reps: [],
+  controlling_persons: [],
+  beneficiaries: [],
+  documents: [],
+});
+// Every value present, undefined otherwise, so an all-blank block collapses
+// to undefined rather than persisting an object of empty strings.
+const buildTrustAddress = (a) => {
+  const out = {
+    address: a.address.trim() || undefined,
+    suburb: a.suburb.trim() || undefined,
+    state: a.state.trim() || undefined,
+    postcode: a.postcode.trim() || undefined,
+    country: a.country || undefined,
+  };
+  return Object.values(out).some(Boolean) ? out : undefined;
+};
+const buildResidentialAddress = (tr) => {
+  const out = {
+    street: tr.street.trim() || undefined,
+    suburb: tr.suburb.trim() || undefined,
+    state: tr.state.trim() || undefined,
+    postcode: tr.postcode.trim() || undefined,
+    country: tr.country || undefined,
+  };
+  return Object.values(out).some(Boolean) ? out : undefined;
+};
+// Comma-separated free text -> trimmed non-empty name list (appointors,
+// company-trustee directors — flat capture for list-inside-a-list fields).
+const splitNames = (s) => String(s || "").split(",").map((x) => x.trim()).filter(Boolean);
+// Mirrors the wrapper shape resolveTrustLinks() expects server-side
+// (customerController.js) — { id, trust_details, individual_trustees,
+// beneficiaries, company_trustees, settlor, controllers, appointors,
+// aml_kyc, documents } — used for a shareholder's beneficial trust
+// (docs/65 Step 43; expanded to every TrustKyc property in Step 46 and to
+// the Step 55 schema expansion).
+const buildTrustPayload = (t) => {
+  const typeValue = TRUST_TYPES.find(([l]) => l === t.trust_type)?.[1] || "unregulated_trust";
+  const idField = TRUST_TYPE_ID_FIELD[typeValue];
+  const variantDetails = {
+    ...(idField && t.trust_type_id.trim() ? { [idField.key]: t.trust_type_id.trim() } : {}),
+    ...(typeValue === "unregulated_trust"
+      ? {
+          type_description: t.unregulated_type_description.trim() || undefined,
+          is_registered: t.unregulated_is_registered === "Yes",
+          regulatory_body: t.unregulated_regulatory_body.trim() || undefined,
+        }
+      : {}),
+    ...(typeValue === "other_superannuation_trust"
+      ? { regulator_name: t.other_super_regulator_name.trim() || undefined }
+      : {}),
+  };
+  const postalSame = t.postal_same_as_principal !== "Different";
+  const settlorAddress = buildResidentialAddress({
+    street: t.settlor_street,
+    suburb: t.settlor_suburb,
+    state: t.settlor_state,
+    postcode: t.settlor_postcode,
+    country: t.settlor_country,
+  });
+  const settlorIsCompany = t.settlor_is_company === "Yes";
+  return {
+    id: t.id || undefined,
+    trust_details: {
+      full_trust_name: t.full_trust_name.trim(),
+      country_of_establishment: t.country || undefined,
+      // Dates live on trust_details, not under trust_identification — a date
+      // is not an identifier (docs/65 Step 59).
+      date_established: t.date_established || undefined,
+      date_of_deed: t.date_of_deed || undefined,
+      trust_identification: {
+        abn: t.abn.trim() || undefined,
+        acn: t.acn.trim() || undefined,
+        registration_number: t.registration_number.trim() || undefined,
+        tfn: t.tfn.trim() || undefined,
+        tax_residency: t.tax_residency || undefined,
+      },
+      governing_law: t.governing_law.trim() || undefined,
+      // No trust_details.settlor_name — removed from the schema in docs/65
+      // Step 60. The settlor's name goes on settlor.full_name below only.
+      settled_sum: {
+        amount: toNum(t.settled_sum_amount),
+        currency: t.settled_sum_currency.trim() || undefined,
+      },
+      industry: t.industry.trim() || undefined,
+      nature_of_business: t.nature_of_business.trim() || undefined,
+      annual_income: t.annual_income.trim() || undefined,
+      estimated_trading_volume: t.estimated_trading_volume.trim() || undefined,
+      principal_address: buildTrustAddress(t.principal_address),
+      postal_address: {
+        different_from_principal: !postalSame,
+        ...(postalSame ? {} : buildTrustAddress(t.postal_address) || {}),
+      },
+      contact_information: {
+        email: t.contact_email.trim() || undefined,
+        phone: t.contact_phone.trim() || undefined,
+        website: t.contact_website.trim() || undefined,
+      },
+      trust_type: {
+        selected_type: typeValue,
+        ...(Object.keys(variantDetails).length ? { [typeValue]: variantDetails } : {}),
+      },
+      account_purpose: t.account_purpose,
+    },
+    settlor: {
+      full_name: t.settlor_name.trim() || undefined,
+      date_of_birth: settlorIsCompany ? undefined : t.settlor_dob || undefined,
+      residential_address: settlorIsCompany ? undefined : settlorAddress,
+      country_of_residence: settlorIsCompany ? undefined : t.settlor_country || undefined,
+      is_company: settlorIsCompany,
+      company: settlorIsCompany
+        ? {
+            company_name: t.settlor_company_name.trim() || undefined,
+            registration_number: t.settlor_company_reg.trim() || undefined,
+          }
+        : undefined,
+    },
+    individual_trustees: {
+      trustees: t.trustees
+        .filter((tr) => tr.full_name.trim())
+        .map((tr) => ({
+          full_name: tr.full_name.trim(),
+          date_of_birth: tr.dob || undefined,
+          residential_address: buildResidentialAddress(tr),
+        })),
+      has_additional_trustees: t.has_additional_trustees === "Yes",
+    },
+    company_trustees: {
+      has_company_trustees: t.has_company_trustees === "Yes",
+      company_details: t.company_trustees
+        .filter((c) => c.company_name.trim())
+        .map((c) => ({
+          company_name: c.company_name.trim(),
+          registration_number: c.registration_number.trim() || undefined,
+          abn: c.abn.trim() || undefined,
+          registered_address: buildResidentialAddress(c),
+          directors: splitNames(c.directors).map((full_name) => ({ full_name })),
+        })),
+    },
+    controllers: {
+      authorised_representatives: t.authorised_reps
+        .filter((r) => r.full_name.trim())
+        .map((r) => ({ full_name: r.full_name.trim(), role: r.role.trim() || undefined })),
+      controlling_persons: t.controlling_persons
+        .filter((p) => p.full_name.trim())
+        .map((p) => ({
+          full_name: p.full_name.trim(),
+          role: p.role.trim() || undefined,
+          pep_status: PEP_STATUS_OPTIONS.find(([l]) => l === p.pep)?.[1] || "pending",
+          sanctions_status: SANCTIONS_STATUS_OPTIONS.find(([l]) => l === p.sanctions)?.[1] || "pending",
+        })),
+    },
+    appointors: splitNames(t.appointors),
+    aml_kyc: {
+      source_of_funds: t.source_of_funds.trim() || undefined,
+      source_of_wealth: t.source_of_wealth.trim() || undefined,
+    },
+    beneficiaries: t.beneficiaries
+      .filter((b) => b.named_beneficiaries.trim())
+      .map((b) => ({
+        named_beneficiaries: b.named_beneficiaries.trim(),
+        beneficiary_classes: b.beneficiary_classes.trim() || undefined,
+        beneficiary_type: BENEFICIARY_TYPES.find(([l]) => l === b.beneficiary_type)?.[1] || undefined,
+        beneficial_interest_percent: toNum(b.interest_percent),
+        date_of_birth: b.dob || undefined,
+      })),
+    documents: (t.documents || [])
+      .filter((d) => d.url)
+      .map((d) => ({
+        name: d.name,
+        url: d.url,
+        mimeType: d.mimeType,
+        docType: d.docType || undefined,
+        expiry_date: d.expiry || undefined,
+      })),
+  };
+};
 // Jurisdiction is a plain country pick — same shared list used for every
 // other country field in the app (@/constants), not the design mockup's
 // bespoke combined "State, Country" strings.
@@ -211,8 +552,25 @@ const emptyHolder = {
   security: "Ordinary",
   holding: "",
   percent: "",
-  beneficially: "No",
+  // Was defaulted to "No" — harmless before, but now "No" requires the new
+  // beneficial-arrangement fields below (docs/65 Step 43), so every freshly
+  // added row would immediately demand extra input for what's normally the
+  // common case (the registered holder is the real owner). Defaulting to
+  // "Yes" avoids that; existing records restore whatever they actually have.
+  beneficially: "Yes",
   paid: "Fully paid",
+  beneficialType: "",
+  // Person vs company beneficiary (docs/65 Step 66) — decides whether the
+  // name is captured as split person-name parts or a single entity name.
+  beneficiaryKind: "individual",
+  // Split name parts (docs/65 Step 67). Middle name is genuinely optional;
+  // first + last are what identify the person for screening.
+  beneficiaryFirst: "",
+  beneficiaryMiddle: "",
+  beneficiaryLast: "",
+  beneficiaryEntityName: "",
+  beneficiaryDob: "",
+  trust: null,
 };
 const emptyUbo = { full_name: "", percent: "", control: "Ownership (25%+)", country: "", dob: "" };
 const emptyCapitalRow = { security_class: "Ordinary", number_issued: "", total_paid: "", total_unpaid: "", voting: "Yes" };
@@ -224,6 +582,102 @@ const emptyPerson = {
   birth_place: "",
   residential_address: { street: "", suburb: "", state: "", postcode: "", country: "" },
 };
+
+// eKYB OCR pre-fill (docs/65 Step 48/49) — converts one row of the OCR
+// service's response into this wizard's local row shape. The upstream
+// response is documented as mirroring "general_information +
+// directors_beneficial_owner", but a real sample (docs/65 Step 49) showed it
+// actually returns a near-complete CompanyKyc-shaped extraction — top-level
+// identifiers[]/appointments[]/share_capital[]/shareholders[]/
+// related_entities[] as well, each already shaped exactly like this
+// wizard's own mapCompanyToWizardState() reads them (same field names as
+// the real CompanyKyc schema). These mappers mirror that existing restore
+// logic field-for-field rather than guessing at alternate key names.
+const ocrIdentifierRow = (i = {}) => ({
+  id_type: labelFor(IDENTIFIER_TYPES, i.id_type, "Other"),
+  value: (i.value || "").trim(),
+  jurisdiction: i.jurisdiction || "",
+});
+// Prefers the richer top-level appointments[] (full name/DOB/address/role —
+// what a real ASIC extract actually contains) over
+// directors_beneficial_owner.directors[], which the schema only ever
+// carries given_name/surname for (it's a legacy mirror, not a primary
+// source) — applyOcrResult() below only falls back to the latter when
+// appointments[] is absent.
+const ocrAppointmentToPerson = (a = {}) => ({
+  ...emptyPerson,
+  full_name: [a.given_name, a.surname].filter(Boolean).join(" ") || a.full_name || "",
+  appointment: labelFor(APPOINTMENTS, a.role, "Director"),
+  date_appointed: dateOnly(a.date_appointed),
+  dob: dateOnly(a.date_of_birth || a.dob),
+  birth_place: a.birth_place || "",
+  residential_address: {
+    street: a.residential_address?.street || "",
+    suburb: a.residential_address?.suburb || "",
+    state: a.residential_address?.state || "",
+    postcode: a.residential_address?.postcode || "",
+    country: a.residential_address?.country || "",
+  },
+});
+const ocrOwnerToUbo = (o = {}) => ({
+  full_name: o.full_name || "",
+  percent: o.ownership_percent ?? o.percent ?? "",
+  control: labelFor(CONTROL_TYPES, o.control_type, "Ownership (25%+)"),
+  country: o.residential_address?.country || o.country || "",
+  dob: dateOnly(o.date_of_birth || o.dob),
+});
+const ocrAddressRow = (a = {}, type) => ({
+  type,
+  street: a.street || "",
+  suburb: a.suburb || "",
+  state: a.state || "",
+  postcode: a.postcode || "",
+  country: a.country || "",
+  from: "",
+  to: "",
+});
+const ocrAgentRow = (a = {}) => ({
+  name: a.name || "",
+  street: a.address?.street || a.street || "",
+  suburb: a.address?.suburb || a.suburb || "",
+  state: a.address?.state || a.state || "",
+  postcode: a.address?.postcode || a.postcode || "",
+  country: a.address?.country || a.country || "",
+});
+const ocrCapitalRow = (c = {}) => ({
+  security_class: c.security_class || "Ordinary",
+  number_issued: c.amount_issued ?? "",
+  total_paid: c.total_paid ?? "",
+  total_unpaid: c.total_unpaid ?? "",
+  voting: c.voting === false ? "No" : "Yes",
+});
+// beneficially_held:false rows come back with no beneficial_arrangement —
+// an ASIC extract has no way to tell us who the arrangement is actually
+// for (that's not a fact the register itself records) — so these rows
+// land incomplete on purpose and the submit-time validation (docs/65 Step
+// 43) already blocks submission until a human resolves them. applyOcrResult
+// counts these so the toast can say so explicitly rather than the user
+// only discovering it at submit time.
+const ocrHolderRow = (h = {}) => ({
+  ...emptyHolder,
+  name: h.holder_name || "",
+  security: h.security_class || "Ordinary",
+  holding: h.units_held ?? "",
+  percent: h.percent_held ?? "",
+  beneficially: h.beneficially_held === false ? "No" : "Yes",
+  paid: h.fully_paid === false ? "Partly paid" : "Fully paid",
+});
+const ocrRelatedEntityRow = (r = {}) => ({
+  name: r.name || "",
+  percent: r.percent_interest ?? "",
+  acquired: dateOnly(r.date_acquired),
+  jurisdiction: r.jurisdiction || "",
+});
+// True when every one of `keys` on `row` is blank — used to decide whether
+// an OCR-derived list should replace a still-untouched default row (one
+// empty starter row) or append alongside rows the user already filled in,
+// so pre-filling never silently discards manual entry.
+const rowIsBlank = (row, keys) => keys.every((k) => !row[k] || !String(row[k]).trim());
 
 const DRAFT_KEY = "kyb-intake-draft";
 // A parent is "foreign" relative to the subject entity's own country of
@@ -253,6 +707,306 @@ const findRegistrationNumber = (identifiers) =>
 // the exact label the record was originally saved with (docs/65 Step 29).
 const labelFor = (list, value, fallback) => list.find(([, v]) => v === value)?.[0] || fallback;
 const dateOnly = (v) => (v ? String(v).slice(0, 10) : "");
+
+// Restore a beneficiary's name into the wizard's split fields (docs/65 Step
+// 67). The parts are canonical, but a record can legitimately carry only
+// `full_name` — an OCR/imported payload, or a row migrated from the pre-Step
+// 66 single-name shape — so that gets split rather than shown as blank:
+// first token to first, last token to last, anything between to middle.
+// A Minor is always a person, whatever the person/entity toggle last held —
+// the toggle isn't rendered on that row (docs/65 Step 67).
+const isEntityBeneficiary = (h) => h.beneficialType !== "Minor" && h.beneficiaryKind === "entity";
+// Is this holder's beneficiary identified? Entity => a name; person => first
+// AND last, which is what screening needs (a lone surname isn't a match).
+const beneficiaryNamed = (h) =>
+  isEntityBeneficiary(h)
+    ? Boolean(h.beneficiaryEntityName.trim())
+    : Boolean(h.beneficiaryFirst.trim() && h.beneficiaryLast.trim());
+
+const beneficiaryNameParts = (b = {}) => {
+  const parts = {
+    beneficiaryFirst: b?.first_name || "",
+    beneficiaryMiddle: b?.middle_name || "",
+    beneficiaryLast: b?.last_name || "",
+    beneficiaryEntityName: b?.entity_name || "",
+  };
+  if (parts.beneficiaryFirst || parts.beneficiaryLast) return parts;
+  const words = String(b?.full_name || "").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return parts;
+  return {
+    ...parts,
+    beneficiaryFirst: words[0],
+    beneficiaryMiddle: words.slice(1, -1).join(" "),
+    beneficiaryLast: words.length > 1 ? words[words.length - 1] : "",
+  };
+};
+
+// Reverse of buildTrustPayload() — maps a populated TrustKyc doc (a
+// shareholder's populated holder_entity when holder_model is "TrustKyc")
+// back into TrustFields' local state shape (docs/65 Step 43). Falls back to
+// a blank trust when there's nothing to restore (not yet linked, or the ref
+// didn't populate).
+function trustKycToWizardState(t) {
+  if (!t || typeof t !== "object") return emptyTrust();
+  const td = t.trust_details || {};
+  const typeValue = td.trust_type?.selected_type;
+  const idField = TRUST_TYPE_ID_FIELD[typeValue];
+  const variant = td.trust_type?.[typeValue] || {};
+  const pa = td.principal_address || {};
+  const posta = td.postal_address || {};
+  const ci = td.contact_information || {};
+  const ap = td.account_purpose || {};
+  const ct = t.company_trustees || {};
+  const ti = td.trust_identification || {};
+  const settlor = t.settlor || {};
+  const sa = settlor.residential_address || {};
+  const ctrl = t.controllers || {};
+  const aml = t.aml_kyc || {};
+  return {
+    id: t._id || "",
+    full_trust_name: td.full_trust_name || "",
+    country: td.country_of_establishment || "",
+    abn: ti.abn || "",
+    acn: ti.acn || "",
+    registration_number: ti.registration_number || "",
+    tfn: ti.tfn || "",
+    tax_residency: ti.tax_residency || "",
+    // Read the new home first, falling back to the pre-Step-59 path so
+    // records written before the move still restore.
+    date_established: dateOnly(td.date_established ?? ti.date_established),
+    date_of_deed: dateOnly(td.date_of_deed ?? ti.date_of_deed),
+    governing_law: td.governing_law || "",
+    appointors: (t.appointors || []).join(", "),
+    // Canonical field only; the `td.settlor_name` fallback covers records
+    // stored before the Step 60 removal that haven't been migrated yet.
+    settlor_name: settlor.full_name || td.settlor_name || "",
+    settled_sum_amount: td.settled_sum?.amount ?? "",
+    settled_sum_currency: td.settled_sum?.currency || "",
+    settlor_dob: dateOnly(settlor.date_of_birth),
+    settlor_is_company: settlor.is_company ? "Yes" : "No",
+    settlor_company_name: settlor.company?.company_name || "",
+    settlor_company_reg: settlor.company?.registration_number || "",
+    settlor_street: sa.street || "",
+    settlor_suburb: sa.suburb || "",
+    settlor_state: sa.state || "",
+    settlor_postcode: sa.postcode || "",
+    settlor_country: sa.country || settlor.country_of_residence || "",
+    source_of_funds: aml.source_of_funds || "",
+    source_of_wealth: aml.source_of_wealth || "",
+    authorised_reps: (ctrl.authorised_representatives || []).map((r) => ({
+      full_name: r.full_name || "",
+      role: r.role || "",
+    })),
+    controlling_persons: (ctrl.controlling_persons || []).map((p) => ({
+      full_name: p.full_name || "",
+      role: p.role || "",
+      pep: labelFor(PEP_STATUS_OPTIONS, p.pep_status, "Pending"),
+      sanctions: labelFor(SANCTIONS_STATUS_OPTIONS, p.sanctions_status, "Pending"),
+    })),
+    industry: td.industry || "",
+    nature_of_business: td.nature_of_business || "",
+    annual_income: td.annual_income || "",
+    estimated_trading_volume: td.estimated_trading_volume || "",
+    principal_address: {
+      address: pa.address || "",
+      suburb: pa.suburb || "",
+      state: pa.state || "",
+      postcode: pa.postcode || "",
+      country: pa.country || "",
+    },
+    postal_same_as_principal: posta.different_from_principal ? "Different" : "Same as principal",
+    postal_address: {
+      address: posta.address || "",
+      suburb: posta.suburb || "",
+      state: posta.state || "",
+      postcode: posta.postcode || "",
+      country: posta.country || "",
+    },
+    contact_email: ci.email || "",
+    contact_phone: ci.phone || "",
+    contact_website: ci.website || "",
+    trust_type: labelFor(TRUST_TYPES, typeValue, "Unregulated Trust"),
+    trust_type_id: idField ? variant[idField.key] || "" : "",
+    unregulated_type_description: typeValue === "unregulated_trust" ? variant.type_description || "" : "",
+    unregulated_is_registered: typeValue === "unregulated_trust" && variant.is_registered ? "Yes" : "No",
+    unregulated_regulatory_body: typeValue === "unregulated_trust" ? variant.regulatory_body || "" : "",
+    other_super_regulator_name: typeValue === "other_superannuation_trust" ? variant.regulator_name || "" : "",
+    account_purpose: {
+      digital_currency_exchange: Boolean(ap.digital_currency_exchange),
+      peer_to_peer: Boolean(ap.peer_to_peer),
+      fx: Boolean(ap.fx),
+      other: Boolean(ap.other),
+    },
+    has_company_trustees: ct.has_company_trustees ? "Yes" : "No",
+    company_trustees: (ct.company_details || []).length
+      ? ct.company_details.map((c) => ({
+          company_name: c.company_name || "",
+          registration_number: c.registration_number || "",
+          abn: c.abn || "",
+          street: c.registered_address?.street || "",
+          suburb: c.registered_address?.suburb || "",
+          state: c.registered_address?.state || "",
+          postcode: c.registered_address?.postcode || "",
+          country: c.registered_address?.country || "",
+          directors: (c.directors || []).map((d) => d.full_name).filter(Boolean).join(", "),
+        }))
+      : [emptyCompanyTrustee()],
+    trustees: (t.individual_trustees?.trustees || []).length
+      ? t.individual_trustees.trustees.map((tr) => ({
+          full_name: tr.full_name || "",
+          dob: dateOnly(tr.date_of_birth),
+          street: tr.residential_address?.street || "",
+          suburb: tr.residential_address?.suburb || "",
+          state: tr.residential_address?.state || "",
+          postcode: tr.residential_address?.postcode || "",
+          country: tr.residential_address?.country || "",
+        }))
+      : [emptyTrustee()],
+    has_additional_trustees: t.individual_trustees?.has_additional_trustees ? "Yes" : "No",
+    beneficiaries: (t.beneficiaries || []).map((b) => ({
+      named_beneficiaries: b.named_beneficiaries || "",
+      beneficiary_classes: b.beneficiary_classes || "",
+      beneficiary_type: labelFor(BENEFICIARY_TYPES, b.beneficiary_type, ""),
+      interest_percent: b.beneficial_interest_percent ?? "",
+      dob: dateOnly(b.date_of_birth),
+    })),
+    documents: (t.documents || []).map((d, i) => ({
+      _uploadId: d._id ? String(d._id) : `existing_${i}`,
+      name: d.name || "",
+      mimeType: d.mimeType || "",
+      docType: d.docType || d.type || "",
+      url: d.url || "",
+      expiry: dateOnly(d.expiry_date),
+      // Server-owned; carried through for display only, never editable in
+      // the wizard (docs/65 Step 55).
+      verification_status: d.verification_status || "",
+      status: "done",
+    })),
+  };
+}
+
+// eKYB OCR pre-fill for a Trust Deed (docs/65 Step 50) — merges a
+// /process-ekyb-trust response into TrustFields' current local state.
+// Unlike the Company OCR response (Step 49), a real sample here confirmed
+// `data` genuinely does mirror TrustKyc.js one-for-one (same top-level
+// trust_details/beneficiaries/company_trustees/individual_trustees layout
+// trustKycToWizardState() above already reads) — no undocumented extra
+// top-level arrays this time. Same additive-never-destructive rule as the
+// Company merge: a field only overwrites the current value when OCR
+// actually returned something for it.
+//
+// One real wrinkle a live sample surfaced: `trust_details.trust_type.
+// selected_type` came back "Discretionary" — natural-language, not one of
+// TRUST_TYPES' six backend enum values. Rather than drop an unrecognised
+// type, it's matched case-insensitively against TRUST_TYPES' labels/values
+// first; if nothing matches, it falls back to "unregulated_trust" (the
+// correct umbrella per TrustKyc's own schema — see unregulated_trust.
+// type_description) with the raw OCR string recorded in that description
+// field, so "Discretionary" isn't silently lost.
+function applyOcrToTrust(t, ocrData) {
+  const td = ocrData?.trust_details || {};
+  const pa = td.principal_address || {};
+  const posta = td.postal_address || {};
+  const ci = td.contact_information || {};
+  const ap = td.account_purpose;
+
+  const rawType = td.trust_type?.selected_type || "";
+  const matchedTypeValue = TRUST_TYPES.find(
+    ([label, value]) => value.toLowerCase() === rawType.toLowerCase() || label.toLowerCase() === rawType.toLowerCase(),
+  )?.[1];
+  const typeValue = matchedTypeValue || (rawType ? "unregulated_trust" : "");
+  const variant = typeValue ? td.trust_type?.[typeValue] || {} : {};
+  const idField = typeValue ? TRUST_TYPE_ID_FIELD[typeValue] : null;
+
+  const newTrustees = (ocrData?.individual_trustees?.trustees || [])
+    .map((tr) => ({
+      full_name: tr.full_name || "",
+      dob: dateOnly(tr.date_of_birth || tr.dob),
+      street: tr.residential_address?.street || tr.street || "",
+      suburb: tr.residential_address?.suburb || tr.suburb || "",
+      state: tr.residential_address?.state || tr.state || "",
+      postcode: tr.residential_address?.postcode || tr.postcode || "",
+      country: tr.residential_address?.country || tr.country || "",
+    }))
+    .filter((r) => r.full_name.trim());
+  const newCompanyTrustees = (ocrData?.company_trustees?.company_details || [])
+    .map((c) => ({ company_name: c.company_name || "", registration_number: c.registration_number || "" }))
+    .filter((r) => r.company_name.trim());
+  const newBeneficiaries = (ocrData?.beneficiaries || [])
+    .map((b) => ({
+      ...emptyTrustBeneficiary(),
+      named_beneficiaries: b.named_beneficiaries || "",
+      beneficiary_classes: b.beneficiary_classes || "",
+    }))
+    .filter((r) => r.named_beneficiaries.trim());
+
+  return {
+    ...t,
+    full_trust_name: td.full_trust_name?.trim() || t.full_trust_name,
+    country: td.country_of_establishment?.trim() || t.country,
+    // Had no schema home until Step 55 — previously surfaced in a
+    // "not captured by this form" toast, now stored like everything else.
+    date_of_deed: dateOnly(td.date_of_deed) || t.date_of_deed,
+    governing_law: ocrData?.governing_law?.trim() || t.governing_law,
+    appointors: (ocrData?.appointors || []).length ? ocrData.appointors.join(", ") : t.appointors,
+    settlor_name: td.settlor_name?.trim() || t.settlor_name,
+    industry: td.industry?.trim() || t.industry,
+    nature_of_business: td.nature_of_business?.trim() || t.nature_of_business,
+    annual_income: td.annual_income?.trim() || t.annual_income,
+    estimated_trading_volume: td.estimated_trading_volume?.trim() || t.estimated_trading_volume,
+    principal_address: {
+      address: pa.address?.trim() || t.principal_address.address,
+      suburb: pa.suburb?.trim() || t.principal_address.suburb,
+      state: pa.state?.trim() || t.principal_address.state,
+      postcode: pa.postcode?.trim() || t.principal_address.postcode,
+      country: pa.country?.trim() || t.principal_address.country,
+    },
+    postal_same_as_principal: posta.different_from_principal ? "Different" : t.postal_same_as_principal,
+    postal_address: posta.different_from_principal
+      ? {
+          address: posta.address?.trim() || t.postal_address.address,
+          suburb: posta.suburb?.trim() || t.postal_address.suburb,
+          state: posta.state?.trim() || t.postal_address.state,
+          postcode: posta.postcode?.trim() || t.postal_address.postcode,
+          country: posta.country?.trim() || t.postal_address.country,
+        }
+      : t.postal_address,
+    contact_email: ci.email?.trim() || t.contact_email,
+    contact_phone: ci.phone?.trim() || t.contact_phone,
+    contact_website: ci.website?.trim() || t.contact_website,
+    trust_type: typeValue ? labelFor(TRUST_TYPES, typeValue, t.trust_type) : t.trust_type,
+    trust_type_id: idField && variant[idField.key] ? String(variant[idField.key]) : t.trust_type_id,
+    unregulated_type_description:
+      typeValue === "unregulated_trust"
+        ? variant.type_description?.trim() || (!matchedTypeValue && rawType ? rawType : t.unregulated_type_description)
+        : t.unregulated_type_description,
+    unregulated_is_registered:
+      typeValue === "unregulated_trust" && variant.is_registered != null ? (variant.is_registered ? "Yes" : "No") : t.unregulated_is_registered,
+    unregulated_regulatory_body:
+      typeValue === "unregulated_trust" ? variant.regulatory_body?.trim() || t.unregulated_regulatory_body : t.unregulated_regulatory_body,
+    other_super_regulator_name:
+      typeValue === "other_superannuation_trust" ? variant.regulator_name?.trim() || t.other_super_regulator_name : t.other_super_regulator_name,
+    account_purpose: ap
+      ? {
+          digital_currency_exchange: ap.digital_currency_exchange ?? t.account_purpose.digital_currency_exchange,
+          peer_to_peer: ap.peer_to_peer ?? t.account_purpose.peer_to_peer,
+          fx: ap.fx ?? t.account_purpose.fx,
+          other: ap.other ?? t.account_purpose.other,
+        }
+      : t.account_purpose,
+    has_company_trustees: ocrData?.company_trustees?.has_company_trustees ? "Yes" : t.has_company_trustees,
+    company_trustees: newCompanyTrustees.length
+      ? (t.company_trustees.length === 1 && rowIsBlank(t.company_trustees[0], ["company_name", "registration_number"])
+          ? newCompanyTrustees
+          : [...t.company_trustees, ...newCompanyTrustees])
+      : t.company_trustees,
+    trustees: newTrustees.length
+      ? (t.trustees.length === 1 && rowIsBlank(t.trustees[0], ["full_name"]) ? newTrustees : [...t.trustees, ...newTrustees])
+      : t.trustees,
+    has_additional_trustees: ocrData?.individual_trustees?.has_additional_trustees ? "Yes" : t.has_additional_trustees,
+    beneficiaries: newBeneficiaries.length ? [...t.beneficiaries, ...newBeneficiaries] : t.beneficiaries,
+  };
+}
 
 // Edit mode: map a CompanyKyc document (API shape) back into the wizard's
 // local state shapes (docs/65 Step 29) — the inverse of buildPayload() below.
@@ -338,6 +1092,10 @@ function mapCompanyToWizardState(doc) {
           voting: row.voting === false ? "No" : "Yes",
         }))
       : [{ ...emptyCapitalRow }],
+    // beneficial_arrangement / holder_entity restore is docs/65 Step 43 —
+    // a "trust" arrangement's TrustKyc comes from the populated
+    // holder_entity (holder_model:"TrustKyc"; getCompanyKyc populates
+    // shareholders.holder_entity server-side).
     holders: (doc.shareholders || []).length
       ? doc.shareholders.map((h) => ({
           name: h.holder_name || "",
@@ -346,6 +1104,11 @@ function mapCompanyToWizardState(doc) {
           percent: h.percent_held ?? "",
           beneficially: h.beneficially_held ? "Yes" : "No",
           paid: h.fully_paid ? "Fully paid" : "Partly paid",
+          beneficialType: labelFor(BENEFICIAL_ARRANGEMENT_TYPES, h.beneficial_arrangement?.arrangement_type, ""),
+          beneficiaryKind: h.beneficial_arrangement?.beneficiary_type === "entity" ? "entity" : "individual",
+          ...beneficiaryNameParts(h.beneficial_arrangement?.beneficiary),
+          beneficiaryDob: dateOnly(h.beneficial_arrangement?.beneficiary?.date_of_birth),
+          trust: h.holder_model === "TrustKyc" && h.holder_entity ? trustKycToWizardState(h.holder_entity) : null,
         }))
       : [{ ...emptyHolder }],
     parent: relatedParent
@@ -405,28 +1168,38 @@ function mapCompanyToWizardState(doc) {
 /* ------------------------------------------------------------------ */
 /* Small building blocks                                               */
 /* ------------------------------------------------------------------ */
-function Fld({ label, required, mono, children }) {
+// `error` (docs/65 Step 62) is the one place a field's validation message is
+// rendered, so every validated field looks the same. `data-invalid` is the
+// hook the trust modal uses to scroll to the first offending field.
+function Fld({ label, required, mono, error, children }) {
   return (
-    <div>
+    <div data-invalid={error ? "true" : undefined}>
       <label style={labelCss}>
         {label} {required && <span style={{ color: C.red }}>*</span>}
       </label>
       {children}
+      {error && <div style={errCss}>{error}</div>}
     </div>
   );
 }
 
-function Input({ mono, style, ...props }) {
+function Input({ mono, style, invalid, onFocus, onBlur, ...props }) {
+  // Focus/blur repaint the border directly, so the resting colour has to be
+  // resolved in both places — otherwise blurring an invalid field would
+  // repaint it back to the neutral grey.
+  const resting = invalid ? C.red : "#d9ddd6";
   return (
     <input
-      style={{ ...fld, ...(mono ? { fontFamily: monoFam } : {}), ...style }}
+      style={{ ...fld, borderColor: resting, ...(mono ? { fontFamily: monoFam } : {}), ...style }}
       onFocus={(e) => {
-        e.target.style.borderColor = C.green;
-        e.target.style.boxShadow = "0 0 0 3px rgba(31,111,92,.15)";
+        e.target.style.borderColor = invalid ? C.red : C.green;
+        e.target.style.boxShadow = invalid ? "0 0 0 3px rgba(165,52,42,.15)" : "0 0 0 3px rgba(31,111,92,.15)";
+        onFocus?.(e);
       }}
       onBlur={(e) => {
-        e.target.style.borderColor = "#d9ddd6";
+        e.target.style.borderColor = resting;
         e.target.style.boxShadow = "none";
+        onBlur?.(e);
       }}
       {...props}
     />
@@ -441,7 +1214,7 @@ function Input({ mono, style, ...props }) {
 // "state holds the display label" convention (docs/65 Step 34/labelFor) —
 // the DOM/combobox value has always been the label, never the backend
 // value, exactly like the native <select> this replaces.
-function Select({ value, onChange, options, style, placeholder, onAddItem }) {
+function Select({ value, onChange, options, style, placeholder, onAddItem, invalid }) {
   const opts = useMemo(
     () =>
       options.map((o) => {
@@ -458,6 +1231,9 @@ function Select({ value, onChange, options, style, placeholder, onAddItem }) {
         options={opts}
         value={value}
         onChange={onChange}
+        // CustomSelect's own `error` prop paints the red border, so an
+        // invalid dropdown reads the same as an invalid input.
+        error={invalid}
         placeholder={placeholder || "Select…"}
         searchPlaceholder="Search…"
         className="w-full justify-between font-normal text-[13.5px] h-[38px] rounded-[9px] border-[#d9ddd6] bg-white"
@@ -519,6 +1295,1307 @@ function MultiField({ label, required, values, onChange, placeholder, type = "te
         </button>
       </div>
     </Fld>
+  );
+}
+
+// Reused for both the entity's own Trust details (entity_type === "Trust")
+// and a shareholder's beneficial trust (Beneficially held = No, arrangement
+// = Trust) — same TrustKyc-shaped fields either way (docs/65 Step 43),
+// so the two required-trust-form contexts stay consistent by construction
+// rather than by copy-pasted markup.
+// (SectionLabel — the flat heading used here in Steps 46–55 — was replaced
+// by TrustSection below in Step 56 and removed rather than left dead.)
+// Each trust section is its own titled card (docs/65 Step 56) — with 15
+// sections in one modal, a flat stack of labels made it hard to tell where
+// one ended and the next began. The header wraps on narrow screens so a
+// section with an action control (Add…/Yes-No toggle) stays usable.
+// `issues` (docs/65 Step 62) — with 15 sections in one scrolling modal, a
+// per-section count is what makes "3 fields need attention" findable without
+// scrolling the whole form looking for red.
+function TrustSection({ title, hint, action, issues = 0, children }) {
+  const flagged = issues > 0;
+  return (
+    <section style={{ border: `1px solid ${flagged ? C.redLine : C.line}`, borderRadius: 12, background: "#fff", overflow: "hidden" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          flexWrap: "wrap",
+          padding: "11px 14px",
+          background: flagged ? C.redSoft : "#f7f9f7",
+          borderBottom: `1px solid ${flagged ? C.redLine : C.hair}`,
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
+            <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: ".05em", textTransform: "uppercase", color: flagged ? C.redDeep : C.mid }}>{title}</div>
+            {flagged && (
+              <span
+                style={{
+                  background: "#fff",
+                  border: `1px solid ${C.redLine}`,
+                  color: C.red,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: "2px 7px",
+                  borderRadius: 20,
+                }}
+              >
+                {issues} to fix
+              </span>
+            )}
+          </div>
+          {hint && <div style={{ fontSize: 11.5, color: C.sub, marginTop: 3, fontWeight: 400 }}>{hint}</div>}
+        </div>
+        {action}
+      </div>
+      <div style={{ padding: 14 }}>{children}</div>
+    </section>
+  );
+}
+const trustFieldGrid = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14 };
+const smallRemoveBtn = (onClick) => (
+  <button
+    type="button"
+    title="Remove"
+    onClick={onClick}
+    style={{ background: "none", border: "none", cursor: "pointer", color: "#b0b6bd", padding: "8px 2px", flexShrink: 0 }}
+  >
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  </button>
+);
+/* ------------------------------------------------------------------ */
+/* Beneficial-trust validation (docs/65 Step 62)                       */
+/* ------------------------------------------------------------------ */
+// One validator for the whole trust form. Returns a flat map of
+// field-key -> message; array rows use dotted keys ("trustees.0.dob") so the
+// same object drives the inline messages, the per-section counts and the
+// wizard's own submit gate. Required set follows the standalone Trust KYC
+// form's schema (ui/views/customer-registration/trust/Schema.js) so the two
+// places a trust can be captured demand the same things, plus per-row
+// integrity and format checks the schema leaves to the backend.
+const blankStr = (v) => !String(v ?? "").trim();
+const digitsOnly = (v) => String(v ?? "").replace(/\D/g, "");
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const isAdultDob = (iso) => {
+  const cutoff = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - 18);
+  return new Date(iso) <= cutoff;
+};
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
+const URL_RE = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+([/?#][^\s]*)?$/;
+const POSTCODE_RE = /^[A-Za-z0-9][A-Za-z0-9 -]{2,9}$/;
+
+function validateTrust(t) {
+  const e = {};
+  const req = (key, value, message) => {
+    if (blankStr(value)) e[key] = message;
+  };
+  const addressBlock = (prefix, a = {}) => {
+    req(`${prefix}.address`, a.address, "Address is required.");
+    req(`${prefix}.suburb`, a.suburb, "Suburb is required.");
+    req(`${prefix}.state`, a.state, "State is required.");
+    req(`${prefix}.postcode`, a.postcode, "Postcode is required.");
+    req(`${prefix}.country`, a.country, "Country is required.");
+    if (!blankStr(a.postcode) && !POSTCODE_RE.test(String(a.postcode).trim())) e[`${prefix}.postcode`] = "Enter a valid postcode.";
+  };
+
+  // Trust identity
+  req("full_trust_name", t.full_trust_name, "Full trust name is required.");
+  req("country", t.country, "Country of establishment is required.");
+  req("industry", t.industry, "Industry is required.");
+  req("nature_of_business", t.nature_of_business, "Nature of business is required.");
+  req("annual_income", t.annual_income, "Annual income is required.");
+  req("estimated_trading_volume", t.estimated_trading_volume, "Estimated trading volume is required.");
+
+  // Trust identification — every identifier is optional (which ones exist
+  // depends on the trust), but a supplied one has to be well-formed.
+  if (!blankStr(t.abn) && digitsOnly(t.abn).length !== 11) e.abn = "ABN must be 11 digits.";
+  if (!blankStr(t.acn) && digitsOnly(t.acn).length !== 9) e.acn = "ACN must be 9 digits.";
+  if (!blankStr(t.tfn) && ![8, 9].includes(digitsOnly(t.tfn).length)) e.tfn = "TFN must be 8 or 9 digits.";
+  if (!blankStr(t.date_established) && t.date_established > todayISO()) e.date_established = "Date established can't be in the future.";
+  if (!blankStr(t.date_of_deed) && t.date_of_deed > todayISO()) e.date_of_deed = "Date of deed can't be in the future.";
+
+  // Trust type + the variant-specific fields it unlocks
+  req("trust_type", t.trust_type, "Trust type is required.");
+  const typeValue = TRUST_TYPES.find(([l]) => l === t.trust_type)?.[1];
+  const idField = TRUST_TYPE_ID_FIELD[typeValue];
+  if (idField) {
+    // Where the variant's identifier is one the generic Trust identification
+    // section already collects (abn / registration_number), the requirement
+    // applies to THAT field — its variant input isn't rendered any more
+    // (docs/65 Step 59), and requiring a hidden field would block submit
+    // with an error the user can't see or clear.
+    if (GENERIC_TRUST_ID_FIELDS.includes(idField.key)) {
+      req(idField.key, t[idField.key], `${idField.label} is required for this trust type.`);
+    } else {
+      req("trust_type_id", t.trust_type_id, `${idField.label} is required for this trust type.`);
+    }
+  }
+  // (ABN digit-length is already validated once on the generic field above.)
+  if (typeValue === "unregulated_trust") {
+    req("unregulated_type_description", t.unregulated_type_description, "Type description is required.");
+    if (t.unregulated_is_registered === "Yes") {
+      req("unregulated_regulatory_body", t.unregulated_regulatory_body, "Regulatory body is required when the trust is registered.");
+    }
+  }
+  if (typeValue === "other_superannuation_trust") {
+    req("other_super_regulator_name", t.other_super_regulator_name, "Regulator name is required.");
+  }
+
+  // Settlor
+  req("settlor_name", t.settlor_name, "Settlor name is required.");
+  if (t.settlor_is_company === "Yes") {
+    req("settlor_company_name", t.settlor_company_name, "Company name is required.");
+    req("settlor_company_reg", t.settlor_company_reg, "Registration number is required.");
+  } else if (!blankStr(t.settlor_dob) && t.settlor_dob > todayISO()) {
+    e.settlor_dob = "Date of birth can't be in the future.";
+  }
+
+  // Addresses — postal only when it differs from the principal address.
+  addressBlock("principal_address", t.principal_address);
+  if (t.postal_same_as_principal === "Different") addressBlock("postal_address", t.postal_address);
+
+  // Contact information
+  if (blankStr(t.contact_email)) e.contact_email = "Email is required.";
+  else if (!EMAIL_RE.test(t.contact_email.trim())) e.contact_email = "Enter a valid email address.";
+  if (blankStr(t.contact_phone)) e.contact_phone = "Phone is required.";
+  else if (digitsOnly(t.contact_phone).length < 6) e.contact_phone = "Enter a valid phone number.";
+  if (!blankStr(t.contact_website) && !URL_RE.test(t.contact_website.trim())) e.contact_website = "Enter a valid website URL.";
+
+  // Account purpose — section-level, at least one box ticked.
+  if (!Object.values(t.account_purpose || {}).some(Boolean)) e.account_purpose = "Select at least one account purpose.";
+
+  // Company trustees — only when the trust says it has them.
+  if (t.has_company_trustees === "Yes") {
+    const rows = t.company_trustees || [];
+    if (!rows.length) e.company_trustees = "Add at least one company trustee.";
+    rows.forEach((c, i) => {
+      req(`company_trustees.${i}.company_name`, c.company_name, "Company name is required.");
+      req(`company_trustees.${i}.registration_number`, c.registration_number, "ACN / registration number is required.");
+      if (!blankStr(c.abn) && digitsOnly(c.abn).length !== 11) e[`company_trustees.${i}.abn`] = "ABN must be 11 digits.";
+    });
+  }
+
+  // Individual trustees — at least one, fully identified (name, DOB and
+  // residential address), same as the standalone trust form.
+  const trustees = t.trustees || [];
+  if (!trustees.length) e.trustees = "At least one individual trustee is required.";
+  trustees.forEach((tr, i) => {
+    req(`trustees.${i}.full_name`, tr.full_name, "Full name is required.");
+    if (blankStr(tr.dob)) e[`trustees.${i}.dob`] = "Date of birth is required.";
+    else if (tr.dob > todayISO()) e[`trustees.${i}.dob`] = "Date of birth can't be in the future.";
+    else if (!isAdultDob(tr.dob)) e[`trustees.${i}.dob`] = "A trustee must be at least 18 years old.";
+    req(`trustees.${i}.street`, tr.street, "Street is required.");
+    req(`trustees.${i}.suburb`, tr.suburb, "Suburb is required.");
+    req(`trustees.${i}.state`, tr.state, "State is required.");
+    req(`trustees.${i}.postcode`, tr.postcode, "Postcode is required.");
+    req(`trustees.${i}.country`, tr.country, "Country is required.");
+    if (!blankStr(tr.postcode) && !POSTCODE_RE.test(String(tr.postcode).trim())) e[`trustees.${i}.postcode`] = "Enter a valid postcode.";
+  });
+
+  // Controllers and representatives are optional lists — but a row that has
+  // been added has to say who and in what capacity, or it's noise.
+  (t.controlling_persons || []).forEach((p, i) => {
+    req(`controlling_persons.${i}.full_name`, p.full_name, "Full name is required.");
+    req(`controlling_persons.${i}.role`, p.role, "Role is required.");
+  });
+  (t.authorised_reps || []).forEach((r, i) => {
+    req(`authorised_reps.${i}.full_name`, r.full_name, "Full name is required.");
+    req(`authorised_reps.${i}.role`, r.role, "Role is required.");
+  });
+
+  // Beneficiaries
+  let totalInterest = 0;
+  (t.beneficiaries || []).forEach((b, i) => {
+    req(`beneficiaries.${i}.named_beneficiaries`, b.named_beneficiaries, "Named beneficiary is required.");
+    req(`beneficiaries.${i}.beneficiary_type`, b.beneficiary_type, "Beneficiary type is required.");
+    if (!blankStr(b.interest_percent)) {
+      const pct = Number(b.interest_percent);
+      if (!Number.isFinite(pct) || pct < 0 || pct > 100) e[`beneficiaries.${i}.interest_percent`] = "Enter a percentage between 0 and 100.";
+      else totalInterest += pct;
+    }
+    if (b.beneficiary_type === "Individual") {
+      if (blankStr(b.dob)) e[`beneficiaries.${i}.dob`] = "Date of birth is required for an individual beneficiary.";
+      else if (b.dob > todayISO()) e[`beneficiaries.${i}.dob`] = "Date of birth can't be in the future.";
+    }
+  });
+  if (totalInterest > 100) e.beneficiaries = "Total beneficial interest can't exceed 100%.";
+
+  // Documents — an attached file has to say what it is, and an unfinished
+  // or failed upload would be silently dropped by buildTrustPayload().
+  const docs = t.documents || [];
+  docs.forEach((d) => {
+    if (blankStr(d.docType)) e[`doc.${d._uploadId}.docType`] = "Document type is required.";
+  });
+  if (docs.some((d) => d.status === "uploading")) e.documents = "Wait for the upload to finish.";
+  else if (docs.some((d) => d.status === "error")) e.documents = "Retry or remove the failed upload.";
+
+  return e;
+}
+
+// Which error keys belong to which TrustSection card, for the "N to fix"
+// header badges. Prefix match, so "trustees" covers "trustees.0.dob".
+const TRUST_SECTION_KEYS = {
+  identity: ["full_trust_name", "country", "governing_law", "industry", "nature_of_business", "annual_income", "estimated_trading_volume"],
+  identification: ["abn", "acn", "registration_number", "tfn", "tax_residency", "date_established", "date_of_deed"],
+  settlor: ["settlor_name", "settlor_dob", "settlor_company_name", "settlor_company_reg", "settlor_street", "settlor_suburb", "settlor_state", "settlor_postcode", "settlor_country"],
+  trust_type: ["trust_type", "trust_type_id", "unregulated_type_description", "unregulated_regulatory_body", "other_super_regulator_name"],
+  principal_address: ["principal_address"],
+  postal_address: ["postal_address"],
+  contact: ["contact_email", "contact_phone", "contact_website"],
+  account_purpose: ["account_purpose"],
+  company_trustees: ["company_trustees"],
+  trustees: ["trustees"],
+  control: ["appointors", "controlling_persons"],
+  reps: ["authorised_reps"],
+  funds: ["source_of_funds", "source_of_wealth"],
+  beneficiaries: ["beneficiaries"],
+  documents: ["documents", "doc"],
+};
+const countIssues = (errors, group) =>
+  Object.keys(errors).filter((k) => (TRUST_SECTION_KEYS[group] || []).some((p) => k === p || k.startsWith(`${p}.`))).length;
+
+// Wraps a single field with its required ✱, inline message and red border,
+// and marks it touched so a blank field the user hasn't been near yet stays
+// quiet until they leave it (or until Save/Done reveals everything).
+// Module-scope on purpose: a component declared inside TrustFields would be
+// a new type on every keystroke and remount the input, losing focus.
+function VField({ label, required, error, onTouch, children }) {
+  const child = React.cloneElement(children, {
+    invalid: Boolean(error),
+    // A dropdown never blurs the way an input does — Radix moves focus into
+    // the popover — so selects are touched on change instead.
+    ...(children.type === Select
+      ? {
+          onChange: (ev) => {
+            children.props.onChange?.(ev);
+            onTouch?.();
+          },
+        }
+      : {
+          onBlur: (ev) => {
+            children.props.onBlur?.(ev);
+            onTouch?.();
+          },
+        }),
+  });
+  return (
+    <Fld label={label} required={required} error={error}>
+      {child}
+    </Fld>
+  );
+}
+
+// Shared 5-field address block (address/suburb/state/postcode/country) —
+// used for both principal_address and postal_address, which share this
+// exact shape on TrustKyc (docs/65 Step 46). `vf` supplies each field's
+// validation wiring, keyed by the block's prefix (docs/65 Step 62).
+function TrustAddressFields({ value: a, onChange, vf, prefix }) {
+  const p = (k, v) => onChange({ ...a, [k]: v });
+  return (
+    <div style={trustFieldGrid}>
+      <VField label="Address" required {...vf(`${prefix}.address`)}>
+        <Input value={a.address} onChange={(e) => p("address", e.target.value)} />
+      </VField>
+      <VField label="Suburb" required {...vf(`${prefix}.suburb`)}>
+        <Input value={a.suburb} onChange={(e) => p("suburb", e.target.value)} />
+      </VField>
+      <VField label="State" required {...vf(`${prefix}.state`)}>
+        <Input value={a.state} onChange={(e) => p("state", e.target.value)} />
+      </VField>
+      <VField label="Postcode" required {...vf(`${prefix}.postcode`)}>
+        <Input value={a.postcode} onChange={(e) => p("postcode", e.target.value)} />
+      </VField>
+      <VField label="Country" required {...vf(`${prefix}.country`)}>
+        <Select value={a.country} onChange={(e) => p("country", e.target.value)} options={["", ...COUNTRY_OPTIONS]} />
+      </VField>
+    </div>
+  );
+}
+
+// Reused for a shareholder's beneficial trust (Beneficially held = No,
+// arrangement = Trust — docs/65 Step 43). Covers every property on the
+// TrustKyc schema (docs/65 Step 46) so the linked record this creates isn't
+// a partial capture — trust identity, both addresses, contact info, every
+// trust_type variant's own fields, account purpose, company trustees,
+// individual trustees (incl. residential address), beneficiaries and
+// documents.
+function TrustFields({ value: t, onChange, showErrors = false }) {
+  const patch = (k, v) => onChange({ ...t, [k]: v });
+  const patchAccountPurpose = (k, v) => onChange({ ...t, account_purpose: { ...t.account_purpose, [k]: v } });
+
+  const patchTrustee = (i, k, v) =>
+    onChange({ ...t, trustees: t.trustees.map((tr, idx) => (idx === i ? { ...tr, [k]: v } : tr)) });
+  const addTrustee = () => onChange({ ...t, trustees: [...t.trustees, emptyTrustee()] });
+  const removeTrustee = (i) =>
+    onChange({ ...t, trustees: t.trustees.length > 1 ? t.trustees.filter((_, idx) => idx !== i) : t.trustees });
+
+  const patchCompanyTrustee = (i, k, v) =>
+    onChange({ ...t, company_trustees: t.company_trustees.map((c, idx) => (idx === i ? { ...c, [k]: v } : c)) });
+  const addCompanyTrustee = () => onChange({ ...t, company_trustees: [...t.company_trustees, emptyCompanyTrustee()] });
+  const removeCompanyTrustee = (i) =>
+    onChange({
+      ...t,
+      company_trustees: t.company_trustees.length > 1 ? t.company_trustees.filter((_, idx) => idx !== i) : t.company_trustees,
+    });
+
+  const patchBeneficiary = (i, k, v) =>
+    onChange({ ...t, beneficiaries: t.beneficiaries.map((b, idx) => (idx === i ? { ...b, [k]: v } : b)) });
+  const addBeneficiary = () => onChange({ ...t, beneficiaries: [...t.beneficiaries, emptyTrustBeneficiary()] });
+  const removeBeneficiary = (i) => onChange({ ...t, beneficiaries: t.beneficiaries.filter((_, idx) => idx !== i) });
+
+  // Controllers (docs/65 Step 55) — authorised representatives and the
+  // persons exercising effective control over the trust.
+  const patchRep = (i, k, v) =>
+    onChange({ ...t, authorised_reps: t.authorised_reps.map((r, idx) => (idx === i ? { ...r, [k]: v } : r)) });
+  const addRep = () => onChange({ ...t, authorised_reps: [...t.authorised_reps, emptyAuthorisedRep()] });
+  const removeRep = (i) => onChange({ ...t, authorised_reps: t.authorised_reps.filter((_, idx) => idx !== i) });
+  const patchController = (i, k, v) =>
+    onChange({ ...t, controlling_persons: t.controlling_persons.map((p, idx) => (idx === i ? { ...p, [k]: v } : p)) });
+  const addController = () => onChange({ ...t, controlling_persons: [...t.controlling_persons, emptyControllingPerson()] });
+  const removeController = (i) =>
+    onChange({ ...t, controlling_persons: t.controlling_persons.filter((_, idx) => idx !== i) });
+
+  /* -------- validation (docs/65 Step 62) -------- */
+  // Errors are always computed; what changes is whether they're *shown*.
+  // A field shows its message once it's been touched, and Save (here) or
+  // Done (in the modal footer, via `showErrors`) reveals all of them at once.
+  const errors = useMemo(() => validateTrust(t), [t]);
+  const issueCount = Object.keys(errors).length;
+  const [selfAttempted, setSelfAttempted] = useState(false);
+  const [touched, setTouched] = useState({});
+  const reveal = showErrors || selfAttempted;
+  // The subset the user can currently see — everything once revealed, only
+  // touched fields before that. Section badges count the same subset, so a
+  // badge never claims an issue the form isn't showing anywhere.
+  const visibleErrors = useMemo(
+    () => (reveal ? errors : Object.fromEntries(Object.entries(errors).filter(([k]) => touched[k]))),
+    [errors, reveal, touched],
+  );
+  const err = (k) => visibleErrors[k];
+  const vf = (k) => ({
+    error: visibleErrors[k],
+    onTouch: () => setTouched((s) => (s[k] ? s : { ...s, [k]: true })),
+  });
+  const issues = (group) => countIssues(visibleErrors, group);
+  // Bring the first offending field into view when everything is revealed —
+  // in a modal this long the failure is otherwise off-screen. Scoped to the
+  // dialog so it can't grab a field on the wizard page behind it.
+  useEffect(() => {
+    if (!reveal || !issueCount) return;
+    // Deliberately keyed on `reveal` alone: this fires when errors are first
+    // revealed, not on every keystroke while the user works through them.
+    document.querySelector('[role="dialog"] [data-invalid="true"]')?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [reveal]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Refs so the async upload callback always writes into the latest state
+  // rather than whatever `t`/`onChange` closed over when the upload started
+  // (docs/65 Step 46) — this is a controlled prop, not top-level useState,
+  // so a functional updater isn't available the way the wizard's own
+  // Documents step (setDocs(d => ...)) uses.
+  const tRef = useRef(t);
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    tRef.current = t;
+    onChangeRef.current = onChange;
+  });
+  const uploadDoc = async (uploadId, file) => {
+    try {
+      const res = await fileUploadOnCloudinary(file);
+      const publicUrl = res?.file?.publicUrl;
+      if (!res?.success || !publicUrl) throw new Error(res?.message || "Upload failed");
+      onChangeRef.current({
+        ...tRef.current,
+        documents: tRef.current.documents.map((d) => (d._uploadId === uploadId ? { ...d, url: publicUrl, status: "done" } : d)),
+      });
+    } catch (err) {
+      onChangeRef.current({
+        ...tRef.current,
+        documents: tRef.current.documents.map((d) => (d._uploadId === uploadId ? { ...d, status: "error" } : d)),
+      });
+      toast.error(`${file.name}: ${err.message || "Upload failed"}`);
+    }
+  };
+  const onFiles = (fileList) => {
+    const added = Array.from(fileList || []).map((f) => ({
+      _uploadId: `${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      _file: f,
+      name: f.name,
+      mimeType: f.type || "application/octet-stream",
+      docType: "",
+      url: "",
+      status: "uploading",
+    }));
+    if (!added.length) return;
+    onChange({ ...t, documents: [...t.documents, ...added] });
+    added.forEach((row) => uploadDoc(row._uploadId, row._file));
+  };
+  const retryUpload = (row) => {
+    if (!row._file) return;
+    onChange({ ...t, documents: t.documents.map((d) => (d._uploadId === row._uploadId ? { ...d, status: "uploading" } : d)) });
+    uploadDoc(row._uploadId, row._file);
+  };
+  const removeDoc = (uploadId) => onChange({ ...t, documents: t.documents.filter((d) => d._uploadId !== uploadId) });
+  const patchDocType = (uploadId, v) =>
+    onChange({ ...t, documents: t.documents.map((d) => (d._uploadId === uploadId ? { ...d, docType: v } : d)) });
+
+  // Connect an existing trust + Save (docs/65 Step 57). `t.id` is the link:
+  // set means this form is bound to a real TrustKyc record, so saving
+  // updates that record and the company submit reuses it rather than
+  // creating a duplicate (resolveTrustLinks reads `trust.id`).
+  const [trustOptions, setTrustOptions] = useState([]);
+  const [trustsLoading, setTrustsLoading] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const linked = Boolean(t.id);
+
+  // Load the pickable trust list once the section is first rendered.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setTrustsLoading(true);
+      try {
+        const res = await getTrusts();
+        if (cancelled) return;
+        setTrustOptions(
+          (res?.data || []).map((d) => ({
+            id: String(d._id),
+            label: [d.trust_details?.full_trust_name || "Unnamed trust", d.uid].filter(Boolean).join(" · "),
+          })),
+        );
+      } catch {
+        // Non-fatal: the picker just stays empty and the form still works
+        // as a create-new form.
+      } finally {
+        if (!cancelled) setTrustsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Selecting an existing trust loads its full record into this form, so
+  // what's shown is the connected trust's real details (not a blank form
+  // that would overwrite them on the next save).
+  const connectExisting = async (label) => {
+    const match = trustOptions.find((o) => o.label === label);
+    if (!match) return;
+    setConnecting(true);
+    try {
+      const res = await getTrustById(match.id);
+      if (!res?.success || !res?.data) {
+        toast.error(res?.message || "Could not load that trust");
+        return;
+      }
+      onChangeRef.current(trustKycToWizardState(res.data));
+      toast.success(`Connected to ${res.data.trust_details?.full_trust_name || "the selected trust"}.`);
+    } catch (err) {
+      toast.error(err.message || "Could not load that trust");
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const disconnect = () => {
+    // Keeps the typed details, drops the link — the next save creates a new
+    // record instead of overwriting the one that was connected.
+    onChange({ ...t, id: "" });
+    toast.message("Disconnected. Saving now creates a new trust record.");
+  };
+
+  const saveTrust = async () => {
+    // A saved trust is a real TrustKyc record other companies can connect
+    // to, so it has to be complete — not just named (docs/65 Step 62).
+    // Saving also re-maps the form from the server's response, which would
+    // replace an in-flight upload row (its File handle and "uploading"
+    // status live only in local state) and silently lose that document —
+    // validateTrust() covers that case too.
+    if (issueCount) {
+      setSelfAttempted(true);
+      toast.error(`${issueCount} ${issueCount === 1 ? "field needs" : "fields need"} attention before this trust can be saved.`);
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = buildTrustPayload(t);
+      delete payload.id; // the id travels in the URL for an update, not the body
+      const res = t.id ? await updateTrust(t.id, payload) : await createTrust(payload);
+      if (!res?.success || !res?.data) {
+        toast.error(res?.message || "Could not save this trust");
+        return;
+      }
+      // Re-map from the saved record so the form reflects exactly what was
+      // stored (and picks up the new id + uid on a create).
+      onChangeRef.current(trustKycToWizardState(res.data));
+      if (!t.id) {
+        setTrustOptions((opts) => [
+          { id: String(res.data._id), label: [res.data.trust_details?.full_trust_name, res.data.uid].filter(Boolean).join(" · ") },
+          ...opts,
+        ]);
+      }
+      toast.success(t.id ? "Trust updated." : "Trust saved — it can now be connected from other companies.");
+    } catch (err) {
+      toast.error(err.message || "Could not save this trust");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // eKYB OCR pre-fill for a Trust Deed (docs/65 Step 50) — no document-type
+  // picker needed here (unlike the Company wizard's uploader): the upstream
+  // endpoint only ever accepts one kind of document, a trust deed.
+  const [trustOcrFile, setTrustOcrFile] = useState(null);
+  const [trustOcrLoading, setTrustOcrLoading] = useState(false);
+  const runTrustOcr = async () => {
+    if (!trustOcrFile) return;
+    setTrustOcrLoading(true);
+    try {
+      const res = await ocrExtractTrust(trustOcrFile);
+      if (!res?.success || !res?.data) {
+        toast.error(res?.error || res?.message || "Could not extract data from this trust deed — try a clearer scan or fill the form manually.");
+        return;
+      }
+      const merged = applyOcrToTrust(tRef.current, res.data);
+      const uploadId = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      onChangeRef.current({
+        ...merged,
+        documents: [
+          ...merged.documents,
+          {
+            _uploadId: uploadId,
+            _file: trustOcrFile,
+            name: trustOcrFile.name,
+            mimeType: trustOcrFile.type || "application/octet-stream",
+            docType: "Trust Deed",
+            url: "",
+            status: "uploading",
+          },
+        ],
+      });
+      uploadDoc(uploadId, trustOcrFile);
+
+      // date_of_deed / appointors / governing_law used to be surfaced here
+      // as "extracted but not captured" — since the Step 55 schema
+      // expansion they have real fields and applyOcrToTrust() stores them
+      // like everything else, so the extra toast is gone.
+      toast.success("Trust details pre-filled from the deed. Review every field before continuing.");
+      setTrustOcrFile(null);
+    } catch (err) {
+      toast.error(err.message || "OCR extraction failed — try again or fill the form manually.");
+    } finally {
+      setTrustOcrLoading(false);
+    }
+  };
+
+  const typeValue = TRUST_TYPES.find(([l]) => l === t.trust_type)?.[1];
+  const idField = TRUST_TYPE_ID_FIELD[typeValue];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Outstanding-issues summary (docs/65 Step 62) — only once errors are
+          revealed, so a form that's simply not filled in yet doesn't open
+          shouting. */}
+      {reveal && issueCount > 0 && (
+        <div style={{ display: "flex", gap: 11, alignItems: "flex-start", border: `1px solid ${C.redLine}`, background: C.redSoft, borderRadius: 11, padding: "12px 14px" }}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={C.red} strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8v5" />
+            <circle cx="12" cy="16" r=".6" fill={C.red} />
+          </svg>
+          <div style={{ fontSize: 12.5, color: C.redDeep, lineHeight: 1.5 }}>
+            <strong>{issueCount} {issueCount === 1 ? "field needs" : "fields need"} attention.</strong>{" "}
+            Sections with outstanding items are marked below. Required fields are marked with{" "}
+            <span style={{ color: C.red, fontWeight: 700 }}>*</span>.
+          </div>
+        </div>
+      )}
+      {/* Connect an existing trust (docs/65 Step 57) — picking one loads its
+          full record into this form, so the fields below show the connected
+          trust's real details rather than a blank form that would overwrite
+          them on the next save. */}
+      <div
+        style={{
+          border: `1px solid ${linked ? C.green : C.line}`,
+          background: linked ? C.greenBg : "#fafbfa",
+          borderRadius: 12,
+          padding: "13px 15px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            {/* An action picker, not a bound field — `value` stays empty so
+                selecting always fires connectExisting(); which trust is
+                currently linked is shown in the status line below instead. */}
+            <Fld label={linked ? "Connect a different trust" : "Connect an existing trust"}>
+              <Select
+                value=""
+                onChange={(e) => connectExisting(e.target.value)}
+                options={trustOptions.map((o) => o.label)}
+                placeholder={
+                  trustsLoading ? "Loading trusts…" : trustOptions.length ? "Search existing trusts…" : "No saved trusts yet"
+                }
+              />
+            </Fld>
+          </div>
+          {linked && (
+            <button
+              type="button"
+              onClick={disconnect}
+              style={{
+                flexShrink: 0,
+                background: "none",
+                border: `1px solid ${C.line}`,
+                borderRadius: 9,
+                padding: "9px 14px",
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: C.mid,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                height: 38,
+              }}
+            >
+              Disconnect
+            </button>
+          )}
+        </div>
+        <div style={{ fontSize: 11.5, color: linked ? C.greenText : C.sub, marginTop: 8 }}>
+          {connecting ? (
+            "Loading trust details…"
+          ) : linked ? (
+            <>
+              Connected to <strong>{t.full_trust_name || "an existing trust"}</strong> — saving updates that record, and this
+              company reuses it instead of creating a copy.
+            </>
+          ) : (
+            "Or fill the form below and press Save to create a new trust record."
+          )}
+        </div>
+      </div>
+
+      {/* eKYB OCR pre-fill (docs/65 Step 50) — same "start from a document"
+          pattern as the Company wizard's Entity Details step, scaled down
+          (no doc-type picker; this endpoint only accepts a trust deed). */}
+      <div style={{ border: `1px dashed ${C.green}`, background: "#f2f8f6", borderRadius: 12, padding: "14px 16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={C.green} strokeWidth="2">
+            <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" />
+          </svg>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: C.green }}>Start from a document</span>
+          <span
+            style={{
+              background: C.green,
+              color: "#fff",
+              fontSize: 9.5,
+              fontWeight: 700,
+              letterSpacing: ".05em",
+              textTransform: "uppercase",
+              padding: "2px 7px",
+              borderRadius: 5,
+            }}
+          >
+            OCR
+          </span>
+        </div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <Fld label="Trust deed">
+              <input
+                type="file"
+                accept="application/pdf,image/*"
+                onChange={(e) => setTrustOcrFile(e.target.files?.[0] || null)}
+                style={{ ...fld, padding: "8px 10px" }}
+              />
+            </Fld>
+          </div>
+          <button
+            type="button"
+            onClick={runTrustOcr}
+            disabled={!trustOcrFile || trustOcrLoading}
+            style={{
+              flexShrink: 0,
+              background: !trustOcrFile || trustOcrLoading ? "#9db8ae" : C.green,
+              color: "#fff",
+              border: "none",
+              borderRadius: 9,
+              padding: "10px 16px",
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: !trustOcrFile || trustOcrLoading ? "not-allowed" : "pointer",
+              fontFamily: "inherit",
+              height: 38,
+            }}
+          >
+            {trustOcrLoading ? "Extracting…" : "Extract & pre-fill"}
+          </button>
+        </div>
+      </div>
+
+      <TrustSection title="Trust identity" issues={issues("identity")}>
+        <div style={{ ...trustFieldGrid, marginBottom: 12 }}>
+          <VField label="Full trust name" required {...vf("full_trust_name")}>
+            <Input value={t.full_trust_name} onChange={(e) => patch("full_trust_name", e.target.value)} placeholder="Legal name of the trust" />
+          </VField>
+          <VField label="Country of establishment" required {...vf("country")}>
+            <Select value={t.country} onChange={(e) => patch("country", e.target.value)} options={["", ...COUNTRY_OPTIONS]} />
+          </VField>
+          <Fld label="Governing law">
+            <Input value={t.governing_law} onChange={(e) => patch("governing_law", e.target.value)} placeholder="e.g. VIC" />
+          </Fld>
+        </div>
+        <div style={trustFieldGrid}>
+          <VField label="Industry" required {...vf("industry")}>
+            <Input value={t.industry} onChange={(e) => patch("industry", e.target.value)} />
+          </VField>
+          <VField label="Nature of business" required {...vf("nature_of_business")}>
+            <Input value={t.nature_of_business} onChange={(e) => patch("nature_of_business", e.target.value)} />
+          </VField>
+          <VField label="Annual income" required {...vf("annual_income")}>
+            <Input value={t.annual_income} onChange={(e) => patch("annual_income", e.target.value)} placeholder="e.g. $500,000 - $1,000,000" />
+          </VField>
+          <VField label="Estimated trading volume" required {...vf("estimated_trading_volume")}>
+            <Input value={t.estimated_trading_volume} onChange={(e) => patch("estimated_trading_volume", e.target.value)} placeholder="e.g. $50,000 per month" />
+          </VField>
+        </div>
+      </TrustSection>
+
+      {/* Identifiers are optional — which ones a trust has depends on what it
+          is — but anything typed here is format-checked (docs/65 Step 62). */}
+      <TrustSection title="Trust identification" hint="Registry and tax identifiers of the trust itself." issues={issues("identification")}>
+        <div style={{ ...trustFieldGrid, marginBottom: 12 }}>
+          <VField label="ABN" {...vf("abn")}>
+            <Input mono value={t.abn} onChange={(e) => patch("abn", e.target.value)} placeholder="11 digits" />
+          </VField>
+          <VField label="ACN" {...vf("acn")}>
+            <Input mono value={t.acn} onChange={(e) => patch("acn", e.target.value)} placeholder="9 digits" />
+          </VField>
+          <Fld label="Registration number">
+            <Input mono value={t.registration_number} onChange={(e) => patch("registration_number", e.target.value)} />
+          </Fld>
+          <VField label="TFN (if applicable)" {...vf("tfn")}>
+            <Input mono value={t.tfn} onChange={(e) => patch("tfn", e.target.value)} />
+          </VField>
+        </div>
+        <div style={trustFieldGrid}>
+          <Fld label="Tax residency">
+            <Select value={t.tax_residency} onChange={(e) => patch("tax_residency", e.target.value)} options={["", ...COUNTRY_OPTIONS]} />
+          </Fld>
+          <VField label="Date established" {...vf("date_established")}>
+            <Input type="date" max={todayISO()} value={t.date_established} onChange={(e) => patch("date_established", e.target.value)} />
+          </VField>
+          <VField label="Date of deed" {...vf("date_of_deed")}>
+            <Input type="date" max={todayISO()} value={t.date_of_deed} onChange={(e) => patch("date_of_deed", e.target.value)} />
+          </VField>
+        </div>
+      </TrustSection>
+
+      <TrustSection
+        title="Settlor"
+        hint="The person or company that settled the trust."
+        issues={issues("settlor")}
+        action={
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 11.5, color: C.sub }}>Settlor is a company</span>
+            <Seg value={t.settlor_is_company} onChange={(v) => patch("settlor_is_company", v)} options={["No", "Yes"]} />
+          </div>
+        }
+      >
+        <div style={{ ...trustFieldGrid, marginBottom: t.settlor_is_company === "Yes" ? 0 : 12 }}>
+          <VField label="Settlor name" required {...vf("settlor_name")}>
+            <Input value={t.settlor_name} onChange={(e) => patch("settlor_name", e.target.value)} />
+          </VField>
+          {t.settlor_is_company === "Yes" ? (
+            <>
+              <VField label="Company name" required {...vf("settlor_company_name")}>
+                <Input value={t.settlor_company_name} onChange={(e) => patch("settlor_company_name", e.target.value)} />
+              </VField>
+              <VField label="Registration number" required {...vf("settlor_company_reg")}>
+                <Input mono value={t.settlor_company_reg} onChange={(e) => patch("settlor_company_reg", e.target.value)} />
+              </VField>
+            </>
+          ) : (
+            <VField label="Date of birth" {...vf("settlor_dob")}>
+              <Input type="date" max={todayISO()} value={t.settlor_dob} onChange={(e) => patch("settlor_dob", e.target.value)} />
+            </VField>
+          )}
+          {/* The nominal sum stated on the deed (commonly $10). Currency is
+              captured separately so a trust settled outside Australia isn't
+              silently read as AUD. */}
+          <Fld label="Settled sum">
+            <Input
+              mono
+              type="number"
+              min="0"
+              step="any"
+              value={t.settled_sum_amount}
+              onChange={(e) => patch("settled_sum_amount", e.target.value)}
+              placeholder="e.g. 10"
+            />
+          </Fld>
+          <Fld label="Settled sum currency">
+            <Input
+              value={t.settled_sum_currency}
+              onChange={(e) => patch("settled_sum_currency", e.target.value)}
+              placeholder="e.g. AUD"
+            />
+          </Fld>
+        </div>
+        {t.settlor_is_company !== "Yes" && (
+          <div style={trustFieldGrid}>
+            <Fld label="Street"><Input value={t.settlor_street} onChange={(e) => patch("settlor_street", e.target.value)} /></Fld>
+            <Fld label="Suburb"><Input value={t.settlor_suburb} onChange={(e) => patch("settlor_suburb", e.target.value)} /></Fld>
+            <Fld label="State"><Input value={t.settlor_state} onChange={(e) => patch("settlor_state", e.target.value)} /></Fld>
+            <Fld label="Postcode"><Input value={t.settlor_postcode} onChange={(e) => patch("settlor_postcode", e.target.value)} /></Fld>
+            <Fld label="Country of residence">
+              <Select value={t.settlor_country} onChange={(e) => patch("settlor_country", e.target.value)} options={["", ...COUNTRY_OPTIONS]} />
+            </Fld>
+          </div>
+        )}
+      </TrustSection>
+
+      <TrustSection title="Trust type" issues={issues("trust_type")}>
+        <div style={{ ...trustFieldGrid, marginBottom: 12 }}>
+          <VField label="Trust type" required {...vf("trust_type")}>
+            <Select value={t.trust_type} onChange={(e) => patch("trust_type", e.target.value)} options={TRUST_TYPES} />
+          </VField>
+          {/* Only render the variant's identifier when it names something
+              the generic Trust identification section above doesn't already
+              ask for. Before Step 59 an SMSF showed "ABN" twice — once here,
+              once there — as two inputs for one fact; the model now treats
+              the generic field as canonical and mirrors it into the variant,
+              so asking twice is both redundant and a way to enter a
+              contradiction. */}
+          {idField && !GENERIC_TRUST_ID_FIELDS.includes(idField.key) && (
+            <VField label={idField.label} required {...vf("trust_type_id")}>
+              <Input value={t.trust_type_id} onChange={(e) => patch("trust_type_id", e.target.value)} />
+            </VField>
+          )}
+        </div>
+        {typeValue === "unregulated_trust" && (
+          <div style={trustFieldGrid}>
+            <VField label="Type description" required {...vf("unregulated_type_description")}>
+              <Input value={t.unregulated_type_description} onChange={(e) => patch("unregulated_type_description", e.target.value)} />
+            </VField>
+            {/* Only meaningful — and only required — once the trust says it
+                is registered. */}
+            <VField label="Regulatory body" required={t.unregulated_is_registered === "Yes"} {...vf("unregulated_regulatory_body")}>
+              <Input value={t.unregulated_regulatory_body} onChange={(e) => patch("unregulated_regulatory_body", e.target.value)} />
+            </VField>
+            <Fld label="Registered?">
+              <Seg value={t.unregulated_is_registered} onChange={(v) => patch("unregulated_is_registered", v)} />
+            </Fld>
+          </div>
+        )}
+        {typeValue === "other_superannuation_trust" && (
+          <div style={trustFieldGrid}>
+            <VField label="Regulator name" required {...vf("other_super_regulator_name")}>
+              <Input value={t.other_super_regulator_name} onChange={(e) => patch("other_super_regulator_name", e.target.value)} />
+            </VField>
+          </div>
+        )}
+      </TrustSection>
+
+      <TrustSection title="Principal address" issues={issues("principal_address")}>
+        <TrustAddressFields value={t.principal_address} onChange={(a) => patch("principal_address", a)} vf={vf} prefix="principal_address" />
+      </TrustSection>
+
+      <TrustSection
+        title="Postal address"
+        issues={issues("postal_address")}
+        action={<Seg value={t.postal_same_as_principal} onChange={(v) => patch("postal_same_as_principal", v)} options={["Same as principal", "Different"]} />}
+      >
+        {t.postal_same_as_principal === "Same as principal" ? (
+          <div style={{ fontSize: 13, color: C.sub }}>Same as the principal address above.</div>
+        ) : (
+          <TrustAddressFields value={t.postal_address} onChange={(a) => patch("postal_address", a)} vf={vf} prefix="postal_address" />
+        )}
+      </TrustSection>
+
+      <TrustSection title="Contact information" issues={issues("contact")}>
+        <div style={trustFieldGrid}>
+          <VField label="Email" required {...vf("contact_email")}>
+            <Input type="email" value={t.contact_email} onChange={(e) => patch("contact_email", e.target.value)} />
+          </VField>
+          <VField label="Phone" required {...vf("contact_phone")}>
+            <Input value={t.contact_phone} onChange={(e) => patch("contact_phone", e.target.value)} />
+          </VField>
+          <VField label="Website" {...vf("contact_website")}>
+            <Input value={t.contact_website} onChange={(e) => patch("contact_website", e.target.value)} placeholder="e.g. example.com.au" />
+          </VField>
+        </div>
+      </TrustSection>
+
+      <TrustSection title="Account purpose" issues={issues("account_purpose")}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {[
+            ["digital_currency_exchange", "Digital currency exchange"],
+            ["peer_to_peer", "Peer-to-peer (P2P)"],
+            ["fx", "FX"],
+            ["other", "Other"],
+          ].map(([key, label]) => (
+            <label key={key} style={{ display: "flex", gap: 9, alignItems: "center", cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={t.account_purpose[key]}
+                onChange={(e) => patchAccountPurpose(key, e.target.checked)}
+                style={{ width: 16, height: 16, accentColor: C.green, flexShrink: 0 }}
+              />
+              <span style={{ fontSize: 13, color: C.body }}>{label}</span>
+            </label>
+          ))}
+        </div>
+        {/* Section-level rather than per-checkbox: the rule is about the set,
+            not about any one box. */}
+        {err("account_purpose") && <div style={{ ...errCss, marginTop: 10 }} data-invalid="true">{err("account_purpose")}</div>}
+      </TrustSection>
+
+      <TrustSection
+        title="Company trustee(s)"
+        issues={issues("company_trustees")}
+        action={
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 11.5, color: C.sub }}>Has company trustees</span>
+            <Seg value={t.has_company_trustees} onChange={(v) => patch("has_company_trustees", v)} />
+          </div>
+        }
+      >
+        {t.has_company_trustees !== "Yes" ? (
+          <div style={{ fontSize: 13, color: C.sub }}>No company trustees — the trust is administered by the individual trustees below.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {err("company_trustees") && <div style={errCss} data-invalid="true">{err("company_trustees")}</div>}
+            {t.company_trustees.map((c, i) => (
+              <div key={i} style={{ border: `1px solid ${C.hair}`, borderRadius: 10, padding: 12 }}>
+                <div style={{ display: "flex", gap: 10, alignItems: "flex-end", marginBottom: 10 }}>
+                  <div style={{ flex: 2 }}>
+                    <VField label="Company name" required {...vf(`company_trustees.${i}.company_name`)}>
+                      <Input value={c.company_name} onChange={(e) => patchCompanyTrustee(i, "company_name", e.target.value)} />
+                    </VField>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <VField label="ACN / registration number" required {...vf(`company_trustees.${i}.registration_number`)}>
+                      <Input mono value={c.registration_number} onChange={(e) => patchCompanyTrustee(i, "registration_number", e.target.value)} />
+                    </VField>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <VField label="ABN" {...vf(`company_trustees.${i}.abn`)}>
+                      <Input mono value={c.abn} onChange={(e) => patchCompanyTrustee(i, "abn", e.target.value)} />
+                    </VField>
+                  </div>
+                  {t.company_trustees.length > 1 && smallRemoveBtn(() => removeCompanyTrustee(i))}
+                </div>
+                <div style={{ ...trustFieldGrid, marginBottom: 10 }}>
+                  <Fld label="Registered street"><Input value={c.street} onChange={(e) => patchCompanyTrustee(i, "street", e.target.value)} /></Fld>
+                  <Fld label="Suburb"><Input value={c.suburb} onChange={(e) => patchCompanyTrustee(i, "suburb", e.target.value)} /></Fld>
+                  <Fld label="State"><Input value={c.state} onChange={(e) => patchCompanyTrustee(i, "state", e.target.value)} /></Fld>
+                  <Fld label="Postcode"><Input value={c.postcode} onChange={(e) => patchCompanyTrustee(i, "postcode", e.target.value)} /></Fld>
+                  <Fld label="Country"><Select value={c.country} onChange={(e) => patchCompanyTrustee(i, "country", e.target.value)} options={["", ...COUNTRY_OPTIONS]} /></Fld>
+                </div>
+                <Fld label="Director(s) — comma-separated">
+                  <Input value={c.directors} onChange={(e) => patchCompanyTrustee(i, "directors", e.target.value)} placeholder="e.g. Jane Doe, John Smith" />
+                </Fld>
+              </div>
+            ))}
+            <AddBtn onClick={addCompanyTrustee}>Add company trustee</AddBtn>
+          </div>
+        )}
+      </TrustSection>
+
+      {/* Every trustee is fully identified, not just the first — a trustee
+          without a DOB and address can't be screened (docs/65 Step 62). */}
+      <TrustSection title="Individual trustees" issues={issues("trustees")} action={<AddBtn onClick={addTrustee}>Add trustee</AddBtn>}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {err("trustees") && <div style={errCss} data-invalid="true">{err("trustees")}</div>}
+          {t.trustees.map((tr, i) => (
+            <div key={i} style={{ border: `1px solid ${C.hair}`, borderRadius: 10, padding: 12 }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-end", marginBottom: 10 }}>
+                <div style={{ flex: 2 }}>
+                  <VField label="Full name" required {...vf(`trustees.${i}.full_name`)}>
+                    <Input value={tr.full_name} onChange={(e) => patchTrustee(i, "full_name", e.target.value)} placeholder="Trustee name" />
+                  </VField>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <VField label="Date of birth" required {...vf(`trustees.${i}.dob`)}>
+                    <Input type="date" max={todayISO()} value={tr.dob} onChange={(e) => patchTrustee(i, "dob", e.target.value)} />
+                  </VField>
+                </div>
+                {t.trustees.length > 1 && smallRemoveBtn(() => removeTrustee(i))}
+              </div>
+              <div style={trustFieldGrid}>
+                <VField label="Street" required {...vf(`trustees.${i}.street`)}>
+                  <Input value={tr.street} onChange={(e) => patchTrustee(i, "street", e.target.value)} />
+                </VField>
+                <VField label="Suburb" required {...vf(`trustees.${i}.suburb`)}>
+                  <Input value={tr.suburb} onChange={(e) => patchTrustee(i, "suburb", e.target.value)} />
+                </VField>
+                <VField label="State" required {...vf(`trustees.${i}.state`)}>
+                  <Input value={tr.state} onChange={(e) => patchTrustee(i, "state", e.target.value)} />
+                </VField>
+                <VField label="Postcode" required {...vf(`trustees.${i}.postcode`)}>
+                  <Input value={tr.postcode} onChange={(e) => patchTrustee(i, "postcode", e.target.value)} />
+                </VField>
+                <VField label="Country" required {...vf(`trustees.${i}.country`)}>
+                  <Select value={tr.country} onChange={(e) => patchTrustee(i, "country", e.target.value)} options={["", ...COUNTRY_OPTIONS]} />
+                </VField>
+              </div>
+            </div>
+          ))}
+        </div>
+        <label style={{ display: "flex", gap: 9, alignItems: "center", cursor: "pointer", marginTop: 12 }}>
+          <input
+            type="checkbox"
+            checked={t.has_additional_trustees === "Yes"}
+            onChange={(e) => patch("has_additional_trustees", e.target.checked ? "Yes" : "No")}
+            style={{ width: 16, height: 16, accentColor: C.green, flexShrink: 0 }}
+          />
+          <span style={{ fontSize: 13, color: C.body }}>There are additional trustees not listed above</span>
+        </label>
+      </TrustSection>
+
+      <TrustSection
+        title="Control of the trust"
+        hint="Who can appoint or remove the trustee, and anyone else exercising effective control."
+        issues={issues("control")}
+        action={<AddBtn onClick={addController}>Add controlling person</AddBtn>}
+      >
+        <div style={{ ...trustFieldGrid, marginBottom: 12 }}>
+          <Fld label="Appointor(s) — comma-separated">
+            <Input value={t.appointors} onChange={(e) => patch("appointors", e.target.value)} placeholder="Person(s) with power to appoint/remove the trustee" />
+          </Fld>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
+          {t.controlling_persons.length === 0 && (
+            <div style={{ fontSize: 13, color: C.sub }}>No controlling persons recorded.</div>
+          )}
+          {t.controlling_persons.map((p, i) => (
+            <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" }}>
+              <div style={{ flex: 2, minWidth: 160 }}>
+                <VField label="Controlling person" required {...vf(`controlling_persons.${i}.full_name`)}>
+                  <Input value={p.full_name} onChange={(e) => patchController(i, "full_name", e.target.value)} placeholder="Full name" />
+                </VField>
+              </div>
+              <div style={{ flex: 1, minWidth: 120 }}>
+                <VField label="Role" required {...vf(`controlling_persons.${i}.role`)}>
+                  <Input value={p.role} onChange={(e) => patchController(i, "role", e.target.value)} placeholder="e.g. Appointor" />
+                </VField>
+              </div>
+              <div style={{ flex: 1, minWidth: 120 }}>
+                <Fld label="PEP status">
+                  <Select value={p.pep} onChange={(e) => patchController(i, "pep", e.target.value)} options={PEP_STATUS_OPTIONS.map(([l]) => l)} />
+                </Fld>
+              </div>
+              <div style={{ flex: 1, minWidth: 120 }}>
+                <Fld label="Sanctions status">
+                  <Select value={p.sanctions} onChange={(e) => patchController(i, "sanctions", e.target.value)} options={SANCTIONS_STATUS_OPTIONS.map(([l]) => l)} />
+                </Fld>
+              </div>
+              {smallRemoveBtn(() => removeController(i))}
+            </div>
+          ))}
+        </div>
+      </TrustSection>
+
+      <TrustSection
+        title="Authorised representatives"
+        hint="People authorised to act for the trust — accountants, agents, signatories."
+        issues={issues("reps")}
+        action={<AddBtn onClick={addRep}>Add representative</AddBtn>}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {t.authorised_reps.length === 0 && (
+            <div style={{ fontSize: 13, color: C.sub }}>No authorised representatives recorded.</div>
+          )}
+          {t.authorised_reps.map((r, i) => (
+            <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+              <div style={{ flex: 2 }}>
+                <VField label="Full name" required {...vf(`authorised_reps.${i}.full_name`)}>
+                  <Input value={r.full_name} onChange={(e) => patchRep(i, "full_name", e.target.value)} />
+                </VField>
+              </div>
+              <div style={{ flex: 1 }}>
+                <VField label="Role" required {...vf(`authorised_reps.${i}.role`)}>
+                  <Input value={r.role} onChange={(e) => patchRep(i, "role", e.target.value)} placeholder="e.g. Accountant, Agent" />
+                </VField>
+              </div>
+              {smallRemoveBtn(() => removeRep(i))}
+            </div>
+          ))}
+        </div>
+      </TrustSection>
+
+      <TrustSection title="Source of funds &amp; wealth" issues={issues("funds")}>
+        <div style={trustFieldGrid}>
+          <Fld label="Source of funds">
+            <Input value={t.source_of_funds} onChange={(e) => patch("source_of_funds", e.target.value)} placeholder="e.g. Business income, investment returns" />
+          </Fld>
+          <Fld label="Source of wealth">
+            <Input value={t.source_of_wealth} onChange={(e) => patch("source_of_wealth", e.target.value)} placeholder="e.g. Accumulated business profits, inheritance" />
+          </Fld>
+        </div>
+      </TrustSection>
+
+      <TrustSection title="Beneficiaries" issues={issues("beneficiaries")} action={<AddBtn onClick={addBeneficiary}>Add beneficiary</AddBtn>}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {t.beneficiaries.length === 0 && <div style={{ fontSize: 13, color: C.sub }}>No beneficiaries recorded.</div>}
+          {err("beneficiaries") && <div style={errCss} data-invalid="true">{err("beneficiaries")}</div>}
+          {t.beneficiaries.map((b, i) => (
+            <div key={i} style={{ border: `1px solid ${C.hair}`, borderRadius: 10, padding: 12 }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-end", marginBottom: 10 }}>
+                <div style={{ flex: 2 }}>
+                  <VField label="Named beneficiaries" required {...vf(`beneficiaries.${i}.named_beneficiaries`)}>
+                    <Input
+                      value={b.named_beneficiaries}
+                      onChange={(e) => patchBeneficiary(i, "named_beneficiaries", e.target.value)}
+                      placeholder="e.g. Jane Smith"
+                    />
+                  </VField>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <Fld label="Beneficiary class">
+                    <Input
+                      value={b.beneficiary_classes}
+                      onChange={(e) => patchBeneficiary(i, "beneficiary_classes", e.target.value)}
+                      placeholder="e.g. Grandchildren"
+                    />
+                  </Fld>
+                </div>
+                {smallRemoveBtn(() => removeBeneficiary(i))}
+              </div>
+              <div style={trustFieldGrid}>
+                <VField label="Beneficiary type" required {...vf(`beneficiaries.${i}.beneficiary_type`)}>
+                  <Select
+                    value={b.beneficiary_type}
+                    onChange={(e) => patchBeneficiary(i, "beneficiary_type", e.target.value)}
+                    options={["", ...BENEFICIARY_TYPES.map(([l]) => l)]}
+                    placeholder="Select type"
+                  />
+                </VField>
+                <VField label="Beneficial interest %" {...vf(`beneficiaries.${i}.interest_percent`)}>
+                  <Input mono value={b.interest_percent} onChange={(e) => patchBeneficiary(i, "interest_percent", e.target.value)} placeholder="0" />
+                </VField>
+                {b.beneficiary_type === "Individual" && (
+                  <VField label="Date of birth" required {...vf(`beneficiaries.${i}.dob`)}>
+                    <Input type="date" max={todayISO()} value={b.dob} onChange={(e) => patchBeneficiary(i, "dob", e.target.value)} />
+                  </VField>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </TrustSection>
+
+      <TrustSection
+        title="Documents"
+        issues={issues("documents")}
+        action={
+          <label style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", color: C.green, fontSize: 12, fontWeight: 600 }}>
+            <input type="file" multiple style={{ display: "none" }} onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
+            + Add document
+          </label>
+        }
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {t.documents.length === 0 && <div style={{ fontSize: 13, color: C.sub }}>No documents attached.</div>}
+          {err("documents") && <div style={errCss} data-invalid="true">{err("documents")}</div>}
+          {t.documents.map((d) => (
+            <div key={d._uploadId} style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", border: `1px solid ${C.hair}`, borderRadius: 9, padding: "8px 10px" }}>
+              <div style={{ flex: "0 0 auto", fontSize: 12, color: C.sub, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 160 }} title={d.name}>
+                {d.name}
+              </div>
+              {/* No <Fld> wrapper on this row (it's a compact inline layout),
+                  so the required message rides in the title/placeholder and
+                  the red border comes from `invalid` directly. */}
+              <div style={{ flex: 1 }} data-invalid={err(`doc.${d._uploadId}.docType`) ? "true" : undefined}>
+                <Input
+                  value={d.docType}
+                  onChange={(e) => patchDocType(d._uploadId, e.target.value)}
+                  onBlur={vf(`doc.${d._uploadId}.docType`).onTouch}
+                  invalid={Boolean(err(`doc.${d._uploadId}.docType`))}
+                  title={err(`doc.${d._uploadId}.docType`) || undefined}
+                  placeholder="Document type (required)"
+                  style={{ height: 32, fontSize: 12.5 }}
+                />
+              </div>
+              <div style={{ flex: "0 0 138px" }} title="Expiry date (if any)">
+                <Input
+                  type="date"
+                  value={d.expiry || ""}
+                  onChange={(e) =>
+                    onChange({ ...t, documents: t.documents.map((x) => (x._uploadId === d._uploadId ? { ...x, expiry: e.target.value } : x)) })
+                  }
+                  style={{ height: 32, fontSize: 12 }}
+                />
+              </div>
+              {/* Verification is officer-set on the review side — display
+                  only here, never editable in the wizard (docs/65 Step 55). */}
+              {d.verification_status === "verified" && <span style={{ fontSize: 11.5, color: C.green, flexShrink: 0 }}>Verified</span>}
+              {d.verification_status === "rejected" && <span style={{ fontSize: 11.5, color: C.red, flexShrink: 0 }}>Rejected</span>}
+              {d.status === "uploading" && <span style={{ fontSize: 11.5, color: C.sub, flexShrink: 0 }}>Uploading…</span>}
+              {d.status === "error" && (
+                <button type="button" onClick={() => retryUpload(d)} style={{ fontSize: 11.5, color: C.red, background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}>
+                  Retry
+                </button>
+              )}
+              {d.status === "done" && <span style={{ fontSize: 11.5, color: C.green, flexShrink: 0 }}>Uploaded</span>}
+              {smallRemoveBtn(() => removeDoc(d._uploadId))}
+            </div>
+          ))}
+        </div>
+      </TrustSection>
+
+      {/* Save (docs/65 Step 57) — persists this trust as a real TrustKyc
+          record straight away, rather than waiting for the whole company
+          wizard to be submitted. That's what makes "connect an existing
+          trust" useful: a saved trust is immediately linkable from another
+          company. Saving is optional — an unsaved trust still gets created
+          when the company itself is submitted. */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          flexWrap: "wrap",
+          borderTop: `1px solid ${C.line}`,
+          paddingTop: 14,
+        }}
+      >
+        <div style={{ fontSize: 11.5, color: issueCount ? C.red : C.sub, flex: 1, minWidth: 200 }}>
+          {issueCount
+            ? `${issueCount} ${issueCount === 1 ? "field needs" : "fields need"} attention before this trust can be saved.`
+            : linked
+              ? "Changes are saved to the connected trust record."
+              : "Not saved yet — this trust is created when the company is submitted, or save it now to reuse it elsewhere."}
+        </div>
+        {/* Deliberately not disabled while incomplete: clicking it is how the
+            user asks "what's missing?" and reveals every outstanding field. */}
+        <button
+          type="button"
+          onClick={saveTrust}
+          disabled={saving}
+          style={{
+            flexShrink: 0,
+            background: saving ? "#9db8ae" : C.green,
+            color: "#fff",
+            border: "none",
+            borderRadius: 9,
+            padding: "10px 20px",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: saving ? "not-allowed" : "pointer",
+            fontFamily: "inherit",
+          }}
+        >
+          {saving ? "Saving…" : linked ? "Save changes" : "Save trust"}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -691,6 +2768,23 @@ export default function AddCompany() {
     setSecurityClasses((list) => (list.includes(trimmed) ? list : [...list, trimmed]));
   };
   const [holders, setHolders] = useState([{ ...emptyHolder }]);
+  // Which holder row's beneficial-trust modal is open, if any (docs/65 Step
+  // 46 — the full TrustFields form moved from always-inline to a Dialog
+  // given how many sections it now has). Index into `holders`, not a copy
+  // of the row, so edits always land on the live array via pHolder().
+  const [trustModalIndex, setTrustModalIndex] = useState(null);
+  // Reveal-all switch for the trust form's validation (docs/65 Step 62) —
+  // set by Done and by the wizard's own submit gate, cleared each time the
+  // modal is opened fresh so a new trust doesn't open covered in red.
+  const [trustErrorsShown, setTrustErrorsShown] = useState(false);
+  const openTrustModal = (i) => {
+    setTrustErrorsShown(false);
+    setTrustModalIndex(i);
+  };
+  // Outstanding validation issues on a holder's beneficial trust. A holder
+  // with the arrangement set to Trust but no trust captured at all counts as
+  // a blank form, not as "nothing to check".
+  const trustIssueCount = (h) => Object.keys(validateTrust(h.trust || emptyTrust())).length;
   const [parent, setParent] = useState({ name: "", percent: "", acquired: "", jurisdiction: "" });
   const [ubos, setUbos] = useState([{ ...emptyUbo }]);
   const [subsidiaries, setSubsidiaries] = useState([
@@ -699,6 +2793,13 @@ export default function AddCompany() {
   const [people, setPeople] = useState([{ ...emptyPerson }]);
   const [docs, setDocs] = useState([]);
   const [attest, setAttest] = useState({ ubo: false, registry: false });
+  // eKYB OCR pre-fill (docs/65 Step 48) — create mode only (see stepEntity
+  // below); a separate, small state slice rather than piggybacking on
+  // `docs` since this file is picked before it's decided whether to attach
+  // it as a register document at all.
+  const [ocrDocType, setOcrDocType] = useState("ASIC Company Extract");
+  const [ocrFile, setOcrFile] = useState(null);
+  const [ocrLoading, setOcrLoading] = useState(false);
 
   // draft restore / save — never in edit mode, a stale local draft must not
   // clobber a real record being edited.
@@ -923,6 +3024,222 @@ export default function AddCompany() {
     uploadDoc(row._uploadId, row._file);
   };
 
+  // eKYB OCR pre-fill (docs/65 Step 48) — merges an OCR response's
+  // general_information / directors_beneficial_owner into wizard state.
+  // Deliberately additive, never destructive: a scalar entity field only
+  // overwrites the current value when OCR actually returned something for
+  // it; a list section (addresses/agents/people/ubos) replaces the single
+  // still-blank starter row if that's all there is, otherwise appends —
+  // OCR pre-fill should never silently erase something the user already
+  // typed. Returns how many rows landed in each list, for the toast.
+  const applyOcrResult = (ocrData) => {
+    const gi = ocrData?.general_information || {};
+    const db = ocrData?.directors_beneficial_owner || {};
+    const counts = { identifiers: 0, addresses: 0, agents: 0, people: 0, ubos: 0, capital: 0, holders: 0, incompleteHolders: 0, related: 0 };
+
+    if (Object.keys(gi).length) {
+      setEntity((s) => {
+        // class_subclass is free text (not enum-backed), joined with " · "
+        // when *this* wizard builds it — but a real OCR response (docs/65
+        // Step 49) came back "Limited By Shares - Proprietary Company", a
+        // plain hyphen, so splitting on " · " would silently fail to find
+        // it and dump the whole string into klass. Detecting known
+        // CLASSES/SUBCLASSES substrings instead is delimiter-agnostic.
+        const csText = gi.class_subclass || "";
+        const detectedKlass = CLASSES.find((c) => csText.toLowerCase().includes(c.toLowerCase()));
+        const detectedSubclass = SUBCLASSES.find((c) => csText.toLowerCase().includes(c.toLowerCase()));
+        const phones = Array.isArray(gi.phone_number) ? gi.phone_number.filter(Boolean) : gi.phone_number ? [gi.phone_number] : [];
+        const emails = Array.isArray(gi.contact_email) ? gi.contact_email.filter(Boolean) : gi.contact_email ? [gi.contact_email] : [];
+        return {
+          ...s,
+          legal_name: gi.legal_name?.trim() || s.legal_name,
+          trading_names: gi.trading_names?.trim() || s.trading_names,
+          entity_type: gi.entity_type ? labelFor(ENTITY_TYPES, gi.entity_type, s.entity_type) : s.entity_type,
+          jurisdiction: gi.country_of_incorporation?.trim() || s.jurisdiction,
+          klass: detectedKlass || s.klass,
+          subclass: detectedSubclass || s.subclass,
+          registration_date: dateOnly(gi.registration_date) || s.registration_date,
+          status: gi.status ? labelFor(STATUSES, gi.status, s.status) : s.status,
+          activity: gi.industry?.trim() || s.activity,
+          phone_number: phones.length ? phones : s.phone_number,
+          contact_email: emails.length ? emails : s.contact_email,
+          nature_of_business: gi.nature_of_business?.trim() || s.nature_of_business,
+          annual_income: gi.annual_income?.trim() || s.annual_income,
+          estimated_trading_volume: gi.estimated_trading_volume?.trim() || s.estimated_trading_volume,
+        };
+      });
+
+      if (gi.account_purpose) {
+        setAccountPurpose((s) => ({
+          digital_currency_exchange: gi.account_purpose.digital_currency_exchange ?? s.digital_currency_exchange,
+          peer_to_peer: gi.account_purpose.peer_to_peer ?? s.peer_to_peer,
+          fx: gi.account_purpose.fx ?? s.fx,
+          other: gi.account_purpose.other ?? s.other,
+          other_details: s.other_details,
+        }));
+      }
+
+      const newAddrs = [
+        ...(gi.registered_addresses || []).map((a) => ocrAddressRow(a, "Registered Address")),
+        ...(gi.business_addresses || []).map((a) => ocrAddressRow(a, "Principal Place of Business")),
+      ];
+      if (newAddrs.length) {
+        counts.addresses = newAddrs.length;
+        setAddresses((rows) =>
+          rows.length === 1 && rowIsBlank(rows[0], ["street", "suburb", "state", "postcode", "country"])
+            ? newAddrs
+            : [...rows, ...newAddrs],
+        );
+      }
+
+      const newAgents = (gi.local_agents || []).map(ocrAgentRow).filter((a) => a.name.trim());
+      if (newAgents.length) {
+        counts.agents = newAgents.length;
+        setAgents((rows) => [...rows, ...newAgents]);
+      }
+    }
+
+    // identifiers[] (docs/65 Step 49 — a real sample showed the OCR service
+    // returns this top-level, richer than deriving a single ACN row from
+    // general_information.registration_number alone). Reconciled row by
+    // row against the two pre-seeded ACN/ABN rows rather than wholesale
+    // replaced, so a value the user already typed is never overwritten.
+    const ocrIdentifiers = (ocrData?.identifiers || []).map(ocrIdentifierRow).filter((i) => i.value);
+    if (ocrIdentifiers.length) {
+      counts.identifiers = ocrIdentifiers.length;
+      setIdentifiers((rows) => {
+        let next = [...rows];
+        ocrIdentifiers.forEach((oi) => {
+          const idx = next.findIndex((r) => r.id_type === oi.id_type && !r.value.trim());
+          if (idx >= 0) next[idx] = { ...next[idx], value: oi.value, jurisdiction: oi.jurisdiction || next[idx].jurisdiction };
+          else if (!next.some((r) => r.id_type === oi.id_type && r.value.trim() === oi.value)) next = [...next, oi];
+        });
+        return next;
+      });
+    } else if (gi.registration_number?.trim()) {
+      // Fallback for a response that only returned general_information.
+      setIdentifiers((rows) => {
+        const idx = rows.findIndex((r) => r.id_type === "ACN");
+        if (idx < 0 || rows[idx].value.trim()) return rows;
+        const copy = [...rows];
+        copy[idx] = { ...copy[idx], value: gi.registration_number.trim() };
+        return copy;
+      });
+    }
+
+    // appointments[] (docs/65 Step 49) is the same shape this wizard's own
+    // edit-mode restore reads (mapCompanyToWizardState) and is far richer
+    // than directors_beneficial_owner.directors[] (name-only) — preferred
+    // whenever present; the minimal directors[] is only a fallback so a
+    // response lacking appointments[] still pre-fills something.
+    const appointmentSource = (ocrData?.appointments || []).length ? ocrData.appointments : db.directors || [];
+    const newPeople = appointmentSource.map(ocrAppointmentToPerson).filter((p) => p.full_name.trim());
+    if (newPeople.length) {
+      counts.people = newPeople.length;
+      setPeople((rows) => (rows.length === 1 && rowIsBlank(rows[0], ["full_name"]) ? newPeople : [...rows, ...newPeople]));
+    }
+
+    const newUbos = (db.beneficial_owners || []).map(ocrOwnerToUbo).filter((u) => u.full_name.trim());
+    if (newUbos.length) {
+      counts.ubos = newUbos.length;
+      setUbos((rows) => (rows.length === 1 && rowIsBlank(rows[0], ["full_name"]) ? newUbos : [...rows, ...newUbos]));
+    }
+
+    // share_capital[] / shareholders[] (docs/65 Step 49) — top-level,
+    // absent from the originally-documented "general_information +
+    // directors_beneficial_owner" contract but present in a real response.
+    const newCapital = (ocrData?.share_capital || []).map(ocrCapitalRow).filter((c) => c.security_class);
+    if (newCapital.length) {
+      counts.capital = newCapital.length;
+      setCapital((rows) =>
+        rows.length === 1 && rowIsBlank(rows[0], ["number_issued", "total_paid", "total_unpaid"]) ? newCapital : [...rows, ...newCapital],
+      );
+    }
+
+    const newHolders = (ocrData?.shareholders || []).map(ocrHolderRow).filter((h) => h.name.trim());
+    if (newHolders.length) {
+      counts.holders = newHolders.length;
+      // Held-on-behalf-of rows land with beneficially:"No" but no
+      // arrangement — an ASIC register can't tell us who a nominee/trust
+      // arrangement is actually for, so these need a manual follow-up in
+      // the Shareholders step before submit (the existing validation
+      // already blocks submission until resolved; this just surfaces it
+      // early rather than at the end of the wizard).
+      counts.incompleteHolders = newHolders.filter((h) => h.beneficially === "No").length;
+      setHolders((rows) => (rows.length === 1 && rowIsBlank(rows[0], ["name"]) ? newHolders : [...rows, ...newHolders]));
+    }
+
+    const relatedEntities = ocrData?.related_entities || [];
+    const relatedParent = relatedEntities.find((r) => r.relation === "parent");
+    const relatedSubs = relatedEntities.filter((r) => r.relation === "subsidiary");
+    if (relatedParent) {
+      counts.related += 1;
+      setParent((s) => (s.name.trim() ? s : ocrRelatedEntityRow(relatedParent)));
+    }
+    if (relatedSubs.length) {
+      counts.related += relatedSubs.length;
+      const newSubs = relatedSubs.map(ocrRelatedEntityRow);
+      setSubsidiaries((rows) => (rows.length === 1 && rowIsBlank(rows[0], ["name"]) ? newSubs : [...rows, ...newSubs]));
+    }
+
+    return counts;
+  };
+
+  const runOcrExtraction = async () => {
+    if (!ocrFile) return;
+    setOcrLoading(true);
+    try {
+      const res = await ocrExtractCompany(ocrFile);
+      if (!res?.success || !res?.data) {
+        toast.error(res?.error || res?.message || "Could not extract data from this document — try a clearer scan or fill the form manually.");
+        return;
+      }
+      const counts = applyOcrResult(res.data);
+      // The same file becomes a real register document too, tagged with
+      // whichever ASIC document type was picked — one upload does double
+      // duty instead of asking the user to attach it again in the
+      // Documents step.
+      const category = ocrDocType === "ASIC Form 201 (Company Registration)" ? "Certificate of Incorporation" : "ASIC Extract";
+      const uploadId = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      setDocs((d) => [
+        ...d,
+        {
+          _uploadId: uploadId,
+          _file: ocrFile,
+          name: ocrFile.name,
+          size: ocrFile.size,
+          date: new Date().toISOString(),
+          mimeType: ocrFile.type || "application/octet-stream",
+          category,
+          url: "",
+          status: "uploading",
+        },
+      ]);
+      uploadDoc(uploadId, ocrFile);
+      const parts = [
+        counts.identifiers && `${counts.identifiers} identifier(s)`,
+        counts.addresses && `${counts.addresses} address(es)`,
+        counts.agents && `${counts.agents} local agent(s)`,
+        counts.people && `${counts.people} appointment(s)`,
+        counts.ubos && `${counts.ubos} beneficial owner(s)`,
+        counts.capital && `${counts.capital} capital row(s)`,
+        counts.holders && `${counts.holders} shareholder(s)`,
+        counts.related && `${counts.related} related entit(y/ies)`,
+      ].filter(Boolean);
+      toast.success(`Pre-filled from the document${parts.length ? ` — added ${parts.join(", ")}` : ""}. Review every field before submitting.`);
+      if (counts.incompleteHolders) {
+        toast.warning(
+          `${counts.incompleteHolders} shareholder(s) aren't beneficially held — the document doesn't say who the arrangement is for. Complete "Held on behalf of" in Shareholders before submitting.`,
+        );
+      }
+      setOcrFile(null);
+    } catch (err) {
+      toast.error(err.message || "OCR extraction failed — try again or fill the form manually.");
+    } finally {
+      setOcrLoading(false);
+    }
+  };
+
   const buildPayload = () => {
     // Every row of a given type is sent (not just the first) — the model
     // accepts concurrent entries per type (docs/65 Step 26).
@@ -948,12 +3265,16 @@ export default function AddCompany() {
         value: i.value.trim(),
         jurisdiction: i.jurisdiction.trim() || country,
       }));
-    // Structured, not free text (docs/65 Step 27) — no country default here
-    // (unlike addrObj) since a person's residence isn't tied to the entity's
-    // own jurisdiction.
+    // Structured, not free text (docs/65 Step 27). Country now defaults to
+    // the entity's own jurisdiction (docs/65 Step 54, owner decision —
+    // overrides the earlier Step 52 stance that a person's residence
+    // shouldn't inherit it) once the row has any real data at all; the
+    // has-any-data gate below still checks the raw fields, not the
+    // defaulted value, so a completely untouched row still doesn't get a
+    // residential_address object just because country would default.
     const residentialAddr = (a) =>
       a && (a.street?.trim() || a.suburb?.trim() || a.state?.trim() || a.postcode?.trim() || a.country?.trim())
-        ? { street: a.street, suburb: a.suburb, state: a.state, postcode: a.postcode, country: a.country }
+        ? { street: a.street, suburb: a.suburb, state: a.state, postcode: a.postcode, country: a.country?.trim() || entity.jurisdiction }
         : undefined;
     const appointments = people
       .filter((p) => p.full_name.trim())
@@ -967,12 +3288,19 @@ export default function AddCompany() {
         screening_status: "pending",
       }));
     const related = [];
+    // Parent/subsidiary jurisdiction now defaults to the entity's own
+    // (docs/65 Step 53, owner decision) — same visible-default treatment as
+    // addresses/agents/identifiers. Doesn't weaken foreign-parent detection:
+    // isForeign() short-circuits false on an empty jurisdiction anyway, so a
+    // still-blank field and a field defaulted-and-equal-to-home reach the
+    // same "not foreign" conclusion either way — this only removes the
+    // silent mismatch between what the dropdown showed and what got saved.
     if (parent.name.trim())
       related.push({
         relation: "parent",
         name: parent.name.trim(),
         percent_interest: toNum(parent.percent),
-        jurisdiction: parent.jurisdiction || undefined,
+        jurisdiction: parent.jurisdiction || entity.jurisdiction || undefined,
         date_acquired: parent.acquired || undefined,
       });
     subsidiaries
@@ -982,7 +3310,7 @@ export default function AddCompany() {
           relation: "subsidiary",
           name: s.name.trim(),
           percent_interest: toNum(s.percent),
-          jurisdiction: s.jurisdiction || undefined,
+          jurisdiction: s.jurisdiction || entity.jurisdiction || undefined,
           date_acquired: s.acquired || undefined,
         })
       );
@@ -1021,7 +3349,9 @@ export default function AddCompany() {
             date_of_birth: u.dob || undefined,
             ownership_percent: toNum(u.percent),
             control_type: CONTROL_TYPES.find(([l]) => l === u.control)?.[1] || "ownership",
-            residential_address: u.country ? { country: u.country } : undefined,
+            // Country of residence defaults to the entity's own jurisdiction
+            // when left blank (docs/65 Step 54, owner decision).
+            residential_address: { country: u.country.trim() || entity.jurisdiction || undefined },
           })),
       },
       share_capital: capital
@@ -1035,17 +3365,49 @@ export default function AddCompany() {
         })),
       shareholders: holders
         .filter((h) => h.name.trim())
-        .map((h) => ({
-          holder_name: h.name.trim(),
-          security_class: h.security || undefined,
-          units_held: toNum(h.holding),
-          // Derived from Capital's issued units for the same class when
-          // possible, so the two sections can't disagree (docs/65 Step 40);
-          // manual h.percent only backstops a class with no Capital row.
-          percent_held: holderPercent(h) ?? toNum(h.percent),
-          beneficially_held: h.beneficially === "Yes",
-          fully_paid: h.paid === "Fully paid",
-        })),
+        .map((h) => {
+          const beneficiallyHeld = h.beneficially === "Yes";
+          const arrangementType = BENEFICIAL_ARRANGEMENT_TYPES.find(([l]) => l === h.beneficialType)?.[1];
+          return {
+            holder_name: h.name.trim(),
+            security_class: h.security || undefined,
+            units_held: toNum(h.holding),
+            // Derived from Capital's issued units for the same class when
+            // possible, so the two sections can't disagree (docs/65 Step 40);
+            // manual h.percent only backstops a class with no Capital row.
+            percent_held: holderPercent(h) ?? toNum(h.percent),
+            beneficially_held: beneficiallyHeld,
+            fully_paid: h.paid === "Fully paid",
+            // Trust/Nominee/Minor (docs/65 Step 43) — only when not
+            // beneficially held; a "trust" arrangement's `trust` key is
+            // payload-only, consumed server-side by resolveTrustLinks() and
+            // never persisted on the shareholder row itself.
+            ...(!beneficiallyHeld
+              ? {
+                  beneficial_arrangement: {
+                    arrangement_type: arrangementType,
+                    // A minor is a person by definition, so that row never
+                    // offers the person/entity choice (docs/65 Step 66).
+                    beneficiary_type: isEntityBeneficiary(h) ? "entity" : "individual",
+                    // Split parts are what the wizard captures (docs/65 Step
+                    // 67), so they're what it writes — `full_name` is left
+                    // for payloads that only have a whole name (OCR, an
+                    // imported register) rather than derived and stored
+                    // twice.
+                    beneficiary: isEntityBeneficiary(h)
+                      ? { entity_name: h.beneficiaryEntityName.trim() || undefined }
+                      : {
+                          first_name: h.beneficiaryFirst.trim() || undefined,
+                          middle_name: h.beneficiaryMiddle.trim() || undefined,
+                          last_name: h.beneficiaryLast.trim() || undefined,
+                          date_of_birth: h.beneficialType === "Minor" ? h.beneficiaryDob || undefined : undefined,
+                        },
+                  },
+                  ...(arrangementType === "trust" && h.trust ? { trust: buildTrustPayload(h.trust) } : {}),
+                }
+              : {}),
+          };
+        }),
       related_entities: related,
       documents: docs
         .filter((f) => f.status === "done" && f.url)
@@ -1065,9 +3427,36 @@ export default function AddCompany() {
     if (!entity.registration_date) missing.push(["Registration date", 0]);
     if (!findRegistrationNumber(identifiers)) missing.push(["ACN or ARBN", 0]);
     if (!findIdentifierValue(identifiers, "ABN")) missing.push(["ABN", 0]);
+    // Trust/Nominee/Minor (docs/65 Step 43; entity-level branch removed in
+    // Step 45): any holder not beneficially held requires its arrangement to
+    // be resolved (trust needs a trust name, nominee/minor need a
+    // beneficiary name).
+    const unresolvedHolder = holders.some((h) => {
+      if (!h.name.trim() || h.beneficially !== "No") return false;
+      if (!h.beneficialType) return true;
+      return h.beneficialType === "Trust" ? !h.trust?.full_trust_name?.trim() : !beneficiaryNamed(h);
+    });
+    if (unresolvedHolder) missing.push(["Beneficial arrangement details for non-beneficially-held holders", 2]);
     if (missing.length) {
       toast.error(`Required: ${missing.map(([l]) => l).join(", ")}`);
       goStep(missing[0][1]);
+      return;
+    }
+    // A named trust isn't a complete one (docs/65 Step 62) — the whole trust
+    // form has to pass before the linked TrustKyc record gets created. Opens
+    // the offending holder's modal with every outstanding field revealed
+    // rather than just naming the step.
+    const badTrust = holders.findIndex(
+      (h) => h.name.trim() && h.beneficially === "No" && h.beneficialType === "Trust" && trustIssueCount(h) > 0,
+    );
+    if (badTrust !== -1) {
+      const n = trustIssueCount(holders[badTrust]);
+      toast.error(
+        `${holders[badTrust].name.trim()}'s beneficial trust is incomplete — ${n} ${n === 1 ? "field needs" : "fields need"} attention.`,
+      );
+      goStep(2);
+      setTrustModalIndex(badTrust);
+      setTrustErrorsShown(true);
       return;
     }
     if (!attest.ubo || !attest.registry) {
@@ -1128,6 +3517,80 @@ export default function AddCompany() {
     <div style={card}>
       <h2 style={h2}>Entity details</h2>
       <p style={sub13}>Legal identity of the business under review.</p>
+
+      {/* eKYB OCR pre-fill (docs/65 Step 48) — create mode only; editing an
+          existing record already has real data, OCR would only risk
+          overwriting it. */}
+      {!id && (
+        <div style={{ marginBottom: 22, border: `1px dashed ${C.green}`, background: "#f2f8f6", borderRadius: 12, padding: "16px 18px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.green} strokeWidth="2">
+              <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" />
+            </svg>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.green }}>Start from a document</span>
+            <span
+              style={{
+                background: C.green,
+                color: "#fff",
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: ".05em",
+                textTransform: "uppercase",
+                padding: "2px 7px",
+                borderRadius: 5,
+              }}
+            >
+              OCR
+            </span>
+          </div>
+          <p style={{ margin: "0 0 14px", fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>
+            Upload an ASIC Company Extract or Form 201 and entity details, directors and beneficial owners below are pre-filled
+            automatically. The file is also attached as a register document. Nothing is saved until you submit — review every
+            field first.
+          </p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
+            <div style={{ minWidth: 240 }}>
+              <Fld label="Document type">
+                <Select
+                  value={ocrDocType}
+                  onChange={(e) => setOcrDocType(e.target.value)}
+                  options={["ASIC Company Extract", "ASIC Form 201 (Company Registration)"]}
+                />
+              </Fld>
+            </div>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <Fld label="Document">
+                <input
+                  type="file"
+                  accept="application/pdf,image/*"
+                  onChange={(e) => setOcrFile(e.target.files?.[0] || null)}
+                  style={{ ...fld, padding: "8px 10px" }}
+                />
+              </Fld>
+            </div>
+            <button
+              type="button"
+              onClick={runOcrExtraction}
+              disabled={!ocrFile || ocrLoading}
+              style={{
+                flexShrink: 0,
+                background: !ocrFile || ocrLoading ? "#9db8ae" : C.green,
+                color: "#fff",
+                border: "none",
+                borderRadius: 9,
+                padding: "10px 18px",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: !ocrFile || ocrLoading ? "not-allowed" : "pointer",
+                fontFamily: "inherit",
+                height: 38,
+              }}
+            >
+              {ocrLoading ? "Extracting…" : "Extract & pre-fill"}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div style={{ ...grid("1fr 1fr"), marginBottom: 16 }}>
         <Fld label="Legal entity name" required>
@@ -1259,7 +3722,17 @@ export default function AddCompany() {
                 <Input mono value={idf.value} onChange={(ev) => pIdent(i, "value", ev.target.value)} placeholder="Identifier value" />
               </Fld>
               <Fld label="Jurisdiction">
-                <Select value={idf.jurisdiction} onChange={(ev) => pIdent(i, "jurisdiction", ev.target.value)} options={["", ...COUNTRY_OPTIONS]} />
+                {/* Defaults to Entity details' Jurisdiction, same as
+                    buildPayload() already falls back to at submit (docs/65)
+                    — shown here too now rather than only applied invisibly,
+                    so the row never looks blank when it won't submit blank.
+                    Still freely overridable per row; picking a different
+                    country writes it straight into idf.jurisdiction. */}
+                <Select
+                  value={idf.jurisdiction || entity.jurisdiction}
+                  onChange={(ev) => pIdent(i, "jurisdiction", ev.target.value)}
+                  options={["", ...COUNTRY_OPTIONS]}
+                />
               </Fld>
             </div>
           </div>
@@ -1301,7 +3774,14 @@ export default function AddCompany() {
                 <Input mono value={a.postcode} onChange={(e) => pAddr(i, "postcode", e.target.value)} />
               </Fld>
               <Fld label="Country">
-                <Select value={a.country} onChange={(e) => pAddr(i, "country", e.target.value)} options={["", ...COUNTRY_OPTIONS]} />
+                {/* Defaults to Entity details' Jurisdiction, same as
+                    buildPayload()'s addrObj() already falls back to at
+                    submit (docs/65 Step 52) — still freely overridable. */}
+                <Select
+                  value={a.country || entity.jurisdiction}
+                  onChange={(e) => pAddr(i, "country", e.target.value)}
+                  options={["", ...COUNTRY_OPTIONS]}
+                />
               </Fld>
             </div>
             <div style={grid("1fr 1fr", 14)}>
@@ -1347,7 +3827,17 @@ export default function AddCompany() {
                 <Input mono value={a.postcode} onChange={(e) => pAgent(i, "postcode", e.target.value)} />
               </Fld>
               <Fld label="Country">
-                <Select value={a.country} onChange={(e) => pAgent(i, "country", e.target.value)} options={["", ...COUNTRY_OPTIONS]} />
+                {/* Defaults to Entity details' Jurisdiction, same as
+                    buildPayload()'s addrObj() already falls back to at
+                    submit (docs/65 Step 52) — still freely overridable
+                    (expected to differ often here — a local agent
+                    typically represents the entity in a jurisdiction
+                    other than its own). */}
+                <Select
+                  value={a.country || entity.jurisdiction}
+                  onChange={(e) => pAgent(i, "country", e.target.value)}
+                  options={["", ...COUNTRY_OPTIONS]}
+                />
               </Fld>
             </div>
           </div>
@@ -1467,9 +3957,190 @@ export default function AddCompany() {
                   <Select value={h.paid} onChange={(e) => pHolder(i, "paid", e.target.value)} options={PAID_STATUSES} />
                 </Fld>
               </div>
+
+              {h.beneficially === "No" && (
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.hair}` }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                    <WarnIcon size={14} />
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: C.amberDeep }}>
+                      Held on behalf of someone else — who actually benefits?
+                    </span>
+                  </div>
+                  {/* Four tracks rather than three since Step 67: this row
+                      can now hold arrangement + person/entity + three name
+                      parts + DOB, and auto-fit reflows the rest. */}
+                  <div style={{ ...grid("1fr 1fr 1fr 1fr"), marginBottom: h.beneficialType === "Trust" ? 16 : 0 }}>
+                    <Fld label="Arrangement" required>
+                      <Select
+                        value={h.beneficialType}
+                        onChange={(e) => pHolder(i, "beneficialType", e.target.value)}
+                        options={["", ...BENEFICIAL_ARRANGEMENT_TYPES.map(([l]) => l)]}
+                        placeholder="Select type"
+                      />
+                    </Fld>
+                    {/* Person or company (docs/65 Step 66) — a nominee can
+                        hold for either, and the answer decides which field
+                        the name is stored in. A minor is a person by
+                        definition, so the choice isn't offered there. */}
+                    {h.beneficialType && h.beneficialType !== "Trust" && h.beneficialType !== "Minor" && (
+                      <Fld label="Beneficiary is a">
+                        <Select
+                          value={h.beneficiaryKind === "entity" ? "Company / entity" : "Person"}
+                          onChange={(e) => pHolder(i, "beneficiaryKind", e.target.value === "Company / entity" ? "entity" : "individual")}
+                          options={["Person", "Company / entity"]}
+                        />
+                      </Fld>
+                    )}
+                    {/* A person's name is captured in parts (docs/65 Step
+                        67) — that's the shape the schema stores and what
+                        screening matches on. Middle name is optional; first
+                        and last are what identify the person. An entity
+                        beneficiary has one name and no parts to split. */}
+                    {h.beneficialType && h.beneficialType !== "Trust" && isEntityBeneficiary(h) && (
+                      <Fld label="Beneficiary entity name" required>
+                        <Input
+                          value={h.beneficiaryEntityName}
+                          onChange={(e) => pHolder(i, "beneficiaryEntityName", e.target.value)}
+                          placeholder="Registered name of the company"
+                        />
+                      </Fld>
+                    )}
+                    {h.beneficialType && h.beneficialType !== "Trust" && !isEntityBeneficiary(h) && (
+                      <>
+                        <Fld label={h.beneficialType === "Minor" ? "Minor's first name" : "First name"} required>
+                          <Input value={h.beneficiaryFirst} onChange={(e) => pHolder(i, "beneficiaryFirst", e.target.value)} />
+                        </Fld>
+                        <Fld label="Middle name">
+                          <Input
+                            value={h.beneficiaryMiddle}
+                            onChange={(e) => pHolder(i, "beneficiaryMiddle", e.target.value)}
+                            placeholder="If any"
+                          />
+                        </Fld>
+                        <Fld label={h.beneficialType === "Minor" ? "Minor's last name" : "Last name"} required>
+                          <Input value={h.beneficiaryLast} onChange={(e) => pHolder(i, "beneficiaryLast", e.target.value)} />
+                        </Fld>
+                      </>
+                    )}
+                    {h.beneficialType === "Minor" && (
+                      <Fld label="Date of birth">
+                        <Input type="date" max={todayISO()} value={h.beneficiaryDob} onChange={(e) => pHolder(i, "beneficiaryDob", e.target.value)} />
+                      </Fld>
+                    )}
+                  </div>
+                  {h.beneficialType === "Trust" && (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, border: `1px solid ${C.amberLine}`, background: C.amberSoft, borderRadius: 11, padding: "14px 16px" }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
+                          <span style={{ fontSize: 12.5, fontWeight: 600, color: C.amberDeep }}>Beneficial trust details</span>
+                          {/* Linked = bound to a saved TrustKyc record (docs/65
+                              Step 57), so it's visible without opening the modal. */}
+                          {h.trust?.id && (
+                            <span
+                              style={{
+                                background: C.greenBg,
+                                color: C.greenText,
+                                fontSize: 9.5,
+                                fontWeight: 700,
+                                letterSpacing: ".04em",
+                                textTransform: "uppercase",
+                                padding: "2px 6px",
+                                borderRadius: 4,
+                              }}
+                            >
+                              Linked
+                            </span>
+                          )}
+                        </div>
+                        {/* The outstanding count is what makes an incomplete
+                            trust visible without opening the modal — the ✕
+                            can close it half-finished (docs/65 Step 62). */}
+                        <div style={{ fontSize: 12, color: trustIssueCount(h) ? C.red : "#7c6b52", marginTop: 2 }}>
+                          {(() => {
+                            const n = trustIssueCount(h);
+                            const name = h.trust?.full_trust_name?.trim();
+                            if (!n) return name;
+                            return name
+                              ? `${name} — ${n} ${n === 1 ? "field" : "fields"} still to complete.`
+                              : `Not yet completed — ${n} ${n === 1 ? "field" : "fields"} required before this file can be submitted.`;
+                          })()}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => openTrustModal(i)}
+                        style={{
+                          flexShrink: 0,
+                          background: C.amberDeep,
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 8,
+                          padding: "8px 14px",
+                          fontSize: 12.5,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          fontFamily: "inherit",
+                        }}
+                      >
+                        {h.trust?.full_trust_name?.trim() ? "Edit trust details" : "Add trust details"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
+
+        {/* Only the ✕ (or Done) closes this — an outside click or Escape is
+            ignored (docs/65 Step 56). The form is long enough that an
+            accidental backdrop click could discard a lot of typing, and
+            nothing here is auto-saved until the wizard itself is submitted.
+            Width: near-full on small screens, capped wide on large ones —
+            the field grids inside reflow via auto-fit/minmax. */}
+        <Dialog open={trustModalIndex !== null} onOpenChange={(open) => !open && setTrustModalIndex(null)}>
+          <DialogContent
+            className="w-[96vw] sm:max-w-[min(1180px,94vw)] max-h-[92vh] overflow-y-auto p-5 sm:p-7"
+            onInteractOutside={(e) => e.preventDefault()}
+            onEscapeKeyDown={(e) => e.preventDefault()}
+          >
+            <DialogHeader>
+              <DialogTitle>Beneficial trust details</DialogTitle>
+              <DialogDescription>
+                {trustModalIndex !== null ? holders[trustModalIndex]?.name || "Untitled holder" : ""} holds this position on behalf of a
+                trust — complete the trust's own details. Saved as a linked TrustKyc record when this file is submitted.
+              </DialogDescription>
+            </DialogHeader>
+            {trustModalIndex !== null && (
+              <TrustFields
+                value={holders[trustModalIndex].trust || emptyTrust()}
+                onChange={(t) => pHolder(trustModalIndex, "trust", t)}
+                showErrors={trustErrorsShown}
+              />
+            )}
+            {/* Done validates before closing (docs/65 Step 62); the ✕ still
+                closes unconditionally, so an incomplete trust can be parked
+                and come back to — the shareholder row then shows how many
+                fields are outstanding, and submit refuses either way. */}
+            <DialogFooter>
+              <button
+                type="button"
+                onClick={() => {
+                  const n = trustModalIndex === null ? 0 : trustIssueCount(holders[trustModalIndex]);
+                  if (n) {
+                    setTrustErrorsShown(true);
+                    toast.error(`${n} ${n === 1 ? "field needs" : "fields need"} attention before this trust is complete.`);
+                    return;
+                  }
+                  setTrustModalIndex(null);
+                }}
+                style={{ background: C.green, color: "#fff", border: "none", borderRadius: 9, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                Done
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {foreignParent && parent.name.trim() && (
           <div style={{ display: "flex", gap: 13, padding: "14px 16px", background: C.amberBg, border: `1px solid ${C.amberLine}`, borderRadius: 11, marginTop: 16 }}>
@@ -1494,7 +4165,14 @@ export default function AddCompany() {
             <Input type="date" value={parent.acquired} onChange={(e) => setParent((s) => ({ ...s, acquired: e.target.value }))} />
           </Fld>
           <Fld label="Jurisdiction" required>
-            <Select value={parent.jurisdiction} onChange={(e) => setParent((s) => ({ ...s, jurisdiction: e.target.value }))} options={["", ...COUNTRY_OPTIONS]} />
+            {/* Defaults to Entity details' Jurisdiction (docs/65 Step 53,
+                owner decision) — still freely overridable, which is the
+                point: change it to flag a genuinely foreign parent. */}
+            <Select
+              value={parent.jurisdiction || entity.jurisdiction}
+              onChange={(e) => setParent((s) => ({ ...s, jurisdiction: e.target.value }))}
+              options={["", ...COUNTRY_OPTIONS]}
+            />
           </Fld>
         </div>
 
@@ -1537,7 +4215,19 @@ export default function AddCompany() {
                   </div>
                   <div style={{ ...grid("1fr 1fr", 14), marginTop: 12, paddingRight: 24 }}>
                     <Fld label="Country of residence">
-                      <Input value={u.country} onChange={(e) => pUbo(i, "country", e.target.value)} placeholder="Country" />
+                      {/* Defaults to Entity details' Jurisdiction (docs/65
+                          Step 54, owner decision) — shown as a placeholder
+                          hint rather than a committed value, since this is
+                          free text: a pre-filled value would force the user
+                          to clear it before typing something else, where a
+                          Select just lets them pick a different option. The
+                          underlying value stays blank until actually typed,
+                          same as buildPayload()'s fallback expects. */}
+                      <Input
+                        value={u.country}
+                        onChange={(e) => pUbo(i, "country", e.target.value)}
+                        placeholder={entity.jurisdiction || "Country"}
+                      />
                     </Fld>
                     <Fld label="Date of birth">
                       <Input type="date" value={u.dob} onChange={(e) => pUbo(i, "dob", e.target.value)} />
@@ -1573,7 +4263,13 @@ export default function AddCompany() {
                   <Input type="date" value={s.acquired} onChange={(e) => pSub(i, "acquired", e.target.value)} />
                 </Fld>
                 <Fld label="Jurisdiction">
-                  <Select value={s.jurisdiction} onChange={(e) => pSub(i, "jurisdiction", e.target.value)} options={["", ...COUNTRY_OPTIONS]} />
+                  {/* Defaults to Entity details' Jurisdiction (docs/65 Step
+                      53, owner decision) — still freely overridable. */}
+                  <Select
+                    value={s.jurisdiction || entity.jurisdiction}
+                    onChange={(e) => pSub(i, "jurisdiction", e.target.value)}
+                    options={["", ...COUNTRY_OPTIONS]}
+                  />
                 </Fld>
               </div>
             </div>
@@ -1635,7 +4331,13 @@ export default function AddCompany() {
                   <Input mono value={p.residential_address.postcode} onChange={(e) => pPersonAddr(i, "postcode", e.target.value)} />
                 </Fld>
                 <Fld label="Country">
-                  <Select value={p.residential_address.country} onChange={(e) => pPersonAddr(i, "country", e.target.value)} options={["", ...COUNTRY_OPTIONS]} />
+                  {/* Defaults to Entity details' Jurisdiction (docs/65 Step
+                      54, owner decision) — still freely overridable. */}
+                  <Select
+                    value={p.residential_address.country || entity.jurisdiction}
+                    onChange={(e) => pPersonAddr(i, "country", e.target.value)}
+                    options={["", ...COUNTRY_OPTIONS]}
+                  />
                 </Fld>
               </div>
             </div>

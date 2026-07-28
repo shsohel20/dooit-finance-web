@@ -21,6 +21,7 @@ import {
   updateCompanyReviewStatus,
   updateCompanyDocument,
 } from "@/app/dashboard/client/companies/actions";
+import OwnershipGraph from "@/views/companies/ownership-graph";
 
 /* ------------------------------------------------------------------ */
 /* Design tokens — lifted from KYB Review.dc.html (Claude Design)      */
@@ -99,6 +100,19 @@ const ENTITY_TYPE_LABELS = {
   other: "Other",
 };
 
+// Who a non-beneficially-held shareholding is held for (docs/65 Step 66).
+// The beneficiary block names an entity via entity_name and a person via
+// full_name, falling back to the split name parts a richer payload may carry.
+const beneficiaryLabel = (arrangement) => {
+  const b = arrangement?.beneficiary || {};
+  return (
+    b.entity_name ||
+    b.full_name ||
+    [b.first_name, b.middle_name, b.last_name].filter(Boolean).join(" ") ||
+    ""
+  );
+};
+
 const IDENTIFIER_TYPE_LABELS = {
   acn: "ACN",
   abn: "ABN",
@@ -106,6 +120,19 @@ const IDENTIFIER_TYPE_LABELS = {
   lei: "LEI",
   corporate_key: "Register No",
   other: "Other",
+};
+
+// Mirrors TrustKyc's trust_details.trust_type.selected_type vocabulary,
+// same list as TRUST_TYPES in companies/add/index.js (docs/65 Step 43;
+// removed with the entity-level trust card in Step 45, reintroduced in Step
+// 46 for the expanded shareholder-level beneficial-trust card).
+const TRUST_TYPE_LABELS = {
+  unregulated_trust: "Unregulated Trust",
+  self_managed_super_fund: "Self-Managed Super Fund",
+  managed_investment_scheme_registered: "Managed Investment Scheme (Registered)",
+  managed_investment_scheme_unregistered: "Managed Investment Scheme (Unregistered)",
+  government_superannuation_fund: "Government Superannuation Fund",
+  other_superannuation_trust: "Other Superannuation Trust",
 };
 
 // Mirrors DOCUMENT_TYPES in companies/add/index.js (docs/65 Step 34).
@@ -1151,6 +1178,11 @@ export default function KybReview() {
               )}
             </div>
 
+            {/* Interactive ownership graph (docs/65 Step 61) — replaces the
+                static parent→subject→subsidiary stack that used to render
+                here. Same data, so keeping both would show it twice; the
+                graph additionally carries shareholders, UBOs, directors and
+                each trust's own parties, which the stack could not. */}
             {(() => {
               const parents = d.relatedEntities.filter((r) => r.relation === "parent");
               const subs = d.relatedEntities.filter((r) => r.relation !== "parent");
@@ -1158,74 +1190,16 @@ export default function KybReview() {
                 return <EmptyNote>No ownership structure recorded yet.</EmptyNote>;
               }
               return (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0, margin: "0 auto 24px", maxWidth: 520 }}>
-                  {parents.map((p, i) => (
-                    <React.Fragment key={`p${i}`}>
-                      <div style={{ width: "100%", background: "#f6f4ef", border: "1px dashed #d8b98a", borderRadius: 11, padding: "13px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-                        <div style={{ width: 34, height: 34, borderRadius: 8, background: "#e9dcc4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a67c33" strokeWidth="2">
-                            <path d="M3 21h18M6 21V7l6-4 6 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01" />
-                          </svg>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 13.5, fontWeight: 600 }}>{p.name}</div>
-                          <div style={{ fontSize: 11.5, color: C.amberInk }}>
-                            Parent{p.jurisdiction ? ` · ${p.jurisdiction}` : ""}{p.date_acquired ? ` · acquired ${fmtDate(p.date_acquired)}` : ""}
-                          </div>
-                        </div>
-                        {(p.percent_interest || p.percent_voting) && (
-                          <div style={{ textAlign: "right" }}>
-                            <div style={{ ...mono, fontSize: 14, fontWeight: 600 }}>{p.percent_interest}%</div>
-                            <div style={{ fontSize: 10.5, color: C.sub }}>interest{p.percent_voting ? ` & voting` : ""}</div>
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ width: 2, height: 22, background: "#cfd4cc" }} />
-                    </React.Fragment>
-                  ))}
-                  <div style={{ width: "100%", background: C.navy, borderRadius: 11, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 4px 14px rgba(18,35,61,.14)" }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 8, background: "#2f9e83", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#fff", fontWeight: 700, fontSize: 14 }}>
-                      {initials(legalName)}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13.5, fontWeight: 600, color: "#fff" }}>{legalName}</div>
-                      <div style={{ fontSize: 11.5, color: "#9db0cc" }}>
-                        Subject entity
-                        {gi.country_of_incorporation ? ` · ${gi.country_of_incorporation}` : ""}
-                      </div>
-                    </div>
-                    <span style={{ background: "#1e3a5c", color: "#8fd3c0", fontSize: 11, fontWeight: 600, padding: "4px 9px", borderRadius: 6 }}>
-                      This entity
-                    </span>
-                  </div>
-                  {subs.map((s, i) => (
-                    <React.Fragment key={`s${i}`}>
-                      <div style={{ width: 2, height: 22, background: "#cfd4cc" }} />
-                      <div style={{ width: "100%", background: "#f7f8f6", border: `1px solid ${C.line}`, borderRadius: 11, padding: "13px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-                        <div style={{ width: 34, height: 34, borderRadius: 8, background: "#e6ebe9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: C.chipInk, fontWeight: 600, fontSize: 12 }}>
-                          {initials(s.name)}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 13.5, fontWeight: 600 }}>{s.name}</div>
-                          <div style={{ fontSize: 11.5, color: C.sub }}>
-                            {(s.relation || "subsidiary").replace(/^\w/, (c) => c.toUpperCase())}
-                            {s.jurisdiction ? ` · ${s.jurisdiction}` : ""}
-                            {s.date_acquired ? ` · acquired ${fmtDate(s.date_acquired)}` : ""}
-                          </div>
-                        </div>
-                        {s.percent_interest !== undefined && (
-                          <div style={{ textAlign: "right" }}>
-                            <div style={{ ...mono, fontSize: 14, fontWeight: 600 }}>{s.percent_interest}%</div>
-                            <div style={{ fontSize: 10.5, color: C.sub }}>{s.percent_voting || 0}% voting</div>
-                          </div>
-                        )}
-                      </div>
-                    </React.Fragment>
-                  ))}
-                </div>
+                <OwnershipGraph
+                  legalName={legalName}
+                  jurisdiction={gi.country_of_incorporation}
+                  relatedEntities={d.relatedEntities}
+                  shareholders={d.shareholders}
+                  ubos={d.ubos}
+                  appointments={d.appointments}
+                />
               );
             })()}
-
             {(d.shareCapital.length > 0 || d.shareholders.length > 0) && (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 {d.shareCapital.map((sc, i) => (
@@ -1276,6 +1250,193 @@ export default function KybReview() {
                     {sh.percent_held !== undefined && (
                       <div style={{ height: 8, background: "#ecefe9", borderRadius: 5, marginTop: 14, overflow: "hidden" }}>
                         <div style={{ width: `${Math.min(sh.percent_held, 100)}%`, height: "100%", background: C.green }} />
+                      </div>
+                    )}
+                    {sh.beneficially_held === false && sh.holder_model !== "TrustKyc" && (
+                      <div
+                        style={{
+                          marginTop: 12,
+                          padding: "9px 12px",
+                          background: C.amberBg,
+                          borderRadius: 8,
+                          fontSize: 12,
+                          color: C.amberDeep,
+                        }}
+                      >
+                        {/* beneficiary is a block since docs/65 Step 66 — an
+                            entity beneficiary is named by entity_name, a
+                            person by full_name (or split parts). */}
+                        Held on behalf of{" "}
+                        <strong>{beneficiaryLabel(sh.beneficial_arrangement) || "an unnamed beneficiary"}</strong>
+                        {sh.beneficial_arrangement?.arrangement_type ? ` (${sh.beneficial_arrangement.arrangement_type})` : ""}
+                      </div>
+                    )}
+                    {/* Beneficial trust card (docs/65 Step 43; expanded in Step 46 to
+                        surface every TrustFields-captured property, not just the
+                        name) — sh.holder_entity is the populated TrustKyc doc
+                        (shareholders.holder_entity, populated server-side). */}
+                    {sh.beneficially_held === false && sh.holder_model === "TrustKyc" && sh.holder_entity && (
+                      <div style={{ marginTop: 12, border: `1px solid ${C.amberBorder}`, background: C.amberBg, borderRadius: 10, padding: "12px 14px" }}>
+                        <div style={{ fontSize: 11.5, color: C.amberDeep, marginBottom: 6 }}>
+                          Held on behalf of a trust
+                        </div>
+                        <div style={{ fontSize: 13.5, fontWeight: 600 }}>
+                          {sh.holder_entity.trust_details?.full_trust_name || "Unnamed trust"}
+                        </div>
+                        {(() => {
+                          const te = sh.holder_entity;
+                          const td = te.trust_details || {};
+                          const settlor = te.settlor || {};
+                          const settlorLabel = settlor.is_company
+                            ? settlor.company?.company_name || settlor.full_name
+                            : settlor.full_name || td.settlor_name;
+                          const line1 = [
+                            TRUST_TYPE_LABELS[td.trust_type?.selected_type],
+                            td.country_of_establishment,
+                            settlorLabel ? `Settlor: ${settlorLabel}${settlor.is_company ? " (company)" : ""}` : null,
+                            td.settled_sum?.amount != null
+                              ? `Settled sum: ${td.settled_sum.amount.toLocaleString()}${td.settled_sum.currency ? ` ${td.settled_sum.currency}` : ""}`
+                              : null,
+                            td.governing_law ? `Governing law: ${td.governing_law}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ");
+                          // Trust identification (docs/65 Step 55) — registry/tax
+                          // identifiers of the trust itself.
+                          const ti = td.trust_identification || {};
+                          const idLine = [
+                            ti.abn ? `ABN ${ti.abn}` : null,
+                            ti.acn ? `ACN ${ti.acn}` : null,
+                            ti.registration_number ? `Reg. ${ti.registration_number}` : null,
+                            ti.tfn ? "TFN on file" : null,
+                            ti.tax_residency ? `Tax residency: ${ti.tax_residency}` : null,
+                            // Dates moved to trust_details in Step 59; the
+                            // fallback keeps older records rendering.
+                            td.date_established ?? ti.date_established
+                              ? `Established ${fmtDate(td.date_established ?? ti.date_established)}`
+                              : null,
+                            td.date_of_deed ?? ti.date_of_deed ? `Deed ${fmtDate(td.date_of_deed ?? ti.date_of_deed)}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ");
+                          const pa = td.principal_address;
+                          const addrLine = pa
+                            ? [pa.address, pa.suburb, [pa.state, pa.postcode].filter(Boolean).join(" "), pa.country].filter(Boolean).join(", ")
+                            : "";
+                          const ci = td.contact_information || {};
+                          const contactLine = [ci.email, ci.phone, ci.website].filter(Boolean).join(" · ");
+                          const indivTrustees = te.individual_trustees?.trustees || [];
+                          const companyTrustees = te.company_trustees?.company_details || [];
+                          const trusteeNames = [
+                            ...indivTrustees.map((tr) => tr.full_name).filter(Boolean),
+                            ...companyTrustees
+                              .map((c) => [c.company_name, c.registration_number ? `(${c.registration_number})` : null].filter(Boolean).join(" "))
+                              .filter(Boolean),
+                          ];
+                          // Control + AML working state (docs/65 Step 55).
+                          const controllers = te.controllers || {};
+                          const controlNames = (controllers.controlling_persons || [])
+                            .map((p) =>
+                              [
+                                p.full_name,
+                                p.role ? `— ${p.role}` : null,
+                                p.pep_status && p.pep_status !== "pending" ? `[PEP: ${p.pep_status}]` : null,
+                                p.sanctions_status && p.sanctions_status !== "pending" ? `[Sanctions: ${p.sanctions_status}]` : null,
+                              ]
+                                .filter(Boolean)
+                                .join(" ")
+                            )
+                            .filter(Boolean);
+                          const repNames = (controllers.authorised_representatives || [])
+                            .map((r) => [r.full_name, r.role ? `(${r.role})` : null].filter(Boolean).join(" "))
+                            .filter(Boolean);
+                          const appointors = te.appointors || [];
+                          const aml = te.aml_kyc || {};
+                          const amlLine = [
+                            aml.source_of_funds ? `Source of funds: ${aml.source_of_funds}` : null,
+                            aml.source_of_wealth ? `Source of wealth: ${aml.source_of_wealth}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ");
+                          const amlStatusLine = [
+                            aml.kyc_verification_status ? `KYC: ${aml.kyc_verification_status}` : null,
+                            aml.risk_rating ? `Risk: ${aml.risk_rating}` : null,
+                            aml.verification_date ? `Verified ${fmtDate(aml.verification_date)}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ");
+                          const beneficiaries = te.beneficiaries || [];
+                          const documents = te.documents || [];
+                          return (
+                            <>
+                              {line1 && <div style={{ fontSize: 11.5, color: C.sub, marginTop: 3 }}>{line1}</div>}
+                              {idLine && <div style={{ fontSize: 11.5, color: C.sub, marginTop: 4 }}>{idLine}</div>}
+                              {addrLine && <div style={{ fontSize: 11.5, color: C.sub, marginTop: 4 }}>{addrLine}</div>}
+                              {contactLine && <div style={{ fontSize: 11.5, color: C.sub, marginTop: 4 }}>{contactLine}</div>}
+                              {trusteeNames.length > 0 && (
+                                <div style={{ fontSize: 11.5, color: C.sub, marginTop: 6 }}>
+                                  Trustee(s): {trusteeNames.join(", ")}
+                                </div>
+                              )}
+                              {appointors.length > 0 && (
+                                <div style={{ fontSize: 11.5, color: C.sub, marginTop: 4 }}>
+                                  Appointor(s): {appointors.join(", ")}
+                                </div>
+                              )}
+                              {controlNames.length > 0 && (
+                                <div style={{ fontSize: 11.5, color: C.sub, marginTop: 4 }}>
+                                  Controlling person(s): {controlNames.join(", ")}
+                                </div>
+                              )}
+                              {repNames.length > 0 && (
+                                <div style={{ fontSize: 11.5, color: C.sub, marginTop: 4 }}>
+                                  Authorised rep(s): {repNames.join(", ")}
+                                </div>
+                              )}
+                              {beneficiaries.length > 0 && (
+                                <div style={{ fontSize: 11.5, color: C.sub, marginTop: 4 }}>
+                                  Beneficiaries:{" "}
+                                  {beneficiaries
+                                    .map((b) =>
+                                      [
+                                        b.named_beneficiaries,
+                                        b.beneficiary_classes ? `(${b.beneficiary_classes})` : null,
+                                        b.beneficiary_type ? `[${b.beneficiary_type}]` : null,
+                                        b.beneficial_interest_percent !== undefined && b.beneficial_interest_percent !== null
+                                          ? `${b.beneficial_interest_percent}%`
+                                          : null,
+                                      ]
+                                        .filter(Boolean)
+                                        .join(" ")
+                                    )
+                                    .filter(Boolean)
+                                    .join(", ")}
+                                </div>
+                              )}
+                              {amlLine && <div style={{ fontSize: 11.5, color: C.sub, marginTop: 4 }}>{amlLine}</div>}
+                              {amlStatusLine && <div style={{ fontSize: 11.5, color: C.sub, marginTop: 4 }}>{amlStatusLine}</div>}
+                              {documents.length > 0 && (
+                                <div style={{ fontSize: 11.5, color: C.sub, marginTop: 4 }}>
+                                  Documents:{" "}
+                                  {documents.map((d, i) => (
+                                    <React.Fragment key={d._id || d.url || i}>
+                                      {i > 0 && ", "}
+                                      {d.url ? (
+                                        <a href={d.url} target="_blank" rel="noreferrer" style={{ color: C.amberDeep, textDecoration: "underline" }}>
+                                          {d.name || d.docType || "document"}
+                                        </a>
+                                      ) : (
+                                        d.name || d.docType || "document"
+                                      )}
+                                      {d.verification_status && d.verification_status !== "unverified" ? ` [${d.verification_status}]` : ""}
+                                      {d.expiry_date ? ` (exp. ${fmtDate(d.expiry_date)})` : ""}
+                                    </React.Fragment>
+                                  ))}
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
