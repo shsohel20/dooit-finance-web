@@ -10,13 +10,15 @@ import { Osiint } from "./Osiint";
 import TransactionTable from "./TransactionTable";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { getCustomerRelationsGraph } from "@/app/dashboard/client/onboarding/customer-queue/actions";
+import { transformToGraph } from "./d3/lib/transformgraphData";
+import NetworkGraph from "./d3/Networkgraph";
 const FILTERS = [
   // { mode: "all", label: "All", icon: Network },
   { mode: "relations", label: "Relations", icon: Users },
   { mode: "transactions", label: "Transactions", icon: ArrowLeftRight },
   // { mode: "ip", label: "IP Addresses", icon: Globe },
 ];
-
+const graphData = transformToGraph(partyEntities);
 function flatten(node, parent, out) {
   out.push({
     name: node.partyName,
@@ -45,13 +47,14 @@ export function RelationsTree({ details }) {
   const [osintOpen, setOsintOpen] = useState(false);
   const expandAllRef = useRef(null);
   const collapseAllRef = useRef(null);
+  const [selected, setSelected] = useState(null);
 
-  useEffect(() => {
-    getCustomerRelationsGraph(details._id).then((res) => {
-      console.log("relations graph res", res);
-      setRelations(res);
-    });
-  }, [details.id]);
+  // useEffect(() => {
+  //   getCustomerRelationsGraph(details._id).then((res) => {
+  //     console.log("relations graph res", res);
+  //     setRelations(res);
+  //   });
+  // }, [details.id]);
   return (
     <main className="min-h-screen relative ">
       <Sheet open={osintOpen} onOpenChange={setOsintOpen}>
@@ -134,14 +137,16 @@ export function RelationsTree({ details }) {
                   </div>
                 </div>
                 <div className="">
-                  <PartyTreeGraph
+                  {/* <PartyTreeGraph
                     entities={entities}
                     filterMode={filterMode}
                     expandAllRef={expandAllRef}
                     collapseAllRef={collapseAllRef}
                     // relations={relations}
                     details={details}
-                  />
+                  /> */}
+                  {/* <D3Canvas /> */}
+                  <NetworkGraph data={graphData} onNodeClick={setSelected} />
                 </div>
               </div>
             </div>
