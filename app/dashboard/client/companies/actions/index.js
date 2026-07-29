@@ -2,8 +2,23 @@
 
 import { fetchWithAuth } from "@/services/serverApi";
 
-export const getCompanies = async () => {
-  const response = await fetchWithAuth('customer/company/all', {
+// Drops blank/null params so an untouched filter never becomes `?country=`
+// (which the API would otherwise have to special-case).
+const toQuery = (params = {}) => {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === undefined || v === null || v === '') return;
+    qs.set(k, typeof v === 'object' ? (v.value ?? '') : String(v));
+  });
+  return qs.toString();
+}
+
+// Server-side list query (docs/65 Step 68): page, limit, sort, search and the
+// review_status/entity_type/status/country facets. Params are whitelisted
+// server-side by middleware/kybListQuery.js.
+export const getCompanies = async (params = {}) => {
+  const qs = toQuery(params);
+  const response = await fetchWithAuth(`customer/company/all${qs ? `?${qs}` : ''}`, {
     method: 'GET',
   });
   return response.json();
@@ -84,9 +99,14 @@ export const ocrExtractCompany = async (file) => {
 // Trust records (docs/65 Step 57) — back the "connect an existing trust"
 // picker and the Save button inside the beneficial-trust modal. A trust can
 // now be saved on its own, so another company can link to it later.
-export const getTrusts = async (search = '') => {
-  const qs = new URLSearchParams({ limit: '25', ...(search ? { search } : {}) });
-  const response = await fetchWithAuth(`customer/trust/all?${qs}`, {
+// Accepts either a bare search string (the trust-connect picker in the company
+// wizard calls it that way) or a full params object for the Trusts list.
+export const getTrusts = async (searchOrParams = '') => {
+  const params =
+    typeof searchOrParams === 'string'
+      ? { limit: 25, ...(searchOrParams ? { search: searchOrParams } : {}) }
+      : { limit: 25, ...searchOrParams };
+  const response = await fetchWithAuth(`customer/trust/all?${toQuery(params)}`, {
     method: 'GET',
   });
   return response.json();
@@ -94,6 +114,17 @@ export const getTrusts = async (search = '') => {
 
 export const getTrustById = async (id) => {
   const response = await fetchWithAuth(`customer/trust/${id}`, {
+    method: 'GET',
+  });
+  return response.json();
+}
+
+// The companies a trust holds an interest in (docs/65 Step 70). The link is
+// stored only on the company side (shareholders[].holder_entity), so the
+// trust dossier has to ask for it — without this the trust graph could show
+// the parties inside the trust but never what the trust owns.
+export const getCompaniesForTrust = async (id) => {
+  const response = await fetchWithAuth(`customer/trust/${id}/companies`, {
     method: 'GET',
   });
   return response.json();

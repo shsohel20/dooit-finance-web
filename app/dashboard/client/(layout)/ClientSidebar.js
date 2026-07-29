@@ -73,10 +73,24 @@ export default function ClientSidebar({ ...props }) {
       icon: IconUsers,
       url: "/dashboard/client/onboarding/customer-queue",
     },
+    // Company and Trust are both KYB entity registers, so they nest under a
+    // single "Business" parent rather than sitting as siblings of Customers
+    // (docs/65 Step 63).
     {
-      title: "Companies",
+      title: "Business",
       icon: IconBuilding,
-      url: "/dashboard/client/companies",
+      children: [
+        {
+          title: "Company",
+          icon: IconBuildingBank,
+          url: "/dashboard/client/companies",
+        },
+        {
+          title: "Trust",
+          icon: IconCirclesRelation,
+          url: "/dashboard/client/trusts",
+        },
+      ],
     },
   ];
   const onBoardingMenuItems = [
@@ -86,9 +100,20 @@ export default function ClientSidebar({ ...props }) {
       url: "/dashboard/client",
     },
     {
-      title: "Companies",
+      title: "Business",
       icon: IconBuilding,
-      url: "/dashboard/client/companies",
+      children: [
+        {
+          title: "Company",
+          icon: IconBuildingBank,
+          url: "/dashboard/client/companies",
+        },
+        {
+          title: "Trust",
+          icon: IconCirclesRelation,
+          url: "/dashboard/client/trusts",
+        },
+      ],
     },
     {
       title: "Staffs",

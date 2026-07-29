@@ -15,14 +15,28 @@ const statusPillVariants = cva(
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground [&>svg]:text-foreground [&>svg]:fill-foreground before:bg-foreground",
         warning:
           "before:bg-warning [&>svg]:text-warning [&>svg]:fill-warning before:bg-warning bg-warning/10 border-warning/10 text-yellow-700",
+        // Text colours are a darker step than the brand token, because the
+        // brand hue on its own 10% tint is too light to read — measured on a
+        // white surface (docs/65 Step 70): info was 2.75:1, below the 3:1
+        // floor. The dot (`before:`) and any icon keep the true brand colour,
+        // so identity is unchanged; only the label is darkened. This is the
+        // same trick the `warning` variant already used with yellow-700.
         success:
-          "before:bg-success [&>svg]:text-success [&>svg]:fill-success before:bg-success bg-success/10 border-success/10 text-success",
-        info: "before:bg-info [&>svg]:text-info [&>svg]:fill-info before:bg-info bg-info/10 border-info/10 text-info",
+          "before:bg-success [&>svg]:text-success [&>svg]:fill-success bg-success/10 border-success/20 text-green-700",
+        info: "before:bg-info [&>svg]:text-info [&>svg]:fill-info bg-info/10 border-info/20 text-cyan-800",
         danger:
-          "before:bg-danger [&>svg]:text-danger [&>svg]:fill-danger before:bg-danger bg-danger/10 border-danger/10 text-danger",
-        dark: "border-transparent bg-dark text-white [a&]:hover:bg-dark/90 [&>svg]:text-dark [&>svg]:fill-dark before:bg-dark bg-dark/10 border-dark/10 text-dark",
+          "before:bg-danger [&>svg]:text-danger [&>svg]:fill-danger bg-danger/10 border-danger/20 text-pink-700",
+        // `dark` and `muted` previously listed conflicting utilities in one
+        // string — `bg-dark text-white … bg-dark/10 … text-dark`. Tailwind
+        // keeps the LAST of each conflicting pair, so they resolved to
+        // text-dark on bg-dark/10 and, worse, text-muted on bg-muted/10.
+        // `--muted` is oklch(0.97) — near-white — so the muted pill was
+        // near-white text on a near-white tint, i.e. invisible. That is what
+        // hid the "Draft" review status in the register (docs/65 Step 70).
+        // Both now name one background and one readable foreground.
+        dark: "border-dark/20 bg-dark/10 text-dark [&>svg]:text-dark [&>svg]:fill-dark before:bg-dark",
         muted:
-          "border-transparent bg-muted text-white [a&]:hover:bg-muted/90 [&>svg]:text-muted [&>svg]:fill-muted before:bg-muted bg-muted/10 border-muted/10 text-muted",
+          "border-border bg-muted text-muted-foreground [&>svg]:text-muted-foreground [&>svg]:fill-muted-foreground before:bg-muted-foreground",
       },
     },
     defaultVariants: {
