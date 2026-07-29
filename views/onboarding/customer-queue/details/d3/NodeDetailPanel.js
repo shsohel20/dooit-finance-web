@@ -4,6 +4,10 @@ export default function NodeDetailPanel({ node, onClose }) {
   const color = getRiskColor(node.riskRating);
   return (
     <div
+      style={{
+        left: node.x,
+        top: node.y,
+      }}
       className="absolute top-4 right-4 w-72 bg-[#1a1d2e] border border-white/10
                     rounded-xl p-4 shadow-2xl text-sm text-slate-200 z-10"
     >

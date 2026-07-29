@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { getCustomerRelationsGraph } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 import { transformToGraph } from "./d3/lib/transformgraphData";
 import NetworkGraph from "./d3/Networkgraph";
+import NodeDetailPanel from "./d3/NodeDetailPanel";
 const FILTERS = [
   // { mode: "all", label: "All", icon: Network },
   { mode: "relations", label: "Relations", icon: Users },
@@ -148,6 +149,9 @@ export function RelationsTree({ details }) {
                   /> */}
                   {/* <D3Canvas /> */}
                   <NetworkGraph data={graphData} onNodeClick={setSelected} />
+                  {selected && (
+                    <NodeDetailPanel node={selected} onClose={() => setSelected(null)} />
+                  )}
                 </div>
               </div>
             </div>

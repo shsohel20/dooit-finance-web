@@ -80,7 +80,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
           .id((d) => d.id)
           .distance((d) => {
             const target = d.target;
-            return target.depth === 1 ? 150 : target.depth === 2 ? 110 : 80;
+            return target.depth === 1 ? 450 : target.depth === 2 ? 310 : 250;
           })
           .strength(0.5),
       )
@@ -119,7 +119,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
         ctx.moveTo(s.x, s.y);
         ctx.lineTo(tg.x, tg.y);
         ctx.strokeStyle = color + "50"; // 10 is the opacity
-        ctx.lineWidth = 0.8;
+        ctx.lineWidth = link.edgeOpacity ?? 0.4;
         ctx.stroke();
       }
 

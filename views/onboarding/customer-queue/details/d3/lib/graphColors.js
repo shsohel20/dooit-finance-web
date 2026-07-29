@@ -7,10 +7,12 @@ export const RISK_COLORS = {
 
 export const RELATION_COLORS = {
   FAMILY: "#a78bfa", // purple
-  TRANSACTIONAL: "#34d399", // green
-  OWNERSHIP: "#60a5fa", // blue
-  BUSINESS: "#f97316", // orange
-  UNKNOWN: "#4b5563",
+  // TRANSACTIONAL: "#34d399", // green
+  TRANSACTIONAL_INCOMING: "#34d399", // green
+  TRANSACTIONAL_OUTGOING: "#ef4444", // red
+  OWNERSHIP: "#a78bfa", // blue
+  BUSINESS: "#a78bfa", // orange
+  UNKNOWN: "#a78bfa",
 };
 
 export function getRiskColor(risk) {
