@@ -118,7 +118,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
         ctx.beginPath();
         ctx.moveTo(s.x, s.y);
         ctx.lineTo(tg.x, tg.y);
-        ctx.strokeStyle = color + "140";
+        ctx.strokeStyle = color + "50"; // 10 is the opacity
         ctx.lineWidth = 0.8;
         ctx.stroke();
       }
@@ -139,10 +139,6 @@ export default function NetworkGraph({ data, onNodeClick }) {
           grad.addColorStop(1, "transparent");
           ctx.beginPath();
           ctx.arc(node.x, node.y, r + 18, 0, Math.PI * 2);
-          const iconSize = 30;
-          // const svgImage = getPartyIcon(node.partyType);
-
-          // Center SVG inside the circle
           ctx.fillStyle = grad;
           ctx.fill();
         }
@@ -150,13 +146,20 @@ export default function NetworkGraph({ data, onNodeClick }) {
         // Circle fill
         ctx.beginPath();
         ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = isRoot ? "#006045" : "#A65F00";
+        ctx.fillStyle = isRoot ? "#FFDF20" : "#ECFCCA";
         ctx.fill();
 
         // Border
         ctx.strokeStyle = isHovered ? "#ffffff" : color;
         ctx.lineWidth = isRoot ? 2.5 : isHovered ? 2 : 1;
         ctx.stroke();
+
+        // Party type icon (centered in circle)
+        const icon = getPartyIcon(node.partyType);
+        ctx.font = `${isRoot ? 28 : 22}px system-ui`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(icon, node.x, node.y);
 
         // Inner ring on root
         if (isRoot) {
@@ -167,22 +170,13 @@ export default function NetworkGraph({ data, onNodeClick }) {
           ctx.stroke();
         }
 
-        // Label
+        // Label below node
         ctx.fillStyle = "#171717";
         ctx.font = isRoot ? "bold 11px system-ui" : "9.5px system-ui";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-
-        if (isRoot) {
-          const words = node.label.split(" ");
-          const mid = Math.ceil(words.length / 2);
-          ctx.fillStyle = "#f1f5f9";
-          ctx.fillText(words.slice(0, mid).join(" "), node.x, node.y - 5);
-          ctx.fillText(words.slice(mid).join(" "), node.x, node.y + 7);
-        } else {
-          const label = node.label.length > 13 ? node.label.slice(0, 12) + "…" : node.label;
-          ctx.fillText(label, node.x, node.y + r + 11);
-        }
+        const label = node.label.length > 13 ? node.label.slice(0, 12) + "…" : node.label;
+        ctx.fillText(label, node.x, node.y + r + 11);
       }
 
       ctx.restore();
