@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import * as d3 from "d3";
 import { getEdgeColor, getRiskColor } from "./lib/graphColors";
+import { getPartyIcon } from "./lib/icon";
 
 const NODE_RADIUS = 28;
 
@@ -39,6 +40,10 @@ export default function NetworkGraph({ data, onNodeClick }) {
   const hoveredRef = useRef(null);
   // Track whether a drag moved enough to suppress the click handler
   const didDragRef = useRef(false);
+
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const startTransformRef = useRef({ x: 0, y: 0 });
 
   // ── 1. Simulation + draw loop ──────────────────────────────────────────────
   useEffect(() => {
@@ -96,8 +101,8 @@ export default function NetworkGraph({ data, onNodeClick }) {
       ctx.clearRect(0, 0, W, H);
 
       // Background
-      //white
-      ctx.fillStyle = "#121212";
+
+      ctx.fillStyle = "#f5f5f5";
       ctx.fillRect(0, 0, W, H);
 
       ctx.translate(t.x, t.y);
@@ -113,7 +118,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
         ctx.beginPath();
         ctx.moveTo(s.x, s.y);
         ctx.lineTo(tg.x, tg.y);
-        ctx.strokeStyle = color + "40";
+        ctx.strokeStyle = color + "140";
         ctx.lineWidth = 0.8;
         ctx.stroke();
       }
@@ -134,6 +139,10 @@ export default function NetworkGraph({ data, onNodeClick }) {
           grad.addColorStop(1, "transparent");
           ctx.beginPath();
           ctx.arc(node.x, node.y, r + 18, 0, Math.PI * 2);
+          const iconSize = 30;
+          // const svgImage = getPartyIcon(node.partyType);
+
+          // Center SVG inside the circle
           ctx.fillStyle = grad;
           ctx.fill();
         }
@@ -141,7 +150,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
         // Circle fill
         ctx.beginPath();
         ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = isRoot ? "#1a1e30" : "#111526";
+        ctx.fillStyle = isRoot ? "#006045" : "#A65F00";
         ctx.fill();
 
         // Border
@@ -159,7 +168,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
         }
 
         // Label
-        ctx.fillStyle = "#94a3b8";
+        ctx.fillStyle = "#171717";
         ctx.font = isRoot ? "bold 11px system-ui" : "9.5px system-ui";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -285,16 +294,34 @@ export default function NetworkGraph({ data, onNodeClick }) {
   // ── 4. Hover ──────────────────────────────────────────────────────────────
   const handleMouseMove = useCallback(
     (e) => {
-      const rect = canvasRef.current.getBoundingClientRect();
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      // If currently dragging, pan the canvas
+      if (isDraggingRef.current) {
+        const dx = e.clientX - dragStartRef.current.x;
+        const dy = e.clientY - dragStartRef.current.y;
+
+        transformRef.current.x = startTransformRef.current.x + dx;
+        transformRef.current.y = startTransformRef.current.y + dy;
+
+        return;
+      }
+
+      // Otherwise, handle hover
+      const rect = canvas.getBoundingClientRect();
+
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
+
       const found = getNodeAt(data.nodes, cx, cy, transformRef.current);
+
       hoveredRef.current = found;
-      canvasRef.current.style.cursor = found ? "pointer" : "grab";
+
+      canvas.style.cursor = found ? "pointer" : "grab";
     },
     [data],
   );
-
   // ── 5. Click ──────────────────────────────────────────────────────────────
   const handleClick = useCallback(
     (e) => {
@@ -311,6 +338,26 @@ export default function NetworkGraph({ data, onNodeClick }) {
     },
     [data, onNodeClick],
   );
+  const handleMouseDown = useCallback((e) => {
+    isDraggingRef.current = true;
+
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+    };
+
+    startTransformRef.current = {
+      x: transformRef.current.x,
+      y: transformRef.current.y,
+    };
+
+    canvasRef.current.style.cursor = "grabbing";
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isDraggingRef.current = false;
+    canvasRef.current.style.cursor = "grab";
+  }, []);
 
   return (
     <div ref={containerRef} className="w-full h-[80vh] overflow-hidden">
@@ -319,6 +366,8 @@ export default function NetworkGraph({ data, onNodeClick }) {
         className="block w-full h-full"
         onMouseMove={handleMouseMove}
         onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
       />
     </div>
   );
