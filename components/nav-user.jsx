@@ -28,10 +28,17 @@ import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export function NavUser({ user }) {
-
-  console.log(user)
   const { isMobile } = useSidebar();
   const router = useRouter();
+
+  const initials =
+    (user?.name || "")
+      .split(" ")
+      .filter(Boolean)
+      .map((w) => w[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "CN";
   const logout = async () => {
     signOut({
       // redirect: true,
@@ -49,7 +56,7 @@ export function NavUser({ user }) {
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user?.name}</span>

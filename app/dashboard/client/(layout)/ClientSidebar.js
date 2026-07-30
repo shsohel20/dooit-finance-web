@@ -73,10 +73,24 @@ export default function ClientSidebar({ ...props }) {
       icon: IconUsers,
       url: "/dashboard/client/onboarding/customer-queue",
     },
+    // Company and Trust are both KYB entity registers, so they nest under a
+    // single "Business" parent rather than sitting as siblings of Customers
+    // (docs/65 Step 63).
     {
-      title: "Companies",
+      title: "Business",
       icon: IconBuilding,
-      url: "/dashboard/client/companies",
+      children: [
+        {
+          title: "Company",
+          icon: IconBuildingBank,
+          url: "/dashboard/client/companies",
+        },
+        {
+          title: "Trust",
+          icon: IconCirclesRelation,
+          url: "/dashboard/client/trusts",
+        },
+      ],
     },
   ];
   const onBoardingMenuItems = [
@@ -86,9 +100,20 @@ export default function ClientSidebar({ ...props }) {
       url: "/dashboard/client",
     },
     {
-      title: "Companies",
+      title: "Business",
       icon: IconBuilding,
-      url: "/dashboard/client/companies",
+      children: [
+        {
+          title: "Company",
+          icon: IconBuildingBank,
+          url: "/dashboard/client/companies",
+        },
+        {
+          title: "Trust",
+          icon: IconCirclesRelation,
+          url: "/dashboard/client/trusts",
+        },
+      ],
     },
     {
       title: "Staffs",
@@ -149,6 +174,11 @@ export default function ClientSidebar({ ...props }) {
           title: "Customer Risk Assessment",
           url: "/dashboard/client/risk-assessment",
           icon: IconUrgent,
+        },
+        {
+          title: "Risk Registers",
+          url: "/dashboard/client/risk-assessment/risk-registers",
+          icon: IconListDetails,
         },
       ],
     },
@@ -596,7 +626,22 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={watchlistAndScreeningMenuItems} label="Watchlist & Screening" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={session.data?.user} />
+        <NavUser
+          user={{
+            name:
+              loggedInUser?.client?.name ||
+              loggedInUser?.name ||
+              session.data?.user?.name,
+            email:
+              loggedInUser?.client?.email ||
+              loggedInUser?.email ||
+              session.data?.user?.email,
+            avatar:
+              loggedInUser?.client?.settings?.logo ||
+              loggedInUser?.photoUrl ||
+              session.data?.user?.image,
+          }}
+        />
       </SidebarFooter>
     </Sidebar>
   );

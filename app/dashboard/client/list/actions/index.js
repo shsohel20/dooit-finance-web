@@ -40,3 +40,19 @@ export const updateClient = async (id, clientData) => {
   })
   return response.json();
 }
+
+export const sendClientWelcomeEmail = async (id) => {
+  const response = await fetchWithAuth(`client/${id}/send-welcome`, {
+    method: 'POST',
+    body: JSON.stringify({})
+  })
+  return response.json();
+}
+
+export const sendClientPasswordReset = async (id) => {
+  const response = await fetchWithAuth(`client/${id}/send-password-reset`, {
+    method: 'POST',
+    body: JSON.stringify({})
+  })
+  return response.json();
+}

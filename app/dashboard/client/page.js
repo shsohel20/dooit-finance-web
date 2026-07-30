@@ -3,6 +3,7 @@
 import useGetUser from "@/hooks/useGetUser";
 import ClientDashboardPage from "@/views/client-dashboard/dashboard";
 import CryptoCurrencyDashboard from "@/views/crypto-currency/dashboard";
+import LawyerConveyancerDashboard from "@/views/lawyer-conveyancer/dashboard";
 import PreciousMetalDashboard from "@/views/precious-metal/dashboard";
 import RealEstateDashboard from "@/views/real-estate/dashboard";
 import React, { useEffect, useState } from "react";
@@ -52,7 +53,9 @@ export default function DashboardClientPage() {
   const isRealState = matchesEntity("Real Estate");
   const isPreciousMetal = matchesEntity("Precious Metal Dealers");
   const isCrypto = matchesEntity("VASP/DCEP");
-  const hasMatchedDashboard = isFinancial || isRealState || isPreciousMetal || isCrypto;
+  const isLawyer = matchesEntity("Lawyers/Conveyancers");
+  const hasMatchedDashboard =
+    isFinancial || isRealState || isPreciousMetal || isCrypto || isLawyer;
 
  
 
@@ -70,6 +73,7 @@ export default function DashboardClientPage() {
       {isFinancial && <ClientDashboardPage />}
       {isPreciousMetal && <PreciousMetalDashboard />}
       {isCrypto && <CryptoCurrencyDashboard />}
+      {isLawyer && <LawyerConveyancerDashboard />}
       {/* Fallback so the page is never blank when no specific entity type matches */}
       {!hasMatchedDashboard && <ClientDashboardPage />}
     </div>

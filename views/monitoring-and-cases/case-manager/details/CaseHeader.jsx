@@ -1,70 +1,47 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { StatusPill } from "@/components/ui/StatusPill";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   IconArrowLeft,
-  IconArrowRight,
-  IconPennant,
+  IconUserCheck,
+  IconMessageCircle,
+  IconAlertOctagon,
+  IconGavel,
+  IconBan,
+  IconDots,
+  IconPrinter,
+  IconFileExport,
+  IconCopy,
+  IconRotateClockwise,
   IconCalendar,
-  IconChevronRight,
-  IconLoader2,
-  IconFileReport,
-  IconCheck,
-  IconCoin,
+  IconRefresh,
 } from "@tabler/icons-react";
-import { cn, dateShowFormat } from "@/lib/utils";
+import { dateShowFormatWithTime, getInitials } from "@/lib/utils";
+import RiskScoreGauge from "./components/RiskScoreGauge";
+import SlaCountdown from "./components/SlaCountdown";
+import ReasonAlertDialog from "./components/ReasonAlertDialog";
 
-const fmtAUD = (v) =>
-  v == null
-    ? "—"
-    : new Intl.NumberFormat("en-AU", {
-        style: "currency",
-        currency: "AUD",
-        maximumFractionDigits: 0,
-      }).format(v);
-import {
-  updateCaseStatus,
-  fileSAR,
-} from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
-
-const STATUS_TRANSITIONS = {
-  open: ["under_investigation"],
-  under_investigation: ["pending_review"],
-  pending_review: ["closed", "escalated"],
-  closed: [],
-  escalated: [],
-};
-
-const STATUS_LABELS = {
-  open: "Open",
-  under_investigation: "Under Investigation",
-  pending_review: "Pending Review",
-  closed: "Closed",
-  escalated: "Escalated",
-};
-
+// Keyed lowercase to match the Case model enums
+// (low | medium | high | critical). Values are normalised before lookup so
+// Title-case values from the mock fixtures still resolve.
 const priorityVariants = {
-  low: "info",
-  medium: "warning",
-  high: "danger",
-  critical: "dark",
+  critical: "danger",
+  high: "warning",
+  medium: "info",
+  low: "outline",
 };
 
 const statusVariants = {
@@ -75,262 +52,226 @@ const statusVariants = {
   escalated: "danger",
 };
 
-const priorityHeaderBg = {
-  low: "from-blue-50 to-cyan-50 border-blue-100",
-  medium: "from-yellow-50 to-amber-50 border-yellow-100",
-  high: "from-red-50 to-orange-50 border-red-100",
-  critical: "from-gray-900/5 to-gray-800/5 border-gray-300",
+const STATUS_LABELS = {
+  open: "Open",
+  under_investigation: "Under Investigation",
+  pending_review: "Pending Review",
+  closed: "Closed",
+  escalated: "Escalated",
 };
 
-export default function CaseHeader({ caseData, onCaseUpdate }) {
+export default function CaseHeader({
+  caseData,
+  status,
+  priority,
+  assignedAnalyst,
+  onOpenAssign,
+  onOpenRFI,
+  onEscalate,
+  onGenerateSTR,
+  onCloseCase,
+  onReopenCase,
+}) {
   const router = useRouter();
-  const [transitioning, setTransitioning] = useState(false);
-  const [sarSubmitting, setSarSubmitting] = useState(false);
-  // confirm = { toStatus } | null
-  const [confirm, setConfirm] = useState(null);
-  const [closureReason, setClosureReason] = useState("");
 
   if (!caseData) return null;
 
-  const nextStatuses = STATUS_TRANSITIONS[caseData.status] || [];
-
-  const doTransition = async (toStatus) => {
-    setTransitioning(true);
-    try {
-      const res = await updateCaseStatus(caseData._id, toStatus, closureReason.trim() || undefined);
-      if (res?.succeed) {
-        onCaseUpdate?.({
-          ...caseData,
-          status: toStatus,
-          closureReason: closureReason.trim() || caseData.closureReason,
-        });
-      }
-    } finally {
-      setTransitioning(false);
-      setConfirm(null);
-      setClosureReason("");
-    }
-  };
-
-  const handleTransitionClick = (toStatus) => {
-    if (toStatus === "closed" || toStatus === "escalated") {
-      setConfirm({ toStatus });
-    } else {
-      doTransition(toStatus);
-    }
-  };
-
-  const handleFileSAR = async () => {
-    setSarSubmitting(true);
-    try {
-      const res = await fileSAR(caseData._id);
-      if (res?.succeed) {
-        onCaseUpdate?.({ ...caseData, sarFiled: true, sarFiledAt: new Date().toISOString() });
-      }
-    } finally {
-      setSarSubmitting(false);
-    }
-  };
+  const statusKey = String(status ?? "").toLowerCase();
+  const priorityKey = String(priority ?? "").toLowerCase();
+  const isClosed = statusKey === "closed";
 
   return (
-    <>
-      <div
-        className={cn(
-          "rounded-xl border bg-gradient-to-r p-5 shadow-sm",
-          priorityHeaderBg[caseData.priority] || "from-gray-50 to-slate-50 border-border",
-        )}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 gap-1.5 text-xs px-2"
-            onClick={() => router.push("/dashboard/client/monitoring-and-cases/case-manager")}
-          >
-            <IconArrowLeft className="size-3.5" />
-            Back to Cases
-          </Button>
+    <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 gap-1.5 text-xs px-2"
+          onClick={() => router.push("/dashboard/client/monitoring-and-cases/case-manager")}
+        >
+          <IconArrowLeft className="size-3.5" />
+          Back to Cases
+        </Button>
+      </div>
 
-          {/* SAR badge / button */}
-          {caseData.sarFiled ? (
-            <Badge variant="secondary" className="gap-1 text-xs">
-              <IconCheck className="size-3" />
-              SAR Filed
-            </Badge>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 gap-1 text-xs"
-              disabled={sarSubmitting}
-              onClick={handleFileSAR}
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        {/* Left: identity */}
+        <div className="flex flex-col gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded border bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-heading">
+              {caseData.displayId || caseData.uid}
+            </span>
+            <StatusPill variant={statusVariants[statusKey] || "outline"}>
+              {STATUS_LABELS[statusKey] || status}
+            </StatusPill>
+            <StatusPill
+              icon={<IconAlertOctagon />}
+              variant={priorityVariants[priorityKey] || "outline"}
             >
-              {sarSubmitting ? (
-                <IconLoader2 className="size-3 animate-spin" />
-              ) : (
-                <IconFileReport className="size-3" />
-              )}
-              File SAR
-            </Button>
-          )}
+              <span className="capitalize">{priority}</span> Priority
+            </StatusPill>
+            <Badge variant="outline" className="text-xs capitalize">
+              {caseData.customerType}
+            </Badge>
+          </div>
+          <h1 className="text-xl font-bold text-heading">{caseData.title || caseData.caseName}</h1>
+          <p className="text-xs text-muted-foreground">
+            {caseData.customerName || caseData.customer?.name} ·{" "}
+            <span className="capitalize">
+              {(caseData.caseType || caseData.type || "").replace("_", " ")}
+            </span>
+          </p>
         </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-bold text-heading">{caseData.title}</h1>
-              <StatusPill icon={<IconPennant />} variant={priorityVariants[caseData.priority]}>
-                <span className="capitalize">{caseData.priority}</span>
-              </StatusPill>
-              <StatusPill variant={statusVariants[caseData.status]}>
-                {STATUS_LABELS[caseData.status] || caseData.status}
-              </StatusPill>
-              {/* Alert source count */}
-              {caseData.linkedAlerts?.length > 0 && (
-                <Badge variant="outline" className="text-xs gap-1">
-                  {caseData.linkedAlerts.length} linked alert
-                  {caseData.linkedAlerts.length !== 1 ? "s" : ""}
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              {caseData.type && (
-                <span className="font-mono text-xs font-medium text-heading bg-white/60 px-2 py-0.5 rounded border capitalize">
-                  {caseData.type.replace("_", " ")}
-                </span>
-              )}
-              {caseData.riskScore != null && (
-                <span className="text-xs text-muted-foreground">
-                  Risk score:{" "}
-                  <span className="font-semibold text-heading">{caseData.riskScore}</span>
-                </span>
-              )}
-              {caseData.description && (
-                <p className="text-xs text-muted-foreground max-w-lg line-clamp-2">
-                  {caseData.description}
-                </p>
-              )}
-            </div>
-
-            {caseData.closureReason && (
-              <p className="text-xs text-muted-foreground italic">
-                Closure reason: {caseData.closureReason}
-              </p>
-            )}
+        {/* Right: risk, sla, investigator, dates */}
+        <div className="flex flex-col gap-3 shrink-0 xl:items-end">
+          <div className="flex items-center gap-4">
+            <RiskScoreGauge score={caseData.riskScore} label="Risk Score" />
+            <div className="h-10 w-px bg-border" />
+            <SlaCountdown deadline={caseData.slaDeadline} className="text-sm" />
           </div>
-
-          <div className="flex flex-col gap-2 text-sm shrink-0">
-            {/* Maker → checker (four-eyes) */}
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <span className="text-[10px] uppercase tracking-wide">Review</span>
-              <div className="flex items-center gap-1">
-                {caseData.assignedTo ? (
-                  <Avatar className="h-6 w-6 border-2 border-white" title={caseData.assignedTo.name}>
-                    <AvatarImage src={caseData.assignedTo.avatar} />
-                    <AvatarFallback className="text-[8px]">
-                      {caseData.assignedTo.name?.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <span className="text-xs">Unassigned</span>
-                )}
-                <IconArrowRight className="size-3" />
-                {caseData.reviewer ? (
-                  <Avatar className="h-6 w-6 border-2 border-white" title={caseData.reviewer.name}>
-                    <AvatarImage src={caseData.reviewer.avatar} />
-                    <AvatarFallback className="text-[8px]">
-                      {caseData.reviewer.name?.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <span className="text-xs">No reviewer</span>
-                )}
-              </div>
+          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground xl:justify-end">
+            <div className="flex items-center gap-1.5">
+              <Avatar className="size-5">
+                <AvatarFallback className="bg-primary/10 text-[0.6rem] font-semibold text-primary">
+                  {getInitials(assignedAnalyst)}
+                </AvatarFallback>
+              </Avatar>
+              <span>
+                Investigator:{" "}
+                <span className="font-semibold text-heading">{assignedAnalyst || "Unassigned"}</span>
+              </span>
             </div>
-
-            {caseData.netActivity != null && (
-              <div className="flex items-center gap-2 text-muted-foreground text-xs">
-                <IconCoin className="size-4 shrink-0" />
-                Net activity:{" "}
-                <span className="font-semibold text-heading">{fmtAUD(caseData.netActivity)}</span>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <IconCalendar className="size-4 shrink-0" />
-              <span className="text-xs">
+            <div className="flex items-center gap-1.5">
+              <IconCalendar className="size-3.5" />
+              <span>
                 Created:{" "}
                 <span className="font-semibold text-heading">
-                  {dateShowFormat(caseData.createdAt)}
+                  {dateShowFormatWithTime(caseData.createdDate || caseData.createdAt)}
                 </span>
               </span>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground text-xs">
-              By:{" "}
-              <span className="font-semibold text-heading">{caseData.createdBy?.name || "—"}</span>
+            <div className="flex items-center gap-1.5">
+              <IconRefresh className="size-3.5" />
+              <span>
+                Updated:{" "}
+                <span className="font-semibold text-heading">
+                  {dateShowFormatWithTime(caseData.lastUpdated || caseData.updatedAt)}
+                </span>
+              </span>
             </div>
           </div>
         </div>
-
-        {/* Status transition buttons */}
-        {nextStatuses.length > 0 && (
-          <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-3">
-            <span className="text-xs text-muted-foreground">Move to:</span>
-            {nextStatuses.map((s) => (
-              <Button
-                key={s}
-                size="sm"
-                variant="outline"
-                className="h-7 gap-1 text-xs"
-                disabled={transitioning}
-                onClick={() => handleTransitionClick(s)}
-              >
-                {transitioning ? (
-                  <IconLoader2 className="size-3 animate-spin" />
-                ) : (
-                  <IconChevronRight className="size-3" />
-                )}
-                {STATUS_LABELS[s]}
-              </Button>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Confirm close / escalate with optional reason */}
-      <AlertDialog open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {confirm?.toStatus === "closed" ? "Close Case" : "Escalate Case"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {confirm?.toStatus === "closed"
-                ? "This will mark the case as Closed."
-                : "This will escalate the case to senior review / regulator."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+      {/* Action bar */}
+      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <Button size="sm" className="h-8 gap-1.5 text-xs" onClick={onOpenAssign}>
+          <IconUserCheck className="size-3.5" />
+          Assign Case
+        </Button>
+        <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={onOpenRFI}>
+          <IconMessageCircle className="size-3.5" />
+          Request Information
+        </Button>
 
-          <div className="space-y-1.5 px-1">
-            <Label className="text-xs font-medium">Reason (optional)</Label>
-            <Textarea
-              rows={3}
-              className="resize-none text-sm"
-              placeholder="Describe the reason for this decision..."
-              value={closureReason}
-              onChange={(e) => setClosureReason(e.target.value)}
-            />
-          </div>
+        <ReasonAlertDialog
+          trigger={
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+                <IconAlertOctagon className="size-3.5" />
+                Escalate
+              </Button>
+            </AlertDialogTrigger>
+          }
+          title="Escalate this case"
+          description="This raises the case priority and notifies the compliance lead. Provide a reason for the audit trail."
+          actionLabel="Escalate Case"
+          onConfirm={(reason) => {
+            onEscalate?.(reason);
+            toast.success("Case escalated to Critical priority");
+          }}
+        />
 
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setClosureReason("")}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => doTransition(confirm.toStatus)}>
-              Confirm
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+        <ReasonAlertDialog
+          trigger={
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+                <IconGavel className="size-3.5" />
+                Generate STR/SAR
+              </Button>
+            </AlertDialogTrigger>
+          }
+          title="Generate STR/SAR draft"
+          description="A draft Suspicious Transaction/Activity Report will be created from this case's evidence for compliance review."
+          actionLabel="Generate Draft"
+          onConfirm={(reason) => {
+            onGenerateSTR?.(reason);
+            toast.success("STR/SAR draft created");
+          }}
+        />
+
+        {isClosed ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            onClick={() => {
+              onReopenCase?.();
+              toast.success("Case reopened");
+            }}
+          >
+            <IconRotateClockwise className="size-3.5" />
+            Reopen Case
+          </Button>
+        ) : (
+          <ReasonAlertDialog
+            destructive
+            trigger={
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-1.5 text-xs text-danger hover:text-danger"
+                >
+                  <IconBan className="size-3.5" />
+                  Close Case
+                </Button>
+              </AlertDialogTrigger>
+            }
+            title="Close this case"
+            description="This marks the investigation as closed. You can reopen it later if new evidence emerges."
+            actionLabel="Close Case"
+            onConfirm={(reason) => {
+              onCloseCase?.(reason);
+              toast.success("Case closed");
+            }}
+          />
+        )}
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon-sm" className="ml-auto">
+              <IconDots className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => toast.info("Sending to printer...")}>
+              <IconPrinter className="size-4" />
+              Print Case Summary
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => toast.success("Case PDF export queued")}>
+              <IconFileExport className="size-4" />
+              Export Case PDF
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => toast.info("Case duplicated as a new investigation")}>
+              <IconCopy className="size-4" />
+              Duplicate Case
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 }

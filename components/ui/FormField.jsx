@@ -158,6 +158,10 @@ export function FormField({
           />
         )}
       />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
     </div>
   );
 }

@@ -13,7 +13,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IconBrandTelegram } from "@tabler/icons-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { IconBrandTelegram, IconUserPlus } from "@tabler/icons-react";
+import Link from "next/link";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,19 +40,38 @@ export default function CustomerQueueHeader() {
           <PageTitle>Customer Queue</PageTitle>
           <PageDescription>Manage and track all your customers</PageDescription>
         </PageHeader>
-        <Button size={"sm"} className={"text-xs"} onClick={() => setOpen(true)}>
-          <IconBrandTelegram /> Send Invite
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size={"sm"} variant={"outline"} className={"text-xs"} asChild>
+            <Link href="/dashboard/client/onboarding/customer-queue/manual-import">
+              <IconUserPlus /> Add Customer
+            </Link>
+          </Button>
+          <Button size={"sm"} className={"text-xs"} onClick={() => setOpen(true)}>
+            <IconBrandTelegram /> Send Invite
+          </Button>
+        </div>
       </div>
       <InvitationForm open={open} setOpen={setOpen} />
     </>
   );
 }
 
+// Matches the relationType allowlist in createInvite (api/controllers/customerController.js).
+const RELATION_TYPES = [
+  ["individual", "Individual"],
+  ["company", "Company"],
+  ["trust", "Trust"],
+  ["partnership", "Partnership"],
+  ["government_body", "Government Body"],
+  ["association", "Association"],
+  ["cooperative", "Cooperative"],
+];
+
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone is required"),
   notes: z.string(),
+  relationType: z.string().min(1, "Entity type is required"),
 });
 const InvitationForm = ({ open, setOpen }) => {
   const session = useSession();
@@ -52,6 +79,7 @@ const InvitationForm = ({ open, setOpen }) => {
     email: "",
     phone: "",
     notes: "",
+    relationType: "individual",
   };
 
   const [formData, setFormData] = useState(initialValues);
@@ -75,6 +103,7 @@ const InvitationForm = ({ open, setOpen }) => {
       client: session.data?.user?.id,
       notes: data.notes,
       source: "in-branch",
+      relationType: data.relationType,
     };
     console.log("dta", JSON.stringify(modifiedData, null, 2));
     const response = await sendInvite(modifiedData);
@@ -130,6 +159,31 @@ const InvitationForm = ({ open, setOpen }) => {
                 </div>
               )}
             />
+            <Controller
+              control={control}
+              name="relationType"
+              render={({ field }) => (
+                <div className="grid gap-2">
+                  <Label htmlFor="send-invite-relation-type">Register as</Label>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="send-invite-relation-type">
+                      <SelectValue placeholder="Select entity type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {RELATION_TYPES.map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.relationType?.message && (
+                    <p className="text-xs text-destructive">{errors.relationType.message}</p>
+                  )}
+                </div>
+              )}
+            />
+
             <Controller
               control={control}
               name="notes"

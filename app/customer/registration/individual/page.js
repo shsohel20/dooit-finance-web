@@ -220,7 +220,9 @@ const CustomerRegistration = () => {
                 setVerifiedMsg={setVerifiedMsg}
               />
             )} */}
-            {currentStep === 1 && <PersonalInfo control={control} errors={errors} />}
+            {currentStep === 1 && (
+              <PersonalInfo control={control} errors={errors} setValue={setValue} />
+            )}
             {currentStep === 2 && (
               <OtherInfo control={control} errors={errors} setValue={setValue} />
             )}

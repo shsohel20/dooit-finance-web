@@ -10,6 +10,8 @@ import { Osiint } from "@/views/onboarding/customer-queue/details/Osiint";
 import { Transactions } from "@/views/onboarding/customer-queue/details/Transactions";
 import useGetUser from "@/hooks/useGetUser";
 import RelationGraph from "@/views/onboarding/customer-queue/details/relation-graph";
+import KycExportButton from "@/components/KycExportButton";
+import KycStatusButton from "@/components/KycStatusButton";
 
 export default function CustomerQueueDetails() {
   const id = useSearchParams().get("id");
@@ -39,26 +41,34 @@ export default function CustomerQueueDetails() {
   return (
     <div>
       <Tabs defaultValue="details">
-        <TabsList>
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="relations">Relations</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="osint">OSINT</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <TabsList>
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="relations">Relations</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="osint">OSINT</TabsTrigger>
+          </TabsList>
+          <div className="flex items-center gap-2">
+            <KycStatusButton
+              customerId={id}
+              currentStatus={details?.kycStatus}
+              onUpdated={fetchDetails}
+            />
+            <KycExportButton customerId={id} />
+          </div>
+        </div>
         <TabsContent value="details">
-          <DetailViewModal details={details} fetching={fetching} />
+          <DetailViewModal details={details} fetching={fetching} onUpdated={fetchDetails} />
         </TabsContent>
         <TabsContent value="relations">
           <RelationsTree relations={details?.relations || []} details={details} />
-          {/* <RelationGraph details={details} /> */}
-          {/* <RelatedParty /> */}
         </TabsContent>
         <TabsContent value="documents">
-          <Documents documents={details} />
+          <Documents details={details} onUpdated={fetchDetails} />
         </TabsContent>
         <TabsContent value="osint">
-          <Osiint data={details?.osintReport} />
+          <Osiint data={details?.osintReport} details={details} />
         </TabsContent>
         <TabsContent value="transactions">
           <Transactions customerId={id} />

@@ -6,6 +6,7 @@ export const useCustomerStore = create((set) => ({
   currentPage: 1,
   limit: 10,
   kycStatus: '',
+  sort: '-createdAt',
   totalItems: 0,
   setFetching: (state) => set({ fetching: state }),
   setCurrentPage: (state) => set({ currentPage: state }),
@@ -13,4 +14,5 @@ export const useCustomerStore = create((set) => ({
   setTotalItems: (state) => set({ totalItems: state }),
   setCustomers: (state) => set({ customers: state }),
   setKycStatus: (state) => set({ kycStatus: state }),
+  setSort: (state) => set({ sort: state }),
 }));

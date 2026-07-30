@@ -1,6 +1,13 @@
 import { jwtDecode } from "jwt-decode";
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+
+class InvalidCredentialsError extends CredentialsSignin {
+  constructor(message) {
+    super();
+    this.code = message;
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -14,7 +21,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // userType: {},
       },
       authorize: async (credentials) => {
-        console.log("auth credentials", credentials);
         try {
           const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}auth/login`;
           const res = await fetch(url, {
@@ -24,20 +30,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
 
           const data = await res.json();
-          const decodedToken = jwtDecode(data?.token);
-          const user = {
-            ...decodedToken,
-            token: data.token,
-            role: decodedToken.role,
-            name: decodedToken.name,
-            email: decodedToken.email,
-            userType: decodedToken.userType,
-            id: decodedToken.id,
-          };
-          return user;
+
+          if (data.success) {
+            const decodedToken = jwtDecode(data?.token);
+            const user = {
+              ...decodedToken,
+              token: data.token,
+              role: decodedToken.role,
+              name: decodedToken.name,
+              email: decodedToken.email,
+              userType: decodedToken.userType,
+              id: decodedToken.id,
+            };
+            return user;
+          } else {
+            throw new InvalidCredentialsError(data.error);
+          }
         } catch (error) {
-          console.error("Login error:", error);
-          return null;
+          throw new InvalidCredentialsError(error.code);
         }
       },
     }),

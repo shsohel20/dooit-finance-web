@@ -18,6 +18,7 @@ import {
   Plus,
   Save,
   Camera,
+  Loader2,
 } from "lucide-react";
 import { useLoggedInUser } from "@/app/store/useLoggedInUser";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -64,18 +65,19 @@ export function ClientEditForm() {
         client: z.object({
           name: z.string().optional(),
           clientType: z.string().optional(),
+          clientTypeId: z.string().optional(),
           registrationNumber: z.string().optional(),
           taxId: z.string().optional(),
-          email: z.string().email("Invalid email address").optional(),
-          phone: z.string().min(1, "Phone is required").optional(),
-          website: z.string().url("Invalid website URL").optional(),
+          email: z.string().email("Invalid email address").optional().or(z.literal("")),
+          phone: z.string().optional(),
+          website: z.string().url("Invalid website URL").optional().or(z.literal("")),
           contacts: z
             .array(
               z.object({
                 name: z.string().optional(),
                 title: z.string().optional(),
-                email: z.string().email("Invalid email address").optional(),
-                phone: z.string().min(1, "Phone is required").optional(),
+                email: z.string().email("Invalid email address").optional().or(z.literal("")),
+                phone: z.string().optional(),
                 primary: z.boolean().optional(),
               }),
             )
@@ -93,17 +95,18 @@ export function ClientEditForm() {
             .object({
               name: z.string().optional(),
               designation: z.string().optional(),
-              email: z.string().email("Invalid email address").optional(),
-              phone: z.string().min(1, "Phone is required").optional(),
+              email: z.string().email("Invalid email address").optional().or(z.literal("")),
+              phone: z.string().optional(),
             })
             .optional(),
           documents: z
             .array(
               z.object({
                 name: z.string().optional(),
-                url: z.string().url("Invalid URL").optional(),
+                url: z.string().url("Invalid URL").optional().or(z.literal("")),
                 mimeType: z.string().optional(),
                 type: z.string().optional(),
+                uploadedAt: z.string().optional(),
               }),
             )
             .optional(),
@@ -139,6 +142,54 @@ export function ClientEditForm() {
     removeContact(index);
   };
 
+  const {
+    fields: documentFields,
+    append: appendDocument,
+    remove: removeDocument,
+  } = useFieldArray({
+    control: form.control,
+    name: "client.documents",
+  });
+
+  const docInputRef = useRef(null);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+
+  const handleDocUploadClick = () => {
+    docInputRef.current?.click();
+  };
+
+  const handleDocChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingDoc(true);
+    try {
+      const res = await fileUploadOnCloudinary(file);
+      const publicUrl = res?.file?.publicUrl;
+      if (res?.success && publicUrl) {
+        appendDocument({
+          name: file.name,
+          url: publicUrl,
+          mimeType: file.type || "application/octet-stream",
+          type: "other",
+          uploadedAt: new Date().toISOString(),
+        });
+        toast.success("Document uploaded");
+      } else {
+        throw new Error(res?.message || "Upload failed");
+      }
+    } catch (err) {
+      toast.error(err?.message || "Document upload failed");
+    } finally {
+      setUploadingDoc(false);
+      // allow re-selecting the same filename
+      e.target.value = "";
+    }
+  };
+
+  const removeDocumentItem = (index) => {
+    removeDocument(index);
+  };
+
   const onSubmit = async (data) => {
     const action = isClient ? updateClientProfile : isBranch ? updateBranchProfile : updateProfile;
     const id = isClient ? formData?.client?._id : formData?.id;
@@ -152,7 +203,7 @@ export function ClientEditForm() {
       if (response.success) {
         setLoggedInUser(response.data);
       }
-      router.push("/dashboard/client/list");
+      router.push("/dashboard/client/profile");
     } else {
       toast.error("Failed to update profile");
     }
@@ -221,7 +272,13 @@ export function ClientEditForm() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline">Cancel</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/dashboard/client/profile")}
+              >
+                Cancel
+              </Button>
               <Button className="gap-2" onClick={form.handleSubmit(onSubmit)}>
                 <Save className="h-4 w-4" />
                 Save Changes
@@ -276,7 +333,7 @@ export function ClientEditForm() {
                     form={form}
                     disabled={true}
                     type="select"
-                    options={entityTypes}
+                    options={entityTypes?.map((t) => ({ label: t.label, value: t.label }))}
                   />
                 </div>
 
@@ -330,7 +387,7 @@ export function ClientEditForm() {
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
                           <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                            {contact?.name
+                            {(contact?.name || "")
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
@@ -461,17 +518,37 @@ export function ClientEditForm() {
                     </CardTitle>
                     <CardDescription>Manage company documents and files</CardDescription>
                   </div>
-                  <Button size="sm" variant="outline" className="gap-2 bg-transparent">
-                    <Upload className="h-4 w-4" />
-                    Upload Document
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,image/*"
+                    hidden
+                    ref={docInputRef}
+                    onChange={handleDocChange}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 bg-transparent"
+                    onClick={handleDocUploadClick}
+                    disabled={uploadingDoc}
+                  >
+                    {uploadingDoc ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    {uploadingDoc ? "Uploading…" : "Upload Document"}
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {formData?.client?.documents?.map((doc, index) => (
+                  {documentFields.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
+                  )}
+                  {documentFields.map((doc, index) => (
                     <div
-                      key={index}
+                      key={doc.id}
                       className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
@@ -479,25 +556,37 @@ export function ClientEditForm() {
                           <FileText className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">{doc.name}</p>
+                          <p className="font-medium text-foreground">
+                            {doc.name || "Untitled document"}
+                          </p>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <Badge variant="outline" className="text-xs">
-                              {doc.type}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
-                            </span>
+                            {doc.type && (
+                              <Badge variant="outline" className="text-xs">
+                                {doc.type}
+                              </Badge>
+                            )}
+                            {doc.uploadedAt && (
+                              <span className="text-xs text-muted-foreground">
+                                Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={!doc.url}
+                          onClick={() => window.open(doc.url, "_blank", "noopener,noreferrer")}
+                        >
                           View
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => removeDocumentItem(index)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -507,15 +596,24 @@ export function ClientEditForm() {
                 </div>
 
                 {/* Upload Zone */}
-                <div className="mt-4 border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 hover:bg-muted/30 transition-colors cursor-pointer">
-                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                <button
+                  type="button"
+                  onClick={handleDocUploadClick}
+                  disabled={uploadingDoc}
+                  className="mt-4 w-full border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 hover:bg-muted/30 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {uploadingDoc ? (
+                    <Loader2 className="h-8 w-8 mx-auto text-muted-foreground mb-2 animate-spin" />
+                  ) : (
+                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                  )}
                   <p className="text-sm font-medium text-foreground">
-                    Drop files here or click to upload
+                    {uploadingDoc ? "Uploading…" : "Click to upload a document"}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     PDF, DOC, or images up to 10MB
                   </p>
-                </div>
+                </button>
               </CardContent>
             </Card>
 

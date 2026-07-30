@@ -5,9 +5,27 @@ import FormTitle from "../common/FormTitle";
 import { Controller, useWatch } from "react-hook-form";
 import dynamic from "next/dynamic";
 import { countriesData } from "@/constants";
+import { occupationOptions, industryOptions } from "@/constants/kyc-options";
+import SelectWithOther from "@/components/ui/SelectWithOther";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 const CustomSelect = dynamic(() => import("@/components/ui/CustomSelect"), { ssr: false });
 
-const PersonalInfo = ({ control, errors }) => {
+const PersonalInfo = ({ control, errors, setValue }) => {
+  const sameAsResidential = useWatch({ control, name: "mailing_same_as_residential" });
+  const residentialAddress = useWatch({ control, name: "residential_address" });
+
+  // Keep mailing in sync while "same as residential" is ticked, so the
+  // submitted payload always carries a complete mailing address.
+  useEffect(() => {
+    if (sameAsResidential && setValue) {
+      setValue("mailing_address", {
+        ...residentialAddress,
+        postcode: residentialAddress?.postcode || residentialAddress?.zip_code || "",
+      });
+    }
+  }, [sameAsResidential, residentialAddress, setValue]);
+
   return (
     <div className="pb-8">
       <FormTitle>Personal Information</FormTitle>
@@ -91,9 +109,11 @@ const PersonalInfo = ({ control, errors }) => {
           control={control}
           name="employment_details.occupation"
           render={({ field }) => (
-            <CustomInput
+            <SelectWithOther
               label="Occupation"
-              {...field}
+              options={occupationOptions}
+              value={field.value}
+              onChange={field.onChange}
               error={errors.employment_details?.occupation?.message}
             />
           )}
@@ -113,9 +133,11 @@ const PersonalInfo = ({ control, errors }) => {
           control={control}
           name="employment_details.industry"
           render={({ field }) => (
-            <CustomInput
+            <SelectWithOther
               label="Industry"
-              {...field}
+              options={industryOptions}
+              value={field.value}
+              onChange={field.onChange}
               error={errors.employment_details?.industry?.message}
             />
           )}
@@ -185,59 +207,85 @@ const PersonalInfo = ({ control, errors }) => {
           <h4 className="font-semibold mb-4">Mailing Address</h4>
           <Controller
             control={control}
-            name="mailing_address.address"
+            name="mailing_same_as_residential"
             render={({ field }) => (
-              <CustomInput
-                label="Address Line 1"
-                type="textarea"
-                {...field}
-                error={errors.mailing_address?.address?.message}
-              />
+              <div className="flex items-center gap-2 mb-4">
+                <Checkbox
+                  id="mailing-same-as-residential"
+                  checked={!!field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <Label htmlFor="mailing-same-as-residential" className="mb-0">
+                  Same as residential address
+                </Label>
+              </div>
             )}
           />
+          {!sameAsResidential && (
+            <Controller
+              control={control}
+              name="mailing_address.address"
+              render={({ field }) => (
+                <CustomInput
+                  label="Address Line 1"
+                  type="textarea"
+                  {...field}
+                  error={errors.mailing_address?.address?.message}
+                />
+              )}
+            />
+          )}
         </div>
-        <Controller
-          control={control}
-          name="mailing_address.suburb"
-          render={({ field }) => (
-            <CustomInput
-              label="Suburb"
-              {...field}
-              error={errors.mailing_address?.suburb?.message}
+        {!sameAsResidential && (
+          <>
+            <Controller
+              control={control}
+              name="mailing_address.suburb"
+              render={({ field }) => (
+                <CustomInput
+                  label="Suburb"
+                  {...field}
+                  error={errors.mailing_address?.suburb?.message}
+                />
+              )}
             />
-          )}
-        />
-        <Controller
-          control={control}
-          name="mailing_address.state"
-          render={({ field }) => (
-            <CustomInput label="State" {...field} error={errors.mailing_address?.state?.message} />
-          )}
-        />
-        <Controller
-          control={control}
-          name="mailing_address.country"
-          render={({ field }) => (
-            <CustomSelect
-              label="Country"
-              isClearable={true}
-              {...field}
-              options={countriesData}
-              error={errors.mailing_address?.country?.message}
+            <Controller
+              control={control}
+              name="mailing_address.state"
+              render={({ field }) => (
+                <CustomInput
+                  label="State"
+                  {...field}
+                  error={errors.mailing_address?.state?.message}
+                />
+              )}
             />
-          )}
-        />
-        <Controller
-          control={control}
-          name="mailing_address.postcode"
-          render={({ field }) => (
-            <CustomInput
-              label="Postcode"
-              {...field}
-              error={errors.mailing_address?.postcode?.message}
+            <Controller
+              control={control}
+              name="mailing_address.country"
+              render={({ field }) => (
+                <CustomSelect
+                  label="Country"
+                  isClearable={true}
+                  {...field}
+                  options={countriesData}
+                  error={errors.mailing_address?.country?.message}
+                />
+              )}
             />
-          )}
-        />
+            <Controller
+              control={control}
+              name="mailing_address.postcode"
+              render={({ field }) => (
+                <CustomInput
+                  label="Postcode"
+                  {...field}
+                  error={errors.mailing_address?.postcode?.message}
+                />
+              )}
+            />
+          </>
+        )}
       </div>
     </div>
   );

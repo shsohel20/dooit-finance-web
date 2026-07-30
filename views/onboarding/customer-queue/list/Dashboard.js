@@ -1,196 +1,251 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { AlertTriangle, CalendarIcon, Clock, Shield } from "lucide-react"
-import NumberFlow from "@number-flow/react"
+import { useEffect, useMemo, useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
+import { CalendarIcon } from "lucide-react"
 import NumberAnimation from "@/components/NumberAnimation"
-import { Map, MapControls, MapMarker, MarkerContent, MarkerPopup, MarkerTooltip } from "@/components/ui/map"
+import {
+  Map,
+  MapControls,
+  MapMarker,
+  MarkerContent,
+  MarkerPopup,
+  MarkerTooltip,
+} from "@/components/ui/map"
+import { getCustomerStats } from "@/app/dashboard/client/onboarding/customer-queue/actions"
 
-// Sample data based on the customer data provided
-const riskData = [
-  { name: "Unacceptable", value: 6, color: "var(--primary)" },
-  { name: "High", value: 2, color: "var(--danger)" },
-  { name: "Medium", value: 1, color: "var(--warning)" },
-  { name: "Low", value: 1, color: "var(--accent)" },
-]
-
-const kycStatusData = [
-  { name: "Pending", value: 7, color: "#f59e0b" },
-  { name: "Approved", value: 2, color: "#10b981" },
-  { name: "Rejected", value: 1, color: "#ef4444" },
-]
-
-const authorizationData = [
-  { name: "Not Authorized", value: 8, color: "#64748b" },
-  { name: "Authorized", value: 2, color: "#06b6d4" },
-]
-const mostUsersCountryData = [
-
-  { name: "Australia", value: 40 },
-  { name: "Afghanistan", value: 20 },
-  { name: "Bangladesh", value: 100 },
-]
-const locations = [
-  {
-    id: 1,
-    name: "Empire State Building",
-    lng: -73.9857,
-    lat: 40.7484,
+// OpenStreetMap raster basemap for MapLibre GL (genuine OSM tiles).
+const OSM_STYLE = {
+  version: 8,
+  sources: {
+    osm: {
+      type: "raster",
+      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      attribution: "© OpenStreetMap contributors",
+    },
   },
-  {
-    id: 2,
-    name: "Central Park",
-    lng: -73.9654,
-    lat: 40.7829,
-  },
-  { id: 3, name: "Times Square", lng: -73.9855, lat: 40.758 },
-];
+  layers: [
+    { id: "osm-tiles", type: "raster", source: "osm", minzoom: 0, maxzoom: 19 },
+  ],
+}
 
-export default function CustomerDashboard() {
-  const totalCustomers = 10054
-  const unacceptableRisk = 586
-  const pendingKyc = 317
-  const notAuthorized = 108
+// Visual config — maps API buckets to colors/labels. Counts come from the API.
+const RISK_COLORS = {
+  Unacceptable: "var(--primary)",
+  High: "var(--danger)",
+  Medium: "var(--warning)",
+  Low: "var(--accent)",
+}
+
+const KYC_META = {
+  pending: { label: "Pending", color: "#f59e0b" },
+  in_review: { label: "In Review", color: "#3b82f6" },
+  verified: { label: "Verified", color: "#10b981" },
+  rejected: { label: "Rejected", color: "#ef4444" },
+}
+
+const DonutChart = ({ data }) => {
+  const hasValues = data.some((d) => d.value > 0)
+  return (
+    <div className="size-[100px]">
+      <ResponsiveContainer width={"100%"} height={"100%"}>
+        <PieChart>
+          <Tooltip />
+          <Pie
+            data={hasValues ? data : [{ name: "No data", value: 1, color: "var(--smoke-300, #e5e7eb)" }]}
+            cx="50%"
+            cy="50%"
+            innerRadius={30}
+            outerRadius={45}
+            paddingAngle={2}
+            dataKey="value"
+          >
+            {(hasValues ? data : [{ color: "var(--smoke-300, #e5e7eb)" }]).map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+const Legend = ({ items }) => (
+  <div className="flex items-center justify-end gap-2 flex-wrap">
+    {items.map((item) => (
+      <div key={item.name} className="flex items-center gap-2">
+        <div className="size-2 rounded-full" style={{ backgroundColor: item.color }} />
+        <span className="text-xs">{item.name}</span>
+      </div>
+    ))}
+  </div>
+)
+
+// Interactive OpenStreetMap with one marker per geocoded country.
+const LocationsMap = ({ markers }) => {
+  const maxValue = markers.reduce((m, c) => Math.max(m, c.value), 0) || 1
+
+  // Center on the weighted mean of the markers; zoom out for spread-out data.
+  const center = markers.reduce(
+    (acc, c) => [acc[0] + c.lng / markers.length, acc[1] + c.lat / markers.length],
+    [0, 0],
+  )
+  const zoom = markers.length <= 1 ? 3 : 1.2
+
+  return (
+    <Map center={center} zoom={zoom} styles={{ light: OSM_STYLE, dark: OSM_STYLE }}>
+      <MapControls position="bottom-right" showZoom />
+      {markers.map((c) => {
+        const size = 12 + (c.value / maxValue) * 16 // 12–28px by relative volume
+        return (
+          <MapMarker key={c.name} longitude={c.lng} latitude={c.lat}>
+            <MarkerContent>
+              <div
+                className="rounded-full border-2 border-white bg-primary shadow-lg"
+                style={{ width: `${size}px`, height: `${size}px` }}
+              />
+            </MarkerContent>
+            <MarkerTooltip>
+              {c.name}: {c.value}
+            </MarkerTooltip>
+            <MarkerPopup>
+              <div className="space-y-0.5">
+                <p className="font-medium text-foreground">{c.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {c.value} customer{c.value === 1 ? "" : "s"}
+                </p>
+              </div>
+            </MarkerPopup>
+          </MapMarker>
+        )
+      })}
+    </Map>
+  )
+}
+
+export default function CustomerDashboard({ initialStats = null }) {
+  const [stats, setStats] = useState(initialStats)
+  const [loading, setLoading] = useState(!initialStats)
+
+  useEffect(() => {
+    // Server component already provided the data — no need to re-fetch.
+    if (initialStats) return
+
+    let active = true
+    const load = async () => {
+      setLoading(true)
+      try {
+        const res = await getCustomerStats()
+        if (active && res?.success) setStats(res.data)
+      } catch (err) {
+        console.error("Failed to load customer stats", err)
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    load()
+    return () => {
+      active = false
+    }
+  }, [initialStats])
+
+  const total = stats?.total ?? 0
+  const newInWindow = stats?.newInWindow ?? 0
+  const windowDays = stats?.windowDays ?? 30
+  const pendingKyc = stats?.kyc?.pending ?? 0
+
+  const riskData = (stats?.risk?.distribution ?? []).map((d) => ({
+    name: d.label,
+    value: d.value,
+    color: RISK_COLORS[d.label] ?? "var(--muted)",
+  }))
+
+  const kycStatusData = (stats?.kyc?.distribution ?? []).map((d) => ({
+    name: KYC_META[d.status]?.label ?? d.status,
+    value: d.value,
+    color: KYC_META[d.status]?.color ?? "#94a3b8",
+  }))
+
+  const countries = stats?.countries ?? []
+  // Only countries the API could geocode can be plotted on the map.
+  const mapMarkers = useMemo(
+    () =>
+      countries.filter(
+        (c) => typeof c.lat === "number" && typeof c.lng === "number",
+      ),
+    [countries],
+  )
 
   return (
     <div className="mb-4">
       <div className="space-y-4">
-
         <div className="grid gap-6 md:grid-cols-3">
           {/* Risk Assessment Card */}
           <Card className="bg-smoke-200 border-0">
-            {/* <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <AlertTriangle className="size-5 text-destructive" />
-                  Risk Assessment
-                </CardTitle>
-              </div>
-              <CardDescription className="text-muted-foreground">Customer risk levels distribution</CardDescription>
-            </CardHeader> */}
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Risk Assessment</p>
                   <div>
-                    <p className="text-3xl font-bold text-foreground"><NumberAnimation value={totalCustomers} /></p>
-                    <p className="flex items-center gap-1" ><CalendarIcon className="size-4" /><span> Last 30 days</span> </p>
+                    <p className="text-3xl font-bold text-foreground">
+                      <NumberAnimation value={total} />
+                    </p>
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <CalendarIcon className="size-4" />
+                      <span>+{newInWindow} in last {windowDays} days</span>
+                    </p>
                   </div>
                 </div>
-                <div className="size-[100px]">
-                  <ResponsiveContainer width={'100%'} height={"100%"}>
-                    <PieChart >
-                      <Tooltip />
-                      {/* <Legend /> */}
-                      <Pie
-                        data={riskData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={30}
-                        outerRadius={45}
-                        paddingAngle={2}
-                        dataKey="value"
-                      >
-                        {riskData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} tooltip={`${entry.name}: ${entry.value}`} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-
+                <DonutChart data={riskData} />
               </div>
-              <div className="flex items-center justify-end gap-2">
-                {riskData.map((item) => (
-                  <div key={item.name} className="flex items-center gap-2">
-                    <div className="size-2 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-xs ">{item.name}</span>
-                  </div>
-                ))}
-              </div>
+              <Legend items={riskData} />
             </CardContent>
           </Card>
 
           {/* KYC Status Card */}
           <Card className="bg-smoke-200 border-0">
-
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">KYC Status</p>
-                  <p className="text-3xl font-bold text-foreground"><NumberAnimation value={pendingKyc} /></p>
-                  <p>Pending</p>
+                  <p className="text-3xl font-bold text-foreground">
+                    <NumberAnimation value={pendingKyc} />
+                  </p>
+                  <p className="text-xs text-muted-foreground">Pending</p>
                 </div>
-                <div className="size-[100px]">
-                  <ResponsiveContainer width={'100%'} height={"100%"}>
-                    <PieChart>
-                      <Tooltip />
-                      <Pie
-                        data={kycStatusData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={30}
-                        outerRadius={45}
-                        paddingAngle={2}
-                        dataKey="value"
-                      >
-                        {kycStatusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+                <DonutChart data={kycStatusData} />
               </div>
-              <div className="flex items-center justify-end gap-2">
-                {kycStatusData.map((item) => (
-                  <div key={item.name} className="flex items-center gap-2">
-                    <div className="size-2 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-xs ">{item.name}</span>
-                  </div>
-                ))}
-              </div>
+              <Legend items={kycStatusData} />
             </CardContent>
           </Card>
 
-          {/* Authorization Status Card */}
-          {/* <Card className="bg-smoke-200 border-0"> */}
-
-          <div className="">
-            {/* <p className="text-sm text-muted-foreground mb-2">Most Users Locations</p> */}
-            <div className="flex items-center justify-end gap-2">
-
-              <div className="h-[200px] w-full rounded-md overflow-hidden">
-                <Map center={[-73.98, 40.76]} zoom={7}>
-                  {locations.map((location) => (
-                    <MapMarker
-                      key={location.id}
-                      longitude={location.lng}
-                      latitude={location.lat}
-                    >
-                      <MarkerContent>
-                        <div className="size-4 rounded-full bg-primary border-2 border-white shadow-lg" />
-                      </MarkerContent>
-                      <MarkerTooltip>{location.name}</MarkerTooltip>
-                      <MarkerPopup>
-                        <div className="space-y-1">
-                          <p className="font-medium text-foreground">{location.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-                          </p>
-                        </div>
-                      </MarkerPopup>
-                    </MapMarker>
-                  ))}
-                </Map>
+          {/* Top Locations Card — interactive OpenStreetMap */}
+          <Card className="bg-smoke-200 border-0">
+            <CardContent className="space-y-2 ">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Top Locations</p>
+                {mapMarkers.length > 0 && (
+                  <span className="text-xs text-muted-foreground">
+                    {countries.length} countr{countries.length === 1 ? "y" : "ies"}
+                  </span>
+                )}
               </div>
-            </div>
-          </div>
-          {/* </Card> */}
+              <div className="h-[200px] w-full rounded-md overflow-hidden bg-smoke-300/40">
+                {mapMarkers.length > 0 ? (
+                  <LocationsMap markers={mapMarkers} />
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <p className="text-xs text-muted-foreground">
+                      {loading ? "Loading…" : "No location data"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-
-
       </div>
     </div>
   )

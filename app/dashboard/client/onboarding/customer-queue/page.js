@@ -8,25 +8,51 @@ import PendingCollection from "@/views/onboarding/customer-queue/list/PendingCol
 import Rejected from "@/views/onboarding/customer-queue/list/Rejected";
 import Verified from "@/views/onboarding/customer-queue/list/Verified";
 import CustomerDashboard from "@/views/onboarding/customer-queue/list/Dashboard";
+import { getCustomerStats } from "./actions";
 
-export default function Page() {
+export default async function Page() {
+  let stats = null;
+  try {
+    const res = await getCustomerStats();
+    if (res?.success) stats = res.data;
+  } catch (err) {
+    console.error("Failed to load customer queue stats", err);
+  }
+
+  const kycCounts = (stats?.kyc?.distribution ?? []).reduce((acc, d) => {
+    acc[d.status] = d.value;
+    return acc;
+  }, {});
+  const totalCount = stats?.total ?? 0;
+  const pendingCount = kycCounts.pending ?? 0;
+  const rejectedCount = kycCounts.rejected ?? 0;
+  // The "In Review" tab below filters kycStatus="verified", so its badge
+  // must reflect the verified count to match the rows it actually shows.
+  const inReviewCount = kycCounts.verified ?? 0;
+
   return (
     <div>
       <div>
         <CustomerQueueHeader />
-        <CustomerDashboard />
+        <CustomerDashboard initialStats={stats} />
         <Tabs defaultValue="all-applications">
           <TabsList>
             <TabsTrigger value="all-applications">
               All
-              <Badge variant="secondary">100</Badge>
+              <Badge variant="secondary">{totalCount}</Badge>
             </TabsTrigger>
             <TabsTrigger value="pending-collection">
               Pending
-              <Badge variant="secondary">13</Badge>
+              <Badge variant="secondary">{pendingCount}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="rejected-applications">Rejected</TabsTrigger>
-            <TabsTrigger value="in_review">In Review</TabsTrigger>
+            <TabsTrigger value="rejected-applications">
+              Rejected
+              {rejectedCount > 0 && <Badge variant="secondary">{rejectedCount}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="in_review">
+              In Review
+              {inReviewCount > 0 && <Badge variant="secondary">{inReviewCount}</Badge>}
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="all-applications">
             <CustomerQueueList kycStatus="" />

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Check, ChevronsUpDown, Plus } from 'lucide-react';
+import { ChevronsUpDown, Plus } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -161,16 +161,19 @@ export default function CustomSelect({
                       <CommandItem
                         key={option.value}
                         value={option.value}
-                        className={'text-xs hover:bg-muted cursor-pointer'}
+                        className={cn(
+                          'text-xs hover:bg-muted cursor-pointer',
+                          value === option.value && 'bg-primary/10 hover:bg-primary/15'
+                        )}
                         onSelect={(value) => handleSelect(value, option)}
                       >
-                        <Check
+                        <span
                           className={cn(
-                            'mr-2 h-4 w-4',
-                            value === option.value ? 'opacity-100' : 'opacity-0'
+                            value === option.value && 'text-primary font-semibold'
                           )}
-                        />
-                        {option.label}
+                        >
+                          {option.label}
+                        </span>
                       </CommandItem>
                     ))}
                   </CommandGroup>

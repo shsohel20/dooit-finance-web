@@ -5,7 +5,7 @@ Files: Nissa_v3.glb [3.65MB] > C:\Users\Uzair\Documents\New folder (2)\Nissa_v3-
 */
 "use client";
 import { useAnimations, useGLTF } from "@react-three/drei";
-import { useFrame, useGraph } from "@react-three/fiber";
+import { useGraph } from "@react-three/fiber";
 import React from "react";
 import { SkeletonUtils } from "three-stdlib";
 
@@ -16,9 +16,9 @@ export default function Nissa_v3(props) {
   const { nodes, materials } = useGraph(clone);
   const { actions } = useAnimations(animations, group);
 
-  useFrame(() => {
-    actions["Animation"].play();
-  });
+  React.useEffect(() => {
+    actions["Animation"]?.play();
+  }, [actions]);
   return (
     <group ref={group} {...props} dispose={null}>
       <group name="Scene">

@@ -16,3 +16,8 @@ export const getAllEntityTypes = async () => {
   };
   //   return data;
 };
+
+export const getLawyerDashboardSummary = async () => {
+  const response = await fetchWithAuth("lawyer-dashboard/summary");
+  return response.json();
+};

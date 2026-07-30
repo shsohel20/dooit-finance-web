@@ -13,6 +13,7 @@ export default function ForgetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
   const handleSubmit = async (e) => {
     //regex to check if the email is valid
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -27,7 +28,9 @@ export default function ForgetPassword() {
     setIsLoading(true);
     const payload = {
       email: email,
-      url: process.env.NEXT_PUBLIC_CLIENT_URL,
+      // url: process.env.NEXT_PUBLIC_CLIENT_URL,
+      token: "",
+      cid: "",
     };
     console.log("payload", JSON.stringify(payload, null, 2));
     const res = await forgetPassword(payload);

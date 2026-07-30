@@ -40,10 +40,7 @@ export const companyRegistrationFormSchema = z.object({
     local_agent: localAgentSchema,
     registered_address: registeredAddressSchema,
     business_address: businessAddressSchema,
-    company_type: z.object({
-      type: z.string().min(1, "Company type is required"),
-      is_listed: z.boolean(),
-    }),
+    entity_type: z.string().min(1, "Entity type is required"),
     account_purpose: z.object({
       digital_currency_exchange: z.boolean(),
       peer_to_peer: z.boolean(),

@@ -44,6 +44,22 @@ export function SiteHeader() {
   const router = useRouter();
   const userType = loggedInUser?.userType;
   const isDooit = userType === 'dooit';
+
+  // Top-right avatar reflects the client's brand: logo from client.settings.logo,
+  // falling back to the account photo, then name initials.
+  const client = loggedInUser?.client;
+  const brandName = client?.name || loggedInUser?.name || 'Account';
+  const brandEmail = client?.email || loggedInUser?.email || '';
+  const brandLogo = client?.settings?.logo || loggedInUser?.photoUrl || '';
+  const brandInitials =
+    brandName
+      .split(' ')
+      .filter(Boolean)
+      .map((w) => w[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || 'CN';
+
   const routes = [
     {
       name: 'Customers',
@@ -130,7 +146,7 @@ export function SiteHeader() {
           <Button variant="secondary" size="sm">
             Help <IconHelpCircle />
           </Button>
-          <Select defaultValue="sandbox">
+          {/* <Select defaultValue="sandbox">
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Select environment" />
             </SelectTrigger>
@@ -138,7 +154,7 @@ export function SiteHeader() {
               <SelectItem value="production">Production</SelectItem>
               <SelectItem value="sandbox">Sandbox</SelectItem>
             </SelectContent>
-          </Select>
+          </Select> */}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -151,8 +167,8 @@ export function SiteHeader() {
               >
                 <span>
                   <Avatar>
-                    <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>CN</AvatarFallback>
+                    <AvatarImage src={brandLogo} alt={brandName} />
+                    <AvatarFallback>{brandInitials}</AvatarFallback>
                   </Avatar>
                 </span>
               </Button>
@@ -163,21 +179,25 @@ export function SiteHeader() {
               align="end"
               sideOffset={4}
             >
-              {/* <DropdownMenuLabel className="p-0 font-normal">
+              <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user?.avatar} alt={user?.name} />
-                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                    <AvatarImage src={brandLogo} alt={brandName} />
+                    <AvatarFallback className="rounded-lg">
+                      {brandInitials}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user?.name}</span>
-                    <span className="text-muted-foreground truncate text-xs">
-                      {user?.email}
-                    </span>
+                    <span className="truncate font-medium">{brandName}</span>
+                    {brandEmail && (
+                      <span className="text-muted-foreground truncate text-xs">
+                        {brandEmail}
+                      </span>
+                    )}
                   </div>
                 </div>
-              </DropdownMenuLabel> */}
-              {/* <DropdownMenuSeparator /> */}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onClick={() => router.push('/dashboard/client/profile')}

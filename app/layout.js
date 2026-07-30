@@ -5,15 +5,22 @@ import { Toaster } from "sonner";
 
 import { cn } from "@/lib/utils";
 
-const fontSans = Inter_Tight({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
 // const sansFlex = SansFlex({ subsets: ["latin"], variable: "--font-sans-flex" });
-const jetbrainsMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 const interTight = Inter_Tight({
   subsets: ["latin"],
   variable: "--font-sans",
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
@@ -35,7 +42,7 @@ export default function RootLayout({ children }) {
       </head> */}
       <body
         // className={`font-sans antialiased ${montserrat.className} text-sm`}
-        className={cn("antialiased", interTight.variable)}
+        className={cn("antialiased", interTight.variable, geist.variable, geistMono.variable)}
         suppressHydrationWarning
       >
         {/* <AuthProvider> */}
