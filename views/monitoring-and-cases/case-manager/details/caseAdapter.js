@@ -63,9 +63,13 @@ const adaptCustomer = (customer, clientId) => {
   const relation = pickRelation(customer, clientId);
 
   return {
+    // Fall back to the customer reference so an unnamed record still shows
+    // something identifiable rather than an empty avatar.
     name:
       customer.user?.name ||
-      joinNonEmpty([details.given_name, details.middle_name, details.surname], " "),
+      joinNonEmpty([details.given_name, details.middle_name, details.surname], " ") ||
+      customer.uid ||
+      null,
     age: ageFrom(details.date_of_birth),
     nationality: humanize(address.country),
     occupation: employment.occupation || null,
