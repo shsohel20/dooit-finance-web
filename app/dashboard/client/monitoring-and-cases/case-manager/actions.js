@@ -107,6 +107,15 @@ export const addNote = async (caseId, payload) => {
   return res.json();
 };
 
+// ── Regulatory filings ────────────────────────────────────────────────────────
+
+// Every report type filed against this case: ECDD, SMR, TTR, IFTI, GFS, RFI.
+// Returns { data: { ecdd, smr, ttr, ifti, gfs, rfi }, summary: { counts, total, sarFiled } }.
+export const getCaseReports = async (caseId) => {
+  const res = await fetchWithAuth(`cases/${caseId}/reports`);
+  return res.json();
+};
+
 // ── Audit ─────────────────────────────────────────────────────────────────────
 
 export const getAuditLog = async (caseId) => {

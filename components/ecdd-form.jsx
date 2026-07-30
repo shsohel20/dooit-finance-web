@@ -36,12 +36,20 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getEcddById } from '@/app/dashboard/client/report-compliance/ecdd/actions';
 import SelectCaseList from './ui/SelectCaseList';
+import SelectCase from './ui/SelectCase';
 
 const formSchema = z.object({
   caseNumber: z.object({
     label: z.string(),
     value: z.string(),
   }),
+  // Investigation hub. Optional: an ECDD raised from an escalated alert already
+  // resolves its Case server-side, so this only needs setting when attaching to
+  // a Case directly.
+  caseId: z
+    .object({ label: z.string(), value: z.string() })
+    .nullable()
+    .optional(),
   analystName: z.string(),
   fullName: z.string(),
   accountPurpose: z.string(),
@@ -214,6 +222,7 @@ export function ECDDForm({ caseNumber, id }) {
       const response = await getEcddById(id);
       const {
         caseNumber,
+        caseId,
         transaction,
         analyst,
         customer,
@@ -226,6 +235,15 @@ export function ECDDForm({ caseNumber, id }) {
           label: caseNumber,
           value: caseNumber,
         },
+        // caseId may arrive populated or as a bare ObjectId.
+        caseId: caseId
+          ? {
+              label: caseId.uid
+                ? `${caseId.uid} — ${caseId.title || 'Untitled'}`
+                : String(caseId._id || caseId),
+              value: String(caseId._id || caseId),
+            }
+          : null,
         transaction: transaction?._id,
         analyst: analyst?._id,
         customer: customer?._id,
@@ -294,6 +312,9 @@ export function ECDDForm({ caseNumber, id }) {
     const submittedData = {
       ...data,
       caseNumber: data?.caseNumber?.value,
+      // Send the Case _id only when one was picked — omitting it lets the API
+      // fall back to deriving the Case from the alert.
+      ...(data?.caseId?.value ? { caseId: data.caseId.value } : {}),
       ...(id ? { id: id } : {}),
     };
 
@@ -471,7 +492,7 @@ export function ECDDForm({ caseNumber, id }) {
                   name="caseNumber"
                   render={({ field }) => (
                     <SelectCaseList
-                      label="Case Number"
+                      label="Alert / Case Number"
                       options={caseNumbers}
                       value={field.value || null}
                       onChange={(value) => handleCaseNumberChange(value)}
@@ -482,6 +503,25 @@ export function ECDDForm({ caseNumber, id }) {
                     />
                   )}
                 />
+              </div>
+
+              <div>
+                <Controller
+                  control={control}
+                  name="caseId"
+                  render={({ field }) => (
+                    <SelectCase
+                      label="Case (investigation hub)"
+                      value={field.value || null}
+                      onChange={field.onChange}
+                      error={errors.caseId?.message}
+                    />
+                  )}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Optional — leave blank to inherit the Case from the selected
+                  alert once it has been escalated.
+                </p>
               </div>
             </div>
           </div>

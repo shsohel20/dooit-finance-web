@@ -3,9 +3,23 @@
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import { IconFolderOff, IconFolders, IconLoader2 } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCaseById } from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
+import {
+  getCaseById,
+  getCaseReports,
+  getCaseNotes,
+  getAuditLog,
+  addNote as addNoteAction,
+} from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
 import { useCaseManagerStore } from "@/app/store/useCaseManagerStore";
+import {
+  adaptCase,
+  adaptNotes,
+  adaptAuditLog,
+  adaptRfis,
+  adaptPreviousSARs,
+} from "./caseAdapter";
 import CaseHeader from "./CaseHeader";
+import CaseReportsSection from "./sections/CaseReportsSection";
 import CollapsibleSection from "./components/CollapsibleSection";
 import InvestigationSummary from "./sections/InvestigationSummary";
 import CustomerProfileSection from "./sections/CustomerProfileSection";
@@ -53,6 +67,12 @@ export default function CaseDetails({ caseId }) {
   const [assignOpen, setAssignOpen] = useState(false);
   const [rfiOpen, setRfiOpen] = useState(false);
 
+  // Regulatory filings live on their own endpoint so the case document stays
+  // lean; they load alongside the case rather than blocking it.
+  const [reports, setReports] = useState(null);
+  const [reportsSummary, setReportsSummary] = useState(null);
+  const [reportsLoading, setReportsLoading] = useState(true);
+
   const sectionRefs = useRef({});
   const setSectionRef = (id) => (el) => {
     sectionRefs.current[id] = el;
@@ -65,11 +85,29 @@ export default function CaseDetails({ caseId }) {
     if (!caseId) return;
     const load = async () => {
       setLoading(true);
+      setReportsLoading(true);
       setError(null);
       try {
-        const res = await getCaseById(caseId);
+        // One round trip each, in parallel — a failure in any companion
+        // endpoint must not stop the case itself from rendering.
+        const [res, reportsRes, notesRes, auditRes] = await Promise.all([
+          getCaseById(caseId),
+          getCaseReports(caseId).catch(() => null),
+          getCaseNotes(caseId).catch(() => null),
+          getAuditLog(caseId).catch(() => null),
+        ]);
+
+        const filings = reportsRes?.succeed ? reportsRes.data : null;
+        setReports(filings);
+        setReportsSummary(reportsRes?.succeed ? reportsRes.summary : null);
+
         if (res?.succeed) {
-          const loaded = res.data;
+          // Normalise the API document into the shape the sections expect.
+          const loaded = adaptCase(res.data);
+          loaded.rfis = adaptRfis(filings?.rfi);
+          loaded.previousSARs = adaptPreviousSARs(filings?.smr);
+          loaded.notes = notesRes?.succeed ? adaptNotes(notesRes.data) : [];
+          loaded.auditLog = auditRes?.succeed ? adaptAuditLog(auditRes.data) : [];
           setCaseData(loaded);
           setSelectedCase(loaded);
           // Seed the action state from the loaded case. These drive the header
@@ -91,6 +129,7 @@ export default function CaseDetails({ caseId }) {
         setError("Failed to load case");
       } finally {
         setLoading(false);
+        setReportsLoading(false);
       }
     };
     load();
@@ -237,7 +276,19 @@ export default function CaseDetails({ caseId }) {
     });
   };
 
-  const handleAddNote = (note) => setNotes((prev) => [...prev, note]);
+  // Notes are the one action with a real write endpoint — persist, then
+  // reconcile from the server so the note carries its real id and author.
+  const handleAddNote = async (note) => {
+    setNotes((prev) => [...prev, note]);
+    const res = await addNoteAction(caseId, {
+      content: note.text ?? note.content ?? "",
+      attachments: note.attachment ? [note.attachment] : [],
+    }).catch(() => null);
+    if (res?.succeed) {
+      const fresh = await getCaseNotes(caseId).catch(() => null);
+      if (fresh?.succeed) setNotes(adaptNotes(fresh.data));
+    }
+  };
   const handleTogglePin = (id) =>
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, pinned: !n.pinned } : n)));
 
@@ -301,6 +352,13 @@ export default function CaseDetails({ caseId }) {
         />
 
         <AuditLog auditLog={auditLog} sectionRef={setSectionRef("audit-log")} />
+
+        <CaseReportsSection
+          reports={reports}
+          summary={reportsSummary}
+          loading={reportsLoading}
+          sectionRef={setSectionRef("reports")}
+        />
 
         <RelatedCasesSection caseData={caseData} sectionRef={setSectionRef("related-cases")} />
 

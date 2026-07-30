@@ -24,16 +24,14 @@ export default function AuditLog({ auditLog, sectionRef }) {
         <p className="py-6 text-center text-sm text-muted-foreground">No audit entries recorded.</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full min-w-[820px] text-left text-sm">
+          <table className="w-full min-w-[620px] text-left text-sm">
             <thead className="sticky top-0 bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 font-medium">Timestamp</th>
                 <th className="px-3 py-2 font-medium">User</th>
                 <th className="px-3 py-2 font-medium">Action</th>
-                <th className="px-3 py-2 font-medium">Previous Value</th>
-                <th className="px-3 py-2 font-medium">New Value</th>
-                <th className="px-3 py-2 font-medium">IP Address</th>
-                <th className="px-3 py-2 font-medium">Device</th>
+                <th className="px-3 py-2 font-medium">Details</th>
+                <th className="px-3 py-2 font-medium">Source</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -44,12 +42,16 @@ export default function AuditLog({ auditLog, sectionRef }) {
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 font-medium text-heading">{entry.user}</td>
                   <td className="px-3 py-2 text-heading">{entry.action}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{entry.previousValue}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{entry.newValue}</td>
-                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-muted-foreground">
-                    {entry.ip}
+                  <td className="px-3 py-2 text-muted-foreground">
+                    {/* AuditLog is event-shaped (action + details). Fall back to
+                        the before/after pair for locally-logged entries. */}
+                    {entry.details ||
+                      [entry.previousValue, entry.newValue].filter(Boolean).join(" → ") ||
+                      "—"}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">{entry.device}</td>
+                  <td className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
+                    {entry.source || entry.device || "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>

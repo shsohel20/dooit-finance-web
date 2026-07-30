@@ -19,6 +19,9 @@ function formatCurrency(amount, currency = "AUD") {
 }
 
 function StatCard({ icon: Icon, label, value, sub }) {
+  // Not every metric has a backend source — show an explicit dash rather than
+  // an empty slot or a misleading zero.
+  const display = value === null || value === undefined || value === "" ? "—" : value;
   return (
     <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/20 p-3.5">
       <div className="mt-0.5 shrink-0 rounded-md bg-primary/10 p-2">
@@ -26,8 +29,8 @@ function StatCard({ icon: Icon, label, value, sub }) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-        <p className="truncate text-sm font-semibold text-heading" title={typeof value === "string" ? value : undefined}>
-          {value}
+        <p className="truncate text-sm font-semibold text-heading" title={typeof display === "string" ? display : undefined}>
+          {display}
         </p>
         {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
       </div>
@@ -51,7 +54,9 @@ export default function InvestigationSummary({ caseData, sectionRef }) {
           <StatCard
             icon={IconCoin}
             label="Total Exposure"
-            value={formatCurrency(caseData.totalExposure, caseData.transactions?.[0]?.currency)}
+            // netActivity is summed in AUD server-side — do not label it with an
+            // individual transaction's currency.
+            value={formatCurrency(caseData.totalExposure)}
           />
           <StatCard
             icon={IconFlag3}
@@ -64,7 +69,11 @@ export default function InvestigationSummary({ caseData, sectionRef }) {
             label="Previous Investigations"
             value={caseData.previousInvestigationsCount ?? 0}
           />
-          <StatCard icon={IconGauge} label="Confidence Score" value={`${caseData.confidenceScore ?? 0}%`} />
+          <StatCard
+            icon={IconGauge}
+            label="Confidence Score"
+            value={caseData.confidenceScore != null ? `${caseData.confidenceScore}%` : null}
+          />
         </div>
       </CardContent>
     </Card>
