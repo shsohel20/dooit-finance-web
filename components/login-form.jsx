@@ -37,7 +37,6 @@ export default function LoginForm({
   const router = useRouter();
   const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
-  console.log('session', session);
   const isDooit = type === 'dooit';
   const {
     register,

@@ -325,8 +325,6 @@ function computeTxLayout(entities, cx, cy, width, height) {
 
 /* ─── Component ──────────────────────────────────────── */
 export function PartyTreeGraph({ entities, filterMode, expandAllRef, collapseAllRef, details }) {
-  console.log("entities", entities);
-  console.log("details", details);
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const [dims, setDims] = useState({ width: 1000, height: 700 });
