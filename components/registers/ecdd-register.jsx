@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Plus, Filter, Download, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ECDDCaseDialog } from "./ecdd-case-dialog";
+import { getEcdds } from "@/app/dashboard/client/report-compliance/ecdd/actions";
+
+// Map a real ECDD document (api/models/EcddReport.js) → the register's row shape.
+// Unmodeled demo fields fall back to "—".
+const ECDD_STATUS_MAP = { pending: "Open", active: "Under Review", inactive: "Closed", blocked: "Escalated" };
+const toEcddRow = (d = {}) => ({
+  ...d,
+  caseId: d.uid || d.caseNumber || String(d._id || ""),
+  customerName: d.customerName || d.fullName || "—",
+  customerId: d.userId || (d.customer ? String(d.customer) : "") || d.caseNumber || "—",
+  entityType: d.entityType || "—",
+  trigger: d.caseNumber ? `Case ${d.caseNumber}` : d.recommendation || "—",
+  initialRiskRating: d.initialRiskRating || "—",
+  dueDate: d.analysisEndDate || null,
+  caseStatus: ECDD_STATUS_MAP[String(d.status || "").toLowerCase()] || d.status || "Open",
+  industry: d.industry || d.accountPurpose || "—",
+});
 
 // Mock data
 const mockECDDCases = [
@@ -148,8 +165,27 @@ export function ECDDRegister() {
   const [riskFilter, setRiskFilter] = useState("all");
   const [selectedCase, setSelectedCase] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredCases = mockECDDCases.filter((case_) => {
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    getEcdds({ limit: 100 })
+      .then((r) => {
+        if (active) setCases((r?.data || []).map(toEcddRow));
+      })
+      .catch((e) => {
+        console.error("Failed to load ECDD list", e);
+        if (active) setCases(mockECDDCases); // fallback to sample on API failure
+      })
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const filteredCases = cases.filter((case_) => {
     const matchesSearch =
       case_.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       case_.caseId.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -164,12 +200,11 @@ export function ECDDRegister() {
   });
 
   const stats = {
-    total: mockECDDCases.length,
-    open: mockECDDCases.filter((c) => c.caseStatus === "Open").length,
-    underReview: mockECDDCases.filter((c) => c.caseStatus === "Under Review")
-      .length,
-    overdue: mockECDDCases.filter((c) => {
-      if (c.caseStatus === "Closed") return false;
+    total: cases.length,
+    open: cases.filter((c) => c.caseStatus === "Open").length,
+    underReview: cases.filter((c) => c.caseStatus === "Under Review").length,
+    overdue: cases.filter((c) => {
+      if (c.caseStatus === "Closed" || !c.dueDate) return false;
       return new Date(c.dueDate) < new Date();
     }).length,
   };
@@ -198,7 +233,7 @@ export function ECDDRegister() {
   };
 
   const isOverdue = (dueDate, status) => {
-    if (status === "Closed") return false;
+    if (!dueDate || status === "Closed") return false;
     return new Date(dueDate) < new Date();
   };
 
@@ -324,7 +359,7 @@ export function ECDDRegister() {
                       colSpan={8}
                       className="text-center text-muted-foreground py-8"
                     >
-                      No cases found
+                      {loading ? "Loading ECDD cases…" : "No cases found"}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -369,7 +404,9 @@ export function ECDDRegister() {
                                 : ""
                             }
                           >
-                            {new Date(case_.dueDate).toLocaleDateString()}
+                            {case_.dueDate
+                              ? new Date(case_.dueDate).toLocaleDateString()
+                              : "—"}
                           </span>
                         </div>
                       </TableCell>

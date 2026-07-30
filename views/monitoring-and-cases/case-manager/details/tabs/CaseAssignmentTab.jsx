@@ -40,7 +40,7 @@ export default function CaseAssignmentTab({ caseData, onCaseUpdate }) {
   const { investigators, setInvestigators, submitting, setSubmitting } = useCaseManagerStore();
   const [loadingInvestigators, setLoadingInvestigators] = useState(false);
   const [selected, setSelected] = useState(
-    (caseData?.assignedTo || []).map((u) => u._id),
+    caseData?.assignedTo?._id ? [caseData.assignedTo._id] : [],
   );
   const [open, setOpen] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -69,7 +69,7 @@ export default function CaseAssignmentTab({ caseData, onCaseUpdate }) {
     if (submitting) return;
     setSubmitting(true);
     try {
-      const res = await assignInvestigators(caseData._id, selected);
+      const res = await assignInvestigators(caseData._id, selected[0] || null);
       if (res?.succeed) {
         onCaseUpdate?.({ ...caseData, assignedTo: res.data.assignedTo });
         setSaved(true);
@@ -203,11 +203,11 @@ export default function CaseAssignmentTab({ caseData, onCaseUpdate }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {(caseData?.assignedTo || []).length === 0 ? (
+          {!caseData?.assignedTo ? (
             <p className="text-sm text-muted-foreground">No investigators assigned.</p>
           ) : (
             <div className="space-y-2">
-              {caseData.assignedTo.map((u) => (
+              {[caseData.assignedTo].map((u) => (
                 <div key={u._id} className="flex items-center gap-2.5 rounded-lg border p-2">
                   <Avatar className="h-8 w-8 shrink-0">
                     <AvatarImage src={u.avatar} />

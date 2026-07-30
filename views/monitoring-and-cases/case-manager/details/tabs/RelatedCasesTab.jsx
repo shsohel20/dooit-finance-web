@@ -6,12 +6,17 @@ import { StatusPill } from "@/components/ui/StatusPill";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { IconLink, IconEye } from "@tabler/icons-react";
-import { mockCases } from "@/lib/case-manager-data";
 
 const statusVariants = {
   Active: "success",
   "Under Review": "warning",
   Closed: "outline",
+  // Case model statuses
+  open: "info",
+  under_investigation: "warning",
+  pending_review: "warning",
+  closed: "outline",
+  escalated: "danger",
 };
 
 export default function RelatedCasesTab({ caseData }) {
@@ -39,9 +44,8 @@ export default function RelatedCasesTab({ caseData }) {
       <CardContent>
         <div className="divide-y">
           {relatedCases.map((rc, i) => {
-            const fullCase = mockCases.find((c) => c.uid === rc.caseId);
             return (
-              <div key={i} className="flex items-center justify-between py-3">
+              <div key={rc._id || i} className="flex items-center justify-between py-3">
                 <div className="flex flex-col gap-1">
                   <span className="font-mono text-sm font-semibold text-heading">{rc.caseId}</span>
                   <Badge variant="outline" className="w-fit text-xs">
@@ -50,14 +54,14 @@ export default function RelatedCasesTab({ caseData }) {
                 </div>
                 <div className="flex items-center gap-3">
                   <StatusPill variant={statusVariants[rc.status]}>{rc.status}</StatusPill>
-                  {fullCase && (
+                  {rc._id && (
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-7 w-7 p-0"
                       onClick={() =>
                         router.push(
-                          `/dashboard/client/monitoring-and-cases/case-manager/${fullCase._id}`,
+                          `/dashboard/client/monitoring-and-cases/case-manager/${rc._id}`,
                         )
                       }
                     >

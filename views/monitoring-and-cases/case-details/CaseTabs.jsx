@@ -8,6 +8,7 @@ import RFI from "./RFI";
 import ActionAndDisposition from "./ActionAndDisposition";
 import InvestigationPanel from "./InvestigationPanel";
 import Ecdd from "./Ecdd";
+import CaseReports from "./CaseReports";
 import { getCaseDetails } from "@/app/dashboard/client/monitoring-and-cases/case-list/actions";
 import { useEffect } from "react";
 import useAlertStore from "@/app/store/alerts";
@@ -39,6 +40,11 @@ const tabs = [
     title: "RFI",
     component: <RFI />,
     id: "rfi",
+  },
+  {
+    title: "Reports",
+    component: <CaseReports />,
+    id: "reports",
   },
   {
     title: "Action & disposition",

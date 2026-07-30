@@ -2,7 +2,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { IconUser, IconMail, IconPhone, IconMapPin, IconId } from "@tabler/icons-react";
+import {
+  IconUser,
+  IconMail,
+  IconPhone,
+  IconMapPin,
+  IconId,
+  IconUsers,
+} from "@tabler/icons-react";
 
 function InfoRow({ icon: Icon, label, value }) {
   return (
@@ -18,9 +25,30 @@ function InfoRow({ icon: Icon, label, value }) {
   );
 }
 
-export default function CustomerInfoTab({ caseData }) {
-  const c = caseData?.customer;
-  if (!c) return null;
+function buildAddress(addr) {
+  if (!addr) return null;
+  return [addr.address, addr.suburb, addr.state, addr.postcode, addr.country]
+    .filter(Boolean)
+    .join(", ") || null;
+}
+
+function CustomerCard({ customer }) {
+  const pf = customer?.personalKyc?.personal_form;
+  const details = pf?.customer_details;
+  const contact = pf?.contact_details;
+  const employment = pf?.employment_details;
+  const address = buildAddress(pf?.residential_address);
+
+  const fullName =
+    [details?.given_name, details?.middle_name, details?.surname].filter(Boolean).join(" ") ||
+    customer?.user?.name ||
+    "—";
+  const email = contact?.email || customer?.user?.email;
+  const phone = contact?.phone;
+  const dob = details?.date_of_birth
+    ? new Date(details.date_of_birth).toLocaleDateString("en-AU")
+    : null;
+  const customerType = customer?.relations?.[0]?.type;
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -32,20 +60,28 @@ export default function CustomerInfoTab({ caseData }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <InfoRow icon={IconUser} label="Full Name" value={c.name} />
-          {c.age && <InfoRow icon={IconUser} label="Age" value={`${c.age} years`} />}
-          {c.dateOfBirth && <InfoRow icon={IconUser} label="Date of Birth" value={c.dateOfBirth} />}
-          {c.nationality && <InfoRow icon={IconUser} label="Nationality" value={c.nationality} />}
-          {c.occupation && <InfoRow icon={IconUser} label="Occupation" value={c.occupation} />}
-          <InfoRow
-            icon={IconUser}
-            label="Customer Type"
-            value={
-              <Badge variant="outline" className="text-xs capitalize">
-                {c.customerType}
-              </Badge>
-            }
-          />
+          <InfoRow icon={IconUser} label="Full Name" value={fullName} />
+          {dob && <InfoRow icon={IconUser} label="Date of Birth" value={dob} />}
+          {details?.other_names && (
+            <InfoRow icon={IconUser} label="Other Names" value={details.other_names} />
+          )}
+          {employment?.occupation && (
+            <InfoRow icon={IconUser} label="Occupation" value={employment.occupation} />
+          )}
+          {employment?.industry && (
+            <InfoRow icon={IconUser} label="Industry" value={employment.industry} />
+          )}
+          {customerType && (
+            <InfoRow
+              icon={IconUser}
+              label="Customer Type"
+              value={
+                <Badge variant="outline" className="text-xs capitalize">
+                  {customerType.replace(/_/g, " ")}
+                </Badge>
+              }
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -57,17 +93,49 @@ export default function CustomerInfoTab({ caseData }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <InfoRow icon={IconMail} label="Email" value={c.email} />
-          <InfoRow icon={IconPhone} label="Phone" value={c.phone} />
-          <InfoRow icon={IconMapPin} label="Address" value={c.address} />
-          {c.idType && <InfoRow icon={IconId} label="ID Type" value={c.idType} />}
-          {c.idNumber && <InfoRow icon={IconId} label="ID Number" value={c.idNumber} />}
-          {c.registrationNo && (
-            <InfoRow icon={IconId} label="Registration No." value={c.registrationNo} />
+          <InfoRow icon={IconMail} label="Email" value={email} />
+          <InfoRow icon={IconPhone} label="Phone" value={phone} />
+          <InfoRow icon={IconMapPin} label="Address" value={address} />
+          {pf?.identificationNo && (
+            <InfoRow icon={IconId} label="ID Number" value={pf.identificationNo} />
           )}
-          {c.industry && <InfoRow icon={IconUser} label="Industry" value={c.industry} />}
+          {customer?.uid && (
+            <InfoRow icon={IconId} label="Customer ID" value={customer.uid} />
+          )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+export default function CustomerInfoTab({ caseData }) {
+  const customers = caseData?.linkedCustomers || [];
+
+  if (customers.length === 0) {
+    return (
+      <Card className="border border-border shadow-sm">
+        <CardContent className="py-10 text-center text-sm text-muted-foreground">
+          No customers linked to this case.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {customers.map((c, idx) => (
+        <div key={c._id || idx}>
+          {customers.length > 1 && (
+            <div className="flex items-center gap-2 mb-3">
+              <IconUsers className="size-4 text-muted-foreground" />
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Customer {idx + 1}
+              </span>
+            </div>
+          )}
+          <CustomerCard customer={c} />
+        </div>
+      ))}
     </div>
   );
 }

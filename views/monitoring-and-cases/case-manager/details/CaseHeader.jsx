@@ -20,14 +20,25 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   IconArrowLeft,
+  IconArrowRight,
   IconPennant,
   IconCalendar,
   IconChevronRight,
   IconLoader2,
   IconFileReport,
   IconCheck,
+  IconCoin,
 } from "@tabler/icons-react";
 import { cn, dateShowFormat } from "@/lib/utils";
+
+const fmtAUD = (v) =>
+  v == null
+    ? "—"
+    : new Intl.NumberFormat("en-AU", {
+        style: "currency",
+        currency: "AUD",
+        maximumFractionDigits: 0,
+      }).format(v);
 import {
   updateCaseStatus,
   fileSAR,
@@ -210,25 +221,42 @@ export default function CaseHeader({ caseData, onCaseUpdate }) {
           </div>
 
           <div className="flex flex-col gap-2 text-sm shrink-0">
-            {caseData.assignedTo?.length > 0 && (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <div className="flex -space-x-1.5">
-                  {caseData.assignedTo.slice(0, 4).map((u) => (
-                    <Avatar key={u._id} className="h-6 w-6 border-2 border-white">
-                      <AvatarImage src={u.avatar} />
-                      <AvatarFallback className="text-[8px]">
-                        {u.name?.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
-                </div>
-                <span className="text-xs">
-                  {caseData.assignedTo.length === 1
-                    ? caseData.assignedTo[0].name
-                    : `${caseData.assignedTo.length} investigators`}
-                </span>
+            {/* Maker → checker (four-eyes) */}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <span className="text-[10px] uppercase tracking-wide">Review</span>
+              <div className="flex items-center gap-1">
+                {caseData.assignedTo ? (
+                  <Avatar className="h-6 w-6 border-2 border-white" title={caseData.assignedTo.name}>
+                    <AvatarImage src={caseData.assignedTo.avatar} />
+                    <AvatarFallback className="text-[8px]">
+                      {caseData.assignedTo.name?.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <span className="text-xs">Unassigned</span>
+                )}
+                <IconArrowRight className="size-3" />
+                {caseData.reviewer ? (
+                  <Avatar className="h-6 w-6 border-2 border-white" title={caseData.reviewer.name}>
+                    <AvatarImage src={caseData.reviewer.avatar} />
+                    <AvatarFallback className="text-[8px]">
+                      {caseData.reviewer.name?.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <span className="text-xs">No reviewer</span>
+                )}
+              </div>
+            </div>
+
+            {caseData.netActivity != null && (
+              <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                <IconCoin className="size-4 shrink-0" />
+                Net activity:{" "}
+                <span className="font-semibold text-heading">{fmtAUD(caseData.netActivity)}</span>
               </div>
             )}
+
             <div className="flex items-center gap-2 text-muted-foreground">
               <IconCalendar className="size-4 shrink-0" />
               <span className="text-xs">

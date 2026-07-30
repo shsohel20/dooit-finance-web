@@ -455,6 +455,11 @@ const TransactionListView = () => {
         </div>
       )}
 
+      {/* Actions bar — always visible */}
+      <div className="flex justify-end">
+        <Actions />
+      </div>
+
       {/* Empty state */}
       {isEmpty && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
@@ -477,7 +482,6 @@ const TransactionListView = () => {
           onDoubleClick={handleViewReportClick}
           loading={loading}
           mainClass="transactions-table"
-          actions={<Actions />}
         />
       )}
 

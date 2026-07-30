@@ -11,6 +11,8 @@ import {
   IconClock,
 } from "@tabler/icons-react";
 import { caseAnalytics } from "@/lib/case-manager-data";
+import { useState, useEffect } from "react";
+import { getCaseAnalytics } from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
 
 const metricCards = [
   {
@@ -49,12 +51,26 @@ const metricCards = [
 ];
 
 export default function AnalyticsCards() {
+  const [analytics, setAnalytics] = useState(caseAnalytics);
+
+  useEffect(() => {
+    let active = true;
+    getCaseAnalytics()
+      .then((r) => {
+        if (active && r?.data?.summary) setAnalytics(r.data.summary);
+      })
+      .catch((e) => console.error("Failed to load case analytics", e));
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {metricCards.map((card) => {
         const Icon = card.icon;
-        const value = caseAnalytics[card.valueKey];
-        const change = caseAnalytics[card.changeKey];
+        const value = analytics[card.valueKey];
+        const change = analytics[card.changeKey];
         const isPositive = change >= 0;
 
         return (

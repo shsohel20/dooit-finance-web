@@ -21,6 +21,8 @@ import {
   caseTrendData,
   analystPerformanceData,
 } from "@/lib/case-manager-data";
+import { useState, useEffect } from "react";
+import { getCaseAnalytics } from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -43,7 +45,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-function CaseTypePieChart() {
+function CaseTypePieChart({ data = caseTypeDistribution }) {
   return (
     <Card className="border border-border shadow-sm">
       <CardHeader className="pb-2">
@@ -54,7 +56,7 @@ function CaseTypePieChart() {
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
-                data={caseTypeDistribution}
+                data={data}
                 cx="50%"
                 cy="50%"
                 innerRadius={55}
@@ -62,7 +64,7 @@ function CaseTypePieChart() {
                 paddingAngle={3}
                 dataKey="value"
               >
-                {caseTypeDistribution.map((entry) => (
+                {data.map((entry) => (
                   <Cell key={entry.name} fill={entry.color} />
                 ))}
               </Pie>
@@ -85,7 +87,7 @@ function CaseTypePieChart() {
             </PieChart>
           </ResponsiveContainer>
           <div className="flex flex-col gap-2 text-xs w-full max-w-[180px]">
-            {caseTypeDistribution.map((item) => (
+            {data.map((item) => (
               <div key={item.name} className="flex items-center gap-2">
                 <span
                   className="inline-block h-3 w-3 shrink-0 rounded-sm"
@@ -102,7 +104,7 @@ function CaseTypePieChart() {
   );
 }
 
-function CaseTrendChart() {
+function CaseTrendChart({ data = caseTrendData }) {
   return (
     <Card className="border border-border shadow-sm">
       <CardHeader className="pb-2">
@@ -110,7 +112,7 @@ function CaseTrendChart() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={caseTrendData} margin={{ top: 5, right: 10, bottom: 5, left: -20 }}>
+          <LineChart data={data} margin={{ top: 5, right: 10, bottom: 5, left: -20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="month" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} />
@@ -147,7 +149,7 @@ function CaseTrendChart() {
   );
 }
 
-function AnalystPerformanceChart() {
+function AnalystPerformanceChart({ data = analystPerformanceData }) {
   return (
     <Card className="border border-border shadow-sm col-span-2">
       <CardHeader className="pb-2">
@@ -156,7 +158,7 @@ function AnalystPerformanceChart() {
       <CardContent>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart
-            data={analystPerformanceData}
+            data={data}
             margin={{ top: 5, right: 10, bottom: 30, left: -20 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -180,11 +182,31 @@ function AnalystPerformanceChart() {
 }
 
 export default function ChartsSection() {
+  const [analytics, setAnalytics] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    getCaseAnalytics()
+      .then((r) => {
+        if (active && r?.data) setAnalytics(r.data);
+      })
+      .catch((e) => console.error("Failed to load case analytics", e));
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      <CaseTypePieChart />
-      <CaseTrendChart />
-      <AnalystPerformanceChart />
+      <CaseTypePieChart
+        data={analytics?.typeDistribution?.length ? analytics.typeDistribution : caseTypeDistribution}
+      />
+      <CaseTrendChart
+        data={analytics?.trend?.length ? analytics.trend : caseTrendData}
+      />
+      <AnalystPerformanceChart
+        data={analytics?.analystPerformance?.length ? analytics.analystPerformance : analystPerformanceData}
+      />
     </div>
   );
 }

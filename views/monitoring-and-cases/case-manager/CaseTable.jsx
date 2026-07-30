@@ -13,8 +13,20 @@ import {
   IconPennant,
   IconChevronLeft,
   IconChevronRight,
+  IconFileReport,
+  IconBell,
+  IconArrowRight,
 } from "@tabler/icons-react";
 import { dateShowFormat } from "@/lib/utils";
+
+const fmtAUD = (v) =>
+  v == null
+    ? "—"
+    : new Intl.NumberFormat("en-AU", {
+        style: "currency",
+        currency: "AUD",
+        maximumFractionDigits: 0,
+      }).format(v);
 
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
@@ -99,34 +111,67 @@ export default function CaseTable({ cases, loading, currentPage, totalItems, lim
       ),
     },
     {
-      id: "assignedTo",
-      header: "Assigned To",
-      size: 160,
+      id: "filing",
+      header: "Filing",
+      size: 110,
+      cell: ({ row }) =>
+        row.original.sarFiled ? (
+          <StatusPill icon={<IconFileReport />} variant="success">
+            SAR Filed
+          </StatusPill>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        ),
+    },
+    {
+      id: "alerts",
+      header: "Alerts",
+      size: 80,
       cell: ({ row }) => {
-        const investigators = row.original.assignedTo || [];
-        if (investigators.length === 0) {
-          return <span className="text-xs text-muted-foreground">Unassigned</span>;
-        }
+        const n = row.original.alertCount ?? row.original.linkedAlerts?.length ?? 0;
+        return (
+          <div className="flex items-center gap-1 text-sm">
+            <IconBell className="size-3.5 text-muted-foreground" />
+            <span className={n > 0 ? "font-semibold text-heading" : "text-muted-foreground"}>
+              {n}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      id: "netActivity",
+      header: "Net Activity",
+      size: 130,
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-heading">
+          {fmtAUD(row.original.netActivity)}
+        </span>
+      ),
+    },
+    {
+      id: "review",
+      header: "Assignee → Reviewer",
+      size: 180,
+      cell: ({ row }) => {
+        const renderAvatar = (u) =>
+          u ? (
+            <Avatar className="h-6 w-6 border-2 border-white" title={u.name}>
+              <AvatarImage src={u.avatar} />
+              <AvatarFallback className="text-[8px]">
+                {u.name?.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <span className="grid h-6 w-6 place-items-center rounded-full border-2 border-dashed border-muted text-[10px] text-muted-foreground">
+              —
+            </span>
+          );
         return (
           <div className="flex items-center gap-1.5">
-            <div className="flex -space-x-1.5">
-              {investigators.slice(0, 3).map((u) => (
-                <Avatar key={u._id} className="h-6 w-6 border-2 border-white">
-                  <AvatarImage src={u.avatar} />
-                  <AvatarFallback className="text-[8px]">
-                    {u.name?.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-            </div>
-            {investigators.length === 1 && (
-              <span className="text-xs text-muted-foreground truncate max-w-[80px]">
-                {investigators[0].name}
-              </span>
-            )}
-            {investigators.length > 3 && (
-              <span className="text-xs text-muted-foreground">+{investigators.length - 3}</span>
-            )}
+            {renderAvatar(row.original.assignedTo)}
+            <IconArrowRight className="size-3 text-muted-foreground" />
+            {renderAvatar(row.original.reviewer)}
           </div>
         );
       },

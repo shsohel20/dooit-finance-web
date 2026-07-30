@@ -26,12 +26,12 @@ const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizab
   ssr: false,
 });
 
-function formatCurrency(amount) {
-  return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(amount);
+function formatCurrency(amount, currency = "AUD") {
+  return new Intl.NumberFormat("en-AU", { style: "currency", currency }).format(amount ?? 0);
 }
 
 export default function TransactionsTab({ caseData }) {
-  const transactions = caseData?.transactions || [];
+  const transactions = caseData?.linkedTransactions || [];
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortAmt, setSortAmt] = useState(null); // "asc" | "desc" | null
@@ -42,10 +42,9 @@ export default function TransactionsTab({ caseData }) {
       if (search) {
         const q = search.toLowerCase();
         return (
-          t.sender.toLowerCase().includes(q) ||
-          t.receiver.toLowerCase().includes(q) ||
-          t.location.toLowerCase().includes(q) ||
-          t.id.toLowerCase().includes(q)
+          (t.sender?.name || "").toLowerCase().includes(q) ||
+          (t.receiver?.name || "").toLowerCase().includes(q) ||
+          (t.uid || "").toLowerCase().includes(q)
         );
       }
       return true;
@@ -57,14 +56,15 @@ export default function TransactionsTab({ caseData }) {
     return list;
   }, [transactions, search, statusFilter, sortAmt]);
 
-  const flaggedCount = transactions.filter((t) => t.status === "flagged").length;
+  const flaggedCount = transactions.filter((t) => t.riskFlags?.length > 0).length;
+
   const columns = useMemo(
     () => [
       {
-        id: "id",
+        id: "uid",
         header: "Transaction ID",
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-muted-foreground">{row.original.id}</span>
+          <span className="font-mono text-xs text-muted-foreground">{row.original.uid}</span>
         ),
         size: 160,
       },
@@ -83,7 +83,7 @@ export default function TransactionsTab({ caseData }) {
         ),
         cell: ({ row }) => (
           <div className="font-semibold text-heading">
-            {formatCurrency(row.original.amount)}
+            {formatCurrency(row.original.amount, row.original.currency)}
             <span className="ml-1 text-xs font-normal text-muted-foreground">
               {row.original.currency}
             </span>
@@ -96,25 +96,29 @@ export default function TransactionsTab({ caseData }) {
         header: "Sender → Receiver",
         cell: ({ row }) => (
           <div className="flex items-center gap-1.5">
-            <span className="text-heading">{row.original.sender}</span>
+            <span className="text-heading">{row.original.sender?.name || "—"}</span>
             <IconArrowRight className="size-3.5 text-muted-foreground shrink-0" />
-            <span className="text-heading">{row.original.receiver}</span>
+            <span className="text-heading">{row.original.receiver?.name || "—"}</span>
           </div>
         ),
         size: 260,
       },
       {
-        id: "location",
-        header: "Location",
-        cell: ({ row }) => <span className="text-muted-foreground">{row.original.location}</span>,
-        size: 160,
+        id: "type",
+        header: "Type",
+        cell: ({ row }) => (
+          <span className="text-xs text-muted-foreground capitalize">
+            {(row.original.type || "").replace(/_/g, " ") || "—"}
+          </span>
+        ),
+        size: 120,
       },
       {
         id: "date",
         header: "Date",
         cell: ({ row }) => (
           <span className="text-xs text-muted-foreground">
-            {dateShowFormatWithTime(row.original.date)}
+            {dateShowFormatWithTime(row.original.timestamp)}
           </span>
         ),
         size: 180,
@@ -122,16 +126,18 @@ export default function TransactionsTab({ caseData }) {
       {
         id: "status",
         header: "Status",
-        cell: ({ row }) =>
-          row.original.status === "flagged" ? (
+        cell: ({ row }) => {
+          const isFlagged = row.original.riskFlags?.length > 0;
+          return isFlagged ? (
             <StatusPill icon={<IconAlertTriangle />} variant="danger">
               Flagged
             </StatusPill>
           ) : (
             <StatusPill icon={<IconCircleCheck />} variant="success">
-              Normal
+              <span className="capitalize">{row.original.status || "Normal"}</span>
             </StatusPill>
-          ),
+          );
+        },
         size: 140,
       },
     ],
@@ -173,13 +179,15 @@ export default function TransactionsTab({ caseData }) {
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-8 w-28 text-xs">
+              <SelectTrigger className="h-8 w-32 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
-                <SelectItem value="flagged">Flagged</SelectItem>
-                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>

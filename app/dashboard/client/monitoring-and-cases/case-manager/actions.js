@@ -22,6 +22,12 @@ export const getCaseById = async (id) => {
   return res.json();
 };
 
+// Aggregated analytics for the Case Manager dashboard (cards + charts).
+export const getCaseAnalytics = async () => {
+  const res = await fetchWithAuth('cases/analytics');
+  return res.json();
+};
+
 export const createCase = async (payload) => {
   const res = await fetchWithAuth('cases', {
     method: 'POST',
@@ -46,10 +52,10 @@ export const updateCaseStatus = async (id, status, closureReason) => {
   return res.json();
 };
 
-export const assignInvestigators = async (id, investigatorIds) => {
+export const assignInvestigators = async (id, investigatorId) => {
   const res = await fetchWithAuth(`cases/${id}/assign`, {
     method: 'PATCH',
-    body: JSON.stringify({ investigatorIds }),
+    body: JSON.stringify({ investigatorId: investigatorId || null }),
   });
   return res.json();
 };
