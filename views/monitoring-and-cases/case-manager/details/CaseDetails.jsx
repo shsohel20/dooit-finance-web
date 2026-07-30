@@ -1,11 +1,16 @@
 "use client";
 
 import { useMemo, useRef, useState, lazy, Suspense } from "react";
-import { IconFolderOff, IconFolders } from "@tabler/icons-react";
+import {
+  IconFolderOff,
+  IconFolders,
+  IconHistory,
+  IconInfoCircle,
+  IconSitemap,
+} from "@tabler/icons-react";
 import { mockCases } from "@/lib/case-manager-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import CaseHeader from "./CaseHeader";
-import RightActionPanel from "./RightActionPanel";
 import CollapsibleSection from "./components/CollapsibleSection";
 import InvestigationSummary from "./sections/InvestigationSummary";
 import CustomerProfileSection from "./sections/CustomerProfileSection";
@@ -19,11 +24,15 @@ import RelatedCasesSection from "./sections/RelatedCasesSection";
 import CreateRFIModal from "./modals/CreateRFIModal";
 import ReassignCaseModal from "./modals/ReassignCaseModal";
 import OsiintData from "./OsiintData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ATMInfoTab = lazy(() => import("./tabs/ATMInfoTab"));
 const DeviceInfoTab = lazy(() => import("./tabs/DeviceInfoTab"));
 const RelationshipsTab = lazy(() => import("./tabs/RelationshipsTab"));
 const FilesTab = lazy(() => import("./tabs/FilesTab"));
+import partyEntities from "../../../onboarding/customer-queue/details/demo.json";
+import { transformToGraph } from "@/views/onboarding/customer-queue/details/d3/lib/transformgraphData";
+import NetworkGraph from "@/views/onboarding/customer-queue/details/d3/Networkgraph";
 
 function AdditionalRecordsSkeleton() {
   return (
@@ -34,6 +43,7 @@ function AdditionalRecordsSkeleton() {
     </div>
   );
 }
+const graphData = transformToGraph(partyEntities);
 
 export default function CaseDetails({ caseId }) {
   const caseData = useMemo(() => mockCases.find((c) => c._id === caseId) || null, [caseId]);
@@ -196,86 +206,85 @@ export default function CaseDetails({ caseId }) {
   const isClosed = status === "Closed";
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="flex flex-col gap-4 xl:col-span-9 col-span-12">
-        <CaseHeader
-          caseData={{ ...caseData, lastUpdated: caseData.lastUpdated }}
-          status={status}
-          priority={priority}
-          assignedAnalyst={assignedAnalyst}
-          onOpenAssign={() => setAssignOpen(true)}
-          onOpenRFI={() => setRfiOpen(true)}
-          onEscalate={handleEscalate}
-          onGenerateSTR={handleGenerateSTR}
-          onCloseCase={handleCloseCase}
-          onReopenCase={handleReopenCase}
-        />
-
-        <InvestigationSummary
-          caseData={caseData}
-          sectionRef={setSectionRef("investigation-summary")}
-        />
-
-        <CustomerProfileSection
-          caseData={caseData}
-          sectionRef={setSectionRef("customer-profile")}
-        />
-
-        <TransactionAnalysisSection
-          caseData={caseData}
-          sectionRef={setSectionRef("transactions")}
-        />
-
-        <InvestigationTimelineSection
-          caseData={caseData}
-          activities={activities}
-          sectionRef={setSectionRef("timeline")}
-        />
-
-        <InvestigatorNotes
-          notes={notes}
-          onAddNote={handleAddNote}
-          onTogglePin={handleTogglePin}
-          sectionRef={setSectionRef("notes")}
-        />
-
-        <RFISection
-          rfis={rfis}
-          onOpenCreateRFI={() => setRfiOpen(true)}
-          sectionRef={setSectionRef("rfi")}
-        />
-
-        <CaseAssignmentSection
-          assignedAnalyst={assignedAnalyst}
-          assignment={assignment}
-          onOpenReassign={() => setAssignOpen(true)}
-          sectionRef={setSectionRef("assignment")}
-        />
-
-        <AuditLog auditLog={auditLog} sectionRef={setSectionRef("audit-log")} />
-
-        <RelatedCasesSection caseData={caseData} sectionRef={setSectionRef("related-cases")} />
-
-        <CollapsibleSection
-          id="additional-records"
-          title="Additional Records"
-          icon={IconFolders}
-          defaultOpen={false}
-          sectionRef={setSectionRef("additional-records")}
-        >
-          <Suspense fallback={<AdditionalRecordsSkeleton />}>
-            <div className="flex flex-col gap-4">
-              <ATMInfoTab caseData={caseData} />
-              <DeviceInfoTab caseData={caseData} />
-              <RelationshipsTab caseData={caseData} />
-              <FilesTab caseData={caseData} />
-            </div>
-          </Suspense>
-        </CollapsibleSection>
-      </div>
-
-      <div className="xl:col-span-3 col-span-12">
-        {/* <RightActionPanel
+    <div className=" gap-4">
+      <div className="flex flex-col gap-4 ">
+        <Tabs defaultValue="overview">
+          <TabsList>
+            <TabsTrigger value="overview">
+              {" "}
+              <IconInfoCircle /> Overview
+            </TabsTrigger>
+            <TabsTrigger value="timeline">
+              {" "}
+              <IconHistory />
+              Investigation timeline
+            </TabsTrigger>
+            <TabsTrigger value="relation-graph">
+              <IconSitemap /> Relation graph
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">
+            <div className="grid grid-cols-12 gap-4">
+              <div className="space-y-4 xl:col-span-9 col-span-12">
+                <CaseHeader
+                  caseData={{ ...caseData, lastUpdated: caseData.lastUpdated }}
+                  status={status}
+                  priority={priority}
+                  assignedAnalyst={assignedAnalyst}
+                  onOpenAssign={() => setAssignOpen(true)}
+                  onOpenRFI={() => setRfiOpen(true)}
+                  onEscalate={handleEscalate}
+                  onGenerateSTR={handleGenerateSTR}
+                  onCloseCase={handleCloseCase}
+                  onReopenCase={handleReopenCase}
+                />
+                <InvestigationSummary
+                  caseData={caseData}
+                  sectionRef={setSectionRef("investigation-summary")}
+                />
+                <CustomerProfileSection
+                  caseData={caseData}
+                  sectionRef={setSectionRef("customer-profile")}
+                />
+                <TransactionAnalysisSection
+                  caseData={caseData}
+                  sectionRef={setSectionRef("transactions")}
+                />
+                <RFISection
+                  rfis={rfis}
+                  onOpenCreateRFI={() => setRfiOpen(true)}
+                  sectionRef={setSectionRef("rfi")}
+                />
+                <CaseAssignmentSection
+                  assignedAnalyst={assignedAnalyst}
+                  assignment={assignment}
+                  onOpenReassign={() => setAssignOpen(true)}
+                  sectionRef={setSectionRef("assignment")}
+                />
+                <AuditLog auditLog={auditLog} sectionRef={setSectionRef("audit-log")} />
+                <RelatedCasesSection
+                  caseData={caseData}
+                  sectionRef={setSectionRef("related-cases")}
+                />
+                <CollapsibleSection
+                  id="additional-records"
+                  title="Additional Records"
+                  icon={IconFolders}
+                  defaultOpen={false}
+                  sectionRef={setSectionRef("additional-records")}
+                >
+                  <Suspense fallback={<AdditionalRecordsSkeleton />}>
+                    <div className="flex flex-col gap-4">
+                      <ATMInfoTab caseData={caseData} />
+                      <DeviceInfoTab caseData={caseData} />
+                      <RelationshipsTab caseData={caseData} />
+                      <FilesTab caseData={caseData} />
+                    </div>
+                  </Suspense>
+                </CollapsibleSection>
+              </div>
+              <div className="xl:col-span-3 col-span-12">
+                {/* <RightActionPanel
             isClosed={isClosed}
             onOpenAssign={() => setAssignOpen(true)}
             onOpenRFI={() => setRfiOpen(true)}
@@ -284,7 +293,32 @@ export default function CaseDetails({ caseId }) {
             onGenerateSTR={handleGenerateSTR}
             onCloseCase={handleCloseCase}
           /> */}
-        <OsiintData />
+                <OsiintData />
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="timeline">
+            <div className="space-y-4">
+              <InvestigationTimelineSection
+                caseData={caseData}
+                activities={activities}
+                sectionRef={setSectionRef("timeline")}
+              />
+              <InvestigatorNotes
+                notes={notes}
+                onAddNote={handleAddNote}
+                onTogglePin={handleTogglePin}
+                sectionRef={setSectionRef("notes")}
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="relation-graph">
+            {/* <div className="space-y-4">
+              <RelationGraph />
+            </div> */}
+            <NetworkGraph data={graphData} onNodeClick={() => {}} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <CreateRFIModal open={rfiOpen} onOpenChange={setRfiOpen} onSubmit={handleCreateRFI} />
