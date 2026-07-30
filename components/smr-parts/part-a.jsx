@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, HelpCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import SelectCaseList from '../ui/SelectCaseList';
+import SelectCase from '../ui/SelectCase';
 import { autoPopulatedSMRData } from '@/app/dashboard/client/report-compliance/smr-filing/smr/actions';
 
 const DESIGNATED_SERVICES = [
@@ -179,12 +180,23 @@ export function PartA({ data, updateData }) {
     <div className="space-y-8">
       {/* Question 1 */}
       <div className="space-y-4">
-        <div className="max-w-sm">
+        <div className="grid max-w-3xl gap-4 sm:grid-cols-2">
           <SelectCaseList
-            label="Case Number"
+            label="Alert / Case Number"
             onChange={handleCaseNumberChange}
             value={data?.caseNumber}
           />
+          <div>
+            <SelectCase
+              label="Case (investigation hub)"
+              value={data?.caseId || null}
+              onChange={(value) => updateData({ caseId: value })}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Optional — leave blank to inherit the Case from the selected alert
+              once it has been escalated.
+            </p>
+          </div>
         </div>
         <div className="flex items-start gap-2">
           <Label className="text-base font-bold ">

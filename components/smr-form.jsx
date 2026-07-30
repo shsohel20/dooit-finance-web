@@ -86,6 +86,16 @@ export function SuspiciousMatterReportForm({ id, caseNumber, caseId }) {
         attachments: response?.data?.partG?.attachments,
         reportingEntity: response?.data?.partH?.reportingEntity,
         caseNumber: response?.data?.caseNumber,
+        // Keep the existing Case link selected so saving an edit cannot
+        // silently detach the report from its case.
+        caseId: response?.data?.caseId
+          ? {
+              label: response.data.caseId.uid
+                ? `${response.data.caseId.uid} — ${response.data.caseId.title || 'Untitled'}`
+                : String(response.data.caseId._id || response.data.caseId),
+              value: String(response.data.caseId._id || response.data.caseId),
+            }
+          : null,
       };
       setFormData(modifiedData);
     } catch (error) {
@@ -137,7 +147,21 @@ export function SuspiciousMatterReportForm({ id, caseNumber, caseId }) {
     const submittedData = {
       id: id,
       status: 'draft',
-      caseNumber: formData.caseNumber?.uid,
+      // `caseNumber` arrives in three shapes: a full Alert object (Part A
+      // picker), a { label, value } pair (opened from the alert list), or a
+      // plain string (editing an existing report). Reading `.uid` alone silently
+      // dropped the last two, which left the SMR unlinked from its alert.
+      caseNumber:
+        formData.caseNumber?.uid ||
+        formData.caseNumber?.value ||
+        (typeof formData.caseNumber === 'string'
+          ? formData.caseNumber
+          : undefined),
+      // Case hub, when one was picked explicitly in Part A.
+      ...(formData.caseId?.value ? { caseId: formData.caseId.value } : {}),
+      // The alert list passes the originating Alert's _id in the `caseId` query
+      // param — send it as alertId so provenance survives alongside the Case.
+      ...(caseId ? { alertId: caseId } : {}),
       partA: {
         serviceStatus: formData.serviceStatus,
         designatedServices: formData.designatedServices,
