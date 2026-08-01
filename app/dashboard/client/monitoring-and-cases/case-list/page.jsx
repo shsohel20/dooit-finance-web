@@ -18,6 +18,7 @@ import {
   IconGridDots,
   IconList,
   IconPennant,
+  IconPlus,
   IconSearch,
   IconUserPlus,
 } from "@tabler/icons-react";
@@ -86,7 +87,7 @@ const ListView = ({}) => {
       cell: ({ row }) => (
         <>
           <div className="flex justify-center gap-2">
-            <Button
+            {/* <Button
               size="sm"
               variant="outline"
               className=" bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 text-amber-900 font-semibold transition-all duration-200 dark:from-amber-950 dark:to-orange-950 dark:border-amber-800 dark:text-amber-100 dark:hover:border-amber-700 "
@@ -94,10 +95,12 @@ const ListView = ({}) => {
             >
               <span>E</span>
               <span className="text-[0.7rem] bg-secondary">cdd</span>
+            </Button> */}
+            <Button size="sm" variant="outline">
+              <IconPlus /> Triage
             </Button>
 
-            {/* SMR Button - Blue/Cyan theme */}
-            <Button
+            {/* <Button
               size="sm"
               variant="outline"
               className=" bg-gradient-to-br from-red-50 to-rose-50 border-red-200 hover:from-red-100 hover:to-rose-100 hover:border-red-300 text-red-900 font-semibold  transition-all duration-200 dark:from-red-950 dark:to-rose-950 dark:border-red-800 dark:text-red-100 dark:hover:border-red-700 "
@@ -105,10 +108,9 @@ const ListView = ({}) => {
               // disabled={loadingButton === `smr-${alert.caseId}`}
             >
               S <span className="text-[0.7rem] bg-secondary">mr</span>
-            </Button>
+            </Button> */}
 
-            {/* RFI Button - Red/Rose theme */}
-            <Button
+            {/* <Button
               size="sm"
               variant="outline"
               className=" bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 hover:from-blue-100 hover:to-cyan-100 hover:border-blue-300 text-blue-900 font-semibold  transition-all duration-200 dark:from-blue-950 dark:to-cyan-950 dark:border-blue-800 dark:text-blue-100 dark:hover:border-blue-700"
@@ -116,7 +118,7 @@ const ListView = ({}) => {
               // disabled={loadingButton === `rfi-${alert.caseId}`}
             >
               R <span className="text-[0.7rem] bg-secondary">fi</span>
-            </Button>
+            </Button> */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

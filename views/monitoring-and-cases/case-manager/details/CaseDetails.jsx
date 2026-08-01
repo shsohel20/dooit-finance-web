@@ -225,7 +225,13 @@ export default function CaseDetails({ caseId }) {
           </TabsList>
           <TabsContent value="overview">
             <div className="grid grid-cols-12 gap-4">
-              <div className="space-y-4 xl:col-span-9 col-span-12">
+              <div className="xl:col-span-2 col-span-12">
+                <RelatedCasesSection
+                  caseData={caseData}
+                  sectionRef={setSectionRef("related-cases")}
+                />
+              </div>
+              <div className="space-y-4 xl:col-span-7 col-span-12">
                 <CaseHeader
                   caseData={{ ...caseData, lastUpdated: caseData.lastUpdated }}
                   status={status}
@@ -262,10 +268,7 @@ export default function CaseDetails({ caseId }) {
                   sectionRef={setSectionRef("assignment")}
                 />
                 <AuditLog auditLog={auditLog} sectionRef={setSectionRef("audit-log")} />
-                <RelatedCasesSection
-                  caseData={caseData}
-                  sectionRef={setSectionRef("related-cases")}
-                />
+
                 <CollapsibleSection
                   id="additional-records"
                   title="Additional Records"
@@ -299,16 +302,16 @@ export default function CaseDetails({ caseId }) {
           </TabsContent>
           <TabsContent value="timeline">
             <div className="space-y-4">
-              <InvestigationTimelineSection
-                caseData={caseData}
-                activities={activities}
-                sectionRef={setSectionRef("timeline")}
-              />
               <InvestigatorNotes
                 notes={notes}
                 onAddNote={handleAddNote}
                 onTogglePin={handleTogglePin}
                 sectionRef={setSectionRef("notes")}
+              />
+              <InvestigationTimelineSection
+                caseData={caseData}
+                activities={activities}
+                sectionRef={setSectionRef("timeline")}
               />
             </div>
           </TabsContent>
