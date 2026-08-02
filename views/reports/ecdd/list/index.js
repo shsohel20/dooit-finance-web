@@ -58,8 +58,25 @@ const EcddList = () => {
 
     }, [currentPage, limit])
 
-    const handleView = (caseId) => {
-        router.push(`/dashboard/client/monitoring-and-cases/case-list/details/${caseId}?tab=ecdd-review`);
+    // The case-list details route is alert-centric: it loads `alert/{id}` into
+    // the alert store and every tab reads from it. Passing a Case id there makes
+    // the lookup 404 and leaves all tabs blank, so route by what the report has.
+    const idOf = (ref) => (ref && typeof ref === 'object' ? ref._id : ref) || null;
+
+    const handleView = (row) => {
+        const alertId = idOf(row?.alert);
+        if (alertId) {
+            router.push(`/dashboard/client/monitoring-and-cases/case-list/details/${alertId}?tab=ecdd-review`);
+            return;
+        }
+        // Case-origin ECDD (no triggering alert): the case-centric view lists it
+        // under Regulatory Filings.
+        const caseId = idOf(row?.caseId);
+        if (caseId) {
+            router.push(`/dashboard/client/monitoring-and-cases/case-manager/${caseId}`);
+            return;
+        }
+        toast.error('This ECDD is not linked to an alert or a case yet.');
     }
     const handleEdit = (id) => {
         // router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`);
@@ -69,7 +86,12 @@ const EcddList = () => {
         setDeleteId(id);
         setOpenDeleteModal(true);
     }
-    const handleGenerateEcdd = (alertId) => {
+    const handleGenerateEcdd = (row) => {
+        const alertId = idOf(row?.alert);
+        if (!alertId) {
+            toast.error('No originating alert on this ECDD to generate from.');
+            return;
+        }
         router.push(`/dashboard/client/monitoring-and-cases/case-list/details/${alertId}`);
     }
     const columns = [
@@ -86,9 +108,9 @@ const EcddList = () => {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleView(row?.original?.caseId)}> <Eye />View</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleView(row?.original)}> <Eye />View</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleEdit(row?.original?._id)}> <Edit />Edit</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleGenerateEcdd(row?.original?.caseId)}> <FileText />Generate ECDD</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleGenerateEcdd(row?.original)}> <FileText />Generate ECDD</DropdownMenuItem>
                         <DropdownMenuItem variant='destructive' onClick={() => handleDelete(row?.original?._id)}> <Trash />Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

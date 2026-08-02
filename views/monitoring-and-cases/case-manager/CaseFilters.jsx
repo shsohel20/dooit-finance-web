@@ -13,14 +13,38 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { IconX } from "@tabler/icons-react";
 import { useCaseManagerStore } from "@/app/store/useCaseManagerStore";
-import { analysts, CASE_TYPES, RISK_LEVELS, CASE_STATUSES } from "@/lib/case-manager-data";
+
+const CASE_TYPES = [
+  { value: "SAR", label: "SAR" },
+  { value: "PEP", label: "PEP" },
+  { value: "transaction_monitoring", label: "Transaction Monitoring" },
+  { value: "other", label: "Other" },
+];
+
+const PRIORITY_OPTIONS = [
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+  { value: "critical", label: "Critical" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "open", label: "Open" },
+  { value: "under_investigation", label: "Under Investigation" },
+  { value: "pending_review", label: "Pending Review" },
+  { value: "closed", label: "Closed" },
+  { value: "escalated", label: "Escalated" },
+];
+
+const SORT_OPTIONS = [
+  { value: "createdAt", label: "Created Date" },
+  { value: "updatedAt", label: "Last Updated" },
+  { value: "priority", label: "Priority" },
+  { value: "status", label: "Status" },
+];
 
 export default function CaseFilters({ onClose }) {
   const { filters, setFilter, resetFilters } = useCaseManagerStore();
-
-  const handleReset = () => {
-    resetFilters();
-  };
 
   return (
     <div className="flex h-full flex-col">
@@ -38,7 +62,7 @@ export default function CaseFilters({ onClose }) {
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">Case Type</Label>
           <Select
-            value={filters.caseType}
+            value={filters.caseType || "all"}
             onValueChange={(v) => setFilter("caseType", v === "all" ? "" : v)}
           >
             <SelectTrigger className="h-9 text-sm">
@@ -47,29 +71,29 @@ export default function CaseFilters({ onClose }) {
             <SelectContent>
               <SelectItem value="all">All types</SelectItem>
               {CASE_TYPES.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {t}
+                <SelectItem key={t.value} value={t.value}>
+                  {t.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        {/* Risk Level */}
+        {/* Priority */}
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium">Risk Level</Label>
+          <Label className="text-xs font-medium">Priority</Label>
           <Select
-            value={filters.riskLevel}
+            value={filters.riskLevel || "all"}
             onValueChange={(v) => setFilter("riskLevel", v === "all" ? "" : v)}
           >
             <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="All levels" />
+              <SelectValue placeholder="All priorities" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All levels</SelectItem>
-              {RISK_LEVELS.map((r) => (
-                <SelectItem key={r} value={r}>
-                  {r}
+              <SelectItem value="all">All priorities</SelectItem>
+              {PRIORITY_OPTIONS.map((p) => (
+                <SelectItem key={p.value} value={p.value}>
+                  {p.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -80,7 +104,7 @@ export default function CaseFilters({ onClose }) {
         <div className="space-y-1.5">
           <Label className="text-xs font-medium">Status</Label>
           <Select
-            value={filters.status}
+            value={filters.status || "all"}
             onValueChange={(v) => setFilter("status", v === "all" ? "" : v)}
           >
             <SelectTrigger className="h-9 text-sm">
@@ -88,30 +112,9 @@ export default function CaseFilters({ onClose }) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
-              {CASE_STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Assigned Analyst */}
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium">Assigned Analyst</Label>
-          <Select
-            value={filters.assignedAnalyst}
-            onValueChange={(v) => setFilter("assignedAnalyst", v === "all" ? "" : v)}
-          >
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="All analysts" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All analysts</SelectItem>
-              {analysts.map((a) => (
-                <SelectItem key={a.id} value={a.name}>
-                  {a.name}
+              {STATUS_OPTIONS.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -142,10 +145,50 @@ export default function CaseFilters({ onClose }) {
             />
           </div>
         </div>
+
+        <Separator />
+
+        {/* Sort */}
+        <div className="space-y-3">
+          <Label className="text-xs font-medium">Sort</Label>
+          <div className="space-y-1.5">
+            <Label className="text-[11px] text-muted-foreground">Sort by</Label>
+            <Select
+              value={filters.sortBy || "createdAt"}
+              onValueChange={(v) => setFilter("sortBy", v)}
+            >
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SORT_OPTIONS.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-[11px] text-muted-foreground">Order</Label>
+            <Select
+              value={filters.sortOrder || "desc"}
+              onValueChange={(v) => setFilter("sortOrder", v)}
+            >
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="desc">Newest first</SelectItem>
+                <SelectItem value="asc">Oldest first</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       <div className="mt-4 border-t pt-3">
-        <Button variant="outline" size="sm" className="w-full" onClick={handleReset}>
+        <Button variant="outline" size="sm" className="w-full" onClick={resetFilters}>
           Reset Filters
         </Button>
       </div>

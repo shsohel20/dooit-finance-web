@@ -10,6 +10,13 @@ export const getCaseDetails = async (id) => {
   return response.json();
 };
 
+// Unified reports (ECDD/SMR/TTR/IFTI/GFS/RFI) attached to a Case.
+// `id` is a Case _id (e.g. alert.linkedCase).
+export const getCaseReports = async (id) => {
+  const response = await fetchWithAuth(`cases/${id}/reports`);
+  return response.json();
+};
+
 export const getCaseList = async (queryParams) => {
   const queryString = getQueryString(queryParams);
   const response = await fetchWithAuth(`${endpoint}?${queryString}`);

@@ -1,138 +1,130 @@
-'use client';
+'use client'
+import { useEffect, useMemo, useState } from 'react'
+import { Search } from 'lucide-react'
+import { toast } from 'sonner'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { getAllRules } from '@/app/dashboard/client/risk-rule-engine/rule-configuration/actions'
 
-import { useState } from 'react';
-import { Search, Download } from 'lucide-react';
+const STATUS_VARIANT = {
+  active: 'default',
+  draft: 'secondary',
+  paused: 'secondary',
+  archived: 'outline',
+}
 
+const fmtDate = (val) => {
+  if (!val) return '—'
+  const d = new Date(val)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleString()
+}
 
-const mockChanges = [
-  {
-    id: '1',
-    date: '2025-06-15',
-    time: '14:32:10',
-    user: 'admin@fintech.com',
-    ruleId: 'TRK-001',
-    action: 'Modified',
-    description: 'Updated transaction amount threshold from 5000 to 10000',
-  },
-  {
-    id: '2',
-    date: '2025-06-15',
-    time: '14:32:10',
-    user: 'admin@fintech.com',
-    ruleId: 'TRK-001',
-    action: 'Modified',
-    description: 'Updated transaction amount threshold from 5000 to 10000',
-  },
-  {
-    id: '3',
-    date: '2025-06-15',
-    time: '14:32:10',
-    user: 'admin@fintech.com',
-    ruleId: 'TRK-001',
-    action: 'Modified',
-    description: 'Updated transaction amount threshold from 5000 to 10000',
-  },
-];
+const resolveUser = (ref) => {
+  if (!ref) return '—'
+  if (typeof ref === 'object') return ref.name || ref.email || String(ref._id || '—')
+  return String(ref)
+}
 
 export default function ChangeHistory() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [rules, setRules] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
 
-  const itemsPerPage = 10;
-  const totalPages = 68;
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      setLoading(true)
+      try {
+        const res = await getAllRules()
+        if (!cancelled) {
+          const data = Array.isArray(res?.data) ? res.data : []
+          setRules(data.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)))
+        }
+      } catch (e) {
+        if (!cancelled) toast.error(e?.message || 'Failed to load history')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
-  const filteredChanges = mockChanges.filter((change) =>
-    change.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    change.ruleId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    change.date.includes(searchQuery)
-  );
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return rules
+    return rules.filter((r) =>
+      r.ruleId?.toLowerCase().includes(q) ||
+      r.ruleName?.toLowerCase().includes(q) ||
+      resolveUser(r.updatedBy).toLowerCase().includes(q)
+    )
+  }, [rules, search])
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-1">Change History</h1>
-          <p className="text-muted-foreground">Audit log of all rule modifications and changes</p>
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            className="pl-8 h-9 text-sm"
+            placeholder="Search by rule ID, name, or editor…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
+      </div>
 
-        {/* Controls */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div className="relative flex-1 md:max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search by name, ID, date"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-input border border-border rounded-md text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-md hover:opacity-90 transition-opacity font-medium">
-            <Download className="w-4 h-4" />
-            Export CSV/Excel
-          </button>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto bg-card border border-border rounded-lg">
-          <table className="w-full">
-            <thead className="bg-secondary border-b border-border">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Date & Time</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">User</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Rule ID</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Action</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Change Description</th>
+      {loading ? (
+        <p className="py-10 text-center text-sm text-muted-foreground">Loading history…</p>
+      ) : !filtered.length ? (
+        <p className="py-10 text-center text-sm text-muted-foreground">No results.</p>
+      ) : (
+        <div className="rounded-md border overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Rule ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Version</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Last Modified</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Updated By</th>
               </tr>
             </thead>
-            <tbody>
-              {filteredChanges.map((change, index) => (
-                <tr
-                  key={change.id}
-                  className={`border-b border-border hover:bg-secondary/30 transition-colors ${index === filteredChanges.length - 1 ? 'border-b-0' : ''
-                    }`}
-                >
-                  <td className="px-6 py-4 text-sm text-foreground whitespace-nowrap">
-                    {change.date} {change.time}
+            <tbody className="divide-y">
+              {filtered.map((rule) => (
+                <tr key={rule._id} className="hover:bg-muted/30 transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{rule.ruleId}</td>
+                  <td className="px-4 py-3 font-medium">{rule.ruleName}</td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
+                      v{rule.version ?? 1}
+                    </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-foreground">{change.user}</td>
-                  <td className="px-6 py-4 text-sm text-foreground font-medium">{change.ruleId}</td>
-                  <td className="px-6 py-4 text-sm text-foreground">{change.action}</td>
-                  <td className="px-6 py-4 text-sm text-foreground">{change.description}</td>
+                  <td className="px-4 py-3">
+                    <Badge
+                      variant={STATUS_VARIANT[rule.status] || 'secondary'}
+                      className="text-xs px-1.5 py-0 capitalize"
+                    >
+                      {rule.status}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {fmtDate(rule.updatedAt)}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                    {resolveUser(rule.updatedBy)}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
 
-        {/* Pagination */}
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <button className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Previous
-          </button>
-          <div className="flex items-center gap-1">
-            {[1, 2, 3].map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 rounded text-sm font-medium transition-colors ${currentPage === page
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-                  }`}
-              >
-                {page}
-              </button>
-            ))}
-            <span className="text-muted-foreground">...</span>
-            <button className="w-8 h-8 text-sm text-muted-foreground hover:text-foreground transition-colors">67</button>
-            <button className="w-8 h-8 text-sm text-muted-foreground hover:text-foreground transition-colors">68</button>
-          </div>
-          <button className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Next →
-          </button>
-        </div>
-      </div>
-    </main>
-  );
+      <p className="mt-2 text-xs text-muted-foreground">
+        Showing {filtered.length} of {rules.length} rule{rules.length !== 1 ? 's' : ''}
+      </p>
+    </div>
+  )
 }

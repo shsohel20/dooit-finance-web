@@ -24,6 +24,7 @@ import {
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { getCaseList } from "./actions";
+import { getEcddByCaseNumber } from "@/app/dashboard/client/report-compliance/ecdd/actions";
 import { ArrowRight } from "lucide-react";
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
@@ -48,6 +49,9 @@ const ListView = ({}) => {
   const [caseNumber, setCaseNumber] = useState(null);
   const [openRfi, setOpenRfi] = useState(false);
   const [openAssignToAnalyst, setOpenAssignToAnalyst] = useState(false);
+  // Alert whose ECDD lookup is in flight — guards against double-clicks while
+  // we decide between the review tab and the create form.
+  const [ecddCheckingId, setEcddCheckingId] = useState(null);
   const router = useRouter();
   const riskVariants = {
     Low: "info",
@@ -60,9 +64,31 @@ const ListView = ({}) => {
     Rejected: "danger",
     "In Review": "warning",
   };
-  const handleGenerateEcdd = (caseNumber) => {
-    // console.log("caseNumber", caseNumber);
-    router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${caseNumber}`);
+  // ECDD action is view-or-create: open the existing report's review tab when
+  // this alert already has one, otherwise start a new form pre-filled with it.
+  const handleGenerateEcdd = async (alert) => {
+    const uid = alert?.uid;
+    if (!uid) return;
+
+    setEcddCheckingId(alert?._id || uid);
+    try {
+      const res = await getEcddByCaseNumber(uid);
+      // The endpoint 404s when no report exists, so a populated `data` is the
+      // existence check. Note this route returns `success`, not `succeed`.
+      if (res?.success && res?.data?._id && alert?._id) {
+        router.push(
+          `/dashboard/client/monitoring-and-cases/case-list/details/${alert._id}?tab=ecdd-review`,
+        );
+        return;
+      }
+    } catch (error) {
+      // Fall through to the create form — a lookup failure shouldn't block it.
+      console.error("ECDD lookup failed", error);
+    } finally {
+      setEcddCheckingId(null);
+    }
+
+    router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${uid}`);
   };
   const handleGenerateSmr = (data) => {
     router.push(
@@ -90,7 +116,8 @@ const ListView = ({}) => {
               size="sm"
               variant="outline"
               className=" bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300 text-amber-900 font-semibold transition-all duration-200 dark:from-amber-950 dark:to-orange-950 dark:border-amber-800 dark:text-amber-100 dark:hover:border-amber-700 "
-              onClick={() => handleGenerateEcdd(row?.original?.uid)}
+              onClick={() => handleGenerateEcdd(row?.original)}
+              disabled={ecddCheckingId === (row?.original?._id || row?.original?.uid)}
             >
               <span>E</span>
               <span className="text-[0.7rem] bg-secondary">cdd</span>
@@ -138,9 +165,9 @@ const ListView = ({}) => {
                   <IconEye className="mr-2 size-4 " />
                   View
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleGenerateEcdd(row?.original?.uid)}>
+                <DropdownMenuItem onClick={() => handleGenerateEcdd(row?.original)}>
                   <IconFilePlus className="mr-2 size-4 " />
-                  Generate ECDD
+                  ECDD
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleAssignToAnalyst(row?.original)}>
                   <IconUserPlus className="mr-2 size-4 " />

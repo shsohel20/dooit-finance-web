@@ -1,42 +1,87 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { StatusPill } from "@/components/ui/StatusPill";
 import { Badge } from "@/components/ui/badge";
-import { IconArrowLeft, IconPennant, IconUser, IconCalendar } from "@tabler/icons-react";
-import { cn, dateShowFormat } from "@/lib/utils";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  IconArrowLeft,
+  IconUserCheck,
+  IconMessageCircle,
+  IconAlertOctagon,
+  IconGavel,
+  IconBan,
+  IconDots,
+  IconPrinter,
+  IconFileExport,
+  IconCopy,
+  IconRotateClockwise,
+  IconCalendar,
+  IconRefresh,
+} from "@tabler/icons-react";
+import { dateShowFormatWithTime, getInitials } from "@/lib/utils";
+import RiskScoreGauge from "./components/RiskScoreGauge";
+import SlaCountdown from "./components/SlaCountdown";
+import ReasonAlertDialog from "./components/ReasonAlertDialog";
 
-const riskVariants = {
-  High: "danger",
-  Medium: "warning",
-  Low: "info",
+// Keyed lowercase to match the Case model enums
+// (low | medium | high | critical). Values are normalised before lookup so
+// Title-case values from the mock fixtures still resolve.
+const priorityVariants = {
+  critical: "danger",
+  high: "warning",
+  medium: "info",
+  low: "outline",
 };
 
 const statusVariants = {
-  Active: "success",
-  "Under Review": "warning",
-  Closed: "outline",
+  open: "info",
+  under_investigation: "warning",
+  pending_review: "outline",
+  closed: "success",
+  escalated: "danger",
 };
 
-const riskHeaderBg = {
-  High: "from-red-50 to-orange-50 border-red-100",
-  Medium: "from-yellow-50 to-amber-50 border-yellow-100",
-  Low: "from-blue-50 to-cyan-50 border-blue-100",
+const STATUS_LABELS = {
+  open: "Open",
+  under_investigation: "Under Investigation",
+  pending_review: "Pending Review",
+  closed: "Closed",
+  escalated: "Escalated",
 };
 
-export default function CaseHeader({ caseData }) {
+export default function CaseHeader({
+  caseData,
+  status,
+  priority,
+  assignedAnalyst,
+  onOpenAssign,
+  onOpenRFI,
+  onEscalate,
+  onGenerateSTR,
+  onCloseCase,
+  onReopenCase,
+}) {
   const router = useRouter();
 
   if (!caseData) return null;
 
+  const statusKey = String(status ?? "").toLowerCase();
+  const priorityKey = String(priority ?? "").toLowerCase();
+  const isClosed = statusKey === "closed";
+
   return (
-    <div
-      className={cn(
-        "rounded-xl border bg-gradient-to-r p-5 shadow-sm",
-        riskHeaderBg[caseData.riskTag] || "from-gray-50 to-slate-50 border-border",
-      )}
-    >
+    <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
         <Button
           variant="ghost"
@@ -49,64 +94,183 @@ export default function CaseHeader({ caseData }) {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        {/* Left: identity */}
+        <div className="flex flex-col gap-2.5">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl font-bold text-heading">{caseData.caseName}</h1>
-            <StatusPill icon={<IconPennant />} variant={riskVariants[caseData.riskTag]}>
-              {caseData.riskTag} Risk
+            <span className="rounded border bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-heading">
+              {caseData.displayId || caseData.uid}
+            </span>
+            <StatusPill variant={statusVariants[statusKey] || "outline"}>
+              {STATUS_LABELS[statusKey] || status}
             </StatusPill>
-            <StatusPill variant={statusVariants[caseData.status]}>{caseData.status}</StatusPill>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <span className="font-mono text-xs font-medium text-heading bg-white/60 px-2 py-0.5 rounded border">
-                {caseData.uid}
-              </span>
-            </div>
+            <StatusPill
+              icon={<IconAlertOctagon />}
+              variant={priorityVariants[priorityKey] || "outline"}
+            >
+              <span className="capitalize">{priority}</span> Priority
+            </StatusPill>
             <Badge variant="outline" className="text-xs capitalize">
               {caseData.customerType}
             </Badge>
-            <Badge variant="outline" className="text-xs">
-              {caseData.caseType}
-            </Badge>
           </div>
+          <h1 className="text-xl font-bold text-heading">{caseData.title || caseData.caseName}</h1>
+          <p className="text-xs text-muted-foreground">
+            {caseData.customerName || caseData.customer?.name} ·{" "}
+            <span className="capitalize">
+              {(caseData.caseType || caseData.type || "").replace("_", " ")}
+            </span>
+          </p>
         </div>
 
-        <div className="flex flex-col gap-2 text-sm shrink-0">
-          <div className="mb-1 flex w-full flex-wrap gap-2 sm:justify-end">
-            <Button
-              size="sm"
-              className="h-8 min-w-[84px] bg-heading px-3 text-xs font-semibold tracking-wide text-white shadow-sm hover:bg-heading/90"
-            >
-              ECDD
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 min-w-[84px] border-heading/30 bg-white/90 px-3 text-xs font-semibold tracking-wide text-heading shadow-sm hover:bg-white"
-            >
-              SMR
-            </Button>
+        {/* Right: risk, sla, investigator, dates */}
+        <div className="flex flex-col gap-3 shrink-0 xl:items-end">
+          <div className="flex items-center gap-4">
+            <RiskScoreGauge score={caseData.riskScore} label="Risk Score" />
+            <div className="h-10 w-px bg-border" />
+            <SlaCountdown deadline={caseData.slaDeadline} className="text-sm" />
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <IconUser className="size-4 shrink-0" />
-            <span>
-              Analyst:{" "}
-              <span className="font-semibold text-heading">{caseData.assignedAnalyst}</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <IconCalendar className="size-4 shrink-0" />
-            <span>
-              Created:{" "}
-              <span className="font-semibold text-heading">
-                {dateShowFormat(caseData.createdDate)}
+          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground xl:justify-end">
+            <div className="flex items-center gap-1.5">
+              <Avatar className="size-5">
+                <AvatarFallback className="bg-primary/10 text-[0.6rem] font-semibold text-primary">
+                  {getInitials(assignedAnalyst)}
+                </AvatarFallback>
+              </Avatar>
+              <span>
+                Investigator:{" "}
+                <span className="font-semibold text-heading">{assignedAnalyst || "Unassigned"}</span>
               </span>
-            </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <IconCalendar className="size-3.5" />
+              <span>
+                Created:{" "}
+                <span className="font-semibold text-heading">
+                  {dateShowFormatWithTime(caseData.createdDate || caseData.createdAt)}
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <IconRefresh className="size-3.5" />
+              <span>
+                Updated:{" "}
+                <span className="font-semibold text-heading">
+                  {dateShowFormatWithTime(caseData.lastUpdated || caseData.updatedAt)}
+                </span>
+              </span>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Action bar */}
+      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        <Button size="sm" className="h-8 gap-1.5 text-xs" onClick={onOpenAssign}>
+          <IconUserCheck className="size-3.5" />
+          Assign Case
+        </Button>
+        <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={onOpenRFI}>
+          <IconMessageCircle className="size-3.5" />
+          Request Information
+        </Button>
+
+        <ReasonAlertDialog
+          trigger={
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+                <IconAlertOctagon className="size-3.5" />
+                Escalate
+              </Button>
+            </AlertDialogTrigger>
+          }
+          title="Escalate this case"
+          description="This raises the case priority and notifies the compliance lead. Provide a reason for the audit trail."
+          actionLabel="Escalate Case"
+          onConfirm={(reason) => {
+            onEscalate?.(reason);
+            toast.success("Case escalated to Critical priority");
+          }}
+        />
+
+        <ReasonAlertDialog
+          trigger={
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+                <IconGavel className="size-3.5" />
+                Generate STR/SAR
+              </Button>
+            </AlertDialogTrigger>
+          }
+          title="Generate STR/SAR draft"
+          description="A draft Suspicious Transaction/Activity Report will be created from this case's evidence for compliance review."
+          actionLabel="Generate Draft"
+          onConfirm={(reason) => {
+            onGenerateSTR?.(reason);
+            toast.success("STR/SAR draft created");
+          }}
+        />
+
+        {isClosed ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            onClick={() => {
+              onReopenCase?.();
+              toast.success("Case reopened");
+            }}
+          >
+            <IconRotateClockwise className="size-3.5" />
+            Reopen Case
+          </Button>
+        ) : (
+          <ReasonAlertDialog
+            destructive
+            trigger={
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-1.5 text-xs text-danger hover:text-danger"
+                >
+                  <IconBan className="size-3.5" />
+                  Close Case
+                </Button>
+              </AlertDialogTrigger>
+            }
+            title="Close this case"
+            description="This marks the investigation as closed. You can reopen it later if new evidence emerges."
+            actionLabel="Close Case"
+            onConfirm={(reason) => {
+              onCloseCase?.(reason);
+              toast.success("Case closed");
+            }}
+          />
+        )}
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon-sm" className="ml-auto">
+              <IconDots className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => toast.info("Sending to printer...")}>
+              <IconPrinter className="size-4" />
+              Print Case Summary
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => toast.success("Case PDF export queued")}>
+              <IconFileExport className="size-4" />
+              Export Case PDF
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => toast.info("Case duplicated as a new investigation")}>
+              <IconCopy className="size-4" />
+              Duplicate Case
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

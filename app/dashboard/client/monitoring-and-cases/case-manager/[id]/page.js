@@ -4,10 +4,11 @@ export const metadata = {
   title: "Case Details",
 };
 
-export default function CaseDetailsPage({ params }) {
+export default async function CaseDetailsPage({ params }) {
+  const { id } = await params;
   return (
-    <div className="">
-      <CaseDetails caseId={params.id} />
+    <div className="p-4 md:p-6">
+      <CaseDetails caseId={id} />
     </div>
   );
 }

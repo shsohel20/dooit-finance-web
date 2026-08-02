@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, Check } from "lucide-react"
+import { ChevronDown, Check, Plus, Trash } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 
 import { businessFormSchema, generalInformationSchema } from "./schema"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
@@ -31,35 +32,18 @@ const formData = {
     industry: "",
     nature_of_business: "",
     annual_income: "",
-    local_agent: {
-      name: "",
-      address: {
+    local_agents: [],
+    registered_addresses: [
+      {
         street: "",
         suburb: "",
         state: "",
         postcode: "",
         country: ""
       }
-    },
-    registered_address: {
-      street: "",
-      suburb: "",
-      state: "",
-      postcode: "",
-      country: ""
-    },
-    business_address: {
-      different_from_registered: false,
-      street: "",
-      suburb: "",
-      state: "",
-      postcode: "",
-      country: ""
-    },
-    company_type: {
-      type: "",
-      is_listed: false
-    },
+    ],
+    business_addresses: [],
+    entity_type: "",
     account_purpose: {
       digital_currency_exchange: false,
       peer_to_peer: false,
@@ -115,6 +99,22 @@ export default function KYCCompanyForm() {
     defaultValues: formData,
   })
 
+  const {
+    fields: registeredAddressFields,
+    append: appendRegisteredAddress,
+    remove: removeRegisteredAddress,
+  } = useFieldArray({ control, name: "general_information.registered_addresses" })
+  const {
+    fields: businessAddressFields,
+    append: appendBusinessAddress,
+    remove: removeBusinessAddress,
+  } = useFieldArray({ control, name: "general_information.business_addresses" })
+  const {
+    fields: localAgentFields,
+    append: appendLocalAgent,
+    remove: removeLocalAgent,
+  } = useFieldArray({ control, name: "general_information.local_agents" })
+  const emptyAddress = { street: "", suburb: "", state: "", postcode: "", country: "" }
 
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
@@ -135,26 +135,23 @@ export default function KYCCompanyForm() {
       kyc: {
         general_information: {
           ...data.general_information,
-          company_type: {
-            type: data.general_information.company_type?.type?.value,
-            is_listed: data.general_information.company_type.is_listed,
-          },
+          entity_type: data.general_information.entity_type,
           country_of_incorporation: data.general_information.country_of_incorporation?.value,
-          local_agent: {
-            ...data.general_information.local_agent,
+          local_agents: (data.general_information.local_agents || []).map((agent) => ({
+            ...agent,
             address: {
-              ...data.general_information.local_agent.address,
-              country: data.general_information.local_agent.address.country.value
-            }
-          },
-          registered_address: {
-            ...data.general_information.registered_address,
-            country: data.general_information.registered_address.country.value
-          },
-          business_address: {
-            ...data.general_information.business_address,
-            country: data.general_information.business_address.country.value
-          },
+              ...agent.address,
+              country: agent.address?.country?.value ?? agent.address?.country,
+            },
+          })),
+          registered_addresses: (data.general_information.registered_addresses || []).map((addr) => ({
+            ...addr,
+            country: addr.country?.value ?? addr.country,
+          })),
+          business_addresses: (data.general_information.business_addresses || []).map((addr) => ({
+            ...addr,
+            country: addr.country?.value ?? addr.country,
+          })),
           directors_beneficial_owner: {
             ...data.directors_beneficial_owner,
             directors: data.directors_beneficial_owner.directors,
@@ -373,22 +370,27 @@ export default function KYCCompanyForm() {
                   <Label >Company Type</Label>
                   <Controller
                     control={control}
-                    name="general_information.company_type.type"
+                    name="general_information.entity_type"
                     render={({ field }) => (
                       <CustomSelect
                         {...field}
                         options={[
                           {
                             label: 'Private Company',
-                            value: 'private_company'
+                            value: 'proprietary_limited'
                           },
                           {
                             label: 'Public Company',
-                            value: 'public company'
+                            value: 'public_company'
                           }
                         ]}
-                        error={errors.general_information?.company_type?.type?.message}
-                        onChange={(data) => field.onChange(data)}
+                        value={
+                          field.value
+                            ? { label: field.value === 'proprietary_limited' ? 'Private Company' : 'Public Company', value: field.value }
+                            : null
+                        }
+                        error={errors.general_information?.entity_type?.message}
+                        onChange={(opt) => field.onChange(opt?.value ?? opt)}
                       />
                     )}
                   />
@@ -397,18 +399,6 @@ export default function KYCCompanyForm() {
                 <div>
                   <h3>Account Purpose</h3>
                   <div className="flex flex-col gap-4 py-4">
-                    <div className="flex items-center gap-2 ">
-                      <Controller
-                        control={control}
-                        name="general_information.company_type.is_listed"
-                        render={({ field }) => (
-                          <Checkbox {...field} id="general_information.company_type.is_listed" onCheckedChange={field.onChange} />
-                        )}
-                      />
-                      <Label htmlFor="general_information.company_type.is_listed" className={'mb-0'}>Is Listed?</Label>
-
-                    </div>
-
                     <div className="flex items-center gap-2">
                       <Controller
                         control={control}
@@ -449,9 +439,9 @@ export default function KYCCompanyForm() {
 
                     <Controller
                       control={control}
-                      name="general_information.company_type.account_purpose.other_details"
+                      name="general_information.account_purpose.other_details"
                       render={({ field }) => (
-                        <Input type="textarea" {...field} error={errors.general_information?.company_type?.account_purpose?.other_details?.message} />
+                        <Input type="textarea" {...field} error={errors.general_information?.account_purpose?.other_details?.message} />
                       )}
                     />
                   </div>
@@ -464,257 +454,297 @@ export default function KYCCompanyForm() {
               <h3 className="font-semibold text-sm text-foreground">Addresses</h3>
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-xs font-medium text-foreground/80 mb-3">Registered Address</h4>
-                  <div className="p-3 rounded-lg grid grid-cols-4 gap-4 border ">
-                    <div>
-                      <Label>Street</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.registered_address.street"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.registered_address?.street?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>Suburb</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.registered_address.suburb"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.registered_address?.suburb?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>State</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.registered_address.state"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.registered_address?.state?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>Postcode</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.registered_address.postcode"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.registered_address?.postcode?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>Country</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.registered_address.country"
-                        render={({ field }) => (
-                          <CustomSelect
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.registered_address?.country?.message}
-                            options={countriesData}
-                            onChange={(data) => field.onChange(data)}
-                          />
-                        )}
-                      />
-                    </div>
-
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-xs font-medium text-foreground/80">Registered Address(es)</h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => appendRegisteredAddress({ ...emptyAddress })}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
                   </div>
+                  {registeredAddressFields.map((field, index) => (
+                    <div key={field.id} className="p-3 rounded-lg grid grid-cols-4 gap-4 border mb-3">
+                      <div>
+                        <Label>Street</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.registered_addresses.${index}.street`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.registered_addresses?.[index]?.street?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>Suburb</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.registered_addresses.${index}.suburb`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.registered_addresses?.[index]?.suburb?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>State</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.registered_addresses.${index}.state`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.registered_addresses?.[index]?.state?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>Postcode</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.registered_addresses.${index}.postcode`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.registered_addresses?.[index]?.postcode?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>Country</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.registered_addresses.${index}.country`}
+                          render={({ field }) => (
+                            <CustomSelect
+                              {...field}
+                              error={errors.general_information?.registered_addresses?.[index]?.country?.message}
+                              options={countriesData}
+                              onChange={(data) => field.onChange(data)}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div className="flex items-end">
+                        <Button type="button" variant="outline" size="sm" onClick={() => removeRegisteredAddress(index)}>
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
                 <div>
-                  <div>
-                    <h4 className="text-xs font-medium text-foreground/80 mb-3">Business Address</h4>
-                    {/* <div className="flex items-center gap-2">
-                      <Label>Same as registered address</Label>
-                      <Checkbox
-                        defaultChecked={false}
-                      />
-                    </div> */}
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-xs font-medium text-foreground/80">Business Address(es) (if different from registered)</h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => appendBusinessAddress({ ...emptyAddress })}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <div className="p-3 rounded-lg grid grid-cols-4 gap-4 border ">
-                    <div>
-                      <Label>Street</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.business_address.street"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.business_address?.street?.message}
-                          />
-                        )}
-                      />
+                  {businessAddressFields.map((field, index) => (
+                    <div key={field.id} className="p-3 rounded-lg grid grid-cols-4 gap-4 border mb-3">
+                      <div>
+                        <Label>Street</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.business_addresses.${index}.street`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.business_addresses?.[index]?.street?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>Suburb</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.business_addresses.${index}.suburb`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.business_addresses?.[index]?.suburb?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>State</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.business_addresses.${index}.state`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.business_addresses?.[index]?.state?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>Postcode</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.business_addresses.${index}.postcode`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.business_addresses?.[index]?.postcode?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>Country</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.business_addresses.${index}.country`}
+                          render={({ field }) => (
+                            <CustomSelect
+                              {...field}
+                              error={errors.general_information?.business_addresses?.[index]?.country?.message}
+                              options={countriesData}
+                              onChange={(data) => field.onChange(data)}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div className="flex items-end">
+                        <Button type="button" variant="outline" size="sm" onClick={() => removeBusinessAddress(index)}>
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div>
-                      <Label>Suburb</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.business_address.suburb"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.business_address?.suburb?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>State</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.business_address.state"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.business_address?.state?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>Postcode</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.business_address.postcode"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.business_address?.postcode?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>Country</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.business_address.country"
-                        render={({ field }) => (
-                          <CustomSelect
-                            {...field}
-                            error={errors.general_information?.business_address?.country?.message}
-                            options={countriesData}
-                            onChange={(data) => field.onChange(data)}
-                          />
-                        )}
-                      />
-                    </div>
-                  </div>
+                  ))}
                 </div>
                 <div>
-                  <h4 className="text-xs font-medium text-foreground/80 mb-3">Local Agent</h4>
-                  <div className="p-3 rounded-lg grid grid-cols-4 gap-4 border ">
-                    <div>
-                      <Label>Name</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.local_agent.name"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.local_agent?.name?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>Street</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.local_agent.address.street"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.local_agent?.address?.street?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>Suburb</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.local_agent.address.suburb"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.local_agent?.address?.suburb?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>State</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.local_agent.address.state"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.local_agent?.address?.state?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>Postcode</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.local_agent.address.postcode"
-                        render={({ field }) => (
-                          <Input
-                            type="text"
-                            {...field}
-                            error={errors.general_information?.local_agent?.address?.postcode?.message}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div>
-                      <Label>Country</Label>
-                      <Controller
-                        control={control}
-                        name="general_information.local_agent.address.country"
-                        render={({ field }) => (
-                          <CustomSelect
-                            {...field}
-                            options={countriesData}
-                            onChange={(data) => field.onChange(data)}
-                            {...field}
-                            error={errors.general_information?.local_agent?.address?.country?.message}
-                          />
-                        )}
-                      />
-                    </div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-xs font-medium text-foreground/80">Local Agent(s)</h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => appendLocalAgent({ name: "", address: { ...emptyAddress } })}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
                   </div>
+                  {localAgentFields.map((field, index) => (
+                    <div key={field.id} className="p-3 rounded-lg grid grid-cols-4 gap-4 border mb-3">
+                      <div>
+                        <Label>Name</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.local_agents.${index}.name`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.local_agents?.[index]?.name?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>Street</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.local_agents.${index}.address.street`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.local_agents?.[index]?.address?.street?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>Suburb</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.local_agents.${index}.address.suburb`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.local_agents?.[index]?.address?.suburb?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>State</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.local_agents.${index}.address.state`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.local_agents?.[index]?.address?.state?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>Postcode</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.local_agents.${index}.address.postcode`}
+                          render={({ field }) => (
+                            <Input
+                              type="text"
+                              {...field}
+                              error={errors.general_information?.local_agents?.[index]?.address?.postcode?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label>Country</Label>
+                        <Controller
+                          control={control}
+                          name={`general_information.local_agents.${index}.address.country`}
+                          render={({ field }) => (
+                            <CustomSelect
+                              {...field}
+                              options={countriesData}
+                              onChange={(data) => field.onChange(data)}
+                              error={errors.general_information?.local_agents?.[index]?.address?.country?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div className="flex items-end">
+                        <Button type="button" variant="outline" size="sm" onClick={() => removeLocalAgent(index)}>
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

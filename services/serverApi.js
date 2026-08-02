@@ -14,7 +14,10 @@ export async function fetchWithAuth(
   const session = await auth(); // ✅ works anywhere on the server
   const token = session?.user?.accessToken;
   if (!token) {
-    console.log("No valid token found. User might not be logged in.");
+    return new Response(
+      JSON.stringify({ success: false, message: "Not authenticated" }),
+      { status: 401, headers: { "Content-Type": "application/json" } }
+    );
   }
   const allOptions = {
     headers: {
@@ -36,7 +39,11 @@ export async function fetchWithAuth(
 
     return res;
   } catch (error) {
-    console.error("Error fetching data:", error);
-    return { success: false, error: error.message };
+    const isConnRefused = error?.cause?.code === "ECONNREFUSED";
+    if (!isConnRefused) console.error("[fetchWithAuth] Unexpected fetch error:", error);
+    return new Response(
+      JSON.stringify({ success: false, message: "Service unavailable", error: error.message }),
+      { status: 503, headers: { "Content-Type": "application/json" } }
+    );
   }
 }
