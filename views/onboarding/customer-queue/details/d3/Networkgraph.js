@@ -27,6 +27,111 @@ function getNodeAt(nodes, px, py, transform) {
   return null;
 }
 
+/**
+ * Compass layout relative to the root:
+ *   FAMILY            → top
+ *   BUSINESS          → bottom
+ *   transactional in  → left
+ *   transactional out → right
+ */
+function assignLayoutZones(nodes, edges, W, H) {
+  const root = nodes.find((n) => n.depth === 0);
+  const rootId = root?.id;
+  const cx = W / 2;
+  const cy = H / 2;
+  const span = Math.min(W, H) * 0.38;
+
+  const incomingIds = new Set(); // counterparties that send money → root
+  const outgoingIds = new Set(); // counterparties that receive money ← root
+
+  for (const e of edges) {
+    if (e.type !== "TRANSACTION") continue;
+    const s = typeof e.source === "object" ? e.source.id : e.source;
+    const t = typeof e.target === "object" ? e.target.id : e.target;
+    if (!rootId) break;
+    if (t === rootId) incomingIds.add(s);
+    if (s === rootId) outgoingIds.add(t);
+  }
+
+  const groups = { top: [], bottom: [], left: [], right: [], other: [] };
+
+  for (const node of nodes) {
+    if (node.depth === 0) {
+      node.layoutZone = "center";
+      node.targetX = cx;
+      node.targetY = cy;
+      continue;
+    }
+
+    const rt = (node.relationType || "").toUpperCase();
+    const pt = (node.partyType || "").toUpperCase();
+    const hasIn = incomingIds.has(node.id);
+    const hasOut = outgoingIds.has(node.id);
+
+    let zone;
+    if (rt === "FAMILY") {
+      zone = "top";
+    } else if (rt === "BUSINESS" || pt === "BUSINESS") {
+      zone = "bottom";
+    } else if (hasIn && !hasOut) {
+      zone = "left";
+    } else if (hasOut && !hasIn) {
+      zone = "right";
+    } else if (hasIn) {
+      zone = "left";
+    } else if (hasOut) {
+      zone = "right";
+    } else if (
+      rt === "OWNERSHIP" ||
+      rt === "CONTROL" ||
+      rt === "LEGAL_STRUCTURE" ||
+      pt === "LEGAL_ENTITY"
+    ) {
+      // Business-adjacent structural ties sit with business (bottom)
+      zone = "bottom";
+    } else {
+      zone = "other";
+    }
+
+    node.layoutZone = zone;
+    groups[zone].push(node);
+  }
+
+  const placeRow = (list, baseX, baseY, axis) => {
+    const n = list.length;
+    if (n === 0) return;
+    const spread = Math.min(axis === "x" ? W * 0.55 : H * 0.55, Math.max(n - 1, 1) * (NODE_RADIUS * 2.8));
+    list.forEach((node, i) => {
+      const t = n === 1 ? 0 : i / (n - 1) - 0.5;
+      if (axis === "x") {
+        node.targetX = baseX + t * spread;
+        node.targetY = baseY;
+      } else {
+        node.targetX = baseX;
+        node.targetY = baseY + t * spread;
+      }
+      // Seed simulation so nodes start in the right quadrant
+      node.x = node.targetX;
+      node.y = node.targetY;
+    });
+  };
+
+  placeRow(groups.top, cx, cy - span, "x");
+  placeRow(groups.bottom, cx, cy + span, "x");
+  placeRow(groups.left, cx - span, cy, "y");
+  placeRow(groups.right, cx + span, cy, "y");
+
+  // Leftovers: ring just outside center
+  groups.other.forEach((node, i, arr) => {
+    const angle = (i / Math.max(arr.length, 1)) * Math.PI * 2 - Math.PI / 2;
+    const r = span * 0.55;
+    node.targetX = cx + Math.cos(angle) * r;
+    node.targetY = cy + Math.sin(angle) * r;
+    node.x = node.targetX;
+    node.y = node.targetY;
+  });
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────────────────────────────────────
@@ -63,6 +168,9 @@ export default function NetworkGraph({ data, onNodeClick }) {
     const ctx = canvas.getContext("2d");
     ctx.scale(dpr, dpr); // scale once; all subsequent draws are in CSS px
 
+    // Compass layout: family↑ business↓ incoming← outgoing→
+    assignLayoutZones(data.nodes, data.edges, W, H);
+
     // Pin root node to center
     const rootNode = data.nodes.find((n) => n.depth === 0);
     if (rootNode) {
@@ -82,11 +190,23 @@ export default function NetworkGraph({ data, onNodeClick }) {
             const target = d.target;
             return target.depth === 1 ? 450 : target.depth === 2 ? 310 : 250;
           })
-          .strength(0.5),
+          .strength(0.35),
       )
-      .force("charge", d3.forceManyBody().strength(-320))
-      .force("collision", d3.forceCollide(NODE_RADIUS + 10))
-      .force("center", d3.forceCenter(W / 2, H / 2))
+      .force("charge", d3.forceManyBody().strength(-280))
+      .force("collision", d3.forceCollide(NODE_RADIUS + 14))
+      // Pull each node toward its compass zone (soft — still draggable)
+      .force(
+        "x",
+        d3
+          .forceX((d) => d.targetX ?? W / 2)
+          .strength((d) => (d.depth === 0 ? 0 : 0.18)),
+      )
+      .force(
+        "y",
+        d3
+          .forceY((d) => d.targetY ?? H / 2)
+          .strength((d) => (d.depth === 0 ? 0 : 0.18)),
+      )
       // KEY FIX: alphaDecay toward a small positive target → nodes never
       // fully freeze; they breathe gently after the initial layout settles.
       .alphaTarget(0.005)
@@ -118,7 +238,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
         ctx.beginPath();
         ctx.moveTo(s.x, s.y);
         ctx.lineTo(tg.x, tg.y);
-        ctx.strokeStyle = color + "50"; // 10 is the opacity
+        ctx.strokeStyle = color + "50"; //opacity
         ctx.lineWidth = link.edgeOpacity ?? 0.4;
         ctx.stroke();
       }
