@@ -249,6 +249,7 @@ export default function CaseDetails({ caseId }) {
                   onCloseCase={handleCloseCase}
                   onReopenCase={handleReopenCase}
                 />
+
                 <div className="grid grid-cols-12 gap-4">
                   <div className="col-span-8">
                     <EcddTemplate />

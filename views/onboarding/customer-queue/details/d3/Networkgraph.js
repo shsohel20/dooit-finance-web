@@ -281,7 +281,8 @@ export default function NetworkGraph({ data, onNodeClick }) {
     layoutGraph(data.nodes, edges, W, H);
 
     const rootNode = data.nodes.find((n) => n.depth === 0);
-    if (rootNode) {
+    if (rootNode && !rootNode.pinned) {
+      // Default position only — a manual drag sets .pinned and wins.
       rootNode.fx = W / 2;
       rootNode.fy = H / 2;
     }
@@ -433,6 +434,19 @@ export default function NetworkGraph({ data, onNodeClick }) {
         ctx.lineWidth = isRoot ? 2 : isHovered || onHotEdge ? 1.8 : 1;
         ctx.stroke();
 
+        // Pinned nodes get a dashed halo so it's clear they're anchored
+        // and won't be moved by the layout.
+        if (node.pinned) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, r + 3.5, 0, Math.PI * 2);
+          ctx.setLineDash([3, 3]);
+          ctx.strokeStyle = "rgba(15,23,42,0.38)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.restore();
+        }
+
         if (!isRoot && risk) {
           const pa = Math.PI * 0.28;
           ctx.beginPath();
@@ -500,7 +514,8 @@ export default function NetworkGraph({ data, onNodeClick }) {
       const px = e.clientX - rect.left;
       const py = e.clientY - rect.top;
       const hit = getNodeAt(data.nodes, px, py, transformRef.current);
-      if (hit && hit.depth !== 0) {
+      // Root is draggable too — it just starts out pinned to center.
+      if (hit) {
         node = hit;
         didDragRef.current = false;
         start = { x: px, y: py };
@@ -522,17 +537,44 @@ export default function NetworkGraph({ data, onNodeClick }) {
     };
     const up = () => {
       if (!node) return;
-      node.fx = null;
-      node.fy = null;
+      // Leave fx/fy in place so the node stays exactly where it was
+      // dropped. Clearing them here is what made nodes spring back.
+      if (didDragRef.current) {
+        node.pinned = true;
+        // Keep the layout target in sync so a later unpin doesn't yank
+        // the node across the canvas.
+        node.targetX = node.fx;
+        node.targetY = node.fy;
+      }
       node = null;
       simRef.current?.alphaTarget(0);
+      canvas.__redraw?.();
+    };
+
+    const dblclick = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const hit = getNodeAt(
+        data.nodes,
+        e.clientX - rect.left,
+        e.clientY - rect.top,
+        transformRef.current,
+      );
+      if (!hit?.pinned) return;
+      // Release back into the layout; forceX/forceY will draw it home.
+      hit.pinned = false;
+      hit.fx = null;
+      hit.fy = null;
+      simRef.current?.alpha(0.35).restart();
+      e.stopPropagation();
     };
 
     canvas.addEventListener("mousedown", down, { capture: true });
+    canvas.addEventListener("dblclick", dblclick, { capture: true });
     window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", up);
     return () => {
       canvas.removeEventListener("mousedown", down, { capture: true });
+      canvas.removeEventListener("dblclick", dblclick, { capture: true });
       window.removeEventListener("mousemove", move);
       window.removeEventListener("mouseup", up);
     };
