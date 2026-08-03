@@ -126,6 +126,38 @@ function edgeHeadline(edge) {
   return { text: rel ? "Transaction" : "Connected", kind: "relation" };
 }
 
+/**
+ * Replace edge.source / edge.target ID strings with the real node objects.
+ *
+ * d3.forceLink normally does this as a side effect of being added to the
+ * simulation. This layout doesn't use forceLink (link forces fight the
+ * packing), so the resolution has to happen here — otherwise every edge
+ * still holds a string, has no .x/.y, and nothing renders.
+ *
+ * Returns the edges that resolved on both ends; dangling references to
+ * missing nodes are dropped rather than silently skipped every frame.
+ */
+function resolveEdges(nodes, edges) {
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const resolved = [];
+
+  for (const e of edges) {
+    const s = typeof e.source === "object" ? e.source : byId.get(e.source);
+    const t = typeof e.target === "object" ? e.target : byId.get(e.target);
+    if (!s || !t) continue; // edge points at a node we don't have
+    e.source = s;
+    e.target = t;
+    resolved.push(e);
+  }
+
+  if (resolved.length !== edges.length) {
+    console.warn(
+      `NetworkGraph: dropped ${edges.length - resolved.length} edge(s) with unknown endpoints`,
+    );
+  }
+  return resolved;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Layout: dense wedge packing
 // ─────────────────────────────────────────────────────────────────────────────
@@ -215,6 +247,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
   const canvasRef = useRef(null);
   const simRef = useRef(null);
   const transformRef = useRef(d3.zoomIdentity);
+  const edgesRef = useRef([]); // resolved edges, shared with hover handlers
 
   const hoveredRef = useRef(null); // hovered node
   const hoverEdgeRef = useRef(null); // hovered edge
@@ -241,7 +274,11 @@ export default function NetworkGraph({ data, onNodeClick }) {
     const ctx = canvas.getContext("2d");
     ctx.scale(dpr, dpr);
 
-    layoutGraph(data.nodes, data.edges, W, H);
+    // Resolve ID strings → node objects BEFORE anything reads .x/.y
+    const edges = resolveEdges(data.nodes, data.edges);
+    edgesRef.current = edges;
+
+    layoutGraph(data.nodes, edges, W, H);
 
     const rootNode = data.nodes.find((n) => n.depth === 0);
     if (rootNode) {
@@ -342,7 +379,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
       // ── Edges ───────────────────────────────────────────────────────────
       // On a light background, "lighter" blending washes lines out, so we
       // draw normally and lean on alpha for the density gradient instead.
-      for (const link of data.edges) {
+      for (const link of edges) {
         const s = link.source;
         const tg = link.target;
         if (s?.x == null || tg?.x == null) continue;
@@ -526,7 +563,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
 
       const node = getNodeAt(data.nodes, px, py, transformRef.current);
       // Only test edges when no node is under the cursor
-      const edge = node ? null : getEdgeAt(data.edges, px, py, transformRef.current);
+      const edge = node ? null : getEdgeAt(edgesRef.current, px, py, transformRef.current);
 
       const changed = node?.id !== hoveredRef.current?.id || edge !== hoverEdgeRef.current;
 

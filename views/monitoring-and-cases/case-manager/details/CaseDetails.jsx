@@ -6,6 +6,7 @@ import {
   IconFolders,
   IconHistory,
   IconInfoCircle,
+  IconShieldSearch,
   IconSitemap,
 } from "@tabler/icons-react";
 import { mockCases } from "@/lib/case-manager-data";
@@ -21,6 +22,7 @@ import RFISection from "./sections/RFISection";
 import CaseAssignmentSection from "./sections/CaseAssignmentSection";
 import AuditLog from "./sections/AuditLog";
 import RelatedCasesSection from "./sections/RelatedCasesSection";
+import EcddTemplate from "./sections/EcddTemplate";
 import CreateRFIModal from "./modals/CreateRFIModal";
 import ReassignCaseModal from "./modals/ReassignCaseModal";
 import OsiintData from "./OsiintData";
@@ -222,6 +224,9 @@ export default function CaseDetails({ caseId }) {
             <TabsTrigger value="relation-graph">
               <IconSitemap /> Relation graph
             </TabsTrigger>
+            <TabsTrigger value="ecdd">
+              <IconShieldSearch /> ECDD
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
             <div className="grid grid-cols-12 gap-4">
@@ -231,7 +236,7 @@ export default function CaseDetails({ caseId }) {
                   sectionRef={setSectionRef("related-cases")}
                 />
               </div>
-              <div className="space-y-4 xl:col-span-7 col-span-12">
+              <div className="space-y-4 xl:col-span-8 col-span-12">
                 <CaseHeader
                   caseData={{ ...caseData, lastUpdated: caseData.lastUpdated }}
                   status={status}
@@ -244,10 +249,17 @@ export default function CaseDetails({ caseId }) {
                   onCloseCase={handleCloseCase}
                   onReopenCase={handleReopenCase}
                 />
-                <InvestigationSummary
-                  caseData={caseData}
-                  sectionRef={setSectionRef("investigation-summary")}
-                />
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-8">
+                    <EcddTemplate />
+                  </div>
+                  <div className="col-span-4">
+                    <InvestigationSummary
+                      caseData={caseData}
+                      sectionRef={setSectionRef("investigation-summary")}
+                    />
+                  </div>
+                </div>
                 <CustomerProfileSection
                   caseData={caseData}
                   sectionRef={setSectionRef("customer-profile")}
@@ -286,7 +298,7 @@ export default function CaseDetails({ caseId }) {
                   </Suspense>
                 </CollapsibleSection>
               </div>
-              <div className="xl:col-span-3 col-span-12">
+              <div className="xl:col-span-2 col-span-12">
                 {/* <RightActionPanel
             isClosed={isClosed}
             onOpenAssign={() => setAssignOpen(true)}
@@ -320,6 +332,9 @@ export default function CaseDetails({ caseId }) {
               <RelationGraph />
             </div> */}
             <NetworkGraph data={graphData} onNodeClick={() => {}} />
+          </TabsContent>
+          <TabsContent value="ecdd">
+            <EcddTemplate />
           </TabsContent>
         </Tabs>
       </div>
