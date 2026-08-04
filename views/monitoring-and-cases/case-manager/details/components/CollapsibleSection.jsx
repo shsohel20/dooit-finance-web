@@ -16,8 +16,33 @@ export default function CollapsibleSection({
   actions,
   children,
   sectionRef,
+  collapsible = true,
 }) {
   const [open, setOpen] = useState(defaultOpen);
+
+  const header = (
+    <>
+      {Icon && <Icon className="size-4 shrink-0 text-heading" />}
+      <span className="text-sm font-semibold text-heading">{title}</span>
+      {badge !== undefined && badge !== null && (
+        <Badge variant="outline" className="text-xs">
+          {badge}
+        </Badge>
+      )}
+    </>
+  );
+
+  if (!collapsible) {
+    return (
+      <Card ref={sectionRef} id={id} className="scroll-mt-4 border-border py-0 shadow-sm">
+        <div className="flex items-center justify-between gap-2 px-5 py-4">
+          <div className="flex flex-1 items-center gap-2.5">{header}</div>
+          {actions && <div className="shrink-0">{actions}</div>}
+        </div>
+        <CardContent className="pb-5">{children}</CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card ref={sectionRef} id={id} className="scroll-mt-4 border-border py-0 shadow-sm">
@@ -31,13 +56,7 @@ export default function CollapsibleSection({
                   !open && "-rotate-90",
                 )}
               />
-              {Icon && <Icon className="size-4 shrink-0 text-heading" />}
-              <span className="text-sm font-semibold text-heading">{title}</span>
-              {badge !== undefined && badge !== null && (
-                <Badge variant="outline" className="text-xs">
-                  {badge}
-                </Badge>
-              )}
+              {header}
             </button>
           </CollapsibleTrigger>
           {actions && <div className="shrink-0">{actions}</div>}

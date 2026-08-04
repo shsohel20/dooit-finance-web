@@ -57,11 +57,30 @@ function formatCurrency(amount, currency = "AUD") {
   }
 }
 
-export default function TransactionAnalysisSection({ caseData, sectionRef }) {
+// Direction is relative to the case's customer: money landing with them is
+// IN, money leaving their name as sender is OUT.
+function getDirection(txn, customerName) {
+  if (!customerName) return "OUT";
+  return txn.receiver === customerName ? "IN" : "OUT";
+}
+
+export default function TransactionAnalysisSection({ caseData, sectionRef, collapsible = true }) {
   const transactions = caseData?.transactions || [];
+  const customerName = caseData?.customer?.name || caseData?.customerName;
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortAmt, setSortAmt] = useState(null); // "asc" | "desc" | null
+
+  const totals = useMemo(() => {
+    return transactions.reduce(
+      (acc, t) => {
+        const dir = getDirection(t, customerName);
+        acc[dir === "IN" ? "in" : "out"] += t.amount;
+        return acc;
+      },
+      { in: 0, out: 0 },
+    );
+  }, [transactions, customerName]);
 
   const chartData = useMemo(() => {
     const map = new Map();
@@ -110,6 +129,21 @@ export default function TransactionAnalysisSection({ caseData, sectionRef }) {
           </span>
         ),
         size: 170,
+      },
+      {
+        id: "direction",
+        header: "Direction",
+        cell: ({ row }) => {
+          const dir = getDirection(row.original, customerName);
+          return (
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${dir === "IN" ? "bg-success/10 text-success" : "bg-danger/10 text-danger"}`}
+            >
+              {dir}
+            </span>
+          );
+        },
+        size: 90,
       },
       {
         id: "amount",
@@ -192,7 +226,7 @@ export default function TransactionAnalysisSection({ caseData, sectionRef }) {
         size: 120,
       },
     ],
-    [],
+    [customerName],
   );
 
   return (
@@ -202,6 +236,17 @@ export default function TransactionAnalysisSection({ caseData, sectionRef }) {
       icon={IconArrowsExchange}
       badge={transactions.length}
       sectionRef={sectionRef}
+      collapsible={collapsible}
+      actions={
+        <div className="flex items-center gap-3 text-xs">
+          <span className="text-muted-foreground">
+            Total in <span className="font-bold text-success">{formatCurrency(totals.in)}</span>
+          </span>
+          <span className="text-muted-foreground">
+            Total out <span className="font-bold text-danger">{formatCurrency(totals.out)}</span>
+          </span>
+        </div>
+      }
     >
       {chartData.length > 0 && (
         <div className="mb-4 rounded-lg border border-border p-3">

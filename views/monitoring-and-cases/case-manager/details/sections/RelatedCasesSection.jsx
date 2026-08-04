@@ -6,7 +6,14 @@ import SubCard from "../components/SubCard";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { IconLink, IconEye, IconFileCheck, IconUsers, IconCopy, IconArrowsExchange, IconBell } from "@tabler/icons-react";
+import {
+  IconLink,
+  IconEye,
+  IconFileCheck,
+  IconUsers,
+  IconCopy,
+  IconArrowsExchange,
+} from "@tabler/icons-react";
 import { mockCases } from "@/lib/case-manager-data";
 import { dateShowFormat } from "@/lib/utils";
 
@@ -51,9 +58,14 @@ export default function RelatedCasesSection({ caseData, sectionRef }) {
   const allTransactions = mockCases.flatMap((c) => c.transactions || []);
 
   return (
-    <CollapsibleSection id="related-cases" title="Related Cases & Alerts" icon={IconLink} sectionRef={sectionRef}>
-      <div className="grid gap-3.5 md:grid-cols-2">
-        <SubCard icon={IconLink} title="Related Investigations" count={relatedCases.length} empty="No related cases found.">
+    <div id="related-cases" title="Related Cases & Alerts">
+      <div className="grid gap-3.5 ">
+        <SubCard
+          icon={IconLink}
+          title="Related Investigations"
+          count={relatedCases.length}
+          empty="No related cases found."
+        >
           <div className="divide-y">
             {relatedCases.map((rc, i) => {
               // The API already returns the target _id on each related case;
@@ -62,7 +74,9 @@ export default function RelatedCasesSection({ caseData, sectionRef }) {
               return (
                 <div key={i} className="flex items-center justify-between py-2">
                   <div className="flex flex-col gap-1">
-                    <span className="font-mono text-sm font-semibold text-heading">{rc.caseId}</span>
+                    <span className="font-mono text-sm font-semibold text-heading">
+                      {rc.caseId}
+                    </span>
                     <Badge variant="outline" className="w-fit text-xs">
                       {rc.caseType}
                     </Badge>
@@ -77,7 +91,9 @@ export default function RelatedCasesSection({ caseData, sectionRef }) {
                         size="sm"
                         className="h-7 w-7 p-0"
                         onClick={() =>
-                          router.push(`/dashboard/client/monitoring-and-cases/case-manager/${targetId}`)
+                          router.push(
+                            `/dashboard/client/monitoring-and-cases/case-manager/${fullCase._id}`,
+                          )
                         }
                       >
                         <IconEye className="size-4" />
@@ -90,7 +106,12 @@ export default function RelatedCasesSection({ caseData, sectionRef }) {
           </div>
         </SubCard>
 
-        <SubCard icon={IconFileCheck} title="Previous SARs" count={previousSARs.length} empty="No SARs filed for this customer.">
+        <SubCard
+          icon={IconFileCheck}
+          title="Previous SARs"
+          count={previousSARs.length}
+          empty="No SARs filed for this customer."
+        >
           <div className="divide-y">
             {previousSARs.map((s) => (
               <div key={s.id} className="py-2">
@@ -106,36 +127,11 @@ export default function RelatedCasesSection({ caseData, sectionRef }) {
         </SubCard>
 
         <SubCard
-          icon={IconBell}
-          title="Linked Alerts"
-          count={linkedAlerts.length}
-          empty="No alerts linked to this case."
+          icon={IconUsers}
+          title="Connected Customers"
+          count={connectedCustomers.length}
+          empty="No connected customers found."
         >
-          <div className="divide-y">
-            {linkedAlerts.map((a, i) => (
-              <div key={a._id || i} className="flex items-center justify-between py-2">
-                <div className="min-w-0">
-                  <p className="font-mono text-sm font-semibold text-heading">{a.uid}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {a.ruleName || a.explanation || a.caseType || "—"}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  {a.riskLabel && (
-                    <Badge variant="outline" className="text-xs">
-                      {a.riskLabel}
-                    </Badge>
-                  )}
-                  <StatusPill variant={statusVariants[a.status] || "outline"}>
-                    {humanizeStatus(a.status)}
-                  </StatusPill>
-                </div>
-              </div>
-            ))}
-          </div>
-        </SubCard>
-
-        <SubCard icon={IconUsers} title="Connected Customers" count={connectedCustomers.length} empty="No connected customers found.">
           <div className="divide-y">
             {connectedCustomers.map((cc, i) => (
               <div key={i} className="flex items-center justify-between py-2">
@@ -143,17 +139,24 @@ export default function RelatedCasesSection({ caseData, sectionRef }) {
                   <p className="text-sm font-medium text-heading">{cc.name}</p>
                   <p className="text-xs text-muted-foreground">{cc.relationship}</p>
                 </div>
-                {cc.riskTag && (
-                  <StatusPill variant={cc.riskTag === "High" ? "danger" : cc.riskTag === "Medium" ? "warning" : "info"}>
-                    {cc.riskTag}
-                  </StatusPill>
-                )}
+                <StatusPill
+                  variant={
+                    cc.riskTag === "High" ? "danger" : cc.riskTag === "Medium" ? "warning" : "info"
+                  }
+                >
+                  {cc.riskTag}
+                </StatusPill>
               </div>
             ))}
           </div>
         </SubCard>
 
-        <SubCard icon={IconCopy} title="Duplicate Alerts" count={duplicateAlerts.length} empty="No duplicate alerts detected.">
+        <SubCard
+          icon={IconCopy}
+          title="Duplicate Alerts"
+          count={duplicateAlerts.length}
+          empty="No duplicate alerts detected."
+        >
           <div className="divide-y">
             {duplicateAlerts.map((d, i) => (
               <div key={i} className="flex items-center justify-between py-2">
@@ -169,38 +172,7 @@ export default function RelatedCasesSection({ caseData, sectionRef }) {
             ))}
           </div>
         </SubCard>
-
-        <SubCard
-          icon={IconArrowsExchange}
-          title="Linked Transactions"
-          count={linkedTransactions.length}
-          empty="No linked transactions across other cases."
-        >
-          <div className="divide-y">
-            {linkedTransactions.map((linked, i) => {
-              // The API populates linkedTransactions with full Transaction
-              // documents; the mock fixtures store bare ids. Support both.
-              const populated = linked && typeof linked === "object";
-              const txn = populated ? linked : allTransactions.find((t) => t.id === linked);
-              const label = populated ? linked.uid || linked._id : linked;
-              const from = partyName(txn?.sender);
-              const to = partyName(txn?.receiver);
-              return (
-                <div key={label || i} className="flex items-center justify-between py-2">
-                  <span className="font-mono text-sm font-semibold text-heading">{label}</span>
-                  {from || to ? (
-                    <span className="text-xs text-muted-foreground">
-                      {from || "—"} → {to || "—"}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Details unavailable</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </SubCard>
       </div>
-    </CollapsibleSection>
+    </div>
   );
 }

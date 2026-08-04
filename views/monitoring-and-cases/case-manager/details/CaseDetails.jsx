@@ -1,7 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState, lazy, Suspense } from "react";
-import { IconFolderOff, IconFolders, IconLoader2 } from "@tabler/icons-react";
+import { useMemo, useRef, useState, lazy, Suspense, useEffect } from "react";
+import {
+  IconFolderOff,
+  IconBriefcase,
+  IconUser,
+  IconCreditCard,
+  IconFolder,
+  IconClipboardList,
+  IconLoader2,
+  IconSitemap,
+} from "@tabler/icons-react";
+import { mockCases } from "@/lib/case-manager-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   getCaseById,
@@ -11,39 +21,27 @@ import {
   addNote as addNoteAction,
 } from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
 import { useCaseManagerStore } from "@/app/store/useCaseManagerStore";
-import {
-  adaptCase,
-  adaptNotes,
-  adaptAuditLog,
-  adaptRfis,
-  adaptPreviousSARs,
-} from "./caseAdapter";
+import { adaptCase, adaptNotes, adaptAuditLog, adaptRfis, adaptPreviousSARs } from "./caseAdapter";
 import CaseHeader from "./CaseHeader";
-import CaseReportsSection from "./sections/CaseReportsSection";
-import CollapsibleSection from "./components/CollapsibleSection";
-import InvestigationSummary from "./sections/InvestigationSummary";
 import CustomerProfileSection from "./sections/CustomerProfileSection";
 import TransactionAnalysisSection from "./sections/TransactionAnalysisSection";
-import InvestigationTimelineSection from "./sections/InvestigationTimelineSection";
-import InvestigatorNotes from "./sections/InvestigatorNotes";
-import RFISection from "./sections/RFISection";
-import CaseAssignmentSection from "./sections/CaseAssignmentSection";
-import AuditLog from "./sections/AuditLog";
-import RelatedCasesSection from "./sections/RelatedCasesSection";
+import CaseActivityView from "./CaseActivityView";
+import InvestigationHub from "./investigation-hub/InvestigationHub";
 import CreateRFIModal from "./modals/CreateRFIModal";
 import ReassignCaseModal from "./modals/ReassignCaseModal";
-import OsiintData from "./OsiintData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NetworkGraph from "@/views/onboarding/customer-queue/details/d3/Networkgraph";
+import { transformToGraph } from "@/views/onboarding/customer-queue/details/d3/lib/transformgraphData";
+import partyEntities from "@/views/onboarding/customer-queue/details/demo.json";
 
-const ATMInfoTab = lazy(() => import("./tabs/ATMInfoTab"));
-const DeviceInfoTab = lazy(() => import("./tabs/DeviceInfoTab"));
-const RelationshipsTab = lazy(() => import("./tabs/RelationshipsTab"));
 const FilesTab = lazy(() => import("./tabs/FilesTab"));
+const graphData = transformToGraph(partyEntities);
 
-function AdditionalRecordsSkeleton() {
+function FilesTabSkeleton() {
   return (
     <div className="space-y-3">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <Skeleton key={i} className="h-24 w-full rounded-lg" />
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Skeleton key={i} className="h-14 w-full rounded-lg" />
       ))}
     </div>
   );
@@ -76,9 +74,6 @@ export default function CaseDetails({ caseId }) {
   const sectionRefs = useRef({});
   const setSectionRef = (id) => (el) => {
     sectionRefs.current[id] = el;
-  };
-  const scrollToSection = (id) => {
-    sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   useEffect(() => {
@@ -292,106 +287,95 @@ export default function CaseDetails({ caseId }) {
   const handleTogglePin = (id) =>
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, pinned: !n.pinned } : n)));
 
-  const isClosed = status === "Closed";
-
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="flex flex-col gap-4 xl:col-span-9 col-span-12">
-        <CaseHeader
-          caseData={{ ...caseData, lastUpdated: caseData.lastUpdated }}
-          status={status}
-          priority={priority}
-          assignedAnalyst={assignedAnalyst}
-          onOpenAssign={() => setAssignOpen(true)}
-          onOpenRFI={() => setRfiOpen(true)}
-          onEscalate={handleEscalate}
-          onGenerateSTR={handleGenerateSTR}
-          onCloseCase={handleCloseCase}
-          onReopenCase={handleReopenCase}
-        />
+    <div className="flex flex-col gap-4">
+      <CaseHeader
+        caseData={{ ...caseData, lastUpdated: caseData.lastUpdated }}
+        status={status}
+        priority={priority}
+        assignedAnalyst={assignedAnalyst}
+        onOpenAssign={() => setAssignOpen(true)}
+        onOpenRFI={() => setRfiOpen(true)}
+        onEscalate={handleEscalate}
+        onGenerateSTR={handleGenerateSTR}
+        onCloseCase={handleCloseCase}
+        onReopenCase={handleReopenCase}
+      />
 
-        <InvestigationSummary
-          caseData={caseData}
-          sectionRef={setSectionRef("investigation-summary")}
-        />
+      <Tabs defaultValue="investigation-hub">
+        <TabsList>
+          <TabsTrigger value="investigation-hub">
+            <IconBriefcase />
+            Investigation Hub
+          </TabsTrigger>
+          <TabsTrigger value="customer-profile">
+            <IconUser />
+            Customer Profile
+          </TabsTrigger>
+          <TabsTrigger value="transactions">
+            <IconCreditCard />
+            Transactions
+          </TabsTrigger>
+          <TabsTrigger value="files">
+            <IconFolder />
+            Files
+          </TabsTrigger>
+          <TabsTrigger value="case-activity">
+            <IconClipboardList />
+            Case Activity
+          </TabsTrigger>
+          <TabsTrigger value="relation-graph">
+            <IconSitemap />
+            Relation graph
+          </TabsTrigger>
+        </TabsList>
 
-        <CustomerProfileSection
-          caseData={caseData}
-          sectionRef={setSectionRef("customer-profile")}
-        />
+        <TabsContent value="investigation-hub">
+          <InvestigationHub caseData={caseData} />
+        </TabsContent>
 
-        <TransactionAnalysisSection
-          caseData={caseData}
-          sectionRef={setSectionRef("transactions")}
-        />
+        <TabsContent value="customer-profile">
+          <CustomerProfileSection
+            caseData={caseData}
+            sectionRef={setSectionRef("customer-profile")}
+            collapsible={false}
+          />
+        </TabsContent>
 
-        <InvestigationTimelineSection
-          caseData={caseData}
-          activities={activities}
-          sectionRef={setSectionRef("timeline")}
-        />
+        <TabsContent value="transactions">
+          <TransactionAnalysisSection
+            caseData={caseData}
+            sectionRef={setSectionRef("transactions")}
+            collapsible={false}
+          />
+        </TabsContent>
 
-        <InvestigatorNotes
-          notes={notes}
-          onAddNote={handleAddNote}
-          onTogglePin={handleTogglePin}
-          sectionRef={setSectionRef("notes")}
-        />
-
-        <RFISection
-          rfis={rfis}
-          onOpenCreateRFI={() => setRfiOpen(true)}
-          sectionRef={setSectionRef("rfi")}
-        />
-
-        <CaseAssignmentSection
-          assignedAnalyst={assignedAnalyst}
-          assignment={assignment}
-          onOpenReassign={() => setAssignOpen(true)}
-          sectionRef={setSectionRef("assignment")}
-        />
-
-        <AuditLog auditLog={auditLog} sectionRef={setSectionRef("audit-log")} />
-
-        <CaseReportsSection
-          reports={reports}
-          summary={reportsSummary}
-          loading={reportsLoading}
-          sectionRef={setSectionRef("reports")}
-        />
-
-        <RelatedCasesSection caseData={caseData} sectionRef={setSectionRef("related-cases")} />
-
-        <CollapsibleSection
-          id="additional-records"
-          title="Additional Records"
-          icon={IconFolders}
-          defaultOpen={false}
-          sectionRef={setSectionRef("additional-records")}
-        >
-          <Suspense fallback={<AdditionalRecordsSkeleton />}>
-            <div className="flex flex-col gap-4">
-              <ATMInfoTab caseData={caseData} />
-              <DeviceInfoTab caseData={caseData} />
-              <RelationshipsTab caseData={caseData} />
-              <FilesTab caseData={caseData} />
-            </div>
+        <TabsContent value="files">
+          <Suspense fallback={<FilesTabSkeleton />}>
+            <FilesTab caseData={caseData} />
           </Suspense>
-        </CollapsibleSection>
-      </div>
+        </TabsContent>
 
-      <div className="xl:col-span-3 col-span-12">
-        {/* <RightActionPanel
-            isClosed={isClosed}
-            onOpenAssign={() => setAssignOpen(true)}
-            onOpenRFI={() => setRfiOpen(true)}
-            onFocusNotes={() => scrollToSection("notes")}
-            onEscalate={handleEscalate}
-            onGenerateSTR={handleGenerateSTR}
-            onCloseCase={handleCloseCase}
-          /> */}
-        <OsiintData />
-      </div>
+        <TabsContent value="case-activity">
+          <CaseActivityView
+            caseData={caseData}
+            rfis={rfis}
+            onOpenCreateRFI={() => setRfiOpen(true)}
+            assignedAnalyst={assignedAnalyst}
+            assignment={assignment}
+            onOpenReassign={() => setAssignOpen(true)}
+            notes={notes}
+            onAddNote={handleAddNote}
+            onTogglePin={handleTogglePin}
+            activities={activities}
+            auditLog={auditLog}
+            setSectionRef={setSectionRef}
+          />
+        </TabsContent>
+        <TabsContent value="relation-graph">
+          <NetworkGraph data={graphData} onNodeClick={() => {}} />
+        </TabsContent>
+      </Tabs>
 
       <CreateRFIModal open={rfiOpen} onOpenChange={setRfiOpen} onSubmit={handleCreateRFI} />
       <ReassignCaseModal

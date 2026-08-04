@@ -82,33 +82,34 @@ export default function CaseHeader({
 
   return (
     <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 gap-1.5 text-xs px-2"
-          onClick={() => router.push("/dashboard/client/monitoring-and-cases/case-manager")}
-        >
-          <IconArrowLeft className="size-3.5" />
-          Back to Cases
-        </Button>
+      <div className="mb-4 flex items-center gap-2"></div>
+      <div className="flex items-center gap-2 mb-4 text-neutral-500">
+        <div className="flex items-center gap-1.5">
+          <IconCalendar className="size-3.5" />
+          <span>
+            Created: <span className=" ">{dateShowFormatWithTime(caseData.createdDate)}</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <IconRefresh className="size-3.5" />
+          <span>
+            Updated: <span className=" ">{dateShowFormatWithTime(caseData.lastUpdated)}</span>
+          </span>
+        </div>
       </div>
-
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between ">
         {/* Left: identity */}
         <div className="flex flex-col gap-2.5">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded border bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-heading">
               {caseData.displayId || caseData.uid}
             </span>
-            <StatusPill variant={statusVariants[statusKey] || "outline"}>
-              {STATUS_LABELS[statusKey] || status}
-            </StatusPill>
+            <StatusPill variant={statusVariants[status] || "outline"}>{status}</StatusPill>
             <StatusPill
               icon={<IconAlertOctagon />}
-              variant={priorityVariants[priorityKey] || "outline"}
+              variant={priorityVariants[priority] || "outline"}
             >
-              <span className="capitalize">{priority}</span> Priority
+              {priority} Priority
             </StatusPill>
             <Badge variant="outline" className="text-xs capitalize">
               {caseData.customerType}
@@ -139,24 +140,8 @@ export default function CaseHeader({
               </Avatar>
               <span>
                 Investigator:{" "}
-                <span className="font-semibold text-heading">{assignedAnalyst || "Unassigned"}</span>
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <IconCalendar className="size-3.5" />
-              <span>
-                Created:{" "}
                 <span className="font-semibold text-heading">
-                  {dateShowFormatWithTime(caseData.createdDate || caseData.createdAt)}
-                </span>
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <IconRefresh className="size-3.5" />
-              <span>
-                Updated:{" "}
-                <span className="font-semibold text-heading">
-                  {dateShowFormatWithTime(caseData.lastUpdated || caseData.updatedAt)}
+                  {assignedAnalyst || "Unassigned"}
                 </span>
               </span>
             </div>

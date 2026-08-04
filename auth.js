@@ -23,11 +23,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       authorize: async (credentials) => {
         try {
           const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}auth/login`;
+          console.log("log1 login url", url);
           const res = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(credentials),
           });
+          console.log("log1 login res", res);
 
           const data = await res.json();
 

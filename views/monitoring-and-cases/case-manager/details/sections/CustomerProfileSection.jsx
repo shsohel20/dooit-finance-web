@@ -14,7 +14,7 @@ import {
   IconShieldCheck,
   IconShieldX,
 } from "@tabler/icons-react";
-import { dateShowFormat, getInitials } from "@/lib/utils";
+import { cn, dateShowFormat, formatAUD, getInitials } from "@/lib/utils";
 
 function InfoRow({ icon: Icon, label, value }) {
   return (
@@ -45,16 +45,54 @@ function computeBadges(caseData) {
   return badges;
 }
 
-export default function CustomerProfileSection({ caseData, sectionRef }) {
+function StatCard({ label, value, colorClass }) {
+  return (
+    <div className="rounded-lg border border-border bg-white p-4">
+      <p className="mb-1.5 text-[11px] text-muted-foreground">{label}</p>
+      <p className={cn("text-xl font-bold", colorClass)}>{value}</p>
+    </div>
+  );
+}
+
+export default function CustomerProfileSection({ caseData, sectionRef, collapsible = true }) {
   const c = caseData?.customer;
   if (!c) return null;
 
   const badges = computeBadges(caseData);
   const linkedAccounts = caseData.atm?.linkedAccounts || [];
   const beneficialOwners = caseData.beneficialOwners || [];
+  const transactions = caseData.transactions || [];
+  const flaggedCount = transactions.filter((t) => t.status === "flagged").length;
+
+  const stats = [
+    {
+      label: "Total exposure",
+      value: formatAUD(caseData.totalExposure || 0),
+      colorClass: "text-primary",
+    },
+    {
+      label: "Flagged transactions",
+      value: `${flaggedCount} of ${transactions.length}`,
+      colorClass: "text-danger",
+    },
+    { label: "Risk score", value: `${caseData.riskScore ?? "—"} · ${caseData.riskTag || "—"}`, colorClass: "text-warning" },
+    { label: "Open alerts", value: caseData.relatedAlertsCount ?? 0, colorClass: "text-indigo-600" },
+  ];
 
   return (
-    <CollapsibleSection id="customer-profile" title="Customer Profile" icon={IconUser} sectionRef={sectionRef}>
+    <CollapsibleSection
+      id="customer-profile"
+      title="Customer Profile"
+      icon={IconUser}
+      sectionRef={sectionRef}
+      collapsible={collapsible}
+    >
+      <div className="mb-5 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((s) => (
+          <StatCard key={s.label} {...s} />
+        ))}
+      </div>
+
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <div className="flex shrink-0 flex-col items-center gap-2 lg:w-40">
           <Avatar className="size-20">

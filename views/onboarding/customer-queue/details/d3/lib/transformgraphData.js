@@ -99,7 +99,7 @@ export function transformToGraph(data) {
       // Only create transaction edge when both parties
       // exist in the graph.
       if (!sourceId || !targetId) {
-        return;
+        continue;
       }
       const isRiskyAmount = transaction.amount > 1000000;
 
