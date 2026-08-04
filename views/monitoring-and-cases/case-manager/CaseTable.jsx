@@ -71,6 +71,36 @@ export default function CaseTable({ cases, loading, currentPage, totalItems, lim
 
   const columns = [
     {
+      id: "actions",
+      header: "Actions",
+      size: 90,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={(e) => { e.stopPropagation(); handleRowClick(row.original); }}
+          >
+            <IconEye className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(
+                `/dashboard/client/monitoring-and-cases/case-manager/${row.original._id}/edit`
+              );
+            }}
+          >
+            <IconEdit className="size-4" />
+          </Button>
+        </div>
+      ),
+    },
+    {
       id: "title",
       header: "Case Title",
       accessorKey: "title",
@@ -194,36 +224,6 @@ export default function CaseTable({ cases, loading, currentPage, totalItems, lim
         <span className="text-sm text-muted-foreground">
           {dateShowFormat(row.original.updatedAt)}
         </span>
-      ),
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      size: 90,
-      cell: ({ row }) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={(e) => { e.stopPropagation(); handleRowClick(row.original); }}
-          >
-            <IconEye className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              router.push(
-                `/dashboard/client/monitoring-and-cases/case-manager/${row.original._id}/edit`
-              );
-            }}
-          >
-            <IconEdit className="size-4" />
-          </Button>
-        </div>
       ),
     },
   ];
