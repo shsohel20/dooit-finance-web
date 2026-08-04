@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { getSMRById } from "../../actions";
 import UILoader from "@/components/UILoader";
 import { cn } from "@/lib/utils";
+import { downloadReportPdf } from "@/lib/downloadReportPdf";
 import {
   DESIGNATED_SERVICES,
   SUSPICION_REASONS,
@@ -253,7 +254,17 @@ const initials = (name) =>
 export default function ReportDetailView() {
   const [data, setData] = useState(null);
   const [isFetching, setIsFetching] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const id = useSearchParams().get("id");
+
+  const handleExportPdf = async () => {
+    setExporting(true);
+    try {
+      await downloadReportPdf({ kind: "smr", id: data?._id, label: data?.uid });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) {
@@ -322,6 +333,16 @@ export default function ReportDetailView() {
                 </Pill>
               </div>
               <div className="mt-[5px] truncate font-mono text-xs text-[#71767f]">{data?.uid}</div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2.5">
+              <button
+                type="button"
+                onClick={handleExportPdf}
+                disabled={exporting || !data?._id}
+                className="rounded-lg border border-[#d3d6dc] bg-white px-[15px] py-[9px] text-[13px] font-semibold text-[#3d4048] transition-colors hover:bg-[#f5f6f8] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {exporting ? "Preparing PDF…" : "Export PDF"}
+              </button>
             </div>
           </div>
         </header>
