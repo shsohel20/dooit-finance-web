@@ -33,7 +33,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const data = await res.json();
 
-          // console.log("user", user);
           if (data.success) {
             const decodedToken = jwtDecode(data?.token);
             const user = {
@@ -70,6 +69,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      if (typeof token.accessToken !== "string") return session;
       const decodedToken = jwtDecode(token.accessToken);
       session.user = {
         ...decodedToken,

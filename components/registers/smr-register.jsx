@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,24 @@ import {
   XCircle,
 } from "lucide-react";
 import { SMRCaseDialog } from "./smr-case-dialog";
+import { getSMRList } from "@/app/dashboard/client/report-compliance/smr-filing/smr/actions";
+
+// Map a real SMR document (api/models/SmrReport.js) → the register's row shape.
+// Real SMRs don't carry every demo field, so unmodeled ones fall back to "—".
+const SMR_STATUS_MAP = { approved: "Submitted", review: "Under Review", draft: "Draft" };
+const toSmrRow = (d = {}) => ({
+  ...d,
+  caseId: d.uid || d.caseNumber || String(d._id || ""),
+  customerName: d?.partC?.personOrganisation?.name || "—",
+  customerId: d.customer ? String(d.customer) : d.caseNumber || "—",
+  suspicionDate: d.createdAt || null,
+  analystName: d?.metadata?.createdBy || "—",
+  smrDecision: d.smrDecision || "—",
+  status: SMR_STATUS_MAP[String(d.status || "").toLowerCase()] || d.status || "Draft",
+  isVerified: String(d.status || "").toLowerCase() === "approved",
+  reasonForSuspicion: d?.partB?.groundsForSuspicion || "",
+  redFlags: d?.partA?.suspicionReasons || [],
+});
 
 // Mock data for different entity types
 const mockSMRCases = [
@@ -167,8 +185,27 @@ export function SMRRegister() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [decisionFilter, setDecisionFilter] = useState("all");
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredCases = mockSMRCases.filter((smrCase) => {
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    getSMRList({ limit: 100 })
+      .then((r) => {
+        if (active) setCases((r?.data || []).map(toSmrRow));
+      })
+      .catch((e) => {
+        console.error("Failed to load SMR list", e);
+        if (active) setCases(mockSMRCases); // fallback to sample on API failure
+      })
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const filteredCases = cases.filter((smrCase) => {
     const matchesSearch =
       smrCase.caseId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       smrCase.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -186,11 +223,10 @@ export function SMRRegister() {
   });
 
   const stats = {
-    total: mockSMRCases.length,
-    submitted: mockSMRCases.filter((c) => c.status === "Submitted").length,
-    underReview: mockSMRCases.filter((c) => c.status === "Under Review").length,
-    notSubmitted: mockSMRCases.filter((c) => c.status === "Not Submitted")
-      .length,
+    total: cases.length,
+    submitted: cases.filter((c) => c.status === "Submitted").length,
+    underReview: cases.filter((c) => c.status === "Under Review").length,
+    notSubmitted: cases.filter((c) => c.status === "Not Submitted").length,
   };
 
   const handleRowClick = (smrCase) => {
@@ -318,7 +354,7 @@ export function SMRRegister() {
                     colSpan={8}
                     className="text-center text-muted-foreground"
                   >
-                    No SMR cases found
+                    {loading ? "Loading SMR cases…" : "No SMR cases found"}
                   </TableCell>
                 </TableRow>
               ) : (

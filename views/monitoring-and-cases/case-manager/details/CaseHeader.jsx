@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { StatusPill } from "@/components/ui/StatusPill";
 import { Badge } from "@/components/ui/badge";
+import { StatusPill } from "@/components/ui/StatusPill";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import {
@@ -34,17 +34,30 @@ import RiskScoreGauge from "./components/RiskScoreGauge";
 import SlaCountdown from "./components/SlaCountdown";
 import ReasonAlertDialog from "./components/ReasonAlertDialog";
 
+// Keyed lowercase to match the Case model enums
+// (low | medium | high | critical). Values are normalised before lookup so
+// Title-case values from the mock fixtures still resolve.
 const priorityVariants = {
-  Critical: "danger",
-  High: "warning",
-  Medium: "info",
-  Low: "outline",
+  critical: "danger",
+  high: "warning",
+  medium: "info",
+  low: "outline",
 };
 
 const statusVariants = {
-  Active: "success",
-  "Under Review": "warning",
-  Closed: "outline",
+  open: "info",
+  under_investigation: "warning",
+  pending_review: "outline",
+  closed: "success",
+  escalated: "danger",
+};
+
+const STATUS_LABELS = {
+  open: "Open",
+  under_investigation: "Under Investigation",
+  pending_review: "Pending Review",
+  closed: "Closed",
+  escalated: "Escalated",
 };
 
 export default function CaseHeader({
@@ -63,7 +76,9 @@ export default function CaseHeader({
 
   if (!caseData) return null;
 
-  const isClosed = status === "Closed";
+  const statusKey = String(status ?? "").toLowerCase();
+  const priorityKey = String(priority ?? "").toLowerCase();
+  const isClosed = statusKey === "closed";
 
   return (
     <div className="rounded-xl border border-border bg-white p-5 shadow-sm">
@@ -102,7 +117,10 @@ export default function CaseHeader({
           </div>
           <h1 className="text-xl font-bold text-heading">{caseData.title || caseData.caseName}</h1>
           <p className="text-xs text-muted-foreground">
-            {caseData.customerName} · {caseData.caseType}
+            {caseData.customerName || caseData.customer?.name} ·{" "}
+            <span className="capitalize">
+              {(caseData.caseType || caseData.type || "").replace("_", " ")}
+            </span>
           </p>
         </div>
 
@@ -121,7 +139,10 @@ export default function CaseHeader({
                 </AvatarFallback>
               </Avatar>
               <span>
-                Investigator: <span className="font-semibold text-heading">{assignedAnalyst}</span>
+                Investigator:{" "}
+                <span className="font-semibold text-heading">
+                  {assignedAnalyst || "Unassigned"}
+                </span>
               </span>
             </div>
           </div>

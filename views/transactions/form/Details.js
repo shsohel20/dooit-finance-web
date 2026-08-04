@@ -1,554 +1,718 @@
 "use client";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { IconAlertSquare, } from '@tabler/icons-react';
-import React, { useEffect, useState } from 'react'
-import TransactionReportingModal from './ReportingModal';
-import { getTransactionById } from '@/app/dashboard/client/transactions/actions';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import React, { useEffect, useState } from "react";
+import { getTransactionById, downloadTransactionPdf } from "@/app/dashboard/client/transactions/actions";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Shield,
-  AlertCircle,
   User,
+  Calendar,
+  Globe,
   Briefcase,
+  Building2,
+  CheckCircle2,
+  AlertTriangle,
+  FileText,
+  ArrowRight,
+  Link2,
+  Cpu,
+  Scale,
+  Activity,
   MapPin,
   Phone,
   Mail,
-  Building2,
-  Calendar,
-  FileText,
-  Users,
-  ChevronsRight,
-} from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+  Hash,
+  Clock,
+  ChevronRight,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { dateShowFormatWithTime, formatAUD } from "@/lib/utils";
 
-const TransactionDetailView = ({ open, setOpen, currentItem, setCurrentItem }) => {
-  const [viewReport, setViewReport] = useState(false);
-  const [customer, setCustomer] = useState(null);
+// ── shared helpers ────────────────────────────────────────────────────────────
 
-  console.log('customer', customer);
+const getRiskBarColor = (score) => {
+  if (score >= 70) return "bg-destructive";
+  if (score >= 40) return "bg-warning";
+  return "bg-success";
+};
+
+const getRiskLabel = (score) => {
+  if (score >= 70) return { label: "High Risk", cls: "text-destructive" };
+  if (score >= 40) return { label: "Medium Risk", cls: "text-warning-foreground" };
+  return { label: "Low Risk", cls: "text-success" };
+};
+
+const statusMeta = {
+  pending: { variant: "outline", cls: "border-warning/30 bg-warning/10 text-warning-foreground" },
+  completed: { variant: "outline", cls: "border-success/30 bg-success/10 text-success" },
+  failed: { variant: "outline", cls: "border-destructive/30 bg-destructive/10 text-destructive" },
+  cancelled: { variant: "outline", cls: "border-border bg-muted/50 text-muted-foreground" },
+};
+
+// label-value row — matches CaseOverview.jsx pattern exactly
+function LabelValue({ label, value, mono = false }) {
+  if (!value && value !== 0) return null;
+  return (
+    <div className="flex items-start justify-between py-3 border-b border-border last:border-0">
+      <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <span className={`text-sm text-foreground text-right max-w-[60%] ${mono ? "font-mono" : ""}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+// icon + label + value row — matches CustomerProfile.jsx pattern exactly
+function IconRow({ icon: Icon, label, value, children }) {
+  if (!value && !children) return null;
+  return (
+    <div className="flex items-start gap-3">
+      <Icon className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
+      <div className="flex-1 space-y-0.5 min-w-0">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        {children ?? <p className="text-sm font-medium text-foreground break-words">{value}</p>}
+      </div>
+    </div>
+  );
+}
+
+// ── party block (sender / receiver / beneficiary / intermediary) ──────────────
+
+function PartyBlock({ title, party }) {
+  const hasData = party?.name || party?.account || party?.institution;
+  if (!hasData) return null;
+  return (
+    <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </p>
+      <div className="space-y-2">
+        <IconRow icon={User} label="Name" value={party?.name} />
+        <IconRow icon={Hash} label="Account" value={party?.account} />
+        <IconRow icon={Building2} label="Institution" value={party?.institution} />
+        <IconRow icon={Globe} label="Country" value={party?.institutionCountry} />
+        <IconRow icon={MapPin} label="Address" value={party?.address} />
+      </div>
+    </div>
+  );
+}
+
+// ── customer KYC tabs ─────────────────────────────────────────────────────────
+
+function KycProfile({ tx }) {
+  const primaryCustomer =
+    tx?.type === "deposit" ? tx?.receiver?.customer : tx?.sender?.customer;
+  if (!primaryCustomer) return null;
+
+  const partyLabel = tx?.type === "deposit" ? "Receiver" : "Sender";
+  const personal = primaryCustomer?.personalKyc?.personal_form;
+  const details = personal?.customer_details;
+  const contact = personal?.contact_details;
+  const addr = personal?.residential_address;
+  const employment = personal?.employment_details;
+  const funds = primaryCustomer?.personalKyc?.funds_wealth;
+
+  return (
+    <Card className="bg-card border-border">
+      <CardHeader>
+        <CardTitle className="text-lg font-medium">{partyLabel} — KYC Profile</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="personal">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="personal">Personal</TabsTrigger>
+            <TabsTrigger value="employment">Employment</TabsTrigger>
+            <TabsTrigger value="financial">Financial</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="personal" className="pt-4 space-y-4">
+            <div className="space-y-3">
+              <IconRow
+                icon={User}
+                label="Full Name"
+                value={[details?.given_name, contact?.middle_name, details?.surname]
+                  .filter(Boolean).join(" ")}
+              />
+              <IconRow icon={Calendar} label="Date of Birth" value={details?.date_of_birth} />
+              <IconRow icon={Globe} label="Nationality" value={details?.nationality} />
+              <IconRow
+                icon={CheckCircle2}
+                label="Account Status"
+              >
+                <Badge
+                  variant="outline"
+                  className={primaryCustomer?.isActive
+                    ? "h-6 border-success/30 bg-success/10 text-success"
+                    : "h-6 border-border bg-muted/50 text-muted-foreground"}
+                >
+                  {primaryCustomer?.isActive ? "Active" : "Inactive"}
+                </Badge>
+              </IconRow>
+            </div>
+
+            {(contact?.email || contact?.phone) && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <Phone className="size-3" /> Contact
+                  </p>
+                  <IconRow icon={Mail} label="Email" value={contact?.email} />
+                  <IconRow icon={Phone} label="Phone" value={contact?.phone} />
+                </div>
+              </>
+            )}
+
+            {addr && (
+              <>
+                <Separator />
+                <IconRow icon={MapPin} label="Residential Address">
+                  <div className="rounded-md bg-muted/50 px-3 py-2 text-sm text-foreground">
+                    <p>{addr?.address}</p>
+                    <p>{[addr?.suburb, addr?.state, addr?.postcode].filter(Boolean).join(", ")}</p>
+                    <p className="font-medium">{addr?.country}</p>
+                  </div>
+                </IconRow>
+              </>
+            )}
+          </TabsContent>
+
+          <TabsContent value="employment" className="pt-4 space-y-3">
+            <IconRow icon={Briefcase} label="Occupation" value={employment?.occupation} />
+            <IconRow icon={Building2} label="Industry" value={employment?.industry} />
+            <IconRow icon={Building2} label="Employer" value={employment?.employer_name} />
+          </TabsContent>
+
+          <TabsContent value="financial" className="pt-4 space-y-3">
+            <IconRow icon={FileText} label="Source of Funds" value={funds?.source_of_funds} />
+            <IconRow icon={FileText} label="Source of Wealth" value={funds?.source_of_wealth} />
+            <IconRow icon={FileText} label="Account Purpose" value={funds?.account_purpose} />
+            <IconRow icon={FileText} label="Est. Trading Volume" value={funds?.estimated_trading_volume} />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ── main component ────────────────────────────────────────────────────────────
+
+const TransactionDetailView = ({ open, setOpen, currentItem }) => {
+  const [tx, setTx] = useState(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
   useEffect(() => {
-    if (currentItem) {
-      fetchDetails();
-    }
+    if (currentItem) fetchDetails();
   }, [currentItem]);
 
   const fetchDetails = async () => {
-    const details = await getTransactionById(currentItem?._id);
-    setCustomer(details?.data || null);
-  }
+    const res = await getTransactionById(currentItem?._id);
+    setTx(res?.data ?? null);
+  };
 
-  const metaData = [
-    {
-      name: 'Total Debits',
-      value: '13690.00',
-    },
-    {
-      name: 'Total Credits',
-      value: '78640.00',
-    },
-    {
-      name: 'Net Flow',
-      value: '587690.00',
-    },
-    {
-      name: 'Avg. Transaction Value',
-      value: '250.40',
+  const handleDownloadPdf = async () => {
+    if (!tx?._id) return;
+    setPdfLoading(true);
+    try {
+      const result = await downloadTransactionPdf(tx._id);
+      if (!result.success) { toast.error(result.message || "PDF generation failed"); return; }
+      const bytes = Uint8Array.from(atob(result.data), (c) => c.charCodeAt(0));
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `transaction-${tx.uid || tx._id}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("PDF downloaded");
+    } catch (err) {
+      toast.error("PDF download failed: " + err.message);
+    } finally {
+      setPdfLoading(false);
     }
+  };
 
-  ]
-  const columns = [
-    {
-      header: 'Date',
-      accessorKey: 'date',
-    },
-    {
-      header: 'Transaction ID',
-      accessorKey: 'ref',
-    },
-    {
-      header: 'Type',
-      accessorKey: 'method',
-    },
-    {
-      header: 'Debit',
-      accessorKey: 'debit',
-    },
-    {
-      header: 'Credit',
-      accessorKey: 'credit',
-    },
-    {
-      header: 'Balance',
-      accessorKey: 'amount',
-    },
+  const riskScore = tx?.riskScore ?? 0;
+  const { label: riskLabel, cls: riskCls } = getRiskLabel(riskScore);
+  const smeta = statusMeta[tx?.status] ?? statusMeta.pending;
 
-
-  ]
-  const data = [];
-
-  function formatDate(dateString) {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  }
-
+  const hasCrypto = tx?.crypto?.walletAddress || tx?.crypto?.txHash;
+  const hasBullion = tx?.bullion?.type;
+  const hasTravelRule = tx?.travelRule?.originatorVaspId || tx?.travelRule?.beneficiaryVaspId;
+  const hasRelated = tx?.relatedPartyFlag || tx?.relatedPartyTxnId;
+  const hasInvestigation = tx?.investigation?.caseId || tx?.investigation?.flagged;
+  const hasWorkflow = tx?.metadata?.workflowHistory?.length > 0;
+  const hasBeneficiary = tx?.beneficiary?.name || tx?.beneficiary?.account;
+  const hasIntermediary = tx?.intermediary?.name || tx?.intermediary?.account;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className='sm:max-w-5xl w-full overflow-y-auto '>
-        <SheetHeader>
-          <SheetTitle>Detail View</SheetTitle>
-          <SheetDescription>
-            View the detail view here.
-          </SheetDescription>
+      <SheetContent className="sm:max-w-5xl w-full overflow-y-auto">
+
+        {/* ── header ───────────────────────────────────────────────────────── */}
+        <SheetHeader className="mb-6">
+          <SheetTitle className="text-xl font-semibold text-foreground">
+            Transaction Detail
+          </SheetTitle>
+          <div className="flex items-center justify-between mt-1">
+            <SheetDescription className="font-mono text-xs">
+              {tx?.uid ?? "Loading…"}
+            </SheetDescription>
+            {tx && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pdfLoading}
+                onClick={handleDownloadPdf}
+                className="h-7 gap-1.5 text-xs border-destructive/40 text-destructive hover:bg-destructive/5 hover:text-destructive"
+              >
+                {pdfLoading ? (
+                  <span className="size-3 border-2 border-destructive/30 border-t-destructive rounded-full animate-spin" />
+                ) : (
+                  <FileText className="size-3.5" />
+                )}
+                {pdfLoading ? "Generating…" : "Download PDF"}
+              </Button>
+            )}
+          </div>
         </SheetHeader>
-        {/* <div className='px-8 py-4 space-y-4'>
-          <div className='flex justify-between border rounded-md p-4'>
-            <div className='flex  gap-4 '>
-              <div className='size-20 rounded-full overflow-hidden'>
-                <img src="/profile.png" alt="" className='w-full h-full object-cover' />
-              </div>
-              <div>
-                <h4 className='text-lg font-bold relative w-max pr-2'>{currentItem?.name}
-                  <div className='absolute -top-1 left-full'>
-                    <Badge variant="success">
-                      Verified
-                    </Badge>
-                  </div>
-                </h4>
-                <p className='font-mono text-neutral-700'>Customer ID: C-10045 </p>
 
+        {/* ── padded body ──────────────────────────────────────────────────── */}
+        <div className="px-4 pb-6 space-y-6">
 
-              </div>
+          {/* ── flow banner ──────────────────────────────────────────────────── */}
+          <div className="flex items-stretch gap-3">
+            <div className="flex-1 rounded-lg border border-border bg-card p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Sender
+              </p>
+              <p className="font-semibold text-foreground">{tx?.sender?.name ?? "—"}</p>
+              <p className="text-sm font-mono text-muted-foreground mt-0.5">
+                {tx?.sender?.account}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">{tx?.sender?.institution}</p>
             </div>
-            <div className='flex gap-8'>
-              <div className='flex flex-col  items-center'>
-                <h4 className='text-xs text-muted-foreground uppercase'>Account No</h4>
-                <p className='font-mono text-xl text-center'>1234567890</p>
-              </div>
-              <div className='flex flex-col  items-center'>
-                <h4 className='text-xs text-muted-foreground uppercase'>Current Balance</h4>
-                <p className='font-mono text-xl text-center'>AUD 8,420.50</p>
-              </div>
-              <div className='flex flex-col  items-center'>
-                <h4 className='text-xs text-muted-foreground uppercase'>Total Transactions</h4>
-                <p className='font-mono text-xl text-center'>120</p>
-              </div>
-            </div>
-          </div>
-          <Alert variant="destructive">
-            <IconAlertSquare />
-            <AlertTitle className={'font-semibold'}>Risk Alert!</AlertTitle>
-            <AlertDescription >
-              Unusual Activity Detected - High Risk Score
-            </AlertDescription>
-          </Alert>
-          <div className='space-y-2'>
-            <div>
-              <h4 className='text-lg font-semibold'>30 day activity</h4>
-            </div>
-            <div className='grid grid-cols-4 gap-4'>
-              {metaData.map((item) => (
-                <div key={item.name} className='flex flex-col  w-full border rounded-md gap-8 p-4'>
-                  <h4 className='text-xs text-muted-foreground uppercase'>{item.name}</h4>
-                  <p className='font-mono text-xl '>AUD {item.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className='space-y-2'>
-            <h4 className='text-lg font-semibold'>Transaction History</h4>
-            <div>
 
-              <ResizableTable columns={columns} data={data} />
-            </div>
-          </div>
-        </div> */}
-        <div className='flex flex-row items-center gap-4 px-4'>
-          {/* Sender */}
-          <div className="space-y-3 w-full">
-            <div className="flex items-center  gap-2 text-muted-foreground">
-              <User className="size-4" />
-              <p className="text-sm font-medium">SENDER</p>
-            </div>
-            <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-3">
-              <div>
-                <p className=" font-semibold text-balance">
-                  {customer?.sender?.name}
+            <div className="flex flex-col items-center justify-center gap-1 shrink-0 px-2">
+              <ArrowRight className="size-5 text-success" />
+              <p className="text-sm font-bold text-foreground text-center">
+                {tx ? formatAUD(tx.amount, tx.currency) : "—"}
+              </p>
+              {tx?.convertedAmountAUD && (
+                <p className="text-[10px] text-muted-foreground text-center">
+                  ≈ {formatAUD(tx.convertedAmountAUD)} AUD
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  {customer?.sender?.account}
-                </p>
-              </div>
-
+              )}
             </div>
-          </div>
-          <div className='size-4'>
-            <ChevronsRight className='size-4 text-green-500' />
-          </div>
 
-          {/* Receiver */}
-          <div className="space-y-3 w-full">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <User className="size-4" />
-              <p className="text-sm font-medium">RECEIVER</p>
-            </div>
-            <div className="rounded-lg bg-secondary/50 border p-4 space-y-3">
-              <div>
-                <p className=" font-semibold text-balance">
-                  {customer?.receiver?.name}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {customer?.receiver?.account}
-                </p>
-              </div>
-
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="h-px w-12 bg-border" />
-            <span className="font-medium">Amount: ${customer?.amount}</span>
-            <div className="h-px w-12 bg-border" />
-          </div>
-        </div>
-
-
-        <div className="min-h-screen bg-background">
-          {/* Header */}
-          <div className="border-b bg-muted/30">
-            <div className=" px-4 py-6 lg:px-8">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h1 className="text-lg font-semibold tracking-tight text-balance">Transaction Details</h1>
-                  <p className="mt-2 text-sm text-muted-foreground">ID: {customer?.uid}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant={customer?.status ? "destructive" : "secondary"} className="h-7">
-                    {customer?.status}
-                  </Badge>
-                </div>
-              </div>
+            <div className="flex-1 rounded-lg border border-border bg-card p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Receiver
+              </p>
+              <p className="font-semibold text-foreground">{tx?.receiver?.name ?? "—"}</p>
+              <p className="text-sm font-mono text-muted-foreground mt-0.5">
+                {tx?.receiver?.account}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">{tx?.receiver?.institution}</p>
             </div>
           </div>
 
-          <div className=" px-4 py-8 lg:px-8">
-            <div className="grid gap-6 lg:grid-cols-3">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Forensic Analysis */}
-                <Card>
-                  <CardHeader>
+          {/* ── two-column body ──────────────────────────────────────────────── */}
+          <div className="grid gap-6 lg:grid-cols-3">
+
+            {/* ── left (2 / 3) ─────────────────────────────────────────────── */}
+            <div className="lg:col-span-2 space-y-6">
+
+              {/* Transaction Details */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium">Transaction Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-start justify-between py-3 border-b border-border">
+                    <span className="text-sm font-medium text-muted-foreground">Status</span>
                     <div className="flex items-center gap-2">
-                      <Shield className="size-5 text-primary" />
-                      <CardTitle>Security Analysis</CardTitle>
-                    </div>
-                    <CardDescription>Automated security screening results</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Risk Score</p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary transition-all"
-                            style={{ width: `${customer?.forensic?.chainalysisScore}%` }}
-                          />
-                        </div>
-                        <span className="text-sm font-semibold">{customer?.forensic?.chainalysisScore}</span>
-                      </div>
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Wallet Cluster</p>
-                        <p className="mt-1 font-mono text-sm">{customer?.forensic?.walletCluster}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Device ID</p>
-                        <p className="mt-1 font-mono text-sm">{customer?.metadata?.deviceId}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">IP Address</p>
-                        <p className="mt-1 font-mono text-sm">{customer?.metadata?.ip}</p>
-                      </div>
-
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Analysis Notes</p>
-                      <p className="mt-1 text-xs">{customer?.forensic?.notes}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Customer Information Tabs */}
-                <Tabs defaultValue="personal" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="personal">Personal</TabsTrigger>
-                    <TabsTrigger value="employment">Employment</TabsTrigger>
-                    <TabsTrigger value="financial">Financial</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="personal" className="mt-6">
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center gap-2">
-                          <User className="size-5 text-primary" />
-                          <CardTitle>Personal Information</CardTitle>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Full Name</p>
-                            <p className="mt-1">
-                              {customer?.customer?.personalKyc?.personal_form?.customer_details?.given_name}{" "}
-                              {customer?.customer?.personalKyc?.personal_form?.contact_details?.middle_name}{" "}
-                              {customer?.customer?.personalKyc?.personal_form?.customer_details?.surname}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Also Known As</p>
-                            <p className="mt-1">
-                              {customer?.customer?.personalKyc?.personal_form?.customer_details?.given_name || "N/A"}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
-                            <p className="mt-1">
-                              {formatDate(customer?.customer?.personalKyc?.personal_form?.customer_details?.date_of_birth)}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Referral Source</p>
-                            <p className="mt-1">{customer?.customer?.personalKyc?.personal_form?.customer_details?.referral}
-                            </p>
-                          </div>
-                        </div>
-
-                        <Separator />
-
-                        <div className="space-y-3">
-                          <h4 className="text-sm font-semibold flex items-center gap-2">
-                            <Phone className="size-4" />
-                            Contact Details
-                          </h4>
-                          <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="flex items-start gap-2">
-                              <Mail className="size-4 mt-0.5 text-muted-foreground" />
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium text-muted-foreground">Email</p>
-                                <p className="mt-0.5 text-sm truncate">
-                                  {customer?.personalKyc?.personal_form?.contact_details?.email}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-start gap-2">
-                              <Phone className="size-4 mt-0.5 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm font-medium text-muted-foreground">Phone</p>
-                                <p className="mt-0.5 text-sm">{customer?.personalKyc?.personal_form?.contact_details?.phone}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <Separator />
-
-                        <div className="space-y-3">
-                          <h4 className="text-sm font-semibold flex items-center gap-2">
-                            <MapPin className="size-4" />
-                            Residential Address
-                          </h4>
-                          <div className="rounded-lg bg-muted/50 p-4">
-                            <p className="text-sm">{customer?.personalKyc?.personal_form?.residential_address?.address}</p>
-                            <p className="mt-1 text-sm">
-                              {customer?.personalKyc?.personal_form?.residential_address?.suburb},{" "}
-                              {customer?.personalKyc?.personal_form?.residential_address?.state}{" "}
-                              {customer?.personalKyc?.personal_form?.residential_address?.postcode}
-                            </p>
-                            <p className="mt-1 text-sm font-medium">
-                              {customer?.personalKyc?.personal_form?.residential_address?.country}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-
-                  <TabsContent value="employment" className="mt-6">
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="size-5 text-primary" />
-                          <CardTitle>Employment Information</CardTitle>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid gap-6 sm:grid-cols-2">
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Occupation</p>
-                            <p className="mt-1 text-lg font-medium">
-                              {customer?.customer?.personalKyc?.personal_form?.employment_details?.occupation}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Industry</p>
-                            <p className="mt-1 text-lg font-medium">
-                              {customer?.customer?.personalKyc?.personal_form?.employment_details?.industry}
-                            </p>
-                          </div>
-                          <div className="sm:col-span-2">
-                            <p className="text-sm font-medium text-muted-foreground">Employer</p>
-                            {/* <div className="mt-2 flex items-center gap-2 rounded-lg bg-muted/50 p-3">
-                              <Building2 className="size-5 text-muted-foreground" />
-                              <p className="font-medium">
-                                {customer?.personalKyc?.personal_form?.employment_details?.employer_name}
-                              </p>
-                            </div> */}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-
-                  <TabsContent value="financial" className="mt-6">
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center gap-2">
-                          <FileText className="size-5 text-primary" />
-                          <CardTitle>Financial Information</CardTitle>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Source of Funds</p>
-                            <p className="mt-1">{customer?.customer?.personalKyc?.funds_wealth?.source_of_funds}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Source of Wealth</p>
-                            <p className="mt-1">{customer?.customer?.personalKyc?.funds_wealth?.source_of_wealth}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Account Purpose</p>
-                            <p className="mt-1">{customer?.customer?.personalKyc?.funds_wealth?.account_purpose}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Estimated Trading Volume</p>
-                            <p className="mt-1 text-lg font-semibold">
-                              $
-                              {customer?.customer?.personalKyc?.funds_wealth?.estimated_trading_volume}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
-              </div>
-
-              {/* Sidebar */}
-              <div className="space-y-6">
-                {/* Declaration */}
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <FileText className="size-5 text-primary" />
-                      <CardTitle>Declaration</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Status</p>
-                      <Badge
-                        variant={customer?.declaration?.declarations_accepted ? "default" : "secondary"}
-                        className="mt-1"
-                      >
-                        {customer?.declaration?.declarations_accepted ? "Accepted" : "Pending"}
+                      <Badge variant={smeta.variant} className={smeta.cls + " capitalize"}>
+                        {tx?.status}
                       </Badge>
-                    </div>
-                    <Separator />
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Signatory</p>
-                      <p className="mt-1 font-medium">{customer?.declaration?.signatory_name}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Date Signed</p>
-                      <div className="mt-1 flex items-center gap-2 text-sm">
-                        <Calendar className="size-4 text-muted-foreground" />
-                        {formatDate(customer?.declaration?.date)}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Relations */}
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <Users className="size-5 text-primary" />
-                      <CardTitle>Relations</CardTitle>
-                    </div>
-                    <CardDescription>Connected client accounts</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {customer?.relations?.slice(0, 3).map((relation, index) => (
-                        <div key={index} className="rounded-lg border p-3 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <Badge variant="outline" className="text-xs">
-                              {relation.type}
-                            </Badge>
-                            {relation.active && (
-                              <div className="flex items-center gap-1">
-                                <div className="size-2 rounded-full bg-green-500" />
-                                <span className="text-xs text-muted-foreground">Active</span>
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Source: <span className="font-medium text-foreground">{relation.source}</span>
-                          </p>
-                          <p className="text-xs text-muted-foreground">Registered: {formatDate(relation.registeredAt)}</p>
-                        </div>
-                      ))}
-                      {customer?.relations?.length > 3 && (
-                        <p className="text-center text-xs text-muted-foreground pt-2">
-                          +{customer?.relations?.length - 3} more relations
-                        </p>
+                      <Badge variant="outline" className="capitalize">
+                        {tx?.type}
+                      </Badge>
+                      {tx?.subtype && (
+                        <Badge variant="outline" className="text-muted-foreground capitalize">
+                          {tx.subtype}
+                        </Badge>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <LabelValue label="Reference" value={tx?.reference} mono />
+                  <LabelValue label="Narrative" value={tx?.narrative} />
+                  <LabelValue label="Channel" value={tx?.channel} />
+                  <LabelValue label="Purpose" value={tx?.purpose} />
+                  <LabelValue label="Remittance Purpose Code" value={tx?.remittancePurposeCode} mono />
+                  <LabelValue
+                    label="Amount"
+                    value={tx ? formatAUD(tx.amount, tx.currency) : null}
+                  />
+                  <LabelValue
+                    label="Converted Amount (AUD)"
+                    value={tx?.convertedAmountAUD ? formatAUD(tx.convertedAmountAUD) : null}
+                  />
+                  <LabelValue
+                    label="Transaction Date"
+                    value={tx?.timestamp ? dateShowFormatWithTime(tx.timestamp) : null}
+                  />
+                </CardContent>
+              </Card>
 
-                {/* Metadata */}
-                <Card>
+              {/* Other Parties */}
+              {(hasBeneficiary || hasIntermediary) && (
+                <Card className="bg-card border-border">
                   <CardHeader>
-                    <CardTitle className="text-sm">Transaction Metadata</CardTitle>
+                    <CardTitle className="text-lg font-medium">Other Parties</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Transaction ID</p>
-                      <p className="mt-1 font-mono text-xs break-all">{customer?.uid}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Sequence</p>
-                      <p className="mt-1 font-semibold">{customer?.sequence}</p>
-                    </div>
+                  <CardContent className="space-y-4">
+                    <PartyBlock title="Beneficiary" party={tx?.beneficiary} />
+                    <PartyBlock title="Intermediary" party={tx?.intermediary} />
                   </CardContent>
                 </Card>
-              </div>
+              )}
+
+              {/* Risk Analysis — matches CustomerProfile.jsx */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium">Risk Analysis</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+
+                  {/* gauge */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-muted-foreground">Overall Risk Level</p>
+                      <span className={`text-sm font-semibold ${riskCls}`}>{riskLabel}</span>
+                    </div>
+                    <div className="relative h-3 w-full overflow-hidden rounded-full bg-muted">
+                      <div className="absolute inset-0 flex">
+                        <div className="h-full w-1/3 bg-success/20" />
+                        <div className="h-full w-1/3 bg-warning/20" />
+                        <div className="h-full w-1/3 bg-destructive/20" />
+                      </div>
+                      <div
+                        className="absolute top-0 h-full w-1 bg-foreground shadow-lg transition-all"
+                        style={{ left: `${Math.min(riskScore, 99)}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Low</span>
+                      <span>Medium</span>
+                      <span>High</span>
+                    </div>
+                  </div>
+
+                  {/* risk score bar */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-foreground">Risk Score</span>
+                      <span className="text-sm font-semibold text-foreground">{riskScore}</span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className={`h-full transition-all ${getRiskBarColor(riskScore)}`}
+                        style={{ width: `${Math.min(riskScore, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {tx?.riskFlags?.length > 0 && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-muted-foreground">Risk Flags</p>
+                        <div className="flex flex-wrap gap-2">
+                          {tx.riskFlags.map((f) => (
+                            <span
+                              key={f}
+                              className="rounded-md bg-destructive/10 border border-destructive/20 px-2 py-0.5 text-xs font-medium text-destructive"
+                            >
+                              {f}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {(tx?.forensic?.walletCluster || tx?.forensic?.chainalysisScore || tx?.forensic?.notes || tx?.metadata?.deviceId || tx?.metadata?.ip) && (
+                    <>
+                      <Separator />
+                      <div className="space-y-3">
+                        <p className="text-sm font-medium text-muted-foreground">Forensic Details</p>
+                        <LabelValue label="Wallet Cluster" value={tx?.forensic?.walletCluster} mono />
+                        <LabelValue label="Chainalysis Score" value={tx?.forensic?.chainalysisScore} />
+                        <LabelValue label="Forensic Notes" value={tx?.forensic?.notes} />
+                        <LabelValue label="Device ID" value={tx?.metadata?.deviceId} mono />
+                        <LabelValue label="IP Address" value={tx?.metadata?.ip} mono />
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Investigation */}
+              {hasInvestigation && (
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-warning-foreground" />
+                      <CardTitle className="text-lg font-medium">Investigation</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <LabelValue label="Case ID" value={tx?.investigation?.caseId} mono />
+                    <div className="flex items-start justify-between py-3 border-b border-border last:border-0">
+                      <span className="text-sm font-medium text-muted-foreground">Flagged</span>
+                      <Badge
+                        variant="outline"
+                        className={tx?.investigation?.flagged
+                          ? "border-destructive/30 bg-destructive/10 text-destructive"
+                          : "border-border bg-muted/50 text-muted-foreground"}
+                      >
+                        {tx?.investigation?.flagged ? "Yes" : "No"}
+                      </Badge>
+                    </div>
+                    <LabelValue label="Investigator Notes" value={tx?.investigation?.investigatorNotes} />
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Travel Rule */}
+              {hasTravelRule && (
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-lg font-medium">Travel Rule</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <LabelValue label="Originator VASP ID" value={tx?.travelRule?.originatorVaspId} mono />
+                    <LabelValue label="Originator VASP Name" value={tx?.travelRule?.originatorVaspName} />
+                    <LabelValue label="Originator VASP Licence" value={tx?.travelRule?.originatorVaspLicense} />
+                    <LabelValue label="Beneficiary VASP ID" value={tx?.travelRule?.beneficiaryVaspId} mono />
+                    <LabelValue label="Beneficiary VASP Name" value={tx?.travelRule?.beneficiaryVaspName} />
+                    <LabelValue label="Travel Message ID" value={tx?.travelRule?.travelMessageId} mono />
+                    <LabelValue label="Protocol" value={tx?.travelRule?.protocol} />
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Crypto */}
+              {hasCrypto && (
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Cpu className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-lg font-medium">Crypto</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <LabelValue label="Wallet Address" value={tx?.crypto?.walletAddress} mono />
+                    <LabelValue label="Tx Hash" value={tx?.crypto?.txHash} mono />
+                    <LabelValue label="Network" value={tx?.crypto?.network} />
+                    <LabelValue label="Hops" value={tx?.crypto?.hops} />
+                    <LabelValue label="Cluster" value={tx?.crypto?.cluster} mono />
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Bullion */}
+              {hasBullion && (
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Scale className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-lg font-medium">Bullion</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <LabelValue label="Type" value={tx?.bullion?.type} />
+                    <LabelValue label="Purity" value={tx?.bullion?.purity} />
+                    <LabelValue label="Weight" value={tx?.bullion?.weight ? `${tx.bullion.weight} g` : null} />
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* KYC Profile */}
+              <KycProfile tx={tx} />
+            </div>
+
+            {/* ── right sidebar (1 / 3) ─────────────────────────────────────── */}
+            <div className="space-y-6">
+
+              {/* Record */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium">Record</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="rounded-lg bg-muted/50 border border-border p-4 space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">Transaction UID</p>
+                    <p className="font-mono text-xs text-foreground break-all">{tx?.uid ?? "—"}</p>
+                  </div>
+
+
+
+                  <Separator />
+
+                  <div className="flex items-start gap-3">
+                    <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1 space-y-0.5">
+                      <p className="text-xs font-medium text-muted-foreground">Transaction Date</p>
+                      <p className="text-sm text-foreground">
+                        {tx?.timestamp ? dateShowFormatWithTime(tx.timestamp) : "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <Clock className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1 space-y-0.5">
+                      <p className="text-xs font-medium text-muted-foreground">Created At</p>
+                      <p className="text-sm text-foreground">
+                        {tx?.createdAt ? dateShowFormatWithTime(tx.createdAt) : "—"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <Clock className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1 space-y-0.5">
+                      <p className="text-xs font-medium text-muted-foreground">Updated At</p>
+                      <p className="text-sm text-foreground">
+                        {tx?.updatedAt ? dateShowFormatWithTime(tx.updatedAt) : "—"}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Organisation */}
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <CardTitle className="text-lg font-medium">Organisation</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <IconRow
+                    icon={Building2}
+                    label="Client"
+                    value={tx?.client?.name ?? (typeof tx?.client === "string" ? tx.client : null)}
+                  />
+                  <IconRow
+                    icon={Building2}
+                    label="Branch"
+                    value={tx?.branch?.name ?? (typeof tx?.branch === "string" ? tx.branch : null)}
+                  />
+                  <IconRow
+                    icon={User}
+                    label="Created By"
+                    value={tx?.createdBy?.name ?? tx?.createdBy?.email ?? null}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Related Party */}
+              {hasRelated && (
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Link2 className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-lg font-medium">Related Party</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1 space-y-0.5">
+                        <p className="text-xs font-medium text-muted-foreground">Flagged</p>
+                        <Badge
+                          variant="outline"
+                          className={tx?.relatedPartyFlag
+                            ? "h-6 border-destructive/30 bg-destructive/10 text-destructive"
+                            : "h-6 border-border bg-muted/50 text-muted-foreground"}
+                        >
+                          {tx?.relatedPartyFlag ? "Yes" : "No"}
+                        </Badge>
+                      </div>
+                    </div>
+                    <IconRow icon={Link2} label="Related Txn ID" value={tx?.relatedPartyTxnId || null} />
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Workflow History */}
+              {hasWorkflow && (
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-lg font-medium">Workflow History</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {tx.metadata.workflowHistory.map((h, i) => (
+                      <div
+                        key={i}
+                        className="rounded-lg border border-border bg-card p-3 space-y-1.5"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <Badge variant="outline" className="text-[10px] capitalize">
+                            {h.action?.replace(/_/g, " ")}
+                          </Badge>
+                          <span className="text-[10px] text-muted-foreground shrink-0">
+                            {h.timestamp ? dateShowFormatWithTime(h.timestamp) : ""}
+                          </span>
+                        </div>
+                        {h.fromStatus && (
+                          <p className="text-xs text-muted-foreground">
+                            {h.fromStatus}
+                            <ArrowRight className="inline size-3 mx-1" />
+                            {h.toStatus}
+                          </p>
+                        )}
+                        {h.notes && (
+                          <p className="text-xs text-foreground">{h.notes}</p>
+                        )}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
             </div>
           </div>
-        </div>
+
+        </div>{/* end padded body */}
       </SheetContent>
-      <TransactionReportingModal open={viewReport} setOpen={setViewReport} currentItem={currentItem} setCurrentItem={setCurrentItem} />
     </Sheet>
-  )
-}
+  );
+};
+
 export default TransactionDetailView;

@@ -40,6 +40,15 @@ const chartConfig = {
   normal: { label: "Normal", color: "var(--muted-foreground)" },
 };
 
+// Transaction sender/receiver are PartySchema subdocuments on the API
+// ({ name, account, institution, ... }) but plain strings in the mock
+// fixtures — never render either straight into JSX.
+const partyName = (party) => {
+  if (!party) return "";
+  if (typeof party === "string") return party;
+  return party.name || party.account || party.institution || "";
+};
+
 function formatCurrency(amount, currency = "AUD") {
   try {
     return new Intl.NumberFormat("en-AU", { style: "currency", currency }).format(amount);
@@ -76,7 +85,9 @@ export default function TransactionAnalysisSection({ caseData, sectionRef, colla
   const chartData = useMemo(() => {
     const map = new Map();
     transactions.forEach((t) => {
-      const day = t.date.slice(0, 10);
+      // Mock fixtures use `date`; the API uses `timestamp`.
+      const day = String(t.date || t.timestamp || "").slice(0, 10);
+      if (!day) return;
       if (!map.has(day)) map.set(day, { date: day, flagged: 0, normal: 0 });
       const entry = map.get(day);
       entry[t.status === "flagged" ? "flagged" : "normal"] += t.amount;
@@ -89,12 +100,12 @@ export default function TransactionAnalysisSection({ caseData, sectionRef, colla
       if (statusFilter !== "all" && t.status !== statusFilter) return false;
       if (search) {
         const q = search.toLowerCase();
-        return (
-          t.sender.toLowerCase().includes(q) ||
-          t.receiver.toLowerCase().includes(q) ||
-          (t.country || "").toLowerCase().includes(q) ||
-          t.id.toLowerCase().includes(q)
-        );
+        return [
+          partyName(t.sender),
+          partyName(t.receiver),
+          t.country,
+          t.id || t.uid,
+        ].some((field) => String(field || "").toLowerCase().includes(q));
       }
       return true;
     });
@@ -159,9 +170,9 @@ export default function TransactionAnalysisSection({ caseData, sectionRef, colla
         header: "Sender → Receiver",
         cell: ({ row }) => (
           <div className="flex items-center gap-1.5">
-            <span className="text-heading">{row.original.sender}</span>
+            <span className="text-heading">{partyName(row.original.sender)}</span>
             <IconArrowRight className="size-3.5 text-muted-foreground shrink-0" />
-            <span className="text-heading">{row.original.receiver}</span>
+            <span className="text-heading">{partyName(row.original.receiver)}</span>
           </div>
         ),
         size: 260,

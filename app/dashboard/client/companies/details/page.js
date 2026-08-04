@@ -31,6 +31,12 @@ function formatDate(dateString) {
   });
 }
 
+// contact_email/phone_number now support multiple entries (docs/65 Step 38)
+// — may still be a legacy scalar string on old records.
+function toCsv(v) {
+  return (Array.isArray(v) ? v : v ? [v] : []).filter(Boolean).join(", ");
+}
+
 function formatCurrency(value) {
   const num = Number.parseInt(value);
   if (Number.isNaN(num)) return value;
@@ -40,6 +46,13 @@ function formatCurrency(value) {
     maximumFractionDigits: 0,
   }).format(num);
 }
+
+const ENTITY_TYPE_LABELS = {
+  proprietary_limited: "Proprietary Limited",
+  public_company: "Public Company",
+  foreign_company: "Foreign Company",
+  other: "Other",
+};
 
 function StatusBadge({ status }) {
   const statusConfig = {
@@ -324,10 +337,12 @@ const CompanyDetailsPage = () => {
                 label="Country of Incorporation"
                 value={general_information?.country_of_incorporation}
               />
-              <DataField label="Company Type" value={general_information?.company_type?.type} />
               <DataField
-                label="Listed Company"
-                value={general_information?.company_type?.is_listed}
+                label="Company Type"
+                value={
+                  ENTITY_TYPE_LABELS[general_information?.entity_type] ||
+                  general_information?.company_type?.type
+                }
               />
               <DataField label="Industry" value={general_information?.industry} />
               <DataField
@@ -347,7 +362,7 @@ const CompanyDetailsPage = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Email</p>
                   <p className="font-medium text-foreground">
-                    {general_information?.contact_email}
+                    {toCsv(general_information?.contact_email)}
                   </p>
                 </div>
               </div>
@@ -357,7 +372,7 @@ const CompanyDetailsPage = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="font-medium text-foreground">{general_information?.phone_number}</p>
+                  <p className="font-medium text-foreground">{toCsv(general_information?.phone_number)}</p>
                 </div>
               </div>
             </div>
@@ -392,29 +407,46 @@ const CompanyDetailsPage = () => {
             </div>
           </SectionCard>
 
-          {/* Local Agent */}
-          <SectionCard title="Local Agent" icon={User}>
-            <div className="space-y-4">
-              <DataField label="Name" value={general_information?.local_agent?.name} />
-              <AddressBlock address={general_information?.local_agent?.address} title="Address" />
-            </div>
+          {/* Local Agents */}
+          <SectionCard title="Local Agents" icon={User}>
+            {general_information?.local_agents?.length ? (
+              <div className="space-y-6">
+                {general_information.local_agents.map((agent, i) => (
+                  <div key={i} className="space-y-4">
+                    <DataField label="Name" value={agent?.name} />
+                    <AddressBlock address={agent?.address} title="Address" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No local agent on file.</p>
+            )}
           </SectionCard>
 
-          {/* Registered Address */}
-          <SectionCard title="Registered Address" icon={MapPin}>
-            <AddressBlock address={general_information?.registered_address} title="Address" />
+          {/* Registered Addresses */}
+          <SectionCard title="Registered Addresses" icon={MapPin}>
+            {general_information?.registered_addresses?.length ? (
+              <div className="space-y-4">
+                {general_information.registered_addresses.map((addr, i) => (
+                  <AddressBlock key={i} address={addr} title="Address" />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No registered address on file.</p>
+            )}
           </SectionCard>
 
-          {/* Business Address */}
-          <SectionCard title="Business Address" icon={MapPin}>
-            <div className="space-y-4">
-              {general_information?.business_address?.different_from_registered && (
-                <Badge variant="outline" className="text-xs">
-                  Different from Registered Address
-                </Badge>
-              )}
-              <AddressBlock address={general_information?.business_address} title="Address" />
-            </div>
+          {/* Business Addresses */}
+          <SectionCard title="Business Addresses" icon={MapPin}>
+            {general_information?.business_addresses?.length ? (
+              <div className="space-y-4">
+                {general_information.business_addresses.map((addr, i) => (
+                  <AddressBlock key={i} address={addr} title="Address" />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">Same as registered address.</p>
+            )}
           </SectionCard>
         </div>
 

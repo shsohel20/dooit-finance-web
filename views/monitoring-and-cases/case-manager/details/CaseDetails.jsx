@@ -11,6 +11,15 @@ import {
 } from "@tabler/icons-react";
 import { mockCases } from "@/lib/case-manager-data";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  getCaseById,
+  getCaseReports,
+  getCaseNotes,
+  getAuditLog,
+  addNote as addNoteAction,
+} from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
+import { useCaseManagerStore } from "@/app/store/useCaseManagerStore";
+import { adaptCase, adaptNotes, adaptAuditLog, adaptRfis, adaptPreviousSARs } from "./caseAdapter";
 import CaseHeader from "./CaseHeader";
 import CustomerProfileSection from "./sections/CustomerProfileSection";
 import TransactionAnalysisSection from "./sections/TransactionAnalysisSection";
@@ -33,7 +42,10 @@ function FilesTabSkeleton() {
 }
 
 export default function CaseDetails({ caseId }) {
-  const caseData = useMemo(() => mockCases.find((c) => c._id === caseId) || null, [caseId]);
+  const { setSelectedCase } = useCaseManagerStore();
+  const [caseData, setCaseData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [status, setStatus] = useState(caseData?.status);
   const [priority, setPriority] = useState(caseData?.priority);
@@ -47,10 +59,71 @@ export default function CaseDetails({ caseId }) {
   const [assignOpen, setAssignOpen] = useState(false);
   const [rfiOpen, setRfiOpen] = useState(false);
 
+  // Regulatory filings live on their own endpoint so the case document stays
+  // lean; they load alongside the case rather than blocking it.
+  const [reports, setReports] = useState(null);
+  const [reportsSummary, setReportsSummary] = useState(null);
+  const [reportsLoading, setReportsLoading] = useState(true);
+
   const sectionRefs = useRef({});
   const setSectionRef = (id) => (el) => {
     sectionRefs.current[id] = el;
   };
+
+  useEffect(() => {
+    if (!caseId) return;
+    const load = async () => {
+      setLoading(true);
+      setReportsLoading(true);
+      setError(null);
+      try {
+        // One round trip each, in parallel — a failure in any companion
+        // endpoint must not stop the case itself from rendering.
+        const [res, reportsRes, notesRes, auditRes] = await Promise.all([
+          getCaseById(caseId),
+          getCaseReports(caseId).catch(() => null),
+          getCaseNotes(caseId).catch(() => null),
+          getAuditLog(caseId).catch(() => null),
+        ]);
+
+        const filings = reportsRes?.succeed ? reportsRes.data : null;
+        setReports(filings);
+        setReportsSummary(reportsRes?.succeed ? reportsRes.summary : null);
+
+        if (res?.succeed) {
+          // Normalise the API document into the shape the sections expect.
+          const loaded = adaptCase(res.data);
+          loaded.rfis = adaptRfis(filings?.rfi);
+          loaded.previousSARs = adaptPreviousSARs(filings?.smr);
+          loaded.notes = notesRes?.succeed ? adaptNotes(notesRes.data) : [];
+          loaded.auditLog = auditRes?.succeed ? adaptAuditLog(auditRes.data) : [];
+          setCaseData(loaded);
+          setSelectedCase(loaded);
+          // Seed the action state from the loaded case. These drive the header
+          // badges and the action bar, and are updated optimistically by the
+          // handlers below — the `useState` initialisers above run before the
+          // fetch resolves, so they cannot do this on their own.
+          setStatus(loaded?.status);
+          setPriority(loaded?.priority);
+          setAssignedAnalyst(loaded?.assignedAnalyst ?? loaded?.assignedTo?.name);
+          setAssignment(loaded?.assignment);
+          setNotes(loaded?.notes || []);
+          setRfis(loaded?.rfis || []);
+          setActivities(loaded?.activities || []);
+          setAuditLog(loaded?.auditLog || []);
+        } else {
+          setError(res?.message || "Case not found");
+        }
+      } catch {
+        setError("Failed to load case");
+      } finally {
+        setLoading(false);
+        setReportsLoading(false);
+      }
+    };
+    load();
+    return () => setSelectedCase(null);
+  }, [caseId, setSelectedCase]);
 
   const logAction = ({
     user = "You",
@@ -85,12 +158,21 @@ export default function CaseDetails({ caseId }) {
     ]);
   };
 
-  if (!caseData) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24 text-muted-foreground">
+        <IconLoader2 className="size-6 animate-spin mr-2" />
+        <span className="text-sm">Loading case...</span>
+      </div>
+    );
+  }
+
+  if (error || !caseData) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
         <IconFolderOff className="mb-3 size-12 opacity-40" />
         <p className="text-sm font-medium">Case not found</p>
-        <p className="mt-1 text-xs">The case ID &quot;{caseId}&quot; does not exist.</p>
+        <p className="mt-1 text-xs">{error || `The case ID "${caseId}" does not exist.`}</p>
       </div>
     );
   }
@@ -183,7 +265,19 @@ export default function CaseDetails({ caseId }) {
     });
   };
 
-  const handleAddNote = (note) => setNotes((prev) => [...prev, note]);
+  // Notes are the one action with a real write endpoint — persist, then
+  // reconcile from the server so the note carries its real id and author.
+  const handleAddNote = async (note) => {
+    setNotes((prev) => [...prev, note]);
+    const res = await addNoteAction(caseId, {
+      content: note.text ?? note.content ?? "",
+      attachments: note.attachment ? [note.attachment] : [],
+    }).catch(() => null);
+    if (res?.succeed) {
+      const fresh = await getCaseNotes(caseId).catch(() => null);
+      if (fresh?.succeed) setNotes(adaptNotes(fresh.data));
+    }
+  };
   const handleTogglePin = (id) =>
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, pinned: !n.pinned } : n)));
 

@@ -43,6 +43,12 @@ import {
   Download,
   Landmark,
   ReceiptText,
+  PackageSearch,
+  Tags,
+  SquarePen,
+  Repeat,
+  Activity,
+  CreditCard,
 } from "lucide-react";
 import useGetUser from "@/hooks/useGetUser";
 
@@ -73,10 +79,24 @@ export default function ClientSidebar({ ...props }) {
       icon: IconUsers,
       url: "/dashboard/client/onboarding/customer-queue",
     },
+    // Company and Trust are both KYB entity registers, so they nest under a
+    // single "Business" parent rather than sitting as siblings of Customers
+    // (docs/65 Step 63).
     {
-      title: "Companies",
+      title: "Business",
       icon: IconBuilding,
-      url: "/dashboard/client/companies",
+      children: [
+        {
+          title: "Company",
+          icon: IconBuildingBank,
+          url: "/dashboard/client/companies",
+        },
+        {
+          title: "Trust",
+          icon: IconCirclesRelation,
+          url: "/dashboard/client/trusts",
+        },
+      ],
     },
   ];
   const onBoardingMenuItems = [
@@ -86,9 +106,20 @@ export default function ClientSidebar({ ...props }) {
       url: "/dashboard/client",
     },
     {
-      title: "Companies",
+      title: "Business",
       icon: IconBuilding,
-      url: "/dashboard/client/companies",
+      children: [
+        {
+          title: "Company",
+          icon: IconBuildingBank,
+          url: "/dashboard/client/companies",
+        },
+        {
+          title: "Trust",
+          icon: IconCirclesRelation,
+          url: "/dashboard/client/trusts",
+        },
+      ],
     },
     {
       title: "Staffs",
@@ -309,6 +340,55 @@ export default function ClientSidebar({ ...props }) {
       icon: IconListDetails,
       url: "/dashboard/client/pep-and-adverse-media/aml-screening",
     },
+  ];
+
+  // ── Billing ────────────────────────────────────────────────────────────────
+  // Product catalogue reads are open to clients (it names the rows on their
+  // usage table and invoices); writes are dooit-only and hidden in the view.
+  const billingMenuItems = [
+    {
+      title: "Service Usage",
+      icon: Activity,
+      url: "/dashboard/client/billing/usage",
+    },
+    {
+      title: "Products",
+      icon: PackageSearch,
+      url: "/dashboard/client/billing/products",
+    },
+    {
+      title: "Pricing Plans",
+      icon: Tags,
+      url: "/dashboard/client/billing/plans",
+    },
+    {
+      // Same page either way: a client sees their own subscription, dooit sees
+      // every account's. The label just sets the right expectation.
+      title: isDooit ? "Subscriptions" : "My Subscription",
+      icon: Repeat,
+      url: "/dashboard/client/billing/subscription",
+    },
+    {
+      title: "Invoices",
+      icon: ReceiptText,
+      url: "/dashboard/client/billing/invoices",
+    },
+    {
+      title: "Payments",
+      icon: CreditCard,
+      url: "/dashboard/client/billing/payments",
+    },
+    // Authoring surface — dooit only. The API rejects a client write with 403
+    // regardless; hiding it just avoids offering an action that cannot succeed.
+    ...(isDooit
+      ? [
+          {
+            title: "Plan Builder",
+            icon: SquarePen,
+            url: "/dashboard/client/billing/plans/builder",
+          },
+        ]
+      : []),
   ];
 
   const configurationMenuItems = [
@@ -594,6 +674,7 @@ export default function ClientSidebar({ ...props }) {
         <NavMain items={dueDiligenceMenu} label="Due Diligence" />
         <NavMain items={reportingMenuItems} label="Reporting & Registers" />
         <NavMain items={pepScreenigItems} label="PEP Screening" />
+        <NavMain items={billingMenuItems} label="Billing" />
         <NavMain items={TrainingModule} label="Training" />
         <NavMain items={configurationMenuItems} label="Configuration" />
         <NavMain items={grcModule} label="Testing & Governance" />

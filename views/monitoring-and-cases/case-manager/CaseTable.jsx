@@ -1,152 +1,229 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
 import {
   IconEye,
-  IconFolder,
+  IconEdit,
   IconPennant,
   IconChevronLeft,
   IconChevronRight,
+  IconFileReport,
+  IconBell,
+  IconArrowRight,
 } from "@tabler/icons-react";
 import { dateShowFormat } from "@/lib/utils";
+
+const fmtAUD = (v) =>
+  v == null
+    ? "—"
+    : new Intl.NumberFormat("en-AU", {
+        style: "currency",
+        currency: "AUD",
+        maximumFractionDigits: 0,
+      }).format(v);
 
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
 });
 
-const riskVariants = {
-  High: "danger",
-  Medium: "warning",
-  Low: "info",
+const priorityVariants = {
+  low: "info",
+  medium: "warning",
+  high: "danger",
+  critical: "dark",
 };
 
 const statusVariants = {
-  Active: "success",
-  "Under Review": "warning",
-  Closed: "outline",
+  open: "info",
+  under_investigation: "warning",
+  pending_review: "outline",
+  closed: "success",
+  escalated: "danger",
 };
 
-const PAGE_SIZE = 10;
+const STATUS_LABELS = {
+  open: "Open",
+  under_investigation: "Under Investigation",
+  pending_review: "Pending Review",
+  closed: "Closed",
+  escalated: "Escalated",
+};
 
-export default function CaseTable({ cases, loading }) {
+export default function CaseTable({ cases, loading, currentPage, totalItems, limit, onPageChange }) {
   const router = useRouter();
-  const [page, setPage] = useState(1);
 
-  const totalPages = Math.ceil((cases?.length || 0) / PAGE_SIZE);
-
-  const paginated = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return (cases || []).slice(start, start + PAGE_SIZE);
-  }, [cases, page]);
+  const totalPages = Math.ceil((totalItems || 0) / (limit || 10));
+  const start = ((currentPage || 1) - 1) * (limit || 10) + 1;
+  const end = Math.min((currentPage || 1) * (limit || 10), totalItems || 0);
 
   const handleRowClick = useCallback(
     (caseItem) => {
       router.push(`/dashboard/client/monitoring-and-cases/case-manager/${caseItem._id}`);
     },
-    [router],
+    [router]
   );
+
   const columns = [
     {
-      id: "uid",
-      header: "Case ID",
-      accessorKey: "uid",
-      size: 120,
-      cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">{row.original.uid}</span>,
-    },
-    {
-      id: "customerName",
-      header: "Customer Name",
-      accessorKey: "customerName",
-      size: 220,
+      id: "title",
+      header: "Case Title",
+      accessorKey: "title",
+      size: 240,
       cell: ({ row }) => (
         <button
           type="button"
           className="text-left hover:underline"
           onClick={() => handleRowClick(row.original)}
         >
-          <p className="font-semibold text-heading text-sm">{row.original.customerName}</p>
-          <p className="text-xs text-muted-foreground">{row.original.caseType}</p>
+          <p className="font-semibold text-heading text-sm line-clamp-1">{row.original.title}</p>
+          <p className="text-xs text-muted-foreground font-mono">
+            {row.original.type?.replace("_", " ")}
+          </p>
         </button>
       ),
     },
     {
-      id: "customerType",
-      header: "Type",
-      accessorKey: "customerType",
-      size: 120,
+      id: "priority",
+      header: "Priority",
+      accessorKey: "priority",
+      size: 110,
       cell: ({ row }) => (
-        <Badge variant="outline" className="text-xs capitalize">
-          {row.original.customerType}
-        </Badge>
-      ),
-    },
-    {
-      id: "caseType",
-      header: "Case Type",
-      accessorKey: "caseType",
-      size: 130,
-      cell: ({ row }) => <span className="text-sm">{row.original.caseType}</span>,
-    },
-    {
-      id: "riskTag",
-      header: "Risk",
-      accessorKey: "riskTag",
-      size: 120,
-      cell: ({ row }) => (
-        <StatusPill icon={<IconPennant />} variant={riskVariants[row.original.riskTag]}>
-          {row.original.riskTag}
+        <StatusPill icon={<IconPennant />} variant={priorityVariants[row.original.priority]}>
+          <span className="capitalize">{row.original.priority}</span>
         </StatusPill>
       ),
-    },
-    {
-      id: "folderCount",
-      header: "Folders",
-      accessorKey: "folderCount",
-      size: 100,
-      cell: ({ row }) => (
-        <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-          <IconFolder className="size-3.5" />
-          {row.original.folderCount}
-        </span>
-      ),
-    },
-    {
-      id: "lastScreeningTime",
-      header: "Last Screening",
-      accessorKey: "lastScreeningTime",
-      size: 170,
-      cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">{dateShowFormat(row.original.lastScreeningTime)}</span>
-      ),
-    },
-    {
-      id: "assignedAnalyst",
-      header: "Analyst",
-      accessorKey: "assignedAnalyst",
-      size: 140,
-      cell: ({ row }) => <span className="text-sm">{row.original.assignedAnalyst}</span>,
     },
     {
       id: "status",
       header: "Status",
       accessorKey: "status",
+      size: 160,
+      cell: ({ row }) => (
+        <StatusPill variant={statusVariants[row.original.status]}>
+          {STATUS_LABELS[row.original.status] || row.original.status}
+        </StatusPill>
+      ),
+    },
+    {
+      id: "filing",
+      header: "Filing",
+      size: 110,
+      cell: ({ row }) =>
+        row.original.sarFiled ? (
+          <StatusPill icon={<IconFileReport />} variant="success">
+            SAR Filed
+          </StatusPill>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        ),
+    },
+    {
+      id: "alerts",
+      header: "Alerts",
+      size: 80,
+      cell: ({ row }) => {
+        const n = row.original.alertCount ?? row.original.linkedAlerts?.length ?? 0;
+        return (
+          <div className="flex items-center gap-1 text-sm">
+            <IconBell className="size-3.5 text-muted-foreground" />
+            <span className={n > 0 ? "font-semibold text-heading" : "text-muted-foreground"}>
+              {n}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      id: "netActivity",
+      header: "Net Activity",
       size: 130,
-      cell: ({ row }) => <StatusPill variant={statusVariants[row.original.status]}>{row.original.status}</StatusPill>,
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-heading">
+          {fmtAUD(row.original.netActivity)}
+        </span>
+      ),
+    },
+    {
+      id: "review",
+      header: "Assignee → Reviewer",
+      size: 180,
+      cell: ({ row }) => {
+        const renderAvatar = (u) =>
+          u ? (
+            <Avatar className="h-6 w-6 border-2 border-white" title={u.name}>
+              <AvatarImage src={u.avatar} />
+              <AvatarFallback className="text-[8px]">
+                {u.name?.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <span className="grid h-6 w-6 place-items-center rounded-full border-2 border-dashed border-muted text-[10px] text-muted-foreground">
+              —
+            </span>
+          );
+        return (
+          <div className="flex items-center gap-1.5">
+            {renderAvatar(row.original.assignedTo)}
+            <IconArrowRight className="size-3 text-muted-foreground" />
+            {renderAvatar(row.original.reviewer)}
+          </div>
+        );
+      },
+    },
+    {
+      id: "createdBy",
+      header: "Created By",
+      accessorKey: "createdBy.name",
+      size: 140,
+      cell: ({ row }) => (
+        <span className="text-sm">{row.original.createdBy?.name || "—"}</span>
+      ),
+    },
+    {
+      id: "updatedAt",
+      header: "Last Updated",
+      accessorKey: "updatedAt",
+      size: 140,
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">
+          {dateShowFormat(row.original.updatedAt)}
+        </span>
+      ),
     },
     {
       id: "actions",
-      header: "Action",
-      accessorKey: "actions",
-      size: 80,
+      header: "Actions",
+      size: 90,
       cell: ({ row }) => (
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleRowClick(row.original)}>
-          <IconEye className="size-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={(e) => { e.stopPropagation(); handleRowClick(row.original); }}
+          >
+            <IconEye className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(
+                `/dashboard/client/monitoring-and-cases/case-manager/${row.original._id}/edit`
+              );
+            }}
+          >
+            <IconEdit className="size-4" />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -155,7 +232,7 @@ export default function CaseTable({ cases, loading }) {
     <div>
       <CustomResizableTable
         columns={columns}
-        data={paginated}
+        data={cases || []}
         loading={loading}
         tableId="case-manager-table"
         mainClass="case-manager-table"
@@ -166,36 +243,38 @@ export default function CaseTable({ cases, loading }) {
       {totalPages > 1 && (
         <div className="flex items-center justify-between border-t px-4 py-3 text-sm text-muted-foreground">
           <span>
-            Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, cases.length)} of{" "}
-            {cases.length} cases
+            Showing {start}–{end} of {totalItems} cases
           </span>
           <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="sm"
               className="h-7 w-7 p-0"
-              disabled={page === 1}
-              onClick={() => setPage((p) => p - 1)}
+              disabled={currentPage === 1}
+              onClick={() => onPageChange?.(currentPage - 1)}
             >
               <IconChevronLeft className="size-4" />
             </Button>
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <Button
-                key={i}
-                variant={page === i + 1 ? "default" : "outline"}
-                size="sm"
-                className="h-7 w-7 p-0 text-xs"
-                onClick={() => setPage(i + 1)}
-              >
-                {i + 1}
-              </Button>
-            ))}
+            {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => {
+              const pg = i + 1;
+              return (
+                <Button
+                  key={pg}
+                  variant={currentPage === pg ? "default" : "outline"}
+                  size="sm"
+                  className="h-7 w-7 p-0 text-xs"
+                  onClick={() => onPageChange?.(pg)}
+                >
+                  {pg}
+                </Button>
+              );
+            })}
             <Button
               variant="outline"
               size="sm"
               className="h-7 w-7 p-0"
-              disabled={page === totalPages}
-              onClick={() => setPage((p) => p + 1)}
+              disabled={currentPage === totalPages}
+              onClick={() => onPageChange?.(currentPage + 1)}
             >
               <IconChevronRight className="size-4" />
             </Button>
