@@ -2,10 +2,9 @@
 
 import { getEcdds } from '@/app/dashboard/client/report-compliance/ecdd/actions';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ResizableTable from '@/components/ui/Resizabletable';
-import { IconDotsVertical } from '@tabler/icons-react';
-import { ArrowRight, Edit, Eye, FileText, Loader2, Trash } from 'lucide-react';
+import { ArrowRight, Download, Edit, Eye, FileText, Loader2, Trash } from 'lucide-react';
+import { downloadReportPdf } from '@/lib/downloadReportPdf';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import {
@@ -86,6 +85,18 @@ const EcddList = () => {
         setDeleteId(id);
         setOpenDeleteModal(true);
     }
+    // Tracks the row being exported rather than a single boolean, so only the
+    // clicked row shows progress while the PDF renders.
+    const [exportingId, setExportingId] = useState(null);
+
+    const handleExport = async (row) => {
+        setExportingId(row?._id);
+        try {
+            await downloadReportPdf({ kind: 'ecdd', id: row?._id, label: row?.uid });
+        } finally {
+            setExportingId(null);
+        }
+    }
     const handleGenerateEcdd = (row) => {
         const alertId = idOf(row?.alert);
         if (!alertId) {
@@ -97,24 +108,65 @@ const EcddList = () => {
     const columns = [
         {
             id: 'actions',
-            size: 40,
+            // Five inline buttons, not one kebab — the column has to be wide
+            // enough or the last actions clip.
+            size: 220,
             header: 'Action',
             accessorKey: 'id',
-            cell: ({ row }) => <div className='flex justify-center'>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button size='sm' variant='ghost'>
-                            <IconDotsVertical className="size-4" />
+            // Actions are inline icon buttons rather than a kebab menu: the
+            // register is a working queue, and burying Export/Generate behind a
+            // menu cost a click on the two things an officer does most. Matches
+            // the SMR register.
+            cell: ({ row }) => {
+                const record = row?.original;
+                const isExporting = exportingId === record?._id;
+                return (
+                    <div className='flex items-center justify-center gap-1'>
+                        <Button
+                            size='sm'
+                            variant='outline'
+                            title='View'
+                            aria-label='View'
+                            onClick={() => handleView(record)}>
+                            <Eye />
                         </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleView(row?.original)}> <Eye />View</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(row?.original?._id)}> <Edit />Edit</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleGenerateEcdd(row?.original)}> <FileText />Generate ECDD</DropdownMenuItem>
-                        <DropdownMenuItem variant='destructive' onClick={() => handleDelete(row?.original?._id)}> <Trash />Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>,
+                        <Button
+                            size='sm'
+                            variant='outline'
+                            title='Edit'
+                            aria-label='Edit'
+                            onClick={() => handleEdit(record?._id)}>
+                            <Edit />
+                        </Button>
+                        <Button
+                            size='sm'
+                            variant='outline'
+                            title='Generate ECDD'
+                            aria-label='Generate ECDD'
+                            onClick={() => handleGenerateEcdd(record)}>
+                            <FileText />
+                        </Button>
+                        <Button
+                            size='sm'
+                            variant='outline'
+                            title='Export PDF'
+                            aria-label='Export PDF'
+                            disabled={isExporting}
+                            onClick={() => handleExport(record)}>
+                            {isExporting ? <Loader2 className='animate-spin' /> : <Download />}
+                        </Button>
+                        <Button
+                            size='sm'
+                            variant='outline'
+                            title='Delete'
+                            aria-label='Delete'
+                            className='text-destructive hover:text-destructive'
+                            onClick={() => handleDelete(record?._id)}>
+                            <Trash />
+                        </Button>
+                    </div>
+                );
+            },
         },
         {
             id: 'uid',

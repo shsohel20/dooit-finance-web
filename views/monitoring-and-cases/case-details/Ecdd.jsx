@@ -8,6 +8,7 @@ import UILoader from "@/components/UILoader";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { downloadReportPdf } from "@/lib/downloadReportPdf";
 
 /* ────────────────────────────────────────────────────────────────────────────
  * Design primitives
@@ -200,32 +201,10 @@ const Ecdd = () => {
     router.push(`/dashboard/client/report-compliance/ecdd/form?caseNumber=${details?.uid}`);
   };
 
-  /**
-   * Downloads the server-rendered PDF rather than printing the DOM.
-   *
-   * window.print() would capture the app chrome and whatever the viewport
-   * happened to show; the filed artefact has to be deterministic, paginated and
-   * identical for every officer, so it is generated server-side and streamed
-   * through the authenticated proxy route.
-   */
   const handleExportPdf = async () => {
-    if (!caseData?._id) return;
     setExporting(true);
     try {
-      const response = await fetch(`/api/ecdd/${caseData._id}/export-pdf`);
-      if (!response.ok) throw new Error(`Export failed (${response.status})`);
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `ECDD_${caseData.uid || caseData._id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      toast.error(error.message || "Could not export the report");
+      await downloadReportPdf({ kind: "ecdd", id: caseData?._id, label: caseData?.uid });
     } finally {
       setExporting(false);
     }
