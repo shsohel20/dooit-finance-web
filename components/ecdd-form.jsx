@@ -178,9 +178,12 @@ export function ECDDForm({ caseNumber, id }) {
 
   useEffect(() => {
     if (id) {
-      // getDataById();
+      // Editing a saved report. This was disabled, so opening the form from the
+      // register (which navigates with ?id=) showed an empty form and a save
+      // would have written blanks over the stored record.
+      getDataById();
     } else if (caseNumber) {
-      // getDataFromAIAnalysis();
+      // New report against an alert — prefill from the alert's generated data.
       getDataFromAlert();
     }
   }, [id, caseNumber]);
@@ -247,8 +250,17 @@ export function ECDDForm({ caseNumber, id }) {
         transaction: transaction?._id,
         analyst: analyst?._id,
         customer: customer?._id,
-        onboardingDate: customer?.createdAt?.split('T')[0],
-        position: 'Compliance Officer',
+        // customerName is a stored column in its own right — destructuring it
+        // out of `data` dropped it from the form entirely, so reopening a saved
+        // report lost it. Put it back.
+        customerName,
+        // The report's own onboardingDate is authoritative. Reading the
+        // customer's createdAt unconditionally overwrote whatever was saved, so
+        // the stored value could never round-trip.
+        onboardingDate: (data?.onboardingDate || customer?.createdAt)?.split('T')[0] ?? '',
+        // Likewise, a hardcoded position discarded the preparing officer's own
+        // title every time the report was reopened.
+        position: data?.position || 'Compliance Officer',
         accountCreationDate: data?.accountCreationDate?.split('T')[0] ?? '',
         analysisEndDate: data?.analysisEndDate?.split('T')[0] ?? '',
         date: data?.date ? data?.date?.split('T')[0] : '',
@@ -267,14 +279,17 @@ export function ECDDForm({ caseNumber, id }) {
     const formattedData = {
       withdrawalDetails: data.withdrawal_details || '',
       depositDetails: data.deposit_details || '',
-      profileSummary: data.recommendation || '',
+      // Reads profile_summary, not recommendation — they are different sections
+      // of the generated report, and mapping the wrong one both discarded the
+      // profile summary and repeated the recommendation text twice on the form.
+      profileSummary: data.profile_summary || '',
       additionalInfo: data.additional_information || '',
       behavioralAnalysis: data.behavioral_analysis || '',
       analystName: data.analyst_name || '',
-      position: 'Compliance Officer',
+      position: data.position || 'Compliance Officer',
       date: data.analysis_date || new Date().toISOString().split('T')[0],
-      caseNumber: caseNumber,
       fullName: data.name,
+      customerName: data.name,
       onboardingDate: data.onboarding_date || '',
       expectedVolume: data.Expected_Trading_Volume || '',
       accountCreationDate: data.account_creation_date,

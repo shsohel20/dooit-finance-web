@@ -10,68 +10,13 @@ import { useState, useEffect } from 'react';
 import SelectCaseList from '../ui/SelectCaseList';
 import SelectCase from '../ui/SelectCase';
 import { autoPopulatedSMRData } from '@/app/dashboard/client/report-compliance/smr-filing/smr/actions';
-
-const DESIGNATED_SERVICES = [
-  'AFSL holder arranging a designated service',
-  'Account/deposit taking services',
-  'Chequebook access facilities',
-  'Currency exchange services',
-  'Custodial/depository services',
-  'Debit card access facilities',
-  'Debt instruments',
-  'Digital currency exchange services',
-  'Electronic funds transfers',
-  'Lease/hire purchase services',
-  'Life insurance services',
-  'Loan services',
-  'Money/postal orders',
-  'Payroll services',
-  'Pension/annuity services',
-  'Remittance services (money transfers)',
-  'Retirement savings accounts',
-  'Securities market/investment services',
-  'Stored value cards',
-  'Superannuation/approved deposit funds',
-  "Traveller's cheque exchange services",
-  'Bullion dealing',
-  'Betting',
-  'Betting accounts',
-  'Chips/currency exchange',
-  'Games of chance or skill',
-  'Gaming machines',
-];
-
-const SUSPICION_REASONS = [
-  'ATM/cheque fraud',
-  'Advanced fee/scam',
-  'Avoiding reporting obligations',
-  'Corporate/investment fraud',
-  'Counterfeit currency',
-  'Country/jurisdiction risk',
-  'Credit card fraud',
-  'Credit/loan facility fraud',
-  'Currency not declared at border',
-  'DFAT watch list',
-  'False name/identity or documents',
-  'Immigration related issue',
-  'Inconsistent with customer profile',
-  'Internet fraud',
-  'National security concern',
-  'Other watch list',
-  'Phishing',
-  'Refusal to show identification',
-  'Social security issue',
-  'Suspected/known criminal',
-  'Suspicious behaviour',
-  'Unauthorised account transactions',
-  'Unusual account activity',
-  'Unusual financial instrument',
-  'Unusual gambling activity',
-  'Unusual use/exchange of cash',
-  'Unusually large FX transaction',
-  'Unusually large cash transaction',
-  'Unusually large transfer',
-];
+// Shared with the detail view so a label edited here cannot drift out of sync
+// and silently render as unticked there.
+import {
+  DESIGNATED_SERVICES,
+  SUSPICION_REASONS,
+  SERVICE_STATUSES,
+} from './options';
 
 export function PartA({ data, updateData }) {
   const [selectedServices, setSelectedServices] = useState(
@@ -238,24 +183,14 @@ export function PartA({ data, updateData }) {
             }}
             className="flex gap-6"
           >
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value="provided" id="provided" />
-              <Label htmlFor="provided" className="cursor-pointer">
-                Provided
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value="requested" id="requested" />
-              <Label htmlFor="requested" className="cursor-pointer">
-                Requested
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value="enquired" id="enquired" />
-              <Label htmlFor="enquired" className="cursor-pointer">
-                Enquired about
-              </Label>
-            </div>
+            {SERVICE_STATUSES.map((status) => (
+              <div key={status.value} className="flex items-center gap-2">
+                <RadioGroupItem value={status.value} id={status.value} />
+                <Label htmlFor={status.value} className="cursor-pointer">
+                  {status.label}
+                </Label>
+              </div>
+            ))}
           </RadioGroup>
         </div>
       </div>
