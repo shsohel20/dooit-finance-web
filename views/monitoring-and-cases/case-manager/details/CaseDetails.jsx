@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, lazy, Suspense } from "react";
+import { useMemo, useRef, useState, lazy, Suspense, useEffect } from "react";
 import {
   IconFolderOff,
   IconBriefcase,
@@ -8,6 +8,8 @@ import {
   IconCreditCard,
   IconFolder,
   IconClipboardList,
+  IconLoader2,
+  IconSitemap,
 } from "@tabler/icons-react";
 import { mockCases } from "@/lib/case-manager-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,8 +30,12 @@ import InvestigationHub from "./investigation-hub/InvestigationHub";
 import CreateRFIModal from "./modals/CreateRFIModal";
 import ReassignCaseModal from "./modals/ReassignCaseModal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NetworkGraph from "@/views/onboarding/customer-queue/details/d3/Networkgraph";
+import { transformToGraph } from "@/views/onboarding/customer-queue/details/d3/lib/transformgraphData";
+import partyEntities from "@/views/onboarding/customer-queue/details/demo.json";
 
 const FilesTab = lazy(() => import("./tabs/FilesTab"));
+const graphData = transformToGraph(partyEntities);
 
 function FilesTabSkeleton() {
   return (
@@ -318,6 +324,10 @@ export default function CaseDetails({ caseId }) {
             <IconClipboardList />
             Case Activity
           </TabsTrigger>
+          <TabsTrigger value="relation-graph">
+            <IconSitemap />
+            Relation graph
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="investigation-hub">
@@ -361,6 +371,9 @@ export default function CaseDetails({ caseId }) {
             auditLog={auditLog}
             setSectionRef={setSectionRef}
           />
+        </TabsContent>
+        <TabsContent value="relation-graph">
+          <NetworkGraph data={graphData} onNodeClick={() => {}} />
         </TabsContent>
       </Tabs>
 

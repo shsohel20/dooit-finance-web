@@ -6,8 +6,27 @@ import { getRiskColor } from "./lib/graphColors";
 
 const NODE_RADIUS = 19;
 const ROOT_RADIUS = 26;
-const CELL = NODE_RADIUS * 2 + 6; // packing pitch: diameter + gap
+
+// ── Spacing knobs ────────────────────────────────────────────────────────────
+// CELL is the packing pitch: how much room each node claims on an arc.
+// Bigger CELL → fewer nodes per ring → the fan grows outward faster and
+// the spokes from the root get correspondingly longer.
+const CELL = NODE_RADIUS * 2 + 30; // was +6
+
+// Gap between consecutive rings, as a multiple of CELL.
+const RING_GAP = 0.18; // was 0.94
+
+// How far the innermost ring sits from the root. Pushing this out is what
+// lengthens the short center spokes that made the middle look congested.
+const INNER_GAP = 1.4; // multiples of CELL, was 1.6
+
+// Horizontal stretch. Node offsets from the center are scaled on X only,
+// turning the circular fan into a wide ellipse that fills landscape
+// viewports instead of bunching into a disc.
+const X_STRETCH = 2.55;
+
 const EDGE_HIT_PX = 6; // hover tolerance around a line, in screen px
+const FIT_PADDING = 60; // px of breathing room when auto-fitting the view
 
 // ── Light palette ────────────────────────────────────────────────────────────
 const C = {
@@ -158,6 +177,184 @@ function resolveEdges(nodes, edges) {
   return resolved;
 }
 
+/**
+ * Build a transform that fits every node inside the viewport.
+ *
+ * The spacing constants above intentionally produce a layout larger than
+ * a typical viewport, so without this the graph would open cropped and
+ * the user would have to scroll out to find it.
+ */
+function fitTransform(nodes, W, H) {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const n of nodes) {
+    if (n.x == null) continue;
+    const r = nodeRadius(n);
+    minX = Math.min(minX, n.x - r);
+    minY = Math.min(minY, n.y - r);
+    maxX = Math.max(maxX, n.x + r);
+    maxY = Math.max(maxY, n.y + r);
+  }
+  if (!Number.isFinite(minX)) return d3.zoomIdentity;
+
+  const boxW = maxX - minX;
+  const boxH = maxY - minY;
+  const k = Math.min(
+    (W - FIT_PADDING * 2) / boxW,
+    (H - FIT_PADDING * 2) / boxH,
+    1, // never zoom past 1:1 for small graphs
+  );
+
+  // Center the bounding box in the viewport at that scale
+  const tx = W / 2 - ((minX + maxX) / 2) * k;
+  const ty = H / 2 - ((minY + maxY) / 2) * k;
+  return d3.zoomIdentity.translate(tx, ty).scale(k);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Icons
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Map whatever the API sends onto one of our icon kinds.
+ * Checks partyType first, then falls back to relationType, since a node
+ * may only be identifiable by how it's connected to the root.
+ */
+function iconKind(node) {
+  const pt = String(node.partyType ?? "").toUpperCase();
+  const rt = String(node.relationType ?? "").toUpperCase();
+  const both = `${pt} ${rt}`;
+
+  if (/EXCHANGE|VASP|CUSTODIAN/.test(both)) return "exchange";
+  if (/BANK|FINANCIAL|FI\b/.test(both)) return "bank";
+  if (/WALLET|ADDRESS|ACCOUNT/.test(both)) return "wallet";
+  if (
+    /BUSINESS|COMPANY|CORP|LEGAL_ENTITY|ORGANI[SZ]ATION|ENTITY|OWNERSHIP|CONTROL|LEGAL_STRUCTURE/.test(
+      both,
+    )
+  )
+    return "business";
+  if (/PERSON|INDIVIDUAL|NATURAL|FAMILY|SPOUSE|PARENT|CHILD|SIBLING/.test(both)) return "person";
+  return "unknown";
+}
+
+/**
+ * Draw an icon centered at (x, y), scaled to fit a box of `size` px.
+ *
+ * These are hand-built canvas paths rather than emoji or an icon font:
+ * emoji render differently per platform and go blurry when the canvas is
+ * zoomed, whereas paths stay crisp at any scale.
+ */
+function drawIcon(ctx, kind, x, y, size, color) {
+  const u = size / 24; // design grid is 24×24, u = one grid unit
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(u, u);
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 1.7;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+
+  switch (kind) {
+    case "business": {
+      // Office block: body, roofline, window grid, door
+      ctx.beginPath();
+      ctx.rect(-7, -9, 14, 18);
+      ctx.stroke();
+      // windows — 3 columns × 3 rows
+      ctx.beginPath();
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          ctx.rect(-5 + col * 3.6, -6.5 + row * 3.6, 2.2, 2.2);
+        }
+      }
+      ctx.fill();
+      // door
+      ctx.beginPath();
+      ctx.rect(-1.8, 4.6, 3.6, 4.4);
+      ctx.fill();
+      break;
+    }
+    case "bank": {
+      // Classical facade: pediment, columns, plinth
+      ctx.beginPath();
+      ctx.moveTo(-9, -3.5);
+      ctx.lineTo(0, -9);
+      ctx.lineTo(9, -3.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      for (const cx of [-5.5, 0, 5.5]) ctx.rect(cx - 1.2, -2, 2.4, 8);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.rect(-9, 6.5, 18, 2.4);
+      ctx.fill();
+      break;
+    }
+    case "person": {
+      // Head + shoulders
+      ctx.beginPath();
+      ctx.arc(0, -4, 3.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-7, 9);
+      ctx.arc(0, 9, 7, Math.PI, Math.PI * 2, false);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case "exchange": {
+      // Two arrows swapping direction
+      ctx.beginPath();
+      ctx.moveTo(-8, -3);
+      ctx.lineTo(6, -3);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(2.5, -6.5);
+      ctx.lineTo(6.5, -3);
+      ctx.lineTo(2.5, 0.5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(8, 4);
+      ctx.lineTo(-6, 4);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-2.5, 0.5);
+      ctx.lineTo(-6.5, 4);
+      ctx.lineTo(-2.5, 7.5);
+      ctx.stroke();
+      break;
+    }
+    case "wallet": {
+      // Billfold with a clasp
+      ctx.beginPath();
+      ctx.roundRect(-8, -6, 16, 12, 2.2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-8, -2.2);
+      ctx.lineTo(8, -2.2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(4, 1.8, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    default: {
+      // Unknown party — a question mark reads better than a blank circle
+      ctx.font = "bold 15px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("?", 0, 0.5);
+    }
+  }
+
+  ctx.restore();
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Layout: dense wedge packing
 // ─────────────────────────────────────────────────────────────────────────────
@@ -174,12 +371,14 @@ function packWedge(list, cx, cy, angleStart, angleEnd, startRadius) {
       const slot = take === 1 ? 0.5 : (k + 0.5) / take;
       const angle = angleStart + slot * wedge;
       const node = list[i++];
-      node.targetX = cx + Math.cos(angle) * r;
+      // X_STRETCH widens the fan horizontally without touching the
+      // packing math, which stays circular and therefore collision-safe.
+      node.targetX = cx + Math.cos(angle) * r * X_STRETCH;
       node.targetY = cy + Math.sin(angle) * r;
       node.x = node.targetX;
       node.y = node.targetY;
     }
-    r += CELL * 0.94;
+    r += CELL * RING_GAP;
   }
 }
 
@@ -234,7 +433,7 @@ function layoutGraph(nodes, edges, W, H) {
   outgoing.sort(byImportance);
   incoming.sort(byImportance);
 
-  const inner = ROOT_RADIUS + CELL * 1.6;
+  const inner = ROOT_RADIUS + CELL * INNER_GAP;
   packWedge(outgoing, cx, cy, -1.36, 1.36, inner);
   packWedge(incoming, cx, cy, Math.PI - 1.42, Math.PI + 1.42, inner);
 }
@@ -279,6 +478,12 @@ export default function NetworkGraph({ data, onNodeClick }) {
     edgesRef.current = edges;
 
     layoutGraph(data.nodes, edges, W, H);
+
+    // Frame the whole graph on first paint. d3-zoom keeps its own copy of
+    // the transform on the canvas node, so seed that too — otherwise the
+    // first wheel event would snap back to identity.
+    transformRef.current = fitTransform(data.nodes, W, H);
+    d3.select(canvas).property("__zoom", transformRef.current);
 
     const rootNode = data.nodes.find((n) => n.depth === 0);
     if (rootNode && !rootNode.pinned) {
@@ -458,13 +663,28 @@ export default function NetworkGraph({ data, onNodeClick }) {
           ctx.stroke();
         }
 
+        // ── Icon inside the circle ──────────────────────────────────────
+        const kind = iconKind(node);
+        const iconColor = isRoot ? C.rootLabel : isHovered || onHotEdge ? "#0f172a" : "#475569";
+        drawIcon(ctx, kind, node.x, node.y, isRoot ? r * 1.15 : r * 1.05, iconColor);
+
+        // ── Label below the node ────────────────────────────────────────
+        // The wider spacing from the layout constants leaves room for this
+        // outside the circle, which keeps the icon unobstructed.
         const raw = node.label ?? "";
-        const label = raw.length > 7 ? raw.slice(0, 6) + "…" : raw;
-        ctx.font = isRoot ? "bold 9px system-ui" : "8px system-ui";
-        ctx.fillStyle = isRoot ? C.rootLabel : C.label;
+        const label = raw.length > 14 ? raw.slice(0, 13) + "…" : raw;
+        ctx.font = isRoot ? "bold 10px system-ui" : "9px system-ui";
+        ctx.fillStyle = C.label;
         ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(label, node.x, node.y);
+        ctx.textBaseline = "top";
+
+        // Halo behind the text so labels stay legible where edges pass under
+        ctx.save();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = C.bg;
+        ctx.strokeText(label, node.x, node.y + r + 5);
+        ctx.restore();
+        ctx.fillText(label, node.x, node.y + r + 5);
       }
 
       ctx.restore(); // back to screen space
@@ -492,7 +712,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
     const zoom = d3
       .zoom()
       .filter((e) => e.type === "wheel" || e.touches?.length >= 2)
-      .scaleExtent([0.08, 5])
+      .scaleExtent([0.02, 5])
       .on("zoom", (e) => {
         transformRef.current = e.transform;
         canvas.__redraw?.();
