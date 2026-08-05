@@ -1,33 +1,51 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { SearchIcon, EyeIcon, PencilIcon, TrashIcon, PlusIcon } from "lucide-react";
+import {
+  SearchIcon,
+  PencilIcon,
+  TrashIcon,
+  PlusIcon,
+  MoreVertical,
+  UserCheck,
+  UserX,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PageDescription, PageHeader, PageTitle } from "@/components/common";
-
+import { PageHeader, PageTitle } from "@/components/common";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Checkbox } from "@/components/ui/checkbox";
-import { deleteUser, getAllRoles, getAllUsers } from "../actions";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { deleteUser, getAllRoles, getAllUsers, updateUser } from "../actions";
 import dynamic from "next/dynamic";
 import CustomPagination from "@/components/CustomPagination";
 import UserForm from "@/views/user-and-role/form";
-import PermissionDrawer from "@/views/privacy/permissions/PermissionDrawer";
+import useGetUser from "@/hooks/useGetUser";
+import { toast } from "sonner";
+
 const CustomResizableTable = dynamic(() => import("@/components/ui/CustomResizable"), {
   ssr: false,
 });
 
 export default function UserManagementDashboard() {
-  const [activeTab, setActiveTab] = useState("all-users");
+  const { loggedInUser } = useGetUser();
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [allRoles, setAllRoles] = useState([]);
   const [allUsers, setAllUsers] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +53,18 @@ export default function UserManagementDashboard() {
   const [limit, setLimit] = useState(10);
   const [openUserForm, setOpenUserForm] = useState(false);
   const [id, setId] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // Debounce the search box before it drives a fetch.
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setCurrentPage(1);
+      setSearchTerm(searchQuery.trim());
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
 
   const fetchRoles = useCallback(async () => {
     try {
@@ -44,10 +74,12 @@ export default function UserManagementDashboard() {
       console.error("Error fetching roles:", error);
     }
   }, []);
+
   const fetchUsers = useCallback(async () => {
     const queryParams = {
       page: currentPage,
       limit: limit,
+      ...(searchTerm ? { name: searchTerm } : {}),
     };
 
     setLoading(true);
@@ -59,34 +91,79 @@ export default function UserManagementDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, limit]);
+  }, [currentPage, limit, searchTerm]);
+
   useEffect(() => {
     fetchRoles();
-  }, []);
+  }, [fetchRoles]);
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, limit]);
+  }, [fetchUsers]);
 
-  const statCards = [
-    { label: "Total Users", value: "42" },
-    { label: "Active Users", value: "38" },
-    { label: "Pending", value: "3" },
-    { label: "Suspended", value: "2" },
-  ];
+  // Hiding these actions is convenience only — the API is the real guard and
+  // returns 403 for both. `loggedInUser` loads asynchronously, so on the first
+  // render nothing matches and the actions are briefly visible on your own row;
+  // clicking through in that window is still rejected server-side.
+  const currentUserId = loggedInUser?._id ?? loggedInUser?.id ?? null;
+  const isCurrentUser = (userId) =>
+    Boolean(currentUserId) && String(currentUserId) === String(userId);
 
-  const handleEditUser = (id) => {
-    setId(id);
+  const handleEditUser = (userId) => {
+    setId(userId);
     setOpenUserForm(true);
   };
-  const handleDeleteUser = async (id) => {
-    // try {
-    //   const response = await deleteUser(id)
-    //   if(response.success) {
-    //     fetchUsers()
-    //   }
-    // } catch (error) {
-    //   console.error("Error deleting user:", error);
-    // }
+
+  const handleAddUser = () => {
+    setId(null);
+    setOpenUserForm(true);
+  };
+
+  // Also clear `id` whenever the sheet closes (cancel, backdrop click, submit),
+  // so it can't leak into the next "Add User" open.
+  const handleUserFormOpenChange = (open) => {
+    setOpenUserForm(open);
+    if (!open) setId(null);
+  };
+
+  const handleDeleteUser = (userId) => {
+    setDeleteId(userId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    setDeleting(true);
+    try {
+      const response = await deleteUser(deleteId);
+      if (response.success) {
+        toast.success("User deleted successfully");
+        setDeleteDialogOpen(false);
+        setDeleteId(null);
+        fetchUsers();
+      } else {
+        toast.error(response.error || "Failed to delete user");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleToggleActive = async (user) => {
+    const toastId = toast.loading(user.isActive ? "Deactivating user..." : "Activating user...");
+    try {
+      const response = await updateUser(user._id, { isActive: !user.isActive });
+      if (response.success) {
+        toast.success(user.isActive ? "User deactivated" : "User activated", { id: toastId });
+        fetchUsers();
+      } else {
+        toast.error(response.error || "Failed to update user status", { id: toastId });
+      }
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      toast.error("Failed to update user status", { id: toastId });
+    }
   };
 
   const usersColumns = [
@@ -94,29 +171,55 @@ export default function UserManagementDashboard() {
       id: "actions",
       header: "Actions",
       accessorKey: "actions",
-      cell: ({ row }) => (
-        <div className="text-sm text-gray-500 flex items-center gap-2">
-          {/* <Button size="sm" variant="outline" className="">
-            <EyeIcon />
-          </Button> */}
-          <Button
-            size="sm"
-            variant="outline"
-            className=""
-            onClick={() => handleEditUser(row.original._id)}
-          >
-            <PencilIcon />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className=""
-            onClick={() => handleDeleteUser(row.original._id)}
-          >
-            <TrashIcon />
-          </Button>
-        </div>
-      ),
+      size: 80,
+      cell: ({ row }) => {
+        // You can't deactivate or delete yourself — the API rejects both (403),
+        // so don't offer the actions in the first place.
+        const isSelf = isCurrentUser(row.original._id);
+
+        return (
+          <div className="flex items-center justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleEditUser(row.original._id)}>
+                  <PencilIcon className="size-3 text-muted-foreground/70" />
+                  Edit
+                </DropdownMenuItem>
+                {!isSelf && (
+                  <DropdownMenuItem onClick={() => handleToggleActive(row.original)}>
+                    {row.original.isActive ? (
+                      <>
+                        <UserX className="size-3 text-muted-foreground/70" />
+                        Deactivate
+                      </>
+                    ) : (
+                      <>
+                        <UserCheck className="size-3 text-muted-foreground/70" />
+                        Activate
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                )}
+                {!isSelf && (
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => handleDeleteUser(row.original._id)}
+                  >
+                    <TrashIcon className="size-3" />
+                    Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
     },
     {
       id: "user",
@@ -140,179 +243,115 @@ export default function UserManagementDashboard() {
         </div>
       ),
     },
-    // {
-    //   id: 'department',
-    //   header: 'Department',
-    //   accessorKey: 'department',
-    //   cell: ({ row }) => (
-    //     <div className='text-sm text-gray-500'>
-    //       <p>{row.original.department}</p>
-    //     </div>
-    //   ),
-    // },
-    // {
-    //   id: 'lastLogin',
-    //   header: 'Last Login',
-    //   accessorKey: 'lastLogin',
-    //   cell: ({ row }) => (
-    //     <div className='text-sm text-gray-500'>
-    //       <p>{row.original.lastLogin}</p>
-    //     </div>
-    //   ),
-    // },
-    // {
-    //   id: 'status',
-    //   header: 'Status',
-    //   accessorKey: 'status',
-    //   cell: ({ row }) => (
-    //     <div className='text-sm text-gray-500'>
-    //       <p>{row.original.status}</p>
-    //     </div>
-    //   ),
-    // },
+    {
+      id: "status",
+      header: "Status",
+      accessorKey: "isActive",
+      cell: ({ row }) => (
+        <div
+          className={`flex items-center gap-2 border rounded-full px-3 py-1 w-max text-xs font-semibold ${
+            row.original.isActive ? "text-green-600" : "text-gray-500"
+          }`}
+        >
+          <div
+            className={`size-2 rounded-full ${row.original.isActive ? "bg-green-500" : "bg-gray-400"}`}
+          />
+          {row.original.isActive ? "Active" : "Inactive"}
+        </div>
+      ),
+    },
   ];
 
   const handlePageChange = (page) => {
     setCurrentPage(page.selected + 1);
   };
-  const handleLimitChange = (limit) => {
-    setLimit(limit);
+  const handleLimitChange = (newLimit) => {
+    setLimit(newLimit);
     setCurrentPage(1);
   };
   const totalUsers = allUsers?.totalRecords;
+
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <PageHeader>
         <PageTitle>User Management</PageTitle>
-        {/* <PageDescription>Manage users and roles in the system</PageDescription> */}
       </PageHeader>
 
-      <main className="">
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {statCards.map((stat) => (
-            <div key={stat.label} className="bg-smoke-200 rounded-lg p-4">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
-            </div>
-          ))}
-        </div> */}
-        {/* Role Management Section */}
-        {/* <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Roles</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {allRoles?.data?.map((role) => (
-              <div key={role.name} className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 uppercase">{role.name}</h3>
-                <p className="text-sm text-gray-600 mt-3">{role.users} users</p>
-                <PermissionDrawer role={role} />
-              </div>
-            ))}
-          </div>
-        </div> */}
-
-        {/* User Management Section */}
+      <main>
         <div className="mb-12">
-          <Tabs
-            defaultValue="all-users"
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            {/* <TabsList className="border-b border-gray-200 bg-white p-0 mb-4">
-              <TabsTrigger
-                value="all-users"
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 max-w-md w-full">
+              <SearchIcon className="w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Search users by name..."
+                className="border-0 bg-transparent shadow-none text-sm placeholder:text-gray-400 focus-visible:ring-0"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button size="sm" onClick={handleAddUser}>
+              <PlusIcon /> Add User
+            </Button>
+          </div>
 
-              >
-                All
-              </TabsTrigger>
-              <TabsTrigger
-                value="admins"
-
-              >
-                Admins
-              </TabsTrigger>
-              <TabsTrigger
-                value="compliance"
-
-              >
-                Compliance
-              </TabsTrigger>
-              <TabsTrigger
-                value="analysts"
-
-              >
-                Analysts
-              </TabsTrigger>
-            </TabsList> */}
-
-            <TabsContent value="all-users" className="mt-4">
-              <div className="flex items-center justify-between">
-                {/* filter */}
-                <div>
-                  <div className=" flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 max-w-md w-full">
-                    <SearchIcon className="w-4 h-4 text-gray-400" />
-                    <Input
-                      placeholder="Search users..."
-                      className="border-0 bg-transparent shadow-none text-sm placeholder:text-gray-400 focus-visible:ring-0"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <Button size="sm" className="" onClick={() => setOpenUserForm(true)}>
-                  <PlusIcon /> Add User
-                </Button>
-              </div>
-
-              {/* Users Table */}
-              <div className=" ">
-                <CustomResizableTable
-                  columns={usersColumns}
-                  data={allUsers?.data}
-                  loading={loading}
-                  tableId="users-table"
-                  mainClass="users-table"
-                />
-                <CustomPagination
-                  currentPage={currentPage}
-                  onPageChange={handlePageChange}
-                  totalItems={totalUsers}
-                  limit={limit}
-                  onChangeLimit={handleLimitChange}
-                />
-              </div>
-            </TabsContent>
-
-            {/* Other tab contents */}
-            {["admins", "compliance", "analysts"].map((tab) => (
-              <TabsContent key={tab} value={tab} className="mt-0">
-                <div className="mb-4 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
-                  <SearchIcon className="w-4 h-4 text-gray-400" />
-                  <Input
-                    placeholder="Search users..."
-                    className="border-0 bg-transparent text-sm placeholder:text-gray-400 focus-visible:ring-0"
-                  />
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-                  <p className="text-sm text-gray-500">Users in this category will appear here</p>
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
+          <div>
+            <CustomResizableTable
+              columns={usersColumns}
+              data={allUsers?.data}
+              loading={loading}
+              tableId="users-table"
+              mainClass="users-table"
+            />
+            <CustomPagination
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              totalItems={totalUsers}
+              limit={limit}
+              onChangeLimit={handleLimitChange}
+            />
+          </div>
         </div>
       </main>
+
       {openUserForm && (
         <UserForm
           open={openUserForm}
-          setOpen={setOpenUserForm}
+          setOpen={handleUserFormOpenChange}
           allRoles={allRoles?.data || []}
           fetchUsers={fetchUsers}
           id={id}
           setId={setId}
           fetchRoles={fetchRoles}
+          isSelf={Boolean(id) && isCurrentUser(id)}
         />
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the user.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteUser}
+              variant="destructive"
+              disabled={deleting}
+            >
+              {deleting ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Deleting...
+                </span>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
