@@ -105,6 +105,19 @@ const ListView = ({}) => {
     setOpenAssignToAnalyst(true);
     setCaseNumber(data?._id);
   };
+  // Triage happens in the case-centric hub, so route by the alert's owning Case.
+  // `linkedCase` is a raw ObjectId on the list endpoint (only the single-alert
+  // route populates it), hence the object/string handling. Alerts not yet
+  // escalated have none — fall back to the alert's own details view.
+  const handleTriage = (data) => {
+    const linkedCaseId = data?.linkedCase?._id || data?.linkedCase;
+    if (linkedCaseId) {
+      router.push(`/dashboard/client/monitoring-and-cases/case-manager/${linkedCaseId}`);
+      return;
+    }
+    if (!data?._id) return;
+    router.push(`/dashboard/client/monitoring-and-cases/case-list/details/${data._id}`);
+  };
   const columns = [
     {
       id: "actions",
@@ -123,7 +136,7 @@ const ListView = ({}) => {
               <span>E</span>
               <span className="text-[0.7rem] bg-secondary">cdd</span>
             </Button> */}
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" onClick={() => handleTriage(row?.original)}>
               <IconPlus /> Triage
             </Button>
 
