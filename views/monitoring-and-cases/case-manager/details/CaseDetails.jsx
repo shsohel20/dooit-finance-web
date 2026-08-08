@@ -18,10 +18,18 @@ import {
   getCaseReports,
   getCaseNotes,
   getAuditLog,
+  getCustomerDevices,
   addNote as addNoteAction,
 } from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
 import { useCaseManagerStore } from "@/app/store/useCaseManagerStore";
-import { adaptCase, adaptNotes, adaptAuditLog, adaptRfis, adaptPreviousSARs } from "./caseAdapter";
+import {
+  adaptCase,
+  adaptNotes,
+  adaptAuditLog,
+  adaptRfis,
+  adaptPreviousSARs,
+  adaptDevices,
+} from "./caseAdapter";
 import CaseHeader from "./CaseHeader";
 import CustomerProfileSection from "./sections/CustomerProfileSection";
 import TransactionAnalysisSection from "./sections/TransactionAnalysisSection";
@@ -117,6 +125,21 @@ export default function CaseDetails({ caseId }) {
           setRfis(loaded?.rfis || []);
           setActivities(loaded?.activities || []);
           setAuditLog(loaded?.auditLog || []);
+
+          // Device telemetry for the primary linked customer — loaded after
+          // first paint; the tab just stays empty if the user lacks DEVICE.GET.
+          const primaryCustomerId = res.data?.linkedCustomers?.[0]?._id;
+          if (primaryCustomerId) {
+            getCustomerDevices(primaryCustomerId)
+              .then((devRes) => {
+                if (devRes?.success && devRes.data?.length) {
+                  setCaseData((prev) =>
+                    prev ? { ...prev, devices: adaptDevices(devRes.data) } : prev
+                  );
+                }
+              })
+              .catch(() => {});
+          }
         } else {
           setError(res?.message || "Case not found");
         }

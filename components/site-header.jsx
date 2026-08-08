@@ -37,6 +37,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { signOut } from 'next-auth/react';
+import { apiLogout } from '@/app/auth/actions';
 import { useLoggedInUser } from '@/app/store/useLoggedInUser';
 export function SiteHeader() {
   const { loggedInUser } = useLoggedInUser();
@@ -79,6 +80,8 @@ export function SiteHeader() {
     },
   ];
   const logout = async () => {
+    // Record the logout in the API's device/audit trail before the session ends.
+    await apiLogout().catch(() => {});
     signOut({
       // redirect: true,
       callbackUrl: '/auth/login',

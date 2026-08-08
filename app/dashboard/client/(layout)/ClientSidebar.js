@@ -393,23 +393,6 @@ export default function ClientSidebar({ ...props }) {
 
   const configurationMenuItems = [
     {
-      title: "User & Role",
-      icon: IconListDetails,
-      url: "/dashboard/client/user-and-role-management",
-      children: [
-        {
-          title: "Users",
-          url: "/dashboard/client/user-and-role-management/users",
-          icon: IconListDetails,
-        },
-        {
-          title: "Roles",
-          url: "/dashboard/client/user-and-role-management/roles",
-          icon: IconListDetails,
-        },
-      ],
-    },
-    {
       title: "Risk Rule Engine",
       icon: IconListDetails,
       children: [
@@ -436,13 +419,8 @@ export default function ClientSidebar({ ...props }) {
       icon: IconListDetails,
       children: [
         {
-          title: "Privacy",
-          url: "/dashboard/client/system-settings/privacy",
-          icon: IconDatabase,
-        },
-        {
-          title: "Role Management",
-          url: "/dashboard/client/user-and-role-management",
+          title: "Devices & Activity",
+          url: "/dashboard/client/system-settings/devices",
           icon: IconDatabase,
         },
       ],

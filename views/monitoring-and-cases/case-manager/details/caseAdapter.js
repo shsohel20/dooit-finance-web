@@ -145,6 +145,16 @@ export const adaptRfis = (rfis = []) =>
     message: r.message || null,
   }));
 
+// GET /devices?customer=<id> → the shape DeviceInfoTab renders.
+export const adaptDevices = (devices = []) =>
+  devices.map((d) => ({
+    type: d.deviceType === "mobile" ? "Mobile" : d.deviceType === "tablet" ? "Tablet" : "Desktop",
+    os: [d.os, d.osVersion].filter(Boolean).join(" ") || "Unknown",
+    ip: d.ipAddress || "—",
+    location: [d.city, d.country].filter(Boolean).join(", ") || "Unknown",
+    lastSeen: d.lastLoginAt || d.updatedAt,
+  }));
+
 // GET /cases/:id/reports → the `smr` bucket, reshaped for the Previous SARs card.
 export const adaptPreviousSARs = (smrs = []) =>
   smrs.map((s) => ({

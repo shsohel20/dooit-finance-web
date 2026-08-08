@@ -123,6 +123,15 @@ export const getAuditLog = async (caseId) => {
   return res.json();
 };
 
+// ── Devices ───────────────────────────────────────────────────────────────────
+
+// Devices recorded for a customer (device telemetry registry, GET /devices).
+// Response is advancedResults-shaped: { success, totalRecords, data }.
+export const getCustomerDevices = async (customerId) => {
+  const res = await fetchWithAuth(`devices?customer=${customerId}&limit=50`);
+  return res.json();
+};
+
 // ── Investigators ─────────────────────────────────────────────────────────────
 
 export const getInvestigators = async () => {
