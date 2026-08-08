@@ -39,6 +39,7 @@ import {
 import { signOut } from 'next-auth/react';
 import { apiLogout } from '@/app/auth/actions';
 import { useLoggedInUser } from '@/app/store/useLoggedInUser';
+import { EnvironmentBadge } from '@/components/environment-badge';
 export function SiteHeader() {
   const { loggedInUser } = useLoggedInUser();
   const pathname = usePathname();
@@ -146,6 +147,7 @@ export function SiteHeader() {
               50% { box-shadow: 0 0 26px rgba(124,58,237,0.85), 0 2px 14px rgba(8,145,178,0.5); }
             }
           `}</style>
+          <EnvironmentBadge />
           <Button variant="secondary" size="sm">
             Help <IconHelpCircle />
           </Button>
