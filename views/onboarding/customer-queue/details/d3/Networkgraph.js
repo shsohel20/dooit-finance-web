@@ -28,6 +28,28 @@ const X_STRETCH = 2.55;
 const EDGE_HIT_PX = 6; // hover tolerance around a line, in screen px
 const FIT_PADDING = 60; // px of breathing room when auto-fitting the view
 
+// ── Clustering ───────────────────────────────────────────────────────────────
+// Within each side of the fan (outgoing / incoming), nodes are grouped by
+// relationType — FAMILY, OWNERSHIP, CONTROL, LEGAL_STRUCTURE, BUSINESS,
+// SOCIAL, PROFESSIONAL, or plain TRANSACTIONAL for counterparties that have
+// no other relationship to the root. This order is fixed rather than derived
+// from the data (e.g. by volume) so a given category always claims roughly
+// the same angular position — that's what keeps the fan stable across
+// re-renders instead of reshuffling whenever amounts change slightly.
+const CLUSTER_ORDER = [
+  "FAMILY",
+  "OWNERSHIP",
+  "CONTROL",
+  "LEGAL_STRUCTURE",
+  "BUSINESS",
+  "SOCIAL",
+  "PROFESSIONAL",
+  "TRANSACTIONAL",
+];
+
+// Angular gap reserved between two adjacent clusters, in radians.
+const CLUSTER_GAP = 0.14;
+
 // ── Light palette ────────────────────────────────────────────────────────────
 const C = {
   bg: "#f7f8fa",
@@ -382,6 +404,72 @@ function packWedge(list, cx, cy, angleStart, angleEnd, startRadius) {
   }
 }
 
+function clusterKeyOf(node) {
+  const key = String(node.relationType ?? "")
+    .toUpperCase()
+    .trim();
+  return key || "TRANSACTIONAL";
+}
+
+function clusterRank(key) {
+  const i = CLUSTER_ORDER.indexOf(key);
+  return i === -1 ? CLUSTER_ORDER.length : i;
+}
+
+/**
+ * Subdivide [angleStart, angleEnd] into one slice per relationType cluster,
+ * separated by a fixed angular gap, then hand each slice to the existing
+ * packWedge unchanged. Clustering therefore only changes *which slice of
+ * the fan* a node's wedge-packing runs in — the packing math itself, and
+ * its collision-safety, is untouched.
+ *
+ * A single cluster (the common case when a customer only has one kind of
+ * relationship on a given side) fills the entire wedge, so this reduces to
+ * exactly the old un-clustered behavior when there's nothing to separate.
+ */
+function packClusteredWedge(list, cx, cy, angleStart, angleEnd, startRadius) {
+  if (!list.length) return;
+
+  const groups = new Map();
+  for (const node of list) {
+    const key = clusterKeyOf(node);
+    node.cluster = key;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(node);
+  }
+
+  const clusters = Array.from(groups.entries()).sort(
+    (a, b) => clusterRank(a[0]) - clusterRank(b[0]) || a[0].localeCompare(b[0]),
+  );
+
+  const wedge = angleEnd - angleStart;
+  // Gap shrinks if there are too many clusters to fit the base gap, but
+  // never drops below a physical minimum (in px, converted to radians at
+  // the innermost radius) so neighboring clusters stay visibly separated.
+  const gap = Math.max(
+    10 / startRadius,
+    Math.min(CLUSTER_GAP, wedge / (clusters.length * 4 || 1)),
+  );
+  const available = Math.max(wedge - gap * (clusters.length - 1), wedge * 0.3);
+  const minSpan = Math.min(CELL / startRadius, available / clusters.length);
+
+  let spans = clusters.map(([, nodes]) =>
+    Math.max(minSpan, available * (nodes.length / list.length)),
+  );
+  const spanTotal = spans.reduce((a, b) => a + b, 0);
+  if (spanTotal > available) {
+    const scale = available / spanTotal;
+    spans = spans.map((s) => s * scale);
+  }
+
+  let cursor = angleStart;
+  clusters.forEach(([, nodes], idx) => {
+    const span = spans[idx];
+    packWedge(nodes, cx, cy, cursor, cursor + span, startRadius);
+    cursor += span + gap;
+  });
+}
+
 function layoutGraph(nodes, edges, W, H) {
   const root = nodes.find((n) => n.depth === 0);
   const rootId = root?.id;
@@ -434,8 +522,8 @@ function layoutGraph(nodes, edges, W, H) {
   incoming.sort(byImportance);
 
   const inner = ROOT_RADIUS + CELL * INNER_GAP;
-  packWedge(outgoing, cx, cy, -1.36, 1.36, inner);
-  packWedge(incoming, cx, cy, Math.PI - 1.42, Math.PI + 1.42, inner);
+  packClusteredWedge(outgoing, cx, cy, -1.36, 1.36, inner);
+  packClusteredWedge(incoming, cx, cy, Math.PI - 1.42, Math.PI + 1.42, inner);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
