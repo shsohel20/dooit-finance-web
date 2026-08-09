@@ -93,6 +93,39 @@ export async function removeCustomerDocument(id, url) {
   return response.json();
 }
 
+// ── Source of Funds (SOF) verification — QR/no-login upload flow ────────────
+// The upload link/QR is keyed by customer id only (no rotating token) and is
+// auto-provisioned server-side the first time it's read — nothing to
+// "generate" from the UI.
+export async function getSofVerification(customerId) {
+  const response = await fetchWithAuth(`sof-verification/customer/${customerId}`, {
+    method: "GET",
+  });
+  return response.json();
+}
+
+// payload: { email?, caseId? } — email falls back to the customer's KYC address
+// if omitted; caseId links the RFI this raises to that case.
+export async function sendSofVerificationEmail(customerId, payload = {}) {
+  const response = await fetchWithAuth(`sof-verification/${customerId}/send-email`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return response.json();
+}
+
+// payload: { status: "verified" | "rejected" | "needs_review", note? }
+export async function reviewSofDocument(customerId, docId, payload) {
+  const response = await fetchWithAuth(
+    `sof-verification/${customerId}/documents/${docId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+  return response.json();
+}
+
 export async function getCustomerStats(queryParams = {}) {
   const queryString = getQueryString(queryParams);
   const url = `customer/stats${queryString ? `?${queryString}` : ""}`;

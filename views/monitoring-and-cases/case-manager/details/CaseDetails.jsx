@@ -10,6 +10,7 @@ import {
   IconClipboardList,
   IconLoader2,
   IconSitemap,
+  IconCoins,
 } from "@tabler/icons-react";
 import { mockCases } from "@/lib/case-manager-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,9 +44,11 @@ import { transformToGraph } from "@/views/onboarding/customer-queue/details/d3/l
 import partyEntities from "@/views/onboarding/customer-queue/details/demo.json";
 
 const FilesTab = lazy(() => import("./tabs/FilesTab"));
+// Pulls in the OCR detail dialog and its table — only loaded if the tab opens.
+const SourceOfFundsTab = lazy(() => import("./tabs/SourceOfFundsTab"));
 const graphData = transformToGraph(partyEntities);
 
-function FilesTabSkeleton() {
+function TabSkeleton() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 4 }).map((_, i) => (
@@ -343,6 +346,10 @@ export default function CaseDetails({ caseId }) {
             <IconFolder />
             Files
           </TabsTrigger>
+          <TabsTrigger value="source-of-funds">
+            <IconCoins />
+            Source of Funds
+          </TabsTrigger>
           <TabsTrigger value="case-activity">
             <IconClipboardList />
             Case Activity
@@ -374,8 +381,14 @@ export default function CaseDetails({ caseId }) {
         </TabsContent>
 
         <TabsContent value="files">
-          <Suspense fallback={<FilesTabSkeleton />}>
+          <Suspense fallback={<TabSkeleton />}>
             <FilesTab caseData={caseData} />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="source-of-funds">
+          <Suspense fallback={<TabSkeleton />}>
+            <SourceOfFundsTab caseData={caseData} />
           </Suspense>
         </TabsContent>
 
