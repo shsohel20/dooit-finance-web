@@ -5,11 +5,16 @@
 // stable and auto-provisioned server-side per customer.
 import { BASE_URL } from "@/services/serverApi";
 
-export const validateSofCustomer = async (cid) => {
-  const response = await fetch(
-    `${BASE_URL}sof-verification/validate?cid=${encodeURIComponent(cid || "")}`,
-    { method: "GET" },
-  );
+// `clientId` (optional) is the requesting tenant from the link's ?client=
+// param — the API brands the page for it after verifying it against the
+// customer's relations.
+export const validateSofCustomer = async (cid, clientId) => {
+  const query = `cid=${encodeURIComponent(cid || "")}${
+    clientId ? `&client=${encodeURIComponent(clientId)}` : ""
+  }`;
+  const response = await fetch(`${BASE_URL}sof-verification/validate?${query}`, {
+    method: "GET",
+  });
   return response.json();
 };
 

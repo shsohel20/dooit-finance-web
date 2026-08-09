@@ -5,7 +5,7 @@
 // rotating token: the link is stable and auto-provisioned server-side per
 // customer, same as the invite-accept flow this route is nested under.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ import {
   LogOut,
   RotateCcw,
   Lock,
+  Camera,
+  FolderOpen,
 } from "lucide-react";
 import { validateSofCustomer, uploadSofDocument } from "./actions";
 
@@ -36,6 +38,12 @@ const DOC_TYPE_OPTIONS = [
   { value: "bank_cheque", label: "Bank Cheque" },
   { value: "bank_certificate", label: "Bank Certificate" },
 ];
+
+// heic/heif: what iPhone cameras actually produce — the OCR verdict (not the
+// picker) decides whether a format is usable, so don't block them at the door.
+const ACCEPTED_EXTENSIONS = ["pdf", "png", "jpg", "jpeg", "webp", "heic", "heif"];
+// Must match the multer limit on routes/sofVerification.js.
+const MAX_FILE_MB = 20;
 
 /**
  * Dooit + requesting organisation lockup. The page is served by Dooit but the
@@ -87,7 +95,9 @@ function PageShell({ client, children }) {
   );
 }
 
-export default function SofUploadClient({ cid }) {
+// `clientId` — requesting tenant from the link's ?client= param; drives which
+// organisation the page is co-branded for (verified server-side).
+export default function SofUploadClient({ cid, clientId }) {
   const [validating, setValidating] = useState(true);
   const [invalidReason, setInvalidReason] = useState(null);
   const [customerName, setCustomerName] = useState(null);
@@ -100,6 +110,35 @@ export default function SofUploadClient({ cid }) {
   const [lastResult, setLastResult] = useState(null); // { status, message, ocr }
   const [exited, setExited] = useState(false);
 
+  // Hidden native inputs behind the "Take photo" / "Browse files" buttons —
+  // MIME-based accept + capture, which phone pickers honour far more reliably
+  // than the extension list the drag-drop wrapper emits.
+  const cameraInputRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // Single gate for every source (drag-drop, camera, browse): extension +
+  // size checked here so the button row and the drop zone can't diverge.
+  const handleFileSelected = (picked) => {
+    if (!picked) return;
+    const ext = (picked.name?.split(".").pop() || "").toLowerCase();
+    if (!ACCEPTED_EXTENSIONS.includes(ext)) {
+      toast.error(`File type .${ext || "?"} is not supported. Please upload a PDF or photo.`);
+      return;
+    }
+    if (picked.size > MAX_FILE_MB * 1024 * 1024) {
+      toast.error(`File is too large — the limit is ${MAX_FILE_MB} MB.`);
+      return;
+    }
+    setFile(picked);
+  };
+
+  // Reset the input value after reading so picking the same file (or retaking
+  // a photo) fires onChange again.
+  const onNativePick = (e) => {
+    handleFileSelected(e.target.files?.[0]);
+    e.target.value = "";
+  };
+
   useEffect(() => {
     const run = async () => {
       if (!cid) {
@@ -108,7 +147,7 @@ export default function SofUploadClient({ cid }) {
         return;
       }
       try {
-        const res = await validateSofCustomer(cid);
+        const res = await validateSofCustomer(cid, clientId);
         if (res?.success) {
           setCustomerName(res.data?.customerName || null);
           setClient(res.data?.client || null);
@@ -123,7 +162,7 @@ export default function SofUploadClient({ cid }) {
       }
     };
     run();
-  }, [cid]);
+  }, [cid, clientId]);
 
   const resetForm = () => {
     setDocType("");
@@ -355,12 +394,52 @@ export default function SofUploadClient({ cid }) {
             </div>
 
             <CustomDropZone
-              fileTypes={["pdf", "png", "jpg", "jpeg", "webp"]}
-              handleChange={setFile}
+              fileTypes={ACCEPTED_EXTENSIONS}
+              handleChange={handleFileSelected}
               file={file}
               loading={uploading}
               disabled={uploading}
               setFile={setFile}
+            />
+
+            {/* Phone-first entry points: drag-drop is meaningless on touch, and
+                extension-based accept often hides the camera / Files app from
+                mobile pickers. These two inputs use MIME accept (+ capture for
+                the rear camera), which phones honour. */}
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="text-xs"
+                disabled={uploading}
+                onClick={() => cameraInputRef.current?.click()}
+              >
+                <Camera className="size-4" /> Take Photo
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="text-xs"
+                disabled={uploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <FolderOpen className="size-4" /> Browse Files
+              </Button>
+            </div>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={onNativePick}
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/pdf,image/*"
+              className="hidden"
+              onChange={onNativePick}
             />
 
             <Button

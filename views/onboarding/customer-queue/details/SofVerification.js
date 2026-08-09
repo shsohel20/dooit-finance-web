@@ -72,6 +72,9 @@ export default function SofVerification({ details, onUpdated, caseId }) {
   const customerId = details?._id;
 
   const [sof, setSof] = useState(null);
+  // base64 data URL rendered by the API on each read — not part of the session
+  // record, so it always reflects the current frontend origin.
+  const [qrCode, setQrCode] = useState(null);
   const [rfi, setRfi] = useState(null);
   const [url, setUrl] = useState(null);
   const [fetching, setFetching] = useState(false);
@@ -92,6 +95,7 @@ export default function SofVerification({ details, onUpdated, caseId }) {
       if (res?.success) {
         setSof(res.data);
         setUrl(res.url);
+        setQrCode(res.qrCode || null);
       } else {
         toast.error(res?.error || res?.message || "Failed to load SOF verification");
       }
@@ -185,10 +189,11 @@ export default function SofVerification({ details, onUpdated, caseId }) {
           </p>
 
           <div className="rounded-xl border border-dashed border-border p-4 grid place-items-center min-h-[220px] bg-muted/20">
-            {fetching && !sof?.qrCode?.url ? (
+            {fetching && !qrCode ? (
               <IconLoader2 className="size-8 animate-spin text-muted-foreground" />
-            ) : sof?.qrCode?.url ? (
-              <img src={sof.qrCode.url} alt="SOF upload QR code" className="size-44 rounded-md bg-white p-2" />
+            ) : qrCode ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={qrCode} alt="SOF upload QR code" className="size-44 rounded-md bg-white p-2" />
             ) : (
               <p className="text-xs text-muted-foreground">QR unavailable — try reloading.</p>
             )}
