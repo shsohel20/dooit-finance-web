@@ -27,8 +27,6 @@ import {
   LogOut,
   RotateCcw,
   Lock,
-  Camera,
-  FolderOpen,
 } from "lucide-react";
 import { validateSofCustomer, uploadSofDocument } from "./actions";
 
@@ -110,14 +108,13 @@ export default function SofUploadClient({ cid, clientId }) {
   const [lastResult, setLastResult] = useState(null); // { status, message, ocr }
   const [exited, setExited] = useState(false);
 
-  // Hidden native inputs behind the "Take photo" / "Browse files" buttons —
-  // MIME-based accept + capture, which phone pickers honour far more reliably
-  // than the extension list the drag-drop wrapper emits.
-  const cameraInputRef = useRef(null);
-  const fileInputRef = useRef(null);
+  // Taps on the drop zone open this hidden input instead of the drag-drop
+  // library's own one — MIME-based accept, which phone pickers honour far
+  // more reliably than the extension list the library emits.
+  const pickerRef = useRef(null);
 
-  // Single gate for every source (drag-drop, camera, browse): extension +
-  // size checked here so the button row and the drop zone can't diverge.
+  // Single gate for every source (drop, tap-to-pick): extension + size
+  // checked here so the sources can't diverge.
   const handleFileSelected = (picked) => {
     if (!picked) return;
     const ext = (picked.name?.split(".").pop() || "").toLowerCase();
@@ -393,49 +390,33 @@ export default function SofUploadClient({ cid, clientId }) {
               </Select>
             </div>
 
-            <CustomDropZone
-              fileTypes={ACCEPTED_EXTENSIONS}
-              handleChange={handleFileSelected}
-              file={file}
-              loading={uploading}
-              disabled={uploading}
-              setFile={setFile}
-            />
-
-            {/* Phone-first entry points: drag-drop is meaningless on touch, and
-                extension-based accept often hides the camera / Files app from
-                mobile pickers. These two inputs use MIME accept (+ capture for
-                the rear camera), which phones honour. */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="text-xs"
+            {/* Capture-phase handler beats the library's own label-click, so
+                the tap opens our MIME-accept input; drop events pass through
+                untouched. The library's extension-based accept hides the
+                Files app from Android choosers (PDFs become unpickable) —
+                MIME accept restores it. */}
+            <div
+              onClickCapture={(e) => {
+                if (uploading) return;
+                // The selected-file chip's "Remove" X lives inside the zone —
+                // let real buttons handle their own clicks.
+                if (e.target.closest("button")) return;
+                e.preventDefault();
+                e.stopPropagation();
+                pickerRef.current?.click();
+              }}
+            >
+              <CustomDropZone
+                fileTypes={ACCEPTED_EXTENSIONS}
+                handleChange={handleFileSelected}
+                file={file}
+                loading={uploading}
                 disabled={uploading}
-                onClick={() => cameraInputRef.current?.click()}
-              >
-                <Camera className="size-4" /> Take Photo
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="text-xs"
-                disabled={uploading}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <FolderOpen className="size-4" /> Browse Files
-              </Button>
+                setFile={setFile}
+              />
             </div>
             <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={onNativePick}
-            />
-            <input
-              ref={fileInputRef}
+              ref={pickerRef}
               type="file"
               accept="application/pdf,image/*"
               className="hidden"

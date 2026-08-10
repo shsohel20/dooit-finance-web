@@ -126,6 +126,16 @@ export async function reviewSofDocument(customerId, docId, payload) {
   return response.json();
 }
 
+// Re-run OCR on a stored document (e.g. after an OCR outage left it
+// needs_review) — the API pulls the file back from the vault itself.
+export async function reprocessSofDocument(customerId, docId) {
+  const response = await fetchWithAuth(
+    `sof-verification/${customerId}/documents/${docId}/reprocess`,
+    { method: "POST", body: JSON.stringify({}) },
+  );
+  return response.json();
+}
+
 export async function getCustomerStats(queryParams = {}) {
   const queryString = getQueryString(queryParams);
   const url = `customer/stats${queryString ? `?${queryString}` : ""}`;

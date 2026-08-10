@@ -26,6 +26,7 @@ import {
   XCircle,
   Clock,
   ExternalLink,
+  RefreshCw,
 } from "lucide-react";
 import { IconLoader2 } from "@tabler/icons-react";
 import { cn, dateShowFormat } from "@/lib/utils";
@@ -34,6 +35,7 @@ import {
   getSofVerification,
   sendSofVerificationEmail,
   reviewSofDocument,
+  reprocessSofDocument,
 } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 
 const DOC_TYPE_LABELS = {
@@ -145,6 +147,26 @@ export default function SofVerification({ details, onUpdated, caseId }) {
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       toast.error("Could not copy link");
+    }
+  };
+
+  const handleReprocess = async (docId) => {
+    if (reviewingId) return;
+    setReviewingId(docId);
+    try {
+      const res = await reprocessSofDocument(customerId, docId);
+      if (res?.success) {
+        toast.success(res.message || "OCR re-run complete");
+        setSof(res.data);
+        onUpdated?.();
+      } else {
+        toast.error(res?.error || res?.message || "Failed to re-run OCR");
+      }
+    } catch (error) {
+      console.error("Reprocess SOF document failed", error);
+      toast.error("Failed to re-run OCR");
+    } finally {
+      setReviewingId(null);
     }
   };
 
@@ -321,12 +343,32 @@ export default function SofVerification({ details, onUpdated, caseId }) {
                     )}
 
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Button variant="outline" size="sm" className="text-xs" asChild>
-                        <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="size-3.5" /> View
-                        </a>
-                      </Button>
+                      {/* Rejected-at-upload docs are never stored (OCR-first
+                          policy) — no file, no View, no re-run. */}
+                      {doc.url && (
+                        <Button variant="outline" size="sm" className="text-xs" asChild>
+                          <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="size-3.5" /> View
+                          </a>
+                        </Button>
+                      )}
                       <SofOcrDetails doc={doc} />
+                      {doc.url && doc.status === "needs_review" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          disabled={reviewingId === doc._id}
+                          onClick={() => handleReprocess(doc._id)}
+                        >
+                          {reviewingId === doc._id ? (
+                            <IconLoader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <RefreshCw className="size-3.5" />
+                          )}
+                          Re-run OCR
+                        </Button>
+                      )}
                       {doc.status !== "verified" && (
                         <Button
                           variant="outline"
