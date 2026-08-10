@@ -25,6 +25,7 @@ export default function NodeDetailPanel({ node, onClose }) {
         <Row label="Type" value={node.partyType} />
         <Row label="Role" value={node.role} />
         <Row label="Relation" value={node.relationType ?? "—"} />
+        {node.communityLabel && <Row label="Cluster" value={node.communityLabel} />}
         <div className="flex justify-between">
           <span className="text-slate-400">Risk Rating</span>
           <span className="font-semibold" style={{ color }}>

@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useMemo, useState } from "react";
 import * as d3 from "d3";
 import { getRiskColor } from "./lib/graphColors";
+import { normalizeGraphData } from "./graph/normalizeGraphData";
+import { buildBehavioralFeatures } from "./graph/buildBehavioralFeatures";
+import { buildWeightedGraph, computeRootWeights } from "./graph/buildWeightedGraph";
+import { detectCommunities } from "./graph/detectCommunities";
+import { labelCommunities, clusterColor } from "./graph/clusterUtils";
+import { calculateClusterLayout } from "./graph/calculateClusterLayout";
 
 const NODE_RADIUS = 19;
 const ROOT_RADIUS = 26;
@@ -67,7 +73,14 @@ const C = {
   tipRim: "rgba(15,23,42,0.14)",
   tipText: "#0f172a",
   tipSub: "#64748b",
+  clusterLabelBg: "rgba(255,255,255,0.88)",
+  clusterLabelText: "#334155",
+  clusterLabelSub: "#94a3b8",
 };
+
+// Nodes outside the hovered community are dimmed to this alpha (behavioral
+// clustering only — the non-clustered layout never fades nodes).
+const COMMUNITY_FADE_ALPHA = 0.32;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -117,6 +130,15 @@ function getEdgeAt(edges, px, py, t) {
     }
   }
   return best;
+}
+
+/** Hit-test against the cluster-label boxes recorded during the last draw. */
+function getClusterAt(hitboxes, px, py, t) {
+  const { x: wx, y: wy } = toWorld(px, py, t);
+  for (const h of hitboxes) {
+    if (wx >= h.x0 && wx <= h.x1 && wy >= h.y0 && wy <= h.y1) return h;
+  }
+  return null;
 }
 
 function edgeAmount(e) {
@@ -538,12 +560,59 @@ export default function NetworkGraph({ data, onNodeClick }) {
 
   const hoveredRef = useRef(null); // hovered node
   const hoverEdgeRef = useRef(null); // hovered edge
+  const hoveredClusterRef = useRef(null); // hovered cluster id (label hit)
+  const clusterSummariesRef = useRef([]); // communities for the current layout
+  const clusterHitboxesRef = useRef([]); // world-space label hitboxes, refreshed each draw
   const pointerRef = useRef({ x: 0, y: 0 }); // screen px, for tooltip anchor
 
   const didDragRef = useRef(false);
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0 });
   const panOriginRef = useRef({ x: 0, y: 0 });
+
+  const [clusteringEnabled, setClusteringEnabled] = useState(true);
+  const [resetSignal, setResetSignal] = useState(0);
+
+  // ── Behavioral clustering pipeline ─────────────────────────────────────
+  // Staged and memoized so a toggle flip is instant: nothing here re-runs
+  // unless `data` itself changes. See views/.../d3/graph/ for each stage.
+  const rootId = useMemo(() => data.nodes.find((n) => n.depth === 0)?.id, [data]);
+
+  const normalizedGraph = useMemo(() => normalizeGraphData(data.nodes, data.edges), [data]);
+
+  const behavioralFeatures = useMemo(
+    () => buildBehavioralFeatures(normalizedGraph, rootId),
+    [normalizedGraph, rootId],
+  );
+
+  const weightedEdges = useMemo(
+    () => buildWeightedGraph(normalizedGraph, behavioralFeatures, rootId),
+    [normalizedGraph, behavioralFeatures, rootId],
+  );
+
+  const rootWeights = useMemo(
+    () => computeRootWeights(normalizedGraph, rootId),
+    [normalizedGraph, rootId],
+  );
+
+  const communityResult = useMemo(
+    () => detectCommunities([...behavioralFeatures.keys()], weightedEdges),
+    [behavioralFeatures, weightedEdges],
+  );
+
+  const communityMeta = useMemo(
+    () => labelCommunities(communityResult.communities, normalizedGraph),
+    [communityResult, normalizedGraph],
+  );
+
+  const handleResetLayout = useCallback(() => {
+    for (const n of data.nodes) {
+      n.pinned = false;
+      n.fx = null;
+      n.fy = null;
+    }
+    setResetSignal((s) => s + 1);
+  }, [data]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -565,7 +634,29 @@ export default function NetworkGraph({ data, onNodeClick }) {
     const edges = resolveEdges(data.nodes, data.edges);
     edgesRef.current = edges;
 
-    layoutGraph(data.nodes, edges, W, H);
+    if (clusteringEnabled) {
+      clusterSummariesRef.current = calculateClusterLayout({
+        nodes: data.nodes,
+        edges: weightedEdges,
+        communities: communityResult.communities,
+        communityMeta,
+        rootId,
+        rootWeights,
+        W,
+        H,
+        nodeRadius: NODE_RADIUS,
+        rootRadius: ROOT_RADIUS,
+      });
+    } else {
+      layoutGraph(data.nodes, edges, W, H);
+      clusterSummariesRef.current = [];
+      for (const n of data.nodes) {
+        n.communityId = undefined;
+        n.communityLabel = undefined;
+      }
+    }
+
+    const nodesById = new Map(data.nodes.map((n) => [n.id, n]));
 
     // Frame the whole graph on first paint. d3-zoom keeps its own copy of
     // the transform on the canvas node, so seed that too — otherwise the
@@ -658,10 +749,103 @@ export default function NetworkGraph({ data, onNodeClick }) {
       ctx.restore();
     }
 
+    // ── Cluster hulls, drawn behind everything in world space ─────────────
+    // Deliberately subtle: a faint fill + dashed rim, not a solid shape —
+    // node positioning is what communicates the clustering, this is just a
+    // light assist. Skipped for clusters under 3 members (no hull to draw).
+    function drawClusterHulls(activeCommunity) {
+      for (const c of clusterSummariesRef.current) {
+        const pts = c.memberIds
+          .map((id) => nodesById.get(id))
+          .filter((n) => n && n.x != null)
+          .map((n) => [n.x, n.y]);
+        if (pts.length < 3) continue;
+        const hull = d3.polygonHull(pts);
+        if (!hull) continue;
+
+        const isActive = activeCommunity != null && activeCommunity === c.id;
+
+        ctx.beginPath();
+        hull.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
+        ctx.closePath();
+        ctx.fillStyle = isActive ? "rgba(15,23,42,0.035)" : "rgba(15,23,42,0.015)";
+        ctx.fill();
+        ctx.strokeStyle = isActive ? "rgba(15,23,42,0.16)" : "rgba(15,23,42,0.055)";
+        ctx.lineWidth = isActive ? 1.4 : 1;
+        ctx.setLineDash(isActive ? [] : [4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    // ── Cluster labels, drawn above the topmost member of each community ──
+    // Also records world-space hitboxes for hover/click-to-zoom, consumed
+    // by handleMouseMove / handleClick outside this effect.
+    function drawClusterLabels(activeCommunity) {
+      const hitboxes = [];
+      clusterSummariesRef.current.forEach((c, idx) => {
+        const members = c.memberIds.map((id) => nodesById.get(id)).filter((n) => n && n.x != null);
+        if (!members.length) return;
+
+        let topY = Infinity;
+        let sumX = 0;
+        for (const n of members) {
+          sumX += n.x;
+          topY = Math.min(topY, n.y - nodeRadius(n));
+        }
+        const lx = sumX / members.length;
+        const ly = topY - 14;
+
+        const isActive = activeCommunity != null && activeCommunity === c.id;
+        const isDimmed = activeCommunity != null && !isActive;
+        const dotColor = clusterColor(idx);
+
+        const text = `${c.label} · ${c.size}`;
+        ctx.font = "600 10px system-ui";
+        const textW = ctx.measureText(text).width;
+        const padX = 7;
+        const dotGap = 12;
+        const boxH = 16;
+        const boxW = textW + padX * 2 + dotGap;
+        const bx = lx - boxW / 2;
+        const by = ly - boxH;
+
+        ctx.save();
+        ctx.globalAlpha = isDimmed ? 0.35 : 1;
+        ctx.beginPath();
+        ctx.roundRect(bx, by, boxW, boxH, 8);
+        ctx.fillStyle = C.clusterLabelBg;
+        ctx.fill();
+        ctx.strokeStyle = isActive ? "rgba(15,23,42,0.22)" : "rgba(15,23,42,0.08)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(bx + padX + 2, by + boxH / 2, 2.8, 0, Math.PI * 2);
+        ctx.fillStyle = `rgb(${dotColor})`;
+        ctx.fill();
+
+        ctx.fillStyle = C.clusterLabelText;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, lx + dotGap / 2, by + boxH / 2 + 0.5);
+        ctx.restore();
+
+        hitboxes.push({ id: c.id, label: c.label, memberIds: c.memberIds, x0: bx, y0: by, x1: bx + boxW, y1: by + boxH });
+      });
+      clusterHitboxesRef.current = hitboxes;
+    }
+
     function draw() {
       const t = transformRef.current;
       const hovered = hoveredRef.current;
       const hoverEdge = hoverEdgeRef.current;
+      // Hovering either a node or a cluster label highlights that node's/
+      // label's community; gated behind the toggle so the non-clustered
+      // layout never fades anything (unchanged from the original behavior).
+      const activeCommunity = clusteringEnabled
+        ? (hoveredClusterRef.current ?? hovered?.communityId ?? null)
+        : null;
 
       ctx.save();
       ctx.clearRect(0, 0, W, H);
@@ -669,6 +853,8 @@ export default function NetworkGraph({ data, onNodeClick }) {
       ctx.fillRect(0, 0, W, H);
       ctx.translate(t.x, t.y);
       ctx.scale(t.k, t.k);
+
+      if (clusteringEnabled) drawClusterHulls(activeCommunity);
 
       // ── Edges ───────────────────────────────────────────────────────────
       // On a light background, "lighter" blending washes lines out, so we
@@ -683,13 +869,16 @@ export default function NetworkGraph({ data, onNodeClick }) {
 
         const isHotEdge = hoverEdge === link;
         const touchesHotNode = hovered && (hovered.id === s.id || hovered.id === tg.id);
-        const anyHover = hoverEdge || hovered;
+        const anyHover = hoverEdge || hovered || activeCommunity != null;
         const dim = anyHover && !isHotEdge && !touchesHotNode;
 
         let alpha = 0.3;
         if (isHotEdge) alpha = 0.95;
         else if (touchesHotNode) alpha = 0.7;
-        else if (dim) alpha = 0.07;
+        else if (activeCommunity != null) {
+          const touchesCluster = s.communityId === activeCommunity || tg.communityId === activeCommunity;
+          alpha = touchesCluster ? 0.22 : 0.04;
+        } else if (dim) alpha = 0.07;
 
         ctx.beginPath();
         ctx.moveTo(s.x, s.y);
@@ -709,8 +898,12 @@ export default function NetworkGraph({ data, onNodeClick }) {
           hoverEdge && (hoverEdge.source?.id === node.id || hoverEdge.target?.id === node.id);
         const r = nodeRadius(node);
         const risk = getRiskColor(node.riskRating);
+        const inActiveCommunity =
+          activeCommunity == null || isRoot || node.communityId === activeCommunity;
 
         ctx.save();
+        ctx.globalAlpha = inActiveCommunity ? 1 : COMMUNITY_FADE_ALPHA;
+
         if (isRoot || isHovered || onHotEdge) {
           ctx.shadowColor = "rgba(15,23,42,0.18)";
           ctx.shadowBlur = isRoot ? 14 : 10;
@@ -719,7 +912,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
         ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
         ctx.fillStyle = isRoot ? C.rootFill : isHovered || onHotEdge ? C.nodeFillHover : C.nodeFill;
         ctx.fill();
-        ctx.restore();
+        ctx.shadowBlur = 0;
 
         ctx.beginPath();
         ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
@@ -730,14 +923,13 @@ export default function NetworkGraph({ data, onNodeClick }) {
         // Pinned nodes get a dashed halo so it's clear they're anchored
         // and won't be moved by the layout.
         if (node.pinned) {
-          ctx.save();
           ctx.beginPath();
           ctx.arc(node.x, node.y, r + 3.5, 0, Math.PI * 2);
           ctx.setLineDash([3, 3]);
           ctx.strokeStyle = "rgba(15,23,42,0.38)";
           ctx.lineWidth = 1;
           ctx.stroke();
-          ctx.restore();
+          ctx.setLineDash([]);
         }
 
         if (!isRoot && risk) {
@@ -767,13 +959,16 @@ export default function NetworkGraph({ data, onNodeClick }) {
         ctx.textBaseline = "top";
 
         // Halo behind the text so labels stay legible where edges pass under
-        ctx.save();
         ctx.lineWidth = 3;
         ctx.strokeStyle = C.bg;
         ctx.strokeText(label, node.x, node.y + r + 5);
-        ctx.restore();
         ctx.fillText(label, node.x, node.y + r + 5);
+
+        ctx.restore();
       }
+
+      if (clusteringEnabled) drawClusterLabels(activeCommunity);
+      else clusterHitboxesRef.current = [];
 
       ctx.restore(); // back to screen space
 
@@ -789,7 +984,16 @@ export default function NetworkGraph({ data, onNodeClick }) {
       simulation.stop();
       delete canvas.__redraw;
     };
-  }, [data]);
+  }, [
+    data,
+    clusteringEnabled,
+    resetSignal,
+    rootId,
+    weightedEdges,
+    communityResult.communities,
+    communityMeta,
+    rootWeights,
+  ]);
 
   const repaint = () => canvasRef.current?.__redraw?.();
 
@@ -914,24 +1118,34 @@ export default function NetworkGraph({ data, onNodeClick }) {
       const node = getNodeAt(data.nodes, px, py, transformRef.current);
       // Only test edges when no node is under the cursor
       const edge = node ? null : getEdgeAt(edgesRef.current, px, py, transformRef.current);
+      // Cluster labels are the lowest-priority hit target
+      const cluster =
+        !node && !edge && clusteringEnabled
+          ? getClusterAt(clusterHitboxesRef.current, px, py, transformRef.current)
+          : null;
 
-      const changed = node?.id !== hoveredRef.current?.id || edge !== hoverEdgeRef.current;
+      const changed =
+        node?.id !== hoveredRef.current?.id ||
+        edge !== hoverEdgeRef.current ||
+        cluster?.id !== hoveredClusterRef.current;
 
       hoveredRef.current = node;
       hoverEdgeRef.current = edge;
-      canvas.style.cursor = node ? "pointer" : edge ? "crosshair" : "grab";
+      hoveredClusterRef.current = cluster?.id ?? null;
+      canvas.style.cursor = node || cluster ? "pointer" : edge ? "crosshair" : "grab";
 
       // Repaint on change, and also while an edge is hovered so the
       // tooltip follows the cursor.
       if (changed || edge) canvas.__redraw?.();
     },
-    [data],
+    [data, clusteringEnabled],
   );
 
   const handleMouseLeave = useCallback(() => {
     isPanningRef.current = false;
     hoveredRef.current = null;
     hoverEdgeRef.current = null;
+    hoveredClusterRef.current = null;
     if (canvasRef.current) {
       canvasRef.current.style.cursor = "grab";
       canvasRef.current.__redraw?.();
@@ -945,15 +1159,30 @@ export default function NetworkGraph({ data, onNodeClick }) {
         return;
       }
       const rect = canvasRef.current.getBoundingClientRect();
-      const found = getNodeAt(
-        data.nodes,
-        e.clientX - rect.left,
-        e.clientY - rect.top,
-        transformRef.current,
-      );
-      if (found) onNodeClick?.(found);
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      const found = getNodeAt(data.nodes, px, py, transformRef.current);
+      if (found) {
+        onNodeClick?.(found);
+        return;
+      }
+
+      // Clicking a cluster label zooms/pans to fit that community.
+      if (clusteringEnabled) {
+        const cluster = getClusterAt(clusterHitboxesRef.current, px, py, transformRef.current);
+        if (cluster) {
+          const members = data.nodes.filter((n) => cluster.memberIds.includes(n.id));
+          const canvas = canvasRef.current;
+          const W = canvas?.clientWidth ?? 0;
+          const H = canvas?.clientHeight ?? 0;
+          if (members.length && W && H) {
+            transformRef.current = fitTransform(members, W, H);
+            canvas.__redraw?.();
+          }
+        }
+      }
     },
-    [data, onNodeClick],
+    [data, onNodeClick, clusteringEnabled],
   );
 
   const handleMouseDown = useCallback((e) => {
@@ -972,7 +1201,7 @@ export default function NetworkGraph({ data, onNodeClick }) {
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full h-[80vh] overflow-hidden bg-[#f7f8fa]">
+    <div ref={containerRef} className="relative w-full h-[80vh] overflow-hidden bg-[#f7f8fa]">
       <canvas
         ref={canvasRef}
         className="block w-full h-full"
@@ -982,6 +1211,28 @@ export default function NetworkGraph({ data, onNodeClick }) {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
       />
+      <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setClusteringEnabled((v) => !v)}
+          title="Toggle behavioral-community layout vs. the original relationship fan"
+          className={`rounded-md border px-2.5 py-1.5 text-[11px] font-semibold shadow-sm transition-colors ${
+            clusteringEnabled
+              ? "border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100"
+              : "border-border bg-card text-muted-foreground hover:bg-secondary"
+          }`}
+        >
+          Behavioral Clustering: {clusteringEnabled ? "ON" : "OFF"}
+        </button>
+        <button
+          type="button"
+          onClick={handleResetLayout}
+          title="Clear manually dragged positions and re-run the layout"
+          className="rounded-md border border-border bg-card px-2.5 py-1.5 text-[11px] font-semibold text-muted-foreground shadow-sm hover:bg-secondary"
+        >
+          Reset Layout
+        </button>
+      </div>
     </div>
   );
 }
