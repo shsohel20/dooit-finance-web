@@ -372,7 +372,6 @@ export function Osiint({ data, details }) {
       try {
         const entityType = "customers";
         const response = await getOSINTdata(entityType, id);
-        console.log("response", response);
         const screenshotData = await getOSINTScreenshots(entityType, id);
         if (!cancelled) {
           setReportData(response);
@@ -685,7 +684,7 @@ export function Osiint({ data, details }) {
             </SectionCard>
           )}
 
-          {screenshots && screenshots.length > 0 && (
+          {/* {screenshots && screenshots.length > 0 && (
             <SectionCard
               icon={ImageIcon}
               title={`Evidence Screenshots (${screenshots.length})`}
@@ -698,7 +697,7 @@ export function Osiint({ data, details }) {
               </p>
               <ScreenshotGallery screenshots={screenshots} />
             </SectionCard>
-          )}
+          )} */}
         </main>
       </div>
 

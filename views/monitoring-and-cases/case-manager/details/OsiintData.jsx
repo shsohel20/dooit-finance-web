@@ -88,10 +88,10 @@ export default function OsiintData() {
       try {
         const entityType = "customers";
         const response = await getOSINTdata(entityType, id);
-        const screenshotData = await getOSINTScreenshots(entityType, id);
+        // const screenshotData = await getOSINTScreenshots(entityType, id);
         if (!cancelled) {
           setReportData(response);
-          setScreenshots(screenshotData);
+          // setScreenshots(screenshotData);
         }
       } catch (err) {
         if (!cancelled) setError(err?.message || "Failed to load OSINT report");
