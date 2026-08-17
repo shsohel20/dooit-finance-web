@@ -372,6 +372,7 @@ export function Osiint({ data, details }) {
       try {
         const entityType = "customers";
         const response = await getOSINTdata(entityType, id);
+        console.log("response", response);
         const screenshotData = await getOSINTScreenshots(entityType, id);
         if (!cancelled) {
           setReportData(response);

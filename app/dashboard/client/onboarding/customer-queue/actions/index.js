@@ -199,9 +199,12 @@ export const getCustomerRelationsGraph = async (id) => {
 };
 
 export const getOSINTdata = async (entityType, entityId) => {
-  const url = `https://osint.dooit.ai/api/v1/osint/${entityType}/${entityId}`;
+  const url = `https://osint.dooit.ai/api/v1/osint_ai/${entityType}/${entityId}`;
   const response = await fetch(url, {
     method: "GET",
+    headers: {
+      "X-API-Key": process.env.NEXT_PUBLIC_OSINT_API_KEY,
+    },
   });
   return response.json();
 };
