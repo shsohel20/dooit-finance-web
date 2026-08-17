@@ -67,11 +67,13 @@ export function RelationsTree({ details }) {
               OSINT Report
             </SheetTitle>
           </SheetHeader>
-          <Osiint />
+          <div className="px-4 pb-4">
+            <Osiint />
+          </div>
         </SheetContent>
       </Sheet>
 
-      <div className="">
+      <div className=" ">
         {/* Header */}
         <div className="mb-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-end">
           <div className="flex items-center gap-3">

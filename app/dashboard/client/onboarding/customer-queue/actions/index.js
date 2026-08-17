@@ -208,6 +208,16 @@ export const getOSINTdata = async (entityType, entityId) => {
   });
   return response.json();
 };
+export const getOSINTdataSources = async (entityType, entityId) => {
+  const url = `https://osint.dooit.ai/api/v1/osint_ai/${entityType}/${entityId}/sources`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "X-API-Key": process.env.NEXT_PUBLIC_OSINT_API_KEY,
+    },
+  });
+  return response.json();
+};
 
 export const getOSINTScreenshots = async (entityType, entityId) => {
   const url = `https://osint.dooit.ai/api/v1/osint/${entityType}/${entityId}/screenshots`;

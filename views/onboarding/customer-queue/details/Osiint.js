@@ -40,6 +40,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import {
   getOSINTdata,
+  getOSINTdataSources,
   getOSINTScreenshots,
 } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 
@@ -372,10 +373,12 @@ export function Osiint({ data, details }) {
       try {
         const entityType = "customers";
         const response = await getOSINTdata(entityType, id);
-        const screenshotData = await getOSINTScreenshots(entityType, id);
+        // console.log("osint response", response);
+        // const screenshotData = await getOSINTdataSources(entityType, id);
+        // console.log("screenshotDAta", screenshotData);
         if (!cancelled) {
           setReportData(response);
-          setScreenshots(screenshotData);
+          // setScreenshots(screenshotData);
         }
       } catch (err) {
         if (!cancelled) setError(err?.message || "Failed to load OSINT report");
