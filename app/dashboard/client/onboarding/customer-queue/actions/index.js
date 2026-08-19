@@ -199,10 +199,12 @@ export const getCustomerRelationsGraph = async (id) => {
 };
 
 export const createOSINTdata = async (data) => {
-  const url = `https://osint.dooit.ai/api/v1/osint_ai`;
+  const isProduction = process.env.NODE_ENV === "production";
+  const db_source = isProduction ? 1 : 2;
+  const url = `https://osint.dooit.ai/api/v1/osint_searx`;
   const response = await fetch(url, {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, db_source }),
     headers: {
       "Content-Type": "application/json",
       "X-API-Key": process.env.NEXT_PUBLIC_OSINT_API_KEY,
@@ -214,8 +216,8 @@ export const createOSINTdata = async (data) => {
 export const getOSINTdata = async (entityType, entityId) => {
   const isProduction = process.env.NODE_ENV === "production";
   const db_source = isProduction ? 1 : 2;
-  // console.log({ db_source });
-  const url = `https://osint.dooit.ai/api/v1/osint_ai/${entityType}/${entityId}?db_source=${db_source}`;
+  console.log({ db_source });
+  const url = `https://osint.dooit.ai/api/v1/osint_searx/${entityType}/${entityId}?db_source=${db_source}`;
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -225,7 +227,7 @@ export const getOSINTdata = async (entityType, entityId) => {
   return response.json();
 };
 export const getOSINTdataSources = async (entityType, entityId) => {
-  const url = `https://osint.dooit.ai/api/v1/osint_ai/${entityType}/${entityId}/sources`;
+  const url = `https://osint.dooit.ai/api/v1/osint_searx/${entityType}/${entityId}/sources`;
   const response = await fetch(url, {
     method: "GET",
     headers: {

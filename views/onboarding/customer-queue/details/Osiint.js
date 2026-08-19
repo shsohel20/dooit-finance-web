@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import {
+  createOSINTdata,
   getOSINTdata,
   getOSINTdataSources,
   getOSINTScreenshots,
@@ -357,42 +358,52 @@ export function Osiint({ data, details }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [screenshots, setScreenshots] = useState(null);
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState(null);
   const id = useSearchParams().get("id");
 
-  useEffect(() => {
+  const fetchOsintReport = useCallback(async () => {
     if (!id) {
       setLoading(false);
       return;
     }
-
-    let cancelled = false;
-
-    const getOsiintReport = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const entityType = "customers";
-        const response = await getOSINTdata(entityType, id);
-        console.log("response", response);
-        // console.log("osint response", response);
-        // const screenshotData = await getOSINTdataSources(entityType, id);
-        // console.log("screenshotDAta", screenshotData);
-        if (!cancelled) {
-          setReportData(response);
-          // setScreenshots(screenshotData);
-        }
-      } catch (err) {
-        if (!cancelled) setError(err?.message || "Failed to load OSINT report");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    getOsiintReport();
-    return () => {
-      cancelled = true;
-    };
+    setLoading(true);
+    setError(null);
+    try {
+      const entityType = "customers";
+      const response = await getOSINTdata(entityType, id);
+      console.log("response", response);
+      // const screenshotData = await getOSINTdataSources(entityType, id);
+      setReportData(response);
+      // setScreenshots(screenshotData);
+    } catch (err) {
+      setError(err?.message || "Failed to load OSINT report");
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    fetchOsintReport();
+  }, [fetchOsintReport]);
+
+  const handleGenerate = useCallback(async () => {
+    if (!id || generating) return;
+    setGenerating(true);
+    setGenerateError(null);
+    try {
+      await createOSINTdata({
+        entity_type: "customers",
+        entity_id: id,
+        // entity_name: details?.user?.name || details?.fullName || undefined,
+      });
+      await fetchOsintReport();
+    } catch (err) {
+      setGenerateError(err?.message || "Failed to generate OSINT report");
+    } finally {
+      setGenerating(false);
+    }
+  }, [id, generating, details, fetchOsintReport]);
 
   const payload = reportData || (data && typeof data === "object" ? data : null);
   const report = payload?.report || null;
@@ -401,7 +412,10 @@ export function Osiint({ data, details }) {
   const status = statusStyles(payload?.status);
   const StatusIcon = status.Icon;
   const findings = Array.isArray(report?.key_findings) ? report.key_findings : [];
-  console.log({ payload });
+  const hasEntityId = Boolean(payload?.entity_id);
+  const isProcessing = ["pending", "processing", "running", "queued"].includes(
+    (payload?.status || "").toLowerCase(),
+  );
 
   if (loading) {
     return (
@@ -442,14 +456,46 @@ export function Osiint({ data, details }) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-slate-200 bg-gradient-to-b from-slate-50 to-white py-20 text-center">
         <div className="inline-flex size-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <SearchX aria-hidden="true" className="size-6 text-slate-400" />
+          {isProcessing ? (
+            <Loader2 aria-hidden="true" className="size-6 animate-spin text-primary" />
+          ) : (
+            <SearchX aria-hidden="true" className="size-6 text-slate-400" />
+          )}
         </div>
-        <div className="space-y-1">
-          <p className="text-sm font-semibold text-slate-800">No OSINT report available</p>
-          <p className="text-xs text-slate-500">
-            Run an OSINT scan to generate intelligence for this entity.
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-slate-800">
+            {isProcessing ? "OSINT scan in progress" : "No OSINT report available"}
           </p>
+          <p className="max-w-sm text-xs text-slate-500">
+            {isProcessing
+              ? "The scan is currently running. This can take a few minutes — check back shortly."
+              : "Run an OSINT scan to generate intelligence for this entity."}
+          </p>
+          {/* {payload?.status && (
+            <div className="flex justify-center pt-1">
+              <Badge className={cn("border text-[11px] font-medium", status.badge)}>
+                <StatusIcon
+                  aria-hidden="true"
+                  className={cn("size-3", isProcessing && "animate-spin")}
+                />
+                {formatEntityType(payload.status)}
+              </Badge>
+            </div>
+          )} */}
         </div>
+        {!hasEntityId && !isProcessing && (
+          <div className="flex flex-col items-center gap-2 pt-1">
+            <Button type="button" size="sm" onClick={handleGenerate} disabled={generating}>
+              {generating ? (
+                <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
+              ) : (
+                <Radar aria-hidden="true" className="size-3.5" />
+              )}
+              {generating ? "Generating…" : "Generate OSINT Report"}
+            </Button>
+            {generateError && <p className="max-w-sm text-xs text-red-500">{generateError}</p>}
+          </div>
+        )}
       </div>
     );
   }
@@ -457,7 +503,7 @@ export function Osiint({ data, details }) {
   return (
     <div className="@container/osiint space-y-6">
       {/* Hero header */}
-      <section
+      {/* <section
         className={cn(
           "relative overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br shadow-md ring-1 ring-black/[0.03]",
           styles.gradient,
@@ -507,19 +553,45 @@ export function Osiint({ data, details }) {
               </div>
             </div>
 
-            <Badge className={cn("w-fit shrink-0 border px-3 py-1.5 text-xs", status.badge)}>
-              <StatusIcon
-                aria-hidden="true"
-                className={cn(
-                  "size-3.5",
-                  (payload.status || "").toLowerCase().includes("process") && "animate-spin",
-                )}
-              />
-              {formatEntityType(payload.status || "Unknown")}
-            </Badge>
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <Badge className={cn("w-fit border px-3 py-1.5 text-xs", status.badge)}>
+                <StatusIcon
+                  aria-hidden="true"
+                  className={cn(
+                    "size-3.5",
+                    (payload.status || "").toLowerCase().includes("process") && "animate-spin",
+                  )}
+                />
+                {formatEntityType(payload.status || "Unknown")}
+              </Badge>
+              {!hasEntityId && !isProcessing && (
+                <div className="flex flex-col items-end gap-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-fit"
+                    onClick={handleGenerate}
+                    disabled={generating}
+                  >
+                    {generating ? (
+                      <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
+                    ) : (
+                      <Radar aria-hidden="true" className="size-3.5" />
+                    )}
+                    {generating ? "Generating…" : "Generate OSINT Report"}
+                  </Button>
+                  {generateError && (
+                    <p className="max-w-[220px] text-right text-[11px] text-red-500">
+                      {generateError}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <div className="grid grid-cols-1 gap-6 @[900px]/osiint:grid-cols-[280px_minmax(0,1fr)]">
         {/* Sidebar summary */}
@@ -531,7 +603,7 @@ export function Osiint({ data, details }) {
               </p>
             </CardHeader>
             <CardContent className="divide-y divide-border/50 px-4 py-1">
-              <SummaryItem label="Status" value={formatEntityType(payload.status || "Unknown")} />
+              {/* <SummaryItem label="Status" value={formatEntityType(payload.status || "Unknown")} /> */}
               <SummaryItem label="Entity Type" value={formatEntityType(payload.entity_type)} />
               <SummaryItem
                 label="Risk Level"
