@@ -373,6 +373,7 @@ export function Osiint({ data, details }) {
       try {
         const entityType = "customers";
         const response = await getOSINTdata(entityType, id);
+        console.log("response", response);
         // console.log("osint response", response);
         // const screenshotData = await getOSINTdataSources(entityType, id);
         // console.log("screenshotDAta", screenshotData);
@@ -400,6 +401,7 @@ export function Osiint({ data, details }) {
   const status = statusStyles(payload?.status);
   const StatusIcon = status.Icon;
   const findings = Array.isArray(report?.key_findings) ? report.key_findings : [];
+  console.log({ payload });
 
   if (loading) {
     return (

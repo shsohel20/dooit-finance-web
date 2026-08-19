@@ -198,8 +198,24 @@ export const getCustomerRelationsGraph = async (id) => {
   return response.json();
 };
 
+export const createOSINTdata = async (data) => {
+  const url = `https://osint.dooit.ai/api/v1/osint_ai`;
+  const response = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-Key": process.env.NEXT_PUBLIC_OSINT_API_KEY,
+    },
+  });
+  return response.json();
+};
+
 export const getOSINTdata = async (entityType, entityId) => {
-  const url = `https://osint.dooit.ai/api/v1/osint_ai/${entityType}/${entityId}`;
+  const isProduction = process.env.NODE_ENV === "production";
+  const db_source = isProduction ? 1 : 2;
+  // console.log({ db_source });
+  const url = `https://osint.dooit.ai/api/v1/osint_ai/${entityType}/${entityId}?db_source=${db_source}`;
   const response = await fetch(url, {
     method: "GET",
     headers: {

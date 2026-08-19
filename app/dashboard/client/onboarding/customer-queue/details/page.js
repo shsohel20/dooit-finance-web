@@ -8,8 +8,7 @@ import { getCustomerById } from "../actions";
 import Documents from "@/views/onboarding/customer-queue/details/Document";
 import { Osiint } from "@/views/onboarding/customer-queue/details/Osiint";
 import { Transactions } from "@/views/onboarding/customer-queue/details/Transactions";
-import useGetUser from "@/hooks/useGetUser";
-import RelationGraph from "@/views/onboarding/customer-queue/details/relation-graph";
+
 import KycExportButton from "@/components/KycExportButton";
 import KycStatusButton from "@/components/KycStatusButton";
 
