@@ -41,8 +41,6 @@ import { useSearchParams } from "next/navigation";
 import {
   createOSINTdata,
   getOSINTdata,
-  getOSINTdataSources,
-  getOSINTScreenshots,
 } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 
 function parseRiskLevel(riskAssessment) {
@@ -372,7 +370,7 @@ export function Osiint({ data, details }) {
     try {
       const entityType = "customers";
       const response = await getOSINTdata(entityType, id);
-      console.log("response", response);
+      console.log("osint response", response);
       // const screenshotData = await getOSINTdataSources(entityType, id);
       setReportData(response);
       // setScreenshots(screenshotData);
