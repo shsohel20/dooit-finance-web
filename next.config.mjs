@@ -3,16 +3,22 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'files.strikeo.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "files.strikeo.com",
+        port: "",
+        pathname: "/**",
       },
       {
-        protocol: 'http',
-        hostname: '31.97.71.194',
-        port: '5050',
-        pathname: '/**',
+        protocol: "http",
+        hostname: "31.97.71.194",
+        port: "5050",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+        port: "",
+        pathname: "/**",
       },
     ],
   },
