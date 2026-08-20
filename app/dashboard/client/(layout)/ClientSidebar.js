@@ -419,6 +419,11 @@ export default function ClientSidebar({ ...props }) {
           icon: IconDatabase,
         },
         {
+          title: "Rule Back Test",
+          url: "/dashboard/client/risk-rule-engine/back-test",
+          icon: IconDatabase,
+        },
+        {
           title: "CRA Scoring Configuration",
           url: "/dashboard/client/risk-rule-engine/cra-scoring-config",
           icon: IconDatabase,
