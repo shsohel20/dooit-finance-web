@@ -7,7 +7,7 @@ export const metadata = {
 export default async function CaseDetailsPage({ params }) {
   const { id } = await params;
   return (
-    <div className="p-4 md:p-6">
+    <div className=" ">
       <CaseDetails caseId={id} />
     </div>
   );

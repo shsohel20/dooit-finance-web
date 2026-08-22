@@ -225,7 +225,8 @@ export const getOSINTdata = async (entityType, entityId) => {
   return response.json();
 };
 export const getOSINTdataSources = async (entityType, entityId) => {
-  const url = `${OSINT_URL}/${entityType}/${entityId}/sources`;
+  const url = `${OSINT_URL}/${entityType}/${entityId}/sources?db_source=${DB_SOURCE}`;
+  console.log("url", X_API_KEY);
   const response = await fetch(url, {
     method: "GET",
     headers: {

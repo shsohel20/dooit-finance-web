@@ -65,6 +65,7 @@ const adaptCustomer = (customer, clientId) => {
   return {
     // Fall back to the customer reference so an unnamed record still shows
     // something identifiable rather than an empty avatar.
+    ...customer,
     name:
       customer.user?.name ||
       joinNonEmpty([details.given_name, details.middle_name, details.surname], " ") ||

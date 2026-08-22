@@ -65,12 +65,6 @@ export default function CaseDetails({ caseId }) {
   const [assignOpen, setAssignOpen] = useState(false);
   const [rfiOpen, setRfiOpen] = useState(false);
 
-  // Regulatory filings live on their own endpoint so the case document stays
-  // lean; they load alongside the case rather than blocking it.
-  const [reports, setReports] = useState(null);
-  const [reportsSummary, setReportsSummary] = useState(null);
-  const [reportsLoading, setReportsLoading] = useState(true);
-
   const sectionRefs = useRef({});
   const setSectionRef = (id) => (el) => {
     sectionRefs.current[id] = el;
@@ -80,7 +74,6 @@ export default function CaseDetails({ caseId }) {
     if (!caseId) return;
     const load = async () => {
       setLoading(true);
-      setReportsLoading(true);
       setError(null);
       try {
         // One round trip each, in parallel — a failure in any companion
@@ -91,10 +84,9 @@ export default function CaseDetails({ caseId }) {
           getCaseNotes(caseId).catch(() => null),
           getAuditLog(caseId).catch(() => null),
         ]);
+        console.log("case res", res);
 
         const filings = reportsRes?.succeed ? reportsRes.data : null;
-        setReports(filings);
-        setReportsSummary(reportsRes?.succeed ? reportsRes.summary : null);
 
         if (res?.succeed) {
           // Normalise the API document into the shape the sections expect.
@@ -124,7 +116,7 @@ export default function CaseDetails({ caseId }) {
         setError("Failed to load case");
       } finally {
         setLoading(false);
-        setReportsLoading(false);
+        // setReportsLoading(false);
       }
     };
     load();
