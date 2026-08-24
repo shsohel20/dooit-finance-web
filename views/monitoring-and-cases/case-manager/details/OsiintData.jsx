@@ -20,6 +20,7 @@ import {
   Globe,
 } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
+import OsintDataSourceCard from "./tabs/components/OsintDataSourceCard";
 
 const PROCESSING_STATUSES = ["pending", "processing", "running", "queued"];
 
@@ -63,13 +64,15 @@ const DataCard = ({ title, description }) => {
       <div>
         <p className="text-xs text-gray-500 leading-relaxed">
           {showMore ? description : description?.slice(0, 100)}{" "}
-          <button
-            variant="link"
-            className="text-xs font-bold hover:underline transition-all duration-300"
-            onClick={() => setShowMore(!showMore)}
-          >
-            {showMore ? "See Less" : "See More"}
-          </button>
+          {description.length > 100 && (
+            <button
+              variant="link"
+              className="text-xs font-bold hover:underline transition-all duration-300 ml-1"
+              onClick={() => setShowMore(!showMore)}
+            >
+              {showMore ? "See Less" : "See More"}
+            </button>
+          )}
         </p>
       </div>
     </div>
@@ -78,44 +81,7 @@ const DataCard = ({ title, description }) => {
 
 const SOURCES_PAGE_SIZE = 5;
 
-const DataSourceCard = ({ source }) => {
-  return (
-    <div className="bg-white rounded-lg p-3 border space-y-1.5">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-          <span className="text-xs font-semibold text-slate-800 truncate">
-            {source.title || source.domain || "Untitled source"}
-          </span>
-        </div>
-        {source.adverse && (
-          <span className="shrink-0 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-700">
-            Adverse
-          </span>
-        )}
-      </div>
-
-      {source.match_reasoning && (
-        <p className="text-xs text-gray-500 leading-relaxed">{source.match_reasoning}</p>
-      )}
-
-      {source.url && (
-        <a
-          href={source.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline "
-        >
-          <ExternalLink className="w-3 h-3" />
-          Visit link
-        </a>
-      )}
-    </div>
-  );
-};
-
 const ScreenshotCard = ({ screenshot, index, screenshots }) => {
-  const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
   const navigate = useCallback(
@@ -171,8 +137,7 @@ export default function OsiintData({ caseData }) {
       const entityType = "customers";
       const response = await getOSINTdata(entityType, id);
       const sourcesResponse = await getOSINTdataSources(entityType, id);
-      console.log("id", id);
-      console.log("sourcesResponse", sourcesResponse);
+
       const sourcesList = Array.isArray(sourcesResponse)
         ? sourcesResponse.filter((itm) => itm.subject_match === "MATCH")
         : [];
@@ -302,7 +267,7 @@ export default function OsiintData({ caseData }) {
           </h5>
           <div className="flex flex-col gap-2">
             {(showAllSources ? sources : sources.slice(0, SOURCES_PAGE_SIZE)).map((source, idx) => (
-              <DataSourceCard key={source.evidence_id || idx} source={source} />
+              <OsintDataSourceCard key={source.evidence_id || idx} source={source} />
             ))}
           </div>
           {sources.length > SOURCES_PAGE_SIZE && (

@@ -33,6 +33,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NetworkGraph from "@/views/onboarding/customer-queue/details/d3/Networkgraph";
 import { transformToGraph } from "@/views/onboarding/customer-queue/details/d3/lib/transformgraphData";
 import partyEntities from "@/views/onboarding/customer-queue/details/demo.json";
+import TbmlOsint from "./tabs/components/TbmlOsint";
+import { FingerprintIcon } from "lucide-react";
 
 const FilesTab = lazy(() => import("./tabs/FilesTab"));
 const graphData = transformToGraph(partyEntities);
@@ -320,10 +322,16 @@ export default function CaseDetails({ caseId }) {
             <IconSitemap />
             Relation graph
           </TabsTrigger>
+          <TabsTrigger value="tbml-osint">
+            <FingerprintIcon /> TBML Osint
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="investigation-hub">
           <InvestigationHub caseData={caseData} />
+        </TabsContent>
+        <TabsContent value="tbml-osint">
+          <TbmlOsint />
         </TabsContent>
 
         <TabsContent value="customer-profile">
