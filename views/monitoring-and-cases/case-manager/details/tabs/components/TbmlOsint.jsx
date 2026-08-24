@@ -1,33 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import CustomDropZone from "@/components/ui/DropZone";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { FileText, ImageIcon, Download, Trash2, Plus, ExternalLink } from "lucide-react";
+import {
+  FileText,
+  ImageIcon,
+  Download,
+  Trash2,
+  Plus,
+  ExternalLink,
+  FingerprintIcon,
+} from "lucide-react";
 import { IconGridDots, IconList, IconLoader2 } from "@tabler/icons-react";
 import { cn, dateShowFormat } from "@/lib/utils";
-import { fileUploadOnCloudinary } from "@/app/actions";
+import AddDocumentDialog from "@/components/documents/AddDocumentDialog";
+import TbmlOsintDetails from "./TbmlOsintDetails";
 
 // ── Mock document data ───────────────────────────────────────────────────────
 
@@ -74,7 +64,7 @@ const MOCK_DOCUMENTS = [
   },
   {
     name: "Transaction Pattern Analysis",
-    url: "https://res.cloudinary.com/demo/image/upload/sample.pdfg",
+    url: "https://res.cloudinary.com/demo/image/upload/sample.pdfgo",
     mimeType: "application/pdf",
     docType: "transaction_report",
     uploadedAt: "2026-08-18T16:47:00.000Z",
@@ -127,7 +117,7 @@ const RemoveDocButton = ({ doc, onRemove, removing, compact = false }) => {
 
 // ── List row ─────────────────────────────────────────────────────────────────
 
-const DocumentRow = ({ doc, onRemove, removing }) => (
+const DocumentRow = ({ doc, onRemove, removing, onOsint }) => (
   <div className="flex items-center gap-3 py-2.5 px-2 border-b border-border/60 last:border-0 hover:bg-muted/30 rounded-md transition-colors">
     <div className="size-11 rounded-md overflow-hidden border border-border/60 bg-muted/40 flex items-center justify-center flex-shrink-0">
       {isImageDoc(doc) ? (
@@ -162,6 +152,9 @@ const DocumentRow = ({ doc, onRemove, removing }) => (
         <a href={doc.url} download>
           <Download className="size-3.5" />
         </a>
+      </Button>
+      <Button variant="outline" size="icon" onClick={onOsint}>
+        <FingerprintIcon />
       </Button>
       {onRemove && <RemoveDocButton doc={doc} onRemove={onRemove} removing={removing} compact />}
     </div>
@@ -219,115 +212,6 @@ const DocumentCard = ({ doc, onRemove, removing }) => {
   );
 };
 
-// ── Add Document dialog ──────────────────────────────────────────────────────
-
-const AddDocumentDialog = ({ open, setOpen, onAdd }) => {
-  const [file, setFile] = useState(null);
-  const [name, setName] = useState("");
-  const [docType, setDocType] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  const reset = () => {
-    setFile(null);
-    setName("");
-    setDocType("");
-  };
-
-  const handleFileChange = (f) => {
-    setFile(f);
-    if (f && !name) setName(f.name);
-  };
-
-  const handleSave = async () => {
-    if (!file || !docType || saving) return;
-    setSaving(true);
-    try {
-      const uploadRes = await fileUploadOnCloudinary(file);
-      const publicUrl = uploadRes?.file?.publicUrl;
-      if (!uploadRes?.success || !publicUrl) {
-        throw new Error(uploadRes?.message || "File upload failed");
-      }
-      onAdd({
-        name: name.trim() || file.name,
-        url: publicUrl,
-        mimeType: file.type || "application/octet-stream",
-        docType,
-        uploadedAt: new Date().toISOString(),
-      });
-      toast.success("Document added");
-      setOpen(false);
-      reset();
-    } catch (error) {
-      console.error("Add document failed", error);
-      toast.error(error.message || "Failed to add document");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="md:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Add Document</DialogTitle>
-          <DialogDescription>Attach a TBML / OSINT document to this case.</DialogDescription>
-        </DialogHeader>
-
-        <CustomDropZone
-          fileTypes={["pdf", "png", "jpg", "jpeg", "webp", "doc", "docx", "xls", "xlsx"]}
-          handleChange={handleFileChange}
-          file={file}
-          loading={saving}
-          disabled={saving}
-          setFile={setFile}
-        />
-
-        <div className="space-y-1.5">
-          <Label className="font-bold">Document Name</Label>
-          <Input
-            placeholder="e.g. Sanctions Screening — ACME Holdings"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="font-bold">
-            Document Type <span className="text-danger">*</span>
-          </Label>
-          <Select value={docType} onValueChange={setDocType}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select document type" />
-            </SelectTrigger>
-            <SelectContent>
-              {DOC_TYPE_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={!file || !docType || saving}>
-            {saving ? (
-              <>
-                Saving... <IconLoader2 className="size-4 animate-spin" />
-              </>
-            ) : (
-              "Add Document"
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
 // ── Main tab ─────────────────────────────────────────────────────────────────
 
 export default function TbmlOsint() {
@@ -335,6 +219,8 @@ export default function TbmlOsint() {
   const [addOpen, setAddOpen] = useState(false);
   const [removingUrl, setRemovingUrl] = useState(null);
   const [view, setView] = useState("list");
+  const [openOsintDetails, setOpenOsintDetails] = useState(false);
+  const [currentOsint, setCurrentOsint] = useState(null);
 
   const handleAdd = (doc) => setDocuments((prev) => [doc, ...prev]);
 
@@ -342,6 +228,11 @@ export default function TbmlOsint() {
     setRemovingUrl(doc.url);
     setDocuments((prev) => prev.filter((d) => d.url !== doc.url));
     setRemovingUrl(null);
+  };
+
+  const handleOsint = (id) => {
+    setOpenOsintDetails(true);
+    setCurrentOsint(id);
   };
 
   return (
@@ -396,10 +287,11 @@ export default function TbmlOsint() {
             <div>
               {documents.map((doc, i) => (
                 <DocumentRow
-                  key={doc.url || i}
+                  key={i}
                   doc={doc}
                   onRemove={handleRemove}
                   removing={removingUrl === doc.url}
+                  onOsint={handleOsint}
                 />
               ))}
             </div>
@@ -418,7 +310,17 @@ export default function TbmlOsint() {
         </div>
       </Card>
 
-      <AddDocumentDialog open={addOpen} setOpen={setAddOpen} onAdd={handleAdd} />
+      <AddDocumentDialog
+        open={addOpen}
+        setOpen={setAddOpen}
+        docTypeOptions={DOC_TYPE_OPTIONS}
+        description="Attach a TBML / OSINT document to this case."
+        namePlaceholder="e.g. Sanctions Screening — ACME Holdings"
+        onSave={(payload) => handleAdd({ ...payload, uploadedAt: new Date().toISOString() })}
+      />
+      {openOsintDetails && (
+        <TbmlOsintDetails open={openOsintDetails} setOpen={setOpenOsintDetails} />
+      )}
     </div>
   );
 }

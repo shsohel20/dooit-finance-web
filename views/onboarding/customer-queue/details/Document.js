@@ -11,24 +11,6 @@ import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import CustomDropZone from "@/components/ui/DropZone";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
   FileText,
@@ -43,7 +25,7 @@ import {
 } from "lucide-react";
 import { IconGridDots, IconList, IconLoader2 } from "@tabler/icons-react";
 import { cn, dateShowFormat } from "@/lib/utils";
-import { fileUploadOnCloudinary } from "@/app/actions";
+import AddDocumentDialog from "@/components/documents/AddDocumentDialog";
 import {
   addCustomerDocuments,
   removeCustomerDocument,
@@ -278,124 +260,6 @@ const DocumentCard = ({ doc, onRemove, removing }) => {
   );
 };
 
-// ── Add Document dialog ──────────────────────────────────────────────────────
-
-const AddDocumentDialog = ({ open, setOpen, customerId, onUpdated }) => {
-  const [file, setFile] = useState(null);
-  const [name, setName] = useState("");
-  const [docType, setDocType] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  const reset = () => {
-    setFile(null);
-    setName("");
-    setDocType("");
-  };
-
-  const handleFileChange = (f) => {
-    setFile(f);
-    if (f && !name) setName(f.name);
-  };
-
-  const handleSave = async () => {
-    if (!file || !docType || saving) return;
-    setSaving(true);
-    try {
-      const uploadRes = await fileUploadOnCloudinary(file);
-      const publicUrl = uploadRes?.file?.publicUrl;
-      if (!uploadRes?.success || !publicUrl) {
-        throw new Error(uploadRes?.message || "File upload failed");
-      }
-      const res = await addCustomerDocuments(customerId, [
-        {
-          name: name.trim() || file.name,
-          url: publicUrl,
-          mimeType: file.type || "application/octet-stream",
-          type: "manual_upload",
-          docType,
-        },
-      ]);
-      if (res?.success) {
-        toast.success(res.message || "Document added");
-        setOpen(false);
-        reset();
-        onUpdated?.();
-      } else {
-        toast.error(res?.error || res?.message || "Failed to add document");
-      }
-    } catch (error) {
-      console.error("Add document failed", error);
-      toast.error(error.message || "Failed to add document");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="md:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Add Document</DialogTitle>
-          <DialogDescription>
-            Attach a document to this customer&apos;s KYC record.
-          </DialogDescription>
-        </DialogHeader>
-
-        <CustomDropZone
-          fileTypes={["pdf", "png", "jpg", "jpeg", "webp", "doc", "docx", "xls", "xlsx"]}
-          handleChange={handleFileChange}
-          file={file}
-          loading={saving}
-          disabled={saving}
-          setFile={setFile}
-        />
-
-        <div className="space-y-1.5">
-          <Label className="font-bold">Document Name</Label>
-          <Input
-            placeholder="e.g. Passport — Jane Example"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="font-bold">
-            Document Type <span className="text-danger">*</span>
-          </Label>
-          <Select value={docType} onValueChange={setDocType}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select document type" />
-            </SelectTrigger>
-            <SelectContent>
-              {DOC_TYPE_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={!file || !docType || saving}>
-            {saving ? (
-              <>
-                Saving... <IconLoader2 className="size-4 animate-spin" />
-              </>
-            ) : (
-              "Add Document"
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
 // ── Main tab ─────────────────────────────────────────────────────────────────
 
 export default function Documents({ details, onUpdated }) {
@@ -422,6 +286,16 @@ export default function Documents({ details, onUpdated }) {
       ),
     );
   }, [journeys, customerDocs]);
+
+  const handleAddDocument = async (payload) => {
+    const res = await addCustomerDocuments(details?._id, [
+      { ...payload, type: "manual_upload" },
+    ]);
+    if (res?.success) {
+      onUpdated?.();
+    }
+    return res;
+  };
 
   const handleRemove = async (doc) => {
     if (removingUrl) return;
@@ -527,8 +401,10 @@ export default function Documents({ details, onUpdated }) {
       <AddDocumentDialog
         open={addOpen}
         setOpen={setAddOpen}
-        customerId={details?._id}
-        onUpdated={onUpdated}
+        docTypeOptions={DOC_TYPE_OPTIONS}
+        description="Attach a document to this customer's KYC record."
+        namePlaceholder="e.g. Passport — Jane Example"
+        onSave={handleAddDocument}
       />
     </div>
   );
