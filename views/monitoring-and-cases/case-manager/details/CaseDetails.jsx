@@ -35,6 +35,7 @@ import { transformToGraph } from "@/views/onboarding/customer-queue/details/d3/l
 import partyEntities from "@/views/onboarding/customer-queue/details/demo.json";
 import TbmlOsint from "./tabs/components/TbmlOsint";
 import { FingerprintIcon } from "lucide-react";
+import TbmlOsintReport from "./tabs/components/TbmlOsintReport";
 
 const FilesTab = lazy(() => import("./tabs/FilesTab"));
 const graphData = transformToGraph(partyEntities);
@@ -331,7 +332,8 @@ export default function CaseDetails({ caseId }) {
           <InvestigationHub caseData={caseData} />
         </TabsContent>
         <TabsContent value="tbml-osint">
-          <TbmlOsint />
+          {/* <TbmlOsint /> */}
+          <TbmlOsintReport />
         </TabsContent>
 
         <TabsContent value="customer-profile">
