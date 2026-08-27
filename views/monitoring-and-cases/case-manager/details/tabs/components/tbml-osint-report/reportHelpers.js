@@ -118,6 +118,53 @@ export function riskLevelStyle(level) {
   return LEVEL_STYLES[key] || LEVEL_STYLES.INSUFFICIENT_DATA;
 }
 
+// ── generic status chips (teal / ok / danger / warn / mute) ────────────────
+
+const CHIP_STYLES = {
+  teal: "border-primary/20 bg-primary/10 text-primary",
+  ok: "border-success/20 bg-success/10 text-success",
+  danger: "border-danger/20 bg-danger/10 text-danger",
+  warn: "border-warning/30 bg-warning/10 text-yellow-700",
+  mute: "border-border bg-muted text-muted-foreground",
+};
+
+export function chipClass(kind) {
+  return CHIP_STYLES[kind] || CHIP_STYLES.mute;
+}
+
+// ── reference source roles (PRICED / SCREENED / CONTEXT) ───────────────────
+
+const REFERENCE_ROLE_KIND = { PRICED: "teal", SCREENED: "ok", CONTEXT: "mute" };
+
+export function referenceRoleKind(role) {
+  return REFERENCE_ROLE_KIND[role] || "mute";
+}
+
+// ── declared-vs-mid deviation (used for the line-item summary figure) ──────
+
+// Deviation of the declared price from the OSINT mid price, e.g. a labor
+// line declared at 7,000 against a mid of 1,000 reads "+600%". Severity
+// scales with how far off mid the declared value sits.
+export function computePriceDeviation({ declared, mid }) {
+  if (declared == null || mid == null || mid === 0) return null;
+  const pct = ((declared - mid) / mid) * 100;
+  const abs = Math.abs(pct);
+  const kind = abs >= 100 ? "danger" : abs >= 15 ? "warn" : "ok";
+  const sign = pct > 0 ? "+" : pct < 0 ? "-" : "";
+  return { pct, kind, label: `${sign}${Math.round(abs)}%` };
+}
+
+// ── document totals line, e.g. "subtotal 8,500.00 · total 8,623.75 · unexplained 123.75" ──
+
+export function buildTotalsLine(doc, gapAmount) {
+  const parts = [`subtotal ${formatNumber(doc.subtotal)}`];
+  parts.push(`freight ${doc.freightCharges != null ? formatNumber(doc.freightCharges) : "—"}`);
+  parts.push(`insurance ${doc.insurance != null ? formatNumber(doc.insurance) : "—"}`);
+  parts.push(`total ${formatNumber(doc.totalAmount)}`);
+  if (gapAmount) parts.push(`unexplained ${formatNumber(gapAmount)}`);
+  return parts.join("   ·   ");
+}
+
 // ── declared-vs-market comparison ────────────────────────────────────────
 
 // How the declared price sits relative to the OSINT market range: whether

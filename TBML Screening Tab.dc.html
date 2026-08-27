@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #F0EEEF; font-family: 'Geist', system-ui, sans-serif; color: #08070C; -webkit-font-smoothing: antialiased; }
+  a { color: #005964; text-decoration: none; }
+  a:hover { color: #00434C; text-decoration: underline; }
+  *, *::before, *::after { box-sizing: border-box; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#F0EEEF; font-size:0.8rem">
+
+  <!-- case header card -->
+  <div style="margin:20px; padding:22px 26px; background:#fff; border:1px solid #E5E5E5; border-radius:10px; display:flex; flex-direction:column; gap:16px">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:32px">
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="display:flex; gap:18px; font-size:12.5px; color:#696969">
+          <span>Created: 26 Aug 2026 12:16 AM</span>
+          <span>Updated: 26 Aug 2026 12:16 AM</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center">
+          <span style="font-size:12px; font-family:'Geist Mono', monospace; color:#252525; border:1px solid #E5E5E5; border-radius:6px; padding:4px 9px">CA-0000145</span>
+          <span style="font-size:12px; color:#005964; border:1px solid #E5E5E5; border-radius:6px; padding:4px 9px">&bull; open</span>
+          <span style="font-size:12px; color:#8A6500; border:1px solid #E5E5E5; border-radius:6px; padding:4px 9px">&bull; high Priority</span>
+          <span style="font-size:12px; color:#252525; border:1px solid #E5E5E5; border-radius:6px; padding:4px 9px">Individual</span>
+        </div>
+        <h1 style="margin:0; font-family:'Inter Tight', sans-serif; font-size:24px; font-weight:700; letter-spacing:-0.01em; color:#313132">Investigation &mdash; AL-0000011</h1>
+        <span style="font-size:12.5px; letter-spacing:0.04em; color:#696969">MOHAMMAD HOSSAIN &middot; AML</span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px">
+        <div style="display:flex; align-items:center; gap:12px">
+          <div style="width:56px; height:56px; border-radius:50%; background:{{ ringGradient }}; display:flex; align-items:center; justify-content:center">
+            <div style="width:42px; height:42px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:#313132">{{ ringScore }}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:2px">
+            <span style="font-size:11px; letter-spacing:0.07em; text-transform:uppercase; color:#696969">TBML risk &mdash; highest open run</span>
+            <span style="font-size:13.5px; font-weight:600; color:{{ ringColor }}">{{ ringLabel }}</span>
+          </div>
+        </div>
+        <span style="font-size:12.5px; color:#696969">Investigator: Unassigned</span>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:16px">
+      <div style="display:flex; gap:10px; flex-wrap:wrap">
+        <span style="font-size:12.5px; font-weight:500; color:#fff; background:#005964; border-radius:8px; padding:9px 14px; cursor:pointer">Assign Case</span>
+        <span style="font-size:12.5px; color:#252525; border:1px solid #E5E5E5; border-radius:8px; padding:9px 14px; cursor:pointer">Request Information</span>
+        <span style="font-size:12.5px; color:#252525; border:1px solid #E5E5E5; border-radius:8px; padding:9px 14px; cursor:pointer">Escalate</span>
+        <span style="font-size:12.5px; color:#252525; border:1px solid #E5E5E5; border-radius:8px; padding:9px 14px; cursor:pointer">Generate STR/SAR</span>
+        <span style="font-size:12.5px; color:#CA2F7F; border:1px solid #E5E5E5; border-radius:8px; padding:9px 14px; cursor:pointer">Close Case</span>
+      </div>
+      <span style="font-size:16px; color:#696969; padding:0 6px; cursor:pointer">&hellip;</span>
+    </div>
+  </div>
+
+  <!-- tab row -->
+  <div style="padding:0 20px; display:flex; flex-direction:column; gap:10px">
+    <div style="display:flex; gap:4px; align-items:center; background:#fff; border:1px solid #E5E5E5; border-radius:10px; padding:6px; width:fit-content">
+      <span style="font-size:12.5px; color:#5B5B5B; border-radius:7px; padding:8px 12px; cursor:pointer" style-hover="background:#F5F5F5">Investigation Hub</span>
+      <span style="font-size:12.5px; color:#5B5B5B; border-radius:7px; padding:8px 12px; cursor:pointer" style-hover="background:#F5F5F5">Customer Profile</span>
+      <span style="font-size:12.5px; color:#5B5B5B; border-radius:7px; padding:8px 12px; cursor:pointer" style-hover="background:#F5F5F5">Transactions</span>
+      <span style="font-size:12.5px; color:#5B5B5B; border-radius:7px; padding:8px 12px; cursor:pointer" style-hover="background:#F5F5F5">Files</span>
+      <span style="font-size:12.5px; color:#5B5B5B; border-radius:7px; padding:8px 12px; cursor:pointer" style-hover="background:#F5F5F5">Source of Funds</span>
+      <span style="font-size:12.5px; font-weight:600; color:#fff; background:#005964; border-radius:7px; padding:8px 12px; cursor:pointer">TBML Screening</span>
+      <span style="font-size:12.5px; color:#5B5B5B; border-radius:7px; padding:8px 12px; cursor:pointer" style-hover="background:#F5F5F5">Reports</span>
+      <span style="font-size:12.5px; color:#5B5B5B; border-radius:7px; padding:8px 12px; cursor:pointer" style-hover="background:#F5F5F5">Case Activity</span>
+      <span style="font-size:12.5px; color:#5B5B5B; border-radius:7px; padding:8px 12px; cursor:pointer" style-hover="background:#F5F5F5">Relation graph</span>
+    </div>
+    <span style="font-size:12.5px; color:#199335">&#10003; {{ runCompleted }}</span>
+  </div>
+
+  <!-- tab panel -->
+  <div style="padding:14px 20px 24px; display:grid; grid-template-columns:1fr 360px; gap:16px; align-items:start">
+
+    <!-- primary column -->
+    <div style="display:flex; flex-direction:column; gap:16px">
+
+      <!-- run switcher -->
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:#fff; border:1px solid #E5E5E5; border-radius:10px; padding:12px 14px">
+        <sc-for list="{{ runs }}" as="r" hint-placeholder-count="3">
+          <div onClick="{{ r.select }}" style="{{ r.pillStyle }}">
+            <span style="font-family:'Geist Mono', monospace; font-size:11.5px; font-weight:600">{{ r.id }}</span>
+            <span style="font-size:11px; opacity:0.75">{{ r.meta }}</span>
+          </div>
+        </sc-for>
+        <div style="flex:1"></div>
+        <div onClick="{{ openUpload }}" style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#fff; background:#005964; border-radius:8px; padding:9px 14px; cursor:pointer" style-hover="background:#00434C">
+          <span style="font-size:14px; line-height:1">+</span>
+          <span>Run new screening</span>
+        </div>
+      </div>
+
+      <sc-if value="{{ uploadOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:fixed; inset:0; z-index:40; background:rgba(8,7,12,0.42); display:flex; align-items:center; justify-content:center; padding:40px">
+          <div style="width:560px; max-width:100%; background:#fff; border:1px solid #D6D6D6; border-radius:12px; box-shadow:0 40px 80px -30px rgba(8,7,12,0.5); overflow:hidden">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 22px; border-bottom:1px solid #F0EEEF">
+              <div style="display:flex; flex-direction:column; gap:3px">
+                <span style="font-family:'Inter Tight', sans-serif; font-size:16px; font-weight:700; color:#313132">Run new TBML screening</span>
+                <span style="font-size:12.5px; color:#696969">Case CA-0000145 &middot; documents are extracted, price-tested against OSINT, then scored</span>
+              </div>
+              <span onClick="{{ closeUpload }}" style="font-size:18px; line-height:1; color:#696969; padding:2px 6px; cursor:pointer">&times;</span>
+            </div>
+
+            <div style="padding:22px; display:flex; flex-direction:column; gap:18px">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:9px; padding:30px 24px; background:#FCFDFD; border:1.5px dashed #CBE0E0; border-radius:10px; text-align:center">
+                <span style="font-size:13.5px; font-weight:600; color:#00434C">Drop trade documents here</span>
+                <span style="font-size:12.5px; color:#696969; line-height:1.5; max-width:360px; text-wrap:pretty">Proforma Invoice (PI) and Letter of Credit (LC). PDF, JPG or PNG up to 25 MB each.</span>
+                <span style="font-size:12px; font-weight:600; color:#005964; background:#EDF5F5; border:1px solid #CBE0E0; border-radius:7px; padding:7px 13px; cursor:pointer">Browse files</span>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:7px">
+                <span style="font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Queued</span>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 13px; border:1px solid #E5E5E5; border-radius:8px">
+                  <div style="display:flex; flex-direction:column; gap:2px">
+                    <span style="font-size:12.5px; font-weight:500; color:#252525">PI-123456-B.pdf</span>
+                    <span style="font-size:11.5px; color:#696969; font-family:'Geist Mono', monospace">318 KB &middot; PI detected &middot; ready</span>
+                  </div>
+                  <span style="font-size:11.5px; color:#696969; cursor:pointer">Remove</span>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:14px; flex-wrap:wrap">
+                <div style="display:flex; flex-direction:column; gap:5px; min-width:150px">
+                  <span style="font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Document type</span>
+                  <span style="font-size:11.5px; color:#696969; line-height:1.4">PI &mdash; Proforma Invoice &middot; LC &mdash; Letter of Credit</span>
+                  <div style="display:flex; gap:6px">
+                    <span style="font-size:12px; font-weight:600; color:#fff; background:#005964; border:1px solid #005964; border-radius:7px; padding:8px 11px; cursor:pointer">PI</span>
+                    <span style="font-size:12px; font-weight:600; color:#5B5B5B; border:1px solid #E5E5E5; border-radius:7px; padding:8px 11px; cursor:pointer" style-hover="background:#F5F5F5">LC</span>
+                  </div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:5px; min-width:150px">
+                  <span style="font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#696969">OSINT depth</span>
+                  <span style="font-size:12.5px; color:#252525; border:1px solid #E5E5E5; border-radius:7px; padding:8px 11px">Standard &mdash; 24 queries</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 22px; background:#F5F7F9; border-top:1px solid #F0EEEF">
+              <span style="font-size:12px; color:#696969">Typical run time 3&ndash;5 minutes</span>
+              <div style="display:flex; gap:9px">
+                <span onClick="{{ closeUpload }}" style="font-size:12.5px; font-weight:500; color:#252525; border:1px solid #E5E5E5; border-radius:8px; padding:9px 14px; cursor:pointer">Cancel</span>
+                <span onClick="{{ closeUpload }}" style="font-size:12.5px; font-weight:600; color:#fff; background:#005964; border-radius:8px; padding:9px 16px; cursor:pointer">Start screening</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- summary strip -->
+      <div style="background:#fff; border:1px solid #E5E5E5; border-radius:10px; padding:18px 22px; display:flex; flex-direction:column; gap:14px">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:20px">
+          <div style="display:flex; align-items:center; gap:10px">
+            <span style="width:7px; height:7px; border-radius:50%; background:{{ riskColor }}"></span>
+            <span style="font-family:'Inter Tight', sans-serif; font-size:12px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#313132">TBML screening result</span>
+            <span style="font-size:12px; font-family:'Geist Mono', monospace; color:#696969">{{ reportId }}</span>
+          </div>
+          <span style="font-size:12px; color:#696969">{{ docLine }}</span>
+        </div>
+        <div style="display:flex; gap:34px; align-items:flex-end; flex-wrap:wrap">
+          <div style="display:flex; flex-direction:column; gap:3px">
+            <span style="font-size:11px; letter-spacing:0.07em; text-transform:uppercase; color:#696969">Overall risk</span>
+            <span style="font-size:20px; font-weight:700; color:{{ riskColor }}">{{ riskLabel }}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:5px">
+            <span style="font-size:11px; letter-spacing:0.07em; text-transform:uppercase; color:#696969">Indicators</span>
+            <div style="display:flex; gap:7px; flex-wrap:wrap">
+              <sc-for list="{{ indicators }}" as="ind" hint-placeholder-count="2">
+                <span style="{{ ind.style }}">{{ ind.label }}</span>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:3px">
+            <span style="font-size:11px; letter-spacing:0.07em; text-transform:uppercase; color:#696969">Price tested</span>
+            <span style="font-size:14px; font-weight:600; color:#313132">{{ tested }}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:3px">
+            <span style="font-size:11px; letter-spacing:0.07em; text-transform:uppercase; color:#696969">Sanctions</span>
+            <span style="font-size:14px; font-weight:600; color:#199335">No hit</span>
+          </div>
+          <div style="flex:1"></div>
+          <span style="font-size:12.5px; font-weight:500; color:#fff; background:#005964; border-radius:8px; padding:9px 14px; cursor:pointer">Attach to STR/SAR</span>
+        </div>
+        <span style="font-size:12.5px; line-height:1.6; color:#5B5B5B; text-wrap:pretty">{{ runSummary }}</span>
+      </div>
+
+      <!-- extracted products table -->
+      <div style="background:#fff; border:1px solid #E5E5E5; border-radius:10px; overflow:hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 22px; border-bottom:1px solid #F0EEEF">
+          <span style="font-family:'Inter Tight', sans-serif; font-size:12px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#313132">Products as extracted</span>
+          <span style="font-size:12px; color:#696969">fields left empty were not present on the document</span>
+        </div>
+        <div style="display:grid; grid-template-columns:44px minmax(220px,1fr) 82px 84px 66px 96px 96px 74px 96px; font-size:11px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:#696969; background:#F5F7F9; border-bottom:1px solid #F0EEEF">
+          <span style="padding:9px 8px 9px 22px">#</span>
+          <span style="padding:9px 8px">Description</span>
+          <span style="padding:9px 8px">HS code</span>
+          <span style="padding:9px 8px; text-align:right">Quantity</span>
+          <span style="padding:9px 8px">Unit</span>
+          <span style="padding:9px 8px; text-align:right">Unit price</span>
+          <span style="padding:9px 8px; text-align:right">Total price</span>
+          <span style="padding:9px 8px">Currency</span>
+          <span style="padding:9px 22px 9px 8px">Origin</span>
+        </div>
+        <sc-for list="{{ products }}" as="p" hint-placeholder-count="2">
+          <div style="display:grid; grid-template-columns:44px minmax(220px,1fr) 82px 84px 66px 96px 96px 74px 96px; font-size:12.5px; color:#252525; border-bottom:1px solid #F0EEEF; align-items:start">
+            <span style="padding:12px 8px 12px 22px; font-family:'Geist Mono', monospace; color:#696969">{{ p.no }}</span>
+            <span style="padding:12px 8px; line-height:1.5; text-wrap:pretty">{{ p.description }}</span>
+            <span style="padding:12px 8px; color:{{ p.hsColor }}">{{ p.hs }}</span>
+            <span style="padding:12px 8px; text-align:right; color:{{ p.qtyColor }}">{{ p.qty }}</span>
+            <span style="padding:12px 8px; color:{{ p.unitColor }}">{{ p.unit }}</span>
+            <span style="padding:12px 8px; text-align:right; font-family:'Geist Mono', monospace; font-weight:600">{{ p.unitPrice }}</span>
+            <span style="padding:12px 8px; text-align:right; font-family:'Geist Mono', monospace">{{ p.totalPrice }}</span>
+            <span style="padding:12px 8px; color:{{ p.ccyColor }}">{{ p.ccy }}</span>
+            <span style="padding:12px 22px 12px 8px; color:#ABABAB">&mdash;</span>
+          </div>
+        </sc-for>
+        <div style="display:flex; gap:26px; padding:12px 22px; background:#F5F7F9; font-size:12px; color:#5B5B5B; font-family:'Geist Mono', monospace">
+          <span>{{ totalsLine }}</span>
+        </div>
+      </div>
+
+      <!-- line item analyses -->
+      <sc-for list="{{ lines }}" as="l" hint-placeholder-count="2">
+        <div style="background:#fff; border:1px solid #E5E5E5; border-radius:10px; padding:18px 22px; display:flex; flex-direction:column; gap:16px">
+          <div style="display:flex; justify-content:space-between; gap:20px; align-items:flex-start">
+            <div style="display:flex; flex-direction:column; gap:5px; max-width:460px">
+              <span style="font-family:'Geist Mono', monospace; font-size:11.5px; color:#696969">{{ l.tag }}</span>
+              <span style="font-family:'Inter Tight', sans-serif; font-size:14.5px; font-weight:600; color:#313132; text-wrap:pretty">{{ l.title }}</span>
+            </div>
+            <div style="display:flex; gap:24px; text-align:right">
+              <div style="display:flex; flex-direction:column; gap:2px">
+                <span style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Declared</span>
+                <span style="font-family:'Geist Mono', monospace; font-size:17px; font-weight:600">{{ l.declared }}</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:2px">
+                <span style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Market mid</span>
+                <span style="font-family:'Geist Mono', monospace; font-size:17px; font-weight:600; color:#5B5B5B">{{ l.mid }}</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:2px">
+                <span style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Deviation</span>
+                <span style="font-family:'Geist Mono', monospace; font-size:17px; font-weight:600; color:{{ l.devColor }}">{{ l.deviation }}</span>
+              </div>
+            </div>
+          </div>
+
+          <sc-if value="{{ l.hasBar }}" hint-placeholder-val="{{ true }}">
+            <div style="position:relative; height:54px">
+              <div style="position:absolute; left:0; right:0; top:22px; height:11px; border-radius:6px; background:#F0EEEF"></div>
+              <div style="position:absolute; left:{{ l.bandLeft }}; width:{{ l.bandWidth }}; top:22px; height:11px; border-radius:6px; background:#25737D"></div>
+              <div style="position:absolute; left:{{ l.bandLeft }}; top:0; font-family:'Geist Mono', monospace; font-size:11px; color:#005964">{{ l.rangeLabel }}</div>
+              <div style="position:absolute; left:{{ l.markLeft }}; top:16px; width:3px; height:23px; background:{{ l.devColor }}; border-radius:2px"></div>
+              <div style="position:absolute; left:{{ l.markLeft }}; top:40px; transform:translateX(-70%); white-space:nowrap; font-size:11px; font-weight:600; color:{{ l.devColor }}">{{ l.markLabel }}</div>
+              <div style="position:absolute; left:0; top:40px; font-size:11px; color:#696969">{{ l.basisLabel }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ l.blocked }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; background:repeating-linear-gradient(135deg,#FAFAFA 0 6px,#F5F5F5 6px 12px); border:1px dashed #D6D6D6; border-radius:8px">
+              <span style="font-size:12.5px; font-weight:600; color:#5B5B5B">Blocked on data</span>
+              <span style="font-size:12.5px; color:#696969; text-wrap:pretty">{{ l.blockedNote }}</span>
+            </div>
+          </sc-if>
+
+          <div onClick="{{ l.toggle }}" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:11px 14px; background:#EDF5F5; border:1px solid #CBE0E0; border-left:3px solid #005964; border-radius:8px; cursor:pointer" style-hover="background:#DCEBEB">
+            <div style="display:flex; align-items:center; gap:9px">
+              <span style="width:6px; height:6px; border-radius:50%; background:#005964"></span>
+              <span style="font-family:'Inter Tight', sans-serif; font-size:11.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#00434C">Product analysis &amp; findings</span>
+              <span style="font-size:11px; font-weight:600; color:#005964; background:#fff; border:1px solid #CBE0E0; border-radius:5px; padding:2px 7px">{{ l.findingsCount }}</span>
+            </div>
+            <span style="font-size:11.5px; font-weight:600; color:#005964">{{ l.toggleLabel }}</span>
+          </div>
+
+          <sc-if value="{{ l.open }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; gap:14px; padding:14px 16px; background:#FCFDFD; border:1px solid #DEEAEA; border-radius:9px">
+              <div style="display:flex; gap:26px; flex-wrap:wrap; font-size:12.5px">
+                <div style="display:flex; flex-direction:column; gap:3px"><span style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Reference range</span><span style="font-family:'Geist Mono', monospace; font-weight:600; color:#005964; background:#EDF5F5; border:1px solid #CBE0E0; border-radius:5px; padding:3px 7px; width:fit-content">{{ l.refRange }}</span></div>
+                <div style="display:flex; flex-direction:column; gap:3px"><span style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Unit basis</span><span style="font-weight:600; color:#005964; background:#EDF5F5; border:1px solid #CBE0E0; border-radius:5px; padding:3px 7px; width:fit-content">{{ l.basis }}</span></div>
+                <div style="display:flex; flex-direction:column; gap:3px"><span style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Observations</span><span style="font-family:'Geist Mono', monospace; font-weight:600; color:#005964; background:#EDF5F5; border:1px solid #CBE0E0; border-radius:5px; padding:3px 7px; width:fit-content">{{ l.obs }}</span></div>
+                <div style="display:flex; flex-direction:column; gap:3px"><span style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Data availability</span><span style="{{ l.availStyle }}">{{ l.avail }}</span></div>
+                <div style="display:flex; flex-direction:column; gap:3px"><span style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Risk</span><span style="{{ l.riskStyle }}">{{ l.risk }}</span></div>
+              </div>
+
+              <span style="font-size:12.5px; line-height:1.6; color:#5B5B5B; text-wrap:pretty">{{ l.summary }}</span>
+
+              <div style="display:flex; flex-direction:column; gap:8px">
+                <span style="font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#696969">{{ l.findingsLabel }}</span>
+                <sc-for list="{{ l.findings }}" as="f" hint-placeholder-count="2">
+                  <div style="{{ f.wrapStyle }}">
+                    <div style="display:flex; flex-direction:column; gap:4px">
+                      <span style="font-family:'Geist Mono', monospace; font-size:11.5px; font-weight:600; color:{{ f.color }}">{{ f.indicator }}</span>
+                      <span style="{{ f.sevStyle }}">{{ f.severity }}</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:7px; font-size:12.5px; line-height:1.6; color:#252525">
+                      <span style="text-wrap:pretty">{{ f.description }}</span>
+                      <span style="text-wrap:pretty"><strong style="font-weight:600">Evidence. </strong>{{ f.evidence }}</span>
+                      <span style="text-wrap:pretty"><strong style="font-weight:600">Recommendation. </strong>{{ f.recommendation }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:7px; padding-top:12px; border-top:1px dashed #E5E5E5">
+                <span style="font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Market evidence used</span>
+                <sc-for list="{{ l.evidence }}" as="e" hint-placeholder-count="2">
+                  <span style="font-size:12.5px; line-height:1.6; color:#5B5B5B; text-wrap:pretty"><span style="font-family:'Geist Mono', monospace; color:#005964">{{ e.source }}</span> &mdash; {{ e.quote }}</span>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+
+      <!-- references -->
+      <div style="background:#fff; border:1px solid #E5E5E5; border-radius:10px; overflow:hidden">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 22px; border-bottom:1px solid #F0EEEF">
+          <span style="font-family:'Inter Tight', sans-serif; font-size:12px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#313132">References &mdash; document screened and sources used</span>
+          <span style="font-size:12px; color:#696969">{{ refCount }}</span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:13px 22px; background:#EDF5F5; border-bottom:1px solid #CBE0E0">
+          <div style="display:flex; align-items:center; gap:11px">
+            <span style="font-size:10.5px; font-weight:600; font-family:'Geist Mono', monospace; color:#005964; background:#fff; border:1px solid #CBE0E0; border-radius:5px; padding:3px 7px">{{ srcDocType }}</span>
+            <div style="display:flex; flex-direction:column; gap:2px">
+              <span style="font-size:12.5px; font-weight:600; color:#00434C">{{ srcDocFile }}</span>
+              <span style="font-family:'Geist Mono', monospace; font-size:11px; color:#5B7F84">{{ srcDocMeta }}</span>
+            </div>
+          </div>
+          <span style="font-size:12px; font-weight:600; color:#005964; cursor:pointer">View document</span>
+        </div>
+        <sc-for list="{{ references }}" as="r" hint-placeholder-count="4">
+          <div style="display:grid; grid-template-columns:26px 1fr 100px 112px; gap:14px; padding:13px 22px; border-bottom:1px solid #F0EEEF; align-items:start">
+            <span style="font-family:'Geist Mono', monospace; font-size:11px; color:#ABABAB; padding-top:2px">{{ r.no }}</span>
+            <div style="display:flex; flex-direction:column; gap:3px">
+              <span style="font-size:12.5px; font-weight:600; color:#313132; line-height:1.45; text-wrap:pretty">{{ r.title }}</span>
+              <span style="font-family:'Geist Mono', monospace; font-size:11px; color:#005964">{{ r.domain }}</span>
+              <span style="font-size:11.5px; color:#696969; line-height:1.5; text-wrap:pretty">{{ r.note }}</span>
+            </div>
+            <span style="font-size:11.5px; color:#5B5B5B; line-height:1.45">{{ r.usedFor }}</span>
+            <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-end">
+              <span style="{{ r.roleStyle }}">{{ r.role }}</span>
+              <span style="font-family:'Geist Mono', monospace; font-size:11px; color:#696969">{{ r.retrieved }}</span>
+            </div>
+          </div>
+        </sc-for>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 22px; background:#F5F7F9">
+          <span style="font-size:11.5px; color:#696969; line-height:1.5; text-wrap:pretty">{{ refFooter }}</span>
+          <span style="font-size:12px; font-weight:600; color:#005964; cursor:pointer">Export reference list</span>
+        </div>
+      </div>
+
+      <!-- narrative report -->
+      <div style="background:#fff; border:1px solid #E5E5E5; border-radius:10px; padding:24px 26px; display:flex; flex-direction:column; gap:18px">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <span style="font-family:'Inter Tight', sans-serif; font-size:12px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#313132">Narrative report</span>
+          <span style="font-size:12.5px; color:#005964; cursor:pointer">Export to case file</span>
+        </div>
+        <sc-if value="{{ isRun1 }}" hint-placeholder-val="{{ true }}">
+          <dc-import name="NarrativeReport" hint-size="100%,1400px"></dc-import>
+        </sc-if>
+        <sc-if value="{{ notRun1 }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:14px; line-height:1.7; color:#252525; text-wrap:pretty">{{ altNarrative }}</span>
+        </sc-if>
+      </div>
+    </div>
+
+    <!-- side rail -->
+    <div style="display:flex; flex-direction:column; gap:16px">
+      <div style="background:#fff; border:1px solid #E5E5E5; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:12px">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px">
+          <span style="font-family:'Inter Tight', sans-serif; font-size:12px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#313132">Document extract</span>
+          <span onClick="{{ toggleExtract }}" style="font-size:11px; font-weight:600; letter-spacing:0.03em; color:#005964; background:#EDF5F5; border:1px solid #CBE0E0; border-radius:6px; padding:4px 9px; cursor:pointer" style-hover="background:#DCEBEB">{{ extractLabel }}</span>
+        </div>
+        <span style="font-size:11.5px; font-family:'Geist Mono', monospace; color:#696969">{{ extractHeadline }}</span>
+        <sc-for list="{{ railParties }}" as="rp" hint-placeholder-count="3">
+          <div style="display:flex; flex-direction:column; gap:4px; padding-bottom:12px; border-bottom:1px solid #F0EEEF">
+            <span style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#696969">{{ rp.role }}</span>
+            <span style="font-size:13px; font-weight:600; color:#313132">{{ rp.name }}</span>
+            <span style="font-size:12.5px; color:#5B5B5B">{{ rp.detail }}</span>
+            <sc-if value="{{ rp.hasFlag }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:11.5px; color:#CA2F7F">{{ rp.flag }}</span>
+            </sc-if>
+          </div>
+        </sc-for>
+        <div style="display:flex; flex-direction:column; gap:4px">
+          <span style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:#696969">Terms &amp; totals</span>
+          <span style="font-size:12.5px; color:#5B5B5B">{{ railTerms }}</span>
+          <span style="font-size:12.5px; font-family:'Geist Mono', monospace; color:#5B5B5B">{{ railTotals }}</span>
+        </div>
+        <sc-if value="{{ extractOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="padding-top:14px; border-top:1px solid #F0EEEF">
+            <dc-import name="DocumentExtract" doc="{{ extractDoc }}" parties="{{ extractParties }}" raw-text="{{ extractRaw }}" gap-label="{{ extractGapLabel }}" gap-note="{{ extractGapNote }}" hint-size="100%,720px"></dc-import>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="background:#fff; border:1px solid #E5E5E5; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:11px">
+        <span style="font-size:12px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#313132">Fields absent from document</span>
+        <div style="display:flex; flex-wrap:wrap; gap:6px">
+          <sc-for list="{{ absentFields }}" as="af" hint-placeholder-count="8">
+            <span style="font-size:11.5px; color:#5B5B5B; background:#F5F5F5; border-radius:5px; padding:4px 8px">{{ af }}</span>
+          </sc-for>
+        </div>
+        <span style="font-size:11.5px; color:#696969; line-height:1.5">Engine left these empty rather than inferring values.</span>
+      </div>
+
+      <div style="background:#fff; border:1px solid #CBE0E0; border-top:3px solid #005964; border-radius:10px; overflow:hidden; box-shadow:0 6px 18px -12px rgba(0,89,100,0.4)">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:13px 16px; background:#EDF5F5; border-bottom:1px solid #CBE0E0">
+          <div style="display:flex; align-items:center; gap:8px">
+            <span style="width:6px; height:6px; border-radius:50%; background:#005964"></span>
+            <span style="font-family:'Inter Tight', sans-serif; font-size:12px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:#00434C">OSINT results</span>
+          </div>
+          <span style="font-size:11px; font-weight:600; color:#005964; background:#fff; border:1px solid #CBE0E0; border-radius:5px; padding:3px 8px">{{ osintCount }}</span>
+        </div>
+        <div style="padding:14px 16px 16px; display:flex; flex-direction:column; gap:14px">
+        <sc-for list="{{ osintResults }}" as="o" hint-placeholder-count="2">
+          <div style="display:flex; flex-direction:column; gap:9px; padding:13px 14px; background:#FCFDFD; border:1px solid #DEEAEA; border-radius:9px">
+            <div style="display:flex; flex-direction:column; gap:3px">
+              <span style="font-family:'Geist Mono', monospace; font-size:10.5px; color:#7FA3A8">{{ o.productKey }}</span>
+              <span style="font-size:12.5px; font-weight:600; color:#313132; line-height:1.45; text-wrap:pretty">{{ o.productDescription }}</span>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap">
+              <span style="{{ o.availStyle }}">{{ o.dataAvailability }}</span>
+              <span style="{{ o.sanctionStyle }}">{{ o.sanctionLabel }}</span>
+            </div>
+
+            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:10px 12px; background:#005964; border-radius:8px">
+              <span style="font-size:10px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#9FBCBF">Reference range</span>
+              <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:#fff">{{ o.rangeLine }}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:1px; background:#E9EFEF; border:1px solid #E9EFEF; border-radius:8px; overflow:hidden">
+              <sc-for list="{{ o.fields }}" as="f" hint-placeholder-count="7">
+                <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:7px 11px; background:#fff">
+                  <span style="font-size:11.5px; color:#696969">{{ f.key }}</span>
+                  <span style="{{ f.style }}">{{ f.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+
+            <span style="font-size:11.5px; color:#696969; line-height:1.5; text-wrap:pretty">{{ o.availabilityNote }}</span>
+
+            <div style="display:flex; flex-direction:column; gap:5px">
+              <span style="font-size:10.5px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:#696969">Price sources</span>
+              <div style="display:flex; flex-wrap:wrap; gap:5px">
+                <sc-for list="{{ o.priceSources }}" as="src" hint-placeholder-count="2">
+                  <span style="font-size:11px; font-family:'Geist Mono', monospace; color:#005964; background:#EDF5F5; border:1px solid #CBE0E0; border-radius:5px; padding:3px 7px">{{ src }}</span>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:5px">
+              <div onClick="{{ o.toggle }}" style="display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer">
+                <span style="font-size:10.5px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:#696969">Aggregated findings</span>
+                <span style="font-size:11.5px; font-weight:500; color:#005964">{{ o.toggleLabel }}</span>
+              </div>
+              <sc-if value="{{ o.open }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:8px; padding:11px 12px; background:#FAFAFA; border:1px solid #E5E5E5; border-radius:8px">
+                  <sc-for list="{{ o.findings }}" as="fi" hint-placeholder-count="2">
+                    <div style="display:flex; flex-direction:column; gap:3px">
+                      <span style="font-size:10.5px; font-family:'Geist Mono', monospace; color:#005964">{{ fi.source }}</span>
+                      <span style="font-size:11.5px; line-height:1.55; color:#5B5B5B; text-wrap:pretty">{{ fi.text }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #E5E5E5; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:12px">
+        <span style="font-size:12px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:#313132">Run audit trail</span>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+          <sc-for list="{{ auditStats }}" as="a" hint-placeholder-count="4">
+            <div style="display:flex; flex-direction:column; gap:2px"><span style="font-family:'Geist Mono', monospace; font-size:15px; font-weight:500">{{ a.value }}</span><span style="font-size:11.5px; color:#696969">{{ a.label }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:5px">
+          <sc-for list="{{ runDomains }}" as="d" hint-placeholder-count="14">
+            <span style="font-size:11px; font-family:'Geist Mono', monospace; color:#696969; background:#F5F5F5; border-radius:4px; padding:3px 6px">{{ d }}</span>
+          </sc-for>
+        </div>
+        <span style="font-size:11.5px; color:#696969; font-family:'Geist Mono', monospace">{{ auditFooter }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = { tab: 'findings', f1: true, f2: false, decision: null, report: true };
+
+  tabStyle(active) {
+    return 'font-size:14px; padding-bottom:12px; cursor:pointer; font-weight:' + (active ? '600' : '500')
+      + '; color:' + (active ? '#08070C' : '#696969')
+      + '; box-shadow:' + (active ? 'inset 0 -2px 0 #005964' : 'none');
+  }
+
+  chip(kind) {
+    const m = {
+      teal: '#005964,#EDF5F5,#CBE0E0', ok: '#199335,#E9F5EC,#C8E6D1',
+      danger: '#CA2F7F,#FBEDF4,#F2D2E3', warn: '#8A6500,#FDF6E5,#F3E3BE', mute: '#5B5B5B,#F5F5F5,#E5E5E5'
+    }[kind].split(',');
+    return 'font-weight:700; color:' + m[0] + '; background:' + m[1] + '; border:1px solid ' + m[2] + '; border-radius:5px; padding:3px 7px; width:fit-content';
+  }
+
+  runsData() {
+    const F = (indicator, severity, description, evidence, recommendation) => ({ indicator, severity, description, evidence, recommendation });
+    return [
+      {
+        id: 'TBML-DDF975C066E1',
+        srcDoc: { type: 'PI', file: 'PI-123456.pdf', meta: '1 page · 214 KB · uploaded 22 Aug 08:14 · auto-detected Proforma Invoice' },
+        references: [
+          { domain: 'www.homeadvisor.com', title: 'Cost to paint stair risers, stringers and railings', note: 'Detailed painting of railings and balusters can cost up to $20 per linear foot due to the intricate work involved.', usedFor: 'Labour range', role: 'PRICED', retrieved: '22 Aug 08:17' },
+          { domain: 'latestcost.com', title: 'Stair riser painting cost breakdown', note: 'Labour is the largest cost element; a 10–15 riser project takes 1–2 days, larger jobs 2–3 days.', usedFor: 'Labour range', role: 'PRICED', retrieved: '22 Aug 08:17' },
+          { domain: 'procalclab.com', title: 'Paint quantity and cost calculator', note: 'Calculations are approximate; actual material use and costs depend on application method, surface condition and local prices.', usedFor: 'Paint range', role: 'PRICED', retrieved: '22 Aug 08:17' },
+          { domain: 'ofac.treasury.gov', title: 'OFAC sanctions list search', note: 'Both named parties screened; no match returned.', usedFor: 'Sanctions', role: 'SCREENED', retrieved: '22 Aug 08:18' },
+          { domain: 'www.facebook.com', title: 'Contractor pricing discussion threads', note: 'Practitioner commentary on labour-and-material pricing; retained as context only.', usedFor: 'Context', role: 'CONTEXT', retrieved: '22 Aug 08:17' },
+          { domain: 'www.supplychainbrain.com', title: 'Trade-based money laundering typologies', note: 'Background on over-invoicing patterns; not used to establish any price range.', usedFor: 'Context', role: 'CONTEXT', retrieved: '22 Aug 08:17' }
+        ],
+        refFooter: '14 domains consulted across 24 queries; 15 URLs selected, 12 pages read, 5 assessed relevant. Only sources marked PRICED contributed to a reference range.', meta: '22 Aug · HIGH 70', risk: 'HIGH · 70', riskKind: 'danger',
+        doc: 'Invoice 123456 · 1 document · 2 line items', tested: '1 of 2 line items',
+        summary: 'The transaction presents a HIGH overall risk primarily due to a significant price anomaly identified for the Labor component, where the declared price is substantially above market rates for comparable services. Several document inconsistencies, including missing currency information and a discrepancy in the total amount, further contribute to the elevated risk profile.',
+        indicators: [['PRICE_ANOMALY', 'danger'], ['DOCUMENT_INCONSISTENCY', 'warn']],
+        totals: 'subtotal 8,500.00   ·   freight —   ·   insurance —   ·   total 8,623.75   ·   unexplained 123.75',
+        completed: 'Screening run completed 22 Aug 2026 08:21 AM',
+        doc_extract: {
+          document_type: 'Invoice', document_number: '123456', document_date: 'May 10, 2006', lc_number: null, page_number: 1,
+          incoterms: null, port_of_loading: null, port_of_discharge: null, shipping_method: 'UPS',
+          container_number: null, vessel_flight: null, payment_terms: '2%15 Days, Net 45', sales_terms: null,
+          subtotal: '8500.00', freight_charges: null, insurance: null, total_amount: '8623.75',
+          currency: null, amount_in_words: null, fob_value: null, cif_value: null
+        },
+        parties: {
+          Exporter: { name: 'Supplier Street Address', address: 'City, State ZIP', country: null, swift_code: null, iban: null, bank_name: null, tax_id: null, phone: '000.000.0000', email: null },
+          Importer: { name: 'Intel Corporation', address: 'P.O. Box 1000 Hillsboro, OR 97123-1000', country: null, swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null },
+          'Notify party': { name: 'Intel Corporation', address: '3601 Juliette Lane Santa Clara, CA 95052', country: null, swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null },
+          'Issuing bank': { name: null, address: null, country: null, swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null },
+          'Beneficiary bank': { name: null, address: null, country: null, swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null }
+        },
+        gapLabel: 'Unexplained 123.75',
+        gapNote: 'total_amount exceeds subtotal with no freight or insurance itemised; raw text shows SALES TAX 123.75.',
+        railTerms: '2%15 Days, Net 45 · UPS',
+        railTotals: 'subtotal 8,500.00 · total 8,623.75',
+        absent: ['currency', 'quantities', 'HS codes', 'incoterms', 'ports', 'banks / SWIFT', 'container & vessel', 'LC reference'],
+        osint_results: [
+          { product_key: 'labor_paint_the_risers_and_stringers', product_description: 'Labor- Paint the risers and stringers on all five stairways in RNB with paint to match color', hs_code: null, data_availability: 'SUFFICIENT', availability_note: 'Market range established from 9 comparable observation(s).', reference_price_low: 'USD 700.00', reference_price_high: 'USD 1,350.00', reference_price_mid: 'USD 1,000.00', reference_price_currency: 'USD', reference_price_unit: 'for 20riser project', price_observation_count: 28, price_sources: ['www.homeadvisor.com', 'latestcost.com'], typical_origin_countries: [], typical_trade_routes: [], sanctioned_jurisdiction_flag: false, hs_codes_observed: [], findings: [{ source: 'www.homeadvisor.com', text: 'Keep in mind that detailed painting of railings and balusters can cost up to $20 per linear foot due to the intricate work involved.' }, { source: 'latestcost.com', text: 'Labor is typically the largest cost element for stair riser painting. A small project with 10–15 risers can take 1–2 days; larger jobs may extend to 2–3 days.' }] },
+          { product_key: 'material_paint', product_description: 'Material - Paint', hs_code: null, data_availability: 'SUFFICIENT', availability_note: 'Market range established from 2 comparable observation(s).', reference_price_low: 'USD 12.00', reference_price_high: 'USD 25.00', reference_price_mid: 'USD 18.50', reference_price_currency: 'USD', reference_price_unit: 'litre', price_observation_count: 2, price_sources: ['procalclab.com'], typical_origin_countries: [], typical_trade_routes: [], sanctioned_jurisdiction_flag: false, hs_codes_observed: [], findings: [{ source: 'www.facebook.com', text: 'Is $25k labor and material a fair price to paint a 6 unit complex in Texas?' }, { source: 'www.facebook.com', text: 'Always price your paint and materials first then have a panel price' }, { source: 'procalclab.com', text: 'Note: Calculations are approximate. Actual material use and costs depend on application method, surface condition and local prices.' }] }
+        ],
+        audit: [['24/24', 'queries ok'], ['342', 'results seen'], ['12 / 3', 'read / failed'], ['30', 'price obs.']],
+        auditFooter: 'searxng · collected 22 Aug 08:17 UTC',
+        domains: ['www.homeadvisor.com', 'latestcost.com', 'procalclab.com', 'ofac.treasury.gov', 'sanctionssearch.ofac.treas.gov', 'www.sigma360.com', 'www.linzalytics.com', 'www.supplychainbrain.com', 'www.livemint.com', 'www.scribd.com', 'github.com', 'nlp.biu.ac.il', 'www.linkedin.com', 'www.facebook.com'],
+        products: [
+          { no: '001', description: 'Labor- Paint the risers and stringers on all five stairways in RNB with paint to match color', hs: '—', qty: 'missing', unit: '—', unitPrice: '7,000.00', totalPrice: '7,000.00', ccy: 'missing' },
+          { no: '002', description: 'Material - Paint', hs: '—', qty: 'missing', unit: '—', unitPrice: '1,500.00', totalPrice: '1,500.00', ccy: 'missing' }
+        ],
+        lines: [
+          {
+            tag: 'LINE 001 · RISK 75', title: 'Labor — paint the risers and stringers on all five stairways in RNB',
+            declared: '7,000.00', mid: '1,000.00', deviation: '+600%', devKind: 'danger',
+            hasBar: true, bandLeft: '9.1%', bandWidth: '8.4%', markLeft: '90.9%',
+            rangeLabel: '700 – 1,350 market', markLabel: 'declared 7,000', basisLabel: 'basis: per 20-riser project · 28 observations',
+            refRange: 'USD 700.00 – 1,350.00', basis: 'per 20riser project', obs: '28', avail: 'SUFFICIENT', availKind: 'ok', risk: 'HIGH · 75', riskKind: 'danger',
+            summary: 'Market range established from 9 comparable observations across 28 price points. Analysis summary: the declared price for labor is substantially higher than market rates for comparable projects, indicating a potential over-invoicing risk. The currency for the declared price is also missing.',
+            findings: [
+              F('PRICE_ANOMALY', 'HIGH severity', 'The declared price for labor is significantly higher than the established market range for comparable painting projects. While the units of comparison are not perfectly aligned (declared as a total for ‘five stairways’ versus market data ‘per for 20riser project’), the magnitude of the difference is substantial.', 'Declared price: $7,000.00. Market price range for a ‘20riser project’: $700.00 – $1,350.00. The declared price is over five times the high end of the market range for a ‘20riser project’.', 'Investigate the justification for the declared labor cost, requesting a detailed breakdown of hours, rates, and scope of work for the ‘five stairways’ project to compare against market benchmarks more precisely. Seek clarification on how ‘five stairways’ translates to ‘risers’ for a direct comparison.'),
+              F('DOCUMENT_INCONSISTENCY', 'LOW severity', 'The currency for the declared unit price is not specified on the invoice.', 'Invoice line item unit_price is ‘7000.00’ with no currency indicated.', 'Request clarification on the currency used for the transaction.')
+            ],
+            evidence: [
+              { source: 'www.homeadvisor.com', quote: 'detailed painting of railings and balusters can cost up to $20 per linear foot due to the intricate work involved.' },
+              { source: 'latestcost.com', quote: 'labor is typically the largest cost element for stair riser painting; 10–15 risers can take 1–2 days, larger jobs 2–3 days.' }
+            ]
+          },
+          {
+            tag: 'LINE 002 · NOT TESTABLE', title: 'Material — paint',
+            declared: '1,500.00', mid: '18.50/L', deviation: '—', devKind: 'mute',
+            hasBar: false, blocked: true, blockedNote: 'Invoice states no quantity or unit for the paint, so the per-litre benchmark cannot be applied. Two comparable observations available once quantity is supplied.',
+            refRange: 'USD 12.00 – 25.00', basis: 'per litre (mid 18.50)', obs: '2', avail: 'SUFFICIENT (market)', availKind: 'ok', risk: 'INSUFFICIENT_DATA · 0', riskKind: 'mute',
+            summary: 'Analysis summary: no quantity for ‘Material - Paint’ is provided on the invoice, preventing a direct price comparison against the market reference price per litre. The declared price could not be tested. The currency for the declared price is also missing.',
+            findings: [F('DOCUMENT_INCONSISTENCY', 'LOW severity', 'The currency for the declared unit price is not specified on the invoice.', 'Invoice line item unit_price is ‘1500.00’ with no currency indicated.', 'Request clarification on the currency used for the transaction.')],
+            evidence: [
+              { source: 'procalclab.com', quote: 'calculations are approximate; actual material use and costs depend on application method, surface condition and local prices.' },
+              { source: 'www.facebook.com', quote: 'forum context captured but not used to establish the range.' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'TBML-7B41E0C9AD52',
+        srcDoc: { type: 'PI', file: 'PI-123456-A.pdf', meta: '1 page · 318 KB · uploaded 24 Aug 14:41 · auto-detected Proforma Invoice (amendment)' },
+        references: [
+          { domain: 'www.homeadvisor.com', title: 'Cost to paint stair risers, stringers and railings', note: 'Per-riser labour benchmarks applied to the restated 20-riser scope.', usedFor: 'Labour range', role: 'PRICED', retrieved: '24 Aug 14:48' },
+          { domain: 'latestcost.com', title: 'Regional variation in stair painting labour rates', note: 'Upper-quartile metro rates exceed national medians, consistent with the declared total.', usedFor: 'Labour range', role: 'PRICED', retrieved: '24 Aug 14:48' },
+          { domain: 'procalclab.com', title: 'Interior enamel price per litre', note: 'Interior enamel pricing clusters between USD 12 and USD 25 per litre depending on finish.', usedFor: 'Paint range', role: 'PRICED', retrieved: '24 Aug 14:48' },
+          { domain: 'ofac.treasury.gov', title: 'OFAC sanctions list search', note: 'Riser Coatings LLC and Intel Corporation screened; no match returned.', usedFor: 'Sanctions', role: 'SCREENED', retrieved: '24 Aug 14:49' }
+        ],
+        refFooter: '8 domains consulted across 18 queries; 9 pages read, 1 failed. Only sources marked PRICED contributed to a reference range.', meta: '24 Aug · MED 45', risk: 'MEDIUM · 45', riskKind: 'warn',
+        doc: 'Amended invoice 123456-A · 2 documents · 2 line items', tested: '2 of 2 line items',
+        summary: 'Re-screening of the amended invoice. Quantities were supplied for both line items and the labour charge was restated, bringing both declared prices inside the market reference ranges. Residual risk is driven by document inconsistencies: currency is still not stated and the amendment is not cross-referenced to the original invoice.',
+        indicators: [['DOCUMENT_INCONSISTENCY', 'warn']],
+        totals: 'subtotal 2,900.00   ·   freight —   ·   insurance —   ·   total 2,900.00',
+        completed: 'Re-screening completed 24 Aug 2026 15:02 PM',
+        doc_extract: {
+          document_type: 'Amended invoice', document_number: '123456-A', document_date: 'Aug 23, 2026', lc_number: null, page_number: 1,
+          incoterms: null, port_of_loading: null, port_of_discharge: null, shipping_method: 'UPS',
+          container_number: null, vessel_flight: null, payment_terms: '2%15 Days, Net 45', sales_terms: 'Amendment to invoice 123456',
+          subtotal: '2900.00', freight_charges: null, insurance: null, total_amount: '2900.00',
+          currency: null, amount_in_words: null, fob_value: null, cif_value: null
+        },
+        parties: {
+          Exporter: { name: 'Riser Coatings LLC', address: '1420 Foundry Row, Portland, OR 97209', country: 'US', swift_code: null, iban: null, bank_name: null, tax_id: '93-1884420', phone: '503.555.0142', email: 'ap@risercoatings.example' },
+          Importer: { name: 'Intel Corporation', address: 'P.O. Box 1000 Hillsboro, OR 97123-1000', country: 'US', swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null },
+          'Notify party': { name: 'Intel Corporation', address: '3601 Juliette Lane Santa Clara, CA 95052', country: 'US', swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null },
+          'Issuing bank': { name: null, address: null, country: null, swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null },
+          'Beneficiary bank': { name: null, address: null, country: null, swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null }
+        },
+        gapLabel: '',
+        gapNote: '',
+        railTerms: '2%15 Days, Net 45 · UPS',
+        railTotals: 'subtotal 2,900.00 · total 2,900.00',
+        absent: ['currency', 'incoterms', 'ports', 'banks / SWIFT', 'container & vessel', 'LC reference', 'supersedes reference'],
+        osint_results: [
+          { product_key: 'labor_paint_risers_20riser_basis', product_description: 'Labor - Paint risers and stringers, five stairways (20 risers)', hs_code: null, data_availability: 'SUFFICIENT', availability_note: 'Market range established from 9 comparable observation(s); riser count now declared, so the benchmark applies on a like basis.', reference_price_low: 'USD 700.00', reference_price_high: 'USD 1,350.00', reference_price_mid: 'USD 1,000.00', reference_price_currency: 'USD', reference_price_unit: 'for 20riser project', price_observation_count: 28, price_sources: ['www.homeadvisor.com', 'latestcost.com'], typical_origin_countries: ['US'], typical_trade_routes: [], sanctioned_jurisdiction_flag: false, hs_codes_observed: [], findings: [{ source: 'latestcost.com', text: 'Labour rates for stair riser painting vary by region; upper-quartile metro rates exceed national medians.' }] },
+          { product_key: 'material_paint_interior_enamel', product_description: 'Material - Paint, interior enamel', hs_code: '3209.10', data_availability: 'SUFFICIENT', availability_note: 'Market range established from 2 comparable observation(s); 60 litres declared, so the per-litre range is applicable.', reference_price_low: 'USD 12.00', reference_price_high: 'USD 25.00', reference_price_mid: 'USD 18.50', reference_price_currency: 'USD', reference_price_unit: 'litre', price_observation_count: 2, price_sources: ['procalclab.com'], typical_origin_countries: ['US'], typical_trade_routes: [], sanctioned_jurisdiction_flag: false, hs_codes_observed: ['3209.10'], findings: [{ source: 'procalclab.com', text: 'Interior enamel pricing clusters between USD 12 and USD 25 per litre depending on finish.' }] }
+        ],
+        audit: [['18/18', 'queries ok'], ['214', 'results seen'], ['9 / 1', 'read / failed'], ['30', 'price obs.']],
+        auditFooter: 'searxng · collected 24 Aug 14:48 UTC',
+        domains: ['www.homeadvisor.com', 'latestcost.com', 'procalclab.com', 'ofac.treasury.gov', 'sanctionssearch.ofac.treas.gov', 'www.sigma360.com', 'www.supplychainbrain.com', 'www.scribd.com'],
+        rawText: 'AMENDED INVOICE\nINVOICE NO: 123456-A\nDATE: Aug 23, 2026\nRiser Coatings LLC\n1420 Foundry Row\nPortland, OR 97209\nTAX ID 93-1884420\nBill To:\nIntel Corporation\nP.O. Box 1000\nHillsboro, OR 97123-1000\nTERMS\n2%15 Days, Net 45\nSHIPPED VIA\nUPS\nLINE  DESCRIPTION  QTY  UNIT  UNIT PRICE  AMOUNT\n001  Labor - Paint risers and stringers, five stairways (20 risers)  20  riser  70.00  1400.00\n002  Material - Paint, interior enamel  60  litre  25.00  1500.00\nSUBTOTAL  2900.00\nTOTAL DUE  2900.00\nThis amendment restates labour scope on a per-riser basis.',
+        products: [
+          { no: '001', description: 'Labor - Paint risers and stringers, five stairways (20 risers)', hs: '—', qty: '20', unit: 'riser', unitPrice: '70.00', totalPrice: '1,400.00', ccy: 'missing' },
+          { no: '002', description: 'Material - Paint, interior enamel', hs: '3209.10', qty: '60', unit: 'litre', unitPrice: '25.00', totalPrice: '1,500.00', ccy: 'missing' }
+        ],
+        lines: [
+          {
+            tag: 'LINE 001 · RISK 20', title: 'Labor — paint risers and stringers, five stairways (20 risers)',
+            declared: '1,400.00', mid: '1,000.00', deviation: '+40%', devKind: 'warn',
+            hasBar: true, bandLeft: '35%', bandWidth: '32.5%', markLeft: '70%',
+            rangeLabel: '700 – 1,350 market', markLabel: 'declared 1,400', basisLabel: 'basis: per 20-riser project · 28 observations',
+            refRange: 'USD 700.00 – 1,350.00', basis: 'per 20riser project', obs: '28', avail: 'SUFFICIENT', availKind: 'ok', risk: 'LOW · 20', riskKind: 'ok',
+            summary: 'With the riser count supplied the declared total sits just above the upper bound of the market range, a deviation consistent with regional labour rates rather than over-invoicing.',
+            findings: [F('DOCUMENT_INCONSISTENCY', 'LOW severity', 'The amended invoice does not reference the original invoice number it supersedes.', 'Document number ‘123456-A’ with no supersedes reference; original invoice 123456 remains open in the case file.', 'Request written confirmation that 123456-A replaces 123456, and reconcile against the purchase order.')],
+            evidence: [{ source: 'latestcost.com', quote: 'labour rates for stair riser painting vary by region; upper-quartile metro rates exceed national medians.' }]
+          },
+          {
+            tag: 'LINE 002 · RISK 15', title: 'Material — paint, interior enamel',
+            declared: '25.00/L', mid: '18.50/L', deviation: '+35%', devKind: 'warn',
+            hasBar: true, bandLeft: '24%', bandWidth: '26%', markLeft: '50%',
+            rangeLabel: '12.00 – 25.00 market', markLabel: 'declared 25.00', basisLabel: 'basis: per litre · 60 litres declared · 2 observations',
+            refRange: 'USD 12.00 – 25.00', basis: 'per litre (mid 18.50)', obs: '2', avail: 'SUFFICIENT', availKind: 'ok', risk: 'LOW · 15', riskKind: 'ok',
+            summary: 'Quantity of 60 litres now declared. The unit price sits at the ceiling of the observed range but within it; thin observation count keeps confidence moderate.',
+            findings: [F('DOCUMENT_INCONSISTENCY', 'LOW severity', 'The currency for the declared unit price is still not specified on the amended invoice.', 'Line item unit_price is ‘25.00’ with no currency indicated.', 'Request clarification on the currency used for the transaction.')],
+            evidence: [{ source: 'procalclab.com', quote: 'interior enamel pricing clusters between USD 12 and USD 25 per litre depending on finish.' }]
+          }
+        ],
+        narrative: 'Re-screening of amended invoice 123456-A closed the price anomaly raised on 22 August. Both line items now carry quantities and unit bases, and both declared prices fall inside the OSINT reference ranges — labour at USD 1,400.00 against a USD 700.00 – 1,350.00 range on a 20-riser basis, and paint at USD 25.00 per litre against a USD 12.00 – 25.00 range across 60 declared litres. Two document inconsistencies remain open: the amendment does not reference the invoice it supersedes, and currency is still absent from all monetary values. Overall risk is assessed as MEDIUM pending those clarifications.'
+      },
+      {
+        id: 'TBML-2C88F51D3E07',
+        srcDoc: { type: 'LC', file: 'CN-123456-CN.pdf', meta: '1 page · 96 KB · uploaded 25 Aug 09:12 · credit note against PI-123456' },
+        references: [
+          { domain: 'ofac.treasury.gov', title: 'OFAC sanctions list search', note: 'Both named parties screened against consolidated lists; no match returned.', usedFor: 'Sanctions', role: 'SCREENED', retrieved: '25 Aug 09:20' },
+          { domain: 'sanctionssearch.ofac.treas.gov', title: 'Specially Designated Nationals search', note: 'Secondary confirmation of the primary list search.', usedFor: 'Sanctions', role: 'SCREENED', retrieved: '25 Aug 09:20' }
+        ],
+        refFooter: 'No price benchmarking was required for a tax adjustment; 2 domains consulted across 6 queries.', meta: '25 Aug · LOW 15', risk: 'LOW · 15', riskKind: 'ok',
+        doc: 'Credit note 123456-CN · 1 document · 1 line item', tested: '1 of 1 line item',
+        summary: 'Credit note screening. The single line reconciles the 123.75 difference previously flagged between subtotal and total on invoice 123456. No price anomaly and no sanctions exposure; the document is internally consistent.',
+        indicators: [['NO_INDICATORS', 'ok']],
+        totals: 'subtotal 123.75   ·   total 123.75',
+        completed: 'Screening run completed 25 Aug 2026 09:34 AM',
+        doc_extract: {
+          document_type: 'Credit note', document_number: '123456-CN', document_date: 'Aug 24, 2026', lc_number: null, page_number: 1,
+          incoterms: null, port_of_loading: null, port_of_discharge: null, shipping_method: null,
+          container_number: null, vessel_flight: null, payment_terms: 'Applied to invoice 123456', sales_terms: 'Sales tax adjustment',
+          subtotal: '123.75', freight_charges: null, insurance: null, total_amount: '123.75',
+          currency: 'USD', amount_in_words: 'One hundred twenty three and 75/100 US dollars', fob_value: null, cif_value: null
+        },
+        parties: {
+          Exporter: { name: 'Riser Coatings LLC', address: '1420 Foundry Row, Portland, OR 97209', country: 'US', swift_code: null, iban: null, bank_name: null, tax_id: '93-1884420', phone: '503.555.0142', email: 'ap@risercoatings.example' },
+          Importer: { name: 'Intel Corporation', address: 'P.O. Box 1000 Hillsboro, OR 97123-1000', country: 'US', swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null },
+          'Notify party': { name: null, address: null, country: null, swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null },
+          'Issuing bank': { name: null, address: null, country: null, swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null },
+          'Beneficiary bank': { name: null, address: null, country: null, swift_code: null, iban: null, bank_name: null, tax_id: null, phone: null, email: null }
+        },
+        gapLabel: '',
+        gapNote: '',
+        railTerms: 'Applied to invoice 123456',
+        railTotals: 'subtotal 123.75 · total 123.75',
+        absent: ['incoterms', 'ports', 'banks / SWIFT', 'container & vessel', 'LC reference', 'shipping method'],
+        osint_results: [
+          { product_key: 'credit_sales_tax_adjustment', product_description: 'Credit - sales tax adjustment against invoice 123456', hs_code: null, data_availability: 'NOT_REQUIRED', availability_note: 'Tax adjustments are not price-benchmarked; no market research was performed.', reference_price_low: null, reference_price_high: null, reference_price_mid: null, reference_price_currency: null, reference_price_unit: null, price_observation_count: 0, price_sources: [], typical_origin_countries: ['US'], typical_trade_routes: [], sanctioned_jurisdiction_flag: false, hs_codes_observed: [], findings: [{ source: 'ofac.treasury.gov', text: 'Sanctions lists consulted for both named parties; no match returned.' }] }
+        ],
+        audit: [['6/6', 'queries ok'], ['48', 'results seen'], ['4 / 0', 'read / failed'], ['0', 'price obs.']],
+        auditFooter: 'searxng · collected 25 Aug 09:20 UTC',
+        domains: ['ofac.treasury.gov', 'sanctionssearch.ofac.treas.gov'],
+        rawText: 'CREDIT NOTE\nCREDIT NOTE NO: 123456-CN\nDATE: Aug 24, 2026\nRiser Coatings LLC\n1420 Foundry Row\nPortland, OR 97209\nApplied against: INVOICE 123456\nBill To:\nIntel Corporation\nP.O. Box 1000\nHillsboro, OR 97123-1000\nLINE  DESCRIPTION  QTY  UNIT  UNIT PRICE  AMOUNT\n001  Credit - sales tax adjustment against invoice 123456  1  adjustment  123.75  123.75\nSUBTOTAL USD 123.75\nTOTAL CREDIT USD 123.75\nAmount in words: One hundred twenty three and 75/100 US dollars',
+        products: [{ no: '001', description: 'Credit - sales tax adjustment against invoice 123456', hs: '—', qty: '1', unit: 'adjustment', unitPrice: '123.75', totalPrice: '123.75', ccy: 'USD' }],
+        lines: [
+          {
+            tag: 'LINE 001 · RISK 5', title: 'Credit — sales tax adjustment against invoice 123456',
+            declared: '123.75', mid: 'n/a', deviation: '—', devKind: 'mute',
+            hasBar: false, blocked: false,
+            refRange: 'not applicable', basis: 'tax adjustment', obs: '0', avail: 'NOT_REQUIRED', availKind: 'mute', risk: 'LOW · 5', riskKind: 'ok',
+            summary: 'The credit equals the previously unexplained difference between subtotal and total on invoice 123456, resolving that document inconsistency. Tax adjustments are not price-benchmarked.',
+            findings: [],
+            evidence: [{ source: 'internal', quote: 'matched against case document invoice 123456; difference of 123.75 now accounted for.' }]
+          }
+        ],
+        narrative: 'Screening of credit note 123456-CN found no TBML indicators. The single line item credits USD 123.75 against invoice 123456, which reconciles the subtotal-to-total discrepancy recorded in the 22 August screening. Currency is stated, the amount is internally consistent, and no party or jurisdiction on the document appears on the sanctions lists consulted. Overall risk is assessed as LOW; no analyst action is required beyond linking the credit note to the original invoice in the case file.'
+    }
+    ];
+  }
+
+  renderVals() {
+    const t = this.state.tab;
+    const runs = this.runsData();
+    const ri = this.state.run || 0;
+    const run = runs[ri];
+    const riskColors = { danger: '#CA2F7F', warn: '#8A6500', ok: '#199335', mute: '#5B5B5B' };
+    const openMap = this.state.openLines || {};
+    const scored = runs.map(r => ({ score: parseInt(r.risk.split('·')[1].trim(), 10), kind: r.riskKind, label: r.risk.split('·')[0].trim() }));
+    const highest = scored.reduce((a, b) => (b.score > a.score ? b : a));
+    highest.label = highest.label.charAt(0) + highest.label.slice(1).toLowerCase() + ' Risk';
+    const runOut = runs.map((r, i) => ({
+      id: r.id, meta: r.meta,
+      pillStyle: 'display:flex; flex-direction:column; gap:1px; padding:7px 11px; border-radius:8px; cursor:pointer; border:1px solid '
+        + (i === ri ? '#005964' : '#E5E5E5') + '; background:' + (i === ri ? '#005964' : '#fff') + '; color:' + (i === ri ? '#fff' : '#5B5B5B'),
+      select: () => this.setState({ run: i, openLines: {} })
+    }));
+    const lines = run.lines.map((l, i) => {
+      const key = ri + '-' + i;
+      const open = openMap[key] !== false;
+      return Object.assign({}, l, {
+        devColor: riskColors[l.devKind],
+        availStyle: this.chip(l.availKind),
+        riskStyle: this.chip(l.riskKind),
+        findingsLabel: l.findings.length ? 'Findings (' + l.findings.length + ')' : 'No findings recorded',
+        findingsCount: l.findings.length ? l.findings.length + (l.findings.length === 1 ? ' finding' : ' findings') : 'no findings',
+        findings: l.findings.map(f => {
+          const kind = f.severity.indexOf('HIGH') === 0 ? 'danger' : f.severity.indexOf('MEDIUM') === 0 ? 'warn' : 'mute';
+          const bg = { danger: '#FDF6FA', warn: '#FDF6E5', mute: '#FAFAFA' }[kind];
+          const bd = { danger: '#F2D2E3', warn: '#F3E3BE', mute: '#E5E5E5' }[kind];
+          return Object.assign({}, f, {
+            color: riskColors[kind === 'mute' ? 'mute' : kind],
+            wrapStyle: 'display:grid; grid-template-columns:184px 1fr; gap:14px; padding:12px 14px; background:' + bg + '; border:1px solid ' + bd + '; border-radius:8px',
+            sevStyle: 'font-size:11px; font-weight:600; width:fit-content; border-radius:5px; padding:2px 7px; color:' + riskColors[kind === 'mute' ? 'mute' : kind] + '; background:' + (kind === 'mute' ? '#F5F5F5' : bg)
+          });
+        }),
+        open,
+        toggleLabel: open ? 'Collapse −' : 'Expand +',
+        toggle: () => this.setState(s => {
+          const m = Object.assign({}, s.openLines);
+          m[key] = !(m[key] !== false);
+          return { openLines: m };
+        })
+      });
+    });
+    const notes = {
+      escalate: 'Escalated to case CS-2026-0412 — assigned to Financial Crime Investigations.',
+      clear: 'Cleared with rationale. Report retained for 7 years in the audit store.',
+      info: 'Information request drafted to relationship manager: hours/rates breakdown, riser count, currency.'
+    };
+    return {
+      runs: runOut,
+      reportId: run.id, docLine: run.doc, tested: run.tested, runSummary: run.summary,
+      riskLabel: run.risk, riskColor: riskColors[run.riskKind],
+      indicators: run.indicators.map(([label, kind]) => ({
+        label,
+        style: 'font-size:11.5px; font-weight:600; font-family:\'Geist Mono\', monospace; border-radius:6px; padding:4px 8px; color:'
+          + riskColors[kind === 'ok' ? 'ok' : kind] + '; background:' + ({ danger: '#FBEDF4', warn: '#FDF6E5', ok: '#E9F5EC' }[kind])
+          + '; border:1px solid ' + ({ danger: '#F2D2E3', warn: '#F3E3BE', ok: '#C8E6D1' }[kind])
+      })),
+      products: run.products.map(p => Object.assign({}, p, {
+        hsColor: p.hs === '—' ? '#ABABAB' : '#252525',
+        qtyColor: p.qty === 'missing' ? '#CA2F7F' : '#252525',
+        unitColor: p.unit === '—' ? '#ABABAB' : '#252525',
+        ccyColor: p.ccy === 'missing' ? '#CA2F7F' : '#252525'
+      })),
+      totalsLine: run.totals,
+      lines,
+      isRun1: ri === 0,
+      notRun1: ri !== 0,
+      altNarrative: run.narrative || '',
+      extractDoc: run.doc_extract,
+      extractParties: run.parties,
+      extractRaw: run.rawText || null,
+      extractGapLabel: run.gapLabel || '',
+      extractGapNote: run.gapNote || '',
+      extractHeadline: run.doc_extract.document_type + ' ' + run.doc_extract.document_number + ' · ' + run.doc_extract.document_date,
+      railParties: ['Exporter', 'Importer', 'Notify party'].map(role => {
+        const v = run.parties[role] || {};
+        const bits = [v.address, v.phone].filter(Boolean);
+        return {
+          role,
+          name: v.name || 'not stated',
+          detail: bits.length ? bits.join(' · ') : 'no address on document',
+          hasFlag: !v.country && !!v.name,
+          flag: 'country not stated on document'
+        };
+      }),
+      railTerms: run.railTerms,
+      railTotals: run.railTotals,
+      absentFields: run.absent,
+      osintCount: run.osint_results.length + (run.osint_results.length === 1 ? ' product' : ' products'),
+      osintResults: run.osint_results.map((o, i) => {
+        const key = 'o' + ri + '-' + i;
+        const open = !!(this.state.openOsint || {})[key];
+        const val = v => (v === null || v === undefined || v === '' || (Array.isArray(v) && !v.length))
+          ? { value: '\u2014', style: 'font-size:11.5px; color:#ABABAB; text-align:right' }
+          : { value: Array.isArray(v) ? v.join(', ') : String(v), style: 'font-size:11.5px; font-weight:500; color:#252525; text-align:right' };
+        const rows = [
+          ['HS Code', o.hs_code], ['Unit Basis', o.reference_price_unit], ['Mid Price', o.reference_price_mid],
+          ['Currency', o.reference_price_currency], ['Observations', o.price_observation_count],
+          ['Typical Origins', o.typical_origin_countries], ['Typical Routes', o.typical_trade_routes],
+          ['HS Codes Observed', o.hs_codes_observed]
+        ];
+        const rangeLine = o.reference_price_low && o.reference_price_high
+          ? o.reference_price_low.replace('USD ', '') + ' \u2013 ' + o.reference_price_high.replace('USD ', '') + (o.reference_price_unit ? ' / ' + o.reference_price_unit : '')
+          : 'not benchmarked';
+        const availKind = o.data_availability === 'SUFFICIENT' ? 'ok' : 'mute';
+        return {
+          productKey: o.product_key,
+          productDescription: o.product_description,
+          dataAvailability: o.data_availability,
+          availStyle: 'font-size:10.5px; font-weight:600; font-family:\'Geist Mono\', monospace; border-radius:5px; padding:3px 7px; color:'
+            + riskColors[availKind] + '; background:' + (availKind === 'ok' ? '#E9F5EC' : '#F5F5F5') + '; border:1px solid ' + (availKind === 'ok' ? '#C8E6D1' : '#E5E5E5'),
+          sanctionLabel: o.sanctioned_jurisdiction_flag ? 'SANCTIONED JURISDICTION' : 'NO SANCTIONS FLAG',
+          sanctionStyle: 'font-size:10.5px; font-weight:600; font-family:\'Geist Mono\', monospace; border-radius:5px; padding:3px 7px; color:'
+            + (o.sanctioned_jurisdiction_flag ? '#CA2F7F' : '#199335') + '; background:' + (o.sanctioned_jurisdiction_flag ? '#FBEDF4' : '#E9F5EC')
+            + '; border:1px solid ' + (o.sanctioned_jurisdiction_flag ? '#F2D2E3' : '#C8E6D1'),
+          rangeLine,
+          fields: rows.map(([k, v]) => Object.assign({ key: k }, val(v))),
+          availabilityNote: o.availability_note,
+          priceSources: o.price_sources.length ? o.price_sources : ['none used'],
+          findings: o.findings,
+          open,
+          toggleLabel: open ? 'Collapse \u2212' : 'Expand +',
+          toggle: () => this.setState(st => {
+            const m = Object.assign({}, st.openOsint);
+            m[key] = !m[key];
+            return { openOsint: m };
+          })
+        };
+      }),
+      auditStats: run.audit.map(([value, label]) => ({ value, label })),
+      auditFooter: run.auditFooter,
+      runDomains: run.domains,
+      runCompleted: run.completed,
+      ringScore: highest.score,
+      ringLabel: highest.label,
+      ringColor: riskColors[highest.kind],
+      ringGradient: 'conic-gradient(' + riskColors[highest.kind] + ' 0 ' + highest.score + '%, #F0EEEF ' + highest.score + '% 100%)',
+      srcDocType: run.srcDoc.type,
+      srcDocFile: run.srcDoc.file,
+      srcDocMeta: run.srcDoc.meta,
+      refCount: run.references.length + ' sources',
+      refFooter: run.refFooter,
+      references: run.references.map((r, i) => {
+        const kind = r.role === 'PRICED' ? 'teal' : r.role === 'SCREENED' ? 'ok' : 'mute';
+        const c = { teal: ['#005964', '#EDF5F5', '#CBE0E0'], ok: ['#199335', '#E9F5EC', '#C8E6D1'], mute: ['#696969', '#F5F5F5', '#E5E5E5'] }[kind];
+        return Object.assign({}, r, {
+          no: String(i + 1).padStart(2, '0'),
+          roleStyle: 'font-size:10.5px; font-weight:600; font-family:\'Geist Mono\', monospace; border-radius:5px; padding:3px 7px; color:' + c[0] + '; background:' + c[1] + '; border:1px solid ' + c[2]
+        });
+      }),
+      uploadOpen: !!this.state.upload,
+      openUpload: () => this.setState({ upload: true }),
+      closeUpload: () => this.setState({ upload: false }),
+      extractOpen: !!this.state.extract,
+      extractLabel: this.state.extract ? 'Hide all fields' : 'All fields',
+      toggleExtract: () => this.setState(s => ({ extract: !s.extract })),
+      domains: ['www.homeadvisor.com', 'latestcost.com', 'procalclab.com', 'ofac.treasury.gov', 'sanctionssearch.ofac.treas.gov', 'www.sigma360.com', 'www.linzalytics.com', 'www.supplychainbrain.com', 'www.livemint.com', 'www.scribd.com', 'github.com', 'nlp.biu.ac.il', 'www.linkedin.com', 'www.facebook.com'],
+      isFindings: t === 'findings',
+      isNarrative: t === 'narrative',
+      isAudit: t === 'audit',
+      tabFindings: this.tabStyle(t === 'findings'),
+      tabNarrative: this.tabStyle(t === 'narrative'),
+      tabAudit: this.tabStyle(t === 'audit'),
+      showFindings: () => this.setState({ tab: 'findings' }),
+      showNarrative: () => this.setState({ tab: 'narrative' }),
+      showAudit: () => this.setState({ tab: 'audit' }),
+      f1Open: this.state.f1,
+      f2Open: this.state.f2,
+      f1Label: this.state.f1 ? 'hide detail' : 'show detail',
+      f2Label: this.state.f2 ? 'hide detail' : 'show detail',
+      toggleF1: () => this.setState(s => ({ f1: !s.f1 })),
+      toggleF2: () => this.setState(s => ({ f2: !s.f2 })),
+      decisionNote: this.state.decision ? notes[this.state.decision] : 'Requires analyst review — an overall risk of HIGH requires confirmation before any action is taken.',
+      actEscalate: () => this.setState({ decision: 'escalate' }),
+      actClear: () => this.setState({ decision: 'clear' }),
+      actInfo: () => this.setState({ decision: 'info' }),
+      reportOpen: this.state.report,
+      reportLabel: this.state.report ? 'Collapse report' : 'Open full report',
+      toggleReport: () => this.setState(s => ({ report: !s.report })),
+      pa1Open: this.state.pa1 !== false,
+      pa2Open: this.state.pa2 !== false,
+      pa1Label: this.state.pa1 !== false ? 'Collapse \u2212' : 'Expand +',
+      pa2Label: this.state.pa2 !== false ? 'Collapse \u2212' : 'Expand +',
+      togglePA1: () => this.setState(s => ({ pa1: s.pa1 === false })),
+      togglePA2: () => this.setState(s => ({ pa2: s.pa2 === false }))
+    };
+  }
+}
+</script>
+</body>
+</html>
+
+</script>
+</body>
+</html>

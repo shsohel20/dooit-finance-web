@@ -1,92 +1,68 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
-import { FileSearch, ListChecks, ScrollText } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ReportQueueSidebar from "./tbml-osint-report/ReportQueueSidebar";
-import ReportHeader from "./tbml-osint-report/ReportHeader";
-import OverallRiskPanel from "./tbml-osint-report/OverallRiskPanel";
-import FindingsTab from "./tbml-osint-report/FindingsTab";
-import NarrativeReportTab from "./tbml-osint-report/NarrativeReportTab";
-import SourcesAuditTab from "./tbml-osint-report/SourcesAuditTab";
-import ReportFooterActionBar from "./tbml-osint-report/ReportFooterActionBar";
-import mockTbmlReportData from "./tbml-osint-report/mockTbmlReportData";
-import { mockReportQueue, mockCoverageStats } from "./tbml-osint-report/mockReportQueue";
+import { Check } from "lucide-react";
+import mockTbmlRuns from "./tbml-osint-report/mockTbmlRuns";
+import RunSwitcher from "./tbml-osint-report/RunSwitcher";
+import NewScreeningDialog from "./tbml-osint-report/NewScreeningDialog";
+import ScreeningSummaryCard from "./tbml-osint-report/ScreeningSummaryCard";
+import ExtractedProductsTable from "./tbml-osint-report/ExtractedProductsTable";
+import LineItemAnalysisCard from "./tbml-osint-report/LineItemAnalysisCard";
+import ReferencesCard from "./tbml-osint-report/ReferencesCard";
+import NarrativeReportSection from "./tbml-osint-report/NarrativeReportSection";
+import DocumentExtractRail from "./tbml-osint-report/DocumentExtractRail";
+import AbsentFieldsCard from "./tbml-osint-report/AbsentFieldsCard";
+import OsintResultsRail from "./tbml-osint-report/OsintResultsRail";
+import RunAuditTrailCard from "./tbml-osint-report/RunAuditTrailCard";
 
 /**
- * Full TBML / OSINT report review screen: an "awaiting review" queue on the
- * left, the selected report's findings / narrative / audit-trail tabs in
- * the middle, and an overall-risk scorecard + action bar around it.
+ * TBML screening tab: a switcher across every screening run performed on
+ * this case's trade documents (original invoice, an amendment, a credit
+ * note, ...), the selected run's price-vs-OSINT analysis and references in
+ * the primary column, and a side rail with the document extract, absent
+ * fields and raw OSINT research for that run.
  *
- * `report` defaults to the single sample payload the OSINT service returns
- * today. The queue and coverage stats are placeholder data (see
- * mockReportQueue.js) until a real queue-listing endpoint exists.
+ * `runs` defaults to mockTbmlRuns until this is wired up to a real
+ * screening-history endpoint.
  */
-export default function TbmlOsintReport({ report = mockTbmlReportData }) {
-  const [activeReportId, setActiveReportId] = useState(report.report_id);
+export default function TbmlOsintReport({ runs = mockTbmlRuns }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const run = runs[activeIndex];
 
-  const handleSelectQueueItem = (reportId) => {
-    if (reportId === report.report_id) {
-      setActiveReportId(reportId);
-      return;
-    }
-    // The queue list is placeholder data with no backing report payload yet.
-    toast.info(
-      "This report isn't available in the preview — only the sample report loads real data.",
-    );
-  };
-
-  const reviewMessage = report.requires_analyst_review
-    ? `Requires analyst review — ${report.review_reasons?.[0] || "confirmation is needed before any action is taken."}`
-    : "No further review required.";
-
-  console.log("report", report);
   return (
-    <div className="flex gap-5">
-      <ReportQueueSidebar
-        queue={mockReportQueue}
-        activeReportId={activeReportId}
-        onSelect={handleSelectQueueItem}
-        coverage={mockCoverageStats}
-      />
+    <div className="flex flex-col gap-3">
+      <p className="flex items-center gap-1.5 text-xs font-medium text-success">
+        <Check className="size-3.5" />
+        {run.createdAtLabel}
+      </p>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <ReportHeader report={report} />
-          <OverallRiskPanel
-            score={report.overall_risk_score}
-            level={report.overall_risk_level}
-            requiresReview={report.requires_analyst_review}
-          />
+      <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[1fr_380px]">
+        <div className="flex min-w-0 flex-col gap-4">
+          <RunSwitcher runs={runs} activeIndex={activeIndex} onSelect={setActiveIndex} onOpenUpload={() => setUploadOpen(true)} />
+
+          <ScreeningSummaryCard run={run} />
+
+          <ExtractedProductsTable run={run} />
+
+          {run.lineAnalyses.map((lineItem) => (
+            <LineItemAnalysisCard key={`${run.id}-${lineItem.lineNumber}`} lineItem={lineItem} />
+          ))}
+
+          <ReferencesCard run={run} />
+
+          <NarrativeReportSection run={run} />
         </div>
 
-        <Tabs defaultValue="findings">
-          <TabsList>
-            <TabsTrigger value="findings">
-              <ListChecks className="size-3.5" /> Findings
-            </TabsTrigger>
-            <TabsTrigger value="narrative">
-              <ScrollText className="size-3.5" /> Narrative report
-            </TabsTrigger>
-            <TabsTrigger value="sources">
-              <FileSearch className="size-3.5" /> Sources & audit trail
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="findings" className="mt-4">
-            <FindingsTab report={report} />
-          </TabsContent>
-          <TabsContent value="narrative" className="mt-4">
-            <NarrativeReportTab markdown={report.narrative_report} />
-          </TabsContent>
-          <TabsContent value="sources" className="mt-4">
-            <SourcesAuditTab report={report} />
-          </TabsContent>
-        </Tabs>
-
-        {/* <ReportFooterActionBar message={reviewMessage} reportId={report.report_id} /> */}
+        <div className="flex flex-col gap-4">
+          <DocumentExtractRail key={`extract-${run.id}`} run={run} />
+          <AbsentFieldsCard fields={run.absentFields} />
+          <OsintResultsRail key={`osint-${run.id}`} results={run.osintResults} />
+          <RunAuditTrailCard audit={run.audit} />
+        </div>
       </div>
+
+      <NewScreeningDialog open={uploadOpen} onOpenChange={setUploadOpen} />
     </div>
   );
 }
