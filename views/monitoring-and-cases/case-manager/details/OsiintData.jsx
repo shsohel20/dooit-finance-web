@@ -1,38 +1,87 @@
 "use client";
 import {
+  createOSINTdata,
   getOSINTdata,
+  getOSINTdataSources,
   getOSINTScreenshots,
 } from "@/app/dashboard/client/onboarding/customer-queue/actions";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ScreenshotLightbox } from "@/views/onboarding/customer-queue/details/Osiint";
-import { FileIcon, ImageIcon } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ExternalLink,
+  FileIcon,
+  ImageIcon,
+  Loader2,
+  Radar,
+  SearchX,
+  Globe,
+} from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
+import OsintDataSourceCard from "./tabs/components/OsintDataSourceCard";
+
+const PROCESSING_STATUSES = ["pending", "processing", "running", "queued"];
+
+function statusMeta(status) {
+  const s = (status || "").toLowerCase();
+  if (s === "completed" || s === "complete") {
+    return {
+      label: "Completed",
+      className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      Icon: CheckCircle2,
+    };
+  }
+  if (s === "failed" || s === "error") {
+    return {
+      label: "Failed",
+      className: "bg-red-50 text-red-700 border-red-200",
+      Icon: AlertTriangle,
+    };
+  }
+  if (PROCESSING_STATUSES.includes(s)) {
+    return {
+      label: "In Progress",
+      className: "bg-sky-50 text-sky-700 border-sky-200",
+      Icon: Loader2,
+    };
+  }
+  return {
+    label: "Not Generated",
+    className: "bg-slate-50 text-slate-600 border-slate-200",
+    Icon: SearchX,
+  };
+}
 
 const DataCard = ({ title, description }) => {
   const [showMore, setShowMore] = useState(false);
   return (
-    <div className="bg-white rounded-lg p-4 space-y-2">
+    <div className="bg-white rounded-lg pb-2 space-y-2">
       <h5 className="font-bold">{title}</h5>
       {/* add see more button */}
 
       <div>
         <p className="text-xs text-gray-500 leading-relaxed">
           {showMore ? description : description?.slice(0, 100)}{" "}
-          <button
-            variant="link"
-            className="text-xs font-bold hover:underline transition-all duration-300"
-            onClick={() => setShowMore(!showMore)}
-          >
-            {showMore ? "See Less" : "See More"}
-          </button>
+          {description.length > 100 && (
+            <button
+              variant="link"
+              className="text-xs font-bold hover:underline transition-all duration-300 ml-1"
+              onClick={() => setShowMore(!showMore)}
+            >
+              {showMore ? "See Less" : "See More"}
+            </button>
+          )}
         </p>
       </div>
     </div>
   );
 };
 
+const SOURCES_PAGE_SIZE = 5;
+
 const ScreenshotCard = ({ screenshot, index, screenshots }) => {
-  const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
   const navigate = useCallback(
@@ -65,63 +114,173 @@ const ScreenshotCard = ({ screenshot, index, screenshots }) => {
     </div>
   );
 };
-export default function OsiintData() {
+export default function OsiintData({ caseData }) {
+  const id = caseData?.customer?._id;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [reportData, setReportData] = useState(null);
+  const [sources, setSources] = useState([]);
+  const [showAllSources, setShowAllSources] = useState(false);
   const [screenshots, setScreenshots] = useState([]);
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState(null);
 
-  console.log("reportData", reportData);
+  const fetchOsintReport = useCallback(async () => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const entityType = "customers";
+      const response = await getOSINTdata(entityType, id);
+      const sourcesResponse = await getOSINTdataSources(entityType, id);
+
+      const sourcesList = Array.isArray(sourcesResponse)
+        ? sourcesResponse.filter((itm) => itm.subject_match === "MATCH")
+        : [];
+      setReportData(response);
+      setSources(sourcesList);
+      // const screenshotData = await getOSINTScreenshots(entityType, id);
+      // setScreenshots(screenshotData);
+    } catch (err) {
+      setError(err?.message || "Failed to load OSINT report");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
-    // if (!id) {
-    //   setLoading(false);
-    //   return;
-    // }
+    fetchOsintReport();
+  }, [fetchOsintReport]);
 
-    let cancelled = false;
+  const handleGenerate = useCallback(async () => {
+    if (!id || generating) return;
+    setGenerating(true);
+    setGenerateError(null);
+    try {
+      await createOSINTdata({
+        entity_type: "customers",
+        entity_id: id,
+      });
+      await fetchOsintReport();
+    } catch (err) {
+      setGenerateError(err?.message || "Failed to generate OSINT report");
+    } finally {
+      setGenerating(false);
+    }
+  }, [id, generating, fetchOsintReport]);
 
-    const getOsiintReport = async () => {
-      setLoading(true);
-      setError(null);
-      const id = "6a46d281e72ec09b24e55300";
-      try {
-        const entityType = "customers";
-        const response = await getOSINTdata(entityType, id);
-        // const screenshotData = await getOSINTScreenshots(entityType, id);
-        if (!cancelled) {
-          setReportData(response);
-          // setScreenshots(screenshotData);
-        }
-      } catch (err) {
-        if (!cancelled) setError(err?.message || "Failed to load OSINT report");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    getOsiintReport();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
   const data = reportData?.report;
+  const hasReport = Boolean(data);
+  const isProcessing = PROCESSING_STATUSES.includes((reportData?.status || "").toLowerCase());
+  const status = statusMeta(reportData?.status);
 
   return (
-    <div className="shadow rounded-lg p-2 border">
-      <h5 className="font-bold text-base px-3 py-2 text-center flex items-center gap-2 justify-center">
-        <FileIcon className="w-4 h-4" /> OSINT Report
-      </h5>
-      <DataCard
-        title="Analysis and Interpretation"
-        description={data?.analysis_and_interpretation}
-      />
-      <DataCard title="Introduction" description={data?.introduction} />
-      <DataCard title="Area of Interest" description={data?.area_of_interest} />
-      <DataCard title="Data Collection" description={data?.data_collection} />
-      <DataCard title="Conclusion" description={data?.conclusion} />
+    <div className=" rounded-lg  space-y-2">
+      <div className="flex items-center justify-between gap-2 px-3 ">
+        {/* <h5 className="font-bold text-base flex items-center gap-2">
+          <FileIcon className="w-4 h-4" /> OSINT Report
+        </h5> */}
+        {/* {!loading && reportData && (
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium",
+              status.className,
+            )}
+          >
+            <StatusIcon className={cn("w-3 h-3", isProcessing && "animate-spin")} />
+            {status.label}
+          </span>
+        )} */}
+      </div>
 
-      <DataCard title="Risk Assessment" description={data?.risk_assessment} />
+      {loading && (
+        <div className="flex flex-col items-center justify-center gap-2 py-10 text-slate-500">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <p className="text-xs">Loading OSINT report…</p>
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+          <AlertTriangle className="w-6 h-6 text-red-600" />
+          <p className="text-sm font-semibold text-slate-800">Unable to load OSINT report</p>
+          <p className="text-xs text-slate-500">{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && !hasReport && (
+        <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+          {isProcessing ? (
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          ) : (
+            <SearchX className="w-6 h-6 text-slate-400" />
+          )}
+          <div className="space-y-1 px-4">
+            <p className="text-sm font-semibold text-slate-800">
+              {isProcessing ? "OSINT scan in progress" : "No OSINT report available"}
+            </p>
+            <p className="max-w-sm text-xs text-slate-500">
+              {isProcessing
+                ? "The scan is currently running. This can take a few minutes — check back shortly."
+                : "Generate an OSINT scan to get intelligence for this customer."}
+            </p>
+          </div>
+          {!isProcessing && (
+            <div className="flex flex-col items-center gap-1">
+              <Button type="button" size="sm" onClick={handleGenerate} disabled={generating || !id}>
+                {generating ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Radar className="w-3.5 h-3.5" />
+                )}
+                {generating ? "Generating…" : "Generate OSINT Report"}
+              </Button>
+              {generateError && <p className="max-w-sm text-xs text-red-500">{generateError}</p>}
+            </div>
+          )}
+        </div>
+      )}
+
+      {!loading && !error && hasReport && (
+        <>
+          <DataCard
+            title="Analysis and Interpretation"
+            description={data?.analysis_and_interpretation}
+          />
+          <DataCard title="Introduction" description={data?.introduction} />
+          <DataCard title="Area of Interest" description={data?.area_of_interest} />
+          <DataCard title="Data Collection" description={data?.data_collection} />
+          <DataCard title="Conclusion" description={data?.conclusion} />
+
+          <DataCard title="Risk Assessment" description={data?.risk_assessment} />
+        </>
+      )}
+
+      {!loading && !error && sources.length > 0 && (
+        <div className="flex flex-col gap-2 px-1">
+          <h5 className="font-bold text-base px-3 py-2 flex items-center gap-2">
+            <Globe className="w-4 h-4" /> Data Sources
+          </h5>
+          <div className="flex flex-col gap-2">
+            {(showAllSources ? sources : sources.slice(0, SOURCES_PAGE_SIZE)).map((source, idx) => (
+              <OsintDataSourceCard key={source.evidence_id || idx} source={source} />
+            ))}
+          </div>
+          {sources.length > SOURCES_PAGE_SIZE && (
+            <button
+              type="button"
+              className="self-center text-xs font-bold hover:underline transition-all duration-300"
+              onClick={() => setShowAllSources((prev) => !prev)}
+            >
+              {showAllSources ? "See Less" : `See More (${sources.length - SOURCES_PAGE_SIZE})`}
+            </button>
+          )}
+        </div>
+      )}
 
       {screenshots.length > 0 && (
         <div className="flex flex-col gap-2">

@@ -1,118 +1,33 @@
 "use client";
-// Documents tab — functional version.
-// Left: Document Verification Status derived from the customer's latest
-// verification journey (previously hard-coded). Right: real documents gallery
-// (customer.documents + journey step documents) with reviewer Add / Remove
-// (POST/DELETE customer/:id/documents) — uploads go through the FileVault
-// (fileUploadOnCloudinary) like the profile Documents section.
 
-import { useMemo, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
   FileText,
-  CheckCircle2,
-  Clock,
-  XCircle,
   ImageIcon,
   Download,
   Trash2,
   Plus,
   ExternalLink,
+  FingerprintIcon,
 } from "lucide-react";
 import { IconGridDots, IconList, IconLoader2 } from "@tabler/icons-react";
 import { cn, dateShowFormat } from "@/lib/utils";
 import AddDocumentDialog from "@/components/documents/AddDocumentDialog";
-import {
-  addCustomerDocuments,
-  removeCustomerDocument,
-} from "@/app/dashboard/client/onboarding/customer-queue/actions";
+import TbmlOsintDetails from "./TbmlOsintDetails";
 
-// ── Verification status (derived from journey steps) ────────────────────────
-
-const STEP_LABELS = {
-  personal_form: "Personal Details",
-  id_document: "Identity Document",
-  liveness: "Liveness / Facial Check",
-  proof_of_address: "Address Proof",
-  questionnaire: "Questionnaire",
-  funds_wealth: "Source of Funds & Wealth",
-  declaration: "Declaration",
-  authorization: "Authorization",
-  consent: "Consent",
-  review: "Review",
-};
-
-const STEP_STATUS_UI = {
-  approved: { label: "Passed", icon: CheckCircle2, box: "bg-success/5 border-success/20", iconCls: "bg-success/15 text-success", badge: "bg-success text-success-foreground" },
-  submitted: { label: "Submitted", icon: Clock, box: "bg-primary/5 border-primary/20", iconCls: "bg-primary/15 text-primary", badge: "bg-primary text-primary-foreground" },
-  in_progress: { label: "In Progress", icon: Clock, box: "bg-warning/5 border-warning/20", iconCls: "bg-warning/15 text-warning-foreground", badge: "bg-warning text-warning-foreground" },
-  rejected: { label: "Failed", icon: XCircle, box: "bg-danger/5 border-danger/20", iconCls: "bg-danger/15 text-danger", badge: "bg-danger text-danger-foreground" },
-  pending: { label: "Pending", icon: Clock, box: "bg-muted/40 border-border/50", iconCls: "bg-muted text-muted-foreground", badge: "bg-muted text-muted-foreground" },
-  skipped: { label: "Skipped", icon: Clock, box: "bg-muted/40 border-border/50", iconCls: "bg-muted text-muted-foreground", badge: "bg-muted text-muted-foreground" },
-  expired: { label: "Expired", icon: XCircle, box: "bg-danger/5 border-danger/20", iconCls: "bg-danger/15 text-danger", badge: "bg-danger text-danger-foreground" },
-};
-
-const VerificationStatusCard = ({ journey }) => {
-  const steps = [...(journey?.steps || [])]
-    .filter((s) => s.type !== "journey_start" && s.type !== "selfie")
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-
-  return (
-    <Card className="border-border/50">
-      <div className="p-6">
-        <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-          <FileText className="size-5 text-primary" />
-          Document Verification Status
-        </h3>
-        {steps.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            No verification journey found for this customer.
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {steps.map((step) => {
-              const cfg = STEP_STATUS_UI[step.status] ?? STEP_STATUS_UI.pending;
-              const Icon = cfg.icon;
-              return (
-                <div
-                  key={step.type}
-                  className={cn("flex items-center justify-between p-4 rounded-lg border", cfg.box)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={cn("p-2 rounded-full", cfg.iconCls)}>
-                      <Icon className="size-4" />
-                    </div>
-                    <span className="font-medium text-sm">
-                      {STEP_LABELS[step.type] ?? step.type}
-                    </span>
-                  </div>
-                  <Badge className={cfg.badge}>{cfg.label}</Badge>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </Card>
-  );
-};
-
-// ── Documents gallery ────────────────────────────────────────────────────────
+// ── Mock document data ───────────────────────────────────────────────────────
 
 const DOC_TYPE_OPTIONS = [
-  { value: "id_front", label: "ID — Front" },
-  { value: "id_back", label: "ID — Back" },
-  { value: "passport", label: "Passport" },
-  { value: "driver_licence", label: "Driver Licence" },
-  { value: "proof_of_address", label: "Proof of Address" },
+  { value: "sanctions_screening", label: "Sanctions Screening Report" },
+  { value: "adverse_media", label: "Adverse Media Report" },
+  { value: "company_registry", label: "Company Registry Extract" },
+  { value: "transaction_report", label: "Transaction Analysis Report" },
   { value: "bank_statement", label: "Bank Statement" },
-  { value: "source_of_funds", label: "Source of Funds" },
-  { value: "source_of_wealth", label: "Source of Wealth" },
-  { value: "selfie", label: "Selfie" },
+  { value: "osint_report", label: "OSINT Findings" },
   { value: "other", label: "Other" },
 ];
 
@@ -124,6 +39,44 @@ const isImageDoc = (doc = {}) =>
   /^image\//i.test(doc.mimeType || "") || /\.(png|jpe?g|webp|gif)(\?|$)/i.test(doc.url || "");
 
 const docExt = (doc = {}) => (doc.mimeType || "").split("/").pop()?.toUpperCase() || "FILE";
+
+const MOCK_DOCUMENTS = [
+  {
+    name: "Sanctions Screening — World-Check",
+    url: "https://res.cloudinary.com/demo/image/upload/sample.pdf",
+    mimeType: "application/pdf",
+    docType: "sanctions_screening",
+    uploadedAt: "2026-08-10T09:15:00.000Z",
+  },
+  {
+    name: "Adverse Media Summary",
+    url: "https://res.cloudinary.com/demo/image/upload/sample.pdf",
+    mimeType: "application/pdf",
+    docType: "adverse_media",
+    uploadedAt: "2026-08-12T14:32:00.000Z",
+  },
+  {
+    name: "ACME Holdings — Company Registry Extract",
+    url: "https://res.cloudinary.com/demo/image/upload/sample.jpg",
+    mimeType: "image/jpeg",
+    docType: "company_registry",
+    uploadedAt: "2026-08-15T11:05:00.000Z",
+  },
+  {
+    name: "Transaction Pattern Analysis",
+    url: "https://res.cloudinary.com/demo/image/upload/sample.pdfgo",
+    mimeType: "application/pdf",
+    docType: "transaction_report",
+    uploadedAt: "2026-08-18T16:47:00.000Z",
+  },
+  {
+    name: "OSINT Findings — Public Records",
+    url: "https://res.cloudinary.com/demo/image/upload/sample.pdfg",
+    mimeType: "application/pdf",
+    docType: "osint_report",
+    uploadedAt: "2026-08-20T08:22:00.000Z",
+  },
+];
 
 // Two-click confirm remove — shared by the list row and the grid card.
 const RemoveDocButton = ({ doc, onRemove, removing, compact = false }) => {
@@ -164,7 +117,7 @@ const RemoveDocButton = ({ doc, onRemove, removing, compact = false }) => {
 
 // ── List row ─────────────────────────────────────────────────────────────────
 
-const DocumentRow = ({ doc, onRemove, removing }) => (
+const DocumentRow = ({ doc, onRemove, removing, onOsint }) => (
   <div className="flex items-center gap-3 py-2.5 px-2 border-b border-border/60 last:border-0 hover:bg-muted/30 rounded-md transition-colors">
     <div className="size-11 rounded-md overflow-hidden border border-border/60 bg-muted/40 flex items-center justify-center flex-shrink-0">
       {isImageDoc(doc) ? (
@@ -178,10 +131,7 @@ const DocumentRow = ({ doc, onRemove, removing }) => (
       <p className="text-sm font-medium truncate" title={doc.name}>
         {doc.name || docTypeLabel(doc.docType)}
       </p>
-      <p className="text-xs text-muted-foreground truncate">
-        {docExt(doc)}
-        {doc._step ? ` · from ${doc._step}` : " · added by reviewer"}
-      </p>
+      <p className="text-xs text-muted-foreground truncate">{docExt(doc)}</p>
     </div>
 
     <Badge variant="outline" className="text-[10px] flex-shrink-0 hidden sm:inline-flex">
@@ -202,6 +152,9 @@ const DocumentRow = ({ doc, onRemove, removing }) => (
         <a href={doc.url} download>
           <Download className="size-3.5" />
         </a>
+      </Button>
+      <Button variant="outline" size="icon" onClick={onOsint}>
+        <FingerprintIcon />
       </Button>
       {onRemove && <RemoveDocButton doc={doc} onRemove={onRemove} removing={removing} compact />}
     </div>
@@ -246,7 +199,6 @@ const DocumentCard = ({ doc, onRemove, removing }) => {
             </h4>
             <p className="text-xs text-muted-foreground">
               {doc.uploadedAt ? dateShowFormat(doc.uploadedAt) : "—"}
-              {doc._step ? ` · from ${doc._step}` : ""}
             </p>
           </div>
           <Badge variant="outline" className="text-[10px] flex-shrink-0">
@@ -262,71 +214,36 @@ const DocumentCard = ({ doc, onRemove, removing }) => {
 
 // ── Main tab ─────────────────────────────────────────────────────────────────
 
-export default function Documents({ details, onUpdated }) {
+export default function TbmlOsint() {
+  const [documents, setDocuments] = useState(MOCK_DOCUMENTS);
   const [addOpen, setAddOpen] = useState(false);
   const [removingUrl, setRemovingUrl] = useState(null);
   const [view, setView] = useState("list");
+  const [openOsintDetails, setOpenOsintDetails] = useState(false);
+  const [currentOsint, setCurrentOsint] = useState(null);
 
-  const journeys = useMemo(() => details?.journeys || [], [details]);
-  const primaryJourney = journeys[0];
+  const handleAdd = (doc) => setDocuments((prev) => [doc, ...prev]);
 
-  // Customer-level documents are managed here (removable); journey step
-  // documents are evidence collected during onboarding (read-only).
-  const customerDocs = useMemo(() => details?.documents || [], [details]);
-  const journeyDocs = useMemo(() => {
-    const customerUrls = new Set(customerDocs.map((d) => d.url));
-    const seen = new Set();
-    return journeys.flatMap((j) =>
-      (j.steps || []).flatMap((s) =>
-        (s.documents || []).filter((d) => {
-          if (!d.url || customerUrls.has(d.url) || seen.has(d.url)) return false;
-          seen.add(d.url);
-          return true;
-        }).map((d) => ({ ...d, _step: STEP_LABELS[s.type] ?? s.type })),
-      ),
-    );
-  }, [journeys, customerDocs]);
-
-  const handleAddDocument = async (payload) => {
-    const res = await addCustomerDocuments(details?._id, [
-      { ...payload, type: "manual_upload" },
-    ]);
-    if (res?.success) {
-      onUpdated?.();
-    }
-    return res;
+  const handleRemove = (doc) => {
+    setRemovingUrl(doc.url);
+    setDocuments((prev) => prev.filter((d) => d.url !== doc.url));
+    setRemovingUrl(null);
   };
 
-  const handleRemove = async (doc) => {
-    if (removingUrl) return;
-    setRemovingUrl(doc.url);
-    try {
-      const res = await removeCustomerDocument(details._id, doc.url);
-      if (res?.success) {
-        toast.success(res.message || "Document removed");
-        onUpdated?.();
-      } else {
-        toast.error(res?.error || res?.message || "Failed to remove document");
-      }
-    } catch (error) {
-      console.error("Remove document failed", error);
-      toast.error("Failed to remove document");
-    } finally {
-      setRemovingUrl(null);
-    }
+  const handleOsint = (id) => {
+    setOpenOsintDetails(true);
+    setCurrentOsint(id);
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3 mt-6">
-      <VerificationStatusCard journey={primaryJourney} />
-
-      <Card className="border-border/50 lg:col-span-2">
+    <div className="mt-6">
+      <Card className="border-border/50">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6 gap-2 flex-wrap">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <ImageIcon className="size-5 text-primary" />
-              Uploaded Documents
-              <Badge variant="secondary">{customerDocs.length + journeyDocs.length}</Badge>
+              TBML / OSINT Documents
+              <Badge variant="secondary">{documents.length}</Badge>
             </h3>
             <div className="flex items-center gap-2">
               <ButtonGroup>
@@ -353,7 +270,7 @@ export default function Documents({ details, onUpdated }) {
             </div>
           </div>
 
-          {customerDocs.length === 0 && journeyDocs.length === 0 ? (
+          {documents.length === 0 ? (
             <div className="text-center py-12 rounded-xl border border-dashed border-border">
               <ImageIcon className="size-8 mx-auto mb-2 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">No documents yet.</p>
@@ -368,30 +285,25 @@ export default function Documents({ details, onUpdated }) {
             </div>
           ) : view === "list" ? (
             <div>
-              {customerDocs.map((doc, i) => (
+              {documents.map((doc, i) => (
                 <DocumentRow
-                  key={doc.url || i}
+                  key={i}
                   doc={doc}
                   onRemove={handleRemove}
                   removing={removingUrl === doc.url}
+                  onOsint={handleOsint}
                 />
-              ))}
-              {journeyDocs.map((doc, i) => (
-                <DocumentRow key={doc.url || `j-${i}`} doc={doc} />
               ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {customerDocs.map((doc, i) => (
+              {documents.map((doc, i) => (
                 <DocumentCard
                   key={doc.url || i}
                   doc={doc}
                   onRemove={handleRemove}
                   removing={removingUrl === doc.url}
                 />
-              ))}
-              {journeyDocs.map((doc, i) => (
-                <DocumentCard key={doc.url || `j-${i}`} doc={doc} />
               ))}
             </div>
           )}
@@ -402,10 +314,13 @@ export default function Documents({ details, onUpdated }) {
         open={addOpen}
         setOpen={setAddOpen}
         docTypeOptions={DOC_TYPE_OPTIONS}
-        description="Attach a document to this customer's KYC record."
-        namePlaceholder="e.g. Passport — Jane Example"
-        onSave={handleAddDocument}
+        description="Attach a TBML / OSINT document to this case."
+        namePlaceholder="e.g. Sanctions Screening — ACME Holdings"
+        onSave={(payload) => handleAdd({ ...payload, uploadedAt: new Date().toISOString() })}
       />
+      {openOsintDetails && (
+        <TbmlOsintDetails open={openOsintDetails} setOpen={setOpenOsintDetails} />
+      )}
     </div>
   );
 }

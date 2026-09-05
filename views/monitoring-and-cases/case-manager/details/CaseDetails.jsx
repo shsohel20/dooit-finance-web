@@ -45,6 +45,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NetworkGraph from "@/views/onboarding/customer-queue/details/d3/Networkgraph";
 import { transformToGraph } from "@/views/onboarding/customer-queue/details/d3/lib/transformgraphData";
 import partyEntities from "@/views/onboarding/customer-queue/details/demo.json";
+import TbmlOsint from "./tabs/components/TbmlOsint";
+import { FingerprintIcon } from "lucide-react";
+import TbmlOsintReport from "./tabs/components/TbmlOsintReport";
 
 const FilesTab = lazy(() => import("./tabs/FilesTab"));
 // Pulls in the OCR detail dialog and its table — only loaded if the tab opens.
@@ -129,12 +132,11 @@ export default function CaseDetails({ caseId }) {
           getAuditLog(caseId).catch(() => null),
           getCaseAnalysis(caseId).catch(() => null),
         ]);
+        console.log("case res", res);
 
         setAnalysis(analysisRes?.succeed ? analysisRes.data : null);
 
         const filings = reportsRes?.succeed ? reportsRes.data : null;
-        setReports(filings);
-        setReportsSummary(reportsRes?.succeed ? reportsRes.summary : null);
 
         if (res?.succeed) {
           // Normalise the API document into the shape the sections expect.
@@ -392,10 +394,17 @@ export default function CaseDetails({ caseId }) {
             <IconSitemap />
             Relation graph
           </TabsTrigger>
+          <TabsTrigger value="tbml-osint">
+            <FingerprintIcon /> TBML Osint
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="investigation-hub">
           <InvestigationHub caseData={caseData} caseId={caseId} />
+        </TabsContent>
+        <TabsContent value="tbml-osint">
+          {/* <TbmlOsint /> */}
+          <TbmlOsintReport />
         </TabsContent>
 
         <TabsContent value="customer-profile">

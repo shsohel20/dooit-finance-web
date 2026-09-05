@@ -244,8 +244,11 @@ const OSINT_URL = process.env.NEXT_PUBLIC_OSINT_URL;
 const X_API_KEY = process.env.NEXT_PUBLIC_OSINT_API_KEY;
 const DB_SOURCE = process.env.NEXT_PUBLIC_DB_SOURCE;
 
+const osint_search_url = `${OSINT_URL}/osint_searx`;
+const tbml_osint_url = `${OSINT_URL}/osint/tbml`;
+
 export const createOSINTdata = async (data) => {
-  const url = `${OSINT_URL}`;
+  const url = `${osint_search_url}`;
   const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify({ ...data, db_source: DB_SOURCE }),
@@ -258,7 +261,7 @@ export const createOSINTdata = async (data) => {
 };
 
 export const getOSINTdata = async (entityType, entityId) => {
-  const url = `${OSINT_URL}/${entityType}/${entityId}?db_source=${DB_SOURCE}`;
+  const url = `${osint_search_url}/${entityType}/${entityId}?db_source=${DB_SOURCE}`;
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -268,7 +271,7 @@ export const getOSINTdata = async (entityType, entityId) => {
   return response.json();
 };
 export const getOSINTdataSources = async (entityType, entityId) => {
-  const url = `${OSINT_URL}/${entityType}/${entityId}/sources`;
+  const url = `${osint_search_url}/${entityType}/${entityId}/sources?db_source=${DB_SOURCE}`;
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -282,6 +285,17 @@ export const getOSINTScreenshots = async (entityType, entityId) => {
   const url = `https://osint.dooit.ai/api/v1/osint/${entityType}/${entityId}/screenshots`;
   const response = await fetch(url, {
     method: "GET",
+  });
+  return response.json();
+};
+
+export const getTBMLosintReportDetails = async (reportId) => {
+  const url = `${tbml_osint_url}/reports/${reportId}?db_source=${DB_SOURCE}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "X-API-Key": X_API_KEY,
+    },
   });
   return response.json();
 };

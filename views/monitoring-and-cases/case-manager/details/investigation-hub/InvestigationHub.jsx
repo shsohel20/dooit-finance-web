@@ -1,7 +1,16 @@
 "use client";
 
+import { useState } from "react";
+import { Radar } from "lucide-react";
 import { IconAlertTriangle, IconCheck, IconLoader2 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { dateShowFormatWithTime } from "@/lib/utils";
 import AlertDetailsPanel from "./AlertDetailsPanel";
 import StepWorkspacePanel from "./StepWorkspacePanel";
@@ -11,27 +20,54 @@ import { useInvestigationWizard } from "./hooks/useInvestigationWizard";
 
 /**
  * The step-driven investigation workspace: alert context on the left, the
- * active step's form in the middle, the step list + checklist on the right
- * of that, and the OSINT report furthest right. All wizard state lives in
- * `useInvestigationWizard` and is threaded down as a single `wizard` object
- * so step components stay simple props-in/callbacks-out.
+ * active step's form in the middle, and the step list + checklist on the
+ * right of that. The OSINT report opens in a slide-out drawer via the
+ * "OSINT Report" button so the main workspace stays uncluttered. All wizard
+ * state lives in `useInvestigationWizard` and is threaded down as a single
+ * `wizard` object so step components stay simple props-in/callbacks-out.
  */
 export default function InvestigationHub({ caseData, caseId }) {
   // `caseId` gives the wizard somewhere to save; without it the hub still
   // works, but only in memory (docs/74 C18).
   const wizard = useInvestigationWizard(caseData, caseId);
+  const [osintOpen, setOsintOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-2">
-      <SaveIndicator wizard={wizard} />
-      <div className="flex h-[calc(100vh-290px)] min-h-[620px] gap-3.5 overflow-x-auto pb-1">
+      {/* Save state on the left, the OSINT drawer trigger on the right. */}
+      <div className="flex items-center justify-between gap-3">
+        <SaveIndicator wizard={wizard} />
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="shrink-0"
+          onClick={() => setOsintOpen(true)}
+        >
+          <Radar className="size-3.5" />
+          OSINT Report
+        </Button>
+      </div>
+
+      <div className="flex h-[calc(100vh-300px)] min-h-[620px] gap-3.5 overflow-x-auto pb-1">
         <AlertDetailsPanel caseData={caseData} />
         <StepWorkspacePanel caseData={caseData} wizard={wizard} />
         <StepsChecklistPanel wizard={wizard} />
-        <div className="w-[288px] shrink-0 overflow-y-auto rounded-xl border border-border bg-white">
-          <OsiintData />
-        </div>
       </div>
+
+      <Sheet open={osintOpen} onOpenChange={setOsintOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>OSINT Report</SheetTitle>
+            <SheetDescription>
+              Open-source intelligence findings and data sources for this customer.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="px-4 pb-4">
+            <OsiintData caseData={caseData} />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

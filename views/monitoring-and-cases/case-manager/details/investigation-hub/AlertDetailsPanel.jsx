@@ -30,13 +30,13 @@ export default function AlertDetailsPanel({ caseData }) {
   const selected = alerts.find((a) => String(a.id) === String(selectedId)) || alerts[0] || null;
 
   return (
-    <div className="flex w-[290px] shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-white">
-      <div className="flex shrink-0 items-center gap-2.5 border-b-2 border-warning bg-warning/10 px-4 py-3">
+    <div className="flex w-[290px] shrink-0 flex-col overflow-hidden rounded-xl  ">
+      {/* <div className="flex shrink-0 items-center gap-2.5 border-b-2 border-warning bg-warning/10 px-4 py-3">
         <span className="size-2 rounded-full bg-warning" />
         <span className="text-[13px] font-bold tracking-wide text-warning">ALERT DETAILS</span>
-      </div>
+      </div> */}
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-4">
+      <div className="min-h-0 flex-1 overflow-y-auto ">
         <div className="mb-4 rounded-lg border border-warning/20 bg-warning/5 p-3.5">
           <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold tracking-wide text-warning">
             <IconAlertTriangle className="size-3" />
@@ -137,21 +137,35 @@ export default function AlertDetailsPanel({ caseData }) {
             {getInitials(c.name || caseData?.customerName)}
           </div>
           <div className="min-w-0">
-            <div className="text-[13.5px] font-bold text-heading">{c.name || caseData?.customerName}</div>
+            <div className="text-[13.5px] font-bold text-heading">
+              {c.name || caseData?.customerName}
+            </div>
             <div className="text-xs text-muted-foreground">{caseData?.customerType} customer</div>
           </div>
         </div>
 
         <div className="flex flex-col gap-2.5">
-          <FactRow label="Customer ID" value={caseData?.uid} valueClassName="font-mono text-[11px] font-semibold" />
+          <FactRow
+            label="Customer ID"
+            value={caseData?.uid}
+            valueClassName="font-mono text-[11px] font-semibold"
+          />
           <FactRow label="Nationality" value={c.nationality} />
           <FactRow label="Occupation" value={c.occupation} />
           <FactRow
             label="Account opened"
             value={c.accountOpeningDate ? dateShowFormat(c.accountOpeningDate) : "—"}
           />
-          <FactRow label="Risk rating" value={c.riskRating || caseData?.riskTag} valueClassName="font-semibold text-warning" />
-          <FactRow label="Email" value={c.email} valueClassName="text-right text-[11px] font-semibold break-all" />
+          <FactRow
+            label="Risk rating"
+            value={c.riskRating || caseData?.riskTag}
+            valueClassName="font-semibold text-warning"
+          />
+          <FactRow
+            label="Email"
+            value={c.email}
+            valueClassName="text-right text-[11px] font-semibold break-all"
+          />
         </div>
       </div>
     </div>

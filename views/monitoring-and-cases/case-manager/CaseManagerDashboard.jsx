@@ -42,7 +42,6 @@ const STATUS_LABELS = {
 };
 
 export default function CaseManagerDashboard() {
-  const router = useRouter();
   const {
     cases,
     setCases,

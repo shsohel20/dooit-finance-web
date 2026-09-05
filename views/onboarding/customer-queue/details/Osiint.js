@@ -25,6 +25,7 @@ import {
   FileSearch,
   Fingerprint,
   Flag,
+  Globe,
   ImageIcon,
   Lightbulb,
   ListChecks,
@@ -41,7 +42,9 @@ import { useSearchParams } from "next/navigation";
 import {
   createOSINTdata,
   getOSINTdata,
+  getOSINTdataSources,
 } from "@/app/dashboard/client/onboarding/customer-queue/actions";
+import OsintDataSourceCard from "@/views/monitoring-and-cases/case-manager/details/tabs/components/OsintDataSourceCard";
 
 function parseRiskLevel(riskAssessment) {
   if (!riskAssessment) return null;
@@ -350,7 +353,7 @@ function ScreenshotGallery({ screenshots }) {
     </>
   );
 }
-
+const SOURCES_PAGE_SIZE = 5;
 export function Osiint({ data, details }) {
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -358,6 +361,8 @@ export function Osiint({ data, details }) {
   const [screenshots, setScreenshots] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState(null);
+  const [sources, setSources] = useState([]);
+  const [showAllSources, setShowAllSources] = useState(false);
   const id = useSearchParams().get("id");
 
   const fetchOsintReport = useCallback(async () => {
@@ -370,8 +375,13 @@ export function Osiint({ data, details }) {
     try {
       const entityType = "customers";
       const response = await getOSINTdata(entityType, id);
-      console.log("osint response", response);
-      // const screenshotData = await getOSINTdataSources(entityType, id);
+      const sourcesResponse = await getOSINTdataSources(entityType, id);
+
+      const sourcesList = Array.isArray(sourcesResponse)
+        ? sourcesResponse.filter((itm) => itm.subject_match === "MATCH")
+        : [];
+      console.log("source response", sourcesResponse);
+      setSources(sourcesList);
       setReportData(response);
       // setScreenshots(screenshotData);
     } catch (err) {
@@ -500,97 +510,6 @@ export function Osiint({ data, details }) {
 
   return (
     <div className="@container/osiint space-y-6">
-      {/* Hero header */}
-      {/* <section
-        className={cn(
-          "relative overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br shadow-md ring-1 ring-black/[0.03]",
-          styles.gradient,
-        )}
-      >
-        <div className={cn("absolute inset-x-0 top-0 h-1", styles.bar)} aria-hidden="true" />
-        <div
-          className="pointer-events-none absolute -top-16 -right-16 size-56 rounded-full bg-white/40 blur-3xl"
-          aria-hidden="true"
-        />
-
-        <div className="relative px-5 py-6 sm:px-6 sm:py-7">
-          <div className="flex flex-col gap-5 @[640px]/osiint:flex-row @[640px]/osiint:items-start @[640px]/osiint:justify-between">
-            <div className="flex min-w-0 items-start gap-4">
-              <div
-                className={cn(
-                  "inline-flex size-14 shrink-0 items-center justify-center rounded-2xl border bg-white/80 shadow-sm ring-4",
-                  styles.ring,
-                )}
-              >
-                <Fingerprint aria-hidden="true" className="size-6 text-primary" />
-              </div>
-              <div className="min-w-0 space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="truncate text-2xl font-bold tracking-tight text-slate-900">
-                    {payload.entity_name || details?.fullName || "Unknown Entity"}
-                  </h2>
-                  {riskLevel && (
-                    <Badge className={cn("border font-semibold", styles.badge)}>
-                      <ShieldAlert aria-hidden="true" className="size-3" />
-                      {riskLevel} RISK
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-white/70 px-2.5 py-1">
-                    <UserRound aria-hidden="true" className="size-3.5 text-slate-400" />
-                    {formatEntityType(payload.entity_type)}
-                  </span>
-                  {payload.entity_id && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-white/70 px-2.5 py-1 font-mono text-[11px] text-slate-600">
-                      <FileSearch aria-hidden="true" className="size-3 text-slate-400" />
-                      {payload.entity_id}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex shrink-0 flex-col items-end gap-2">
-              <Badge className={cn("w-fit border px-3 py-1.5 text-xs", status.badge)}>
-                <StatusIcon
-                  aria-hidden="true"
-                  className={cn(
-                    "size-3.5",
-                    (payload.status || "").toLowerCase().includes("process") && "animate-spin",
-                  )}
-                />
-                {formatEntityType(payload.status || "Unknown")}
-              </Badge>
-              {!hasEntityId && !isProcessing && (
-                <div className="flex flex-col items-end gap-1">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="w-fit"
-                    onClick={handleGenerate}
-                    disabled={generating}
-                  >
-                    {generating ? (
-                      <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
-                    ) : (
-                      <Radar aria-hidden="true" className="size-3.5" />
-                    )}
-                    {generating ? "Generating…" : "Generate OSINT Report"}
-                  </Button>
-                  {generateError && (
-                    <p className="max-w-[220px] text-right text-[11px] text-red-500">
-                      {generateError}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section> */}
-
       <div className="grid grid-cols-1 gap-6 @[900px]/osiint:grid-cols-[280px_minmax(0,1fr)]">
         {/* Sidebar summary */}
         <aside className="space-y-4 @[900px]/osiint:sticky @[900px]/osiint:top-4 @[900px]/osiint:self-start">
@@ -614,6 +533,29 @@ export function Osiint({ data, details }) {
               )}
             </CardContent>
           </Card>
+          {!loading && sources.length > 0 && (
+            <div className="flex flex-col gap-2 px-1">
+              <h5 className="font-bold text-base px-3 py-2 flex items-center gap-2">
+                <Globe className="w-4 h-4" /> Data Sources
+              </h5>
+              <div className="flex flex-col gap-2">
+                {(showAllSources ? sources : sources.slice(0, SOURCES_PAGE_SIZE)).map(
+                  (source, idx) => (
+                    <OsintDataSourceCard key={source.evidence_id || idx} source={source} />
+                  ),
+                )}
+              </div>
+              {sources.length > SOURCES_PAGE_SIZE && (
+                <button
+                  type="button"
+                  className="self-center text-xs font-bold hover:underline transition-all duration-300"
+                  onClick={() => setShowAllSources((prev) => !prev)}
+                >
+                  {showAllSources ? "See Less" : `See More (${sources.length - SOURCES_PAGE_SIZE})`}
+                </button>
+              )}
+            </div>
+          )}
 
           {riskLevel && (
             <Card className="gap-0 overflow-hidden border-border/70 py-0 shadow-sm ring-1 ring-black/[0.03]">
