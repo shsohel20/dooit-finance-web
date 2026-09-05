@@ -109,14 +109,46 @@ export const addNote = async (caseId, payload) => {
 
 // ── Regulatory filings ────────────────────────────────────────────────────────
 
-// Every report type filed against this case: ECDD, SMR, TTR, IFTI, GFS, RFI.
-// Returns { data: { ecdd, smr, ttr, ifti, gfs, rfi }, summary: { counts, total, sarFiled } }.
+// Every report type filed against this case: ECDD, SMR, TTR, IFTI, GFS, RFI
+// and the alert dismissal records. Returns
+// { data: { ecdd, smr, ttr, ifti, gfs, rfi, dismissal }, summary: { counts, total, sarFiled } }.
 export const getCaseReports = async (caseId) => {
   const res = await fetchWithAuth(`cases/${caseId}/reports`);
   return res.json();
 };
 
 // ── Audit ─────────────────────────────────────────────────────────────────────
+
+// Draft a compliance report for a case: our API computes every figure and
+// identity and asks the AI service only for the narrative sections (docs/74
+// §6.3). `ref` may be a Case id or uid, or the originating Alert's id or uid.
+// Returns our persisted report document, so callers map OUR field names.
+// A dismissal is scoped to one alert, so it needs `alertId` (and optionally a
+// `dismissalType` industry template code).
+export const draftCaseReport = async (ref, type, { alertId, dismissalType, regenerate } = {}) => {
+  const res = await fetchWithAuth(`cases/${ref}/reports/${type}/draft`, {
+    method: 'POST',
+    body: JSON.stringify({ alertId, dismissalType, regenerate }),
+  });
+  return res.json();
+};
+
+// The case's transaction analysis — every figure a report draft is built from.
+// params: { from, to } for an ad-hoc window, { refresh: true } to recompute.
+export const getCaseAnalysis = async (caseId, params = {}) => {
+  const qs = buildQuery(params);
+  const res = await fetchWithAuth(`cases/${caseId}/analysis${qs ? `?${qs}` : ''}`);
+  return res.json();
+};
+
+// Pin the period the analysis covers. An empty body resets it to the default.
+export const setCaseReviewWindow = async (caseId, { start, end } = {}) => {
+  const res = await fetchWithAuth(`cases/${caseId}/review-window`, {
+    method: 'PATCH',
+    body: JSON.stringify({ start, end }),
+  });
+  return res.json();
+};
 
 export const getAuditLog = async (caseId) => {
   const res = await fetchWithAuth(`cases/${caseId}/audit`);
@@ -160,9 +192,62 @@ export const dismissAlert = async (id, payload = {}) => {
   return res.json();
 };
 
+// payload: {} → create a new case · { attach: 'auto' } → attach to the
+// customer's newest open case (else create) · { caseId } → attach to that case.
+// The response carries `attached: true|false` so the caller can word its toast.
 export const escalateAlertToCase = async (id, payload = {}) => {
   const res = await fetchWithAuth(`alert/${id}/escalate`, {
     method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+};
+
+// Open cases of the alert's customer the alert could be attached to.
+export const getAttachableCases = async (alertId) => {
+  const res = await fetchWithAuth(`alert/${alertId}/attachable-cases`);
+  return res.json();
+};
+
+// ── Case ↔ customer (POI) linkage ────────────────────────────────────────────
+export const linkCustomers = async (caseId, customerIds) => {
+  const res = await fetchWithAuth(`cases/${caseId}/customers`, {
+    method: 'POST',
+    body: JSON.stringify({ customerIds }),
+  });
+  return res.json();
+};
+
+export const unlinkCustomer = async (caseId, customerId) => {
+  const res = await fetchWithAuth(`cases/${caseId}/customers/${customerId}`, {
+    method: 'DELETE',
+  });
+  return res.json();
+};
+
+// ── Alert dismissal records (docs/74 §4.5) ───────────────────────────────────
+// `override: true` signs off despite our own blocking conditions (unverified
+// KYC, a live SMR) — the API records who overrode and when.
+export const approveDismissal = async (id, payload = {}) => {
+  const res = await fetchWithAuth(`dismissal-report/${id}/approve`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+};
+
+// ── Investigation Hub progress (docs/74 C18) ─────────────────────────────────
+// The 12-step wizard's saved state. `null` data means the case has never been
+// worked on, so the hub seeds its own empty defaults.
+export const getCaseInvestigation = async (caseId) => {
+  const res = await fetchWithAuth(`cases/${caseId}/investigation`);
+  return res.json();
+};
+
+// Merges the keys it is given, so a partial save never blanks the rest.
+export const saveCaseInvestigation = async (caseId, payload) => {
+  const res = await fetchWithAuth(`cases/${caseId}/investigation`, {
+    method: 'PUT',
     body: JSON.stringify(payload),
   });
   return res.json();

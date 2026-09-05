@@ -65,7 +65,7 @@ const EcddList = () => {
     const handleView = (row) => {
         const alertId = idOf(row?.alert);
         if (alertId) {
-            router.push(`/dashboard/client/monitoring-and-cases/case-list/details/${alertId}?tab=ecdd-review`);
+            router.push(`/dashboard/client/monitoring-and-cases/alerts/${alertId}?tab=ecdd-review`);
             return;
         }
         // Case-origin ECDD (no triggering alert): the case-centric view lists it
@@ -103,7 +103,7 @@ const EcddList = () => {
             toast.error('No originating alert on this ECDD to generate from.');
             return;
         }
-        router.push(`/dashboard/client/monitoring-and-cases/case-list/details/${alertId}`);
+        router.push(`/dashboard/client/monitoring-and-cases/alerts/${alertId}`);
     }
     const columns = [
         {

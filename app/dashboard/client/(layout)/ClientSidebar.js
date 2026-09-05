@@ -272,7 +272,7 @@ export default function ClientSidebar({ ...props }) {
     },
     {
       title: "Alerts",
-      url: "/dashboard/client/monitoring-and-cases/case-list",
+      url: "/dashboard/client/monitoring-and-cases/alerts",
       icon: IconAlertTriangle,
     },
     {

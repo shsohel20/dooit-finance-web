@@ -11,6 +11,7 @@ import {
   IconLoader2,
   IconSitemap,
   IconCoins,
+  IconFileStack,
 } from "@tabler/icons-react";
 import { mockCases } from "@/lib/case-manager-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +20,7 @@ import {
   getCaseReports,
   getCaseNotes,
   getAuditLog,
+  getCaseAnalysis,
   getCustomerDevices,
   addNote as addNoteAction,
 } from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
@@ -32,7 +34,8 @@ import {
   adaptDevices,
 } from "./caseAdapter";
 import CaseHeader from "./CaseHeader";
-import CustomerProfileSection from "./sections/CustomerProfileSection";
+import CustomerProfileTab from "./tabs/CustomerProfileTab";
+import CaseReportsSection from "./sections/CaseReportsSection";
 import TransactionAnalysisSection from "./sections/TransactionAnalysisSection";
 import CaseActivityView from "./CaseActivityView";
 import InvestigationHub from "./investigation-hub/InvestigationHub";
@@ -82,6 +85,28 @@ export default function CaseDetails({ caseId }) {
   const [reportsSummary, setReportsSummary] = useState(null);
   const [reportsLoading, setReportsLoading] = useState(true);
 
+  // The case's transaction analysis (GET /cases/:id/analysis) — the figures the
+  // Case Analysis panel shows and every report draft is built from. Served from
+  // a server-side snapshot, so loading it with the case is cheap.
+  const [analysis, setAnalysis] = useState(null);
+  const [analysisLoading, setAnalysisLoading] = useState(true);
+
+  // "Recompute" on the panel: force a fresh pass rather than the snapshot.
+  const refreshAnalysis = async () => {
+    const res = await getCaseAnalysis(caseId, { refresh: true }).catch(() => null);
+    if (res?.succeed) setAnalysis(res.data);
+  };
+
+  // After drafting a report, pull the filings again so the new record appears —
+  // and with them the RFI list, which is the same payload.
+  const refreshReports = async () => {
+    const res = await getCaseReports(caseId).catch(() => null);
+    if (!res?.succeed) return;
+    setReports(res.data);
+    setReportsSummary(res.summary);
+    setRfis(adaptRfis(res.data?.rfi));
+  };
+
   const sectionRefs = useRef({});
   const setSectionRef = (id) => (el) => {
     sectionRefs.current[id] = el;
@@ -92,16 +117,20 @@ export default function CaseDetails({ caseId }) {
     const load = async () => {
       setLoading(true);
       setReportsLoading(true);
+      setAnalysisLoading(true);
       setError(null);
       try {
         // One round trip each, in parallel — a failure in any companion
         // endpoint must not stop the case itself from rendering.
-        const [res, reportsRes, notesRes, auditRes] = await Promise.all([
+        const [res, reportsRes, notesRes, auditRes, analysisRes] = await Promise.all([
           getCaseById(caseId),
           getCaseReports(caseId).catch(() => null),
           getCaseNotes(caseId).catch(() => null),
           getAuditLog(caseId).catch(() => null),
+          getCaseAnalysis(caseId).catch(() => null),
         ]);
+
+        setAnalysis(analysisRes?.succeed ? analysisRes.data : null);
 
         const filings = reportsRes?.succeed ? reportsRes.data : null;
         setReports(filings);
@@ -151,6 +180,7 @@ export default function CaseDetails({ caseId }) {
       } finally {
         setLoading(false);
         setReportsLoading(false);
+        setAnalysisLoading(false);
       }
     };
     load();
@@ -350,6 +380,10 @@ export default function CaseDetails({ caseId }) {
             <IconCoins />
             Source of Funds
           </TabsTrigger>
+          <TabsTrigger value="reports">
+            <IconFileStack />
+            Reports
+          </TabsTrigger>
           <TabsTrigger value="case-activity">
             <IconClipboardList />
             Case Activity
@@ -361,14 +395,22 @@ export default function CaseDetails({ caseId }) {
         </TabsList>
 
         <TabsContent value="investigation-hub">
-          <InvestigationHub caseData={caseData} />
+          <InvestigationHub caseData={caseData} caseId={caseId} />
         </TabsContent>
 
         <TabsContent value="customer-profile">
-          <CustomerProfileSection
-            caseData={caseData}
-            sectionRef={setSectionRef("customer-profile")}
-            collapsible={false}
+          <CustomerProfileTab caseData={caseData} sectionRef={setSectionRef("customer-profile")} />
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <CaseReportsSection
+            caseId={caseId}
+            alerts={caseData?.alerts}
+            reports={reports}
+            summary={reportsSummary}
+            loading={reportsLoading}
+            onDrafted={refreshReports}
+            sectionRef={setSectionRef("reports")}
           />
         </TabsContent>
 
@@ -395,6 +437,9 @@ export default function CaseDetails({ caseId }) {
         <TabsContent value="case-activity">
           <CaseActivityView
             caseData={caseData}
+            analysis={analysis}
+            analysisLoading={analysisLoading}
+            onRefreshAnalysis={refreshAnalysis}
             rfis={rfis}
             onOpenCreateRFI={() => setRfiOpen(true)}
             assignedAnalyst={assignedAnalyst}

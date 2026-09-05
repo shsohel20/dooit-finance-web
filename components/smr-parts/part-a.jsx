@@ -9,7 +9,7 @@ import { Plus, HelpCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import SelectCaseList from '../ui/SelectCaseList';
 import SelectCase from '../ui/SelectCase';
-import { autoPopulatedSMRData } from '@/app/dashboard/client/report-compliance/smr-filing/smr/actions';
+import { draftSmrReport } from '@/app/dashboard/client/report-compliance/smr-filing/smr/actions';
 // Shared with the detail view so a label edited here cannot drift out of sync
 // and silently render as unticked there.
 import {
@@ -65,57 +65,48 @@ export function PartA({ data, updateData }) {
     setOtherReasons(updated);
     updateData({ otherReasons: updated.filter((r) => r.trim() !== '') });
   };
+  /**
+   * Draft the SMR for the chosen case and load it into the form.
+   *
+   * Parts A, C, D and F are built by our API from the case's own alerts,
+   * customer KYC and transactions; only the grounds-for-suspicion narrative
+   * comes from the AI service (docs/74 §4.2). The draft already uses this
+   * form's own shapes, so the parts are handed over as they are rather than
+   * being translated out of a third-party payload.
+   */
   const handleCaseNumberChange = async (value) => {
     setIsLoading(true);
-    console.log('value', value);
     updateData({ caseNumber: value });
     try {
-      const response = await autoPopulatedSMRData(value.value);
+      const response = await draftSmrReport(value.value);
+      const doc = response?.succeed ? response.data : null;
+      if (!doc) {
+        console.error('Failed to draft SMR', response?.message);
+        return;
+      }
 
+      const person = doc.partC?.personOrganisation || {};
       updateData({
-        groundsForSuspicion: response.narrative,
+        // ours
+        designatedServices: doc.partA?.designatedServices || [],
+        suspicionReasons: doc.partA?.suspicionReasons || [],
+        serviceStatus: doc.partA?.serviceStatus || '',
         personOrganisation: {
           ...data.personOrganisation,
-          name: response.name,
-          emails: [response.email_address],
-          phoneNumbers: [...response.phone_numbers],
-          dateOfBirth: response.dob,
-          citizenship: response.country_of_citizenship,
+          name: person.name || '',
+          emails: person.emails || [],
+          phoneNumbers: person.phoneNumbers || [],
+          dateOfBirth: person.personDetails?.dateOfBirth || '',
+          citizenship: person.personDetails?.nationality || '',
+          occupation: person.occupation || '',
         },
-        transactions: [
-          {
-            date: response.transaction_details?.date_of_transaction ?? '',
-            type: response.transaction_details?.transaction_type ?? '',
-            referenceNumber:
-              response.transaction_details?.transaction_reference_number ?? '',
-            totalAmount: {
-              currencyCode: response.transaction_details?.currency ?? '',
-              amount: response.transaction_details?.total_amount ?? 0,
-            },
-            cashAmount: {
-              currencyCode: response.transaction_details?.currency ?? '',
-              amount: response.transaction_details?.total_cash_involved ?? 0,
-            },
-            completed: false,
-            foreignCurrencies: [],
-            digitalCurrencies: [],
-            sender: {
-              name: response.parties?.sender?.name ?? '',
-              institutions: [response.parties?.sender?.institution ?? ''],
-            },
-            payee: {
-              name: response.parties?.payee ?? '',
-              institutions: [],
-            },
-            beneficiary: {
-              name: response.parties?.beneficiary?.name ?? '',
-              institutions: [response.parties?.beneficiary?.institution ?? ''],
-            },
-          },
-        ],
+        // every transaction on the case, not just the one that alerted
+        transactions: doc.partF?.transactions || [],
+        // theirs
+        groundsForSuspicion: doc.partB?.groundsForSuspicion || '',
       });
     } catch (error) {
-      console.log('Failed to get data', error);
+      console.error('Failed to draft SMR', error);
     } finally {
       setIsLoading(false);
     }

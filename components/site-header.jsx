@@ -76,7 +76,7 @@ export function SiteHeader() {
     },
     {
       name: 'Alerts',
-      href: '/dashboard/client/monitoring-and-cases/case-list',
+      href: '/dashboard/client/monitoring-and-cases/alerts',
       icon: <IconAlertTriangle size={14} />,
     },
   ];

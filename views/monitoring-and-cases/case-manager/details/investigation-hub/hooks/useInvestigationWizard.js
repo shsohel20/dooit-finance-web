@@ -1,12 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   INVESTIGATION_STEPS,
-  DEFAULT_STEP_DONE,
   DEFAULT_CHECKLIST,
   SMR_PART_ORDER,
 } from "../data/investigationHubData";
+import {
+  getCaseInvestigation,
+  saveCaseInvestigation,
+} from "@/app/dashboard/client/monitoring-and-cases/case-manager/actions";
+
+// Nothing is done until someone does it. The hub used to seed six of the twelve
+// steps as complete, so every case opened at "6/12 · 50%" before an analyst had
+// looked at it (docs/70 §3, docs/74 C18).
+const NO_STEPS_DONE = INVESTIGATION_STEPS.map(() => false);
+
+// How long the analyst has to stop typing before their work is written. Long
+// enough not to save on every keystroke, short enough that closing the tab a
+// couple of seconds later still keeps the answer.
+const AUTOSAVE_DELAY_MS = 1500;
 
 function seedPois(caseData) {
   const individuals = caseData?.relationships?.individuals || [];
@@ -61,15 +74,15 @@ function seedCaseAlerts(caseData) {
  * typologies/reasons, the AUSTRAC SMR part, and the investigation checklist.
  * Ported from the AML Case Workspace prototype's Component state machine.
  */
-export function useInvestigationWizard(caseData) {
-  const [activeStep, setActiveStep] = useState(6); // land on Narrative, mirroring the prototype
+export function useInvestigationWizard(caseData, caseId) {
+  const [activeStep, setActiveStep] = useState(0); // start at Triage, not mid-way
   const [narrativeTpl, setNarrativeTpl] = useState("ecdd");
   const [smrPart, setSmrPart] = useState("A");
   const [typoDraft, setTypoDraft] = useState("");
   const [reasonDraft, setReasonDraft] = useState("");
   const [customTypologies, setCustomTypologies] = useState([]);
   const [customReasons, setCustomReasons] = useState([]);
-  const [stepsDone, setStepsDone] = useState(DEFAULT_STEP_DONE);
+  const [stepsDone, setStepsDone] = useState(NO_STEPS_DONE);
   const [checklist, setChecklist] = useState(DEFAULT_CHECKLIST);
   const [pois, setPois] = useState(() => seedPois(caseData));
   const [sel, setSel] = useState({
@@ -77,6 +90,97 @@ export function useInvestigationWizard(caseData) {
     reasons: [],
     provided: "",
   });
+
+  // ── Persistence (docs/74 C18) ─────────────────────────────────────────────
+  // `loaded` gates the autosave: without it the empty initial state would be
+  // written over the analyst's saved work the moment the hub mounted.
+  const [loaded, setLoaded] = useState(false);
+  const [saveState, setSaveState] = useState({ saving: false, savedAt: null, error: null });
+  const saveTimer = useRef(null);
+  const latest = useRef(null);
+
+  useEffect(() => {
+    if (!caseId) {
+      setLoaded(true); // nothing to load against; the hub still works in-memory
+      return;
+    }
+    let cancelled = false;
+
+    getCaseInvestigation(caseId)
+      .then((res) => {
+        if (cancelled) return;
+        const saved = res?.succeed ? res.data : null;
+        if (saved) {
+          // Only restore what was actually stored — a field the analyst never
+          // touched keeps its default rather than becoming null.
+          if (typeof saved.activeStep === "number") setActiveStep(saved.activeStep);
+          if (saved.stepsDone?.length) setStepsDone(saved.stepsDone);
+          if (saved.checklist?.length) setChecklist(saved.checklist);
+          if (saved.selections) setSel((prev) => ({ ...prev, ...saved.selections }));
+          if (saved.pois?.length) setPois(saved.pois);
+          if (saved.customTypologies?.length) setCustomTypologies(saved.customTypologies);
+          if (saved.customReasons?.length) setCustomReasons(saved.customReasons);
+          if (saved.narrativeTemplate) setNarrativeTpl(saved.narrativeTemplate);
+          if (saved.smr?.part) setSmrPart(saved.smr.part);
+          setSaveState({ saving: false, savedAt: saved.updatedAt || null, error: null });
+        }
+      })
+      .catch(() => {
+        // A failed load must not wipe anything: stay on defaults and let the
+        // analyst work, but do not autosave over what may exist on the server.
+        if (!cancelled) setSaveState({ saving: false, savedAt: null, error: "load" });
+      })
+      .finally(() => {
+        if (!cancelled) setLoaded(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [caseId]);
+
+  // Write the analyst's work, debounced. Kept in a ref so the timer always
+  // sends the newest state rather than the state captured when it was set.
+  latest.current = {
+    activeStep,
+    stepsDone,
+    checklist,
+    selections: sel,
+    pois,
+    customTypologies,
+    customReasons,
+    narrativeTemplate: narrativeTpl,
+    smr: { part: smrPart },
+  };
+
+  const flush = useCallback(async () => {
+    if (!caseId) return;
+    setSaveState((s) => ({ ...s, saving: true }));
+    try {
+      const res = await saveCaseInvestigation(caseId, latest.current);
+      setSaveState({
+        saving: false,
+        savedAt: res?.succeed ? res.data?.updatedAt || new Date().toISOString() : null,
+        error: res?.succeed ? null : "save",
+      });
+    } catch {
+      setSaveState({ saving: false, savedAt: null, error: "save" });
+    }
+  }, [caseId]);
+
+  useEffect(() => {
+    // Never autosave before the load has settled, and never when the load
+    // itself failed — either would risk overwriting stored progress.
+    if (!loaded || !caseId || saveState.error === "load") return;
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(flush, AUTOSAVE_DELAY_MS);
+    return () => clearTimeout(saveTimer.current);
+    // The dependency list is the analyst's work: any change schedules a save.
+  }, [
+    loaded, caseId, flush, saveState.error,
+    activeStep, stepsDone, checklist, sel, pois, customTypologies, customReasons,
+    narrativeTpl, smrPart,
+  ]);
 
   const caseAlerts = useMemo(() => seedCaseAlerts(caseData), [caseData]);
 
@@ -191,5 +295,12 @@ export function useInvestigationWizard(caseData) {
     removePoi,
     addPoi,
     caseAlerts,
+
+    // Persistence, for the hub header's "Saving… / Saved" indicator.
+    loaded,
+    saving: saveState.saving,
+    savedAt: saveState.savedAt,
+    saveError: saveState.error,
+    saveNow: flush,
   };
 }

@@ -232,6 +232,45 @@ export function adaptCase(api) {
       relationship: humanize(pickRelation(c, api.client)?.type),
       riskTag: null,
     })),
+
+    // Every person of interest on the case, primary first. `overrides` is the
+    // slice of case-level fields that describe THAT customer, so the profile
+    // section can be pointed at any of them without knowing about switching.
+    pois: customers.map((c, i) => {
+      const adapted = adaptCustomer(c, api.client);
+      if (adapted && i === 0) adapted.riskRating = riskTag;
+      return {
+        id: c._id,
+        uid: c.uid || null,
+        name: adapted?.name || c.uid || null,
+        isPrimary: i === 0,
+        overrides: {
+          customer: adapted,
+          uid: c.uid || api.uid,
+          customerName: adapted?.name || null,
+          customerType: humanize(pickRelation(c, api.client)?.type),
+          kycStatus: KYC_LABELS[c.kycStatus] || humanize(c.kycStatus),
+          pepStatus: c.isPep ? "PEP" : "Not a PEP",
+          sanctionsStatus: c.sanction ? "Confirmed Match" : "No Match",
+        },
+      };
+    }),
+
+    // The case's alerts, newest first — the Investigation Hub lists them all
+    // rather than implying a case is ever about a single rule hit.
+    alerts: alerts.map((a) => ({
+      id: a._id,
+      uid: a.uid,
+      ruleId: a.ruleId || null,
+      ruleName: a.ruleName || null,
+      explanation: a.explanation || null,
+      riskScore: a.riskScore ?? null,
+      riskLabel: a.riskLabel || null,
+      caseType: a.caseType || null,
+      alertOrigin: a.alertOrigin || null,
+      status: a.status || null,
+      createdAt: a.createdAt || null,
+    })),
     // Filings (previousSARs, rfis, auditLog, notes) arrive from the companion
     // endpoints and are merged in by CaseDetails — see the adapt* helpers above.
     previousSARs: [],
