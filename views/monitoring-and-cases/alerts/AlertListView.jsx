@@ -206,7 +206,8 @@ const ListView = ({}) => {
                       ) : (
                         <IconArrowRight />
                       )}
-                      Escalate
+                      {/* Escalate */}
+                      Triage
                     </Button>
                   }
                 />

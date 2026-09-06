@@ -252,3 +252,39 @@ export const saveCaseInvestigation = async (caseId, payload) => {
   });
   return res.json();
 };
+
+// ── Case documents ───────────────────────────────────────────────────────────
+// Evidence attached to a case. The bytes live in FileVault — upload there first
+// (`fileUploadOnCloudinary` in @/app/actions, which posts to /file-vault/upload)
+// and record the returned publicUrl here.
+
+export const getCaseDocuments = async (caseId) => {
+  const res = await fetchWithAuth(`cases/${caseId}/documents`);
+  return res.json();
+};
+
+// payload: { name, url, mimeType, type, sizeBytes, tbml?: { reportId, submissionId, status, dbSource } }
+export const addCaseDocument = async (caseId, payload) => {
+  const res = await fetchWithAuth(`cases/${caseId}/documents`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+};
+
+// Links a document already in the vault to the TBML run it was submitted to.
+export const setCaseDocumentTbml = async (caseId, documentId, payload) => {
+  const res = await fetchWithAuth(`cases/${caseId}/documents/${documentId}/tbml`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+};
+
+// Detaches the document from the case; the file itself stays in FileVault.
+export const removeCaseDocument = async (caseId, documentId) => {
+  const res = await fetchWithAuth(`cases/${caseId}/documents/${documentId}`, {
+    method: 'DELETE',
+  });
+  return res.json();
+};

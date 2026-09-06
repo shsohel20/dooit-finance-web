@@ -277,6 +277,8 @@ export function adaptCase(api) {
     previousSARs: [],
 
     // ── No backend source yet (sections fall through to empty states) ─────────
+    // Note: case documents are NOT here — FilesTab loads them from
+    // GET /cases/:id/documents, so they stay out of the case payload.
     duplicateAlerts: [], // linkedAlerts are the source alerts, not duplicates
     notes: [],
     rfis: [],
@@ -285,7 +287,6 @@ export function adaptCase(api) {
     atm: null,
     devices: [],
     relationships: [],
-    files: [],
     beneficialOwners: [],
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, lazy, Suspense, useEffect } from "react";
+import { useRef, useState, lazy, Suspense, useEffect } from "react";
 import {
   IconFolderOff,
   IconBriefcase,
@@ -13,7 +13,6 @@ import {
   IconCoins,
   IconFileStack,
 } from "@tabler/icons-react";
-import { mockCases } from "@/lib/case-manager-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   getCaseById,
@@ -45,7 +44,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NetworkGraph from "@/views/onboarding/customer-queue/details/d3/Networkgraph";
 import { transformToGraph } from "@/views/onboarding/customer-queue/details/d3/lib/transformgraphData";
 import partyEntities from "@/views/onboarding/customer-queue/details/demo.json";
-import TbmlOsint from "./tabs/components/TbmlOsint";
 import { FingerprintIcon } from "lucide-react";
 import TbmlOsintReport from "./tabs/components/TbmlOsintReport";
 
@@ -132,7 +130,6 @@ export default function CaseDetails({ caseId }) {
           getAuditLog(caseId).catch(() => null),
           getCaseAnalysis(caseId).catch(() => null),
         ]);
-        console.log("case res", res);
 
         setAnalysis(analysisRes?.succeed ? analysisRes.data : null);
 
@@ -403,8 +400,7 @@ export default function CaseDetails({ caseId }) {
           <InvestigationHub caseData={caseData} caseId={caseId} />
         </TabsContent>
         <TabsContent value="tbml-osint">
-          {/* <TbmlOsint /> */}
-          <TbmlOsintReport />
+          <TbmlOsintReport caseId={caseId} caseData={caseData} />
         </TabsContent>
 
         <TabsContent value="customer-profile">
@@ -433,7 +429,7 @@ export default function CaseDetails({ caseId }) {
 
         <TabsContent value="files">
           <Suspense fallback={<TabSkeleton />}>
-            <FilesTab caseData={caseData} />
+            <FilesTab caseData={caseData} caseId={caseId} />
           </Suspense>
         </TabsContent>
 
