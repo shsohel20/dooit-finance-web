@@ -76,7 +76,7 @@ const TONE_STYLES = {
   },
 };
 
-export default function Conversations() {
+export default function Conversations({ setOpenChat }) {
   const [selectedId, setSelectedId] = useState(CONVERSATIONS[1].id);
 
   return (
@@ -146,6 +146,7 @@ export default function Conversations() {
         <button
           type="button"
           className="pointer-events-auto inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-[0_8px_24px_rgba(0,89,100,0.28)] transition-transform hover:bg-primary-light focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]"
+          onClick={() => setOpenChat(true)}
         >
           <IconMessagePlus size={16} stroke={1.75} />
           Start a conversation

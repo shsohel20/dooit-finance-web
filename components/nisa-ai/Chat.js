@@ -23,15 +23,14 @@ const NisaIntro = () => {
     </div>
   );
 };
-export default function Modal({ isOpen, setIsOpen }) {
+export default function Chat({ prompt }) {
   const [chat, setChat] = useState([]);
   const chatRef = useRef(null);
-  useOutsideClick(chatRef, () => setIsOpen(false));
+  // useOutsideClick(chatRef, () => setIsOpen(false));
   const fileInputRef = useRef(null);
   const [fileInput, setFileInput] = useState(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [maximize, setMaximize] = useState(false);
   const endRef = useRef(null);
 
   const handleFileInput = (e) => {
@@ -56,6 +55,13 @@ export default function Modal({ isOpen, setIsOpen }) {
   const scrollToBottom = () => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    if (prompt) {
+      // setMessage(prompt);
+      handleSendMessage(prompt);
+    }
+  }, [prompt]);
   useEffect(() => {
     scrollToBottom();
   }, [chat]);
@@ -74,12 +80,12 @@ export default function Modal({ isOpen, setIsOpen }) {
   //   };
   // }, [isOpen]);
 
-  const handleSendMessage = async () => {
-    if (!message.trim()) return;
+  const handleSendMessage = async (msg) => {
+    if (!message.trim() && !msg) return;
     setMessage('');
     console.log('message', message);
     const myMsg = {
-      msg: message,
+      msg: msg || message,
       type: 'me',
       id: randomIdGenerator(),
       timeStamp: new Date(),
@@ -88,7 +94,7 @@ export default function Modal({ isOpen, setIsOpen }) {
     setChat((prev) => [...prev, myMsg]);
 
     const payload = {
-      query: message,
+      query: msg || message,
       session_id: 'msg',
     };
 

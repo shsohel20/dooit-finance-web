@@ -1,9 +1,10 @@
 'use client';
 import { cn, getFileKind, randomIdGenerator } from '@/lib/utils';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import {
+  ArrowLeft,
   BadgeQuestionMark,
   Forward,
   House,
@@ -32,6 +33,7 @@ import {
 import ChatHome from './tabs/Home';
 import Conversations from './tabs/Conversations';
 import Help from './tabs/Help';
+import Chat from './Chat';
 
 const IconTicketFilled = () => {
   return (
@@ -82,11 +84,19 @@ const tabs = [
 export default function Modal({ isOpen, setIsOpen }) {
   const chatRef = useRef(null);
   const [activeTab, setActiveTab] = useState('Home');
+  const [openChat, setOpenChat] = useState(false);
+  const [prompt, setPrompt] = useState('');
   // useOutsideClick(chatRef, () => setIsOpen(false));
 
   const [maximize, setMaximize] = useState(false);
 
   const currentTab = tabs.find((tab) => tab.name === activeTab);
+
+  const handlePromptSelect = useCallback((prompt) => {
+    // console.log('prompt', prompt);
+    setOpenChat(true);
+    setPrompt(prompt);
+  }, []);
 
   return (
     <div
@@ -102,58 +112,86 @@ export default function Modal({ isOpen, setIsOpen }) {
       )}
     >
       <div className="absolute py-2 top-0 left-0  flex items-center justify-between w-full gap-2 px-2 z-[99]">
-        <div className="flex-1  ">
-          <p className="text-lg font-medium text-center ">{currentTab.title}</p>
-        </div>
+        {openChat && (
+          <div>
+            <Button
+              variant="ghost"
+              // size="icon"
+              onClick={() => setOpenChat(false)}
+            >
+              {' '}
+              <ArrowLeft size={12} /> Back
+            </Button>
+          </div>
+        )}
+        {!openChat && (
+          <div className="flex-1  ">
+            <p className="text-lg font-medium text-center ">
+              {currentTab.title}
+            </p>
+          </div>
+        )}
 
-        <Button
-          size="icon"
-          variant="ghost"
-          className="  size-7 cursor-pointer"
-          onClick={() => setMaximize((prev) => !prev)}
-        >
-          {maximize ? <Minimize /> : <Maximize2 size={12} />}
-        </Button>
-        <Button
-          size="icon"
-          variant="outline"
-          className="  size-7 cursor-pointer"
-          onClick={() => setIsOpen(false)}
-        >
-          <X size={12} />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="  size-7 cursor-pointer"
+            onClick={() => setMaximize((prev) => !prev)}
+          >
+            {maximize ? <Minimize /> : <Maximize2 size={12} />}
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className="  size-7 cursor-pointer"
+            onClick={() => setIsOpen(false)}
+          >
+            <X size={12} />
+          </Button>
+        </div>
       </div>
       {/* chat */}
 
       <div className="h-full flex flex-col">
-        {activeTab === 'Home' && <ChatHome />}
-        {activeTab === 'Convos' && <Conversations />}
-        {/* {activeTab === 'Tickets' && <Tickets />} */}
-        {activeTab === 'Help' && <Help />}
-        <div className="flex mt-auto  p-2 border-t rounded-md justify-between">
-          {tabs.map((tab) => (
-            <button
-              key={tab.name}
-              variant="ghost"
-              className={cn(
-                'w-full flex flex-col items-center gap-1 py-2 text-neutral-400 rounded-md',
-                {
-                  'text-primary  ': activeTab === tab.name,
-                }
-              )}
-              onClick={() => setActiveTab(tab.name)}
-            >
-              <span
-                className={cn({
-                  'text-primary ': activeTab === tab.name,
-                })}
-              >
-                {activeTab === tab.name ? tab.fillIcon : tab.icon}
-              </span>
-              <span>{tab.name}</span>
-            </button>
-          ))}
-        </div>
+        {openChat ? (
+          <Chat prompt={prompt} />
+        ) : (
+          <>
+            {activeTab === 'Home' && (
+              <ChatHome onPromptSelect={handlePromptSelect} />
+            )}
+            {activeTab === 'Convos' && (
+              <Conversations setOpenChat={setOpenChat} />
+            )}
+            {/* {activeTab === 'Tickets' && <Tickets />} */}
+            {activeTab === 'Help' && <Help />}
+            <div className="flex mt-auto  p-2 border-t rounded-md justify-between">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.name}
+                  variant="ghost"
+                  className={cn(
+                    'w-full flex flex-col items-center gap-1 py-2 text-neutral-400 rounded-md',
+                    {
+                      'text-primary  ': activeTab === tab.name,
+                    }
+                  )}
+                  onClick={() => setActiveTab(tab.name)}
+                >
+                  <span
+                    className={cn({
+                      'text-primary ': activeTab === tab.name,
+                    })}
+                  >
+                    {activeTab === tab.name ? tab.fillIcon : tab.icon}
+                  </span>
+                  <span>{tab.name}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
