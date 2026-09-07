@@ -164,6 +164,9 @@ export default function Modal({ isOpen, setIsOpen }) {
             {activeTab === 'Convos' && (
               <Conversations setOpenChat={setOpenChat} />
             )}
+            {activeTab === 'Tickets' && (
+              <Conversations setOpenChat={setOpenChat} />
+            )}
             {/* {activeTab === 'Tickets' && <Tickets />} */}
             {activeTab === 'Help' && <Help />}
             <div className="flex mt-auto  p-2 border-t rounded-md justify-between">

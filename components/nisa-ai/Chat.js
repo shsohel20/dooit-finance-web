@@ -3,30 +3,42 @@ import { cn, getFileKind, randomIdGenerator } from '@/lib/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
-import { Forward, Maximize2, Mic, Minimize, Paperclip, X } from 'lucide-react';
-import useOutsideClick from '@/hooks/useOutsideClick';
+import { ArrowUp, Mic, Paperclip, X } from 'lucide-react';
 import { chatWithNissa } from '@/app/actions';
 import Convos from './Convos';
 
 const NisaIntro = () => {
   return (
-    <div className="pt-10">
-      <h1 className="text-center text-2xl font-bold">
-        Hi, I&apos;m
-        <span className="bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text ml-2">
+    <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center">
+      <div className="relative mb-5">
+        <div className="absolute inset-0 scale-110 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 blur-md" />
+        <div className="relative flex size-14 items-center justify-center rounded-2xl border border-primary/15 bg-gradient-to-br from-white to-primary/5 shadow-[0_8px_30px_rgba(0,89,100,0.12)]">
+          <span className="bg-gradient-to-br from-primary to-accent bg-clip-text text-2xl font-bold tracking-tight text-transparent">
+            N
+          </span>
+        </div>
+        <span className="absolute -right-0.5 -bottom-0.5 flex size-3.5 items-center justify-center rounded-full border-2 border-white bg-accent shadow-sm">
+          <span className="size-1.5 animate-pulse rounded-full bg-white motion-reduce:animate-none" />
+        </span>
+      </div>
+      <p className="mb-1 text-[11px] font-semibold tracking-[0.18em] text-primary/70 uppercase">
+        Risk & Compliance AI
+      </p>
+      <h1 className="text-xl font-bold tracking-tight text-heading">
+        Hi, I&apos;m{' '}
+        <span className="bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent">
           Nisa
         </span>
       </h1>
-      <p className="text-center text-sm text-gray-500">
+      <p className="mt-2 max-w-[260px] text-sm leading-relaxed text-muted-foreground">
         Ask me anything about Risk & Compliance
       </p>
     </div>
   );
 };
+
 export default function Chat({ prompt }) {
   const [chat, setChat] = useState([]);
-  const chatRef = useRef(null);
-  // useOutsideClick(chatRef, () => setIsOpen(false));
   const fileInputRef = useRef(null);
   const [fileInput, setFileInput] = useState(null);
   const [message, setMessage] = useState('');
@@ -125,73 +137,98 @@ export default function Chat({ prompt }) {
       setLoading(false);
     }
   };
+
+  const canSend = Boolean(message.trim());
+
   return (
-    <div className=" p-2  h-full flex flex-col  ">
-      {/* {chat.length === 0 && ( */}
-      <div className="h-full  bg-white mb-2 rounded-lg p-2  overflow-y-auto ">
-        {chat.length === 0 && <NisaIntro />}
-        {chat.length > 0 && (
-          <div className="pt-10">
+    <div className="relative flex h-full flex-col bg-gradient-to-b from-smoke-200/40 via-white to-white">
+      {/* Ambient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-40 overflow-hidden"
+      >
+        <div className="absolute -top-10 left-1/2 h-36 w-36 -translate-x-1/2 rounded-full bg-primary/8 blur-3xl" />
+      </div>
+
+      {/* Messages */}
+      <div className="relative z-10 min-h-0 flex-1 overflow-y-auto px-3 pt-14 pb-3">
+        {chat.length === 0 ? (
+          <NisaIntro />
+        ) : (
+          <div className="mx-auto w-full max-w-2xl">
             <Convos chat={chat} loading={loading} />
             <div ref={endRef} />
           </div>
         )}
       </div>
-      {/* )} */}
-      <div className=" w-full border rounded-lg mt-auto bg-white ">
-        <div className="h-full w-full  rounded-lg bg-gradient-to-b from-white to-zinc-100">
-          {fileInput && (
-            <div className=" rounded-md  rounded-md relative w-max">
-              <div
-                className="absolute -right-1 -top-1 size-5 rounded-full bg-zinc-50 flex items-center justify-center cursor-pointer hover:shadow z-1"
-                onClick={() => setFileInput(null)}
-              >
-                <X size={12} />
-              </div>
-              <div
-                hidden={
-                  fileInput?.kind === 'doc' ||
-                  fileInput?.kind === 'excel' ||
-                  fileInput?.kind === 'file'
-                }
-                className="size-24 rounded-md bg-gray-200 relative overflow-hidden"
-              >
-                {fileInput?.kind === 'image' && (
-                  <img
-                    src={fileInput?.preview}
-                    alt=""
-                    className="w-full h-full object-contain"
-                  />
-                )}
-                {fileInput?.kind === 'pdf' && (
-                  <iframe
-                    src={fileInput?.preview}
-                    className="w-full h-full object-contain"
-                  />
-                )}
-              </div>
-              {(fileInput.kind === 'doc' ||
-                fileInput.kind === 'excel' ||
-                fileInput.kind === 'file') && (
-                <div className="flex  gap-2 w-40  shadow rounded-md px-2 py-1">
-                  <span className="text-xs">
-                    {fileInput.kind === 'doc' && '📄'}
-                    {fileInput.kind === 'excel' && '📊'}
-                    {fileInput.kind === 'file' && '📁'}
-                  </span>
 
-                  <div>
-                    <p className="text-xs font-medium w-32 truncate">
-                      {fileInput.name}
-                    </p>
-                    {/* <p className="text-xs text-gray-500">
-                          {(fileInput.size / 1024).toFixed(1)} KB
-                        </p> */}
-                  </div>
+      {/* Composer */}
+      <div className="relative z-10 shrink-0 px-3 pb-3">
+        <div
+          className={cn(
+            'overflow-hidden rounded-2xl border border-border/80 bg-white shadow-[0_8px_30px_rgba(0,89,100,0.08)]',
+            'focus-within:border-primary/30 focus-within:shadow-[0_8px_30px_rgba(0,89,100,0.12)]',
+            'transition-shadow duration-200'
+          )}
+        >
+          {fileInput && (
+            <div className="border-b border-border/60 px-3 pt-3 pb-2">
+              <div className="relative w-max">
+                <button
+                  type="button"
+                  aria-label="Remove attachment"
+                  className="absolute -top-1.5 -right-1.5 z-10 flex size-5 items-center justify-center rounded-full border border-border bg-white text-muted-foreground shadow-sm transition-colors hover:bg-smoke-200 hover:text-foreground"
+                  onClick={() => setFileInput(null)}
+                >
+                  <X size={11} strokeWidth={2.5} />
+                </button>
+
+                <div
+                  hidden={
+                    fileInput?.kind === 'doc' ||
+                    fileInput?.kind === 'excel' ||
+                    fileInput?.kind === 'file'
+                  }
+                  className="size-20 overflow-hidden rounded-xl border border-border/70 bg-smoke-200"
+                >
+                  {fileInput?.kind === 'image' && (
+                    <img
+                      src={fileInput?.preview}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                  {fileInput?.kind === 'pdf' && (
+                    <iframe
+                      src={fileInput?.preview}
+                      className="h-full w-full object-contain"
+                    />
+                  )}
                 </div>
-              )}
+
+                {(fileInput.kind === 'doc' ||
+                  fileInput.kind === 'excel' ||
+                  fileInput.kind === 'file') && (
+                  <div className="flex w-44 items-center gap-2 rounded-xl border border-border/70 bg-smoke-200/50 px-2.5 py-2">
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-sm shadow-sm">
+                      {fileInput.kind === 'doc' && '📄'}
+                      {fileInput.kind === 'excel' && '📊'}
+                      {fileInput.kind === 'file' && '📁'}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-medium text-heading">
+                        {fileInput.name}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        {fileInput.kind}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
+
           <Textarea
             name="message"
             id="message"
@@ -203,15 +240,19 @@ export default function Chat({ prompt }) {
                 handleSendMessage();
               }
             }}
-            placeholder="Ask me anything"
-            className="resize-none  w-full border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 max-h-40"
+            placeholder="Ask Nisa anything…"
+            className="min-h-[52px] max-h-40 resize-none border-0 bg-transparent px-3.5 pt-3 pb-1 text-[14px] leading-relaxed shadow-none placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
-          <div className="flex justify-between items-center p-2">
-            <div className="flex gap-2">
+
+          <div className="flex items-center justify-between gap-2 px-2.5 pb-2.5">
+            <div className="flex items-center gap-1">
               <Button
+                type="button"
                 size="icon"
-                variant="outline"
+                variant="ghost"
+                className="size-8 rounded-lg text-muted-foreground hover:bg-primary/8 hover:text-primary"
                 onClick={() => fileInputRef.current.click()}
+                aria-label="Attach file"
               >
                 <input
                   ref={fileInputRef}
@@ -219,20 +260,39 @@ export default function Chat({ prompt }) {
                   onChange={handleFileInput}
                   hidden
                 />
+                <Paperclip size={16} strokeWidth={1.75} />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="size-8 rounded-lg text-muted-foreground hover:bg-primary/8 hover:text-primary"
+                aria-label="Voice input"
+              >
+                <Mic size={16} strokeWidth={1.75} />
+              </Button>
+            </div>
 
-                <Paperclip />
-              </Button>
-              <Button size="icon" variant="outline">
-                <Mic />
-              </Button>
-            </div>
-            <div>
-              <Button size="icon" variant="outline" onClick={handleSendMessage}>
-                <Forward />
-              </Button>
-            </div>
+            <Button
+              type="button"
+              size="icon"
+              disabled={!canSend}
+              onClick={handleSendMessage}
+              aria-label="Send message"
+              className={cn(
+                'size-8 rounded-xl shadow-none transition-all',
+                canSend
+                  ? 'bg-primary text-white hover:bg-primary-light shadow-[0_4px_14px_rgba(0,89,100,0.3)]'
+                  : 'bg-smoke-300 text-muted-foreground opacity-60'
+              )}
+            >
+              <ArrowUp size={16} strokeWidth={2.25} />
+            </Button>
           </div>
         </div>
+        <p className="mt-2 text-center text-[10px] tracking-wide text-muted-foreground/80">
+          Nisa can make mistakes. Verify critical compliance guidance.
+        </p>
       </div>
     </div>
   );
