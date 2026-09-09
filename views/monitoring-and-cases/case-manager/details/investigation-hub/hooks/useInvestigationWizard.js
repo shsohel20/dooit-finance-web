@@ -21,6 +21,34 @@ const NO_STEPS_DONE = INVESTIGATION_STEPS.map(() => false);
 // couple of seconds later still keeps the answer.
 const AUTOSAVE_DELAY_MS = 1500;
 
+// The date step, looked up by kind so reordering or renaming steps in
+// investigationHubData.js cannot silently point this at the wrong index.
+const DATE_RANGE_STEP = INVESTIGATION_STEPS.findIndex((s) => s.kind === "dateRange");
+
+const EMPTY_DATE_RANGE = { start: "", end: "", reviewFrom: "", reviewTo: "" };
+
+// An <input type="date"> speaks "yyyy-mm-dd" and nothing else, while the API
+// stores real Dates and hands back ISO strings. Slice the ISO string rather
+// than reading local date getters: the values are stored at UTC midnight, and
+// a local read would shift them a day west of Greenwich.
+function toDateInput(value) {
+  if (!value) return "";
+  const iso = typeof value === "string" ? value : new Date(value).toISOString();
+  return iso.slice(0, 10);
+}
+
+// A cleared input goes back as an explicit null rather than "". Both end up
+// null in Mongo today, but "unset" is what we mean, and it keeps the payload
+// from leaning on how the schema happens to coerce an empty string.
+function toSavedDateRange(range) {
+  return {
+    start: range.start || null,
+    end: range.end || null,
+    reviewFrom: range.reviewFrom || null,
+    reviewTo: range.reviewTo || null,
+  };
+}
+
 function seedPois(caseData) {
   const individuals = caseData?.relationships?.individuals || [];
   const connected = caseData?.connectedCustomers || [];
@@ -85,6 +113,7 @@ export function useInvestigationWizard(caseData, caseId) {
   const [stepsDone, setStepsDone] = useState(NO_STEPS_DONE);
   const [checklist, setChecklist] = useState(DEFAULT_CHECKLIST);
   const [pois, setPois] = useState(() => seedPois(caseData));
+  const [dateRange, setDateRange] = useState(EMPTY_DATE_RANGE);
   const [sel, setSel] = useState({
     services: [],
     reasons: [],
@@ -118,6 +147,14 @@ export function useInvestigationWizard(caseData, caseId) {
           if (saved.checklist?.length) setChecklist(saved.checklist);
           if (saved.selections) setSel((prev) => ({ ...prev, ...saved.selections }));
           if (saved.pois?.length) setPois(saved.pois);
+          if (saved.dateRange) {
+            setDateRange({
+              start: toDateInput(saved.dateRange.start),
+              end: toDateInput(saved.dateRange.end),
+              reviewFrom: toDateInput(saved.dateRange.reviewFrom),
+              reviewTo: toDateInput(saved.dateRange.reviewTo),
+            });
+          }
           if (saved.customTypologies?.length) setCustomTypologies(saved.customTypologies);
           if (saved.customReasons?.length) setCustomReasons(saved.customReasons);
           if (saved.narrativeTemplate) setNarrativeTpl(saved.narrativeTemplate);
@@ -147,6 +184,7 @@ export function useInvestigationWizard(caseData, caseId) {
     checklist,
     selections: sel,
     pois,
+    dateRange: toSavedDateRange(dateRange),
     customTypologies,
     customReasons,
     narrativeTemplate: narrativeTpl,
@@ -178,7 +216,7 @@ export function useInvestigationWizard(caseData, caseId) {
     // The dependency list is the analyst's work: any change schedules a save.
   }, [
     loaded, caseId, flush, saveState.error,
-    activeStep, stepsDone, checklist, sel, pois, customTypologies, customReasons,
+    activeStep, stepsDone, checklist, sel, pois, dateRange, customTypologies, customReasons,
     narrativeTpl, smrPart,
   ]);
 
@@ -228,6 +266,16 @@ export function useInvestigationWizard(caseData, caseId) {
     setCustomReasons((prev) => [...prev, v]);
     setSel((prev) => ({ ...prev, reasons: [...(prev.reasons || []), v] }));
     setReasonDraft("");
+  };
+
+  // Merges a patch, so editing one field and the "match flagged activity"
+  // shortcut (which sets two at once) share a single path. The step counts as
+  // done only when the activity period it exists to capture is complete —
+  // a review window on its own does not answer the question the step asks.
+  const applyDateRange = (patch) => {
+    const next = { ...dateRange, ...patch };
+    setDateRange(next);
+    if (next.start && next.end && DATE_RANGE_STEP >= 0) markDone(DATE_RANGE_STEP);
   };
 
   const removePoi = (id) => setPois((prev) => prev.filter((p) => p.id !== id));
@@ -290,6 +338,9 @@ export function useInvestigationWizard(caseData, caseId) {
     setReasonDraft,
     addReason,
     customReasons,
+
+    dateRange,
+    applyDateRange,
 
     pois,
     removePoi,

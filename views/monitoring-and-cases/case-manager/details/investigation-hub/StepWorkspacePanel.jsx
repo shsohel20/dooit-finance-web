@@ -42,7 +42,9 @@ export default function StepWorkspacePanel({ caseData, wizard }) {
           <SmrStep caseData={caseData} wizard={wizard} />
         ) : (
           <>
-            {StepBody && <StepBody step={step} activeStep={activeStep} wizard={wizard} />}
+            {StepBody && (
+              <StepBody step={step} activeStep={activeStep} caseData={caseData} wizard={wizard} />
+            )}
             <StepFooter
               onBack={goPrev}
               onNext={goNext}
