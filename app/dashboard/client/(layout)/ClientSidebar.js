@@ -435,6 +435,17 @@ export default function ClientSidebar({ ...props }) {
         },
       ],
     },
+    {
+      title: "Workflow Studio",
+      icon: IconListDetails,
+      children: [
+        {
+          title: "Workflows",
+          url: "/dashboard/client/workflow-studio",
+          icon: IconDatabase,
+        },
+      ],
+    },
 
     {
       title: "System Settings",
