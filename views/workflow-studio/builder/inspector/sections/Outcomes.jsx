@@ -1,96 +1,88 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
-// Radix Select forbids empty-string item values, so use a sentinel for "no target"
-const NONE = '__none__'
+import SectionLabel from '../SectionLabel'
+import AddButton from '../AddButton'
+import { REMOVE_X } from '../fieldStyles'
 
 /**
- * Outcomes section: non-condition nodes.
- * config.outcomes[] is an array of { cond, then } pairs (schema:
- * WorkflowConfigSchema.outcomes, api/models/Workflow.js).
- * `cond` is a freetext field description or label.
- * `then` is a target node selector.
+ * Outcomes — what can come of this step, in words.
+ *
+ * Both halves are FREE TEXT, deliberately. `then` is prose ("Continue to
+ * consent collection"), not a node reference: the seeded template documents
+ * each step's possible results this way, and the executable truth about where
+ * the flow actually goes lives in the graph's edges, not here. Rendering this
+ * as a node picker silently rewrote that prose into an id the moment anyone
+ * touched it.
+ *
+ * The left stripe cycles green → amber → pink, so the happy path, the held
+ * path and the refused path are distinguishable at a glance. Colour is never
+ * alone: the condition text always says which is which.
  */
-export default function Outcomes({ node, allNodes, onPatch }) {
-  const outcomes = (node.config?.outcomes || [])
+const STRIPE = ['var(--success)', 'var(--warning)', 'var(--danger)']
 
-  const handleAddOutcome = () => {
-    const newOutcomes = [...outcomes, { cond: '', then: '' }]
-    onPatch({ config: { ...node.config, outcomes: newOutcomes } })
-  }
+export default function Outcomes({ node, onPatch }) {
+  const outcomes = node.config?.outcomes || []
 
-  const handleUpdateOutcome = (index, key, val) => {
-    const newOutcomes = outcomes.map((o, i) =>
-      i === index ? { ...o, [key]: val } : o
-    )
-    onPatch({ config: { ...node.config, outcomes: newOutcomes } })
-  }
+  const write = (next) => onPatch({ config: { ...node.config, outcomes: next } })
 
-  const handleRemoveOutcome = (index) => {
-    const newOutcomes = outcomes.filter((_, i) => i !== index)
-    onPatch({ config: { ...node.config, outcomes: newOutcomes } })
-  }
+  const addOutcome = () => write([...outcomes, { cond: '', then: '' }])
 
-  const otherNodes = allNodes?.filter((n) => n.id !== node.id) || []
+  const updateOutcome = (index, key, val) =>
+    write(outcomes.map((o, i) => (i === index ? { ...o, [key]: val } : o)))
+
+  const removeOutcome = (index) => write(outcomes.filter((_, i) => i !== index))
+
+  // Seamless until hover/focus, then a box — so a column of outcomes reads as
+  // a list of statements rather than a stack of form fields.
+  const seam =
+    'w-full rounded-[5px] border border-transparent bg-transparent px-1 py-0.5 hover:border-[var(--wf-card-border)] focus:border-[var(--primary)] focus:bg-card focus:outline-none'
 
   return (
-    <div className="space-y-3">
-      <div className="text-sm font-medium text-foreground">Outcomes</div>
+    <>
+      <SectionLabel action={<AddButton onClick={addOutcome}>Add outcome</AddButton>}>
+        Outcomes
+      </SectionLabel>
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-1.5">
         {outcomes.map((outcome, i) => (
-          <div key={i} className="border rounded-lg p-3 space-y-2 bg-muted">
-            <div>
-              <label className="text-xs text-muted-foreground">Condition</label>
-              <Textarea
-                placeholder="Describe the condition"
+          <div
+            key={i}
+            className="rounded-r-[7px] bg-[var(--sidebar-bg)] px-2.5 py-2"
+            style={{ borderLeft: `3px solid ${STRIPE[Math.min(i, 2)]}` }}
+          >
+            <div className="grid grid-cols-[1fr_18px] items-center gap-1">
+              <input
                 value={outcome.cond || ''}
-                onChange={(e) => handleUpdateOutcome(i, 'cond', e.target.value)}
-                className="text-sm mt-1"
-                rows={2}
+                onChange={(e) => updateOutcome(i, 'cond', e.target.value)}
+                placeholder="If this happens"
+                aria-label={`Outcome ${i + 1} condition`}
+                className={`${seam} font-mono text-[11px] text-[var(--heading)]`}
               />
+              <button
+                type="button"
+                onClick={() => removeOutcome(i)}
+                aria-label={`Remove outcome ${i + 1}`}
+                className={`${REMOVE_X} text-[12px]`}
+              >
+                &times;
+              </button>
             </div>
-
-            <div>
-              <label className="text-xs text-muted-foreground">Then →</label>
-              <Select value={outcome.then || NONE} onValueChange={(v) => handleUpdateOutcome(i, 'then', v === NONE ? '' : v)}>
-                <SelectTrigger className="text-sm mt-1">
-                  <SelectValue placeholder="Select target node" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NONE}>None</SelectItem>
-                  {otherNodes.map((n) => (
-                    <SelectItem key={n.id} value={n.id}>
-                      {n.title || n.type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleRemoveOutcome(i)}
-              className="text-xs text-muted-foreground hover:text-destructive"
-            >
-              Remove outcome
-            </Button>
+            <input
+              value={outcome.then || ''}
+              onChange={(e) => updateOutcome(i, 'then', e.target.value)}
+              placeholder="then this follows"
+              aria-label={`Outcome ${i + 1} result`}
+              className={`${seam} mt-0.5 font-sans text-[12px] text-[var(--smoke-600)]`}
+            />
           </div>
         ))}
-      </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleAddOutcome}
-        className="text-xs"
-      >
-        Add outcome
-      </Button>
-    </div>
+        {outcomes.length === 0 && (
+          <p className="text-[11.5px] text-[var(--txt-mute)]">
+            No outcomes recorded for this step.
+          </p>
+        )}
+      </div>
+    </>
   )
 }

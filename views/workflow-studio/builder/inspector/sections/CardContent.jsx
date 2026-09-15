@@ -1,175 +1,163 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import SectionLabel from '../SectionLabel'
+import AddButton from '../AddButton'
+import {
+  BOXED_INPUT, BOXED_INPUT_SM, BOXED_SELECT_MUTED, REMOVE_X, FIELD_CAPTION,
+} from '../fieldStyles'
 
 /**
- * CardContent section: manage the step card display fields.
- * - card.inset: subtitle text
- * - card.decision: decision text
- * - card.reason: reason text
- * - card.chips[]: plain strings (schema: `chips: [String]`) — detail lines,
- *   no tone. StepNode.jsx renders each chip's text directly.
- * - card.tags[]: { text, tone } objects — schema and StepNode.jsx both use
- *   `text`, not `label`.
+ * Card content — what the step's card shows on the canvas.
+ *
+ * Presentation only; nothing here changes what the workflow does. The fields
+ * map one-for-one onto the card schema:
+ *   inset     the highlighted line
+ *   decision / reason   shown on review steps
+ *   chips[]   plain strings — detail lines, no tone
+ *   tagLabel  the caption above the tag row
+ *   tags[]    { text, tone } — tone is warn | bad | plain
+ *
+ * Every tag keeps its text beside its tone, because tone alone is colour, and
+ * colour is never the only thing carrying meaning on these cards.
  */
+const TONE_OPTIONS = [
+  { value: 'plain', label: 'Plain' },
+  { value: 'warn', label: 'Warning' },
+  { value: 'bad', label: 'Bad' },
+]
+
 export default function CardContent({ node, onPatch }) {
   const card = node.card || {}
 
-  const handleCardChange = (key, value) => {
-    onPatch({ card: { ...card, [key]: value } })
-  }
+  const write = (key, value) => onPatch({ card: { ...card, [key]: value } })
 
-  const handleAddChip = () => {
-    const chips = card.chips || []
-    handleCardChange('chips', [...chips, ''])
-  }
+  const chips = card.chips || []
+  const tags = card.tags || []
 
-  const handleUpdateChip = (index, val) => {
-    const chips = (card.chips || []).map((c, i) => (i === index ? val : c))
-    handleCardChange('chips', chips)
-  }
+  const addChip = () => write('chips', [...chips, ''])
+  const updateChip = (i, val) => write('chips', chips.map((c, j) => (j === i ? val : c)))
+  const removeChip = (i) => write('chips', chips.filter((_, j) => j !== i))
 
-  const handleRemoveChip = (index) => {
-    const chips = (card.chips || []).filter((_, i) => i !== index)
-    handleCardChange('chips', chips)
-  }
-
-  const handleAddTag = () => {
-    const tags = card.tags || []
-    const newTags = [...tags, { text: '', tone: 'plain' }]
-    handleCardChange('tags', newTags)
-  }
-
-  const handleUpdateTag = (index, key, val) => {
-    const tags = (card.tags || []).map((t, i) =>
-      i === index ? { ...t, [key]: val } : t
-    )
-    handleCardChange('tags', tags)
-  }
-
-  const handleRemoveTag = (index) => {
-    const tags = (card.tags || []).filter((_, i) => i !== index)
-    handleCardChange('tags', tags)
-  }
-
-  const toneOptions = [
-    { value: 'plain', label: 'Plain' },
-    { value: 'warn', label: 'Warning' },
-    { value: 'bad', label: 'Bad' },
-  ]
+  const addTag = () => write('tags', [...tags, { text: '', tone: 'plain' }])
+  const updateTag = (i, key, val) =>
+    write('tags', tags.map((t, j) => (j === i ? { ...t, [key]: val } : t)))
+  const removeTag = (i) => write('tags', tags.filter((_, j) => j !== i))
 
   return (
-    <div className="space-y-4">
-      <div className="text-sm font-medium text-foreground">Card Content</div>
+    <>
+      <SectionLabel>Card content</SectionLabel>
 
-      <div>
-        <label className="text-xs text-muted-foreground">Inset (subtitle)</label>
-        <Input
-          placeholder="Card inset text"
-          value={card.inset || ''}
-          onChange={(e) => handleCardChange('inset', e.target.value)}
-          className="text-sm mt-1"
-        />
-      </div>
-
-      <div>
-        <label className="text-xs text-muted-foreground">Decision</label>
-        <Textarea
-          placeholder="Decision text"
-          value={card.decision || ''}
-          onChange={(e) => handleCardChange('decision', e.target.value)}
-          className="text-sm mt-1"
-          rows={2}
-        />
-      </div>
-
-      <div>
-        <label className="text-xs text-muted-foreground">Reason</label>
-        <Textarea
-          placeholder="Reason text"
-          value={card.reason || ''}
-          onChange={(e) => handleCardChange('reason', e.target.value)}
-          className="text-sm mt-1"
-          rows={2}
-        />
-      </div>
-
-      <div>
-        <label className="text-xs text-muted-foreground block mb-2">Chips</label>
-        <div className="space-y-2">
-          {(card.chips || []).map((chip, i) => (
-            <div key={i} className="flex gap-2">
-              <Input
-                placeholder="Detail line"
-                value={chip || ''}
-                onChange={(e) => handleUpdateChip(i, e.target.value)}
-                className="flex-1 text-sm"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleRemoveChip(i)}
-                className="px-2 text-muted-foreground hover:text-destructive"
-              >
-                ×
-              </Button>
-            </div>
-          ))}
+      <div className="flex flex-col gap-2">
+        <div>
+          <div className={FIELD_CAPTION}>Highlighted line</div>
+          <input
+            value={card.inset || ''}
+            onChange={(e) => write('inset', e.target.value)}
+            placeholder="e.g. ID document, MRZ and chip"
+            aria-label="Highlighted line"
+            className={BOXED_INPUT}
+          />
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleAddChip}
-          className="text-xs mt-2"
-        >
-          Add chip
-        </Button>
-      </div>
 
-      <div>
-        <label className="text-xs text-muted-foreground block mb-2">Tags</label>
-        <div className="space-y-2">
-          {(card.tags || []).map((tag, i) => (
-            <div key={i} className="flex gap-2">
-              <Input
-                placeholder="Label"
-                value={tag.text || ''}
-                onChange={(e) => handleUpdateTag(i, 'text', e.target.value)}
-                className="flex-1 text-sm"
-              />
-              <Select value={tag.tone || 'plain'} onValueChange={(v) => handleUpdateTag(i, 'tone', v)}>
-                <SelectTrigger className="w-24 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {toneOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+        <div className="grid grid-cols-2 gap-1.5">
+          <div>
+            <div className={FIELD_CAPTION}>Decision</div>
+            <input
+              value={card.decision || ''}
+              onChange={(e) => write('decision', e.target.value)}
+              placeholder="Manual review"
+              aria-label="Decision"
+              className={BOXED_INPUT}
+            />
+          </div>
+          <div>
+            <div className={FIELD_CAPTION}>Reasons</div>
+            <input
+              value={card.reason || ''}
+              onChange={(e) => write('reason', e.target.value)}
+              placeholder="Reasons shown on card"
+              aria-label="Reasons"
+              className={BOXED_INPUT}
+            />
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-1 flex items-center gap-2">
+            <div className="text-[11.5px] text-[var(--mute-200)]">Detail lines</div>
+            <div className="ml-auto">
+              <AddButton variant="inline" onClick={addChip}>Add line</AddButton>
+            </div>
+          </div>
+          <div className="flex flex-col gap-[5px]">
+            {chips.map((chip, i) => (
+              <div key={i} className="grid grid-cols-[1fr_20px] items-center gap-[5px]">
+                <input
+                  value={chip || ''}
+                  onChange={(e) => updateChip(i, e.target.value)}
+                  aria-label={`Detail line ${i + 1}`}
+                  className={BOXED_INPUT_SM}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeChip(i)}
+                  aria-label={`Remove detail line ${i + 1}`}
+                  className={REMOVE_X}
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-1 flex items-center gap-2">
+            <div className="text-[11.5px] text-[var(--mute-200)]">Tags and labels</div>
+            <div className="ml-auto">
+              <AddButton variant="inline" onClick={addTag}>Add tag</AddButton>
+            </div>
+          </div>
+          {/* The caption the card prints above its tag row. */}
+          <input
+            value={card.tagLabel || ''}
+            onChange={(e) => write('tagLabel', e.target.value)}
+            placeholder="Add labels to applicant"
+            aria-label="Tag row caption"
+            className="mb-[5px] w-full rounded-[7px] border border-[var(--wf-card-border)] bg-card px-[9px] py-1.5 font-sans text-[11.5px] text-[var(--mute-200)] focus:border-[var(--primary)] focus:outline-none"
+          />
+          <div className="flex flex-col gap-[5px]">
+            {tags.map((tag, i) => (
+              <div key={i} className="grid grid-cols-[1fr_74px_20px] items-center gap-[5px]">
+                <input
+                  value={tag.text || ''}
+                  onChange={(e) => updateTag(i, 'text', e.target.value)}
+                  aria-label={`Tag ${i + 1} text`}
+                  className={`${BOXED_INPUT_SM} font-mono text-[11px]`}
+                />
+                <select
+                  value={tag.tone || 'plain'}
+                  onChange={(e) => updateTag(i, 'tone', e.target.value)}
+                  aria-label={`Tag ${i + 1} tone`}
+                  className={BOXED_SELECT_MUTED}
+                >
+                  {TONE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
-                </SelectContent>
-              </Select>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleRemoveTag(i)}
-                className="px-2 text-muted-foreground hover:text-destructive"
-              >
-                ×
-              </Button>
-            </div>
-          ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => removeTag(i)}
+                  aria-label={`Remove tag ${i + 1}`}
+                  className={REMOVE_X}
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleAddTag}
-          className="text-xs mt-2"
-        >
-          Add tag
-        </Button>
       </div>
-    </div>
+    </>
   )
 }

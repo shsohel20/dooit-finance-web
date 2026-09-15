@@ -62,6 +62,12 @@
   --wf-rule: #eceff0;
   --wf-stripe: #fcfdfd;
   --wf-port: #c3ccce;
+  /* Inspector tints. The same #f1f6f7 as --wf-note-bg, but a different job —
+     a note's ground vs a primary control's hover — so it gets its own name
+     rather than making one token mean two things. */
+  --wf-primary-tint: #f1f6f7;
+  --wf-danger-tint: #fdeef5;
+  --wf-danger-border: #f3cfe0;
   --radius: 0.625rem;
   --background: oklch(0.98 0 0);
   --foreground: oklch(0.145 0 0);

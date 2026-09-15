@@ -1,46 +1,56 @@
 'use client'
 
-import { Input } from '@/components/ui/input'
+import SectionLabel from '../SectionLabel'
+import { SEAMLESS_INPUT } from '../fieldStyles'
 
 /**
- * Ownership section: config.owner and config.sla.
- * Also displays a read-only Audit row (placeholder for future audit trail).
+ * Ownership — who answers for this step and how long they have.
+ *
+ * The design draws this as one bordered card of right-aligned rows, like a
+ * summary table rather than a form: the values read as facts about the step
+ * until you click one. Both are recorded for the audit trail; neither is
+ * enforced by anything in this slice.
  */
 export default function Ownership({ node, onPatch }) {
   const config = node.config || {}
+  const write = (key, value) => onPatch({ config: { ...config, [key]: value } })
 
-  const handleConfigChange = (key, value) => {
-    onPatch({ config: { ...config, [key]: value } })
-  }
+  const rowInput = `flex-1 min-w-0 text-right focus:text-left ${SEAMLESS_INPUT} text-[12.5px] text-[var(--heading)]`
 
   return (
-    <div className="space-y-3">
-      <div className="text-sm font-medium text-foreground">Ownership</div>
+    <>
+      <SectionLabel>Ownership</SectionLabel>
 
-      <div>
-        <label className="text-xs text-muted-foreground">Owner</label>
-        <Input
-          placeholder="Assign owner (e.g., compliance-team)"
-          value={config.owner || ''}
-          onChange={(e) => handleConfigChange('owner', e.target.value)}
-          className="text-sm mt-1"
-        />
-      </div>
+      <div className="rounded-[9px] border border-[var(--wf-card-border)] p-3 text-[12.5px] leading-[1.6]">
+        <div className="flex items-center justify-between gap-2.5">
+          <span className="shrink-0 text-[var(--mute-200)]">Owner</span>
+          <input
+            value={config.owner || ''}
+            onChange={(e) => write('owner', e.target.value)}
+            placeholder="Unassigned"
+            aria-label="Owner"
+            className={rowInput}
+          />
+        </div>
 
-      <div>
-        <label className="text-xs text-muted-foreground">SLA</label>
-        <Input
-          placeholder="SLA duration (e.g., 24h, 2 days)"
-          value={config.sla || ''}
-          onChange={(e) => handleConfigChange('sla', e.target.value)}
-          className="text-sm mt-1"
-        />
-      </div>
+        <div className="flex items-center justify-between gap-2.5">
+          <span className="shrink-0 text-[var(--mute-200)]">SLA</span>
+          <input
+            value={config.sla || ''}
+            onChange={(e) => write('sla', e.target.value)}
+            placeholder="Not set"
+            aria-label="SLA"
+            className={rowInput}
+          />
+        </div>
 
-      <div className="p-2 bg-muted rounded border border-border">
-        <label className="text-xs text-muted-foreground block mb-1">Audit</label>
-        <div className="text-xs text-muted-foreground">No audit events yet</div>
+        {/* Not editable: it states how this step is treated, it is not a
+            setting someone chooses. */}
+        <div className="flex justify-between gap-2.5">
+          <span className="text-[var(--mute-200)]">Audit</span>
+          <span>Every field logged</span>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

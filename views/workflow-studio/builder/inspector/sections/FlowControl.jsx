@@ -1,58 +1,90 @@
 'use client'
 
-import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
+import SectionLabel from '../SectionLabel'
 
 /**
- * FlowControl section: the endOfFlow checkbox and start node selector.
- * When endOfFlow is checked, any outgoing edges from this node are cleared.
- * The "Set as start" button makes this the workflow's entry point.
+ * Flow control — whether this step ends the flow, and whether it starts it.
+ *
+ * The design draws "End of flow" as a whole tickable card that turns pink when
+ * armed, so a terminal step is obvious at a glance in a long inspector rather
+ * than being one checkbox among many.
+ *
+ * The "start step" control below it is NOT in the design canvas. It is here
+ * because nothing else in the builder can set `startNodeId`: without it, a
+ * workflow whose start was deleted — or one created empty from the gallery —
+ * fails validation with no way to recover from the UI.
  */
 export default function FlowControl({ node, startNodeId, onPatch, onClearEdges, onSetStart }) {
-  const handleEndOfFlowChange = (checked) => {
+  const isEnd = !!node.endOfFlow
+  const isStart = node.id === startNodeId
+  const isNote = node.type === 'note'
+
+  const handleEndOfFlow = (checked) => {
     onPatch({ endOfFlow: checked })
-    if (checked) {
-      // Clear all outgoing edges when marking as end of flow
-      onClearEdges(node.id)
-    }
+    // A terminal step that still points somewhere is a graph error the author
+    // did not ask for, so the edges go with the flag.
+    if (checked) onClearEdges(node.id)
   }
 
-  const isStart = node.id === startNodeId
-
   return (
-    <div className="space-y-4">
-      <div className="text-sm font-medium text-foreground">Flow Control</div>
+    <>
+      <SectionLabel>Flow control</SectionLabel>
 
-      <div className="flex items-start gap-3">
-        <Checkbox
-          checked={node.endOfFlow || false}
-          onCheckedChange={handleEndOfFlowChange}
-          id="endOfFlow"
+      <label
+        className="flex cursor-pointer items-start gap-[9px] rounded-[9px] border px-3 py-[11px] transition-colors"
+        style={{
+          borderColor: isEnd ? 'var(--wf-danger-border)' : 'var(--wf-card-border)',
+          background: isEnd ? 'var(--wf-danger-tint)' : 'var(--color-card)',
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={isEnd}
+          onChange={(e) => handleEndOfFlow(e.target.checked)}
+          className="m-0 size-3.5 accent-[var(--danger)]"
         />
-        <div className="flex-1">
-          <label htmlFor="endOfFlow" className="text-sm text-foreground cursor-pointer">
-            Mark as end of flow
-          </label>
-          <p className="text-xs text-muted-foreground mt-1">
-            When checked, this step is the final step in the workflow. Any outgoing connectors are automatically removed.
-          </p>
+        <div className="min-w-0">
+          <div className="text-[12.5px] font-medium text-[var(--heading)]">End of flow</div>
+          <div className="mt-0.5 text-[11.5px] leading-[1.4] text-[var(--mute-200)]">
+            Terminal step. No outgoing connections; existing ones are removed.
+          </div>
         </div>
-      </div>
+      </label>
 
-      <div>
-        <Button
-          variant={isStart ? 'default' : 'outline'}
-          size="sm"
+      {/* Notes are annotations, not steps — the validator rejects one as the
+          start, so it must not be offered here. */}
+      {!isNote && (
+        <button
+          type="button"
           onClick={() => onSetStart(node.id)}
           disabled={isStart}
-          className="text-xs w-full"
+          className="mt-2 flex w-full items-start gap-[9px] rounded-[9px] border px-3 py-[11px] text-left transition-colors disabled:cursor-default"
+          style={{
+            borderColor: isStart ? 'var(--primary)' : 'var(--wf-card-border)',
+            background: isStart ? 'var(--wf-primary-tint)' : 'var(--color-card)',
+          }}
         >
-          {isStart ? '✓ Start node' : 'Set as start node'}
-        </Button>
-        <p className="text-xs text-muted-foreground mt-2">
-          The workflow begins at the start node. Only one node can be the start.
-        </p>
-      </div>
-    </div>
+          <span
+            className="mt-px flex size-3.5 shrink-0 items-center justify-center rounded-full border text-[9px] leading-none"
+            style={{
+              borderColor: isStart ? 'var(--primary)' : 'var(--primary-gray)',
+              background: isStart ? 'var(--primary)' : 'transparent',
+              color: '#fff',
+            }}
+            aria-hidden="true"
+          >
+            {isStart ? '✓' : ''}
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[12.5px] font-medium text-[var(--heading)]">
+              {isStart ? 'This is the start step' : 'Make this the start step'}
+            </span>
+            <span className="mt-0.5 block text-[11.5px] leading-[1.4] text-[var(--mute-200)]">
+              The flow begins here. Only one step can start a workflow.
+            </span>
+          </span>
+        </button>
+      )}
+    </>
   )
 }

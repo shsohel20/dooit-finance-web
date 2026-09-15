@@ -511,7 +511,6 @@ export default function WorkflowBuilder({ workflow }) {
   ) : (
     <StepInspector
       node={selectedNode}
-      allNodes={state.nodes}
       startNodeId={state.startNodeId}
       onPatch={handleNodePatch}
       onRemove={handleNodeRemove}

@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { OPERATORS } from '../../../lib/variableCatalog'
+import SectionLabel from '../SectionLabel'
+import AddButton from '../AddButton'
 
 /**
  * Branches section: condition nodes only.
@@ -93,11 +95,19 @@ export default function Branches({ node, onPatch }) {
   const isElse = (label) => (label || '').trim().toLowerCase() === 'else'
 
   return (
-    <div className="space-y-4">
-      <div className="text-sm font-medium text-foreground">Branches</div>
+    <>
+      {/* The design puts "Add branch" flush right on the heading row, not
+          below the list — with several branch cards stacked up, a button at
+          the bottom is a long way from the thing it adds to. */}
+      <SectionLabel action={<AddButton onClick={handleAddBranch}>Add branch</AddButton>}>
+        Branches
+      </SectionLabel>
 
       {branches.map((branch, branchIdx) => (
-        <div key={branch.key} className="border rounded-lg p-3 space-y-3 bg-muted">
+        <div
+          key={branch.key}
+          className="mb-2 space-y-3 rounded-[9px] border border-[var(--wf-card-border)] bg-card p-[10px_11px]"
+        >
           <div className="flex items-center gap-2">
             <Input
               placeholder="Branch label"
@@ -166,14 +176,6 @@ export default function Branches({ node, onPatch }) {
         </div>
       ))}
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleAddBranch}
-        className="text-xs"
-      >
-        Add branch
-      </Button>
-    </div>
+    </>
   )
 }

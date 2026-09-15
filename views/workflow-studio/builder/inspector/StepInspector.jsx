@@ -1,13 +1,10 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { stepType, STEP_TYPES } from '../../lib/stepTypes'
+import { stepType, STEP_TYPES, STEP_TYPE_ORDER } from '../../lib/stepTypes'
 import { OPERATORS, VARIABLE_NAMESPACES } from '../../lib/variableCatalog'
 
 import SectionLabel from './SectionLabel'
+import { BOXED_SELECT } from './fieldStyles'
 import Settings from './sections/Settings'
 import CardContent from './sections/CardContent'
 import Branches from './sections/Branches'
@@ -23,7 +20,6 @@ import FlowControl from './sections/FlowControl'
  */
 export default function StepInspector({
   node,
-  allNodes,
   startNodeId,
   onPatch,
   onRemove,
@@ -31,9 +27,14 @@ export default function StepInspector({
   onSetStart,
 }) {
   if (!node) {
+    // The design names this state rather than leaving the panel blank, so an
+    // empty inspector reads as "nothing selected yet" instead of "broken".
     return (
-      <div className="p-4 text-sm text-muted-foreground">
-        Select a step to edit it
+      <div className="border-l border-border bg-card p-4">
+        <div className="text-[17px] font-semibold tracking-[-0.01em]">Step settings</div>
+        <p className="mt-1.5 text-[12.5px] leading-relaxed text-[var(--mute-200)]">
+          Select a step on the canvas to configure it.
+        </p>
       </div>
     )
   }
@@ -41,75 +42,87 @@ export default function StepInspector({
   const type = stepType(node.type)
   const isCondition = node.type === 'cond'
 
+  // One continuous padded column that scrolls as a whole — the design draws no
+  // rule between the header and the sections, and a nested scroller here would
+  // strand the header while the sections moved under it.
   return (
-    <div className="flex flex-col h-full bg-card border-l border-border overflow-y-auto">
-      {/* Header */}
-      <div className="p-4 border-b border-border space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded flex items-center justify-center text-white text-xs font-bold"
-              style={{ backgroundColor: `var(${type.colorVar})` }}
-            >
-              {type.iconLetter}
-            </div>
-            <span className="text-sm font-medium text-foreground">{type.label}</span>
+    <div className="h-full overflow-y-auto border-l border-border bg-card p-4">
+      <div>
+        {/* Identity row: icon, type name in the type's own colour, step number. */}
+        <div className="flex items-center gap-2">
+          <div
+            className="flex size-5 items-center justify-center rounded-[5px] font-mono text-[10px] text-white"
+            style={{ backgroundColor: `var(${type.colorVar})` }}
+            aria-hidden="true"
+          >
+            {type.iconLetter}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
+          <div
+            className="font-mono text-[10px] uppercase tracking-[0.1em]"
+            style={{ color: `var(${type.colorVar})` }}
+          >
+            {type.label}
+          </div>
+          {node.num ? (
+            <span className="ml-auto font-mono text-[10px] text-[var(--primary-gray)]">
+              Step {node.num}
+            </span>
+          ) : null}
+        </div>
+
+        {/* Title reads as a heading until you click it — the design gives it no
+            box at rest, which is what keeps this dense panel calm. */}
+        <div className="mt-2.5 flex items-start gap-2.5">
+          <input
+            value={node.title || ''}
+            onChange={(e) => onPatch({ title: e.target.value })}
+            placeholder="Step title"
+            aria-label="Step title"
+            className="-ml-1.5 min-w-0 flex-1 rounded-[6px] border border-transparent bg-transparent px-1.5 py-[3px] font-sans text-[17px] font-semibold tracking-[-0.01em] text-[var(--smoke-700)] hover:border-[var(--wf-card-border)] focus:border-[var(--primary)] focus:outline-none"
+          />
+          <button
+            type="button"
             onClick={onRemove}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="shrink-0 rounded-[6px] border border-[var(--wf-card-border)] bg-card px-[9px] py-[5px] font-sans text-[11.5px] font-medium text-[var(--danger)] transition-colors hover:border-[var(--danger)] hover:bg-[var(--wf-danger-tint)]"
           >
             Remove
-          </Button>
+          </button>
         </div>
 
-        <Input
-          placeholder="Step title"
-          value={node.title || ''}
-          onChange={(e) => onPatch({ title: e.target.value })}
-          className="text-sm font-medium"
-        />
-
-        <Textarea
-          placeholder="Purpose of this step"
+        <textarea
           value={node.purpose || ''}
           onChange={(e) => onPatch({ purpose: e.target.value })}
-          className="text-sm"
-          rows={2}
+          placeholder="What this step is for, in one sentence"
+          aria-label="Purpose"
+          rows={3}
+          className="-ml-1.5 mt-1.5 w-full resize-y rounded-[7px] border border-transparent bg-transparent p-1.5 font-sans text-[12.5px] leading-relaxed text-[var(--mute-200)] hover:border-[var(--wf-card-border)] focus:border-[var(--primary)] focus:text-[var(--heading)] focus:outline-none"
         />
 
-        <div>
-          <label className="text-xs text-muted-foreground">Step type</label>
-          <Select value={node.type} onValueChange={(v) => onPatch({ type: v })}>
-            <SelectTrigger className="text-sm mt-1">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.values(STEP_TYPES).map((t) => (
-                <SelectItem key={t.key} value={t.key}>
-                  {t.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <SectionLabel>Step type</SectionLabel>
+        <select
+          value={node.type}
+          onChange={(e) => onPatch({ type: e.target.value })}
+          aria-label="Step type"
+          className={BOXED_SELECT}
+        >
+          {STEP_TYPE_ORDER.map((key) => (
+            <option key={key} value={key}>
+              {STEP_TYPES[key].label}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Sections. Each carries a mono uppercase heading, as the design draws
-          them — without these the inspector is one long undifferentiated
-          column of inputs with no way to tell where one concern ends. */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <SectionLabel>Settings</SectionLabel>
+      {/* Sections. Each owns its own heading now, because the design puts the
+          section's "Add …" control flush right on that same heading row — so
+          the label and the action have to live together. */}
+      <div>
         <Settings node={node} onPatch={onPatch} />
 
-        <SectionLabel>Card content</SectionLabel>
         <CardContent node={node} onPatch={onPatch} />
 
         {isCondition && (
           <>
-            <SectionLabel>Branches</SectionLabel>
             <Branches node={node} onPatch={onPatch} />
 
             <SectionLabel>Operators</SectionLabel>
@@ -139,13 +152,9 @@ export default function StepInspector({
         )}
 
         {!isCondition && (
-          <>
-            <SectionLabel>Outcomes</SectionLabel>
-            <Outcomes node={node} allNodes={allNodes} onPatch={onPatch} />
-          </>
+          <Outcomes node={node} onPatch={onPatch} />
         )}
 
-        <SectionLabel>Flow control</SectionLabel>
         <FlowControl
           node={node}
           startNodeId={startNodeId}
@@ -154,7 +163,6 @@ export default function StepInspector({
           onSetStart={onSetStart}
         />
 
-        <SectionLabel>Ownership</SectionLabel>
         <Ownership node={node} onPatch={onPatch} />
       </div>
     </div>
