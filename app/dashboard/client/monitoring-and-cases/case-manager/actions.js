@@ -225,7 +225,41 @@ export const unlinkCustomer = async (caseId, customerId) => {
   return res.json();
 };
 
-// ── Alert dismissal records (docs/74 §4.5) ───────────────────────────────────
+// ── Persons of interest who are not customers ───────────────────────────────
+// What the "Add person of interest" picker offers: tenant customers matching
+// `q` (none when q is empty) and every party on the case's linked alerts.
+export const getPoiCandidates = async (caseId, q = '') => {
+  const qs = q ? `?q=${encodeURIComponent(q)}` : '';
+  const res = await fetchWithAuth(`cases/${caseId}/poi-candidates${qs}`);
+  return res.json();
+};
+
+// payload: POI fields, or `{ fromAlert: { alertId, slot }, ...overrides }` to
+// take the person off a party slot on a linked alert's transaction.
+export const addCasePoi = async (caseId, payload) => {
+  const res = await fetchWithAuth(`cases/${caseId}/pois`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+};
+
+export const updateCasePoi = async (caseId, poiId, payload) => {
+  const res = await fetchWithAuth(`cases/${caseId}/pois/${poiId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+};
+
+export const removeCasePoi = async (caseId, poiId) => {
+  const res = await fetchWithAuth(`cases/${caseId}/pois/${poiId}`, {
+    method: 'DELETE',
+  });
+  return res.json();
+};
+
+// ── Alert dismissal records (docs/74 §4.5)───────────────────────────────────
 // `override: true` signs off despite our own blocking conditions (unverified
 // KYC, a live SMR) — the API records who overrode and when.
 export const approveDismissal = async (id, payload = {}) => {

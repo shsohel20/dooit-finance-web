@@ -98,6 +98,30 @@ export default function CaseDetails({ caseId }) {
     if (res?.succeed) setAnalysis(res.data);
   };
 
+  // A case write (POI added/removed…) returns the populated case. Re-adapt it,
+  // but keep what came from the companion endpoints, then pull the audit log
+  // so the write's server-side audit row shows. Customer POIs change what the
+  // transaction analysis covers, so those also recompute it.
+  const applyCaseUpdate = (apiCase, { refreshAnalysis: recompute = false } = {}) => {
+    if (!apiCase) return;
+    setCaseData((prev) => {
+      const next = adaptCase(apiCase);
+      if (!prev) return next;
+      return {
+        ...next,
+        rfis: prev.rfis,
+        previousSARs: prev.previousSARs,
+        notes: prev.notes,
+        auditLog: prev.auditLog,
+        devices: prev.devices,
+      };
+    });
+    getAuditLog(caseId)
+      .then((res) => res?.succeed && setAuditLog(adaptAuditLog(res.data)))
+      .catch(() => {});
+    if (recompute) refreshAnalysis();
+  };
+
   // After drafting a report, pull the filings again so the new record appears —
   // and with them the RFI list, which is the same payload.
   const refreshReports = async () => {
@@ -397,7 +421,7 @@ export default function CaseDetails({ caseId }) {
         </TabsList>
 
         <TabsContent value="investigation-hub">
-          <InvestigationHub caseData={caseData} caseId={caseId} />
+          <InvestigationHub caseData={caseData} caseId={caseId} onCaseChange={applyCaseUpdate} />
         </TabsContent>
         <TabsContent value="tbml-osint">
           <TbmlOsintReport caseId={caseId} caseData={caseData} />

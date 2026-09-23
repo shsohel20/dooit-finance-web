@@ -14,7 +14,9 @@ const STEP_RENDERERS = {
   narrative: NarrativeStep,
 };
 
-export default function StepWorkspacePanel({ caseData, wizard }) {
+// `caseId` / `onCaseChange` let a step write to the case itself (the POI step
+// links customers and adds POIs) rather than only to the wizard's saved state.
+export default function StepWorkspacePanel({ caseData, caseId, onCaseChange, wizard }) {
   const { steps, activeStep, goPrev, goNext } = wizard;
   const step = steps[activeStep];
   const StepBody = STEP_RENDERERS[step.kind];
@@ -43,7 +45,14 @@ export default function StepWorkspacePanel({ caseData, wizard }) {
         ) : (
           <>
             {StepBody && (
-              <StepBody step={step} activeStep={activeStep} caseData={caseData} wizard={wizard} />
+              <StepBody
+                step={step}
+                activeStep={activeStep}
+                caseData={caseData}
+                caseId={caseId}
+                onCaseChange={onCaseChange}
+                wizard={wizard}
+              />
             )}
             <StepFooter
               onBack={goPrev}

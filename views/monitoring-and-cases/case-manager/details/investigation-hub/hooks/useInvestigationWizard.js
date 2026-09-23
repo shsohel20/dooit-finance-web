@@ -49,56 +49,21 @@ function toSavedDateRange(range) {
   };
 }
 
-function seedPois(caseData) {
-  const individuals = caseData?.relationships?.individuals || [];
-  const connected = caseData?.connectedCustomers || [];
-  const priorReports = (caseData?.previousSARs || []).map((s) => ({
-    id: s.id,
-    date: new Date(s.filedDate).toLocaleDateString("en-AU", { month: "2-digit", year: "numeric" }),
+// The alerts combined in this case, as the POI step's header lists them. This
+// used to present the CASE uid as the "primary alert" and read a
+// `duplicateAlerts` field the adapter never fills.
+function caseAlertsOf(caseData) {
+  return (caseData?.alerts || []).map((a) => ({
+    id: a.id,
+    uid: a.uid || String(a.id),
+    title: [a.ruleId, a.ruleName].filter(Boolean).join(": ") || a.explanation || a.caseType || "Alert",
+    date: a.createdAt ? new Date(a.createdAt).toLocaleDateString("en-AU") : "—",
   }));
-
-  const fromIndividuals = individuals.map((p, i) => ({
-    id: `poi-ind-${i}`,
-    name: p.name,
-    meta: `${p.relationship} · related individual`,
-    role: i === 0 ? "Primary subject" : "Associated party",
-    color: i === 0 ? "#c0392b" : "#4340a0",
-    ecdds: [],
-    reports: i === 0 ? priorReports : [],
-  }));
-
-  const fromConnected = connected.map((p, i) => ({
-    id: `poi-conn-${i}`,
-    name: p.name,
-    meta: `${p.relationship} · connected customer`,
-    role: "Associated party",
-    color: "#4340a0",
-    ecdds: [],
-    reports: [],
-  }));
-
-  return [...fromIndividuals, ...fromConnected];
-}
-
-function seedCaseAlerts(caseData) {
-  const primary = {
-    id: caseData?.uid || "AL-PRIMARY",
-    title: caseData?.title || caseData?.caseName || "Primary alert",
-    date: caseData?.createdDate
-      ? new Date(caseData.createdDate).toLocaleDateString("en-AU")
-      : "—",
-  };
-  const duplicates = (caseData?.duplicateAlerts || []).map((d) => ({
-    id: d.alertId,
-    title: d.detectionRule,
-    date: new Date(d.date).toLocaleDateString("en-AU"),
-  }));
-  return [primary, ...duplicates];
 }
 
 /**
  * Owns all state and mutation logic for the Investigation Hub wizard: the
- * active step, per-step selections, the persons-of-interest list, custom
+ * active step, per-step selections, custom
  * typologies/reasons, the AUSTRAC SMR part, and the investigation checklist.
  * Ported from the AML Case Workspace prototype's Component state machine.
  */
@@ -112,8 +77,10 @@ export function useInvestigationWizard(caseData, caseId) {
   const [customReasons, setCustomReasons] = useState([]);
   const [stepsDone, setStepsDone] = useState(NO_STEPS_DONE);
   const [checklist, setChecklist] = useState(DEFAULT_CHECKLIST);
-  const [pois, setPois] = useState(() => seedPois(caseData));
   const [dateRange, setDateRange] = useState(EMPTY_DATE_RANGE);
+  // Names typed into the old, local-only POI step. Read-only here: the POI
+  // step offers to add each one to the case properly.
+  const [legacyPois, setLegacyPois] = useState([]);
   const [sel, setSel] = useState({
     services: [],
     reasons: [],
@@ -146,7 +113,15 @@ export function useInvestigationWizard(caseData, caseId) {
           if (saved.stepsDone?.length) setStepsDone(saved.stepsDone);
           if (saved.checklist?.length) setChecklist(saved.checklist);
           if (saved.selections) setSel((prev) => ({ ...prev, ...saved.selections }));
-          if (saved.pois?.length) setPois(saved.pois);
+          // `saved.pois` is legacy: POIs now live on the case itself
+          // (linkedCustomers + externalPois). Only the hand-typed ones carry
+          // anything the case does not already know — the "poi-ind-" /
+          // "poi-conn-" rows were seeded from fields that were always empty.
+          setLegacyPois(
+            (saved.pois || []).filter(
+              (p) => p?.name && !/^poi-(ind|conn)-/.test(String(p.id || ""))
+            )
+          );
           if (saved.dateRange) {
             setDateRange({
               start: toDateInput(saved.dateRange.start),
@@ -183,7 +158,6 @@ export function useInvestigationWizard(caseData, caseId) {
     stepsDone,
     checklist,
     selections: sel,
-    pois,
     dateRange: toSavedDateRange(dateRange),
     customTypologies,
     customReasons,
@@ -216,11 +190,11 @@ export function useInvestigationWizard(caseData, caseId) {
     // The dependency list is the analyst's work: any change schedules a save.
   }, [
     loaded, caseId, flush, saveState.error,
-    activeStep, stepsDone, checklist, sel, pois, dateRange, customTypologies, customReasons,
+    activeStep, stepsDone, checklist, sel, dateRange, customTypologies, customReasons,
     narrativeTpl, smrPart,
   ]);
 
-  const caseAlerts = useMemo(() => seedCaseAlerts(caseData), [caseData]);
+  const caseAlerts = useMemo(() => caseAlertsOf(caseData), [caseData]);
 
   const steps = useMemo(
     () => INVESTIGATION_STEPS.map((s, i) => ({ ...s, done: stepsDone[i] })),
@@ -277,10 +251,6 @@ export function useInvestigationWizard(caseData, caseId) {
     setDateRange(next);
     if (next.start && next.end && DATE_RANGE_STEP >= 0) markDone(DATE_RANGE_STEP);
   };
-
-  const removePoi = (id) => setPois((prev) => prev.filter((p) => p.id !== id));
-
-  const addPoi = (poi) => setPois((prev) => [...prev, poi]);
 
   const toggleCheck = (i) =>
     setChecklist((prev) => {
@@ -342,10 +312,8 @@ export function useInvestigationWizard(caseData, caseId) {
     dateRange,
     applyDateRange,
 
-    pois,
-    removePoi,
-    addPoi,
     caseAlerts,
+    legacyPois,
 
     // Persistence, for the hub header's "Saving… / Saved" indicator.
     loaded,

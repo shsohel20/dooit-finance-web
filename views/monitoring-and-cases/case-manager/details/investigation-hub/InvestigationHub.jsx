@@ -16,7 +16,7 @@ import { useInvestigationWizard } from "./hooks/useInvestigationWizard";
  * `useInvestigationWizard` and is threaded down as a single `wizard` object
  * so step components stay simple props-in/callbacks-out.
  */
-export default function InvestigationHub({ caseData, caseId }) {
+export default function InvestigationHub({ caseData, caseId, onCaseChange }) {
   // `caseId` gives the wizard somewhere to save; without it the hub still
   // works, but only in memory (docs/74 C18).
   const wizard = useInvestigationWizard(caseData, caseId);
@@ -27,7 +27,7 @@ export default function InvestigationHub({ caseData, caseId }) {
 
       <div className="flex h-[calc(100vh-300px)] min-h-[620px] gap-3.5 overflow-x-auto pb-1">
         <AlertDetailsPanel caseData={caseData} />
-        <StepWorkspacePanel caseData={caseData} wizard={wizard} />
+        <StepWorkspacePanel caseData={caseData} caseId={caseId} onCaseChange={onCaseChange} wizard={wizard} />
         <StepsChecklistPanel wizard={wizard} />
         <OsintReportPanel caseData={caseData} />
       </div>

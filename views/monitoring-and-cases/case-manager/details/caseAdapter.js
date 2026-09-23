@@ -165,6 +165,20 @@ export const adaptPreviousSARs = (smrs = []) =>
     filedDate: s.createdAt,
   }));
 
+// A person of interest who is not a customer (Case.externalPois). The raw
+// fields pass through untouched — the POI step edits them — with display
+// labels alongside.
+const adaptExternalPoi = (p) => ({
+  ...p,
+  id: p._id,
+  roleLabel: humanize(p.role),
+  kindLabel: p.kind === "entity" ? "Entity" : "Individual",
+  sourceLabel:
+    p.source === "alert"
+      ? joinNonEmpty([p.sourceAlertUid && `Alert ${p.sourceAlertUid}`, humanize(p.sourcePartySlot)], " · ")
+      : "Manual entry",
+});
+
 export function adaptCase(api) {
   if (!api) return null;
 
@@ -240,11 +254,19 @@ export function adaptCase(api) {
     pois: customers.map((c, i) => {
       const adapted = adaptCustomer(c, api.client);
       if (adapted && i === 0) adapted.riskRating = riskTag;
+      // `case.customer` is the primary; fall back to position only when it
+      // is not populated (it cannot be unlinked, so the UI must know which).
+      const primaryId = api.customer?._id || api.customer;
+      const isPrimary = primaryId ? String(primaryId) === String(c._id) : i === 0;
       return {
         id: c._id,
         uid: c.uid || null,
         name: adapted?.name || c.uid || null,
-        isPrimary: i === 0,
+        isPrimary,
+        kycStatus: c.kycStatus || null,
+        isPep: !!c.isPep,
+        sanction: !!c.sanction,
+        riskRating: isPrimary ? riskTag : null,
         overrides: {
           customer: adapted,
           uid: c.uid || api.uid,
@@ -256,6 +278,10 @@ export function adaptCase(api) {
         },
       };
     }),
+
+    // Persons of interest who are not customers — counterparties, directors,
+    // third parties — added from an alert party or by hand.
+    externalPois: (api.externalPois || []).map(adaptExternalPoi),
 
     // The case's alerts, newest first — the Investigation Hub lists them all
     // rather than implying a case is ever about a single rule hit.
