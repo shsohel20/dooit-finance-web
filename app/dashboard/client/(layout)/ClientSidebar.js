@@ -441,6 +441,11 @@ export default function ClientSidebar({ ...props }) {
           icon: IconDatabase,
         },
         {
+          title: "Xero",
+          url: "/dashboard/client/system-settings/xero",
+          icon: IconDatabase,
+        },
+        {
           title: "Role Management",
           url: "/dashboard/client/user-and-role-management",
           icon: IconDatabase,
