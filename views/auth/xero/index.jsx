@@ -20,11 +20,37 @@ import {
 
 import {
   completeXeroSignup,
+  continueXeroPending,
+  getXeroPendingStatus,
   getXeroSignupPrefill,
   startXeroSignup,
 } from "@/app/auth/xero/actions";
 
 const DASHBOARD = "/dashboard/client";
+const POLL_MS = 4000;
+// The pending handle is a secret: keep it out of the URL/history/referrers and
+// in this tab's session storage so a reload can resume the wait.
+const PENDING_KEY = "dooit.xero.pending";
+
+const store = {
+  get: () => {
+    try {
+      return window.sessionStorage.getItem(PENDING_KEY);
+    } catch {
+      return null;
+    }
+  },
+  set: (v) => {
+    try {
+      window.sessionStorage.setItem(PENDING_KEY, v);
+    } catch {}
+  },
+  clear: () => {
+    try {
+      window.sessionStorage.removeItem(PENDING_KEY);
+    } catch {}
+  },
+};
 
 const ERROR_TITLES = {
   denied: "Xero sign-up was cancelled",
@@ -52,7 +78,114 @@ function Spinner({ title, description }) {
   );
 }
 
-export default function XeroSignup({ ticket, loginCode, error, message }) {
+/**
+ * Shown when the Xero organisation already belongs to a Dooit client: we have
+ * asked that client's administrator to confirm, and wait for the answer.
+ */
+function PendingApproval({ token, onSignedIn }) {
+  const router = useRouter();
+  const [info, setInfo] = useState(null);
+  const [gone, setGone] = useState(false);
+  const [continuing, setContinuing] = useState(false);
+
+  useEffect(() => {
+    let stopped = false;
+    let timer;
+    const tick = async () => {
+      const res = await getXeroPendingStatus(token);
+      if (stopped) return;
+      if (!res.ok) return setGone(true);
+      setInfo(res.data);
+      if (res.data.status === "PENDING_CONFIRMATION") timer = setTimeout(tick, POLL_MS);
+    };
+    tick();
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, [token]);
+
+  const restart = () => {
+    store.clear();
+    window.location.href = "/auth/xero";
+  };
+
+  const onContinue = async () => {
+    setContinuing(true);
+    const res = await continueXeroPending(token);
+    if (!res.ok) {
+      setContinuing(false);
+      toast.error(res.error || "Could not continue. Please sign in to Dooit.");
+      return;
+    }
+    store.clear();
+    if (res.data.next === "signed_in") return onSignedIn(res.data.loginCode);
+    toast.success("Connection approved. Sign in to Dooit to continue.");
+    router.replace("/auth/login");
+  };
+
+  if (gone || info?.status === "EXPIRED") {
+    return (
+      <Status
+        title="This request has expired"
+        description="The administrator didn't respond in time, or the request is no longer valid. You can start again."
+      >
+        <Button onClick={restart}>Start again with Xero</Button>
+      </Status>
+    );
+  }
+
+  if (!info) return <Spinner title="Checking your request…" />;
+
+  if (info.status === "REJECTED") {
+    return (
+      <Status
+        title="Request declined"
+        description="The administrator of the Dooit account declined this connection, so nothing was connected."
+      >
+        <Button variant="outline" onClick={() => router.push("/auth/login")}>
+          Go to login
+        </Button>
+      </Status>
+    );
+  }
+
+  if (info.status === "APPROVED") {
+    return (
+      <Status
+        title="Connection approved"
+        description={`${info.organisation} is now connected to Dooit.`}
+      >
+        <Button onClick={onContinue} disabled={continuing}>
+          {continuing && <Loader2 className="animate-spin" />}
+          Continue to Dooit
+        </Button>
+      </Status>
+    );
+  }
+
+  return (
+    <Status
+      title="Waiting for confirmation"
+      description="This Xero organisation is already associated with a Dooit client."
+    >
+      <p className="text-sm text-muted-foreground">
+        For security, we need confirmation from the existing client administrator before connecting this Xero
+        organisation. We&apos;ve sent a confirmation request to <strong>{info.maskedEmail}</strong>.
+      </p>
+      <p className="text-sm text-muted-foreground">Once it&apos;s approved, you can continue here.</p>
+      <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground" role="status">
+        <Loader2 className="size-3 animate-spin" />
+        Waiting for approval…
+      </p>
+      <Button variant="outline" onClick={() => router.push("/auth/login")}>
+        Go to login
+      </Button>
+    </Status>
+  );
+}
+
+export default function XeroSignup({ ticket, loginCode, pending, error, message }) {
   const router = useRouter();
   const started = useRef(false); // StrictMode runs effects twice; each secret is single-use
 
@@ -63,6 +196,7 @@ export default function XeroSignup({ ticket, loginCode, error, message }) {
   const [form, setForm] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
+  const [pendingToken, setPendingToken] = useState(null);
 
   const begin = useCallback(async () => {
     setStarting(true);
@@ -119,10 +253,17 @@ export default function XeroSignup({ ticket, loginCode, error, message }) {
           },
         });
       });
+    } else if (pending) {
+      store.set(pending);
+      setPendingToken(pending);
+      router.replace("/auth/xero"); // take the secret out of the address bar
     } else if (!error) {
-      begin(); // bare /auth/xero (e.g. Xero App Store launch) → go straight to Xero
+      // A reload while waiting resumes the wait instead of starting a second request.
+      const saved = store.get();
+      if (saved) setPendingToken(saved);
+      else begin(); // bare /auth/xero (e.g. Xero App Store launch) → go straight to Xero
     }
-  }, [ticket, loginCode, error, begin, signInWithCode]);
+  }, [ticket, loginCode, pending, error, begin, signInWithCode, router]);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const setAddr = (key) => (e) =>
@@ -161,6 +302,8 @@ export default function XeroSignup({ ticket, loginCode, error, message }) {
   if (loginCode || signingIn) {
     return <Spinner title="Signing you in…" description="Your Xero account is verified." />;
   }
+
+  if (pendingToken) return <PendingApproval token={pendingToken} onSignedIn={signInWithCode} />;
 
   if (ticket) {
     if (!form) return <Spinner title="Loading your Xero details…" />;
