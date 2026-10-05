@@ -51,6 +51,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       },
     }),
+    // "Sign up / Sign in with Xero". The API has already verified the Xero
+    // identity; this redeems its single-use, 2-minute login code for the same
+    // JWT /auth/login would have issued.
+    Credentials({
+      id: "xero",
+      name: "Xero",
+      credentials: { loginCode: {} },
+      authorize: async (credentials) => {
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}xero/signup/session`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ loginCode: credentials.loginCode }),
+          });
+          const data = await res.json();
+          if (!data.success) throw new InvalidCredentialsError(data.error);
+          const decodedToken = jwtDecode(data.token);
+          return {
+            ...decodedToken,
+            token: data.token,
+            role: decodedToken.role,
+            name: decodedToken.name,
+            email: decodedToken.email,
+            userType: decodedToken.userType,
+            id: decodedToken.id,
+          };
+        } catch (error) {
+          throw new InvalidCredentialsError(error.code || "Xero sign-in failed");
+        }
+      },
+    }),
   ],
   pages: {
     signIn: "/auth/login",

@@ -21,6 +21,7 @@ import { signIn, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { IconLoaderQuarter } from '@tabler/icons-react';
 import Link from 'next/link';
+import { startXeroSignup } from '@/app/auth/xero/actions';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -108,7 +109,26 @@ export default function LoginForm({
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid gap-6">
-              {/* <SocialLogin /> */}
+              {!isDooit && (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    disabled={isLoading}
+                    onClick={async () => {
+                      const res = await startXeroSignup();
+                      if (res.ok && res.data?.url) window.location.href = res.data.url;
+                      else toast.error(res.error || 'Xero is unavailable right now');
+                    }}
+                  >
+                    Continue with Xero
+                  </Button>
+                  <div className="text-center text-xs text-muted-foreground">
+                    New to Dooit? Xero fills in your details for you.
+                  </div>
+                </>
+              )}
 
               <div className="grid gap-6">
                 <Controller
